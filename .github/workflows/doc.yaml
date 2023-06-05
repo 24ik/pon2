@@ -1,0 +1,53 @@
+name: Make Documentation
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/cache@v1
+        with:
+          path: ~/.nimble
+          key: ${{ runner.os }}-nimble-${{ hashFiles('*.nimble') }}
+
+      - uses: jiro4989/setup-nim-action@v1
+
+      - run: >-
+          nimble -y install
+          docopt karax tiny_sqlite
+          https://github.com/izumiya-keisuke/puyo-core
+          https://github.com/izumiya-keisuke/nazopuyo-core
+
+      - run: nim doc --project --index ./src/pon2.nim
+
+      - run: mv ./src/htmldocs/pon2.html ./src/htmldocs/index.html
+
+      - uses: actions/configure-pages@v2
+
+      - uses: actions/upload-pages-artifact@v1
+        with:
+          path: ./src/htmldocs
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/deploy-pages@v1
