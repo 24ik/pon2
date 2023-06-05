@@ -1,0 +1,16 @@
+/nimcache/
+/testresults/
+/outputGotten.txt
+/tests/*
+!/tests/*/
+!/tests/makeTest.nim
+/tests/*/*
+!/tests/*/main.nim
+
+/benchmark/*
+!/benchmark/*.nim*
+
+/www/index.js
+
+/pon2
+/resources

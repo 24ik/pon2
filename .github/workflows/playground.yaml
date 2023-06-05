@@ -1,0 +1,53 @@
+name: Make playground
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/cache@v1
+        with:
+          path: ~/.nimble
+          key: ${{ runner.os }}-nimble-${{ hashFiles('*.nimble') }}
+
+      - uses: jiro4989/setup-nim-action@v1
+
+      - run: >-
+          nimble -y install
+          docopt karax tiny_sqlite
+          https://github.com/izumiya-keisuke/puyo-core
+          https://github.com/izumiya-keisuke/nazopuyo-core
+
+      - run: nim js -o:www/index.js src/pon2.nim
+
+      - run: cp -r ./www ./playground
+
+      - uses: actions/configure-pages@v2
+
+      - uses: actions/upload-pages-artifact@v1
+        with:
+          path: ./playground
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/deploy-pages@v1

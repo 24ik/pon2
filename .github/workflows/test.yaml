@@ -1,0 +1,42 @@
+name: Run Test
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macOS-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/cache@v1
+        with:
+          path: ~/.nimble
+          key: ${{ runner.os }}-nimble-${{ hashFiles('*.nimble') }}
+        if: runner.os != 'Windows'
+
+      - uses: jiro4989/setup-nim-action@v1
+
+      - run: >-
+          nimble -y install
+          docopt karax tiny_sqlite
+          https://github.com/izumiya-keisuke/puyo-core
+          https://github.com/izumiya-keisuke/nazopuyo-core
+
+      - run: nim c -r ./tests/makeTest.nim
+        if: runner.os == 'Linux'
+
+      - run: nim c -r -d:avx2=false ./tests/makeTest.nim
+        if: runner.os == 'Windows'
+
+      - run: nim c -r -d:bmi2=false -d:avx2=false ./tests/makeTest.nim
+        if: runner.os == 'macOS'
+
+      - run: nimble -y test
