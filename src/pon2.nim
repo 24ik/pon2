@@ -64,8 +64,9 @@ Options:
     [16] cぷよn連結以上で消すべし
 """
 
-import ./pon2pkg/core/db
-export db.connectDb, db.insert, db.delete, db.search
+when not defined(js):
+  import ./pon2pkg/core/db
+  export db.connectDb, db.insert, db.delete, db.search
 
 import ./pon2pkg/core/permute
 export permute.permute
