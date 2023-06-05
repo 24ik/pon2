@@ -1,4 +1,4 @@
-## This module implements a CUI solver.
+## This module implements the solver CUI.
 ##
 
 import browsers
@@ -11,14 +11,18 @@ import puyo_core
 
 import ../core/solve
 
+# ------------------------------------------------
+# Entry Point
+# ------------------------------------------------
+
 proc solve*(args: Table[string, Value]) {.inline.} =
-  ## Runs a CUI solver.
+  ## Runs the solver CUI.
   let
     url = $args["<url>"]
     solutions = url.solve(if args["-i"].to_bool: IPS else: ISHIKAWAPUYO)
   if solutions.isNone:
     echo "正しくない形式のURLが入力されました．"
-    quit()
+    return
 
   if args["-B"].to_bool:
     url.openDefaultBrowser

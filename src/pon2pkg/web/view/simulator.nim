@@ -1,4 +1,4 @@
-## This module implements a simulator frame.
+## This module implements the simulator frame.
 ##
 
 import karax/vstyles
@@ -7,7 +7,7 @@ include karax/prelude
 var simulatorUrl* = kstring""
 
 proc simulatorFrame*: VNode =
-  ## Returns a simulator frame.
+  ## Returns the simulator frame.
   buildHtml(tdiv):
     if simulatorUrl.len > 0:
       iframe(

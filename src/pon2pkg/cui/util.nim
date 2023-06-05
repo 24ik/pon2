@@ -8,9 +8,9 @@ import docopt
 import nazopuyo_core
 
 proc parseNatural*(val: Value, allowNone = false): Option[Natural] {.inline.} =
-  ## Converts the docopt.Value to an integer.
+  ## Converts :code:`val` to the integer.
   ## If the conversion fails, quits the application.
-  ## If allowNone is true, returns none(Natural) if the val is vkNone.
+  ## If :code:`val` is :code:`vkNone` and :code:`allowNone` is :code:`true`, returns :code:`none`.
   case val.kind
   of vkNone:
     if allowNone:
@@ -27,8 +27,8 @@ proc parseNatural*(val: Value, allowNone = false): Option[Natural] {.inline.} =
   else:
     raise newException(ValueError, "Impossible path.")
 
-proc parseNatural*(val: char | string): Natural {.inline.} =
-  ## Converts the char or string to an integer.
+proc parseNatural*(val: char or string): Natural {.inline.} =
+  ## Converts :code:`val` to the integer.
   ## If the conversion fails, quits the application.
   try:
     return ($val).parseInt
@@ -37,9 +37,9 @@ proc parseNatural*(val: char | string): Natural {.inline.} =
     quit()
 
 proc parseRequirementKind*(val: Value, allowNone = false): Option[RequirementKind] {.inline.} =
-  ## Converts the docopt.Value to a requirement kind of nazo puyo.
+  ## Converts :code:`val` to the requirement kind.
   ## If the conversion fails, quits the application.
-  ## If allowNone is true, returns none(RequirementKind) if the val is vkNone.
+  ## If :code:`val` is :code:`vkNone` and :code:`allowNone` is :code:`true`, returns :code:`none`.
   let idx = val.parseNatural allowNone
   if idx.isNone:
     return
@@ -50,8 +50,8 @@ proc parseRequirementKind*(val: Value, allowNone = false): Option[RequirementKin
 
   return some RequirementKind.low.succ idx.get
 
-proc parseRequirementKind*(val: char | string): RequirementKind {.inline.} =
-  ## Converts the char or string to a requirement kind of nazo puyo.
+proc parseRequirementKind*(val: char or string): RequirementKind {.inline.} =
+  ## Converts :code:`val` to the requirement kind.
   ## If the conversion fails, quits the application.
   let idx = val.parseNatural
   if idx notin RequirementKind.low.ord .. RequirementKind.high.ord:

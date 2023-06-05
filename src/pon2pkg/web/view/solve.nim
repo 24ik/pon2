@@ -1,4 +1,4 @@
-## This module implements a solver view.
+## This module implements the solver view.
 ##
 
 import options
@@ -12,7 +12,7 @@ import ./simulator
 import ../../core/solve
 
 proc solverField*: VNode =
-  ## Returns a solver view.
+  ## Returns the solver view.
   const ProblemFormId = "question-form"
 
   # FIXME: proper async

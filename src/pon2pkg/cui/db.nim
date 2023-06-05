@@ -1,4 +1,4 @@
-## This module implements a CUI operator for DB.
+## This module implements the database CUI.
 ##
 
 import options
@@ -13,8 +13,12 @@ import tiny_sqlite
 import ./util
 import ../core/db
 
+# ------------------------------------------------
+# Entry Point
+# ------------------------------------------------
+
 proc operateDb*(args: Table[string, Value]) {.inline.} =
-  ## Runs a CUI operator for DB.
+  ## Runs the database CUI.
   let db = connectDb()
   if db.isNone:
     echo "データベースファイルが開けません．"
@@ -23,7 +27,8 @@ proc operateDb*(args: Table[string, Value]) {.inline.} =
 
   if args["add"] or args["a"]:
     let urls = @(args["<urls>"]).deduplicate true
-    for (url, nazo) in zip(urls, urls.mapIt it.toNazo true):
+    for url in urls:
+      let nazo = url.toNazo true
       if nazo.isNone:
         echo &"正しくない形式のURLです：{url}"
         continue
@@ -42,7 +47,7 @@ proc operateDb*(args: Table[string, Value]) {.inline.} =
       saturates.add false
 
     var idx = 1
-    for url in db.get.search(
+    for url in db.get.find(
       args["--fk"].mapIt it.parseRequirementKind,
       args["--fm"].mapIt it.parseNatural.Positive,
       saturates,

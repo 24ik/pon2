@@ -1,10 +1,9 @@
-## This module implements a CUI permuter.
+## This module implements the permuter CUI.
 ##
 
 import browsers
 import options
 import sequtils
-import sets
 import strformat
 import tables
 
@@ -14,13 +13,17 @@ import puyo_core
 import ./util
 import ../core/permute
 
+# ------------------------------------------------
+# Entry Point
+# ------------------------------------------------
+
 proc permute*(args: Table[string, Value]) {.inline.} =
-  ## Runs a CUI permuter.
+  ## Runs the permuter CUI.
   let url = $args["<url>"]
 
   var idx = 1
   for res in url.permute(
-    args["-f"].mapIt(it.parseNatural.Positive).toHashSet,
+    args["-f"].mapIt(it.parseNatural.Positive),
     not args["-D"].to_bool,
     args["-d"].to_bool,
     not args["-S"].to_bool,
@@ -28,7 +31,7 @@ proc permute*(args: Table[string, Value]) {.inline.} =
   ):
     if res.isNone:
       echo "正しくない形式のURLが入力されました．"
-      quit()
+      return
 
     echo &"(Q{idx}) {res.get.problem}"
     echo &"(A{idx}) {res.get.solution}"
