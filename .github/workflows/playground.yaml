@@ -1,18 +1,20 @@
 name: Make playground
 
-on:
-  push:
-    branches:
-      - main
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
-concurrency:
-  group: "playground"
-  cancel-in-progress: true
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
 
 jobs:
   build:
