@@ -1,4 +1,4 @@
-## This module implements a message table.
+## This module implements the message table.
 ##
 
 include karax/prelude
@@ -6,14 +6,14 @@ include karax/prelude
 var messages*: seq[kstring]
 
 proc messageTable*: VNode =
-  ## Returns a message table.
+  ## Returns the message table.
   buildHtml(tdiv):
     tdiv(class = "table-container"):
       table(class = "table"):
         for message in messages:
           tr:
             td:
-              if message.startsWith "http":
+              if message.cstring.startsWith "http":
                 a(href = message, target = "_blank", rel = "noopener noreferrer"):
                   text message
               else:

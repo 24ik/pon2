@@ -7,7 +7,7 @@ Pon!通は，なぞぷよに関する様々な機能を提供するツールで�
 
 ソルバー
     なぞぷよを解く．
-    `ブラウザで試す <https://izumiya-keisuke.github.io/pon2/playground>`_
+    `[ブラウザで試す] <https://izumiya-keisuke.github.io/pon2/playground>`_
 
 ツモ探索
     なぞぷよのツモを入れ替えて一意解問題を生成する．
@@ -54,6 +54,31 @@ APIの利用
 
 :code:`import pon2` でこのモジュールが提供する全てのAPIにアクセスできる．
 詳しくは `APIドキュメント <https://izumiya-keisuke.github.io/pon2>`_ を参照．
+
+テスト
+======
+
+::
+
+    nim c -r tests/makeTest.nim
+    nimble test
+
+:code:`tests/makeTest.nim` をコンパイルする際，:code:`-d:bmi2=<bool>` や :code:`-d:avx2=<bool>` を
+オプションとして与えることで，使用する命令セットを指定することができる．
+
+ベンチマーク
+============
+
+::
+
+    nim c -r benchmark/main.nim
+
+テストの書き方
+==============
+
+#. :code:`tests` ディレクトリ直下に新しいディレクトリを作成する．
+#. 作成したディレクトリ内に新しい :code:`main.nim` ファイルを作成する．
+#. 作成したファイル内に，テストのエントリーポイントを :code:`main()` プロシージャとして記述する．
 
 静的ウェブサイト作成
 ====================

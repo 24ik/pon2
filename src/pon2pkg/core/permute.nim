@@ -1,10 +1,10 @@
-## This module implements a permuter.
+## This module implements the permuter.
 ##
 
 import deques
 import math
 import options
-import sets
+import sequtils
 import sugar
 
 import nazopuyo_core
@@ -12,20 +12,26 @@ import puyo_core
 
 import ./solve
 
-iterator possiblePairsSeq(
+# ------------------------------------------------
+# Permute
+# ------------------------------------------------
+
+iterator allPairsSeq(
   originalPairs: Pairs,
-  fixMoves: HashSet[Positive],
+  fixMoves: seq[Positive],
   allowDouble: bool,
   allowLastDouble: bool,
   skipSwap: bool
 ): seq[Pairs] {.inline.} =
-  ## Yields all pairs that are equal if we identify all swapped pairs.
+  ## Yields all possible pairs in ascending order that can be obtained by permuting puyoes contained in the
+  ## :code:`originalPairs`.
+  # calculate the number of puyoes
   let moveNum = originalPairs.len
   var colorNums: array[ColorPuyo, Natural]
   for color in ColorPuyo.low .. ColorPuyo.high:
     colorNums[color] = originalPairs.colorNum color
 
-  # HACK: we use a stack instead of recursion since a recursive iterator is not allowed
+  # HACK: we use a stack instead of recursion since a recursive iterator is not allowed by Nim
   var stack: Deque[tuple[colorNums: array[ColorPuyo, Natural], pairsSeq: seq[Pairs]]]
   stack.addLast (colorNums: colorNums, pairsSeq: @[initDeque[Pair](moveNum)])
 
@@ -88,13 +94,14 @@ iterator possiblePairsSeq(
 
 iterator permute*(
   nazo: Nazo,
-  fixMoves: HashSet[Positive],
+  fixMoves: seq[Positive],
   allowDouble: bool,
   allowLastDouble: bool,
   skipSwap: bool,
 ): tuple[pairs: Pairs, solution: Solution]{.inline.} =
-  ## Yields pairs and a solution such that nazo puyoes with the pairs have a unique solution.
-  for pairsSeq in nazo.env.pairs.possiblePairsSeq(fixMoves, allowDouble, allowLastDouble, skipSwap):
+  ## Yields the pairs and solution of the :code:`nazo` that is obtained by permuting puyoes contained in the pairs,
+  ## and has a unique solution.
+  for pairsSeq in nazo.env.pairs.allPairsSeq(fixMoves.deduplicate true, allowDouble, allowLastDouble, skipSwap):
     for pairs in pairsSeq:
       var nazo2 = nazo
       nazo2.env.pairs = pairs
@@ -102,17 +109,19 @@ iterator permute*(
       let sol = nazo2.inspectSolve(true).solutions
       if sol.len == 1:
         yield (pairs: pairs, solution: sol[0])
-        break # TODO: sometimes swapped pair gives a different solution
+        break # TODO: swapped pair sometimes gives a different solution
 
 iterator permute*(
   url: string,
-  fixMoves: HashSet[Positive],
+  fixMoves: seq[Positive],
   allowDouble: bool,
   allowLastDouble: bool,
   skipSwap: bool,
   domain = ISHIKAWAPUYO,
 ): Option[tuple[problem: string, solution: string]] {.inline.} =
-  ## Yields a nazo puyo with a unique solution obtained by changing only the pairs.
+  ## Yields the pairs and solution of the nazo puyo represented by the :code:`url`
+  ## that is obtained by permuting puyoes contained in the pairs, and has a unique solution.
+  ## If the :code:`url` is invalid, yields :code:`none` once.
   let nazo = url.toNazo true
   if nazo.isSome:
     for (pairs, solution) in nazo.get.permute(fixMoves, allowDouble, allowLastDouble, skipSwap):

@@ -8,7 +8,7 @@ import ./view/simulator
 import ./view/solve
 
 proc makeWebPageCore: VNode =
-  ## Returns a full page.
+  ## Returns the full page.
   buildHtml(tdiv):
     tdiv(class = "columns"):
       tdiv(class = "column"):
@@ -23,5 +23,5 @@ proc makeWebPageCore: VNode =
         simulatorFrame()
 
 proc makeWebPage* =
-  ## Makes a full web page.
+  ## Makes the full web page.
   makeWebPageCore.setRenderer

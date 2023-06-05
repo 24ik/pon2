@@ -1,20 +1,42 @@
-## The :code:`pon2` module provides a standalone application and some APIs relating to Nazo Puyo.
-## The main features are as follows:
+## The :code:`pon2` module provides a standalone application and API relating to Nazo Puyo.
+## Features:
 ## * Solver
 ## * Permuter
 ## * Database
 ##
-## With :code:`import pon2`, you can access all APIs provides by this module.
-## Documentations for all features are as follows:
+## With :code:`import pon2`, you can use all features provides by this module.
+## Documentations:
 ## * `Permute <./pon2pkg/core/permute.html>`_
 ## * `Solve <./pon2pkg/core/solve.html>`_
 ## * `Database <./pon2pkg/core/db.html>`_
 ##
 ## This module uses multiple threads by default.
-## To have only one thread used, specify :code:`-d:singleThread` to the compile options.
+## To prevent this, specify :code:`-d:singleThread` to the compile options.
 ##
 
-const Document = """
+when not defined(js):
+  import ./pon2pkg/core/db
+  export db.connectDb, db.insert, db.delete, db.find
+
+import ./pon2pkg/core/permute
+export permute.permute
+
+import ./pon2pkg/core/solve
+export solve.Solution, solve.Solutions, solve.InspectSolutions, solve.solve, solve.inspectSolve, solve.`$`
+
+when isMainModule:
+  when defined(js):
+    import ./pon2pkg/web/main as webMain
+
+    makeWebPage()
+  else:
+    import docopt
+
+    import ./pon2pkg/cui/db as cuiDb
+    import ./pon2pkg/cui/permute as cuiPermute
+    import ./pon2pkg/cui/solve as cuiSolve
+
+    const Document = """
 なぞぷよツール．ソルバー・ツモ並べ替え・データベース機能が提供されている．
 
 Usage:
@@ -61,30 +83,7 @@ Options:
     [13] cぷよn箇所同時に消すべし
     [14] cぷよn箇所以上同時に消すべし
     [15] cぷよn連結で消すべし
-    [16] cぷよn連結以上で消すべし
-"""
-
-when not defined(js):
-  import ./pon2pkg/core/db
-  export db.connectDb, db.insert, db.delete, db.search
-
-import ./pon2pkg/core/permute
-export permute.permute
-
-import ./pon2pkg/core/solve
-export solve.Solution, solve.Solutions, solve.InspectSolutions, solve.`$`, solve.solve, solve.inspectSolve
-
-when isMainModule:
-  when defined(js):
-    import ./pon2pkg/web/main as webMain
-
-    makeWebPage()
-  else:
-    import docopt
-
-    import ./pon2pkg/cui/db as cuiDb
-    import ./pon2pkg/cui/permute as cuiPermute
-    import ./pon2pkg/cui/solve as cuiSolve
+    [16] cぷよn連結以上で消すべし"""
 
     let args = Document.docopt
     if args["-h"]:
