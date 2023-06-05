@@ -1,4 +1,4 @@
-name: Make Documentation
+name: Deploy Web Page
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -38,6 +38,10 @@ jobs:
       - run: nim doc --threads:on --project --index ./src/pon2.nim
 
       - run: mv ./src/htmldocs/pon2.html ./src/htmldocs/index.html
+
+      - run: nim js -o:www/index.js src/pon2.nim
+
+      - run: mv ./www ./src/htmldocs/playground
 
       - uses: actions/configure-pages@v2
 
