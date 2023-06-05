@@ -33,7 +33,7 @@ jobs:
           https://github.com/izumiya-keisuke/puyo-core
           https://github.com/izumiya-keisuke/nazopuyo-core
 
-      - run: nim doc --project --index ./src/pon2.nim
+      - run: nim doc --threads:on --project --index ./src/pon2.nim
 
       - run: mv ./src/htmldocs/pon2.html ./src/htmldocs/index.html
 

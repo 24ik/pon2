@@ -11,7 +11,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: "playground"
   cancel-in-progress: true
 
 jobs:
@@ -35,7 +35,7 @@ jobs:
 
       - run: nim js -o:www/index.js src/pon2.nim
 
-      - run: cp -r ./www ./playground
+      - run: mv ./www ./playground
 
       - uses: actions/configure-pages@v2
 
