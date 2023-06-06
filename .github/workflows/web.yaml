@@ -31,7 +31,7 @@ jobs:
 
       - run: >-
           nimble -y install
-          docopt karax tiny_sqlite
+          docopt karax nigui tiny_sqlite yaml
           https://github.com/izumiya-keisuke/puyo-core
           https://github.com/izumiya-keisuke/nazopuyo-core
 
