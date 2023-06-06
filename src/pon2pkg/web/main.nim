@@ -23,7 +23,7 @@ proc makeWebPageCore: VNode =
                 text "バグ（探索結果の間違い等）がある可能性があります．見つけたら"
                 a(href = "https://twitter.com/PP_Orange_PP"): text "作者"
                 text "までご連絡ください．"
-              li: text "固ぷよ・鉄ぷよ・壁には対応していません．"
+              li: text "固ぷよ・鉄ぷよ・壁や，フィーバーモード，途中でお邪魔が降る問題には対応していません．"
               li: text "探索が遅いです．4手問題まで，多くても5手問題までの利用を推奨します．"
               li:
                 text "以下の種類のなぞぷよは探索が"
