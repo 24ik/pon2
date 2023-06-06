@@ -3,11 +3,13 @@
 
 include karax/prelude
 
-var messages*: seq[kstring]
+var messages* = newSeq[kstring](0)
 
 proc messageTable*: VNode =
   ## Returns the message table.
   buildHtml(tdiv):
+    h2(class = "subtitle"):
+      text "解"
     tdiv(class = "table-container"):
       table(class = "table"):
         for message in messages:
