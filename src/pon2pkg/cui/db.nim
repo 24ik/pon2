@@ -17,7 +17,7 @@ import ../core/db
 # Entry Point
 # ------------------------------------------------
 
-proc operateDb*(args: Table[string, Value]) {.inline.} =
+proc runDb*(args: Table[string, Value]) {.inline.} =
   ## Runs the database CUI.
   let db = connectDb()
   if db.isNone:
@@ -55,4 +55,4 @@ proc operateDb*(args: Table[string, Value]) {.inline.} =
       echo &"({idx}) {url}"
       idx.inc
   else:
-    raise newException(ValueError, "Impossible path.")
+    doAssert false

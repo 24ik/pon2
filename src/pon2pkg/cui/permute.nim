@@ -17,7 +17,7 @@ import ../core/permute
 # Entry Point
 # ------------------------------------------------
 
-proc permute*(args: Table[string, Value]) {.inline.} =
+proc runPermuter*(args: Table[string, Value]) {.inline.} =
   ## Runs the permuter CUI.
   let url = $args["<url>"]
 

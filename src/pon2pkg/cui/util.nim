@@ -7,6 +7,10 @@ import strutils
 import docopt
 import nazopuyo_core
 
+# ------------------------------------------------
+# Parse
+# ------------------------------------------------
+
 proc parseNatural*(val: Value, allowNone = false): Option[Natural] {.inline.} =
   ## Converts :code:`val` to the integer.
   ## If the conversion fails, quits the application.
@@ -25,7 +29,7 @@ proc parseNatural*(val: Value, allowNone = false): Option[Natural] {.inline.} =
       echo "数値を入力すべき箇所に数値以外が入力されています．"
       quit()
   else:
-    raise newException(ValueError, "Impossible path.")
+    doAssert false
 
 proc parseNatural*(val: char or string): Natural {.inline.} =
   ## Converts :code:`val` to the integer.
