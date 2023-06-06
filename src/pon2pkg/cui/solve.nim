@@ -15,7 +15,7 @@ import ../core/solve
 # Entry Point
 # ------------------------------------------------
 
-proc solve*(args: Table[string, Value]) {.inline.} =
+proc runSolver*(args: Table[string, Value]) {.inline.} =
   ## Runs the solver CUI.
   let
     url = $args["<url>"]

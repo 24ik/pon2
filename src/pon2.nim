@@ -1,9 +1,4 @@
-## The :code:`pon2` module provides a standalone application and API relating to Nazo Puyo.
-## Features:
-## * Solver
-## * Permuter
-## * Database
-##
+## The :code:`pon2` module provides some tools for Nazo Puyo.
 ## With :code:`import pon2`, you can use all features provides by this module.
 ## Documentations:
 ## * `Permute <./pon2pkg/core/permute.html>`_
@@ -35,29 +30,31 @@ when isMainModule:
     import ./pon2pkg/cui/db as cuiDb
     import ./pon2pkg/cui/permute as cuiPermute
     import ./pon2pkg/cui/solve as cuiSolve
+    import ./pon2pkg/gui/main as guiMain
 
     const Document = """
-なぞぷよツール．ソルバー・ツモ並べ替え・データベース機能が提供されている．
+なぞぷよツール．ソルバー・ツモ並べ替え・データベース・エディター機能が提供されている．
 
 Usage:
-  pon2 (solve | s) <url> [-hibB]
-  pon2 (permute | p) <url> [(-f <>)... -hibBdDS]
-  pon2 (database | d) (add | a) <urls>... [-h]
-  pon2 (database | d) (remove | r) <urls>... [-h]
-  pon2 (database | d) (find | f) [(--fk <>)... (--fm <>)... --fs --fS -h]
-  pon2 [-h]
+  pon2 (solve | s) <url> [-ibB] [-h | --help]
+  pon2 (permute | p) <url> [(-f <>)... -ibBdDS] [-h | --help]
+  pon2 (database | d) (add | a) <urls>... [-h | --help]
+  pon2 (database | d) (remove | r) <urls>... [-h | --help]
+  pon2 (database | d) (find | f) [(--fk <>)... (--fm <>)... --fs --fS] [-h | --help]
+  pon2 [<url>] [-h | --help]
 
 Options:
-  -h        このヘルプ画面を表示する．
-  -i        IPS形式のURLで出力する．
-  -b        解をブラウザで開く．
-  -B        問題をブラウザで開く．
+  -h --help   このヘルプ画面を表示する．
 
-  -d        最終手のゾロを許可．
-  -D        ゾロを許可．                [default: true]
+  -i          IPS形式のURLで出力する．
+  -b          解をブラウザで開く．
+  -B          問題をブラウザで開く．
 
-  -f <>...  何手目を固定するか．
-  -S        ハチイチを同一視するか．    [default: true]
+  -d          最終手のゾロを許可．
+  -D          ゾロを許可．                [default: true]
+
+  -f <>...    何手目を固定するか．
+  -S          ハチイチを同一視するか．    [default: true]
 
   --fk <>...  検索したいクリア条件．
   --fm <>...  検索したい手数．
@@ -86,13 +83,11 @@ Options:
     [16] cぷよn連結以上で消すべし"""
 
     let args = Document.docopt
-    if args["-h"]:
-      echo Document
-    elif args["solve"] or args["s"]:
-      args.solve
+    if args["solve"] or args["s"]:
+      args.runSolver
     elif args["permute"] or args["p"]:
-      args.permute
+      args.runPermuter
     elif args["database"] or args["d"]:
-      args.operateDb
+      args.runDb
     else:
-      echo Document
+      args.runGui
