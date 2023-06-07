@@ -30,7 +30,10 @@ proc loadResource*: Option[Resource] =
     "yellow.png",
     "purple.png"]
 
-  let resourceDir= getAppDir() / "resources"
+  # HACK: resource directory are different during development and installation
+  let
+    resourceDirAtRoot = getAppDir() / "resources"
+    resourceDir = if resourceDirAtRoot.dirExists: resourceDirAtRoot else: getAppDir() / "src" / "resources"
 
   var resource: Resource
   for cell, fileName in FileNames:
