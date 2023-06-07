@@ -9,6 +9,9 @@ Pon!通は，なぞぷよに関する様々な機能を提供するツールで�
     なぞぷよを解く．
     `[ブラウザで試す] <https://izumiya-keisuke.github.io/pon2/playground>`_
 
+ジェネレーター
+    なぞぷよを生成する．
+
 ツモ探索
     なぞぷよのツモを入れ替えて一意解問題を生成する．
 
@@ -41,6 +44,7 @@ GUIアプリケーション
 各種ドキュメントは以下を参照．
 
 * `ソルバー <doc/solve.rst>`_
+* `ジェネレーター <doc/generate.rst>`_
 * `ツモ探索 <doc/permute.rst>`_
 * `データベース <doc/db.rst>`_
 * `GUIアプリケーション <doc/gui.rst>`_
