@@ -26,6 +26,7 @@ proc runGui(nazo: Nazo, positions: Positions, play: bool) {.inline.} =
 
   let cfgRef = new Config
   cfgRef[] = loadConfig()
+  cfgRef[].save
 
   let resource = loadResource()
   if resource.isNone:
