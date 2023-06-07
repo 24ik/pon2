@@ -42,7 +42,7 @@ when isMainModule:
 
 Usage:
   pon2 (solve | s) <url> [-ibB] [-h | --help]
-  pon2 (generate | g) [options]
+  pon2 (generate | g) [-ibBdD] [options] [-h | --help]
   pon2 (permute | p) <url> [(-f <>)... -ibBdDS] [-h | --help]
   pon2 (database | d) (add | a) <urls>... [-h | --help]
   pon2 (database | d) (remove | r) <urls>... [-h | --help]

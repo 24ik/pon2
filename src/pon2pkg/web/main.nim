@@ -17,13 +17,12 @@ proc makeWebPageCore: VNode =
             text "解探索"
 
           tdiv(class = "content"):
-            text "このツールは開発途中です．以下の点に注意してください．"
             ul:
               li:
-                text "バグ（探索結果の間違い等）がある可能性があります．見つけたら"
+                text "バグ（探索結果の間違い等）を見つけたら"
                 a(href = "https://twitter.com/PP_Orange_PP"): text "作者"
                 text "までご連絡ください．"
-              li: text "固ぷよ・鉄ぷよ・壁や，フィーバーモード，途中でお邪魔が降る問題には対応していません．"
+              li: text "固ぷよ・鉄ぷよ・壁，フィーバー，お邪魔ぷよが降る問題は未対応です．"
               li: text "探索が遅いです．4手問題まで，多くても5手問題までの利用を推奨します．"
               li:
                 text "以下の種類のなぞぷよは探索が"
@@ -32,8 +31,7 @@ proc makeWebPageCore: VNode =
               ul:
                 li: text "cぷよn箇所[以上]同時に消すべし"
                 li: text "cぷよn連結[以上]で消すべし"
-              li: text "探索中にこのWebページの動作が固まります．仕様です．"
-              li: text "探索を中断したい場合，このページを再読込してください．"
+              li: text "探索中に動作が固まりますが，仕様です．探索を止める場合はページを再読込してください．"
 
           solverField()
         section(class = "section"):
