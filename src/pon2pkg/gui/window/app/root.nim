@@ -10,9 +10,10 @@ import ./firstPair
 import ./messages
 import ./pairs
 import ./requirement
-import ../config
+import ./state
 import ../resource
-import ../state
+import ../../setting/main
+import ../../setting/theme
 
 type RootControl* = ref object of LayoutContainer
   ## Root control.
@@ -37,7 +38,7 @@ proc newRootControl*(
   nextIdx: ref Natural,
   nextPos: ref Position,
 
-  cfg: ref Config,
+  setting: ref Setting,
   resource: ref Resource,
 ): RootControl {.inline.} =
   ## Returns a new root control.
@@ -46,11 +47,11 @@ proc newRootControl*(
   result.layout = Layout_Vertical
 
   # member
-  result.fieldControl = newFieldControl(nazo, mode, focus, inserted, cfg, resource)
-  result.firstPairControl = newFirstPairControl(nazo, mode, state, nextIdx, nextPos, cfg, resource)
-  result.messagesControl = newMessagesControl(cfg, resource)
-  result.pairsControl = newPairsControl(nazo, positions, mode, focus, inserted, nextIdx, cfg, resource)
-  result.requirementControl = newRequirementControl(nazo, mode, focus, cfg, resource)
+  result.fieldControl = newFieldControl(nazo, mode, focus, inserted, setting, resource)
+  result.firstPairControl = newFirstPairControl(nazo, mode, state, nextIdx, nextPos, setting, resource)
+  result.messagesControl = newMessagesControl(setting, resource)
+  result.pairsControl = newPairsControl(nazo, positions, mode, focus, inserted, nextIdx, setting, resource)
+  result.requirementControl = newRequirementControl(nazo, mode, focus, setting, resource)
 
   #[
     fieldFirstPairControl

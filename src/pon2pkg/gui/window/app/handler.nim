@@ -1,4 +1,4 @@
-## This module implements the window.
+## This module implements handlers.
 ##
 
 import deques
@@ -15,15 +15,15 @@ import nigui/msgBox
 import puyo_core
 import tiny_sqlite
 
-import ./config
-import ./resource
+import ./window
+import ./field
+import ./messages
+import ./pairs
 import ./state
-import ./view/window
-import ./view/field
-import ./view/messages
-import ./view/pairs
-import ../core/db
-import ../core/solve
+import ../../setting/key
+import ../../setting/main
+import ../../../core/db
+import ../../../core/solve
 
 # ------------------------------------------------
 # Property
@@ -368,7 +368,7 @@ proc exitHandler(event: CloseClickEvent) {.inline.} =
   ## Handler for clicking the close button.
   event.appWindow.confirmExit
 
-proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
+proc keyHandler(event: KeyboardEvent, keySetting: KeySetting) {.inline.} =
   ## Handler for pressing keys.
   let
     pressedKeys = downKeys().toSet
@@ -379,7 +379,7 @@ proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
     pairsControl = window.pairsControl
 
   # exit
-  if keyConfig.exit.pressed(event, pressedKeys):
+  if keySetting.exit.pressed(event, pressedKeys):
     window.confirmExit
     return
 
@@ -387,14 +387,14 @@ proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
 
   window.redrawIfReturned:
     # copy window
-    if keyConfig.newWindow.pressed(event, pressedKeys):
+    if keySetting.newWindow.pressed(event, pressedKeys):
       window.copy.show
       return
 
     case window.mode[]
     of Mode.EDIT:
       # change mode
-      if keyConfig.mode.pressed(event, pressedKeys):
+      if keySetting.mode.pressed(event, pressedKeys):
         window.mode[] = Mode.PLAY
         window.nazo[] = window.stableNazo
         window.undoDeque.clear
@@ -407,7 +407,7 @@ proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
         return
 
       # load from the clipboard
-      if keyConfig.paste.pressed(event, pressedKeys):
+      if keySetting.paste.pressed(event, pressedKeys):
         let newNazo = app.clipboardText.toNazo true
         if newNazo.isSome:
           window.change:
@@ -424,19 +424,19 @@ proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
         return
 
       # save to the clipboard
-      if keyConfig.copy.pressed(event, pressedKeys):
+      if keySetting.copy.pressed(event, pressedKeys):
         app.clipboardText = window.nazo[].toUrl
         messagesControl.messages[MISC] = "URLをコピーしました"
 
         return
 
       # change focus
-      if keyConfig.focus.pressed(event, pressedKeys):
+      if keySetting.focus.pressed(event, pressedKeys):
         window.focus[].incRot
         return
 
       # solve
-      if keyConfig.solve.pressed(event, pressedKeys):
+      if keySetting.solve.pressed(event, pressedKeys):
         case window.recordState
         of EMPTY:
           spawn window.solveAndWrite
@@ -450,7 +450,7 @@ proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
         return
 
       # save to the database
-      if keyConfig.save.pressed(event, pressedKeys):
+      if keySetting.save.pressed(event, pressedKeys):
         let (nazo, useOriginal) = window.solveTarget
         window.db[].insert nazo
         messagesControl.messages[MISC] = if useOriginal: "設置前のなぞぷよを保存しました" else: "現在のなぞぷよを保存しました"
@@ -458,7 +458,7 @@ proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
         return
 
       # remove from the database
-      if keyConfig.remove.pressed(event, pressedKeys):
+      if keySetting.remove.pressed(event, pressedKeys):
         let
           (nazo, useOriginal) = window.solveTarget
           prefix = if useOriginal: "設置前" else: "現在"
@@ -468,7 +468,7 @@ proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
         return
 
       # undo
-      if keyConfig.undo.pressed(event, pressedKeys):
+      if keySetting.undo.pressed(event, pressedKeys):
         window.undo
         window.originalNazo = window.nazo[]
         window.fixPairsControlPositions
@@ -477,7 +477,7 @@ proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
         return
 
       # redo
-      if keyConfig.redo.pressed(event, pressedKeys):
+      if keySetting.redo.pressed(event, pressedKeys):
         window.redo
         window.originalNazo = window.nazo[]
         window.fixPairsControlPositions
@@ -486,7 +486,7 @@ proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
         return
 
       # insert
-      if keyConfig.insert.pressed(event, pressedKeys):
+      if keySetting.insert.pressed(event, pressedKeys):
         if window.inserted[]:
           window.inserted[] = false
           messagesControl.messages[MISC] = "挿入モードを抜けました"
@@ -499,52 +499,52 @@ proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
       case window.focus[]
       of Focus.FIELD:
         # move cursor
-        if keyConfig.up.pressed(event, pressedKeys):
+        if keySetting.up.pressed(event, pressedKeys):
           fieldControl.cursor.row.decRot
           return
-        if keyConfig.right.pressed(event, pressedKeys):
+        if keySetting.right.pressed(event, pressedKeys):
           fieldControl.cursor.col.incRot
           return
-        if keyConfig.down.pressed(event, pressedKeys):
+        if keySetting.down.pressed(event, pressedKeys):
           fieldControl.cursor.row.incRot
           return
-        if keyConfig.left.pressed(event, pressedKeys):
+        if keySetting.left.pressed(event, pressedKeys):
           fieldControl.cursor.col.decRot
           return
 
         # shift
-        if keyConfig.shiftUp.pressed(event, pressedKeys):
+        if keySetting.shiftUp.pressed(event, pressedKeys):
           window.change:
             window.nazo[].env.field.shiftUp
           return
-        if keyConfig.shiftDown.pressed(event, pressedKeys):
+        if keySetting.shiftDown.pressed(event, pressedKeys):
           window.change:
             window.nazo[].env.field.shiftDown
           return
-        if keyConfig.shiftRight.pressed(event, pressedKeys):
+        if keySetting.shiftRight.pressed(event, pressedKeys):
           window.change:
             window.nazo[].env.field.shiftRight
           return
-        if keyConfig.shiftLeft.pressed(event, pressedKeys):
+        if keySetting.shiftLeft.pressed(event, pressedKeys):
           window.change:
             window.nazo[].env.field.shiftLeft
           return
 
         # drop
-        if keyConfig.drop.pressed(event, pressedKeys):
+        if keySetting.drop.pressed(event, pressedKeys):
           window.change:
             window.nazo[].env.field.drop
           return
 
         # write/remove cell
         let pressedKeyAndCell = [
-          (keyConfig.none, NONE),
-          (keyConfig.garbage, Cell.GARBAGE),
-          (keyConfig.red, Cell.RED),
-          (keyConfig.green, Cell.GREEN),
-          (keyConfig.blue, Cell.BLUE),
-          (keyConfig.yellow, Cell.YELLOW),
-          (keyConfig.purple, Cell.PURPLE),
+          (keySetting.none, NONE),
+          (keySetting.garbage, Cell.GARBAGE),
+          (keySetting.red, Cell.RED),
+          (keySetting.green, Cell.GREEN),
+          (keySetting.blue, Cell.BLUE),
+          (keySetting.yellow, Cell.YELLOW),
+          (keySetting.purple, Cell.PURPLE),
         ].filterIt it[0].pressed(event, pressedKeys)
         case pressedKeyAndCell.len
         of 0:
@@ -572,26 +572,26 @@ proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
           doAssert false
       of Focus.PAIRS:
         # move cursor
-        if keyConfig.up.pressed(event, pressedKeys):
+        if keySetting.up.pressed(event, pressedKeys):
           if pairsControl.cursor.idx == 0:
             pairsControl.cursor.idx = window.nazo[].env.pairs.len
           else:
             pairsControl.cursor.idx.dec
 
           return
-        if keyConfig.down.pressed(event, pressedKeys):
+        if keySetting.down.pressed(event, pressedKeys):
           if pairsControl.cursor.idx == window.nazo[].env.pairs.len:
             pairsControl.cursor.idx = 0
           else:
             pairsControl.cursor.idx.inc
 
           return
-        if keyConfig.right.pressed(event, pressedKeys) or keyConfig.left.pressed(event, pressedKeys):
+        if keySetting.right.pressed(event, pressedKeys) or keySetting.left.pressed(event, pressedKeys):
           pairsControl.cursor.axis = not pairsControl.cursor.axis
           return
 
         # swap
-        if keyConfig.shiftRight.pressed(event, pressedKeys) or keyConfig.shiftLeft.pressed(event, pressedKeys):
+        if keySetting.shiftRight.pressed(event, pressedKeys) or keySetting.shiftLeft.pressed(event, pressedKeys):
           if pairsControl.cursor.idx < window.nazo[].env.pairs.len:
             window.change:
               window.nazo[].env.pairs[pairsControl.cursor.idx].swap
@@ -600,15 +600,15 @@ proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
 
         # write/remove cell
         let pressedKeyAndColor = [
-          (keyConfig.red, Cell.RED.ColorPuyo),
-          (keyConfig.green, Cell.GREEN.ColorPuyo),
-          (keyConfig.blue, Cell.BLUE.ColorPuyo),
-          (keyConfig.yellow, Cell.YELLOW.ColorPuyo),
-          (keyConfig.purple, Cell.PURPLE.ColorPuyo),
+          (keySetting.red, Cell.RED.ColorPuyo),
+          (keySetting.green, Cell.GREEN.ColorPuyo),
+          (keySetting.blue, Cell.BLUE.ColorPuyo),
+          (keySetting.yellow, Cell.YELLOW.ColorPuyo),
+          (keySetting.purple, Cell.PURPLE.ColorPuyo),
         ].filterIt it[0].pressed(event, pressedKeys)
         case pressedKeyAndColor.len
         of 0:
-          if keyConfig.none.pressed(event, pressedKeys):
+          if keySetting.none.pressed(event, pressedKeys):
             window.change:
               window.nazo[].env.pairs.delete pairsControl.cursor.idx
 
@@ -636,13 +636,13 @@ proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
           doAssert false
       of Focus.REQUIREMENT:
         # kind
-        if keyConfig.down.pressed(event, pressedKeys):
+        if keySetting.down.pressed(event, pressedKeys):
           window.change:
             window.nazo[].req.kind.incRot
             window.fixRequirement
 
           return
-        if keyConfig.up.pressed(event, pressedKeys):
+        if keySetting.up.pressed(event, pressedKeys):
           window.change:
             window.nazo[].req.kind.decRot
             window.fixRequirement
@@ -652,14 +652,14 @@ proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
         # color
         if window.nazo[].req.kind in RequirementKindsWithColor:
           let pressedKeyAndColor = [
-            (keyConfig.garbage, RequirementColor.GARBAGE),
-            (keyConfig.red, RequirementColor.RED),
-            (keyConfig.green, RequirementColor.GREEN),
-            (keyConfig.blue, RequirementColor.BLUE),
-            (keyConfig.yellow, RequirementColor.YELLOW),
-            (keyConfig.purple, RequirementColor.PURPLE),
-            (keyConfig.all, RequirementColor.ALL),
-            (keyConfig.color, RequirementColor.COLOR),
+            (keySetting.garbage, RequirementColor.GARBAGE),
+            (keySetting.red, RequirementColor.RED),
+            (keySetting.green, RequirementColor.GREEN),
+            (keySetting.blue, RequirementColor.BLUE),
+            (keySetting.yellow, RequirementColor.YELLOW),
+            (keySetting.purple, RequirementColor.PURPLE),
+            (keySetting.all, RequirementColor.ALL),
+            (keySetting.color, RequirementColor.COLOR),
           ].filterIt it[0].pressed(event, pressedKeys)
           case pressedKeyAndColor.len
           of 0:
@@ -675,14 +675,14 @@ proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
         # num
         if window.nazo[].req.kind in RequirementKindsWithNum:
           # increment
-          if keyConfig.right.pressed(event, pressedKeys):
+          if keySetting.right.pressed(event, pressedKeys):
             window.change:
               window.nazo[].req.num = some window.nazo[].req.num.get.succRot
 
             return
 
           # decrement
-          if keyConfig.left.pressed(event, pressedKeys):
+          if keySetting.left.pressed(event, pressedKeys):
             window.change:
               window.nazo[].req.num = some window.nazo[].req.num.get.predRot
 
@@ -700,7 +700,7 @@ proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
             return
     of Mode.PLAY:
       # change mode
-      if keyConfig.mode.pressed(event, pressedKeys):
+      if keySetting.mode.pressed(event, pressedKeys):
         window.mode[] = Mode.EDIT
         window.nazo[] = window.stableNazo
         window.undoDeque.clear
@@ -713,12 +713,12 @@ proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
         return
 
       # forward
-      if keyConfig.down.pressed(event, pressedKeys):
+      if keySetting.down.pressed(event, pressedKeys):
         window.forward true
         return
 
       # backward
-      if keyConfig.up.pressed(event, pressedKeys):
+      if keySetting.up.pressed(event, pressedKeys):
         window.backward
         return
 
@@ -726,23 +726,23 @@ proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
         return
 
       # move the first pair
-      if keyConfig.right.pressed(event, pressedKeys):
+      if keySetting.right.pressed(event, pressedKeys):
         window.nextPos[].moveRight
         return
-      if keyConfig.left.pressed(event, pressedKeys):
+      if keySetting.left.pressed(event, pressedKeys):
         window.nextPos[].moveLeft
         return
 
       # rotate the first pair
-      if keyConfig.rotateRight.pressed(event, pressedKeys):
+      if keySetting.rotateRight.pressed(event, pressedKeys):
         window.nextPos[].rotateRight
         return
-      if keyConfig.rotateLeft.pressed(event, pressedKeys):
+      if keySetting.rotateLeft.pressed(event, pressedKeys):
         window.nextPos[].rotateLeft
         return
 
       # skip
-      if keyConfig.skip.pressed(event, pressedKeys):
+      if keySetting.skip.pressed(event, pressedKeys):
         if window.nextIdx[] < window.nazo[].env.pairs.len:
           window.positions[][window.nextIdx[]] = none Position
           window.forward false
@@ -750,46 +750,39 @@ proc keyHandler(event: KeyboardEvent, keyConfig: KeyConfig) {.inline.} =
         return
 
       # next
-      if keyConfig.next.pressed(event, pressedKeys):
+      if keySetting.next.pressed(event, pressedKeys):
         window.forward false
         return
 
     of Mode.RECORD:
       # prev/next record
-      if keyConfig.right.pressed(event, pressedKeys):
+      if keySetting.right.pressed(event, pressedKeys):
         window.recordIdx = if window.recordIdx == window.records.len.pred: 0 else: window.recordIdx.succ
         window.playRecord
         return
-      if keyConfig.left.pressed(event, pressedKeys):
+      if keySetting.left.pressed(event, pressedKeys):
         window.recordIdx = if window.recordIdx == 0: window.records.len.pred else: window.recordIdx.pred
         window.playRecord
         return
 
       # forward
-      if keyConfig.down.pressed(event, pressedKeys):
+      if keySetting.down.pressed(event, pressedKeys):
         window.forward false
         return
 
       # backward
-      if keyConfig.up.pressed(event, pressedKeys):
+      if keySetting.up.pressed(event, pressedKeys):
         window.backward
         return
 
-func setHandlers(window: AppWindow) {.inline.} =
+func setHandlers*(window: AppWindow) {.inline.} =
   ## Sets handlers to the window.
   window.onCloseClick = (event: CloseClickEvent) => event.exitHandler
-  window.onKeyDown = (event: KeyboardEvent) => event.keyHandler window.cfg[].key
+  window.onKeyDown = (event: KeyboardEvent) => event.keyHandler window.setting[].key
 
 # ------------------------------------------------
-# Constructor
+# Copy
 # ------------------------------------------------
-
-proc newWindow*(
-  nazo: Nazo, positions: Positions, mode: Mode, cfg: ref Config, resource: ref Resource, db: ref DbConn
-): AppWindow {.inline.} =
-  ## Returns a new window.
-  result = newWindowView(nazo, positions, mode, cfg, resource, db)
-  result.setHandlers
 
 proc copy(window: AppWindow): AppWindow {.inline.} =
   ## Copys the :code:`window`.

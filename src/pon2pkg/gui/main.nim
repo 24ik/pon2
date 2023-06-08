@@ -10,10 +10,10 @@ import nigui
 import puyo_core
 import tiny_sqlite
 
-import ./config
-import ./resource
-import ./state
-import ./window
+import ./setting/main
+import ./window/app/main as appMain
+import ./window/app/state
+import ./window/resource
 import ../core/db
 
 # ------------------------------------------------
@@ -24,9 +24,9 @@ proc runGui(nazo: Nazo, positions: Positions, play: bool) {.inline.} =
   ## Runs the GUI applicaton.
   app.init
 
-  let cfgRef = new Config
-  cfgRef[] = loadConfig()
-  cfgRef[].save
+  let settingRef = new Setting
+  settingRef[] = loadSetting()
+  settingRef[].save
 
   let resource = loadResource()
   if resource.isNone:
@@ -43,7 +43,7 @@ proc runGui(nazo: Nazo, positions: Positions, play: bool) {.inline.} =
   dbRef[] = db.get
 
   try:
-    let window = nazo.newWindow(positions, if play: PLAY else: Mode.EDIT, cfgRef, resourceRef, dbRef)
+    let window = nazo.newWindow(positions, if play: PLAY else: Mode.EDIT, settingRef, resourceRef, dbRef)
     window.show
 
     app.run
