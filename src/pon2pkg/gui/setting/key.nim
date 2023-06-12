@@ -126,7 +126,7 @@ type
 
 func fixUnicode(fullKey: var FullKey) {.inline.} =
   ## Fixes :code:`fullKey.unicode` that depends on the OS.
-  when defined(windows):
+  when defined windows:
     #[
       unicode[A] == 97 == ASCII[a]
       unicode[Shift-A] == 65 == ASCII[A]
@@ -144,7 +144,7 @@ func fixUnicode(fullKey: var FullKey) {.inline.} =
       else:
         fullKey.unicode = 0
 
-  when not defined(windows):
+  when not defined windows:
     #[
       unicode[A] == 65 == ASCII[A]
       unicode[Shift-A] == 65 == ASCII[A]

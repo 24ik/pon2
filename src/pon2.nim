@@ -10,7 +10,7 @@
 ## To prevent this, specify :code:`-d:singleThread` to the compile options.
 ##
 
-when not defined(js):
+when not defined js:
   import ./pon2pkg/core/db
   export db.connectDb, db.insert, db.delete, db.find
 
@@ -24,7 +24,7 @@ import ./pon2pkg/core/solve
 export solve.Solution, solve.Solutions, solve.InspectSolutions, solve.solve, solve.inspectSolve, solve.`$`
 
 when isMainModule:
-  when defined(js):
+  when defined js:
     import ./pon2pkg/web/main as webMain
 
     makeWebPage()

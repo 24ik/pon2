@@ -2,6 +2,7 @@
 ##
 
 import deques
+import math
 
 import nazopuyo_core
 import nigui
@@ -122,9 +123,16 @@ proc newWindowView(
   result.stableNazo = nazo
 
   result.title = "Pon!通"
-  result.width = rootControl.naturalWidth
-  result.height = rootControl.naturalHeight
   result.resizable = false
+
+  # HACK: somehow :code:`rootControl.natural**` is not accurate on Windows
+  # TODO: better implementation
+  when defined windows:
+    result.width = (rootControl.naturalWidth.float * 1.1).round.int
+    result.height = (rootControl.naturalHeight.float * 1.1).round.int
+  else:
+    result.width = rootControl.naturalWidth
+    result.height = rootControl.naturalHeight
 
 proc newWindowView*(
   nazo: Nazo, positions: Positions, mode: Mode, setting: ref Setting, resource: ref Resource, db: ref DbConn

@@ -28,8 +28,8 @@ const DefaultSetting = (key: DefaultKeySetting, theme: DefaultThemeSetting).Sett
 
 const
   SettingDir = (
-    when defined(windows): "APPDATA".getEnv getHomeDir() / "AppData" / "Roaming"
-    elif defined(macos): getHomeDir() / "Application Support"
+    when defined windows: "APPDATA".getEnv getHomeDir() / "AppData" / "Roaming"
+    elif defined macos: getHomeDir() / "Application Support"
     else: "XDG_CONFIG_HOME".getEnv getHomeDir() / ".config") / "pon2"
   SettingFileName = "setting.yaml"
 

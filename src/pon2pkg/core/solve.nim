@@ -3,7 +3,7 @@
 
 const
   singleThread {.booldefine.} = false
-  SingleThread = singleThread or defined(js)
+  SingleThread = singleThread or defined js
 
 import deques
 import math
