@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.3.1"
+version       = "0.3.2"
 author        = "Keisuke Izumiya"
 description   = "Nazo Puyo Tool"
 license       = "Apache-2.0 OR MPL-2.0"
@@ -32,5 +32,7 @@ task test, "Test":
   let mainFile = "./src/pon2.nim".unixToNativePath
   exec &"nim doc --threads:on --project --index {mainFile}"
   rmDir "./src/htmldocs".unixToNativePath
+
+  exec "nimble -y build"
 
   exec "testament all"

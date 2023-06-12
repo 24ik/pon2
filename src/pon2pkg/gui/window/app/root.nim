@@ -13,7 +13,6 @@ import ./requirement
 import ./state
 import ../resource
 import ../../setting/main
-import ../../setting/theme
 
 type RootControl* = ref object of LayoutContainer
   ## Root control.
