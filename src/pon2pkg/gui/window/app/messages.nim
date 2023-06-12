@@ -6,8 +6,9 @@ import sugar
 import nigui
 
 import ./common
-import ../config
 import ../resource
+import ../../setting/main
+import ../../setting/theme
 
 type
   MessageKind* {.pure.} = enum
@@ -18,7 +19,7 @@ type
 
   MessagesControl* = ref object of LayoutContainer
     ## Messages control.
-    cfg: ref Config
+    setting: ref Setting
 
     messages*: array[MessageKind, string]
 
@@ -40,7 +41,7 @@ proc messageDrawHandler(event: DrawEvent, kind: MessageKind) {.inline.} =
   ## Draws the message.
   let
     control = event.messagesControl
-    theme = control.cfg[].theme
+    theme = control.setting[].theme
     canvas = event.control.canvas
 
   # background color
@@ -59,14 +60,14 @@ proc newMessageControl(kind: MessageKind, fontSize: float): Control {.inline.} =
   result.height = fontSize.px
 
 proc newMessagesControl*(
-  cfg: ref Config, resource: ref Resource, messages = [MARK: "", RECORD: "", MISC: ""]
+  setting: ref Setting, resource: ref Resource, messages = [MARK: "", RECORD: "", MISC: ""]
 ): MessagesControl {.inline.} =
   ## Returns a new messages control.
   result = new MessagesControl
   result.init
   result.layout = Layout_Vertical
 
-  result.cfg = cfg
+  result.setting = setting
 
   result.messages = messages
 

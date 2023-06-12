@@ -8,9 +8,10 @@ import nazopuyo_core
 import nigui
 import puyo_core
 
-import ../config
+import ./state
 import ../resource
-import ../state
+import ../../setting/main
+import ../../setting/theme
 
 type FirstPairControl* = ref object of LayoutContainer
   ## First pair control.
@@ -21,7 +22,7 @@ type FirstPairControl* = ref object of LayoutContainer
   nextIdx: ref Natural
   nextPos: ref Position
 
-  cfg: ref Config
+  setting: ref Setting
   resource: ref Resource
 
 # ------------------------------------------------
@@ -42,7 +43,7 @@ proc cellDrawHandler(event: DrawEvent, rowDiff: int, col: Col) {.inline.} =
   ## Draws cells in the first pair.
   let
     control = event.firstPairControl
-    theme = control.cfg[].theme
+    theme = control.setting[].theme
     canvas = event.control.canvas
 
   canvas.areaColor = theme.bgControl
@@ -75,7 +76,7 @@ proc newFirstPairControl*(
   nextIdx: ref Natural,
   nextPos: ref Position,
 
-  cfg: ref Config,
+  setting: ref Setting,
   resource: ref Resource,
 ): FirstPairControl {.inline.} =
   ## Returns a new first pair control.
@@ -88,7 +89,7 @@ proc newFirstPairControl*(
   result.state = state
   result.nextIdx = nextIdx
   result.nextPos = nextPos
-  result.cfg = cfg
+  result.setting = setting
   result.resource = resource
 
   for rowDiff in -1 .. 1:

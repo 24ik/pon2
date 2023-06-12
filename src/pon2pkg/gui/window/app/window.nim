@@ -14,12 +14,12 @@ import ./messages
 import ./pairs
 import ./requirement
 import ./root
-import ../config
+import ./state
 import ../resource
-import ../state
+import ../../setting/main
 
 type AppWindow* = ref object of WindowImpl
-  ## Application Window.
+  ## Application window.
   nazo*: ref Nazo
   positions*: ref Positions
   mode*: ref Mode
@@ -28,7 +28,7 @@ type AppWindow* = ref object of WindowImpl
   inserted*: ref bool
   nextIdx*: ref Natural
   nextPos*: ref Position
-  cfg*: ref Config
+  setting*: ref Setting
   resource*: ref Resource
   db*: ref DbConn
 
@@ -63,7 +63,7 @@ proc newWindowView(
   nextIdx: Natural,
   nextPos: Position,
 
-  cfg: ref Config,
+  setting: ref Setting,
   resource: ref Resource,
   db: ref DbConn,
 ): AppWindow {.inline.} =
@@ -95,7 +95,7 @@ proc newWindowView(
   result.nextPos = new Position
   result.nextPos[] = nextPos
 
-  result.cfg = cfg
+  result.setting = setting
   result.resource = resource
   result.db = db
 
@@ -108,7 +108,7 @@ proc newWindowView(
     result.inserted,
     result.nextIdx,
     result.nextPos,
-    result.cfg,
+    result.setting,
     result.resource)
   result.add rootControl
 
@@ -127,7 +127,7 @@ proc newWindowView(
   result.resizable = false
 
 proc newWindowView*(
-  nazo: Nazo, positions: Positions, mode: Mode, cfg: ref Config, resource: ref Resource, db: ref DbConn
+  nazo: Nazo, positions: Positions, mode: Mode, setting: ref Setting, resource: ref Resource, db: ref DbConn
 ): AppWindow {.inline.} =
   ## Returns a new window view.
   newWindowView(
@@ -139,7 +139,7 @@ proc newWindowView*(
     false,
     0.Natural,
     POS_3U,
-    cfg,
+    setting,
     resource,
     db)
 
@@ -158,7 +158,7 @@ proc copyView*(window: AppWindow): AppWindow {.inline.} =
     window.inserted[],
     window.nextIdx[],
     window.nextPos[],
-    window.cfg,
+    window.setting,
     window.resource,
     window.db)
 

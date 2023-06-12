@@ -1,12 +1,21 @@
-switch("threads", "on")
-switch("opt", "speed")
-switch("define", "danger")
+--threads:on
+--opt:speed
+--define:danger
 
 #[
-These are necessary in Nim==1.6.12.
+These are needed at Nim==1.6.12.
 In #devel, tlsEmulation and useMalloc can (or should) be removed,
-and all memory management strategies are allowed.
+and all memory management strategies can be allowed.
 ]#
-switch("tlsEmulation", "off")
-switch("define", "useMalloc")
-switch("mm", "arc")
+--tlsEmulation:off
+--define:useMalloc
+--mm:arc
+
+when defined linux:
+  discard
+elif defined windows:
+  --passL:"-static"
+  --define:"avx2=false"
+else:
+  --define:"avx2=false"
+  --define:"bmi2=false"

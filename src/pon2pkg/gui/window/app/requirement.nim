@@ -7,9 +7,10 @@ import nazopuyo_core
 import nigui
 
 import ./common
-import ../config
+import ./state
 import ../resource
-import ../state
+import ../../setting/main
+import ../../setting/theme
 
 type RequirementControl* = ref object of ControlImpl
   ## Requirement control.
@@ -18,7 +19,7 @@ type RequirementControl* = ref object of ControlImpl
   mode: ref Mode
   focus: ref Focus
 
-  cfg: ref Config
+  setting: ref Setting
 
 # ------------------------------------------------
 # Property
@@ -38,7 +39,7 @@ proc requirementDrawHandler(event: DrawEvent) {.inline.} =
   ## Draws the requirement.
   let
     control = event.requirementControl
-    theme = control.cfg[].theme
+    theme = control.setting[].theme
     canvas = event.control.canvas
 
   canvas.areaColor =
@@ -54,7 +55,7 @@ proc newRequirementControl*(
   mode: ref Mode,
   focus: ref Focus,
 
-  cfg: ref Config,
+  setting: ref Setting,
   resource: ref Resource,
 ): RequirementControl {.inline.} =
   ## Returns a new requirement control.
@@ -64,7 +65,7 @@ proc newRequirementControl*(
   result.nazo = nazo
   result.mode = mode
   result.focus = focus
-  result.cfg = cfg
+  result.setting = setting
 
   result.onDraw = (event: DrawEvent) => event.requirementDrawHandler
 

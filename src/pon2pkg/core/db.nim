@@ -14,11 +14,7 @@ import nazopuyo_core
 import puyo_core
 import tiny_sqlite
 
-import ./common
-
 const
-  DbFileName = "nazo.db"
-
   TableName = "nazoTable"
 
   UrlColName = "url"
@@ -30,6 +26,13 @@ const
 # ------------------------------------------------
 # Connection
 # ------------------------------------------------
+
+const
+  DataDir = (
+    when defined(windows): "APPDATA".getEnv getHomeDir() / "AppData" / "Roaming"
+    elif defined(macos): getHomeDir() / "Application Support"
+    else: "XDG_DATA_HOME".getEnv getHomeDir() / ".local" / "share") / "pon2"
+  DbFileName = "nazo.db"
 
 proc connectDb*(dbFile = DataDir / DbFileName): Option[DbConn] {.inline.} =
   ## Returns a connection to the database.

@@ -10,9 +10,10 @@ import nigui
 import puyo_core
 
 import ./common
-import ../config
+import ./state
 import ../resource
-import ../state
+import ../../setting/main
+import ../../setting/theme
 
 type PairsControl* = ref object of LayoutContainer
   ## Pairs control.
@@ -24,7 +25,7 @@ type PairsControl* = ref object of LayoutContainer
   inserted: ref bool
   nextIdx: ref Natural
 
-  cfg: ref Config
+  setting: ref Setting
   resource: ref Resource
 
   cursor*: tuple[idx: Natural, axis: bool]
@@ -47,7 +48,7 @@ proc cellDrawHandler(event: DrawEvent, idx: Natural, axis: bool) {.inline.} =
   ## Draws cells in the pairs.
   let
     control = event.pairsControl
-    theme = control.cfg[].theme
+    theme = control.setting[].theme
     canvas = event.control.canvas
 
   canvas.areaColor =
@@ -99,7 +100,7 @@ proc idxDrawHandler(event: DrawEvent, idx: Natural) {.inline.} =
   ## Draws the index of the pairs.
   let
     control = event.pairsControl
-    theme = control.cfg[].theme
+    theme = control.setting[].theme
     canvas = event.control.canvas
 
   canvas.areaColor = theme.bgControl
@@ -122,7 +123,7 @@ proc positionDrawHandler(event: DrawEvent, idx: Natural) {.inline.} =
   ## Draws the position of the pairs.
   let
     control = event.pairsControl
-    theme = control.cfg[].theme
+    theme = control.setting[].theme
     canvas = event.control.canvas
 
   canvas.areaColor = theme.bgControl
@@ -185,7 +186,7 @@ proc newPairsControl*(
   inserted: ref bool,
   nextIdx: ref Natural,
 
-  cfg: ref Config,
+  setting: ref Setting,
   resource: ref Resource,
 
   cursor = (idx: 0.Natural, axis: true),
@@ -201,7 +202,7 @@ proc newPairsControl*(
   result.focus = focus
   result.inserted = inserted
   result.nextIdx = nextIdx
-  result.cfg = cfg
+  result.setting = setting
   result.resource = resource
   result.cursor = cursor
 

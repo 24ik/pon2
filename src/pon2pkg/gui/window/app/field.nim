@@ -7,9 +7,10 @@ import nazopuyo_core
 import nigui
 import puyo_core
 
-import ../config
+import ./state
 import ../resource
-import ../state
+import ../../setting/main
+import ../../setting/theme
 
 type FieldControl* = ref object of LayoutContainer
   ## Field control.
@@ -19,7 +20,7 @@ type FieldControl* = ref object of LayoutContainer
   focus: ref Focus
   inserted: ref bool
 
-  cfg: ref Config
+  setting: ref Setting
   resource: ref Resource
 
   cursor*: tuple[row: Row, col: Col]
@@ -42,7 +43,7 @@ proc cellDrawHandler(event: DrawEvent, row: Row, col: Col) {.inline.} =
   ## Draws cells in the field.
   let
     control = event.fieldControl
-    theme = control.cfg[].theme
+    theme = control.setting[].theme
     canvas = event.control.canvas
 
   canvas.areaColor =
@@ -76,7 +77,7 @@ proc newFieldControl*(
   focus: ref Focus,
   inserted: ref bool,
 
-  cfg: ref Config,
+  setting: ref Setting,
   resource: ref Resource,
 
   cursor = (row: Row.high, col: Col.low),
@@ -90,7 +91,7 @@ proc newFieldControl*(
   result.mode = mode
   result.focus = focus
   result.inserted = inserted
-  result.cfg = cfg
+  result.setting = setting
   result.resource = resource
   result.cursor = cursor
 
