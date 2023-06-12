@@ -445,6 +445,7 @@ proc keyHandler(event: KeyboardEvent, keySetting: KeySetting) {.inline.} =
         of READY:
           let newWindow = window.copy
           newWindow.mode[] = Mode.RECORD
+          newWindow.playRecord
           newWindow.show
 
         return

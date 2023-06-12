@@ -7,10 +7,12 @@ import math
 # Unit conversion
 # ------------------------------------------------
 
+const Dpi = when defined windows: 144 else: 120 # TODO: better implementation
+
 func pt*(px: int): float {.inline.} =
   ## Converts :code:`px` to pt.
-  px * 2 / 3
+  px / Dpi * 72
 
 func px*(pt: float): int {.inline.} =
   ## Converts :code:`pt` to px.
-  (pt * 3 / 2).round.int
+  (pt / 72 * Dpi).round.int
