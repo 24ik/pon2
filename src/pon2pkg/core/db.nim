@@ -29,8 +29,8 @@ const
 
 const
   DataDir = (
-    when defined(windows): "APPDATA".getEnv getHomeDir() / "AppData" / "Roaming"
-    elif defined(macos): getHomeDir() / "Application Support"
+    when defined windows: "APPDATA".getEnv getHomeDir() / "AppData" / "Roaming"
+    elif defined macos: getHomeDir() / "Application Support"
     else: "XDG_DATA_HOME".getEnv getHomeDir() / ".local" / "share") / "pon2"
   DbFileName = "nazo.db"
 
