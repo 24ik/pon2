@@ -15,10 +15,59 @@ on:
   workflow_dispatch:
 
 jobs:
-  release:
+  release-build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macOS-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/cache@v3
+        with:
+          path: ~/.nimble
+          key: ${{ runner.os }}-nimble-${{ hashFiles('*.nimble') }}
+          restore-keys: |
+              ${{ runner.os }}-nimble-
+      - uses: jiro4989/setup-nim-action@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: nimble -y install
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ runner.os }}
+          path: ./pon2.exe
+        if: runner.os == 'Windows'
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ runner.os }}
+          path: ./pon2
+        if: runner.os != 'Windows'
+
+  release-publish:
+    needs: release-build
+
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/download-artifact@v3
+
+      - run: |-
+          tar -zcvf Linux.tar.gz ./Linux
+          zip -rv Windows.zip ./Windows
+          zip -rv macOS.zip ./macOS
+
       - uses: softprops/action-gh-release@v1
         with:
+          files: |-
+              ./Linux.tar.gz
+              ./Windows.zip
+              ./macOS.zip
           generate_release_notes: true
