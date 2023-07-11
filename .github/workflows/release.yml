@@ -38,7 +38,7 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: nimble -y install
+      - run: nimble -y install --define:distribute
 
       - uses: actions/upload-artifact@v3
         with:

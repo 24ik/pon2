@@ -1,6 +1,8 @@
 ## This module implements resources handling.
 ##
 
+const distribute {.booldefine.} = false # used for GitHub release
+
 import options
 import os
 
@@ -30,10 +32,11 @@ proc loadResource*: Option[Resource] =
     "yellow.png",
     "purple.png"]
 
-  # HACK: resource directory are different during development and installation
+  # HACK: resource directory are different during development, installation and distribution
   let
     resourceDirAtRoot = getAppDir() / "resources"
-    resourceDir = if resourceDirAtRoot.dirExists: resourceDirAtRoot else: getAppDir() / "src" / "resources"
+    resourceDir = if distribute: getCurrentDir() / "resources" else:
+      if resourceDirAtRoot.dirExists: resourceDirAtRoot else: getAppDir() / "src" / "resources"
 
   var resource: Resource
   for cell, fileName in FileNames:
