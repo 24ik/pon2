@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.3.4"
+version       = "0.4.0"
 author        = "Keisuke Izumiya"
 description   = "Nazo Puyo Tool"
 license       = "Apache-2.0 OR MPL-2.0"
@@ -12,15 +12,15 @@ bin           = @["pon2"]
 
 # Dependencies
 
-requires "nim >= 1.6.12"
+requires "nim >= 1.6.14"
 
 requires "docopt >= 0.7.0"
 requires "karax >= 1.3.0"
 requires "nigui >= 0.2.7"
 requires "tiny_sqlite >= 0.2.0"
 requires "yaml >= 1.1.0"
-requires "https://github.com/izumiya-keisuke/nazopuyo-core.git >= 0.1.1"
-requires "https://github.com/izumiya-keisuke/puyo-core.git >= 0.2.1"
+requires "https://github.com/izumiya-keisuke/nazopuyo-core.git >= 0.2.0"
+requires "https://github.com/izumiya-keisuke/puyo-core.git >= 0.3.0"
 
 
 # Tasks

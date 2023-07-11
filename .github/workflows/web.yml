@@ -17,43 +17,44 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  web-build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/cache@v1
+      - uses: actions/cache@v3
         with:
           path: ~/.nimble
           key: ${{ runner.os }}-nimble-${{ hashFiles('*.nimble') }}
-
+          restore-keys: |
+            ${{ runner.os }}-nimble-
       - uses: jiro4989/setup-nim-action@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: >-
-          nimble -y install
-          docopt karax nigui tiny_sqlite yaml
-          https://github.com/izumiya-keisuke/puyo-core
-          https://github.com/izumiya-keisuke/nazopuyo-core
+      - run: |-
+          nimble -y install -d
+          nim doc --threads:on --project --index ./src/pon2.nim
+          mv ./src/htmldocs/pon2.html ./src/htmldocs/index.html
 
-      - run: nim doc --threads:on --project --index ./src/pon2.nim
+      - run: |-
+          nim js -o:www/index.js src/pon2.nim
+          mv ./www ./src/htmldocs/playground
 
-      - run: mv ./src/htmldocs/pon2.html ./src/htmldocs/index.html
-
-      - run: nim js -o:www/index.js src/pon2.nim
-
-      - run: mv ./www ./src/htmldocs/playground
-
-      - uses: actions/configure-pages@v2
-
+      - uses: actions/configure-pages@v3
       - uses: actions/upload-pages-artifact@v1
         with:
           path: ./src/htmldocs
 
-  deploy:
+  web-deploy:
+    needs: web-build
+
+    runs-on: ubuntu-latest
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
+
     steps:
-      - uses: actions/deploy-pages@v1
+      - uses: actions/deploy-pages@v2

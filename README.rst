@@ -31,6 +31,17 @@ GUIアプリケーション
 インストール
 ************
 
+ビルド済バイナリ
+================
+
+`最新リリース <https://github.com/izumiya-keisuke/pon2/releases/latest>`_ の「Assets」から，使用するOSに応じてダウンロードできる．
+
+特にWindowsの場合，Microsoft Defenderのセキュリティチェックに引っかかってダウンロードに失敗する場合がある．
+失敗したら，`対処法の記事 <https://www.gigafree.net/faq/Windows-Security-Detection/>`_ 等を参考にダウンロードを再試行することで改善すると思われる．
+
+ソースからビルド
+================
+
 `Nimをインストール <https://nim-lang.org/install.html>`_ した後，以下のコマンドを実行する．
 
 ::

@@ -1,0 +1,15 @@
+- color: d73a4a
+  description: Something isn't working
+  name: bug
+- color: 0075ca
+  description: Improvements or additions to documentation
+  name: documentation
+- color: a2eeef
+  description: New feature or request
+  name: enhancement
+- color: f9d0c4
+  description: Refactor code
+  name: refactor
+- color: 1d76db
+  description: Fix test code
+  name: test
