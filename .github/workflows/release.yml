@@ -51,23 +51,33 @@ jobs:
           path: ./pon2
         if: runner.os != 'Windows'
 
+  release-resources:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
       - uses: actions/upload-artifact@v3
         with:
           name: resources
           path: ./src/resources
 
   release-publish:
-    needs: release-build
+    needs:
+      - release-build
+      - release-resources
 
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v3
+
       - uses: actions/download-artifact@v3
 
       - run: |-
-          cp -r ./resources/resources ./Linux
-          cp -r ./resources/resources ./Windows
-          cp -r ./resources/resources ./macOS
+          cp -r ./resources ./Linux
+          cp -r ./resources ./Windows
+          cp -r ./resources ./macOS
           tar -zcvf Linux.tar.gz ./Linux
           zip -rv Windows.zip ./Windows
           zip -rv macOS.zip ./macOS
