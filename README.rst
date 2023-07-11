@@ -34,10 +34,10 @@ GUIアプリケーション
 ビルド済バイナリ
 ================
 
-[最新リリース](https://github.com/izumiya-keisuke/pon2/releases/latest) の「Assets」から，使用するOSに応じてダウンロードできる．
+`最新リリース <https://github.com/izumiya-keisuke/pon2/releases/latest>`_ の「Assets」から，使用するOSに応じてダウンロードできる．
 
 特にWindowsの場合，Microsoft Defenderのセキュリティチェックに引っかかってダウンロードに失敗する場合がある．
-失敗したら，[対処法の記事](https://www.gigafree.net/faq/Windows-Security-Detection/) 等を参考にダウンロードを再試行することで改善すると思われる．
+失敗したら，`対処法の記事 <https://www.gigafree.net/faq/Windows-Security-Detection/>`_ 等を参考にダウンロードを再試行することで改善すると思われる．
 
 ソースからビルド
 ================
