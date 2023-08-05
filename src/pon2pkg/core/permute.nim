@@ -24,7 +24,7 @@ iterator allPairsSeq(
   skipSwap: bool
 ): seq[Pairs] {.inline.} =
   ## Yields all possible pairs in ascending order that can be obtained by permuting puyoes contained in the
-  ## :code:`originalPairs`.
+  ## `originalPairs`.
   # calculate the number of puyoes
   let moveNum = originalPairs.len
   var colorNums: array[ColorPuyo, Natural]
@@ -99,7 +99,7 @@ iterator permute*(
   allowLastDouble: bool,
   skipSwap: bool,
 ): tuple[pairs: Pairs, solution: Solution]{.inline.} =
-  ## Yields the pairs and solution of the :code:`nazo` that is obtained by permuting puyoes contained in the pairs,
+  ## Yields the pairs and solution of the `nazo` that is obtained by permuting puyoes contained in the pairs,
   ## and has a unique solution.
   for pairsSeq in nazo.env.pairs.allPairsSeq(fixMoves.deduplicate true, allowDouble, allowLastDouble, skipSwap):
     for pairs in pairsSeq:
@@ -119,9 +119,9 @@ iterator permute*(
   skipSwap: bool,
   domain = ISHIKAWAPUYO,
 ): Option[tuple[problem: string, solution: string]] {.inline.} =
-  ## Yields the pairs and solution of the nazo puyo represented by the :code:`url`
+  ## Yields the pairs and solution of the nazo puyo represented by the `url`
   ## that is obtained by permuting puyoes contained in the pairs, and has a unique solution.
-  ## If the :code:`url` is invalid, yields :code:`none` once.
+  ## If the `url` is invalid, yields `none` once.
   let nazo = url.toNazo true
   if nazo.isSome:
     for (pairs, solution) in nazo.get.permute(fixMoves, allowDouble, allowLastDouble, skipSwap):

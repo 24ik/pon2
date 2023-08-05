@@ -35,7 +35,7 @@ jobs:
 
       - run: |-
           nimble -y install -d
-          nim doc --threads:on --project --index ./src/pon2.nim
+          nim doc --project --index ./src/pon2.nim || :
           mv ./src/htmldocs/pon2.html ./src/htmldocs/index.html
 
       - run: |-

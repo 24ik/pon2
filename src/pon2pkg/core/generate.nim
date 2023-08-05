@@ -35,13 +35,13 @@ type
 
 func round(rng: var Rand, x: SomeNumber): int {.inline.} =
   ## Probabilistic round function.
-  ## For example, :code:`rng.round(2.7)` becomes :code:`2` with a 30% probability and :code:`3` with a 70% probability.
+  ## For example, `rng.round(2.7)` becomes `2` with a 30% probability and `3` with a 70% probability.
   let floorX = x.int
   return floorX + (rng.rand(1.0) < x.float - floorX.float).int
 
 func split(rng: var Rand, total: Natural, chunkNum: Positive, allowZeroChunk: bool): Option[seq[Natural]] {.inline.} =
-  ## Splits the :code:`total` number into :code:`chunkNum` chunks.
-  ## If the splitting fails, returns :code:`none`.
+  ## Splits the `total` number into `chunkNum` chunks.
+  ## If the splitting fails, returns `none`.
   runnableExamples:
     import math
     import random
@@ -86,10 +86,10 @@ func split(rng: var Rand, total: Natural, chunkNum: Positive, allowZeroChunk: bo
   return some res
 
 func split(rng: var Rand, total: Natural, ratios: openArray[Option[Natural]]): Option[seq[Natural]] {.inline.} =
-  ## Splits the :code:`total` number into chunks following the distribution represented by the :code:`ratios`.
-  ## :code:`none` in the :code:`ratios` means a random.
-  ## If :code:`ratios` are all :code:`some(0)`, splits randomly.
-  ## If the splitting fails, returns :code:`none`.
+  ## Splits the `total` number into chunks following the distribution represented by the `ratios`.
+  ## `none` in the `ratios` means a random.
+  ## If `ratios` are all `some(0)`, splits randomly.
+  ## If the splitting fails, returns `none`.
   runnableExamples:
     import random
 
@@ -151,7 +151,7 @@ func generateEnv(
   puyoNums: tuple[color: Natural, garbage: Natural],
 ): Option[Env] {.inline.} =
   ## Returns a random environment.
-  ## If the generation fails, returns :code:`none`.
+  ## If the generation fails, returns `none`.
   let
     fieldNum = puyoNums.color + puyoNums.garbage - 2 * moveNum
     chainNum = puyoNums.color div 4
@@ -197,7 +197,7 @@ func generateRequirement(
   puyoNums: tuple[color: Natural, garbage: Natural],
 ): Option[Requirement] {.inline.} =
   ## Returns a random requirement.
-  ## If the generation fails, returns :code:`none`.
+  ## If the generation fails, returns `none`.
   const ColorToRequirementColor: array[ColorPuyo, RequirementColor] = [
     RequirementColor.RED,
     RequirementColor.GREEN,
@@ -236,15 +236,15 @@ func generateRequirement(
 # ------------------------------------------------
 
 func sample[T](rng: var Rand, `array`: openArray[T], num: Natural): seq[T] {.inline.} =
-  ## Selects and returns :code:`num` elements in the :code:`array` without duplicates.
+  ## Selects and returns `num` elements in the `array` without duplicates.
   var array2 = `array`.toSeq
   rng.shuffle array2
   return array2[0 ..< num]
 
 func hasDouble(pairs: Pairs): bool {.inline.} =
-  ## Returns :code:`true` if any pair in the :code:`pairs` is double.
+  ## Returns `true` if any pair in the `pairs` is double.
   # HACK: It should not be necessary to cut it out as a function, but perhaps due to a Nim's bug
-  # the program does not work if we check :code:`hasDouble` directly in the :code:`generate` function.
+  # the program does not work if we check `hasDouble` directly in the `generate` function.
   pairs.anyIt it.isDouble
 
 proc generate*(
@@ -260,7 +260,7 @@ proc generate*(
   allowLastDouble: bool,
 ): Option[tuple[problem: Nazo, solution: Solution]] {.inline.} =
   ## Returns a nazo puyo that have a unique solution.
-  ## If the generation fails, returns :code:`none`.
+  ## If the generation fails, returns `none`.
   # validate the arguments
   # TODO: validate more strictly
   if puyoNums.color + puyoNums.garbage - 2 * moveNum notin 0 .. Height * Width - 2:

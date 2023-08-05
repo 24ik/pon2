@@ -30,7 +30,7 @@ main()
   let
     matrixSeq = collect:
       for thread in ThreadSeq:
-         &"-d:bmi2={bmi2} -d:avx2={avx2} {thread} --threads:on --mm:arc --tlsEmulation:off -d:useMalloc"
+         &"-d:bmi2={bmi2} -d:avx2={avx2} {thread}"
     fileContent = FileContentTemplate.replace(Matrix, matrixSeq.join "; ")
 
   for categoryDir in (currentSourcePath().parentDir / "*").walkDirs:

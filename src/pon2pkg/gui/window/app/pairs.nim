@@ -35,7 +35,7 @@ type PairsControl* = ref object of LayoutContainer
 # ------------------------------------------------
 
 proc pairsControl(event: DrawEvent): PairsControl {.inline.} =
-  ## Returns the pairs control from the :code:`event`.
+  ## Returns the pairs control from the `event`.
   let control = event.control.parentWindow.control.childControls[1].childControls[1]
   assert control of PairsControl
   return cast[PairsControl](control)
@@ -165,12 +165,12 @@ proc newPairWithInfoControl(idx: Natural, imgWidth: int, imgHeight: int): Layout
   positionControl.height = pairControl.naturalHeight
 
 proc addPairWithInfoControl*(control: PairsControl) {.inline.} =
-  ## Adds a new full pair control to the :code:`control`.
+  ## Adds a new full pair control to the `control`.
   control.add control.childControls.len.newPairWithInfoControl(
     control.resource[].cellImageWidth, control.resource[].cellImageHeight)
 
 proc removePairWithInfoControl*(control: PairsControl) {.inline.} =
-  ## Removes the last full pair control from the :code:`control`.
+  ## Removes the last full pair control from the `control`.
   control.remove control.childControls[^1]
 
 # ------------------------------------------------

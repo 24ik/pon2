@@ -21,7 +21,7 @@ type Resource* = tuple
 
 proc loadResource*: Option[Resource] =
   ## Returns the resources.
-  ## If the loading fails, returns :code:`none(Resource)`.
+  ## If the loading fails, returns `none(Resource)`.
   const FileNames: array[Cell, string] = [
     "none.png",
     "",

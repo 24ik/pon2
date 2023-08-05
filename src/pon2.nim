@@ -1,13 +1,14 @@
-## The :code:`pon2` module provides some tools for Nazo Puyo.
-## With :code:`import pon2`, you can use all features provides by this module.
+## The `pon2` module provides some tools for Nazo Puyo.
+## With `import pon2`, you can use all features provided by this module.
+##
 ## Documentations:
-## * `Database <./pon2pkg/core/db.html>`_
-## * `Generate <./pon2pkg/core/generate.html>`_
-## * `Permute <./pon2pkg/core/permute.html>`_
-## * `Solve <./pon2pkg/core/solve.html>`_
+## - [Database](./pon2pkg/core/db.html)
+## - [Generate](./pon2pkg/core/generate.html)
+## - [Permute](./pon2pkg/core/permute.html)
+## - [Solve](./pon2pkg/core/solve.html)
 ##
 ## This module uses multiple threads by default.
-## To prevent this, specify :code:`-d:singleThread` to the compile options.
+## To prevent this, specify `-d:singleThread` to the compile options.
 ##
 
 when not defined js:

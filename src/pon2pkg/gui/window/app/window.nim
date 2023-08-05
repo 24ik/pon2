@@ -2,7 +2,6 @@
 ##
 
 import deques
-import math
 
 import nazopuyo_core
 import nigui
@@ -125,7 +124,7 @@ proc newWindowView(
   result.title = "Pon!通"
   result.resizable = false
 
-  # HACK: somehow :code:`rootControl.natural**` is not accurate on Windows
+  # HACK: somehow `rootControl.natural**` is not accurate on Windows
   # TODO: better implementation
   when defined windows:
     result.width = (rootControl.naturalWidth.float * 1.1).round.int
@@ -156,7 +155,7 @@ proc newWindowView*(
 # ------------------------------------------------
 
 proc copyView*(window: AppWindow): AppWindow {.inline.} =
-  ## Copies the :code:`window` view.
+  ## Copies the `window` view.
   result = newWindowView(
     window.nazo[],
     window.positions[],

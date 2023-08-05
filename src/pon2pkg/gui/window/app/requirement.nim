@@ -26,7 +26,7 @@ type RequirementControl* = ref object of ControlImpl
 # ------------------------------------------------
 
 proc requirementControl(event: DrawEvent): RequirementControl {.inline.} =
-  ## Returns the requirement control from the :code:`event`.
+  ## Returns the requirement control from the `event`.
   let control = event.control.parentWindow.control.childControls[0]
   assert control of RequirementControl
   return cast[RequirementControl](control)

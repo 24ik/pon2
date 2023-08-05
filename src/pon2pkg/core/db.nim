@@ -36,7 +36,7 @@ const
 
 proc connectDb*(dbFile = DataDir / DbFileName): Option[DbConn] {.inline.} =
   ## Returns a connection to the database.
-  ## If the connection fails, returns :code:`none(DbConn)`.
+  ## If the connection fails, returns `none(DbConn)`.
   if dbFile.dirExists:
     return
 
@@ -59,12 +59,12 @@ CREATE TABLE {TableName} (
 # ------------------------------------------------
 
 proc contains(db: DbConn, url: string): bool {.inline.} =
-  ## Returns :code:`true` if the nazo puyo represented by the :code:`url` is in the :code:`db`.
+  ## Returns `true` if the nazo puyo represented by the `url` is in the `db`.
   for _ in db.iterate &"SELECT * FROM {TableName} WHERE {UrlColName} = '{url}'":
     return true
 
 proc contains(db: DbConn, nazo: Nazo): bool {.inline.} =
-  ## Returns :code:`true` if the :code:`nazo` is in the :code:`db`.
+  ## Returns `true` if the `nazo` is in the `db`.
   nazo.toUrl in db
 
 # ------------------------------------------------
@@ -72,8 +72,8 @@ proc contains(db: DbConn, nazo: Nazo): bool {.inline.} =
 # ------------------------------------------------
 
 proc insertCore(db: DbConn, nazo: Nazo): bool {.inline, discardable.} =
-  ## Inserts the :code:`nazo` into the :code:`db` without commit and returns :code:`true`.
-  ## If the :code:`nazo` is already in the :code:`db`, this procedure does nothing and returns :code:`false`.
+  ## Inserts the `nazo` into the `db` without commit and returns `true`.
+  ## If the `nazo` is already in the `db`, this procedure does nothing and returns `false`.
   if nazo in db:
     return false
 
@@ -91,8 +91,8 @@ proc insertCore(db: DbConn, nazo: Nazo): bool {.inline, discardable.} =
   return true
 
 proc insert*(db: DbConn, nazo: Nazo, commit = true): bool {.inline, discardable.} =
-  ## Inserts the :code:`nazo` into the :code:`db` and returns :code:`true`.
-  ## If the :code:`nazo` is already in the :code:`db`, this procedure does nothing and returns :code:`false`.
+  ## Inserts the `nazo` into the `db` and returns `true`.
+  ## If the `nazo` is already in the `db`, this procedure does nothing and returns `false`.
   if commit:
     db.transaction:
       return db.insertCore nazo
@@ -104,8 +104,8 @@ proc insert*(db: DbConn, nazo: Nazo, commit = true): bool {.inline, discardable.
 # ------------------------------------------------
 
 proc deleteCore(db: DbConn, url: string): bool {.inline, discardable.} =
-  ## Deletes the nazo puyo represented by the :code:`url` from the :code:`db` without commit and returns :code:`true`.
-  ## If the nazo puyo is not in the :code:`db`, this procedure does nothing and returns :code:`false`.
+  ## Deletes the nazo puyo represented by the `url` from the `db` without commit and returns `true`.
+  ## If the nazo puyo is not in the `db`, this procedure does nothing and returns `false`.
   if url notin db:
     return false
 
@@ -113,8 +113,8 @@ proc deleteCore(db: DbConn, url: string): bool {.inline, discardable.} =
   return true
 
 proc delete*(db: DbConn, url: string, commit = true): bool {.inline, discardable.} =
-  ## Deletes the nazo puyo represented by the :code:`url` from the :code:`db` and returns :code:`true`.
-  ## If the nazo puyo is not in the :code:`db`, this procedure does nothing and returns :code:`false`.
+  ## Deletes the nazo puyo represented by the `url` from the `db` and returns `true`.
+  ## If the nazo puyo is not in the `db`, this procedure does nothing and returns `false`.
   if commit:
     db.transaction:
       return db.deleteCore url

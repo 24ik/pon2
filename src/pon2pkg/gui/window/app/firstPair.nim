@@ -30,7 +30,7 @@ type FirstPairControl* = ref object of LayoutContainer
 # ------------------------------------------------
 
 proc firstPairControl(event: DrawEvent): FirstPairControl {.inline.} =
-  ## Returns the first pair control from the :code:`event`.
+  ## Returns the first pair control from the `event`.
   let control = event.control.parentWindow.control.childControls[1].childControls[0].childControls[0]
   assert control of FirstPairControl
   return cast[FirstPairControl](control)

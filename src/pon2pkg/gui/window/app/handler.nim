@@ -30,7 +30,7 @@ import ../../../core/solve
 # ------------------------------------------------
 
 func appWindow(event: CloseClickEvent or KeyboardEvent): AppWindow {.inline.} =
-  ## Returns the window from the :code:`event`.
+  ## Returns the window from the `event`.
   let window = event.window
   assert window of AppWindow
   return cast[AppWindow](window)
@@ -278,7 +278,7 @@ func playRecord(window: AppWindow) {.inline.} =
 # ------------------------------------------------
 
 func insert[T](deque: var Deque[T], item: sink T, idx = 0.Natural) {.inline.} =
-  ## Inserts :code:`item` to the :code:`deque` at index :code:`idx`.
+  ## Inserts `item` to the `deque` at index `idx`.
   runnableExamples:
     import deques
 
@@ -291,13 +291,13 @@ func insert[T](deque: var Deque[T], item: sink T, idx = 0.Natural) {.inline.} =
   deque = s.toDeque
 
 func delete[T](deque: var Deque[T], idx: Natural) {.inline.} =
-  ## Deletes the item at index :code:`idx` from the :code:`deque`.
+  ## Deletes the item at index `idx` from the `deque`.
   var s = deque.toSeq
   s.delete idx
   deque = s.toDeque
 
 func succRot[T: Ordinal](x: T): T {.inline.} =
-  ## Rotating :code:`succ`.
+  ## Rotating `succ`.
   runnableExamples:
     let x = int.high.pred
     assert x.succRot == int.high
@@ -306,7 +306,7 @@ func succRot[T: Ordinal](x: T): T {.inline.} =
   if x == T.high: T.low else: x.succ
 
 func incRot[T: Ordinal](x: var T) {.inline.} =
-  ## Rotating :code:`inc`.
+  ## Rotating `inc`.
   runnableExamples:
     var x = int.high.pred
     x.incRot
@@ -317,7 +317,7 @@ func incRot[T: Ordinal](x: var T) {.inline.} =
   x = x.succRot
 
 func predRot[T: Ordinal](x: T): T {.inline.} =
-  ## Rotating :code:`pred`.
+  ## Rotating `pred`.
   runnableExamples:
     let x = int.low.succ
     assert x.predRot == int.low
@@ -326,7 +326,7 @@ func predRot[T: Ordinal](x: T): T {.inline.} =
   if x == T.low: T.high else: x.pred
 
 func decRot[T: Ordinal](x: var T) {.inline.} =
-  ## Rotating :code:`dec`.
+  ## Rotating `dec`.
   runnableExamples:
     var x = int.low.succ
     x.decRot
@@ -337,15 +337,15 @@ func decRot[T: Ordinal](x: var T) {.inline.} =
   x = x.predRot
 
 func parseNum(key: Key): Option[int] {.inline.} =
-  ## Returns the integer represented by the :code:`key`.
-  ## If the :code:`key` does not represent a number, returns :code:`none(int)`.
+  ## Returns the integer represented by the `key`.
+  ## If the `key` does not represent a number, returns `none(int)`.
   if key.ord in Key_Number0.ord .. Key_Number9.ord:
     return some key.ord - Key_Number0.ord
   elif key.ord in Key_Numpad0.ord .. Key_Numpad9.ord:
     return some key.ord - Key_Numpad0.ord
 
 template redrawIfReturned(window: AppWindow, body: untyped) =
-  ## Redraws the :code:`window` only if a :code:`return` statement is executed in the :code:`body`.
+  ## Redraws the `window` only if a `return` statement is executed in the `body`.
   var returned = true
   try:
     body
@@ -786,6 +786,6 @@ func setHandlers*(window: AppWindow) {.inline.} =
 # ------------------------------------------------
 
 proc copy(window: AppWindow): AppWindow {.inline.} =
-  ## Copys the :code:`window`.
+  ## Copies the `window`.
   result = window.copyView
   result.setHandlers

@@ -125,7 +125,7 @@ type
 # ------------------------------------------------
 
 func fixUnicode(fullKey: var FullKey) {.inline.} =
-  ## Fixes :code:`fullKey.unicode` that depends on the OS.
+  ## Fixes `fullKey.unicode` that depends on the OS.
   when defined windows:
     #[
       unicode[A] == 97 == ASCII[a]
@@ -235,8 +235,8 @@ const DefaultKeySetting* = (
 # ------------------------------------------------
 
 func pressed*(fullKey: FullKey, event: KeyboardEvent, pressedKeys: set[Key]): bool {.inline.} =
-  ## Returns :code:`true` if the :code:`fullKey` is pressed.
-  ## :code:`pressedKeys` should be :code:`nigui.downKeys().toSet()`.
+  ## Returns `true` if the `fullKey` is pressed.
+  ## `pressedKeys` should be `nigui.downKeys().toSet()`.
   # check modifiers
   if fullKey.shift != (Key_ShiftL in pressedKeys or Key_ShiftR in pressedKeys):
     return false
@@ -307,8 +307,8 @@ func `$`(fullKey: FullKey): string {.inline.} =
 # ------------------------------------------------
 
 func toStr*(setting: KeySetting, idx: Natural): string {.inline.} =
-  ## This function roughly equivalent to :code:`$setting[idx]`.
-  ## (When written this way, :code:`idx` need to be a compile-time constant.)
+  ## This function roughly equivalent to `$setting[idx]`.
+  ## (When written this way, `idx` need to be a compile-time constant.)
   # TODO: refactor
   case idx
   of 0: $setting.up

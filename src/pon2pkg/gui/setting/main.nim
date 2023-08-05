@@ -34,7 +34,7 @@ const
   SettingFileName = "setting.yaml"
 
 proc save*(setting: Setting, settingFile = SettingDir / SettingFileName) {.inline.} =
-  ## Saves the :code:`setting` to the :code:`settingFile`.
+  ## Saves the `setting` to the `settingFile`.
   settingFile.parentDir.createDir
 
   var s = settingFile.newFileStream fmWrite
@@ -43,8 +43,8 @@ proc save*(setting: Setting, settingFile = SettingDir / SettingFileName) {.inlin
   setting.dump s
 
 proc loadSetting*(settingFile = SettingDir / SettingFileName): Setting {.inline.} =
-  ## Returns the settings loaded from the :code:`settingFile`.
-  ## If the :code:`settingFile` does not exist, returns the default settings.
+  ## Returns the settings loaded from the `settingFile`.
+  ## If the `settingFile` does not exist, returns the default settings.
   if not settingFile.fileExists:
     return DefaultSetting
 

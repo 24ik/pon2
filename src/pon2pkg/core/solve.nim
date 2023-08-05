@@ -64,7 +64,7 @@ const RequirementColorToCell = {
 # ------------------------------------------------
 
 func toNode(nazo: Nazo): Node {.inline.} =
-  ## Converts the :code:`nazo` to the node.
+  ## Converts the `nazo` to the node.
   result.nazo = nazo
   result.positions = newSeqOfCap[Option[Position]] nazo.moveNum
 
@@ -122,7 +122,7 @@ func toNode(nazo: Nazo): Node {.inline.} =
 # ------------------------------------------------
 
 func isAccepted(node: Node): bool {.inline.} =
-  ## Returns :code:`true` if the :code:`node` is in the accepted state.
+  ## Returns `true` if the `node` is in the accepted state.
   if node.nums.isSome:
     let nowNums = node.nums.get
 
@@ -153,12 +153,12 @@ func isAccepted(node: Node): bool {.inline.} =
 # ------------------------------------------------
 
 func filter4(num: int): int {.inline.} =
-  ## If :code:`num >= 4`, returns :code:`num`.
-  ## Otherwise, returns :code:`0`.
+  ## If `num >= 4`, returns `num`.
+  ## Otherwise, returns `0`.
   num * (num >= 4).int
 
 func canPrune(node: Node): bool {.inline.} =
-  ## Returns :code:`true` if the :code:`node` is in the unsolvable state.
+  ## Returns `true` if the `node` is in the unsolvable state.
   if node.nazo.env.field.isDead:
     return true
 
@@ -218,11 +218,11 @@ func canPrune(node: Node): bool {.inline.} =
 # ------------------------------------------------
 
 func isLeaf(node: Node): bool {.inline.} =
-  ## Returns :code:`true` if the :code:`node` is the leaf (i.e., all moves are completed).
+  ## Returns `true` if the `node` is the leaf (i.e., all moves are completed).
   node.positions.len == node.nazo.moveNum
 
 func child(node: Node, pos: Position): Node {.inline.} =
-  ## Returns the child of the :code:`node` with the :code:`pos` edge.
+  ## Returns the child of the `node` with the `pos` edge.
   let moveFn =
     if node.nazo.req.kind in {
       CLEAR,
@@ -335,7 +335,7 @@ func child(node: Node, pos: Position): Node {.inline.} =
     result.puyoNums = some puyoNums
 
 func children(node: Node): seq[Node] {.inline.} =
-  ## Returns the children of the :code:`node`.
+  ## Returns the children of the `node`.
   collect:
     for pos in (
       if node.nazo.env.pairs.peekFirst.isDouble: node.nazo.env.field.validDoublePositions
@@ -348,7 +348,7 @@ func children(node: Node): seq[Node] {.inline.} =
 # ------------------------------------------------
 
 func solveRec(node: Node): Solutions {.inline.} =
-  ## Solves the nazo puyo at the :code:`node`.
+  ## Solves the nazo puyo at the `node`.
   if node.isAccepted:
     result.add node.positions
     return
@@ -360,7 +360,7 @@ func solveRec(node: Node): Solutions {.inline.} =
     result &= child.solveRec
 
 proc solve*(nazo: Nazo): Solutions {.inline.} =
-  ## Solves the nazo puyo at the :code:`node`.
+  ## Solves the nazo puyo at the `node`.
   if (
     nazo.req.kind in {DISAPPEAR_PLACE, DISAPPEAR_PLACE_MORE, DISAPPEAR_CONNECT, DISAPPEAR_CONNECT_MORE} and
     nazo.req.color.get == RequirementColor.GARBAGE
@@ -386,8 +386,8 @@ proc solve*(nazo: Nazo): Solutions {.inline.} =
       result &= ^sol
 
 proc solve*(url: string, domain = ISHIKAWAPUYO): Option[seq[string]] {.inline.} =
-  ## Solves the nazo puyo represented by the :code:`url`.
-  ## If the :code:`url` is invalid, returns :code:`none`.
+  ## Solves the nazo puyo represented by the `url`.
+  ## If the `url` is invalid, returns `none`.
   let nazo = url.toNazo true
   if nazo.isNone:
     return
@@ -406,7 +406,7 @@ func `&=`(sol1: var InspectSolutions, sol2: InspectSolutions) {.inline.} =
   sol1.visitNodeNum.inc sol2.visitNodeNum
 
 func inspectSolveRec(node: Node, earlyStopping: bool): InspectSolutions {.inline.} =
-  ## Solves the nazo puyo at the :code:`node` while keeping the number of visited nodes.
+  ## Solves the nazo puyo at the `node` while keeping the number of visited nodes.
   result.visitNodeNum.inc
 
   if node.isAccepted:
@@ -422,8 +422,8 @@ func inspectSolveRec(node: Node, earlyStopping: bool): InspectSolutions {.inline
       return
 
 proc inspectSolve*(nazo: Nazo, earlyStopping = false): InspectSolutions {.inline.} =
-  ## Solves the nazo puyo at the :code:`node` while keeping the number of visited nodes.
-  ## If :code:`earlyStopping` is specified, searching is interrupted if any solution is found.
+  ## Solves the nazo puyo at the `node` while keeping the number of visited nodes.
+  ## If `earlyStopping` is specified, searching is interrupted if any solution is found.
   if (
     nazo.req.kind in {DISAPPEAR_PLACE, DISAPPEAR_PLACE_MORE, DISAPPEAR_CONNECT, DISAPPEAR_CONNECT_MORE} and
     nazo.req.color.get == RequirementColor.GARBAGE
@@ -451,9 +451,9 @@ proc inspectSolve*(nazo: Nazo, earlyStopping = false): InspectSolutions {.inline
 proc inspectSolve*(url: string, earlyStopping = false, domain = ISHIKAWAPUYO): Option[
   tuple[urls: seq[string], visitNodeNum: int]
 ] {.inline.} =
-  ## Solves the nazo puyo represented by the :code:`url` while keeping the number of visited nodes.
-  ## If :code:`earlyStopping` is specified, searching is interrupted if any solution is found.
-  ## If the :code:`url` is invalid, returns :code:`none`.
+  ## Solves the nazo puyo represented by the `url` while keeping the number of visited nodes.
+  ## If `earlyStopping` is specified, searching is interrupted if any solution is found.
+  ## If the `url` is invalid, returns `none`.
   let nazo = url.toNazo true
   if nazo.isNone:
     return

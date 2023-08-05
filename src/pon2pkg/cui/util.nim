@@ -12,9 +12,9 @@ import nazopuyo_core
 # ------------------------------------------------
 
 proc parseNatural*(val: Value, allowNone = false): Option[Natural] {.inline.} =
-  ## Converts :code:`val` to the integer.
+  ## Converts `val` to the integer.
   ## If the conversion fails, quits the application.
-  ## If :code:`val` is :code:`vkNone` and :code:`allowNone` is :code:`true`, returns :code:`none`.
+  ## If `val` is `vkNone` and `allowNone` is `true`, returns `none`.
   case val.kind
   of vkNone:
     if allowNone:
@@ -32,7 +32,7 @@ proc parseNatural*(val: Value, allowNone = false): Option[Natural] {.inline.} =
     doAssert false
 
 proc parseNatural*(val: char or string): Natural {.inline.} =
-  ## Converts :code:`val` to the integer.
+  ## Converts `val` to the integer.
   ## If the conversion fails, quits the application.
   try:
     return ($val).parseInt
@@ -41,9 +41,9 @@ proc parseNatural*(val: char or string): Natural {.inline.} =
     quit()
 
 proc parseRequirementKind*(val: Value, allowNone = false): Option[RequirementKind] {.inline.} =
-  ## Converts :code:`val` to the requirement kind.
+  ## Converts `val` to the requirement kind.
   ## If the conversion fails, quits the application.
-  ## If :code:`val` is :code:`vkNone` and :code:`allowNone` is :code:`true`, returns :code:`none`.
+  ## If `val` is `vkNone` and `allowNone` is `true`, returns `none`.
   let idx = val.parseNatural allowNone
   if idx.isNone:
     return
@@ -55,7 +55,7 @@ proc parseRequirementKind*(val: Value, allowNone = false): Option[RequirementKin
   return some RequirementKind.low.succ idx.get
 
 proc parseRequirementKind*(val: char or string): RequirementKind {.inline.} =
-  ## Converts :code:`val` to the requirement kind.
+  ## Converts `val` to the requirement kind.
   ## If the conversion fails, quits the application.
   let idx = val.parseNatural
   if idx notin RequirementKind.low.ord .. RequirementKind.high.ord:

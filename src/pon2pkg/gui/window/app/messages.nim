@@ -28,7 +28,7 @@ type
 # ------------------------------------------------
 
 proc messagesControl(event: DrawEvent): MessagesControl {.inline.} =
-  ## Returns the messages control from the :code:`event`.
+  ## Returns the messages control from the `event`.
   let control = event.control.parentWindow.control.childControls[2]
   assert control of MessagesControl
   return cast[MessagesControl](control)

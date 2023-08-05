@@ -42,9 +42,9 @@ jobs:
 
       - run: nim c -r ./tests/makeTest.nim
         if: runner.os == 'Linux'
-      - run: nim c -r -d:avx2=0 ./tests/makeTest.nim
+      - run: nim c -r -d:avx2=false ./tests/makeTest.nim
         if: runner.os == 'Windows'
-      - run: nim c -r -d:bmi2=0 -d:avx2=0 ./tests/makeTest.nim
+      - run: nim c -r -d:bmi2=false -d:avx2=false ./tests/makeTest.nim
         if: runner.os == 'macOS'
 
       - run: nimble -y test

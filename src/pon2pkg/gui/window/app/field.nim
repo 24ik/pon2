@@ -30,7 +30,7 @@ type FieldControl* = ref object of LayoutContainer
 # ------------------------------------------------
 
 proc fieldControl(event: DrawEvent): FieldControl {.inline.} =
-  ## Returns the field control from the :code:`event`.
+  ## Returns the field control from the `event`.
   let control = event.control.parentWindow.control.childControls[1].childControls[0].childControls[1]
   assert control of FieldControl
   return cast[FieldControl](control)

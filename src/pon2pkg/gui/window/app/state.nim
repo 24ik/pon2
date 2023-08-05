@@ -9,7 +9,7 @@ type
     RECORD
 
   Focus* {.pure.} = enum
-    ## Which area is focused in the :code:`EDIT` mode.
+    ## Which area is focused in the `EDIT` mode.
     FIELD
     PAIRS
     REQUIREMENT
@@ -21,7 +21,7 @@ type
     BEFORE_DROP
 
   RecordState* {.pure.} = enum
-    ## State in the :code:`RECORD` mode.
+    ## State in the `RECORD` mode.
     EMPTY
     WRITING
     READY
