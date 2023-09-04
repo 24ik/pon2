@@ -6,7 +6,7 @@ description   = "Nazo Puyo Tool"
 license       = "Apache-2.0 OR MPL-2.0"
 
 srcDir        = "src"
-installExt    = @["nim", "png"]
+installExt    = @["nim"]
 bin           = @["pon2"]
 
 
@@ -14,13 +14,13 @@ bin           = @["pon2"]
 
 requires "nim ^= 2.0.0"
 
-requires "docopt ^= 0.7.0"
 requires "nigui ^= 0.2.7"
 requires "tiny_sqlite ^= 0.2.0"
-requires "yaml ^= 1.1.0"
+requires "https://github.com/izumiya-keisuke/docopt.nim#c50d709"
+requires "https://github.com/izumiya-keisuke/nazopuyo-core ^= 0.9.2"
+requires "https://github.com/izumiya-keisuke/puyo-core ^= 0.14.1"
+requires "https://github.com/izumiya-keisuke/puyo-simulator ^= 0.9.0"
 requires "https://github.com/karaxnim/karax#2371ea3"
-requires "https://github.com/izumiya-keisuke/nazopuyo-core.git ^= 0.3.0"
-requires "https://github.com/izumiya-keisuke/puyo-core.git ^= 0.4.0"
 
 
 # Tasks
@@ -30,12 +30,15 @@ import strformat
 
 task test, "Test":
   let mainFile = "./src/pon2.nim".unixToNativePath
-  try:
-    exec &"nim doc --project --index {mainFile}"
-  except OSError: # HACK: now `nim doc` can generates htmldocs but raises error (due to docopt's bug)
-    discard
+  exec &"nim doc --project --index {mainFile}"
   rmDir "./src/htmldocs".unixToNativePath
 
-  exec "nimble -y build"
+  let defineOptions = case buildOS
+  of "linux": ""
+  of "windows": "-d:avx2=false"
+  of "macosx": "-d:avx2=false -d:bmi2=false"
+  else: ""
+  exec &"nimble -y build {defineOptions}"
 
-  exec "testament all"
+  if buildOS != "windows": # HACK: now we cannot pass the test on Windows due to Nim's bug
+    exec "testament all"

@@ -34,6 +34,7 @@ jobs:
           key: ${{ runner.os }}-nimble-${{ hashFiles('*.nimble') }}
           restore-keys: |
               ${{ runner.os }}-nimble-
+        if: runner.os != 'Windows'
       - uses: jiro4989/setup-nim-action@v1
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
