@@ -11,12 +11,8 @@ import docopt
 import nazopuyo_core
 import puyo_core
 
-import ./util
+import ./common
 import ../core/generate
-
-# ------------------------------------------------
-# Entry Point
-# ------------------------------------------------
 
 proc runGenerator*(args: Table[string, Value]) {.inline.} =
   ## Runs the generator CUI.
@@ -25,31 +21,26 @@ proc runGenerator*(args: Table[string, Value]) {.inline.} =
 
   # requirement
   let
-    reqKind = args["--rk"].parseRequirementKind.get
-    reqColor = some AbstractRequirementColor.low.succ args["--rc"].parseNatural.get
-    reqNum = RequirementNumber args["--rn"].parseNatural.get
-  if reqNum notin RequirementNumber.low .. RequirementNumber.high:
-    echo "--rnオプションに扱えない範囲の数値が入力されました．"
-    return
-  let req = (
-    kind: reqKind,
-    color: (if reqKind in RequirementKindsWithColor: reqColor else: none AbstractRequirementColor),
-    num: (if reqKind in RequirementKindsWithNum: some reqNum else: none RequirementNumber),
-  ).AbstractRequirement
+    kind = args["--rk"].parseRequirementKind.get
+    req = (
+      kind,
+      (if kind in ColorKinds: args["--rc"].parseAbstractRequirementColor else: none AbstractRequirementColor),
+      (if kind in NumberKinds: args["--rn"].parseRequirementNumber else: none RequirementNumber))
 
   # heights
   if ($args["-H"]).len != 6:
     echo "-Hオプションには長さ6の文字列のみ指定できます．"
     return
-  var heights: array[Col, Option[Natural]]
+  var heights: array[Column, Option[Natural]]
   for i, c in ($args["-H"]):
-    heights[Col.low.succ i] = if c == '+': none Natural else: some c.parseNatural
+    heights[i.Column] = if c == '+': none Natural else: some c.parseNatural
 
-  for i in 0 ..< args["-n"].parseNatural.get:
+  # generate
+  for nazoIdx in 0 ..< args["-n"].parseNatural.get:
     let
-      seed = rng.rand int.low .. int.high
-      res = generate(
-        seed,
+      nazo = generate(
+        (rng.rand int.low .. int.high),
+        args["-r"].parseRule.get,
         args["-m"].parseNatural.get,
         req,
         args["-c"].parseNatural.get,
@@ -63,22 +54,18 @@ proc runGenerator*(args: Table[string, Value]) {.inline.} =
         ),
         not args["-D"].to_bool,
         args["-d"].to_bool)
-
-    if res.isNone:
+    if nazo.isNone:
       echo "入力された条件を満たすなぞぷよは存在しません．"
       return
 
     let
-      (problem, solution) = res.get
-      domain = if args["-i"].to_bool: IPS else: ISHIKAWAPUYO
-      problemUrl = problem.toUrl(domain = domain)
-      solutionUrl = problem.toUrl(some solution, domain)
-
-    echo &"(Q{i.succ}) {problemUrl}"
-    echo &"(A{i.succ}) {solutionUrl}"
+      questionUri = nazo.get.question.toUri
+      answerUri = nazo.get.question.toUri some nazo.get.answer
+    echo &"(Q{nazoIdx.succ}) {questionUri}"
+    echo &"(A{nazoIdx.succ}) {answerUri}"
     echo ""
 
     if args["-B"].to_bool:
-      problemUrl.openDefaultBrowser
+      ($questionUri).openDefaultBrowser
     if args["-b"].to_bool:
-      solutionUrl.openDefaultBrowser
+      ($answerUri).openDefaultBrowser

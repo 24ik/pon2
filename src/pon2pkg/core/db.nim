@@ -1,159 +1,112 @@
 ## This module implements the database.
-## This module is not available with JS backend.
+## Not available on JS backend.
 ##
 
+import deques
+import json
+import hashes
 import options
-import os
 import sequtils
+import std/appdirs
+import std/files
+import std/paths
 import strformat
 import strutils
 import sugar
+import tables
 import times
+import uri
 
 import nazopuyo_core
 import puyo_core
-import tiny_sqlite
 
-const
-  TableName = "nazoTable"
+type
+  NazoPuyoProperties = tuple
+    ## Nazo puyo data with some properties.
+    answers: seq[Positions]
+    regsiterTime: Time
 
-  UrlColName = "url"
-  KindColName = "kind"
-  MoveNumColName = "moveNum"
-  SaturateColName = "saturate"
-  TimeColName = "time"
+  RawNazoPuyoProperties = ref object
+    ## Nazo puyo data with some properties, using compatible type with JSON format.
+    answers: seq[string]
+    regsiterTime: string
+
+  NazoPuyoDatabase = Table[NazoPuyo, NazoPuyoProperties]
 
 # ------------------------------------------------
-# Connection
+# Hash
 # ------------------------------------------------
 
-const
-  DataDir = (
-    when defined windows: "APPDATA".getEnv getHomeDir() / "AppData" / "Roaming"
-    elif defined macos: getHomeDir() / "Application Support"
-    else: "XDG_DATA_HOME".getEnv getHomeDir() / ".local" / "share") / "pon2"
-  DbFileName = "nazo.db"
+func hash(field: Field): Hash {.inline.} =
+  ## Returns the hash.
+  field.toArray.hash
 
-proc connectDb*(dbFile = DataDir / DbFileName): Option[DbConn] {.inline.} =
-  ## Returns a connection to the database.
-  ## If the connection fails, returns `none(DbConn)`.
-  if dbFile.dirExists:
+func hash(env: Environment): Hash {.inline.} =
+  ## Returns the hash.
+  !$ (env.field.hash !& env.pairs.toSeq.hash)
+
+# ------------------------------------------------
+# Save / Load
+# ------------------------------------------------
+
+proc loadDatabase*(file = getDataDir() / "pon2".Path / "nazo.json".Path): NazoPuyoDatabase {.inline.} =
+  ## Loads the nazo puyo database.
+  if not file.fileExists:
     return
 
-  dbFile.parentDir.createDir
+  return collect:
+    for questionUri, propertiesNode in file.string.parseFile.pairs:
+      let properties = propertiesNode.to RawNazoPuyoProperties
 
-  let needCreateTable = not dbFile.fileExists
-  result = some dbFile.openDatabase
-  if needCreateTable:
-    result.get.execScript &"""
-CREATE TABLE {TableName} (
-  {UrlColName}       TEXT NOT NULL,
-  {KindColName}      INTEGER NOT NULL,
-  {MoveNumColName}   INTEGER NOT NULL,
-  {SaturateColName}  INTEGER NOT NULL,
-  {TimeColName}      TEXT NOT NULL
-)"""
+      {questionUri.parseUri.toNazoPuyo.get.nazoPuyo: (
+        properties.answers.mapIt it.toPositions(IZUMIYA).get,
+        properties.regsiterTime.parseTime("yyyy-MM-dd'T'HH:mm:sszzz", utc()))}
+
+proc saveDatabase*(
+  nazoPuyoDatabase: NazoPuyoDatabase, file = getDataDir() / "pon2".Path / "nazo.json".Path
+) {.inline.} =
+  ## Saves the database to the file.
+  let rawTable = collect:
+    for nazo, properties in nazoPuyoDatabase.pairs:
+      {$nazo.toUri: {
+        "answers": % properties.answers.mapIt(it.toUriQueryValue IZUMIYA),
+        "registerTime": % $properties.regsiterTime}.toTable
+      }.toTable
+
+  var content: string
+  content.toUgly %*rawTable
+  file.string.writeFile content
 
 # ------------------------------------------------
 # Operation
 # ------------------------------------------------
 
-proc contains(db: DbConn, url: string): bool {.inline.} =
-  ## Returns `true` if the nazo puyo represented by the `url` is in the `db`.
-  for _ in db.iterate &"SELECT * FROM {TableName} WHERE {UrlColName} = '{url}'":
-    return true
+proc insert*(nazoPuyoDatabase: var NazoPuyoDatabase, nazo: NazoPuyo, answers: seq[Positions] = @[]) {.inline.} =
+  ## Inserts the nazo puyo and answers (optional) into the database.
+  nazoPuyoDatabase[nazo] = (answers, now().utc.toTime)
 
-proc contains(db: DbConn, nazo: Nazo): bool {.inline.} =
-  ## Returns `true` if the `nazo` is in the `db`.
-  nazo.toUrl in db
-
-# ------------------------------------------------
-# Insert
-# ------------------------------------------------
-
-proc insertCore(db: DbConn, nazo: Nazo): bool {.inline, discardable.} =
-  ## Inserts the `nazo` into the `db` without commit and returns `true`.
-  ## If the `nazo` is already in the `db`, this procedure does nothing and returns `false`.
-  if nazo in db:
-    return false
-
-  db.exec(
-    &"INSERT INTO {TableName} VALUES (?, ?, ?, ?, ?)",
-    nazo.toUrl,
-    nazo.req.kind.ord,
-    nazo.moveNum,
-    (
-      nazo.req.kind in {CHAIN, CHAIN_MORE, CHAIN_CLEAR, CHAIN_MORE_CLEAR} and
-      nazo.env.colorNum == nazo.req.num.get * 4
-    ).int,
-    $now().utc,
-  )
-  return true
-
-proc insert*(db: DbConn, nazo: Nazo, commit = true): bool {.inline, discardable.} =
-  ## Inserts the `nazo` into the `db` and returns `true`.
-  ## If the `nazo` is already in the `db`, this procedure does nothing and returns `false`.
-  if commit:
-    db.transaction:
-      return db.insertCore nazo
-  else:
-    return db.insertCore nazo
-
-# ------------------------------------------------
-# Delete
-# ------------------------------------------------
-
-proc deleteCore(db: DbConn, url: string): bool {.inline, discardable.} =
-  ## Deletes the nazo puyo represented by the `url` from the `db` without commit and returns `true`.
-  ## If the nazo puyo is not in the `db`, this procedure does nothing and returns `false`.
-  if url notin db:
-    return false
-
-  db.exec(&"DELETE FROM {TableName} WHERE {UrlColName} = '{url}'")
-  return true
-
-proc delete*(db: DbConn, url: string, commit = true): bool {.inline, discardable.} =
-  ## Deletes the nazo puyo represented by the `url` from the `db` and returns `true`.
-  ## If the nazo puyo is not in the `db`, this procedure does nothing and returns `false`.
-  if commit:
-    db.transaction:
-      return db.deleteCore url
-  else:
-    return db.deleteCore url
-
-# ------------------------------------------------
-# Find
-# ------------------------------------------------
+proc delete*(nazoPuyoDatabase: var NazoPuyoDatabase, nazo: NazoPuyo) {.inline.} =
+  ## Deletes the nazo puyo from the database.
+  nazoPuyoDatabase.del nazo
 
 iterator find*(
-  db: DbConn,
-  kinds: openArray[RequirementKind] = [],
-  moveNums: openArray[Positive] = [],
-  saturates: openArray[bool] = [],
-  timeIntervals: openArray[tuple[start: Option[DateTime], stop: Option[DateTime]]] = [],
-): string {.inline.} =
-  ## Yields all nazo puyo URLs that satisfy the query.
-  var conditions = newSeqOfCap[string](5)
-  if kinds.len > 0:
-    conditions.add '(' & kinds.deduplicate(true).mapIt(&"{KindColName} = {it.ord}").join(" OR ") & ')'
-  if moveNums.len > 0:
-    conditions.add '(' & moveNums.deduplicate(true).mapIt(&"{MoveNumColName} = {it}").join(" OR ") & ')'
-  if saturates.len > 0:
-    conditions.add '(' & saturates.deduplicate(true).mapIt(&"{SaturateColName} = {it.int}").join(" OR ") & ')'
-  if timeIntervals.len > 0:
-    let strs = collect:
-      for interval in timeIntervals:
-        var intervalStrs = newSeqOfCap[string](2)
-        if interval.start.isSome:
-          intervalStrs.add &"{TimeColName} >= '{interval.start.get.utc}'"
-        if interval.stop.isSome:
-          intervalStrs.add &"{TimeColName} <= '{interval.stop.get.utc}'"
-        '(' & intervalStrs.join(" AND ") & ')'
-    conditions.add '(' & strs.join(" OR ") & ')'
+  nazoPuyoDatabase: NazoPuyoDatabase,
+  kinds = none seq[RequirementKind],
+  moveCounts = none seq[Positive],
+  registerTimeIntervals = none seq[tuple[start: Option[Time], stop: Option[Time]]],
+): tuple[nazoPuyo: NazoPuyo, answers: seq[Positions]] {.inline.} =
+  ## Yields all nazo puyoes that satisfy the query.
+  for nazo, properties in nazoPuyoDatabase.pairs:
+    if kinds.isSome and nazo.requirement.kind notin kinds.get:
+      continue
 
-  let
-    condition = conditions.join " AND "
-    wherePhrase = if conditions.len == 0: "" else: &"WHERE {condition}"
+    if moveCounts.isSome and nazo.moveCount notin moveCounts.get:
+      continue
 
-  for row in db.iterate &"SELECT {UrlColName} FROM {TableName} {wherePhrase}":
-    yield row[0].strVal
+    if registerTimeIntervals.isSome and registerTimeIntervals.get.allIt(
+      (it.start.isSome and it.start.get > properties.regsiterTime) or
+      (it.stop.isSome and it.stop.get < properties.regsiterTime)
+    ):
+      continue
+
+    yield (nazo, properties.answers)

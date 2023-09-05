@@ -7,7 +7,6 @@ import math
 import options
 import random
 import sequtils
-import std/setutils
 import sugar
 
 import nazopuyo_core
@@ -27,10 +26,10 @@ type
     ## Requirement with all single color puyoes identical.
     kind: RequirementKind
     color: Option[AbstractRequirementColor]
-    num: Option[RequirementNumber]
+    number: Option[RequirementNumber]
 
 # ------------------------------------------------
-# Env
+# Environment
 # ------------------------------------------------
 
 func round(rng: var Rand, x: SomeNumber): int {.inline.} =
@@ -40,7 +39,7 @@ func round(rng: var Rand, x: SomeNumber): int {.inline.} =
   return floorX + (rng.rand(1.0) < x.float - floorX.float).int
 
 func split(rng: var Rand, total: Natural, chunkNum: Positive, allowZeroChunk: bool): Option[seq[Natural]] {.inline.} =
-  ## Splits the `total` number into `chunkNum` chunks.
+  ## Splits the number `total` into `chunkNum` chunks.
   ## If the splitting fails, returns `none`.
   runnableExamples:
     import math
@@ -86,9 +85,9 @@ func split(rng: var Rand, total: Natural, chunkNum: Positive, allowZeroChunk: bo
   return some res
 
 func split(rng: var Rand, total: Natural, ratios: openArray[Option[Natural]]): Option[seq[Natural]] {.inline.} =
-  ## Splits the `total` number into chunks following the distribution represented by the `ratios`.
+  ## Splits the number `total` into chunks following the probabilistic distribution represented by `ratios`.
   ## `none` in the `ratios` means a random.
-  ## If `ratios` are all `some(0)`, splits randomly.
+  ## If all elements in `ratios` are all `some(0)`, splits randomly.
   ## If the splitting fails, returns `none`.
   runnableExamples:
     import random
@@ -139,75 +138,76 @@ func split(rng: var Rand, total: Natural, ratios: openArray[Option[Natural]]): O
 
 iterator zip[T, U, V](s1: openArray[T], s2: openArray[U], s3: openArray[V]): (T, U, V) {.inline.} =
   ## Yields a combination of elements.
+  ## Longer arrays will be truncated.
   let minLen = [s1.len, s2.len, s3.len].min
   for i in 0 ..< minLen:
     yield (s1[i], s2[i], s3[i])
 
-func generateEnv(
+func generateEnvironment(
   rng: var Rand,
-  moveNum: Positive,
+  rule: Rule,
+  moveCount: Positive,
   useColors: seq[ColorPuyo],
-  heights: array[Col, Option[Natural]],
-  puyoNums: tuple[color: Natural, garbage: Natural],
-): Option[Env] {.inline.} =
+  heights: array[Column, Option[Natural]],
+  puyoCounts: tuple[color: Natural, garbage: Natural],
+): Option[Environment] {.inline.} =
   ## Returns a random environment.
   ## If the generation fails, returns `none`.
   let
-    fieldNum = puyoNums.color + puyoNums.garbage - 2 * moveNum
-    chainNum = puyoNums.color div 4
-    surplusNum = puyoNums.color mod 4
+    fieldCount = puyoCounts.color + puyoCounts.garbage - 2 * moveCount
+    chainCount = puyoCounts.color div 4
+    surplusCount = puyoCounts.color mod 4
 
-    chains = rng.split(chainNum, useColors.len, false).get 
-    surpluses = rng.split(surplusNum, useColors.len, true).get
+    chains = rng.split(chainCount, useColors.len, false).get 
+    surpluses = rng.split(surplusCount, useColors.len, true).get
 
   # pairs
-  var puyoes = newSeqOfCap[Puyo] puyoNums.color + puyoNums.garbage
+  var puyoes = newSeqOfCap[Puyo] puyoCounts.color + puyoCounts.garbage
   for color, chain, surplus in zip(useColors, chains, surpluses):
-    puyoes &= color.Puyo.repeat (chain * 4 + surplus)
+    puyoes &= color.Puyo.repeat chain * 4 + surplus
   rng.shuffle puyoes
   let pairsArray = collect:
-    for i in 0 ..< moveNum:
+    for i in 0 ..< moveCount:
       [puyoes[2 * i].ColorPuyo, puyoes[2 * i + 1].ColorPuyo]
 
   # field
-  puyoes = puyoes[2 * moveNum .. ^1]
-  puyoes &= Cell.GARBAGE.Puyo.repeat puyoNums.garbage
+  puyoes = puyoes[2 * moveCount .. ^1]
+  puyoes &= Cell.GARBAGE.Puyo.repeat puyoCounts.garbage
   rng.shuffle puyoes
-  let colNums = rng.split(fieldNum, heights)
-  if colNums.isNone or colNums.get.anyIt it > Height:
+  let colCounts = rng.split(fieldCount, heights)
+  if colCounts.isNone or colCounts.get.anyIt it > Height:
     return
   var
-    fieldArray: array[Row, array[Col, Cell]]
+    fieldArray: array[Row, array[Column, Cell]]
     idx = 0
-  for i in 0 ..< Width:
-    for j in 0 ..< colNums.get[i]:
-      fieldArray[Row.high.pred j][Col.low.succ i] = puyoes[idx]
+  for col in Column.low .. Column.high:
+    for i in 0 ..< colCounts.get[col]:
+      fieldArray[Row.high.pred i][col] = puyoes[idx]
       idx.inc
 
-  return some toEnv(fieldArray, pairsArray, some ColorPuyo.fullSet)
+  return some toEnvironment(fieldArray, pairsArray, rule)
 
 # ------------------------------------------------
 # Requirement
 # ------------------------------------------------
 
+const ColorToRequirementColor: array[ColorPuyo, RequirementColor] = [
+  RequirementColor.RED,
+  RequirementColor.GREEN,
+  RequirementColor.BLUE,
+  RequirementColor.YELLOW,
+  RequirementColor.PURPLE]
+
 func generateRequirement(
   rng: var Rand,
   req: AbstractRequirement,
   useColors: seq[ColorPuyo],
-  puyoNums: tuple[color: Natural, garbage: Natural],
 ): Option[Requirement] {.inline.} =
   ## Returns a random requirement.
   ## If the generation fails, returns `none`.
-  const ColorToRequirementColor: array[ColorPuyo, RequirementColor] = [
-    RequirementColor.RED,
-    RequirementColor.GREEN,
-    RequirementColor.BLUE,
-    RequirementColor.YELLOW,
-    RequirementColor.PURPLE]
-
   # color
   var reqColor = none RequirementColor
-  if req.kind in RequirementKindsWithColor:
+  if req.kind in ColorKinds:
     if req.color.isNone:
       return
 
@@ -221,15 +221,15 @@ func generateRequirement(
     of AbstractRequirementColor.COLOR:
       reqColor = some RequirementColor.COLOR
 
-  # num
-  var reqNum = none RequirementNumber
-  if req.kind in RequirementKindsWithNum:
-    if req.num.isNone:
+  # number
+  var reqNumber = none RequirementNumber
+  if req.kind in NumberKinds:
+    if req.number.isNone:
       return
 
-    reqNum = req.num
+    reqNumber = req.number
 
-  return some (kind: req.kind, color: reqColor, num: reqNum).Requirement
+  return some Requirement (kind: req.kind, color: reqColor, number: reqNumber)
 
 # ------------------------------------------------
 # Entry Point
@@ -249,40 +249,44 @@ func hasDouble(pairs: Pairs): bool {.inline.} =
 
 proc generate*(
   seed: SomeSignedInt,
-  moveNum: Positive,
-  req: AbstractRequirement,
-  colorNum: range[1 .. 5],
-  heights: array[Col, Option[Natural]],
-  puyoNums: tuple[color: Natural, garbage: Natural],
-  connect3Nums: tuple[
+  rule: Rule,
+  moveCount: Positive,
+  abstractReq: AbstractRequirement,
+  colorCount: range[1 .. 5],
+  heights: array[Column, Option[Natural]],
+  puyoCounts: tuple[color: Natural, garbage: Natural],
+  connect3Counts: tuple[
     total: Option[Natural], vertical: Option[Natural], horizontal: Option[Natural], lShape: Option[Natural]],
   allowDouble: bool,
   allowLastDouble: bool,
-): Option[tuple[problem: Nazo, solution: Solution]] {.inline.} =
-  ## Returns a nazo puyo that have a unique solution.
+): Option[tuple[question: NazoPuyo, answer: Positions]] {.inline.} =
+  ## Returns a randomly generated nazo puyo that has a unique answer.
   ## If the generation fails, returns `none`.
   # validate the arguments
   # TODO: validate more strictly
-  if puyoNums.color + puyoNums.garbage - 2 * moveNum notin 0 .. Height * Width - 2:
+  let height = case rule
+  of TSU: Height
+  of WATER: WaterHeight
+  if puyoCounts.color + puyoCounts.garbage - 2 * moveCount notin 0 .. height * Width - 2:
     return
-  if puyoNums.color div 4 < colorNum:
+  if puyoCounts.color div 4 < colorCount:
     return
-  if req.kind in {
+  if abstractReq.kind in {
     DISAPPEAR_PLACE, DISAPPEAR_PLACE_MORE, DISAPPEAR_CONNECT, DISAPPEAR_CONNECT_MORE
-  } and req.color.get == AbstractRequirementColor.GARBAGE:
+  } and abstractReq.color.get == AbstractRequirementColor.GARBAGE:
     return
 
   var rng = seed.int64.initRand
 
   let
-    useColors = rng.sample(ColorPuyo.toSeq, colorNum)
-    req = rng.generateRequirement(req, useColors, puyoNums)
+    useColors = rng.sample(ColorPuyo.toSeq, colorCount)
+    req = rng.generateRequirement(abstractReq, useColors)
   if req.isNone:
     return
 
   # FIXME: better implementation (currently no guarantee of loop termination)
   while true:
-    let env = rng.generateEnv(moveNum, useColors, heights, puyoNums)
+    let env = rng.generateEnvironment(rule, moveCount, useColors, heights, puyoCounts)
     if env.isNone:
       continue
 
@@ -295,20 +299,20 @@ proc generate*(
       continue
     if not allowLastDouble and env.get.pairs.peekLast.isDouble:
       continue
-    if connect3Nums.total.isSome and env.get.field.connect3.puyoNum != connect3Nums.total.get * 3:
+    if connect3Counts.total.isSome and env.get.field.connect3.countColor != connect3Counts.total.get * 3:
       continue
-    if connect3Nums.vertical.isSome and env.get.field.connect3V.puyoNum != connect3Nums.vertical.get * 3:
+    if connect3Counts.vertical.isSome and env.get.field.connect3V.countColor != connect3Counts.vertical.get * 3:
       continue
-    if connect3Nums.horizontal.isSome and env.get.field.connect3H.puyoNum != connect3Nums.horizontal.get * 3:
+    if connect3Counts.horizontal.isSome and env.get.field.connect3H.countColor != connect3Counts.horizontal.get * 3:
       continue
-    if connect3Nums.lShape.isSome and env.get.field.connect3L.puyoNum != connect3Nums.lShape.get * 3:
-      continue
-
-    let nazo = (env: env.get, req: req.get).Nazo
-    let sol = nazo.inspectSolve(true).solutions
-    if sol.len != 1:
-      continue
-    if sol[0].len != nazo.moveNum:
+    if connect3Counts.lShape.isSome and env.get.field.connect3L.countColor != connect3Counts.lShape.get * 3:
       continue
 
-    return some (problem: nazo, solution: sol[0])
+    let nazo = (environment: env.get, requirement: req.get)
+    let answers = nazo.inspectSolve(true).answers
+    if answers.len != 1:
+      continue
+    if answers[0].len != nazo.moveCount:
+      continue
+
+    return some (nazo, answers[0])

@@ -5,30 +5,27 @@ import browsers
 import options
 import strformat
 import tables
+import uri
 
 import docopt
+import nazopuyo_core
 import puyo_core
 
 import ../core/solve
 
-# ------------------------------------------------
-# Entry Point
-# ------------------------------------------------
-
 proc runSolver*(args: Table[string, Value]) {.inline.} =
   ## Runs the solver CUI.
-  let
-    url = $args["<url>"]
-    solutions = url.solve(if args["-i"].to_bool: IPS else: ISHIKAWAPUYO)
-  if solutions.isNone:
-    echo "正しくない形式のURLが入力されました．"
+  let question = ($args["<question>"]).parseUri.toNazoPuyo
+  if question.isNone:
+    echo "問題のURLが不正です．"
     return
 
   if args["-B"].to_bool:
-    url.openDefaultBrowser
+    ($args["<question>"]).openDefaultBrowser
 
-  for i, sol in solutions.get:
-    echo &"({i.succ}) {sol}"
+  for answerIdx, answer in question.get.nazoPuyo.solve:
+    let answerUri = question.get.nazoPuyo.toUri some answer
+    echo &"({answerIdx.succ}) {answerUri}"
 
     if args["-b"].to_bool:
-      sol.openDefaultBrowser
+      ($answerUri).openDefaultBrowser

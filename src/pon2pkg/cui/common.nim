@@ -1,4 +1,4 @@
-## This module implements utility functions.
+## This module implements common stuff.
 ##
 
 import options
@@ -6,6 +6,9 @@ import strutils
 
 import docopt
 import nazopuyo_core
+import puyo_core
+
+import ../core/generate
 
 # ------------------------------------------------
 # Parse
@@ -63,3 +66,45 @@ proc parseRequirementKind*(val: char or string): RequirementKind {.inline.} =
     quit()
 
   return RequirementKind.low.succ idx
+
+proc parseAbstractRequirementColor*(val: Value, allowNone = false): Option[AbstractRequirementColor] {.inline.} =
+  ## Converts `val` to the abstract requirement color.
+  ## If the conversion fails, quits the application.
+  ## If `val` is `vkNone` and `allowNone` is `true`, returns `none`.
+  let idx = val.parseNatural allowNone
+  if idx.isNone:
+    return
+
+  if idx.get notin AbstractRequirementColor.low.ord .. AbstractRequirementColor.high.ord:
+    echo "クリア条件の色を表す整数が不適切な値です．"
+    quit()
+
+  return some AbstractRequirementColor idx.get
+
+proc parseRequirementNumber*(val: Value, allowNone = false): Option[RequirementNumber] {.inline.} =
+  ## Converts `val` to the requirement number.
+  ## If the conversion fails, quits the application.
+  ## If `val` is `vkNone` and `allowNone` is `true`, returns `none`.
+  let idx = val.parseNatural allowNone
+  if idx.isNone:
+    return
+
+  if idx.get notin RequirementNumber.low.ord .. RequirementNumber.high.ord:
+    echo "クリア条件の数字を表す整数が不適切な値です．"
+    quit()
+
+  return some RequirementNumber idx.get
+
+proc parseRule*(val: Value, allowNone = false): Option[Rule] {.inline.} =
+  ## Converts `val` to the rule.
+  ## If the conversion fails, quits the application.
+  ## If `val` is `vkNone` and `allowNone` is `true`, returns `none`.
+  let idx = val.parseNatural allowNone
+  if idx.isNone:
+    return
+
+  if idx.get notin Rule.low.ord .. Rule.high.ord:
+    echo "ルールを表す整数が不適切な値です．"
+    quit()
+
+  return some Rule idx.get
