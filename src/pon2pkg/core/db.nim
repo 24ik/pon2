@@ -8,6 +8,7 @@ import hashes
 import options
 import sequtils
 import std/appdirs
+import std/dirs
 import std/files
 import std/paths
 import strformat
@@ -21,27 +22,27 @@ import nazopuyo_core
 import puyo_core
 
 type
-  NazoPuyoProperties = tuple
+  NazoPuyoProperties* = tuple
     ## Nazo puyo data with some properties.
     answers: seq[Positions]
-    regsiterTime: Time
+    registerTime: Time
 
   RawNazoPuyoProperties = ref object
     ## Nazo puyo data with some properties, using compatible type with JSON format.
     answers: seq[string]
-    regsiterTime: string
+    registerTime: string
 
-  NazoPuyoDatabase = Table[NazoPuyo, NazoPuyoProperties]
+  NazoPuyoDatabase* = Table[NazoPuyo, NazoPuyoProperties]
 
 # ------------------------------------------------
 # Hash
 # ------------------------------------------------
 
-func hash(field: Field): Hash {.inline.} =
+func hash*(field: Field): Hash {.inline.} =
   ## Returns the hash.
   field.toArray.hash
 
-func hash(env: Environment): Hash {.inline.} =
+func hash*(env: Environment): Hash {.inline.} =
   ## Returns the hash.
   !$ (env.field.hash !& env.pairs.toSeq.hash)
 
@@ -60,7 +61,7 @@ proc loadDatabase*(file = getDataDir() / "pon2".Path / "nazo.json".Path): NazoPu
 
       {questionUri.parseUri.toNazoPuyo.get.nazoPuyo: (
         properties.answers.mapIt it.toPositions(IZUMIYA).get,
-        properties.regsiterTime.parseTime("yyyy-MM-dd'T'HH:mm:sszzz", utc()))}
+        properties.registerTime.parseTime("yyyy-MM-dd'T'HH:mm:sszzz", utc()))}
 
 proc saveDatabase*(
   nazoPuyoDatabase: NazoPuyoDatabase, file = getDataDir() / "pon2".Path / "nazo.json".Path
@@ -70,24 +71,21 @@ proc saveDatabase*(
     for nazo, properties in nazoPuyoDatabase.pairs:
       {$nazo.toUri: {
         "answers": % properties.answers.mapIt(it.toUriQueryValue IZUMIYA),
-        "registerTime": % $properties.regsiterTime}.toTable
-      }.toTable
+        "registerTime": % $properties.registerTime}.toTable
+      }
 
   var content: string
   content.toUgly %*rawTable
+  file.parentDir.createDir
   file.string.writeFile content
 
 # ------------------------------------------------
 # Operation
 # ------------------------------------------------
 
-proc insert*(nazoPuyoDatabase: var NazoPuyoDatabase, nazo: NazoPuyo, answers: seq[Positions] = @[]) {.inline.} =
+proc add*(nazoPuyoDatabase: var NazoPuyoDatabase, nazo: NazoPuyo, answers: seq[Positions] = @[]) {.inline.} =
   ## Inserts the nazo puyo and answers (optional) into the database.
   nazoPuyoDatabase[nazo] = (answers, now().utc.toTime)
-
-proc delete*(nazoPuyoDatabase: var NazoPuyoDatabase, nazo: NazoPuyo) {.inline.} =
-  ## Deletes the nazo puyo from the database.
-  nazoPuyoDatabase.del nazo
 
 iterator find*(
   nazoPuyoDatabase: NazoPuyoDatabase,
@@ -104,8 +102,8 @@ iterator find*(
       continue
 
     if registerTimeIntervals.isSome and registerTimeIntervals.get.allIt(
-      (it.start.isSome and it.start.get > properties.regsiterTime) or
-      (it.stop.isSome and it.stop.get < properties.regsiterTime)
+      (it.start.isSome and it.start.get > properties.registerTime) or
+      (it.stop.isSome and it.stop.get < properties.registerTime)
     ):
       continue
 

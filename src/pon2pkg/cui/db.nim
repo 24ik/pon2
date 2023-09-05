@@ -31,7 +31,7 @@ proc runDb*(args: Table[string, Value]) {.inline.} =
       echo "解答に操作が含まれていないURLが含まれています．"
       return
 
-    db.insert question.get.nazoPuyo, answers.mapIt(it.get.positions.get)
+    db.add question.get.nazoPuyo, answers.mapIt(it.get.positions.get)
   elif args["delete"] or args["d"]:
     for url in @(args["<question>"]):
       let question = ($args["<question>"]).parseUri.toNazoPuyo
@@ -39,7 +39,7 @@ proc runDb*(args: Table[string, Value]) {.inline.} =
         echo "問題のURLが不正です．"
         return
 
-      db.delete question.get.nazoPuyo
+      db.del question.get.nazoPuyo
   elif args["find"] or args["f"]:
     var idx = 1
     for nazo in db.find(

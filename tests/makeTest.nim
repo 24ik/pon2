@@ -1,4 +1,5 @@
-import os
+import std/dirs
+import std/paths
 import strformat
 import strutils
 import sugar
@@ -11,11 +12,12 @@ when isMainModule:
   const
     # file content
     TripleQuote = "\"\"\""
+    Targets = "<TARGETS>"
     Matrix = "<MATRIX>"
     FileContentTemplate = &"""
 discard {TripleQuote}
   action: "run"
-  targets: "c cpp js"
+  targets: "{TARGETS}"
   matrix: "{Matrix}"
 {TripleQuote}
 
@@ -33,8 +35,7 @@ main()
          &"-d:bmi2={bmi2} -d:avx2={avx2} {thread}"
     fileContent = FileContentTemplate.replace(Matrix, matrixSeq.join "; ")
 
-  for categoryDir in (currentSourcePath().parentDir / "*").walkDirs:
-    let f = (categoryDir / "test.nim").open fmWrite
-    defer: f.close
-
-    f.write fileContent
+  for kind, path in currentSourcePath().Path.parentDir.walkDir:
+    if kind == pcDir:
+      let content = fileContent.replace(Targets, if path.lastPathPart == "db".Path: "c cpp" else: "c cpp js")
+      (path / "test.nim".Path).string.writeFile content
