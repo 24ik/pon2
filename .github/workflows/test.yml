@@ -34,17 +34,23 @@ jobs:
           key: ${{ runner.os }}-nimble-${{ hashFiles('*.nimble') }}
           restore-keys: |
             ${{ runner.os }}-nimble-
+        if: runner.os != 'Windows'
       - uses: jiro4989/setup-nim-action@v1
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - run: nimble -y install -d
+        if: runner.os == 'Linux'
+      - run: nimble -y install -d "-p:-d:avx2=false"
+        if: runner.os == 'Windows'
+      - run: nimble -y install -d -p:-d:avx2=false -p:-d:bmi2=false
+        if: runner.os == 'macOS'
 
       - run: nim c -r ./tests/makeTest.nim
         if: runner.os == 'Linux'
-      - run: nim c -r -d:avx2=0 ./tests/makeTest.nim
+      - run: nim c -r -d:avx2=false ./tests/makeTest.nim
         if: runner.os == 'Windows'
-      - run: nim c -r -d:bmi2=0 -d:avx2=0 ./tests/makeTest.nim
+      - run: nim c -r -d:bmi2=false -d:avx2=false ./tests/makeTest.nim
         if: runner.os == 'macOS'
 
       - run: nimble -y test

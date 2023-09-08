@@ -5,6 +5,9 @@ changelog:
       - refactor
       - test
   categories:
+    - title: 💥 Breaking Change
+      labels:
+        - breaking
     - title: 🛠 Bug Fix
       labels:
         - bug

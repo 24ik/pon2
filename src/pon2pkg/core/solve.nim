@@ -10,14 +10,12 @@ import math
 import options
 import sequtils
 import std/setutils
-import strutils
-import strformat
 import sugar
 import tables
 
 import nazopuyo_core
 import puyo_core
-import puyo_core/env as envLib
+import puyo_core/environment
 
 when not SingleThread:
   import threadpool
@@ -25,7 +23,7 @@ when not SingleThread:
 type
   Node = tuple
     ## Node of solution search tree.
-    nazo: Nazo
+    nazo: NazoPuyo
     positions: Positions
 
     isChainKind: bool
@@ -33,22 +31,24 @@ type
 
     # used to check if the requirement are satisfied
     disappearColors: Option[set[ColorPuyo]]
-    num: Option[Natural]
-    nums: Option[seq[int]]
+    number: Option[Natural]
+    numbers: Option[seq[int]]
 
     # used to check if the field is cleared
-    fieldNum: Option[Natural]
+    fieldCount: Option[Natural]
 
     # used to calculate the maximum number of puyoes that can disappear
-    puyoNum: Option[Natural]
-    puyoNums: Option[array[Puyo, Natural]]
+    puyoCount: Option[Natural]
+    puyoCounts: Option[array[Puyo, Natural]]
 
-  Solution* = Positions ## Nazo Puyo solution.
-  Solutions* = seq[Solution] ## Sequence of Nazo Puyo solutions.
-  InspectSolutions* = tuple
-    ## Sequence of Nazo Puyo solutions with the number of search tree nodes visited.
-    solutions: Solutions
-    visitNodeNum: Positive
+  InspectAnswers* = tuple
+    ## Sequence of Nazo Puyo answers with the number of search tree nodes visited.
+    answers: seq[Positions]
+    visitNodeCount: Positive
+
+# ------------------------------------------------
+# NazoPuyo -> Node
+# ------------------------------------------------
 
 const RequirementColorToCell = {
   RequirementColor.GARBAGE: Cell.GARBAGE,
@@ -59,156 +59,121 @@ const RequirementColorToCell = {
   RequirementColor.PURPLE: Cell.PURPLE,
 }.toTable
 
-# ------------------------------------------------
-# Nazo -> Node
-# ------------------------------------------------
-
-func toNode(nazo: Nazo): Node {.inline.} =
-  ## Converts the :code:`nazo` to the node.
+func toNode(nazo: NazoPuyo): Node {.inline.} =
+  ## Converts the nazo puyo to the node.
   result.nazo = nazo
-  result.positions = newSeqOfCap[Option[Position]] nazo.moveNum
+  result.positions = newSeqOfCap[Option[Position]] nazo.moveCount
 
   # kinds
-  result.isChainKind = nazo.req.kind in {CHAIN, CHAIN_MORE, CHAIN_CLEAR, CHAIN_MORE_CLEAR}
-  result.isExactKind = nazo.req.kind in {
+  result.isChainKind = nazo.requirement.kind in {CHAIN, CHAIN_MORE, CHAIN_CLEAR, CHAIN_MORE_CLEAR}
+  result.isExactKind = nazo.requirement.kind in {
     DISAPPEAR_COLOR,
-    DISAPPEAR_NUM,
+    DISAPPEAR_COUNT,
     CHAIN,
     CHAIN_CLEAR,
     DISAPPEAR_COLOR_SAMETIME,
-    DISAPPEAR_NUM_SAMETIME,
+    DISAPPEAR_COUNT_SAMETIME,
     DISAPPEAR_PLACE,
     DISAPPEAR_CONNECT}
 
-  # numbers corresponding to 'n' in the kind
-  case nazo.req.kind
+  # set property corresponding to 'n' in the kind
+  case nazo.requirement.kind
   of CLEAR:
     discard
   of DISAPPEAR_COLOR, DISAPPEAR_COLOR_MORE:
     result.disappearColors = some set[ColorPuyo]({})
-  of DISAPPEAR_NUM, DISAPPEAR_NUM_MORE, CHAIN, CHAIN_MORE, CHAIN_CLEAR, CHAIN_MORE_CLEAR:
-    result.num = some 0.Natural
+  of DISAPPEAR_COUNT, DISAPPEAR_COUNT_MORE, CHAIN, CHAIN_MORE, CHAIN_CLEAR, CHAIN_MORE_CLEAR:
+    result.number = some 0.Natural
   else:
-    result.nums = some newSeq[int] 0
+    result.numbers = some newSeq[int] 0
 
   # number of puyoes in the field
-  if nazo.req.kind in {CLEAR, CHAIN_CLEAR, CHAIN_MORE_CLEAR}:
-    case nazo.req.color.get
+  if nazo.requirement.kind in {CLEAR, CHAIN_CLEAR, CHAIN_MORE_CLEAR}:
+    case nazo.requirement.color.get
     of RequirementColor.ALL:
-      result.fieldNum = some nazo.env.field.puyoNum.Natural
+      result.fieldCount = some nazo.environment.field.countPuyo.Natural
     of RequirementColor.COLOR:
-      result.fieldNum = some nazo.env.field.colorNum.Natural
+      result.fieldCount = some nazo.environment.field.countColor.Natural
     of RequirementColor.GARBAGE:
-      result.fieldNum = some nazo.env.field.garbageNum.Natural
+      result.fieldCount = some nazo.environment.field.countGarbage.Natural
     else:
-      result.fieldNum = some Natural nazo.env.field.colorNum RequirementColorToCell[nazo.req.color.get]
+      result.fieldCount = some Natural nazo.environment.field.count RequirementColorToCell[nazo.requirement.color.get]
 
   # number of puyoes that can disappear
   if (
     result.isChainKind or
-    nazo.req.kind in RequirementKindsWithoutColor or
-    nazo.req.color.get in {RequirementColor.ALL, RequirementColor.GARBAGE, RequirementColor.COLOR}
+    nazo.requirement.kind in NoColorKinds or
+    nazo.requirement.color.get in {RequirementColor.ALL, RequirementColor.GARBAGE, RequirementColor.COLOR}
   ):
-    var puyoNums: array[Puyo, Natural]
-    puyoNums[Cell.GARBAGE] = nazo.env.garbageNum
+    var puyoCounts: array[Puyo, Natural]
+    puyoCounts[Cell.GARBAGE] = nazo.environment.countGarbage
     for color in ColorPuyo:
-      puyoNums[color] = Natural nazo.env.colorNum color
-    result.puyoNums = some puyoNums
+      puyoCounts[color] = Natural nazo.environment.count color
+    result.puyoCounts = some puyoCounts
   else:
-    result.puyoNum = some Natural nazo.env.colorNum RequirementColorToCell[nazo.req.color.get]
-
-# ------------------------------------------------
-# Check
-# ------------------------------------------------
-
-func isAccepted(node: Node): bool {.inline.} =
-  ## Returns :code:`true` if the :code:`node` is in the accepted state.
-  if node.nums.isSome:
-    let nowNums = node.nums.get
-
-    if node.isExactKind:
-      if nowNums.allIt it != node.nazo.req.num.get:
-        return false
-    else:
-      if nowNums.allIt it < node.nazo.req.num.get:
-        return false
-  else:
-    if node.num.isSome or node.disappearColors.isSome:
-      let nowNum = if node.num.isSome: node.num.get else: node.disappearColors.get.card
-
-      if node.isExactKind:
-        if nowNum != node.nazo.req.num.get:
-          return false
-      else:
-        if nowNum < node.nazo.req.num.get:
-          return false
-
-  if node.fieldNum.isSome and node.fieldNum.get > 0:
-    return false
-
-  return true
+    result.puyoCount = some Natural nazo.environment.count RequirementColorToCell[nazo.requirement.color.get]
 
 # ------------------------------------------------
 # Prune
 # ------------------------------------------------
 
 func filter4(num: int): int {.inline.} =
-  ## If :code:`num >= 4`, returns :code:`num`.
-  ## Otherwise, returns :code:`0`.
+  ## If `num >= 4`, returns `num`.
+  ## Otherwise, returns `0`.
   num * (num >= 4).int
 
 func canPrune(node: Node): bool {.inline.} =
-  ## Returns :code:`true` if the :code:`node` is in the unsolvable state.
-  if node.nazo.env.field.isDead:
+  ## Returns `true` if the `node` is in the unsolvable state.
+  if node.nazo.environment.field.isDead:
     return true
 
   # check if it is impossible to clear the field
-  if node.fieldNum.isSome:
-    if node.puyoNum.isSome:
-      if node.puyoNum.get in 1 .. 3:
+  if node.fieldCount.isSome:
+    if node.puyoCount.isSome:
+      if node.puyoCount.get in 1 .. 3:
         return true
     else:
-      if node.puyoNums.get[ColorPuyo.low .. ColorPuyo.high].anyIt it in 1 .. 3:
+      if node.puyoCounts.get[ColorPuyo.low .. ColorPuyo.high].anyIt it in 1 .. 3:
         return true
 
   # check the number corresponding to 'n' in the kind
   var
     nowNum = 0
     possibleNum = 0
-    targetNum = if node.nazo.req.num.isSome: node.nazo.req.num.get.int else: -1
-  case node.nazo.req.kind
+    targetNum = if node.nazo.requirement.number.isSome: node.nazo.requirement.number.get.int else: -1
+  case node.nazo.requirement.kind
   of CLEAR:
     discard
   of DISAPPEAR_COLOR, DISAPPEAR_COLOR_MORE, DISAPPEAR_COLOR_SAMETIME, DISAPPEAR_COLOR_MORE_SAMETIME:
-    if node.nazo.req.kind in {DISAPPEAR_COLOR, DISAPPEAR_COLOR_MORE}:
+    if node.nazo.requirement.kind in {DISAPPEAR_COLOR, DISAPPEAR_COLOR_MORE}:
       nowNum = node.disappearColors.get.card
 
-    possibleNum = node.puyoNums.get[ColorPuyo.low .. ColorPuyo.high].countIt it >= 4
-  of DISAPPEAR_NUM, DISAPPEAR_NUM_MORE, DISAPPEAR_NUM_SAMETIME, DISAPPEAR_NUM_MORE_SAMETIME:
-    if node.nazo.req.kind in {DISAPPEAR_NUM, DISAPPEAR_NUM_MORE}:
-      nowNum = node.num.get
+    possibleNum = node.puyoCounts.get[ColorPuyo.low .. ColorPuyo.high].countIt it >= 4
+  of DISAPPEAR_COUNT, DISAPPEAR_COUNT_MORE, DISAPPEAR_COUNT_SAMETIME, DISAPPEAR_COUNT_MORE_SAMETIME:
+    if node.nazo.requirement.kind in {DISAPPEAR_COUNT, DISAPPEAR_COUNT_MORE}:
+      nowNum = node.number.get
 
-    if node.puyoNum.isSome:
-      possibleNum = node.puyoNum.get.filter4
+    if node.puyoCount.isSome:
+      possibleNum = node.puyoCount.get.filter4
     else:
-      let colorPossibleNum = sum node.puyoNums.get[ColorPuyo.low .. ColorPuyo.high].mapIt it.filter4
-      if node.nazo.req.color.get in {RequirementColor.ALL, RequirementColor.COLOR}:
+      let colorPossibleNum = sum node.puyoCounts.get[ColorPuyo.low .. ColorPuyo.high].mapIt it.filter4
+      if node.nazo.requirement.color.get in {RequirementColor.ALL, RequirementColor.COLOR}:
         possibleNum = colorPossibleNum
-      if node.nazo.req.color.get in {RequirementColor.ALL, RequirementColor.GARBAGE}:
+      if node.nazo.requirement.color.get in {RequirementColor.ALL, RequirementColor.GARBAGE}:
         if colorPossibleNum > 0:
-          possibleNum.inc node.puyoNums.get[Cell.GARBAGE]
+          possibleNum.inc node.puyoCounts.get[Cell.GARBAGE]
   of CHAIN, CHAIN_MORE, CHAIN_CLEAR, CHAIN_MORE_CLEAR:
-    possibleNum = sum node.puyoNums.get[ColorPuyo.low .. ColorPuyo.high].mapIt it div 4
+    possibleNum = sum node.puyoCounts.get[ColorPuyo.low .. ColorPuyo.high].mapIt it div 4
   of DISAPPEAR_PLACE, DISAPPEAR_PLACE_MORE:
-    if node.puyoNum.isSome:
-      possibleNum = node.puyoNum.get div 4
+    if node.puyoCount.isSome:
+      possibleNum = node.puyoCount.get div 4
     else:
-      possibleNum = sum node.puyoNums.get[ColorPuyo.low .. ColorPuyo.high].mapIt it div 4
+      possibleNum = sum node.puyoCounts.get[ColorPuyo.low .. ColorPuyo.high].mapIt it div 4
   of DISAPPEAR_CONNECT, DISAPPEAR_CONNECT_MORE:
-    if node.puyoNum.isSome:
-      possibleNum = node.puyoNum.get.filter4
+    if node.puyoCount.isSome:
+      possibleNum = node.puyoCount.get.filter4
     else:
-      possibleNum = max node.puyoNums.get[ColorPuyo.low .. ColorPuyo.high].mapIt it.filter4
+      possibleNum = max node.puyoCounts.get[ColorPuyo.low .. ColorPuyo.high].mapIt it.filter4
 
   if nowNum + possibleNum < targetNum:
     return true
@@ -218,128 +183,130 @@ func canPrune(node: Node): bool {.inline.} =
 # ------------------------------------------------
 
 func isLeaf(node: Node): bool {.inline.} =
-  ## Returns :code:`true` if the :code:`node` is the leaf (i.e., all moves are completed).
-  node.positions.len == node.nazo.moveNum
+  ## Returns `true` if the node is the leaf; *i.e.*, all moves are completed.
+  node.positions.len == node.nazo.moveCount
 
 func child(node: Node, pos: Position): Node {.inline.} =
-  ## Returns the child of the :code:`node` with the :code:`pos` edge.
+  ## Returns the child of the `node` with the `pos` edge.
   let moveFn =
-    if node.nazo.req.kind in {
+    if node.nazo.requirement.kind in {
       CLEAR,
       DISAPPEAR_COLOR,
       DISAPPEAR_COLOR_MORE,
-      DISAPPEAR_NUM,
-      DISAPPEAR_NUM_MORE,
+      DISAPPEAR_COUNT,
+      DISAPPEAR_COUNT_MORE,
       CHAIN,
       CHAIN_MORE,
       CHAIN_CLEAR,
       CHAIN_MORE_CLEAR,
     }:
-      envLib.moveWithRoughTracking
-    elif node.nazo.req.kind in {
-      DISAPPEAR_COLOR_SAMETIME, DISAPPEAR_COLOR_MORE_SAMETIME, DISAPPEAR_NUM_SAMETIME, DISAPPEAR_NUM_MORE_SAMETIME
+      environment.moveWithRoughTracking
+    elif node.nazo.requirement.kind in {
+      DISAPPEAR_COLOR_SAMETIME, DISAPPEAR_COLOR_MORE_SAMETIME, DISAPPEAR_COUNT_SAMETIME, DISAPPEAR_COUNT_MORE_SAMETIME
     }:
-      envLib.moveWithDetailTracking
+      environment.moveWithDetailTracking
     else:
-      envLib.moveWithFullTracking
+      environment.moveWithFullTracking
   
   result = node
   result.positions.add pos.some
 
   let
-    pair = result.nazo.env.pairs.peekFirst
-    moveResult = result.nazo.env.moveFn pos
+    pair = result.nazo.environment.pairs.peekFirst
+    moveResult = result.nazo.environment.moveFn pos
 
   # set the number corresponding to 'n' in the kind
-  case node.nazo.req.kind
+  case node.nazo.requirement.kind
   of CLEAR:
     discard
   of DISAPPEAR_COLOR, DISAPPEAR_COLOR_MORE:
     result.disappearColors =
-      some node.disappearColors.get + (ColorPuyo.toSeq.filterIt moveResult.totalDisappearNums.get[it] > 0).toSet
-  of DISAPPEAR_NUM, DISAPPEAR_NUM_MORE:
-    result.num = some node.num.get.succ(
-      case node.nazo.req.color.get
+      some node.disappearColors.get + (ColorPuyo.toSeq.filterIt moveResult.totalDisappearCounts.get[it] > 0).toSet
+  of DISAPPEAR_COUNT, DISAPPEAR_COUNT_MORE:
+    result.number = some node.number.get.succ(
+      case node.nazo.requirement.color.get
       of RequirementColor.AlL:
-        moveResult.puyoNum
+        moveResult.puyoCount
       of RequirementColor.COLOR:
-        moveResult.colorNum
+        moveResult.colorCount
       else:
-        moveResult.totalDisappearNums.get[RequirementColorToCell[node.nazo.req.color.get]]
+        moveResult.totalDisappearCounts.get[RequirementColorToCell[node.nazo.requirement.color.get]]
     )
   of CHAIN, CHAIN_MORE, CHAIN_CLEAR, CHAIN_MORE_CLEAR:
-    result.num = some moveResult.chainNum
+    result.number = some moveResult.chainCount
   of DISAPPEAR_COLOR_SAMETIME, DISAPPEAR_COLOR_MORE_SAMETIME:
-    let nums = collect:
-      for numsArray in moveResult.disappearNums.get:
-        numsArray[ColorPuyo.low .. ColorPuyo.high].countIt it > 0
-    result.nums = some nums
-  of DISAPPEAR_NUM_SAMETIME, DISAPPEAR_NUM_MORE_SAMETIME:
-    let nums = case node.nazo.req.color.get
+    let numbers = collect:
+      for countsArray in moveResult.disappearCounts.get:
+        countsArray[ColorPuyo.low .. ColorPuyo.high].countIt it > 0
+    result.numbers = some numbers
+  of DISAPPEAR_COUNT_SAMETIME, DISAPPEAR_COUNT_MORE_SAMETIME:
+    let nums = case node.nazo.requirement.color.get
     of RequirementColor.ALL:
-      moveResult.puyoNums
+      moveResult.puyoCounts
     of RequirementColor.COLOR:
-      moveResult.colorNums
+      moveResult.colorCounts
     else:
-      moveResult.disappearNums.get.mapIt it[RequirementColorToCell[node.nazo.req.color.get]].int
-    result.nums = some nums
+      moveResult.disappearCounts.get.mapIt it[RequirementColorToCell[node.nazo.requirement.color.get]].int
+    result.numbers = some nums
   of DISAPPEAR_PLACE, DISAPPEAR_PLACE_MORE:
     var nums: seq[int]
-    case node.nazo.req.color.get
+    case node.nazo.requirement.color.get
     of RequirementColor.ALL, RequirementColor.COLOR:
-      for numsArray in moveResult.detailDisappearNums.get:
-        nums.add sum numsArray[ColorPuyo.low .. ColorPuyo.high].mapIt it.len
+      for countsArray in moveResult.detailDisappearCounts.get:
+        nums.add sum countsArray[ColorPuyo.low .. ColorPuyo.high].mapIt it.len
     else:
-      nums.add moveResult.detailDisappearNums.get.mapIt it[RequirementColorToCell[node.nazo.req.color.get]].len
-    result.nums = some nums
+      nums.add(
+        moveResult.detailDisappearCounts.get.mapIt it[RequirementColorToCell[node.nazo.requirement.color.get]].len)
+    result.numbers = some nums
   of DISAPPEAR_CONNECT, DISAPPEAR_CONNECT_MORE:
     var nums: seq[int]
-    case node.nazo.req.color.get
+    case node.nazo.requirement.color.get
     of RequirementColor.ALL, RequirementColor.COLOR:
-      for numsArray in moveResult.detailDisappearNums.get:
-        for numsAtColor in numsArray[ColorPuyo.low .. ColorPuyo.high]:
+      for countsArray in moveResult.detailDisappearCounts.get:
+        for numsAtColor in countsArray[ColorPuyo.low .. ColorPuyo.high]:
           nums &= numsAtColor.mapIt it.int
     else:
-      for numsArray in moveResult.detailDisappearNums.get:
-        nums &= numsArray[RequirementColorToCell[node.nazo.req.color.get]].mapIt it.int
-    result.nums = some nums
+      for countsArray in moveResult.detailDisappearCounts.get:
+        nums &= countsArray[RequirementColorToCell[node.nazo.requirement.color.get]].mapIt it.int
+    result.numbers = some nums
 
   # set the number of puyoes in the field 
-  if node.fieldNum.isSome:
+  if node.fieldCount.isSome:
     var
       addNum = 0
       disappearNum = 0
-    case node.nazo.req.color.get
+    case node.nazo.requirement.color.get
     of RequirementColor.ALL:
       addNum = 2
-      disappearNum = moveResult.puyoNum
+      disappearNum = moveResult.puyoCount
     of RequirementColor.COLOR:
       addNum = 2
-      disappearNum = moveResult.colorNum
+      disappearNum = moveResult.colorCount
     of RequirementColor.GARBAGE:
-      disappearNum = moveResult.totalDisappearNums.get[Cell.GARBAGE]
+      disappearNum = moveResult.totalDisappearCounts.get[Cell.GARBAGE]
     else:
-      let color = RequirementColorToCell[node.nazo.req.color.get]
-      addNum = pair.colorNum color
-      disappearNum = moveResult.totalDisappearNums.get[color]
-    result.fieldNum = some node.fieldNum.get.succ(addNum).pred disappearNum
+      let color = RequirementColorToCell[node.nazo.requirement.color.get]
+      addNum = pair.count color
+      disappearNum = moveResult.totalDisappearCounts.get[color]
+    result.fieldCount = some node.fieldCount.get.succ(addNum).pred disappearNum
 
   # set the maximum number of puyoes that can disappear
-  if node.puyoNum.isSome:
-    result.puyoNum =
-      some node.puyoNum.get.pred moveResult.totalDisappearNums.get[RequirementColorToCell[node.nazo.req.color.get]]
+  if node.puyoCount.isSome:
+    result.puyoCount =
+      some node.puyoCount.get.pred(
+        moveResult.totalDisappearCounts.get[RequirementColorToCell[node.nazo.requirement.color.get]])
   else:
-    var puyoNums: array[Puyo, Natural]
+    var puyoCounts: array[Puyo, Natural]
     for puyo in Puyo:
-      puyoNums[puyo] = node.puyoNums.get[puyo].pred moveResult.totalDisappearNums.get[puyo]
-    result.puyoNums = some puyoNums
+      puyoCounts[puyo] = node.puyoCounts.get[puyo].pred moveResult.totalDisappearCounts.get[puyo]
+    result.puyoCounts = some puyoCounts
 
 func children(node: Node): seq[Node] {.inline.} =
-  ## Returns the children of the :code:`node`.
+  ## Returns the children of the `node`.
   collect:
     for pos in (
-      if node.nazo.env.pairs.peekFirst.isDouble: node.nazo.env.field.validDoublePositions
-      else: node.nazo.env.field.validPositions
+      if node.nazo.environment.pairs.peekFirst.isDouble: node.nazo.environment.field.validDoublePositions
+      else: node.nazo.environment.field.validPositions
     ):
       node.child pos
 
@@ -347,8 +314,40 @@ func children(node: Node): seq[Node] {.inline.} =
 # Solve
 # ------------------------------------------------
 
-func solveRec(node: Node): Solutions {.inline.} =
-  ## Solves the nazo puyo at the :code:`node`.
+func isAccepted(node: Node): bool {.inline.} =
+  ## Returns `true` if the node is in the accepted state.
+  if node.numbers.isSome:
+    let nowNums = node.numbers.get
+
+    if node.isExactKind:
+      if nowNums.allIt it != node.nazo.requirement.number.get:
+        return false
+    else:
+      if nowNums.allIt it < node.nazo.requirement.number.get:
+        return false
+  else:
+    if node.number.isSome or node.disappearColors.isSome:
+      let nowNum = if node.number.isSome: node.number.get else: node.disappearColors.get.card
+
+      if node.isExactKind:
+        if nowNum != node.nazo.requirement.number.get:
+          return false
+      else:
+        if nowNum < node.nazo.requirement.number.get:
+          return false
+
+  if node.fieldCount.isSome and node.fieldCount.get > 0:
+    return false
+
+  return true
+
+func isNotSupported(nazo: NazoPuyo): bool {.inline.} =
+  ## Returns `true` if the nazo puyo is not supported, i.e., unsolvable.
+  nazo.requirement.kind in {DISAPPEAR_PLACE, DISAPPEAR_PLACE_MORE, DISAPPEAR_CONNECT, DISAPPEAR_CONNECT_MORE} and
+  nazo.requirement.color.get == RequirementColor.GARBAGE
+
+func solveRec(node: Node): seq[Positions] {.inline.} =
+  ## Solves the nazo puyo at the `node`.
   if node.isAccepted:
     result.add node.positions
     return
@@ -359,14 +358,9 @@ func solveRec(node: Node): Solutions {.inline.} =
   for child in node.children:
     result &= child.solveRec
 
-proc solve*(nazo: Nazo): Solutions {.inline.} =
-  ## Solves the nazo puyo at the :code:`node`.
-  if (
-    nazo.req.kind in {DISAPPEAR_PLACE, DISAPPEAR_PLACE_MORE, DISAPPEAR_CONNECT, DISAPPEAR_CONNECT_MORE} and
-    nazo.req.color.get == RequirementColor.GARBAGE
-  ):
-    return
-  if nazo.env.pairs.len == 0:
+proc solve*(nazo: NazoPuyo): seq[Positions] {.inline.} =
+  ## Solves the nazo puyo.
+  if nazo.isNotSupported or nazo.moveCount == 0:
     return
 
   let node = nazo.toNode
@@ -379,38 +373,26 @@ proc solve*(nazo: Nazo): Solutions {.inline.} =
   else:
     let children = node.children
 
-    var futureSolutions = newSeqOfCap[FlowVar[Solutions]] children.len
+    var futureSolutions = newSeqOfCap[FlowVar[seq[Positions]]] children.len
     for child in children:
-      futureSolutions.add child.solveRec.spawn
+      futureSolutions.add spawn child.solveRec
     for sol in futureSolutions:
       result &= ^sol
-
-proc solve*(url: string, domain = ISHIKAWAPUYO): Option[seq[string]] {.inline.} =
-  ## Solves the nazo puyo represented by the :code:`url`.
-  ## If the :code:`url` is invalid, returns :code:`none`.
-  let nazo = url.toNazo true
-  if nazo.isNone:
-    return
-
-  let urls = collect:
-    for sol in nazo.get.solve:
-      nazo.get.toUrl sol.some, domain
-  return some urls
 
 # ------------------------------------------------
 # Inspect Solve
 # ------------------------------------------------
 
-func `&=`(sol1: var InspectSolutions, sol2: InspectSolutions) {.inline.} =
-  sol1.solutions &= sol2.solutions
-  sol1.visitNodeNum.inc sol2.visitNodeNum
+func `&=`(sol1: var InspectAnswers, sol2: InspectAnswers) {.inline.} =
+  sol1.answers &= sol2.answers
+  sol1.visitNodeCount.inc sol2.visitNodeCount
 
-func inspectSolveRec(node: Node, earlyStopping: bool): InspectSolutions {.inline.} =
-  ## Solves the nazo puyo at the :code:`node` while keeping the number of visited nodes.
-  result.visitNodeNum.inc
+func inspectSolveRec(node: Node, earlyStopping: bool): InspectAnswers {.inline.} =
+  ## Solves the nazo puyo at the node while keeping the number of visited nodes.
+  result.visitNodeCount.inc
 
   if node.isAccepted:
-    result.solutions.add node.positions
+    result.answers.add node.positions
     return
 
   if node.isLeaf or node.canPrune:
@@ -418,18 +400,13 @@ func inspectSolveRec(node: Node, earlyStopping: bool): InspectSolutions {.inline
 
   for child in node.children:
     result &= child.inspectSolveRec earlyStopping
-    if earlyStopping and result.solutions.len > 1:
+    if earlyStopping and result.answers.len > 1:
       return
 
-proc inspectSolve*(nazo: Nazo, earlyStopping = false): InspectSolutions {.inline.} =
-  ## Solves the nazo puyo at the :code:`node` while keeping the number of visited nodes.
-  ## If :code:`earlyStopping` is specified, searching is interrupted if any solution is found.
-  if (
-    nazo.req.kind in {DISAPPEAR_PLACE, DISAPPEAR_PLACE_MORE, DISAPPEAR_CONNECT, DISAPPEAR_CONNECT_MORE} and
-    nazo.req.color.get == RequirementColor.GARBAGE
-  ):
-    return
-  if nazo.env.pairs.len == 0:
+proc inspectSolve*(nazo: NazoPuyo, earlyStopping = false): InspectAnswers {.inline.} =
+  ## Solves the nazo puyo while keeping the number of visited nodes.
+  ## If `earlyStopping` is `true`, searching is interrupted if any solution is found.
+  if nazo.isNotSupported or nazo.moveCount == 0:
     return
 
   let node = nazo.toNode
@@ -442,34 +419,8 @@ proc inspectSolve*(nazo: Nazo, earlyStopping = false): InspectSolutions {.inline
   else:
     let children = node.children
 
-    var futureSolutions = newSeqOfCap[FlowVar[InspectSolutions]] children.len
+    var futureSolutions = newSeqOfCap[FlowVar[InspectAnswers]] children.len
     for child in children:
       futureSolutions.add spawn child.inspectSolveRec earlyStopping
     for sol in futureSolutions:
       result &= ^sol
-
-proc inspectSolve*(url: string, earlyStopping = false, domain = ISHIKAWAPUYO): Option[
-  tuple[urls: seq[string], visitNodeNum: int]
-] {.inline.} =
-  ## Solves the nazo puyo represented by the :code:`url` while keeping the number of visited nodes.
-  ## If :code:`earlyStopping` is specified, searching is interrupted if any solution is found.
-  ## If the :code:`url` is invalid, returns :code:`none`.
-  let nazo = url.toNazo true
-  if nazo.isNone:
-    return
-
-  let (solutions, visitNodeNum) = nazo.get.inspectSolve earlyStopping
-  return some (urls: solutions.mapIt nazo.get.toUrl(it.some, domain), visitNodeNum: visitNodeNum.int)
-
-# ------------------------------------------------
-# Solution -> string
-# ------------------------------------------------
-
-func `$`*(sol: Solution): string {.inline.} =
-  let
-    posStrs = collect:
-      for pos in sol:
-        $pos
-    solStr = posStrs.join ", "
-
-  return &"@[{solStr}]"

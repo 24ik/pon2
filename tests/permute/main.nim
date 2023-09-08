@@ -1,36 +1,12 @@
 import options
 import sequtils
-import strutils
 import unittest
+import uri
 
+import nazopuyo_core
 import puyo_core
 
 import ../../src/pon2pkg/core/permute
-
-func toIps(url: string): string = url.replace("https://ishikawapuyo.net", "http://ips.karou.jp")
-
-proc checkPermuteCore(
-  url: string,
-  results: seq[tuple[problem: string, solution: string]],
-  fixMoves: seq[Positive],
-  allowDouble: bool,
-  allowLastDouble: bool,
-  skipSwap: bool,
-) =
-  check url.permute(fixMoves, allowDouble, allowLastDouble, skipSwap, ISHIKAWAPUYO).toSeq.mapIt(it.get) == results
-  check url.permute(fixMoves, allowDouble, allowLastDouble, skipSwap, IPS).toSeq.mapIt(it.get) ==
-    results.mapIt (it[0].toIps, it[1].toIps)
-
-proc checkPermute(
-  url: string,
-  results: seq[tuple[problem: string, solution: string]],
-  fixMoves: seq[Positive],
-  allowDouble: bool,
-  allowLastDouble: bool,
-  skipSwap: bool,
-) =
-  checkPermuteCore(url, results, fixMoves, allowDouble, allowLastDouble, skipSwap)
-  checkPermuteCore(url.toIps, results, fixMoves, allowDouble, allowLastDouble, skipSwap)
 
 proc main* =
   # ------------------------------------------------
@@ -40,33 +16,25 @@ proc main* =
   # permute
   block:
     let
-      query = "https://ishikawapuyo.net/simu/pn.html?S00r0Mm6iOi_g1g1__u03"
+      query = "https://ishikawapuyo.net/simu/pn.html?S00r0Mm6iOi_g1g1__u03".parseUri.toNazoPuyo.get.nazoPuyo
 
-      result1rbrb = (
-        problem: "https://ishikawapuyo.net/simu/pn.html?S00r0Mm6iOi_q1q1__u03",
-        solution: "https://ishikawapuyo.net/simu/pn.html?S00r0Mm6iOi_qcqc__u03")
-      result1rbbr = (
-        problem: "https://ishikawapuyo.net/simu/pn.html?S00r0Mm6iOi_q1g1__u03",
-        solution: "https://ishikawapuyo.net/simu/pn.html?S00r0Mm6iOi_qcgC__u03")
-      result1brbr = (
-        problem: "https://ishikawapuyo.net/simu/pn.html?S00r0Mm6iOi_g1g1__u03",
-        solution: "https://ishikawapuyo.net/simu/pn.html?S00r0Mm6iOi_gCgC__u03")
-      result2 = (
-        problem: "https://ishikawapuyo.net/simu/pn.html?S00r0Mm6iOi_e1s1__u03",
-        solution: "https://ishikawapuyo.net/simu/pn.html?S00r0Mm6iOi_e0s2__u03")
+      result1gbgb = ("gb\ngb".toPairs.get, "12\n12".toPositions.get)
+      result1gbbg = ("gb\nbg".toPairs.get, "12\n21".toPositions.get)
+      result1bgbg = ("bg\nbg".toPairs.get, "21\n21".toPositions.get)
+      result2 = ("gg\nbb".toPairs.get, "1N\n2N".toPositions.get)
 
     # allow double
     # w/o fixMoves
-    checkPermute(query, @[result2, result1rbrb], newSeq[Positive](0), true, true, true)
-    checkPermute(query, @[result2, result1rbrb], newSeq[Positive](0), true, true, false)
+    check query.permute(newSeq[Positive](0), true, true, true).toSeq == @[result2, result1gbgb]
+    check query.permute(newSeq[Positive](0), true, true, false).toSeq == @[result2, result1gbgb]
     # w/ fixMoves
-    checkPermute(query, @[result1rbbr], @[2.Positive], true, true, true)
-    checkPermute(query, @[result1rbbr], @[2.Positive], true, true, false)
-    checkPermute(query, @[result1brbr], @[1.Positive, 2.Positive], true, true, true)
-    checkPermute(query, @[result1brbr], @[1.Positive, 2.Positive], true, true, false)
+    check query.permute(@[2.Positive], true, true, true).toSeq == @[result1gbbg]
+    check query.permute(@[2.Positive], true, true, false).toSeq == @[result1gbbg]
+    check query.permute(@[1.Positive, 2.Positive], true, true, true).toSeq == @[result1bgbg]
+    check query.permute(@[1.Positive, 2.Positive], true, true, false).toSeq == @[result1bgbg]
 
     # not allow last double
-    checkPermute(query, @[result1rbrb], newSeq[Positive](0), true, false, true)
+    check query.permute(newSeq[Positive](0), true, false, true).toSeq == @[result1gbgb]
 
     # not allow double
-    checkPermute(query, @[result1rbrb], newSeq[Positive](0), false, false, true)
+    check query.permute(newSeq[Positive](0), false, false, true).toSeq == @[result1gbgb]

@@ -1,58 +1,65 @@
-## This module implements the database CUI.
+## This module implements the CUI database.
 ##
 
+import logging
 import options
 import sequtils
 import strformat
 import tables
+import uri
 
 import docopt
 import nazopuyo_core
-import tiny_sqlite
 
-import ./util
+import ./common
 import ../core/db
 
-# ------------------------------------------------
-# Entry Point
-# ------------------------------------------------
+let logger = newConsoleLogger(lvlNotice, verboseFmtStr)
 
 proc runDb*(args: Table[string, Value]) {.inline.} =
-  ## Runs the database CUI.
-  let db = connectDb()
-  if db.isNone:
-    echo "データベースファイルが開けません．"
-    return
-  defer: db.get.close
+  ## Runs the CUI database.
+  var db = loadDatabase()
 
   if args["add"] or args["a"]:
-    let urls = @(args["<urls>"]).deduplicate true
-    for url in urls:
-      let nazo = url.toNazo true
-      if nazo.isNone:
-        echo &"正しくない形式のURLです：{url}"
-        continue
+    let question = ($args["<question>"]).parseUri.toNazoPuyo
+    if question.isNone:
+      logger.log lvlError, "問題のURLが不正です．"
+      return
 
-      if not db.get.insert nazo.get:
-        echo &"既にデータベースに登録されています：{url}"
+    let answers = (@(args["<answers>"]).deduplicate true).mapIt it.parseUri.toNazoPuyo
+    if answers.anyIt it.isNone:
+      logger.log lvlError, "解答に不正なURLが含まれています．"
+      return
+    if answers.anyIt it.get.positions.isNone:
+      logger.log lvlError, "解答に操作が含まれていないURLが含まれています．"
+      return
+
+    db.add question.get.nazoPuyo, answers.mapIt(it.get.positions.get)
   elif args["remove"] or args["r"]:
-    for url in @(args["<urls>"]):
-      if not db.get.delete url:
-        echo &"データベースに登録されていません：{url}"
-  elif args["find"] or args["f"]:
-    var saturates = newSeqOfCap[bool](2)
-    if args["--fs"]:
-      saturates.add true
-    if args["--fS"]:
-      saturates.add false
+    let questions = (@(args["<questions>"]).deduplicate true).mapIt it.parseUri.toNazoPuyo
+    if questions.anyIt it.isNone:
+      logger.log lvlError, "不正なURLが含まれています．"
+      return
 
+    for question in questions:
+      db.del question.get.nazoPuyo
+  elif args["find"] or args["f"]:
     var idx = 1
-    for url in db.get.find(
-      args["--fk"].mapIt it.parseRequirementKind,
-      args["--fm"].mapIt it.parseNatural.Positive,
-      saturates,
+    for nazo in db.find(
+      some args["--fr"].mapIt it.parseRule,
+      some args["--fk"].mapIt it.parseRequirementKind,
+      some args["--fm"].mapIt it.parseNatural.Positive,
     ):
-      echo &"({idx}) {url}"
+      let questionUri = nazo.nazoPuyo.toUri
+      echo &"(Q{idx}) {questionUri}"
+
+      for answerIdx, answer in nazo.answers:
+        let answerUri = nazo.nazoPuyo.toUri some answer
+        echo &"(A{idx}-{answerIdx.succ}) {answerUri}"
+
+      echo ""
       idx.inc
   else:
     doAssert false
+
+  db.saveDatabase

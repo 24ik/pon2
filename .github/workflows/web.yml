@@ -29,17 +29,19 @@ jobs:
           key: ${{ runner.os }}-nimble-${{ hashFiles('*.nimble') }}
           restore-keys: |
             ${{ runner.os }}-nimble-
+        if: runner.os != 'Windows'
       - uses: jiro4989/setup-nim-action@v1
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - run: |-
           nimble -y install -d
-          nim doc --threads:on --project --index ./src/pon2.nim
+          nim doc --project --index ./src/pon2.nim
           mv ./src/htmldocs/pon2.html ./src/htmldocs/index.html
 
       - run: |-
-          nim js -o:www/index.js src/pon2.nim
+          nim js -d:danger -o:www/index.js src/pon2.nim
+          npx --yes google-closure-compiler --js ./www/index.js --js_output_file ./www/index.min.js
           mv ./www ./src/htmldocs/playground
 
       - uses: actions/configure-pages@v3

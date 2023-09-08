@@ -7,11 +7,14 @@
 /tests/*/*
 !/tests/*/main.nim
 
-/benchmark/*
-!/benchmark/*.nim*
+/src/htmldocs/
 
 /www/index.js
+/www/index.min.js
+/www/assets
+
 /pon2
 /pon2.exe
 
-/src/htmldocs/
+/benchmark/*
+!/benchmark/*.nim*

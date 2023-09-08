@@ -18,29 +18,32 @@ proc main* =
   # generate
   block:
     let
-      moveNum = 3
+      rule = TSU
+      moveCount = 3
       kind = CHAIN_CLEAR
       num = 5.RequirementNumber
-      colorNum = 3
-      heights = [1.Col: some 0.Natural, none Natural, none Natural, none Natural, some 0.Natural, some 0.Natural]
-      puyoNums = (color: 20.Natural, garbage: 2.Natural)
-      connect3Nums = (total: none Natural, vertical: some 0.Natural, horizontal: some 1.Natural, lShape: none Natural)
-      (nazo, sol) = generate(
+      colorCount = 3
+      heights = [some 0.Natural, none Natural, none Natural, none Natural, some 0.Natural, some 0.Natural]
+      puyoCounts = (color: 20.Natural, garbage: 2.Natural)
+      connect3Counts =
+        (total: none Natural, vertical: some 0.Natural, horizontal: some 1.Natural, lShape: none Natural)
+      nazo = generate(
         42,
-        moveNum,
-        (kind: kind, color: some AbstractRequirementColor.ALL, num: some num),
-        colorNum,
+        rule,
+        moveCount,
+        (kind: kind, color: some AbstractRequirementColor.ALL, number: some num),
+        colorCount,
         heights,
-        puyoNums,
-        connect3Nums,
+        puyoCounts,
+        connect3Counts,
         false,
         false).get
-      fieldArray = nazo.env.field.toArray
+      fieldArray = nazo.question.environment.field.toArray
 
-    check nazo.solve == @[sol]
-    check nazo.moveNum == moveNum
-    check nazo.req == (kind: kind, color: some RequirementColor.ALL, num: some num)
-    check ColorPuyo.countIt(nazo.env.colorNum(it) > 0) == colorNum
+    check nazo.question.solve == @[nazo.answer]
+    check nazo.question.moveCount == moveCount
+    check nazo.question.requirement == (kind: kind, color: some RequirementColor.ALL, number: some num)
+    check ColorPuyo.countIt(nazo.question.environment.count(it) > 0) == colorCount
 
     for col, height in heights:
       if height.isNone:
@@ -49,12 +52,16 @@ proc main* =
         if height.get == 0:
           check (Row.low .. Row.high).allIt fieldArray[it][col] == NONE
 
-    check nazo.env.colorNum == puyoNums.color
-    check nazo.env.garbageNum == puyoNums.garbage
+    check nazo.question.environment.countColor == puyoCounts.color
+    check nazo.question.environment.countGarbage == puyoCounts.garbage
 
-    check connect3Nums.total.isNone or nazo.env.field.connect3.puyoNum == connect3Nums.total.get * 3
-    check connect3Nums.vertical.isNone or nazo.env.field.connect3V.puyoNum == connect3Nums.vertical.get * 3
-    check connect3Nums.horizontal.isNone or nazo.env.field.connect3H.puyoNum == connect3Nums.horizontal.get * 3
-    check connect3Nums.lShape.isNone or nazo.env.field.connect3L.puyoNum == connect3Nums.lShape.get * 3
+    check connect3Counts.total.isNone or nazo.question.environment.field.connect3.countPuyo ==
+      connect3Counts.total.get * 3
+    check connect3Counts.vertical.isNone or nazo.question.environment.field.connect3V.countPuyo ==
+      connect3Counts.vertical.get * 3
+    check connect3Counts.horizontal.isNone or nazo.question.environment.field.connect3H.countPuyo ==
+      connect3Counts.horizontal.get * 3
+    check connect3Counts.lShape.isNone or nazo.question.environment.field.connect3L.countPuyo ==
+      connect3Counts.lShape.get * 3
 
-    check nazo.env.pairs.toSeq.allIt(not it.isDouble)
+    check nazo.question.environment.pairs.toSeq.allIt(not it.isDouble)

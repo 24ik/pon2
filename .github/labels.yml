@@ -1,3 +1,6 @@
+- color: ffd900
+  name: breaking
+  description: Breaking change
 - color: d73a4a
   description: Something isn't working
   name: bug

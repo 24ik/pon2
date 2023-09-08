@@ -1,45 +1,105 @@
 ## This module implements the entry point for making a web page.
 ##
 
-include karax/prelude
+import dom
+import sugar
+import options
+import uri
 
-import ./view/message
-import ./view/simulator
-import ./view/solve
+import karax / [karax, karaxdsl, vdom, kdom]
 
-proc makeWebPageCore: VNode =
-  ## Returns the full page.
-  buildHtml(tdiv):
-    tdiv(class = "columns"):
-      tdiv(class = "column"):
-        section(class = "section"):
-          h1(class = "title"):
-            text "解探索"
+import nazopuyo_core
+import puyo_core
+import puyo_simulator
 
-          tdiv(class = "content"):
-            ul:
-              li:
-                text "バグ（探索結果の間違い等）を見つけたら"
-                a(href = "https://twitter.com/PP_Orange_PP"): text "作者"
-                text "までご連絡ください．"
-              li: text "固ぷよ・鉄ぷよ・壁，フィーバー，お邪魔ぷよが降る問題は未対応です．"
-              li: text "探索が遅いです．4手問題まで，多くても5手問題までの利用を推奨します．"
-              li:
-                text "以下の種類のなぞぷよは探索が"
-                strong: text "非常に"
-                text "遅いです．"
-              ul:
-                li: text "cぷよn箇所[以上]同時に消すべし"
-                li: text "cぷよn連結[以上]で消すべし"
-              li: text "探索中に動作が固まりますが，仕様です．探索を止める場合はページを再読込してください．"
+import ./answer
+import ./controller
+import ../manager
 
-          solverField()
-        section(class = "section"):
-          messageTable()
-      tdiv(class = "column"):
-        section(class = "section"):
-          simulatorFrame()
+# ------------------------------------------------
+# API
+# ------------------------------------------------
 
-proc makeWebPage* =
-  ## Makes the full web page.
-  makeWebPageCore.setRenderer
+proc keyboardEventHandler*(manager: var Manager, event: KeyEvent) {.inline.} =
+  ## Keyboard event handler.
+  let needRedraw = manager.operate event
+  if needRedraw and not kxi.surpressRedraws:
+    kxi.redraw
+
+proc keyboardEventHandler*(manager: var Manager, event: dom.Event) {.inline.} =
+  ## Keybaord event handler.
+  # assert event of KeyboardEvent # HACK: somehow this assertion fails
+  manager.keyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
+
+proc makeKeyboardEventHandler*(manager: var Manager): (event: dom.Event) -> void {.inline.} =
+  ## Returns the keyboard event handler.
+  (event: dom.Event) => manager.keyboardEventHandler event
+
+proc makePon2Dom*(manager: var Manager, setKeyHandler = true): VNode =
+  ## Returns the DOM.
+  if setKeyHandler:
+    document.onkeydown = manager.makeKeyboardEventHandler
+
+  let simulatorDom = manager.simulator[].makePuyoSimulatorDom(setKeyHandler = false)
+  return buildHtml(tdiv(class = "columns is-mobile is-variable is-1")):
+    tdiv(class = "column is-narrow"):
+      simulatorDom
+    tdiv(class = "column is-narrow"):
+      section(class = "section"):
+        tdiv(class = "block"):
+          manager.controllerFrame
+        if manager.answers.isSome:
+          tdiv(class = "block"):
+            manager.answerFrame
+
+proc makePon2Dom*(
+  nazoEnv: NazoPuyo or Environment,
+  positions = none Positions,
+  mode = IzumiyaSimulatorMode.PLAY,
+  showCursor = false,
+  setKeyHandler = true,
+): VNode {.inline.} =
+  ## Returns the DOM.
+  var manager = nazoEnv.toManager(positions, mode, showCursor)
+  return manager.makePon2Dom setKeyHandler
+
+# ------------------------------------------------
+# Web Page Generator
+# ------------------------------------------------
+
+var
+  pageInitialized = false
+  globalManager: Manager
+
+proc isMobile: bool {.importjs:"navigator.userAgent.match(/iPhone|Android.+Mobile/)".}
+
+proc makePon2Dom(routerData: RouterData): VNode =
+  ## Returns the DOM with izumiya-format URL.
+  if pageInitialized:
+    return globalManager.makePon2Dom
+
+  pageInitialized = true
+  let query = if routerData.queryString == cstring"": "" else: ($routerData.queryString)[1 .. ^1]
+
+  var uri = initUri()
+  uri.scheme = "https"
+  uri.hostname = $IZUMIYA
+  uri.path = "/puyo-simulator/playground/index.html"
+  uri.query = query
+
+  let nazo = uri.toNazoPuyo
+  if nazo.isSome:
+    globalManager = nazo.get.nazoPuyo.toManager(nazo.get.positions, nazo.get.izumiyaMode.get, not isMobile())
+    return globalManager.makePon2Dom
+
+  let env = uri.toEnvironment
+  if env.isSome:
+    globalManager = env.get.environment.toManager(env.get.positions, env.get.izumiyaMode.get, not isMobile())
+    return globalManager.makePon2Dom
+
+  return buildHtml:
+    text "URL形式エラー"
+
+proc makeWebPage* {.inline.} =
+  ## Makes the web page.
+  makePon2Dom.setRenderer
