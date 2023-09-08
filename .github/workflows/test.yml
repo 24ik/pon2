@@ -40,6 +40,11 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - run: nimble -y install -d
+        if: runner.os == 'Linux'
+      - run: nimble -y install -d "-p:-d:avx2=false"
+        if: runner.os == 'Windows'
+      - run: nimble -y install -d -p:-d:avx2=false -p:-d:bmi2=false
+        if: runner.os == 'macOS'
 
       - run: nim c -r ./tests/makeTest.nim
         if: runner.os == 'Linux'
