@@ -160,7 +160,7 @@ func nextAnswer*(manager: var Manager) {.inline.} =
     manager.answerIdx.inc
 
   manager.updateAnswerSimulatorPositions
-  manager.answerSimulator[].reset
+  manager.answerSimulator[].reset false
 
 func prevAnswer*(manager: var Manager) {.inline.} =
   ## Shows the previous answer.
@@ -173,7 +173,7 @@ func prevAnswer*(manager: var Manager) {.inline.} =
     manager.answerIdx.dec
 
   manager.updateAnswerSimulatorPositions
-  manager.answerSimulator[].reset
+  manager.answerSimulator[].reset false
 
 # ------------------------------------------------
 # DB
