@@ -1,7 +1,8 @@
-## This module implements the solver CUI.
+## This module implements the CUI solver.
 ##
 
 import browsers
+import logging
 import options
 import strformat
 import tables
@@ -13,11 +14,13 @@ import puyo_core
 
 import ../core/solve
 
+let logger = newConsoleLogger(lvlNotice, verboseFmtStr)
+
 proc runSolver*(args: Table[string, Value]) {.inline.} =
-  ## Runs the solver CUI.
+  ## Runs the CUI solver.
   let question = ($args["<question>"]).parseUri.toNazoPuyo
   if question.isNone:
-    echo "問題のURLが不正です．"
+    logger.log lvlError, "問題のURLが不正です．"
     return
 
   if args["-B"].to_bool:

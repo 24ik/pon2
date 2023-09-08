@@ -15,12 +15,11 @@ bin           = @["pon2"]
 requires "nim ^= 2.0.0"
 
 requires "nigui ^= 0.2.7"
-requires "tiny_sqlite ^= 0.2.0"
 requires "https://github.com/izumiya-keisuke/docopt.nim#c50d709"
-requires "https://github.com/izumiya-keisuke/nazopuyo-core ^= 0.9.2"
-requires "https://github.com/izumiya-keisuke/puyo-core ^= 0.14.1"
-requires "https://github.com/izumiya-keisuke/puyo-simulator ^= 0.9.0"
-requires "https://github.com/karaxnim/karax#2371ea3"
+requires "https://github.com/izumiya-keisuke/nazopuyo-core ^= 0.10.0"
+requires "https://github.com/izumiya-keisuke/puyo-core ^= 0.15.0"
+requires "https://github.com/izumiya-keisuke/puyo-simulator ^= 0.11.5"
+requires "https://github.com/karaxnim/karax#7dd0c83"
 
 
 # Tasks

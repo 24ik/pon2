@@ -7,8 +7,8 @@
 以下のいずれかを実行する：
 
 ```shell
-pon2 permute <url> [options]
-pon2 p <url> [options]
+pon2 permute <question> [options]
+pon2 p <question> [options]
 ```
 
 例：
@@ -22,7 +22,6 @@ pon2 p https://ishikawapuyo.net/simu/pn.html?Mp6j92mS_o1q1__u03 -d
 | オプション | 説明                                     | デフォルト値 |
 | ---------- | ---------------------------------------- | ------------ |
 | -h         | ヘルプ画面を表示する．                   | しない       |
-| -i         | 出力されるURLをIPS形式にする．           | しない       |
 | -b         | 生成された問題の解をブラウザで開く．     | 開かない     |
 | -B         | 生成された問題をブラウザで開く．         | 開かない     |
 | -d         | 最終手がゾロになるのを許可する．         | 禁止         |

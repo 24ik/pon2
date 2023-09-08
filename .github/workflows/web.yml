@@ -40,7 +40,8 @@ jobs:
           mv ./src/htmldocs/pon2.html ./src/htmldocs/index.html
 
       - run: |-
-          nim js -o:www/index.js src/pon2.nim
+          nim js -d:danger -o:www/index.js src/pon2.nim
+          npx --yes google-closure-compiler --js ./www/index.js --js_output_file ./www/index.min.js
           mv ./www ./src/htmldocs/playground
 
       - uses: actions/configure-pages@v3

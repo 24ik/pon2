@@ -10,6 +10,8 @@
 /src/htmldocs/
 
 /www/index.js
+/www/index.min.js
+/www/assets
 
 /pon2
 /pon2.exe

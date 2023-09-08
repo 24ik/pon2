@@ -39,7 +39,12 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: nimble -y install --define:distribute
+      - run: nimble -y install -p:-d:danger
+        if: runner.os == 'Linux'
+      - run: nimble -y install "-p:-d:danger" "-p:-d:avx2=false"
+        if: runner.os == 'Windows'
+      - run: nimble -y install -p:-d:danger -p:-d:avx2=false -p:-d:bmi2=false
+        if: runner.os == 'macOS'
 
       - uses: actions/upload-artifact@v3
         with:
@@ -52,21 +57,9 @@ jobs:
           path: ./pon2
         if: runner.os != 'Windows'
 
-  release-resources:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: resources
-          path: ./src/resources
-
   release-publish:
     needs:
       - release-build
-      - release-resources
 
     runs-on: ubuntu-latest
 
@@ -76,9 +69,6 @@ jobs:
       - uses: actions/download-artifact@v3
 
       - run: |-
-          cp -r ./resources ./Linux
-          cp -r ./resources ./Windows
-          cp -r ./resources ./macOS
           tar -zcvf Linux.tar.gz ./Linux
           zip -rv Windows.zip ./Windows
           zip -rv macOS.zip ./macOS

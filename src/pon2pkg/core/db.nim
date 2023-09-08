@@ -11,7 +11,6 @@ import std/appdirs
 import std/dirs
 import std/files
 import std/paths
-import strformat
 import strutils
 import sugar
 import tables
@@ -89,12 +88,16 @@ proc add*(nazoPuyoDatabase: var NazoPuyoDatabase, nazo: NazoPuyo, answers: seq[P
 
 iterator find*(
   nazoPuyoDatabase: NazoPuyoDatabase,
+  rules = none seq[Rule],
   kinds = none seq[RequirementKind],
   moveCounts = none seq[Positive],
   registerTimeIntervals = none seq[tuple[start: Option[Time], stop: Option[Time]]],
 ): tuple[nazoPuyo: NazoPuyo, answers: seq[Positions]] {.inline.} =
   ## Yields all nazo puyoes that satisfy the query.
   for nazo, properties in nazoPuyoDatabase.pairs:
+    if rules.isSome and nazo.environment.field.rule notin rules.get:
+      continue
+
     if kinds.isSome and nazo.requirement.kind notin kinds.get:
       continue
 

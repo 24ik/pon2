@@ -10,10 +10,10 @@
 以下のいずれかを実行する：
 
 ```shell
-pon2 database add [options]
-pon2 database a [options]
-pon2 d add [options]
-pon2 d a [options]
+pon2 database add <question> [<answers>...] [options]
+pon2 database a <question> [<answers>...] [options]
+pon2 d add <question> [<answers>...] [options]
+pon2 d a <question> [<answers>...] [options]
 ```
 
 例：
@@ -27,10 +27,10 @@ pon2 d a https://ishikawapuyo.net/simu/pn.html?Mp6j92mS_o1q1__u03
 以下のいずれかを実行する：
 
 ```shell
-pon2 database remove [options]
-pon2 database r [options]
-pon2 d remove [options]
-pon2 d r [options]
+pon2 database remove <questions>... [options]
+pon2 database r <questions>... [options]
+pon2 d remove <questions>... [options]
+pon2 d r <questions>... [options]
 ```
 
 例：
@@ -53,7 +53,7 @@ pon2 d f [options]
 例：
 
 ```shell
-pon2 d f --fm 2 --fm 3 --fs
+pon2 d f --fr 0 --fm 2 --fm 3
 ```
 
 ## オプション（共通）
@@ -68,12 +68,18 @@ pon2 d f --fm 2 --fm 3 --fs
 
 | オプション | 説明                   |
 | ---------- | ---------------------- |
+| --fr       | 検索したいルール．     |
 | --fk       | 検索したいクリア条件． |
 | --fm       | 検索したい手数．       |
-| --fs       | 飽和問題を検索する．   |
-| --fS       | 不飽和問題を検索する． |
 
-なお，クリア条件 `--fk` は以下の表を参照して数値で指定する．
+なお，ルール `--fr` は以下の表を参照して数値で指定する．
+
+| 指定する数字 | ルール     |
+| ------------ | ---------- |
+| 0            | 通         |
+| 1            | すいちゅう |
+
+また，クリア条件 `--fk` は以下の表を参照して数値で指定する．
 
 | 指定する数字 | クリア条件の種類             |
 | ------------ | ---------------------------- |

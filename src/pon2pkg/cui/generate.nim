@@ -1,6 +1,7 @@
-## This module implements generator CUI.
+## This module implements CUI generator.
 ##
 
+import logging
 import options
 import browsers
 import strformat
@@ -14,9 +15,10 @@ import puyo_core
 import ./common
 import ../core/generate
 
-proc runGenerator*(args: Table[string, Value]) {.inline.} =
-  ## Runs the generator CUI.
+let logger = newConsoleLogger(lvlNotice, verboseFmtStr)
 
+proc runGenerator*(args: Table[string, Value]) {.inline.} =
+  ## Runs the CUI generator.
   var rng = if args["-s"].kind == vkNone: initRand() else: args["-s"].parseNatural.get.initRand
 
   # requirement
@@ -29,7 +31,7 @@ proc runGenerator*(args: Table[string, Value]) {.inline.} =
 
   # heights
   if ($args["-H"]).len != 6:
-    echo "-Hオプションには長さ6の文字列のみ指定できます．"
+    logger.log lvlError, "-Hオプションには長さ6の文字列のみ指定できます．"
     return
   var heights: array[Column, Option[Natural]]
   for i, c in ($args["-H"]):
@@ -37,25 +39,23 @@ proc runGenerator*(args: Table[string, Value]) {.inline.} =
 
   # generate
   for nazoIdx in 0 ..< args["-n"].parseNatural.get:
-    let
-      nazo = generate(
-        (rng.rand int.low .. int.high),
-        args["-r"].parseRule.get,
-        args["-m"].parseNatural.get,
-        req,
-        args["-c"].parseNatural.get,
-        heights,
-        (color: args["--nc"].parseNatural.get, garbage: args["--ng"].parseNatural.get),
-        (
-          total: args["--tt"].parseNatural true,
-          vertical: args["--tv"].parseNatural true,
-          horizontal: args["--th"].parseNatural true,
-          lShape: args["--tl"].parseNatural true,
-        ),
-        not args["-D"].to_bool,
-        args["-d"].to_bool)
+    let nazo = generate(
+      (rng.rand int.low .. int.high),
+      args["-r"].parseRule.get,
+      args["-m"].parseNatural.get,
+      req,
+      args["-c"].parseNatural.get,
+      heights,
+      (color: args["--nc"].parseNatural.get, garbage: args["--ng"].parseNatural.get),
+      (
+        total: args["--tt"].parseNatural true,
+        vertical: args["--tv"].parseNatural true,
+        horizontal: args["--th"].parseNatural true,
+        lShape: args["--tl"].parseNatural true),
+      not args["-D"].to_bool,
+      args["-d"].to_bool)
     if nazo.isNone:
-      echo "入力された条件を満たすなぞぷよは存在しません．"
+      logger.log lvlError, "入力された条件を満たすなぞぷよは存在しません．"
       return
 
     let

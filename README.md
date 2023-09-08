@@ -2,11 +2,14 @@
 
 Pon!通は，なぞぷよに関する様々な機能を提供するツールである．
 以下の機能が提供されている．
-- ソルバー：なぞぷよを解く．[【ブラウザで試す】](https://izumiya-keisuke.github.io/pon2/playground)
-- ジェネレータ：なぞぷよを生成する．
+- GUIアプリケーション：なぞぷよを編集したり自分でプレイしたりする．
+    - [【ブラウザで試す】](https://izumiya-keisuke.github.io/pon2/playground/index.html?kind=n&mode=e&field=t-&pairs&req-kind=0&req-color=0)
+- ソルバー：なぞぷよを解く．
+- ジェネレーター：なぞぷよを生成する．
 - ツモ探索：なぞぷよのツモを入れ替えて一意解問題を生成する．
 - データベース：なぞぷよを管理する．
-- GUIアプリケーション：なぞぷよを編集したり自分でプレイしたりする．
+
+GUIアプリケーションのキーボードショートカットは[ドキュメント](./docs/gui.md)を参照．
 
 現在のところ以下の機能には対応していない．
 - 壁・固ぷよ・鉄ぷよ
@@ -19,14 +22,11 @@ Pon!通は，なぞぷよに関する様々な機能を提供するツールで�
 
 [最新リリース](https://github.com/izumiya-keisuke/pon2/releases/latest)の「Assets」から，使用するOSに応じてダウンロードできる．
 
-#### 注意点
-
-- Windowsでは，Microsoft Defenderのセキュリティチェックに引っかかってダウンロードに失敗する場合がある．失敗したら，[対処法の記事](https://www.gigafree.net/faq/Windows-Security-Detection/)等を参考にダウンロードを再試行することで改善すると思われる．
-- 技術的な制約により，GUIアプリケーションは実行ファイルが入ったディレクトリで実行する必要がある．
+**注意：** 現在，ビルド済バイナリはmacOSでは動作しないかもしれない．
+これは[GTK+3](https://docs.gtk.org/gtk3/)を利用している[NiGui](https://github.com/simonkrauter/NiGui)の制約によるものである．
+手動でのインストールは可能であるはずだが，試していない．
 
 ### ソースからビルド
-
-[Nimをインストール](https://nim-lang.org/install.html)した後，以下のコマンドを実行する．
 
 ```shell
 nimble install https://github.com/izumiya-keisuke/pon2
@@ -34,22 +34,24 @@ nimble install https://github.com/izumiya-keisuke/pon2
 
 ## 使い方
 
-各種ドキュメントは以下を参照．
-- [ソルバー](/doc/solve.rst)
-- [ジェネレーター](/doc/generate.rst)
-- [ツモ探索](/doc/permute.rst)
-- [データベース](/doc/db.rst)
-- [GUIアプリケーション](/doc/gui.rst)
+以下のドキュメントを参照．
+- [GUIアプリケーション](./doc/gui.md)
+- [ソルバー](./doc/solve.md)
+- [ジェネレーター](./doc/generate.md)
+- [ツモ探索](./doc/permute.md)
+- [データベース](./doc/db.md)
 
 ## 開発者向け
 
-このモジュールは[puyo-core](https://github.com/izumiya-keisuke/puyo-core)と
-[nazopuyo-core](https://github.com/izumiya-keisuke/nazopuyo-core)を利用しているので，そちらも参照のこと．
+このモジュールは以下を使用しているので，そちらも参照のこと．
+- [puyo-core](https://github.com/izumiya-keisuke/puyo-core)
+- [nazopuyo-core](https://github.com/izumiya-keisuke/nazopuyo-core)
+- [puyo-simulator](https://github.com/izumiya-keisuke/puyo-simulator)
 
 ### APIの利用
 
 `import pon2` でこのモジュールが提供する全てのAPIにアクセスできる．
-詳しくは[APIドキュメント](https://izumiya-keisuke.github.io/pon2)を参照．
+詳しくは[ドキュメント](https://izumiya-keisuke.github.io/pon2)を参照．
 
 ### テスト
 
@@ -78,7 +80,9 @@ nim c -r benchmark/main.nim
 プロジェクトルートで以下を実行する：
 
 ```shell
-nim js -o:www/index.js src/pon2.nim
+nim js -d:danger -o:www/index.js src/pon2.nim
+npx --yes google-closure-compiler --js www/index.js --js_output_file www/index.min.js
+cp -r assets www
 ```
 
 その後，`www` ディレクトリ以下の全ファイルを目的のディレクトリにコピーする．
@@ -90,4 +94,4 @@ nim js -o:www/index.js src/pon2.nim
 ## ライセンス
 
 Apache-2.0，MPL-2.0のいずれかを選択する．
-詳しくは[NOTICE](/NOTICE)を参照．
+詳しくは[NOTICE](./NOTICE)を参照．

@@ -1,7 +1,8 @@
-## This module implements the permuter CUI.
+## This module implements the CUI permuter.
 ##
 
 import browsers
+import logging
 import options
 import sequtils
 import strformat
@@ -15,16 +16,17 @@ import puyo_core
 import ./common
 import ../core/permute
 
+let logger = newConsoleLogger(lvlNotice, verboseFmtStr)
+
 # ------------------------------------------------
 # Entry Point
 # ------------------------------------------------
 
 proc runPermuter*(args: Table[string, Value]) {.inline.} =
-  ## Runs the permuter CUI.
+  ## Runs the CUI permuter.
   let question = ($args["<question>"]).parseUri.toNazoPuyo
   if question.isNone:
-    echo "問題のURLが不正です．"
-    return
+    logger.log lvlError, "問題のURLが不正です．"
 
   var
     idx = 1
