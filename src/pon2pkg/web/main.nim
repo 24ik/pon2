@@ -16,9 +16,21 @@ import ./answer
 import ./controller
 import ../manager
 
+export solve
+
 # ------------------------------------------------
 # API
 # ------------------------------------------------
+
+proc operate*(manager: var Manager, event: KeyEvent): bool {.inline.} =
+  ## Handler for keyboard input.
+  ## Returns `true` if any action is executed.
+  if not manager.focusAnswer and manager.simulator[].mode == IzumiyaSimulatorMode.EDIT:
+    if event == ("Enter", false, false, false, false):
+      manager.solve
+      return true
+
+  return manager.operateCommon event
 
 proc keyboardEventHandler*(manager: var Manager, event: KeyEvent) {.inline.} =
   ## Keyboard event handler.
@@ -71,7 +83,7 @@ var
   pageInitialized = false
   globalManager: Manager
 
-proc isMobile: bool {.importjs:"navigator.userAgent.match(/iPhone|Android.+Mobile/)".}
+proc isMobile: bool {.importjs: "navigator.userAgent.match(/iPhone|Android.+Mobile/)".}
 
 proc makePon2Dom(routerData: RouterData): VNode =
   ## Returns the DOM with izumiya-format URL.

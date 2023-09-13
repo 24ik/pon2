@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.5.3"
+version       = "0.5.4"
 author        = "Keisuke Izumiya"
 description   = "Nazo Puyo Tool"
 license       = "Apache-2.0 OR MPL-2.0"
@@ -16,9 +16,9 @@ requires "nim ^= 2.0.0"
 
 requires "nigui ^= 0.2.7"
 requires "https://github.com/izumiya-keisuke/docopt.nim#c50d709"
-requires "https://github.com/izumiya-keisuke/nazopuyo-core ^= 0.10.0"
-requires "https://github.com/izumiya-keisuke/puyo-core ^= 0.15.0"
-requires "https://github.com/izumiya-keisuke/puyo-simulator ^= 0.11.5"
+requires "https://github.com/izumiya-keisuke/nazopuyo-core ^= 0.10.1"
+requires "https://github.com/izumiya-keisuke/puyo-core ^= 0.15.1"
+requires "https://github.com/izumiya-keisuke/puyo-simulator ^= 0.11.6"
 requires "https://github.com/karaxnim/karax#7dd0c83"
 
 
@@ -27,17 +27,42 @@ requires "https://github.com/karaxnim/karax#7dd0c83"
 import os
 import strformat
 
-task test, "Test":
-  let mainFile = "./src/pon2.nim".unixToNativePath
-  exec &"nim doc --project --index {mainFile}"
-  rmDir "./src/htmldocs".unixToNativePath
+task test, "Run Tests":
+  const
+    avx2 {.booldefine.} = true
+    bmi2 {.booldefine.} = true
 
-  let defineOptions = case buildOS
-  of "linux": ""
-  of "windows": "-d:avx2=false"
-  of "macosx": "-d:avx2=false -d:bmi2=false"
-  else: ""
-  exec &"nimble -y build {defineOptions}"
+  exec &"nimble -y install -d \"-p:-d:avx2={avx2}\" \"-p:-d:bmi2={bmi2}\""
+
+  exec "nim doc --project --index src/pon2.nim"
+  rmDir "src/htmldocs"
+
+  exec &"nimble -y build -d:avx2={avx2} -d:bmi2={bmi2}"
 
   if buildOS != "windows": # HACK: now we cannot pass the test on Windows due to Nim's bug
+    exec &"nim c -r -d:avx2={avx2} -d:bmi2={bmi2} tests/makeTest.nim"
     exec "testament all"
+
+task doc, "Make Documentation":
+  const
+    avx2 {.booldefine.} = true
+    bmi2 {.booldefine.} = true
+
+  exec &"nimble -y install -d \"-p:-d:avx2={avx2}\" \"-p:-d:bmi2={bmi2}\""
+
+  exec "nim doc --project --index src/pon2.nim"
+
+task web, "Make Web Page":
+  const
+    avx2 {.booldefine.} = true
+    bmi2 {.booldefine.} = true
+    danger {.booldefine.} = true
+
+  exec &"nimble -y install -d \"-p:-d:avx2={avx2}\" \"-p:-d:bmi2={bmi2}\""
+
+  exec &"nim js -d:danger={danger} -o:www/index.js src/pon2.nim"
+  exec "npx --yes google-closure-compiler -W QUIET --js www/index.js --js_output_file www/index.min.js"
+  exec &"nim js -d:danger={danger} -o:www/worker.js src/pon2pkg/web/worker.nim"
+  exec "npx --yes google-closure-compiler -W QUIET --js www/worker.js --js_output_file www/worker.min.js"
+
+  exec "cp -r assets www"

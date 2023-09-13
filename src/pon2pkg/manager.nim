@@ -10,7 +10,6 @@ import nazopuyo_core
 import puyo_core
 import puyo_simulator
 
-import ./core/solve
 when not defined js:
   import ./core/db
 
@@ -116,34 +115,18 @@ func toggleFocus*(manager: var Manager) {.inline.} =
 # Solve
 # ------------------------------------------------
 
-func updateAnswerSimulatorPositions(manager: var Manager) {.inline.} =
-  ## Updates the positions of answer simulator.
-  if manager.answers.isSome and manager.answers.get.len > 0:
-    manager.answerSimulator[].positions = manager.answers.get[manager.answerIdx]
+func updateAnswerSimulator*(manager: var Manager, nazo: NazoPuyo) {.inline.} =
+  ## Updates the answer simulator.
+  ## This procedure is assumed to be called after `manager.answers` is set.
+  assert manager.answers.isSome
 
-proc solve*(manager: var Manager) {.inline.} =
-  ## Solves the nazo puyo and write answers.
-  # TODO: make async
-  if manager.simulator[].requirement.isNone or manager.solving:
-    return
-
-  manager.solving = true
-
-  let nazo = manager.simulator[].nazoPuyo.get
-  manager.answers = some nazo.solve
-  if manager.answers.get.len == 0:
-    manager.answerSimulator[].environment =
-      makeEnvironment(colorCount = 5, setPairs = false, rule = nazo.environment.field.rule)
-    manager.focusAnswer = false
-  else:
-    manager.answerSimulator[].environment = nazo.environment
-    manager.focusAnswer = true
-    manager.updateAnswerSimulatorPositions
-
-  manager.answerSimulator[].originalEnvironment = manager.answerSimulator[].environment
+  manager.focusAnswer = manager.answers.get.len > 0
+  manager.answerSimulator[].environment = nazo.environment
+  manager.answerSimulator[].originalEnvironment = nazo.environment
   manager.answerSimulator[].requirement = some nazo.requirement
+  if manager.answers.get.len > 0:
+    manager.answerSimulator[].positions = manager.answers.get[manager.answerIdx]
   manager.answerIdx = 0
-  manager.solving = false
 
 # ------------------------------------------------
 # Answer - Prev / Next
@@ -159,7 +142,7 @@ func nextAnswer*(manager: var Manager) {.inline.} =
   else:
     manager.answerIdx.inc
 
-  manager.updateAnswerSimulatorPositions
+  manager.answerSimulator[].positions = manager.answers.get[manager.answerIdx]
   manager.answerSimulator[].reset false
 
 func prevAnswer*(manager: var Manager) {.inline.} =
@@ -172,7 +155,7 @@ func prevAnswer*(manager: var Manager) {.inline.} =
   else:
     manager.answerIdx.dec
 
-  manager.updateAnswerSimulatorPositions
+  manager.answerSimulator[].positions = manager.answers.get[manager.answerIdx]
   manager.answerSimulator[].reset false
 
 # ------------------------------------------------
@@ -209,9 +192,11 @@ func toUri*(manager: Manager): Uri {.inline.} =
 # Keyboard Operation
 # ------------------------------------------------
 
-proc operate*(manager: var Manager, event: KeyEvent): bool {.inline.} =
+proc operateCommon*(manager: var Manager, event: KeyEvent): bool {.inline.} =
   ## Handler for keyboard input.
   ## Returns `true` if any action is executed.
+  ##
+  ## NOTE: This procedure does not handle backend-specific operations.
   if event == ("KeyQ", true, false, false, false):
     manager.toggleFocus
     return true
@@ -229,11 +214,6 @@ proc operate*(manager: var Manager, event: KeyEvent): bool {.inline.} =
   else:
     case manager.simulator[].mode
     of IzumiyaSimulatorMode.EDIT:
-      # solve
-      if event == ("Enter", false, false, false, false):
-        manager.solve
-        return true
-
       # DB
       when not defined js:
         if event == ("KeyR", false, false, false, false):

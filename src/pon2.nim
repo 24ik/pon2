@@ -22,14 +22,13 @@ export
   manager.Manager,
   manager.toManager,
   manager.toggleFocus,
-  manager.solve,
+  manager.updateAnswerSimulator,
   manager.nextAnswer,
-  manager.prevAnswer,
-  manager.operate
+  manager.prevAnswer
 
 when defined js:
   import ./pon2pkg/web/main
-  export main.keyboardEventHandler, main.makePon2Dom
+  export main.solve, main.operate, main.keyboardEventHandler, main.makePon2Dom
 
   when isMainModule:
     makeWebPage()
