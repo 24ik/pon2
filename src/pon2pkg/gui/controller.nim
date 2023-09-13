@@ -1,11 +1,16 @@
 ## This module implements the controller control.
 ##
 
+import options
 import sugar
+import threadpool
 
+import nazopuyo_core
 import nigui
+import puyo_simulator
 
 import ./common
+import ../core/solve
 import ../manager
 
 type ControllerControl* = ref object of LayoutContainer
@@ -22,21 +27,42 @@ proc makeToggleHandler(control: ControllerControl): (event: ClickEvent) -> void 
   # NOTE: inline handler does not work due to specifications
   (event: ClickEvent) => control.toggleHandler event
 
-proc solveHandler(control: ControllerControl, event: ClickEvent) {.inline.} =
+var globalControl: ControllerControl = nil # FIXME: remove global control
+
+proc solveWrite(nazo: NazoPuyo) {.inline.} =
+  ## Solves the nazo puyo and write answers.
+  let answers = nazo.solve
+  {.gcsafe.}:
+    app.queueMain () => (
+      globalControl.manager[].answers = some answers;
+      globalControl.manager[].updateAnswerSimulator nazo;
+
+      globalControl.manager[].solving = false;
+
+      globalControl.parentWindow.control.forceRedraw)
+
+proc solve*(manager: var Manager) {.inline.} =
   ## Solves the nazo puyo.
-  # TODO: async
-  control.manager[].solve
+  if manager.solving or manager.simulator[].requirement.isNone:
+    return
+
+  manager.solving = true
+
+  spawn manager.simulator[].nazoPuyo.get.solveWrite
 
 proc makeSolveHandler(control: ControllerControl): (event: ClickEvent) -> void =
   ## Returns the solve handler.
   # NOTE: inline handler does not work due to specifications
-  (event: ClickEvent) => control.solveHandler event
+  (event: ClickEvent) => control.manager[].solve
 
 proc newControllerControl*(manager: ref Manager): ControllerControl {.inline.} =
   ## Returns a new controller control.
   result = new ControllerControl
   result.init
   result.layout = Layout_Horizontal
+
+  doAssert globalControl.isNil
+  globalControl = result
 
   result.manager = manager
 

@@ -19,6 +19,8 @@ import ./answer
 import ./controller
 import ../manager
 
+export solve
+
 type
   Pon2Control* = ref object of LayoutContainer
     ## Root control of application window.
@@ -33,6 +35,16 @@ let logger = newConsoleLogger(lvlInfo, verboseFmtStr)
 # ------------------------------------------------
 # API
 # ------------------------------------------------
+
+proc operate*(manager: var Manager, event: KeyEvent): bool {.inline.} =
+  ## Handler for keyboard input.
+  ## Returns `true` if any action is executed.
+  if not manager.focusAnswer and manager.simulator[].mode == IzumiyaSimulatorMode.EDIT:
+    if event == ("Enter", false, false, false, false):
+      manager.solve
+      return true
+
+  return manager.operateCommon event
 
 proc keyboardEventHandler*(window: Pon2Window, event: KeyboardEvent, keys = downKeys()) {.inline.} =
   ## Keyboard event handler.

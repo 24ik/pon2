@@ -34,7 +34,14 @@ when defined js:
     makeWebPage()
 else:
   import ./pon2pkg/gui/main
-  export main.Pon2Control, main.Pon2Window, main.keyboardEventHandler, main.makePon2Control, main.makePon2Window
+  export
+    main.solve,
+    main.Pon2Control,
+    main.Pon2Window,
+    main.operate,
+    main.keyboardEventHandler,
+    main.makePon2Control,
+    main.makePon2Window
 
   when isMainModule:
     import docopt
