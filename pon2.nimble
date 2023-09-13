@@ -50,7 +50,7 @@ task documentation, "Make Documentation":
 
   exec &"nimble -y install -d \"-p:-d:avx2={avx2}\" \"-p:-d:bmi2={bmi2}\""
 
-  exec "nim doc -d:avx2={avx2} -d:bmi2={bmi2} --project --index src/pon2.nim"
+  exec &"nim doc -d:avx2={avx2} -d:bmi2={bmi2} --project --index src/pon2.nim"
 
 task web, "Make Web Page":
   const
