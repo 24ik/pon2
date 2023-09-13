@@ -34,7 +34,7 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: nimble doc
+      - run: nimble documentation
 
       - run: |-
           nimble web

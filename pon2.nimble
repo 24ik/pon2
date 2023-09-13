@@ -34,7 +34,7 @@ task test, "Run Tests":
 
   exec &"nimble -y install -d \"-p:-d:avx2={avx2}\" \"-p:-d:bmi2={bmi2}\""
 
-  exec "nim doc --project --index src/pon2.nim"
+  exec &"nimble -d:avx2={avx2} -d:bmi2={bmi2} documentation"
   rmDir "src/htmldocs"
 
   exec &"nimble -y build -d:avx2={avx2} -d:bmi2={bmi2}"
@@ -43,14 +43,14 @@ task test, "Run Tests":
     exec &"nim c -r -d:avx2={avx2} -d:bmi2={bmi2} tests/makeTest.nim"
     exec "testament all"
 
-task doc, "Make Documentation":
+task documentation, "Make Documentation":
   const
     avx2 {.booldefine.} = true
     bmi2 {.booldefine.} = true
 
   exec &"nimble -y install -d \"-p:-d:avx2={avx2}\" \"-p:-d:bmi2={bmi2}\""
 
-  exec "nim doc --project --index src/pon2.nim"
+  exec "nim doc -d:avx2={avx2} -d:bmi2={bmi2} --project --index src/pon2.nim"
 
 task web, "Make Web Page":
   const
