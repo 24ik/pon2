@@ -55,7 +55,7 @@ nimble install https://github.com/izumiya-keisuke/pon2 "-p:-d:danger"
 ### テスト
 
 ```shell
-nimble -d:avx2=<bool> -d:bmi2=<bool> test
+nimble test -d:avx2=<bool> -d:bmi2=<bool>
 ```
 
 ### ベンチマーク
@@ -75,7 +75,7 @@ nim c -r benchmark/main.nim
 以下コマンドで `www` ディレクトリに必要なファイルが生成される．
 
 ```shell
-nimble web
+nimble -d:avx2=<bool> -d:bmi2=<bool> web
 ```
 
 ### 開発への協力
