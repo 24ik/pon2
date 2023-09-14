@@ -19,6 +19,8 @@ import ./answer
 import ./controller
 import ../manager
 
+export solve
+
 type
   Pon2Control* = ref object of LayoutContainer
     ## Root control of application window.
@@ -28,11 +30,21 @@ type
     ## Application window.
     manager*: ref Manager
 
-let logger = newConsoleLogger(lvlInfo, verboseFmtStr)
+let logger = newConsoleLogger(lvlNotice, verboseFmtStr)
 
 # ------------------------------------------------
 # API
 # ------------------------------------------------
+
+proc operate*(manager: var Manager, event: KeyEvent): bool {.inline.} =
+  ## Handler for keyboard input.
+  ## Returns `true` if any action is executed.
+  if not manager.focusAnswer and manager.simulator[].mode == IzumiyaSimulatorMode.EDIT:
+    if event == ("Enter", false, false, false, false):
+      manager.solve
+      return true
+
+  return manager.operateCommon event
 
 proc keyboardEventHandler*(window: Pon2Window, event: KeyboardEvent, keys = downKeys()) {.inline.} =
   ## Keyboard event handler.
@@ -84,7 +96,7 @@ proc makePon2Window*(manager: ref Manager, title = "Pon!通", setKeyHandler = tr
   let rootControl = manager.makePon2Control
   result.add rootControl
 
-  when defined windows:
+  when defined(windows):
     # HACK: somehow this adjustment is needed on Windows
     # TODO: better implementation
     result.width = (rootControl.naturalWidth.float * 1.1).int

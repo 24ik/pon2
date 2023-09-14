@@ -182,7 +182,10 @@ func generateEnvironment(
     idx = 0
   for col in Column.low .. Column.high:
     for i in 0 ..< colCounts.get[col]:
-      fieldArray[Row.high.pred i][col] = puyoes[idx]
+      let row = case rule
+      of TSU: Row.high.pred i
+      of WATER: WaterRow.low.Row.succ i
+      fieldArray[row][col] = puyoes[idx]
       idx.inc
 
   return some toEnvironment(fieldArray, pairsArray, rule)
@@ -267,7 +270,7 @@ proc generate*(
   let height = case rule
   of TSU: Height
   of WATER: WaterHeight
-  if puyoCounts.color + puyoCounts.garbage - 2 * moveCount notin 0 .. height * Width - 2:
+  if puyoCounts.color + puyoCounts.garbage - 2 * moveCount notin 0 .. height * Width:
     return
   if puyoCounts.color div 4 < colorCount:
     return

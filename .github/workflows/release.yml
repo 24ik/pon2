@@ -41,7 +41,7 @@ jobs:
 
       - run: nimble -y install -p:-d:danger
         if: runner.os == 'Linux'
-      - run: nimble -y install "-p:-d:danger" "-p:-d:avx2=false"
+      - run: nimble -y install -p:"-d:danger" -p:"-d:avx2=false"
         if: runner.os == 'Windows'
       - run: nimble -y install -p:-d:danger -p:-d:avx2=false -p:-d:bmi2=false
         if: runner.os == 'macOS'

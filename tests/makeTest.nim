@@ -5,8 +5,8 @@ import strutils
 import sugar
 
 const
-  bmi2 {.booldefine.} = true
   avx2 {.booldefine.} = true
+  bmi2 {.booldefine.} = true
 
 when isMainModule:
   const
@@ -32,7 +32,7 @@ main()
   let
     matrixSeq = collect:
       for thread in ThreadSeq:
-         &"-d:bmi2={bmi2} -d:avx2={avx2} {thread}"
+         &"-d:avx2={avx2} -d:bmi2={bmi2} {thread}"
     fileContent = FileContentTemplate.replace(Matrix, matrixSeq.join "; ")
 
   for kind, path in currentSourcePath().Path.parentDir.walkDir:

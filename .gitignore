@@ -9,9 +9,11 @@
 
 /src/htmldocs/
 
+/www/assets/
 /www/index.js
 /www/index.min.js
-/www/assets
+/www/worker.js
+/www/worker.min.js
 
 /pon2
 /pon2.exe

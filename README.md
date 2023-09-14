@@ -2,8 +2,7 @@
 
 Pon!通は，なぞぷよに関する様々な機能を提供するツールである．
 以下の機能が提供されている．
-- GUIアプリケーション：なぞぷよを編集したり自分でプレイしたりする．
-    - [【ブラウザで試す】](https://izumiya-keisuke.github.io/pon2/playground/index.html?kind=n&mode=e&field=t-&pairs&req-kind=0&req-color=0)
+- GUIアプリケーション：なぞぷよを編集したり自分でプレイしたりする．[【ブラウザで試す】][1]
 - ソルバー：なぞぷよを解く．
 - ジェネレーター：なぞぷよを生成する．
 - ツモ探索：なぞぷよのツモを入れ替えて一意解問題を生成する．
@@ -29,7 +28,7 @@ GUIアプリケーションのキーボードショートカットは[ドキュ�
 ### ソースからビルド
 
 ```shell
-nimble install https://github.com/izumiya-keisuke/pon2
+nimble install https://github.com/izumiya-keisuke/pon2 -p:"-d:danger" -p:"-d:avx2=<bool>" -p:-"-d:bmi2=<bool>"
 ```
 
 ## 使い方
@@ -51,22 +50,18 @@ nimble install https://github.com/izumiya-keisuke/pon2
 ### APIの利用
 
 `import pon2` でこのモジュールが提供する全てのAPIにアクセスできる．
-詳しくは[ドキュメント](https://izumiya-keisuke.github.io/pon2)を参照．
+詳しくは[ドキュメント](https://izumiya-keisuke.github.io/pon2/pon2.html)を参照．
 
 ### テスト
 
 ```shell
-nim c -r tests/makeTest.nim
-nimble test
+nimble -d:avx2=<bool> -d:bmi2=<bool> test
 ```
-
-`tests/makeTest.nim` をコンパイルする際，`-d:bmi2=<bool>` や `-d:avx2=<bool>` を
-オプションとして与えることで，使用する命令セットを指定することができる．
 
 ### ベンチマーク
 
 ```shell
-nim c -r benchmark/main.nim
+nim c -r -d:avx2=<bool> -d:bmi2=<bool> benchmark/main.nim
 ```
 
 ### テストの書き方
@@ -77,15 +72,11 @@ nim c -r benchmark/main.nim
 
 ### 静的ウェブサイト作成
 
-プロジェクトルートで以下を実行する：
+以下コマンドで `www` ディレクトリに必要なファイルが生成される．
 
 ```shell
-nim js -d:danger -o:www/index.js src/pon2.nim
-npx --yes google-closure-compiler --js www/index.js --js_output_file www/index.min.js
-cp -r assets www
+nimble -d:avx2=<bool> -d:bmi2=<bool> web
 ```
-
-その後，`www` ディレクトリ以下の全ファイルを目的のディレクトリにコピーする．
 
 ### 開発への協力
 
@@ -95,3 +86,5 @@ cp -r assets www
 
 Apache-2.0，MPL-2.0のいずれかを選択する．
 詳しくは[NOTICE](./NOTICE)を参照．
+
+[1]: https://izumiya-keisuke.github.io/pon2/playground/index.html?kind=n&mode=e&field=t-&pairs&req-kind=0&req-color=0
