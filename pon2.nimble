@@ -17,7 +17,7 @@ requires "nim ^= 2.0.0"
 requires "nigui ^= 0.2.7"
 requires "https://github.com/hoijui/docopt.nim#3e8130e"
 requires "https://github.com/izumiya-keisuke/nazopuyo-core ^= 0.10.2"
-requires "https://github.com/izumiya-keisuke/puyo-core ^= 0.15.3"
+requires "https://github.com/izumiya-keisuke/puyo-core ^= 0.15.4"
 requires "https://github.com/izumiya-keisuke/puyo-simulator ^= 0.11.7"
 requires "https://github.com/karaxnim/karax#7dd0c83"
 
