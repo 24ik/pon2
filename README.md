@@ -28,7 +28,7 @@ GUIアプリケーションのキーボードショートカットは[ドキュ�
 ### ソースからビルド
 
 ```shell
-nimble install https://github.com/izumiya-keisuke/pon2 "-p:-d:danger"
+nimble install https://github.com/izumiya-keisuke/pon2 -p:"-d:danger" -p:"-d:avx2=<bool>" -p:-"-d:bmi2=<bool>"
 ```
 
 ## 使い方
@@ -55,13 +55,13 @@ nimble install https://github.com/izumiya-keisuke/pon2 "-p:-d:danger"
 ### テスト
 
 ```shell
-nimble test -d:avx2=<bool> -d:bmi2=<bool>
+nimble -d:avx2=<bool> -d:bmi2=<bool> test
 ```
 
 ### ベンチマーク
 
 ```shell
-nim c -r benchmark/main.nim
+nim c -r -d:avx2=<bool> -d:bmi2=<bool> benchmark/main.nim
 ```
 
 ### テストの書き方

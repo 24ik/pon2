@@ -39,7 +39,6 @@ jobs:
       - run: |-
           nimble web
           mv www src/htmldocs/playground
-          mv assets src/htmldocs/playground
 
       - uses: actions/configure-pages@v3
       - uses: actions/upload-pages-artifact@v1
