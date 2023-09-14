@@ -26,7 +26,7 @@ export
   manager.nextAnswer,
   manager.prevAnswer
 
-when defined js:
+when defined(js):
   import ./pon2pkg/web/main
   export main.solve, main.operate, main.keyboardEventHandler, main.makePon2Dom
 

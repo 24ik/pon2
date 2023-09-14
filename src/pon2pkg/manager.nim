@@ -3,17 +3,17 @@
 
 import options
 import uri
-when not defined js:
+when not defined(js):
   import tables
 
 import nazopuyo_core
 import puyo_core
 import puyo_simulator
 
-when not defined js:
+when not defined(js):
   import ./core/db
 
-when defined js:
+when defined(js):
   type Manager* = tuple
     ## Nazo Puyo Manager.
     simulator: ref Simulator
@@ -42,7 +42,7 @@ else:
 # Constructor
 # ------------------------------------------------
 
-when defined js:
+when defined(js):
   func toManager*(env: Environment, positions = none Positions, mode = PLAY, showCursor = true): Manager {.inline.} =
     ## Returns the manager.
     result.simulator = new Simulator
@@ -162,7 +162,7 @@ func prevAnswer*(manager: var Manager) {.inline.} =
 # DB
 # ------------------------------------------------
 
-when not defined js:
+when not defined(js):
   proc saveToDb*(manager: var Manager) {.inline.} =
     ## Saves the nazo puyo and answers to the database.
     if manager.simulator[].requirement.isNone:
@@ -215,7 +215,7 @@ proc operateCommon*(manager: var Manager, event: KeyEvent): bool {.inline.} =
     case manager.simulator[].mode
     of IzumiyaSimulatorMode.EDIT:
       # DB
-      when not defined js:
+      when not defined(js):
         if event == ("KeyR", false, false, false, false):
           manager.saveToDb
           return true
