@@ -6,7 +6,7 @@
 ## - [Generate](./pon2pkg/core/generate.html)
 ## - [Permute](./pon2pkg/core/permute.html)
 ## - [Solve](./pon2pkg/core/solve.html)
-## - [Manager](./pon2pkg/core/manager.html)
+## - [Editor Manager](./pon2pkg/core/manager/editor.html)
 ## - [GUI Editor](./pon2pkg/gui/editor/main.html)
 ## - Web Editor
 ##
