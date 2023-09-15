@@ -15,7 +15,7 @@ when not defined(js):
 
 when defined(js):
   type EditorManager* = tuple
-    ## Nazo Puyo Manager for the editor.
+    ## Nazo Puyo manager for the editor.
     simulator: ref Simulator
     answerSimulator: ref Simulator
 
@@ -26,7 +26,7 @@ when defined(js):
     focusAnswer: bool
 else:
   type EditorManager* = tuple
-    ## Nazo Puyo Manager for the editor.
+    ## Nazo Puyo manager for the editor.
     simulator: ref Simulator
     answerSimulator: ref Simulator
 
