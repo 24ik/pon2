@@ -470,5 +470,6 @@ proc inspectSolve*(nazo: NazoPuyo, earlyStopping = false, showProgress = false):
           bar.inc
           bar.update SuruBarUpdateMs * 1000 * 1000
 
-  if showProgress:
-    bar.finish
+  when not defined(js):
+    if showProgress:
+      bar.finish
