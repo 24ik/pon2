@@ -1,4 +1,4 @@
-## This module implements the entry point for making a web page.
+## This module implements the entry point for making a editor web page.
 ##
 
 import dom
@@ -6,7 +6,7 @@ import sugar
 import options
 import uri
 
-import karax / [karax, karaxdsl, vdom, kdom]
+import karax / [karax, karaxdsl, kdom, vdom]
 
 import nazopuyo_core
 import puyo_core
@@ -14,7 +14,7 @@ import puyo_simulator
 
 import ./answer
 import ./controller
-import ../../manager
+import ../../core/manager
 
 export solve
 
@@ -47,8 +47,8 @@ proc makeKeyboardEventHandler*(manager: var Manager): (event: dom.Event) -> void
   ## Returns the keyboard event handler.
   (event: dom.Event) => manager.keyboardEventHandler event
 
-proc makePon2Dom*(manager: var Manager, setKeyHandler = true): VNode =
-  ## Returns the DOM.
+proc makePon2EditorDom*(manager: var Manager, setKeyHandler = true): VNode {.inline.} =
+  ## Returns the DOM for the editor.
   if setKeyHandler:
     document.onkeydown = manager.makeKeyboardEventHandler
 
@@ -64,16 +64,16 @@ proc makePon2Dom*(manager: var Manager, setKeyHandler = true): VNode =
           tdiv(class = "block"):
             manager.answerFrame
 
-proc makePon2Dom*(
+proc makePon2EditorDom*(
   nazoEnv: NazoPuyo or Environment,
   positions = none Positions,
   mode = IzumiyaSimulatorMode.PLAY,
   showCursor = false,
   setKeyHandler = true,
 ): VNode {.inline.} =
-  ## Returns the DOM.
+  ## Returns the DOM for the editor.
   var manager = nazoEnv.toManager(positions, mode, showCursor)
-  return manager.makePon2Dom setKeyHandler
+  return manager.makePon2EditorDom setKeyHandler
 
 # ------------------------------------------------
 # Web Page Generator
@@ -85,10 +85,10 @@ var
 
 proc isMobile: bool {.importjs: "navigator.userAgent.match(/iPhone|Android.+Mobile/)".}
 
-proc makePon2Dom(routerData: RouterData): VNode =
-  ## Returns the DOM with izumiya-format URL.
+proc makePon2EditorDom(routerData: RouterData): VNode =
+  ## Returns the DOM for the editor.
   if pageInitialized:
-    return globalManager.makePon2Dom
+    return globalManager.makePon2EditorDom
 
   pageInitialized = true
   let query = if routerData.queryString == cstring"": "" else: ($routerData.queryString)[1 .. ^1]
@@ -102,16 +102,16 @@ proc makePon2Dom(routerData: RouterData): VNode =
   let nazo = uri.toNazoPuyo
   if nazo.isSome:
     globalManager = nazo.get.nazoPuyo.toManager(nazo.get.positions, nazo.get.izumiyaMode.get, not isMobile())
-    return globalManager.makePon2Dom
+    return globalManager.makePon2EditorDom
 
   let env = uri.toEnvironment
   if env.isSome:
     globalManager = env.get.environment.toManager(env.get.positions, env.get.izumiyaMode.get, not isMobile())
-    return globalManager.makePon2Dom
+    return globalManager.makePon2EditorDom
 
   return buildHtml:
     text "URL形式エラー"
 
-proc makeGuiWebPage* {.inline.} =
-  ## Makes the web page.
-  makePon2Dom.setRenderer
+proc makePon2EditorWebPage* {.inline.} =
+  ## Makes the web page of the GUI application.
+  makePon2EditorDom.setRenderer

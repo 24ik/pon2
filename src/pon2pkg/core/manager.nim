@@ -1,4 +1,4 @@
-## This module implements the manager.
+## This module implements the manager for the editor.
 ##
 
 import options
@@ -11,7 +11,7 @@ import puyo_core
 import puyo_simulator
 
 when not defined(js):
-  import ./core/db
+  import ./db
 
 when defined(js):
   type Manager* = tuple

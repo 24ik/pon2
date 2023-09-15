@@ -8,8 +8,8 @@ import sugar
 import nigui
 import puyo_simulator
 
-import ./common
-import ../manager
+import ../common
+import ../../core/manager
 
 type AnswerControl* = ref object of LayoutContainer
   ## Answer control.

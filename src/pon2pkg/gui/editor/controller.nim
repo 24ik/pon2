@@ -9,9 +9,9 @@ import nazopuyo_core
 import nigui
 import puyo_simulator
 
-import ./common
-import ../core/solve
-import ../manager
+import ../common
+import ../../core/manager
+import ../../core/solve
 
 type ControllerControl* = ref object of LayoutContainer
   ## Solve control.

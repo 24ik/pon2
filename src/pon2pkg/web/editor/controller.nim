@@ -15,7 +15,7 @@ import puyo_core
 import puyo_simulator
 
 import ../common
-import ../../manager
+import ../../core/manager
 
 const
   UriCopyButtonId = "pon2-button-uri"
