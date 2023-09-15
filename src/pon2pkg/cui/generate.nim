@@ -7,6 +7,7 @@ import browsers
 import strformat
 import random
 import tables
+import uri
 
 import docopt
 import nazopuyo_core
