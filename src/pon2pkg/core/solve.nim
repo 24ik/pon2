@@ -11,12 +11,14 @@ import options
 import sequtils
 import std/setutils
 import sugar
-import suru
 import tables
 
 import nazopuyo_core
 import puyo_core
 import puyo_core/environment
+
+when not defined(js):
+  import suru
 
 when not SingleThread:
   import threadpool
@@ -372,19 +374,21 @@ proc solve*(nazo: NazoPuyo, showProgress = false): seq[Positions] {.inline.} =
 
   let childNodes = node.children
 
-  var bar: SuruBar
-  if showProgress:
-    bar = initSuruBar()
-    bar[0].total = childNodes.len
-    bar.setup
+  when not defined(js):
+    var bar: SuruBar
+    if showProgress:
+      bar = initSuruBar()
+      bar[0].total = childNodes.len
+      bar.setup
 
   when SingleThread:
     for child in childNodes:
       result &= child.solveRec
 
-      if showProgress:
-        bar.inc
-        bar.update SuruBarUpdateMs * 1000 * 1000
+      when not defined(js):
+        if showProgress:
+          bar.inc
+          bar.update SuruBarUpdateMs * 1000 * 1000
   else:
     let futureAnswers = collect:
       for child in childNodes:
@@ -393,12 +397,14 @@ proc solve*(nazo: NazoPuyo, showProgress = false): seq[Positions] {.inline.} =
     for answer in futureAnswers:
       result &= ^answer
 
-      if showProgress:
-        bar.inc
-        bar.update SuruBarUpdateMs * 1000 * 1000
+      when not defined(js):
+        if showProgress:
+          bar.inc
+          bar.update SuruBarUpdateMs * 1000 * 1000
 
-  if showProgress:
-    bar.finish
+  when not defined(js):
+    if showProgress:
+      bar.finish
 
 # ------------------------------------------------
 # Inspect Solve
@@ -436,19 +442,21 @@ proc inspectSolve*(nazo: NazoPuyo, earlyStopping = false, showProgress = false):
 
   let childNodes = node.children
 
-  var bar: SuruBar
-  if showProgress:
-    bar = initSuruBar()
-    bar[0].total = childNodes.len
-    bar.setup
+  when not defined(js):
+    var bar: SuruBar
+    if showProgress:
+      bar = initSuruBar()
+      bar[0].total = childNodes.len
+      bar.setup
 
   when SingleThread:
     for child in node.children:
       result &= child.inspectSolveRec earlyStopping
 
-      if showProgress:
-        bar.inc
-        bar.update SuruBarUpdateMs * 1000 * 1000
+      when not defined(js):
+        if showProgress:
+          bar.inc
+          bar.update SuruBarUpdateMs * 1000 * 1000
   else:
     let futureAnswers = collect:
       for child in childNodes:
@@ -457,9 +465,10 @@ proc inspectSolve*(nazo: NazoPuyo, earlyStopping = false, showProgress = false):
     for answer in futureAnswers:
       result &= ^answer
 
-      if showProgress:
-        bar.inc
-        bar.update SuruBarUpdateMs * 1000 * 1000
+      when not defined(js):
+        if showProgress:
+          bar.inc
+          bar.update SuruBarUpdateMs * 1000 * 1000
 
   if showProgress:
     bar.finish
