@@ -14,8 +14,8 @@ import nazopuyo_core
 import puyo_core
 import puyo_simulator
 
-import ./common
-import ../manager
+import ../common
+import ../../core/manager/editor
 
 const
   UriCopyButtonId = "pon2-button-uri"
@@ -30,7 +30,7 @@ proc showFlashMessage(element: Element, messageHtml: string, timeoutMs = Natural
 
 let worker = runWorker()
 
-proc solveMessageHandler(event: JsObject, manager: var Manager, nazo: NazoPuyo) {.inline.} =
+proc solveMessageHandler(event: JsObject, manager: var EditorManager, nazo: NazoPuyo) {.inline.} =
   ## Writes the answers to the window.
   let messages = ($event.data.to(cstring)).split WorkerMessageHeaderSeparator
   assert messages.len == 3
@@ -47,7 +47,7 @@ proc solveMessageHandler(event: JsObject, manager: var Manager, nazo: NazoPuyo) 
   if not kxi.surpressRedraws:
     kxi.redraw
 
-proc solve*(manager: var Manager) {.inline.} =
+proc solve*(manager: var EditorManager) {.inline.} =
   ## Solves the nazo puyo.
   if manager.solving or manager.simulator[].requirement.isNone:
     return
@@ -60,7 +60,7 @@ proc solve*(manager: var Manager) {.inline.} =
   worker.onmessage = (event: JsObject) => event.solveMessageHandler(manager, nazo)
   worker.postMessage &"{SOLVE}{WorkerMessageHeaderSeparator}{nazoUri}"
 
-proc controllerFrame*(manager: var Manager): VNode {.inline.} =
+proc controllerFrame*(manager: var EditorManager): VNode {.inline.} =
   ## Returns the controller frame.
   return buildHtml(tdiv(class = "buttons")):
     button(

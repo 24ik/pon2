@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.5.4"
+version       = "0.6.0"
 author        = "Keisuke Izumiya"
 description   = "Nazo Puyo Tool"
 license       = "Apache-2.0 OR MPL-2.0"

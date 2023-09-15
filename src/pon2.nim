@@ -2,12 +2,13 @@
 ## With `import pon2`, you can use all features provided by this module.
 ##
 ## Documentations:
-## - [Core-Database](./pon2pkg/core/db.html)
-## - [Core-Generate](./pon2pkg/core/generate.html)
-## - [Core-Permute](./pon2pkg/core/permute.html)
-## - [Core-Solve](./pon2pkg/core/solve.html)
-## - [GUI](./pon2pkg/gui/main.html)
-## - Web Interface
+## - [Database](./pon2pkg/core/db.html)
+## - [Generate](./pon2pkg/core/generate.html)
+## - [Permute](./pon2pkg/core/permute.html)
+## - [Solve](./pon2pkg/core/solve.html)
+## - [Editor Manager](./pon2pkg/core/manager/editor.html)
+## - [GUI Editor](./pon2pkg/gui/editor/main.html)
+## - Web Editor
 ##
 ## This module uses multiple threads by default.
 ## To prevent this, specify `-d:singleThread` to the compile options.
@@ -17,39 +18,51 @@
 ## [puyo-simulator](https://github.com/izumiya-keisuke/puyo-simulator), so please refer to them for details.
 ##
 
-import ./pon2pkg/manager
+import ./pon2pkg/core/db
+export db.NazoPuyoProperties, db.NazoPuyoDatabase, db.hash, db.loadDatabase, db.saveDatabase, db.add, db.find
+
+import ./pon2pkg/core/generate
+export generate.AbstractRequirementColor, generate.AbstractRequirement, generate.generate
+
+import ./pon2pkg/core/manager/editor
 export
-  manager.Manager,
-  manager.toManager,
-  manager.toggleFocus,
-  manager.updateAnswerSimulator,
-  manager.nextAnswer,
-  manager.prevAnswer
+  editor.EditorManager,
+  editor.toEditorManager,
+  editor.toggleFocus,
+  editor.updateAnswerSimulator,
+  editor.nextAnswer,
+  editor.prevAnswer
+
+import ./pon2pkg/core/permute
+export permute.permute
+
+import ./pon2pkg/core/solve
+export solve.InspectAnswers, solve.solve, solve.inspectSolve
 
 when defined(js):
-  import ./pon2pkg/web/main
-  export main.solve, main.operate, main.keyboardEventHandler, main.makePon2Dom
+  import ./pon2pkg/web/editor/main
+  export main.solve, main.operate, main.keyboardEventHandler, main.makePon2EditorDom
 
   when isMainModule:
-    makeWebPage()
+    makePon2EditorWebPage()
 else:
-  import ./pon2pkg/gui/main
+  import ./pon2pkg/gui/editor/main
   export
     main.solve,
-    main.Pon2Control,
-    main.Pon2Window,
+    main.Pon2EditorControl,
+    main.Pon2EditorWindow,
     main.operate,
     main.keyboardEventHandler,
-    main.makePon2Control,
-    main.makePon2Window
+    main.makePon2EditorControl,
+    main.makePon2EditorWindow
 
   when isMainModule:
     import docopt
 
-    import ./pon2pkg/cui/db
-    import ./pon2pkg/cui/generate
-    import ./pon2pkg/cui/permute
-    import ./pon2pkg/cui/solve
+    import ./pon2pkg/cui/db as cuiDb
+    import ./pon2pkg/cui/generate as cuiGenerate
+    import ./pon2pkg/cui/permute as cuiPermute
+    import ./pon2pkg/cui/solve as cuiSolve
 
     const Document = """
 なぞぷよツール．ソルバー・ジェネレーター・ツモ探索・データベース機能とGUIアプリケーションが提供されている．
@@ -82,8 +95,8 @@ Options:
   -H <>       各列の高さの割合．          [default: 0++++0]
   --nc <>     色ぷよの数．                [default: 24]
   --ng <>     お邪魔ぷよの数．            [default: 2]
-  --tt <>     3連結の数．                 [default: 4]
-  --tv <>     縦3連結の数．               [default: 0]
+  --tt <>     3連結の数．
+  --tv <>     縦3連結の数．
   --th <>     横3連結の数．
   --tl <>     L字3連結の数．
   -s <>       シード．
@@ -142,4 +155,4 @@ Options:
     elif args["database"] or args["d"]:
       args.runDb
     else:
-      args.runGui
+      args.runPon2EditorGui
