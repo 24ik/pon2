@@ -14,7 +14,7 @@ import puyo_simulator
 
 import ./answer
 import ./controller
-import ../manager
+import ../../manager
 
 export solve
 
@@ -112,6 +112,6 @@ proc makePon2Dom(routerData: RouterData): VNode =
   return buildHtml:
     text "URL形式エラー"
 
-proc makeWebPage* {.inline.} =
+proc makeGuiWebPage* {.inline.} =
   ## Makes the web page.
   makePon2Dom.setRenderer

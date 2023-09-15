@@ -27,11 +27,11 @@ export
   manager.prevAnswer
 
 when defined(js):
-  import ./pon2pkg/web/main
-  export main.solve, main.operate, main.keyboardEventHandler, main.makePon2Dom
+  import ./pon2pkg/web/gui/main as guiMain
+  export guiMain.solve, guiMain.operate, guiMain.keyboardEventHandler, guiMain.makePon2Dom
 
   when isMainModule:
-    makeWebPage()
+    makeGuiWebPage()
 else:
   import ./pon2pkg/gui/main
   export

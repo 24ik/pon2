@@ -8,7 +8,7 @@ import sugar
 import karax / [karax, karaxdsl, vdom]
 import puyo_simulator
 
-import ../manager
+import ../../manager
 
 proc answerFrame*(manager: var Manager): VNode {.inline.} =
   ## Returns the answer frame.
