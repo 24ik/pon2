@@ -17,18 +17,18 @@ import puyo_simulator
 
 import ./answer
 import ./controller
-import ../../core/manager
+import ../../core/manager/editor
 
 export solve
 
 type
   Pon2EditorControl* = ref object of LayoutContainer
     ## Root control of the editor window.
-    manager*: ref Manager
+    manager*: ref EditorManager
 
   Pon2EditorWindow* = ref object of WindowImpl
     ## Editor window.
-    manager*: ref Manager
+    manager*: ref EditorManager
 
 let logger = newConsoleLogger(lvlNotice, verboseFmtStr)
 
@@ -36,7 +36,7 @@ let logger = newConsoleLogger(lvlNotice, verboseFmtStr)
 # API
 # ------------------------------------------------
 
-proc operate*(manager: var Manager, event: KeyEvent): bool {.inline.} =
+proc operate*(manager: var EditorManager, event: KeyEvent): bool {.inline.} =
   ## Handler for keyboard input.
   ## Returns `true` if any action is executed.
   if not manager.focusAnswer and manager.simulator[].mode == IzumiyaSimulatorMode.EDIT:
@@ -59,7 +59,7 @@ proc keyboardEventHandler(event: KeyboardEvent) =
 
   cast[Pon2EditorWindow](rawWindow).keyboardEventHandler event
 
-proc makePon2EditorControl*(manager: ref Manager): Pon2EditorControl {.inline.} =
+proc makePon2EditorControl*(manager: ref EditorManager): Pon2EditorControl {.inline.} =
   ## Returns the root control of GUI window.
   result = new Pon2EditorControl
   result.init
@@ -81,7 +81,9 @@ proc makePon2EditorControl*(manager: ref Manager): Pon2EditorControl {.inline.} 
   secondCol.add manager.newControllerControl
   secondCol.add manager.newAnswerControl
 
-proc makePon2EditorWindow*(manager: ref Manager, title = "Pon!通", setKeyHandler = true): Pon2EditorWindow {.inline.} =
+proc makePon2EditorWindow*(
+  manager: ref EditorManager, title = "Pon!通", setKeyHandler = true
+): Pon2EditorWindow {.inline.} =
   ## Returns the GUI window.
   result = new Pon2EditorWindow
   result.init
@@ -118,8 +120,8 @@ proc runPon2EditorGui(
   ## Runs the GUI application.
   app.init
 
-  let manager = new Manager
-  manager[] = nazoEnv.toManager(positions, mode, true)
+  let manager = new EditorManager
+  manager[] = nazoEnv.toEditorManager(positions, mode, true)
 
   manager.makePon2EditorWindow.show
   app.run

@@ -9,11 +9,11 @@ import nigui
 import puyo_simulator
 
 import ../common
-import ../../core/manager
+import ../../core/manager/editor
 
 type AnswerControl* = ref object of LayoutContainer
   ## Answer control.
-  manager: ref Manager
+  manager: ref EditorManager
 
 proc answerIndexDrawHandler(control: AnswerControl, event: DrawEvent) {.inline.} =
   ## Draws the answer index.
@@ -44,7 +44,7 @@ proc makeAnswerClickHandler(control: AnswerControl, next: bool): (event: ClickEv
   # NOTE: inline handler does not work due to specifications
   (event: ClickEvent) => control.answerClickHandler(event, next)
 
-proc newAnswerControl*(manager: ref Manager): AnswerControl {.inline.} =
+proc newAnswerControl*(manager: ref EditorManager): AnswerControl {.inline.} =
   ## Returns a new answer control.
   result = new AnswerControl
   result.init

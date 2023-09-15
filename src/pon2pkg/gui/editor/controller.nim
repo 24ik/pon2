@@ -10,12 +10,12 @@ import nigui
 import puyo_simulator
 
 import ../common
-import ../../core/manager
+import ../../core/manager/editor
 import ../../core/solve
 
 type ControllerControl* = ref object of LayoutContainer
   ## Solve control.
-  manager: ref Manager
+  manager: ref EditorManager
 
 proc toggleHandler(control: ControllerControl, event: ClickEvent) {.inline.} =
   ## Toggles `manager.focusAnswer`.
@@ -41,7 +41,7 @@ proc solveWrite(nazo: NazoPuyo) {.inline.} =
 
       globalControl.parentWindow.control.forceRedraw)
 
-proc solve*(manager: var Manager) {.inline.} =
+proc solve*(manager: var EditorManager) {.inline.} =
   ## Solves the nazo puyo.
   if manager.solving or manager.simulator[].requirement.isNone:
     return
@@ -55,7 +55,7 @@ proc makeSolveHandler(control: ControllerControl): (event: ClickEvent) -> void =
   # NOTE: inline handler does not work due to specifications
   (event: ClickEvent) => control.manager[].solve
 
-proc newControllerControl*(manager: ref Manager): ControllerControl {.inline.} =
+proc newControllerControl*(manager: ref EditorManager): ControllerControl {.inline.} =
   ## Returns a new controller control.
   result = new ControllerControl
   result.init

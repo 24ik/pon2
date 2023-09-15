@@ -8,9 +8,9 @@ import sugar
 import karax / [karax, karaxdsl, vdom]
 import puyo_simulator
 
-import ../../core/manager
+import ../../core/manager/editor
 
-proc answerFrame*(manager: var Manager): VNode {.inline.} =
+proc answerFrame*(manager: var EditorManager): VNode {.inline.} =
   ## Returns the answer frame.
   let answerSimulatorFrame =
     manager.answerSimulator[].makePuyoSimulatorAnswerDom(setKeyHandler = false, wrapSection = false)

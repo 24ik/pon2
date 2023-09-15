@@ -3,19 +3,19 @@
 
 import options
 import uri
-when not defined(js):
-  import tables
 
 import nazopuyo_core
 import puyo_core
 import puyo_simulator
 
 when not defined(js):
-  import ./db
+  import tables
+
+  import ../db
 
 when defined(js):
-  type Manager* = tuple
-    ## Nazo Puyo Manager.
+  type EditorManager* = tuple
+    ## Nazo Puyo Manager for the editor.
     simulator: ref Simulator
     answerSimulator: ref Simulator
 
@@ -25,8 +25,8 @@ when defined(js):
 
     focusAnswer: bool
 else:
-  type Manager* = tuple
-    ## Nazo Puyo Manager.
+  type EditorManager* = tuple
+    ## Nazo Puyo Manager for the editor.
     simulator: ref Simulator
     answerSimulator: ref Simulator
 
@@ -43,7 +43,9 @@ else:
 # ------------------------------------------------
 
 when defined(js):
-  func toManager*(env: Environment, positions = none Positions, mode = PLAY, showCursor = true): Manager {.inline.} =
+  func toEditorManager*(
+    env: Environment, positions = none Positions, mode = PLAY, showCursor = true
+  ): EditorManager {.inline.} =
     ## Returns the manager.
     result.simulator = new Simulator
     result.simulator[] = env.toSimulator(positions, mode, showCursor)
@@ -56,7 +58,9 @@ when defined(js):
 
     result.focusAnswer = false
 
-  func toManager*(nazo: NazoPuyo, positions = none Positions, mode = PLAY, showCursor = true): Manager {.inline.} =
+  func toEditorManager*(
+    nazo: NazoPuyo, positions = none Positions, mode = PLAY, showCursor = true
+  ): EditorManager {.inline.} =
     ## Returns the manager.
     result.simulator = new Simulator
     result.simulator[] = nazo.toSimulator(positions, mode, showCursor)
@@ -69,9 +73,9 @@ when defined(js):
 
     result.focusAnswer = false
 else:
-  func toManager*(
+  func toEditorManager*(
     env: Environment, positions = none Positions, mode = PLAY, showCursor = true, db = loadDatabase()
-  ): Manager {.inline.} =
+  ): EditorManager {.inline.} =
     ## Returns the manager.
     result.simulator = new Simulator
     result.simulator[] = env.toSimulator(positions, mode, showCursor)
@@ -86,9 +90,9 @@ else:
 
     result.focusAnswer = false
 
-  func toManager*(
+  func toEditorManager*(
     nazo: NazoPuyo, positions = none Positions, mode = PLAY, showCursor = true, db = loadDatabase()
-  ): Manager {.inline.} =
+  ): EditorManager {.inline.} =
     ## Returns the manager.
     result.simulator = new Simulator
     result.simulator[] = nazo.toSimulator(positions, mode, showCursor)
@@ -107,7 +111,7 @@ else:
 # Toggle
 # ------------------------------------------------
 
-func toggleFocus*(manager: var Manager) {.inline.} =
+func toggleFocus*(manager: var EditorManager) {.inline.} =
   ## Toggles `manager.focusAnswer`.
   manager.focusAnswer = not manager.focusAnswer
 
@@ -115,7 +119,7 @@ func toggleFocus*(manager: var Manager) {.inline.} =
 # Solve
 # ------------------------------------------------
 
-func updateAnswerSimulator*(manager: var Manager, nazo: NazoPuyo) {.inline.} =
+func updateAnswerSimulator*(manager: var EditorManager, nazo: NazoPuyo) {.inline.} =
   ## Updates the answer simulator.
   ## This procedure is assumed to be called after `manager.answers` is set.
   assert manager.answers.isSome
@@ -132,7 +136,7 @@ func updateAnswerSimulator*(manager: var Manager, nazo: NazoPuyo) {.inline.} =
 # Answer - Prev / Next
 # ------------------------------------------------
 
-func nextAnswer*(manager: var Manager) {.inline.} =
+func nextAnswer*(manager: var EditorManager) {.inline.} =
   ## Shows the next answer.
   if manager.answers.isNone or manager.answers.get.len == 0:
     return
@@ -145,7 +149,7 @@ func nextAnswer*(manager: var Manager) {.inline.} =
   manager.answerSimulator[].positions = manager.answers.get[manager.answerIdx]
   manager.answerSimulator[].reset false
 
-func prevAnswer*(manager: var Manager) {.inline.} =
+func prevAnswer*(manager: var EditorManager) {.inline.} =
   ## Shows the previous answer.
   if manager.answers.isNone or manager.answers.get.len == 0:
     return
@@ -163,7 +167,7 @@ func prevAnswer*(manager: var Manager) {.inline.} =
 # ------------------------------------------------
 
 when not defined(js):
-  proc saveToDb*(manager: var Manager) {.inline.} =
+  proc saveToDb*(manager: var EditorManager) {.inline.} =
     ## Saves the nazo puyo and answers to the database.
     if manager.simulator[].requirement.isNone:
       return
@@ -171,7 +175,7 @@ when not defined(js):
     manager.db.add manager.simulator[].nazoPuyo.get, (if manager.answers.isSome: manager.answers.get else: @[])
     manager.db.saveDatabase
 
-  proc deleteFromDb*(manager: var Manager) {.inline.} =
+  proc deleteFromDb*(manager: var EditorManager) {.inline.} =
     ## Deletes the nazo puyo from the database.
     if manager.simulator[].requirement.isNone:
       return
@@ -180,10 +184,10 @@ when not defined(js):
     manager.db.saveDatabase
 
 # ------------------------------------------------
-# Manager -> URI
+# EditorManager -> URI
 # ------------------------------------------------
 
-func toUri*(manager: Manager): Uri {.inline.} =
+func toUri*(manager: EditorManager): Uri {.inline.} =
   ## Converts the manager to the URI.
   result = manager.simulator[].toUri
   result.path = "/pon2/playground/index.html"
@@ -192,7 +196,7 @@ func toUri*(manager: Manager): Uri {.inline.} =
 # Keyboard Operation
 # ------------------------------------------------
 
-proc operateCommon*(manager: var Manager, event: KeyEvent): bool {.inline.} =
+proc operateCommon*(manager: var EditorManager, event: KeyEvent): bool {.inline.} =
   ## Handler for keyboard input.
   ## Returns `true` if any action is executed.
   ##

@@ -24,14 +24,14 @@ export db.NazoPuyoProperties, db.NazoPuyoDatabase, db.hash, db.loadDatabase, db.
 import ./pon2pkg/core/generate
 export generate.AbstractRequirementColor, generate.AbstractRequirement, generate.generate
 
-import ./pon2pkg/core/manager
+import ./pon2pkg/core/manager/editor
 export
-  manager.Manager,
-  manager.toManager,
-  manager.toggleFocus,
-  manager.updateAnswerSimulator,
-  manager.nextAnswer,
-  manager.prevAnswer
+  editor.EditorManager,
+  editor.toEditorManager,
+  editor.toggleFocus,
+  editor.updateAnswerSimulator,
+  editor.nextAnswer,
+  editor.prevAnswer
 
 import ./pon2pkg/core/permute
 export permute.permute
