@@ -17,6 +17,9 @@ import nazopuyo_core
 import puyo_core
 import puyo_core/environment
 
+when not defined(js):
+  import suru
+
 when not SingleThread:
   import threadpool
 
@@ -314,6 +317,8 @@ func children(node: Node): seq[Node] {.inline.} =
 # Solve
 # ------------------------------------------------
 
+const SuruBarUpdateMs = 100
+
 func isAccepted(node: Node): bool {.inline.} =
   ## Returns `true` if the node is in the accepted state.
   if node.numbers.isSome:
@@ -358,7 +363,7 @@ func solveRec(node: Node): seq[Positions] {.inline.} =
   for child in node.children:
     result &= child.solveRec
 
-proc solve*(nazo: NazoPuyo): seq[Positions] {.inline.} =
+proc solve*(nazo: NazoPuyo, showProgress = false): seq[Positions] {.inline.} =
   ## Solves the nazo puyo.
   if nazo.isNotSupported or nazo.moveCount == 0:
     return
@@ -367,17 +372,39 @@ proc solve*(nazo: NazoPuyo): seq[Positions] {.inline.} =
   if node.canPrune:
     return
 
-  when SingleThread:
-    for child in node.children:
-      result &= child.solveRec
-  else:
-    let children = node.children
+  let childNodes = node.children
 
-    var futureSolutions = newSeqOfCap[FlowVar[seq[Positions]]] children.len
-    for child in children:
-      futureSolutions.add spawn child.solveRec
-    for sol in futureSolutions:
-      result &= ^sol
+  when not defined(js):
+    var bar: SuruBar
+    if showProgress:
+      bar = initSuruBar()
+      bar[0].total = childNodes.len
+      bar.setup
+
+  when SingleThread:
+    for child in childNodes:
+      result &= child.solveRec
+
+      when not defined(js):
+        if showProgress:
+          bar.inc
+          bar.update SuruBarUpdateMs * 1000 * 1000
+  else:
+    let futureAnswers = collect:
+      for child in childNodes:
+        spawn child.solveRec
+
+    for answer in futureAnswers:
+      result &= ^answer
+
+      when not defined(js):
+        if showProgress:
+          bar.inc
+          bar.update SuruBarUpdateMs * 1000 * 1000
+
+  when not defined(js):
+    if showProgress:
+      bar.finish
 
 # ------------------------------------------------
 # Inspect Solve
@@ -403,7 +430,7 @@ func inspectSolveRec(node: Node, earlyStopping: bool): InspectAnswers {.inline.}
     if earlyStopping and result.answers.len > 1:
       return
 
-proc inspectSolve*(nazo: NazoPuyo, earlyStopping = false): InspectAnswers {.inline.} =
+proc inspectSolve*(nazo: NazoPuyo, earlyStopping = false, showProgress = false): InspectAnswers {.inline.} =
   ## Solves the nazo puyo while keeping the number of visited nodes.
   ## If `earlyStopping` is `true`, searching is interrupted if any solution is found.
   if nazo.isNotSupported or nazo.moveCount == 0:
@@ -413,14 +440,36 @@ proc inspectSolve*(nazo: NazoPuyo, earlyStopping = false): InspectAnswers {.inli
   if node.canPrune:
     return
 
+  let childNodes = node.children
+
+  when not defined(js):
+    var bar: SuruBar
+    if showProgress:
+      bar = initSuruBar()
+      bar[0].total = childNodes.len
+      bar.setup
+
   when SingleThread:
     for child in node.children:
       result &= child.inspectSolveRec earlyStopping
-  else:
-    let children = node.children
 
-    var futureSolutions = newSeqOfCap[FlowVar[InspectAnswers]] children.len
-    for child in children:
-      futureSolutions.add spawn child.inspectSolveRec earlyStopping
-    for sol in futureSolutions:
-      result &= ^sol
+      when not defined(js):
+        if showProgress:
+          bar.inc
+          bar.update SuruBarUpdateMs * 1000 * 1000
+  else:
+    let futureAnswers = collect:
+      for child in childNodes:
+        spawn child.inspectSolveRec earlyStopping
+
+    for answer in futureAnswers:
+      result &= ^answer
+
+      when not defined(js):
+        if showProgress:
+          bar.inc
+          bar.update SuruBarUpdateMs * 1000 * 1000
+
+  when not defined(js):
+    if showProgress:
+      bar.finish

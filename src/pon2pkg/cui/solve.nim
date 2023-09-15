@@ -26,7 +26,7 @@ proc runSolver*(args: Table[string, Value]) {.inline.} =
   if args["-B"].to_bool:
     ($args["<question>"]).openDefaultBrowser
 
-  for answerIdx, answer in question.get.nazoPuyo.solve:
+  for answerIdx, answer in question.get.nazoPuyo.solve(true):
     let answerUri = question.get.nazoPuyo.toUri some answer
     echo &"({answerIdx.succ}) {answerUri}"
 

@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.6.1"
+version       = "0.6.2"
 author        = "Keisuke Izumiya"
 description   = "Nazo Puyo Tool"
 license       = "Apache-2.0 OR MPL-2.0"
@@ -15,6 +15,7 @@ bin           = @["pon2"]
 requires "nim ^= 2.0.0"
 
 requires "nigui ^= 0.2.7"
+requires "https://github.com/de-odex/suru#f6f1e60"
 requires "https://github.com/hoijui/docopt.nim#3e8130e"
 requires "https://github.com/izumiya-keisuke/nazopuyo-core ^= 0.10.3"
 requires "https://github.com/izumiya-keisuke/puyo-core ^= 0.15.5"
