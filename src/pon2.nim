@@ -18,8 +18,13 @@
 ## [puyo-simulator](https://github.com/izumiya-keisuke/puyo-simulator), so please refer to them for details.
 ##
 
-import ./pon2pkg/core/db
-export db.NazoPuyoProperties, db.NazoPuyoDatabase, db.hash, db.loadDatabase, db.saveDatabase, db.add, db.find
+# ------------------------------------------------
+# API
+# ------------------------------------------------
+
+when not defined(js):
+  import ./pon2pkg/core/db
+  export db.NazoPuyoProperties, db.NazoPuyoDatabase, db.hash, db.loadDatabase, db.saveDatabase, db.add, db.find
 
 import ./pon2pkg/core/generate
 export generate.AbstractRequirementColor, generate.AbstractRequirement, generate.generate
@@ -38,6 +43,10 @@ export permute.permute
 
 import ./pon2pkg/core/solve
 export solve.InspectAnswers, solve.solve, solve.inspectSolve
+
+# ------------------------------------------------
+# GUI Editor
+# ------------------------------------------------
 
 when defined(js):
   import ./pon2pkg/web/editor/main
