@@ -14,6 +14,9 @@ import puyo_core
 
 import ./solve
 
+when not defined(js):
+  import cpuinfo
+
 type
   AbstractRequirementColor* {.pure.} = enum
     ## Requirement color with all single color puyoes identical.
@@ -262,9 +265,11 @@ proc generate*(
     total: Option[Natural], vertical: Option[Natural], horizontal: Option[Natural], lShape: Option[Natural]],
   allowDouble: bool,
   allowLastDouble: bool,
+  parallelCount = (when defined(js): 1 else: max(countProcessors(), 1)),
 ): Option[tuple[question: NazoPuyo, answer: Positions]] {.inline.} =
   ## Returns a randomly generated nazo puyo that has a unique answer.
   ## If the generation fails, returns `none`.
+  ## `parallelCount` will be ignored on JS backend.
   # validate the arguments
   # TODO: validate more strictly
   let height = case rule
@@ -312,7 +317,7 @@ proc generate*(
       continue
 
     let nazo = (environment: env.get, requirement: req.get)
-    let answers = nazo.inspectSolve(true).answers
+    let answers = nazo.inspectSolve(parallelCount, earlyStopping = true).answers
     if answers.len != 1:
       continue
     if answers[0].len != nazo.moveCount:

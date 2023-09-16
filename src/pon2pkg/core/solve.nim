@@ -1,10 +1,6 @@
 ## This module implements the solver.
 ##
 
-const
-  singleThread {.booldefine.} = false
-  SingleThread = singleThread or defined(js)
-
 import deques
 import math
 import options
@@ -18,10 +14,11 @@ import puyo_core
 import puyo_core/environment
 
 when not defined(js):
-  import suru
-
-when not SingleThread:
+  import cpuinfo
+  import os
   import threadpool
+
+  import suru
 
 type
   Node = tuple
@@ -317,7 +314,9 @@ func children(node: Node): seq[Node] {.inline.} =
 # Solve
 # ------------------------------------------------
 
-const SuruBarUpdateMs = 100
+const
+  SuruBarUpdateMs = 100
+  ParallelSolvingWaitIntervalMs = 100
 
 func isAccepted(node: Node): bool {.inline.} =
   ## Returns `true` if the node is in the accepted state.
@@ -347,7 +346,7 @@ func isAccepted(node: Node): bool {.inline.} =
   return true
 
 func isNotSupported(nazo: NazoPuyo): bool {.inline.} =
-  ## Returns `true` if the nazo puyo is not supported, i.e., unsolvable.
+  ## Returns `true` if the nazo puyo is not supported, *i.e.*, unsolvable.
   nazo.requirement.kind in {DISAPPEAR_PLACE, DISAPPEAR_PLACE_MORE, DISAPPEAR_CONNECT, DISAPPEAR_CONNECT_MORE} and
   nazo.requirement.color.get == RequirementColor.GARBAGE
 
@@ -363,8 +362,11 @@ func solveRec(node: Node): seq[Positions] {.inline.} =
   for child in node.children:
     result &= child.solveRec
 
-proc solve*(nazo: NazoPuyo, showProgress = false): seq[Positions] {.inline.} =
+proc solve*(
+  nazo: NazoPuyo, parallelCount = (when defined(js): 1 else: max(countProcessors(), 1)), showProgress = false
+): seq[Positions] {.inline.} =
   ## Solves the nazo puyo.
+  ## `parallelCount` and `showProgress` will be ignored on JS backend.
   if nazo.isNotSupported or nazo.moveCount == 0:
     return
 
@@ -374,37 +376,58 @@ proc solve*(nazo: NazoPuyo, showProgress = false): seq[Positions] {.inline.} =
 
   let childNodes = node.children
 
-  when not defined(js):
+  when defined(js):
+    for node in childNodes:
+      result &= node.solveRec
+  else:
+    # set up progress bar
     var bar: SuruBar
     if showProgress:
       bar = initSuruBar()
       bar[0].total = childNodes.len
       bar.setup
 
-  when SingleThread:
-    for child in childNodes:
-      result &= child.solveRec
+    # prepare solving
+    let cpuCount = min(countProcessors(), childNodes.len)
+    var
+      futureAnswers = newSeqOfCap[FlowVar[seq[Positions]]] childNodes.len
+      nextNodeIdx = Natural 0
+      runningNodeIdxes = newSeq[Natural] cpuCount
+      completeNodeCount = 0
 
-      when not defined(js):
-        if showProgress:
-          bar.inc
-          bar.update SuruBarUpdateMs * 1000 * 1000
-  else:
-    let futureAnswers = collect:
-      for child in childNodes:
-        spawn child.solveRec
+    # run "first wave" node solving
+    for cpuIdx in 0 ..< cpuCount:
+      futureAnswers.add spawn childNodes[nextNodeIdx].solveRec
+      runningNodeIdxes[cpuIdx] = nextNodeIdx
+      nextNodeIdx.inc
 
-    for answer in futureAnswers:
-      result &= ^answer
+    # solve
+    while true:
+      for cpuIdx in 0 ..< cpuCount:
+        if not futureAnswers[runningNodeIdxes[cpuIdx]].isReady:
+          continue
 
-      when not defined(js):
-        if showProgress:
-          bar.inc
-          bar.update SuruBarUpdateMs * 1000 * 1000
+        # assign the next node to the processor
+        if nextNodeIdx < childNodes.len:
+          futureAnswers.add spawn childNodes[nextNodeIdx].solveRec
+          runningNodeIdxes[cpuIdx] = nextNodeIdx
+          nextNodeIdx.inc
 
-  when not defined(js):
-    if showProgress:
-      bar.finish
+        bar.inc
+        bar.update SuruBarUpdateMs * 1000 * 1000
+
+        # finish solving
+        completeNodeCount.inc
+        if completeNodeCount == childNodes.len:
+          for future in futureAnswers:
+            result &= ^future
+
+          # `bar.finish` affects stdout, so we need to branch here
+          if showProgress:
+            bar.finish
+          return
+
+      sleep ParallelSolvingWaitIntervalMs
 
 # ------------------------------------------------
 # Inspect Solve
@@ -430,9 +453,15 @@ func inspectSolveRec(node: Node, earlyStopping: bool): InspectAnswers {.inline.}
     if earlyStopping and result.answers.len > 1:
       return
 
-proc inspectSolve*(nazo: NazoPuyo, earlyStopping = false, showProgress = false): InspectAnswers {.inline.} =
+proc inspectSolve*(
+  nazo: NazoPuyo,
+  parallelCount = (when defined(js): 1 else: max(countProcessors(), 1)),
+  showProgress = false,
+  earlyStopping = false,
+): InspectAnswers {.inline.} =
   ## Solves the nazo puyo while keeping the number of visited nodes.
   ## If `earlyStopping` is `true`, searching is interrupted if any solution is found.
+  ## `parallelCount` and `showProgress` will be ignored on JS backend.
   if nazo.isNotSupported or nazo.moveCount == 0:
     return
 
@@ -442,34 +471,55 @@ proc inspectSolve*(nazo: NazoPuyo, earlyStopping = false, showProgress = false):
 
   let childNodes = node.children
 
-  when not defined(js):
+  when defined(js):
+    for node in childNodes:
+      result &= node.inspectSolveRec earlyStopping
+  else:
+    # set up progress bar
     var bar: SuruBar
     if showProgress:
       bar = initSuruBar()
       bar[0].total = childNodes.len
       bar.setup
 
-  when SingleThread:
-    for child in node.children:
-      result &= child.inspectSolveRec earlyStopping
+    # prepare solving
+    let cpuCount = min(countProcessors(), childNodes.len)
+    var
+      futureAnswers = newSeqOfCap[FlowVar[InspectAnswers]] childNodes.len
+      nextNodeIdx = Natural 0
+      runningNodeIdxes = newSeq[Natural] cpuCount
+      completeNodeCount = 0
 
-      when not defined(js):
-        if showProgress:
-          bar.inc
-          bar.update SuruBarUpdateMs * 1000 * 1000
-  else:
-    let futureAnswers = collect:
-      for child in childNodes:
-        spawn child.inspectSolveRec earlyStopping
+    # run "first wave" node solving
+    for cpuIdx in 0 ..< cpuCount:
+      futureAnswers.add spawn childNodes[nextNodeIdx].inspectSolveRec earlyStopping
+      runningNodeIdxes[cpuIdx] = nextNodeIdx
+      nextNodeIdx.inc
 
-    for answer in futureAnswers:
-      result &= ^answer
+    # solve
+    while true:
+      for cpuIdx in 0 ..< cpuCount:
+        if not futureAnswers[runningNodeIdxes[cpuIdx]].isReady:
+          continue
 
-      when not defined(js):
-        if showProgress:
-          bar.inc
-          bar.update SuruBarUpdateMs * 1000 * 1000
+        # assign the next node to the processor
+        if nextNodeIdx < childNodes.len:
+          futureAnswers.add spawn childNodes[nextNodeIdx].inspectSolveRec earlyStopping
+          runningNodeIdxes[cpuIdx] = nextNodeIdx
+          nextNodeIdx.inc
 
-  when not defined(js):
-    if showProgress:
-      bar.finish
+        bar.inc
+        bar.update SuruBarUpdateMs * 1000 * 1000
+
+        # finish solving
+        completeNodeCount.inc
+        if completeNodeCount == childNodes.len:
+          for future in futureAnswers:
+            result &= ^future
+
+          # `bar.finish` affects stdout, so we need to branch here
+          if showProgress:
+            bar.finish
+          return
+
+      sleep ParallelSolvingWaitIntervalMs

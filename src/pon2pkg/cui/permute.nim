@@ -36,6 +36,7 @@ proc runPermuter*(args: Table[string, Value]) {.inline.} =
     not args["-D"].to_bool,
     args["-d"].to_bool,
     not args["-S"].to_bool,
+    showProgress = true,
   ):
     nazo.environment.pairs = pairsAnswer.pairs
     let

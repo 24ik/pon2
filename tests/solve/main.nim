@@ -13,7 +13,8 @@ proc checkSolve(questionUri: string, answersStrs: varargs[string]) =
     nazo = questionUri.parseUri.toNazoPuyo.get.nazoPuyo
     answers = answersStrs.mapIt it.toPositions.get
   check nazo.solve == answers
-  check nazo.inspectSolve(false).answers == answers
+  check nazo.solve(parallelCount = 1) == answers
+  check nazo.inspectSolve(earlyStopping = false).answers == answers
 
 proc main* =
   # ------------------------------------------------
