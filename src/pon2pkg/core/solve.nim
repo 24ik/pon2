@@ -366,6 +366,7 @@ proc solve*(
   nazo: NazoPuyo, parallelCount = (when defined(js): 1 else: max(countProcessors(), 1)), showProgress = false
 ): seq[Positions] {.inline.} =
   ## Solves the nazo puyo.
+  ## `parallelCount` and `showProgress` will be ignored on JS backend.
   if nazo.isNotSupported or nazo.moveCount == 0:
     return
 
@@ -460,6 +461,7 @@ proc inspectSolve*(
 ): InspectAnswers {.inline.} =
   ## Solves the nazo puyo while keeping the number of visited nodes.
   ## If `earlyStopping` is `true`, searching is interrupted if any solution is found.
+  ## `parallelCount` and `showProgress` will be ignored on JS backend.
   if nazo.isNotSupported or nazo.moveCount == 0:
     return
 

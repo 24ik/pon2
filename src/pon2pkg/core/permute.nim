@@ -11,9 +11,16 @@ import puyo_core
 
 import ./solve
 
+when not defined(js):
+  import cpuinfo
+
+  import suru
+
 # ------------------------------------------------
 # Permute
 # ------------------------------------------------
+
+const SuruBarUpdateMs = 100
 
 iterator allPairsSeq(
   originalPairs: Pairs,
@@ -97,15 +104,38 @@ iterator permute*(
   allowDouble: bool,
   allowLastDouble: bool,
   skipSwap: bool,
+  parallelCount = (when defined(js): 1 else: max(countProcessors(), 1)),
+  showProgress = false,
 ): tuple[pairs: Pairs, answer: Positions] {.inline.} =
   ## Yields the pairs and the answer of the nazo puyo that is obtained by permuting puyoes contained in the pairs,
   ## and has a unique solution.
-  for pairsSeq in nazo.environment.pairs.allPairsSeq(fixMoves.deduplicate true, allowDouble, allowLastDouble, skipSwap):
+  ## `parallelCount` and `showProgress` will be ignored on JS backend.
+  let pairsSeqSeq =
+    nazo.environment.pairs.allPairsSeq(fixMoves.deduplicate true, allowDouble, allowLastDouble, skipSwap).toSeq
+
+  when not defined(js):
+    var bar: SuruBar
+    if showProgress:
+      bar = initSuruBar()
+      bar[0].total = sum pairsSeqSeq.mapIt it.len
+      bar.setup
+
+  for pairsSeq in pairsSeqSeq:
     for pairs in pairsSeq:
       var nazo2 = nazo
       nazo2.environment.pairs = pairs
 
-      let answers = nazo2.inspectSolve(earlyStopping = true).answers
+      let answers = nazo2.inspectSolve(parallelCount, showProgress, true).answers
+
+      when not defined(js):
+        bar.inc
+        bar.update SuruBarUpdateMs * 1000 * 1000
+
       if answers.len == 1:
         yield (pairs, answers[0])
         break # TODO: swapped pair sometimes gives a different solution
+
+  # `bar.finish` affects stdout, so we need to branch here
+  when not defined(js):
+    if showProgress:
+      bar.finish
