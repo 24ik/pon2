@@ -2,7 +2,6 @@ import std/dirs
 import std/paths
 import strformat
 import strutils
-import sugar
 
 const
   avx2 {.booldefine.} = true
@@ -26,14 +25,7 @@ import ./main
 main()
 """
 
-    # thread flags
-    ThreadSeq = @["", "-d:singleThread"]
-
-  let
-    matrixSeq = collect:
-      for thread in ThreadSeq:
-         &"-d:avx2={avx2} -d:bmi2={bmi2} {thread}"
-    fileContent = FileContentTemplate.replace(Matrix, matrixSeq.join "; ")
+  let fileContent = FileContentTemplate.replace(Matrix, &"-d:avx2={avx2} -d:bmi2={bmi2}")
 
   for kind, path in currentSourcePath().Path.parentDir.walkDir:
     if kind == pcDir:

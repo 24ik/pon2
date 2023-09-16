@@ -10,9 +10,6 @@
 ## - [GUI Editor](./pon2pkg/gui/editor/main.html)
 ## - Web Editor
 ##
-## This module uses multiple threads by default.
-## To prevent this, specify `-d:singleThread` to the compile options.
-## 
 ## This module uses [puyo-core](https://github.com/izumiya-keisuke/puyo-core),
 ## [nazopuyo-core](https://github.com/izumiya-keisuke/nazopuyo-core) and
 ## [puyo-simulator](https://github.com/izumiya-keisuke/puyo-simulator), so please refer to them for details.

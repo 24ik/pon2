@@ -105,7 +105,7 @@ iterator permute*(
       var nazo2 = nazo
       nazo2.environment.pairs = pairs
 
-      let answers = nazo2.inspectSolve(true).answers
+      let answers = nazo2.inspectSolve(earlyStopping = true).answers
       if answers.len == 1:
         yield (pairs, answers[0])
         break # TODO: swapped pair sometimes gives a different solution

@@ -312,7 +312,7 @@ proc generate*(
       continue
 
     let nazo = (environment: env.get, requirement: req.get)
-    let answers = nazo.inspectSolve(true).answers
+    let answers = nazo.inspectSolve(earlyStopping = true).answers
     if answers.len != 1:
       continue
     if answers[0].len != nazo.moveCount:
