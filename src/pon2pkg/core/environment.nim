@@ -42,11 +42,11 @@ func toWaterEnvironment*(self: Environment[TsuField]): Environment[WaterField]
   result.rng = self.rng
 
 # ------------------------------------------------
-# Template
+# Flatten
 # ------------------------------------------------
 
-template flatten*(environments: Environments, body: untyped) =
-  ## Runs `body` with exported `environment`.
+template flattenAnd*(environments: Environments, body: untyped): untyped =
+  ## Runs `body` with `environment` exposed.
   case environments.rule
   of Tsu:
     let environment {.inject.} = environments.tsu

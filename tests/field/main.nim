@@ -402,6 +402,25 @@ oo.oo.
       check not field.isDead
 
   # ------------------------------------------------
+  # Flatten
+  # ------------------------------------------------
+
+  # flattenAnd
+  block:
+    let
+      str = "......\n".repeat(12) & "r....."
+      tsuField = str.parseTsuField
+      waterField = str.parseWaterField
+    var fields = Fields(rule: Tsu, tsu: tsuField, water: waterField)
+
+    fields.flattenAnd:
+      check field.type is TsuField
+
+    fields.rule = Water
+    fields.flattenAnd:
+      check field.type is WaterField
+
+  # ------------------------------------------------
   # Position
   # ------------------------------------------------
 

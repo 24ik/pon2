@@ -2,7 +2,7 @@
 
 import std/[options, unittest, uri]
 import ../../src/pon2pkg/core/[position]
-import ../../src/pon2pkg/core/nazo/[mark {.all.}, nazoPuyo]
+import ../../src/pon2pkg/core/nazoPuyo/[mark {.all.}, nazoPuyo]
 
 func mark(uriStr: string): MarkResult =
   let parseRes = uriStr.parseUri.parseNazoPuyos

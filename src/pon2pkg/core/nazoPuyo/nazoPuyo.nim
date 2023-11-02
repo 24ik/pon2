@@ -111,11 +111,11 @@ func moveCount*[F: TsuField or WaterField](self: NazoPuyo[F]): int {.inline.} =
   self.environment.pairs.len
 
 # ------------------------------------------------
-# Template
+# Flatten
 # ------------------------------------------------
 
-template flatten*(nazos: NazoPuyos, body: untyped) =
-  ## Runs `body` with exported `nazoPuyo`.
+template flattenAnd*(nazos: NazoPuyos, body: untyped): untyped =
+  ## Runs `body` with `nazoPuyo` exposed.
   case nazos.rule
   of Tsu:
     let nazoPuyo {.inject.} = nazos.tsu

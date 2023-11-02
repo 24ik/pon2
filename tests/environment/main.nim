@@ -13,11 +13,30 @@ proc main* =
   block:
     let
       str = "......\n".repeat(12) & "rgbypo\n------\nrg"
-      tsuEnv = parseTsuEnvironment(str).environment
-      waterEnv = parseWaterEnvironment(str).environment
+      tsuEnv = str.parseTsuEnvironment.environment
+      waterEnv = str.parseWaterEnvironment.environment
 
     check tsuEnv.toWaterEnvironment == waterEnv
     check waterEnv.toTsuEnvironment == tsuEnv
+
+  # ------------------------------------------------
+  # Flatten
+  # ------------------------------------------------
+
+  # flattenAnd
+  block:
+    let
+      str = "......\n".repeat(12) & "r.....\n------\ngb"
+      tsuEnv = str.parseTsuEnvironment.environment
+      waterEnv = str.parseWaterEnvironment.environment
+    var envs = Environments(rule: Tsu, tsu: tsuEnv, water: waterEnv)
+
+    envs.flattenAnd:
+      check environment.type is Environment[TsuField]
+
+    envs.rule = Water
+    envs.flattenAnd:
+      check environment.type is Environment[WaterField]
 
   # ------------------------------------------------
   # Pair

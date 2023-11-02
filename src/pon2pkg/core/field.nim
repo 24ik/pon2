@@ -45,11 +45,11 @@ func isDead*[F: TsuField or WaterField](self: F): bool {.inline.} =
   self.exist.isDead self.rule
 
 # ------------------------------------------------
-# Template
+# Flatten
 # ------------------------------------------------
 
-template flatten*(fields: Fields, body: untyped) =
-  ## Runs `body` with exported `field`.
+template flattenAnd*(fields: Fields, body: untyped): untyped =
+  ## Runs `body` with `field` exposed.
   case fields.rule
   of Tsu:
     let field {.inject.} = fields.tsu

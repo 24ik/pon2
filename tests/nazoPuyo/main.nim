@@ -2,7 +2,7 @@
 
 import std/[options, sequtils, strformat, unittest, uri]
 import ../../src/pon2pkg/core/[field, environment, misc, pair, position]
-import ../../src/pon2pkg/core/nazo/[nazoPuyo {.all.}]
+import ../../src/pon2pkg/core/nazoPuyo/[nazoPuyo {.all.}]
 
 func moveCount(uriStr: string): int =
   ## Returns the number of moves.
@@ -62,6 +62,24 @@ proc main* =
       moveCount == 3
     check "https://ishikawapuyo.net/simu/pn.html?z00R00Jw0Qw_G1s1G1Q1__u04".
       moveCount == 4
+
+  # ------------------------------------------------
+  # Flatten
+  # ------------------------------------------------
+
+  # flattenAnd
+  block:
+    let
+      tsuNazo = initTsuNazoPuyo()
+      waterNazo = initWaterNazoPuyo()
+    var nazos = NazoPuyos(rule: Tsu, tsu: tsuNazo, water: waterNazo)
+
+    nazos.flattenAnd:
+      check nazoPuyo.type is NazoPuyo[TsuField]
+
+    nazos.rule = Water
+    nazos.flattenAnd:
+      check nazoPuyo.type is NazoPuyo[WaterField]
 
   # ------------------------------------------------
   # Requirement <-> string / URI
