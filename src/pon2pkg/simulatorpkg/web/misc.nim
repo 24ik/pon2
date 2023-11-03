@@ -6,7 +6,7 @@
 import std/[dom, strutils]
 import karax/[kbase]
 import ../[simulator]
-import ../../core/[cell]
+import ../../corepkg/[cell]
 
 func cellImageSrc*(cell: Cell): kstring {.inline.} =
   ## Returns the image src.

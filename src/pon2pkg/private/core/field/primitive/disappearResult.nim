@@ -4,7 +4,7 @@
 {.experimental: "strictDefs".}
 
 import std/[sequtils]
-import ../../[unionFind]
+import ../../[unionfind]
 import ../../../../corepkg/[cell, misc]
 
 when defined(cpu32):

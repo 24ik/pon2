@@ -6,7 +6,7 @@
 import std/[httpclient, logging, net, options, appdirs, dirs, files, paths,
             strformat]
 import nigui
-import ../../core/[cell]
+import ../../corepkg/[cell]
 
 type Assets* = object
   cellImages*: array[Cell, Image]

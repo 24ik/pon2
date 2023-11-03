@@ -7,7 +7,7 @@ import std/[sugar]
 import nigui
 import ./[assets, misc]
 import ../[simulator]
-import ../../core/[misc]
+import ../../corepkg/[misc]
 import ../../private/simulator/[render]
 
 type NextPairControl* = ref object of LayoutContainer

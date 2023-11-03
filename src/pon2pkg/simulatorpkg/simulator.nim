@@ -4,8 +4,8 @@
 {.experimental: "strictDefs".}
 
 import std/[deques, options, sequtils, uri]
-import ../core/[cell, environment, field, misc, pair, position]
-import ../nazoPuyo/[nazoPuyo]
+import ../corepkg/[cell, environment, field, misc, pair, position]
+import ../nazopuyopkg/[nazopuyo]
 
 type
   SimulatorState* {.pure.} = enum

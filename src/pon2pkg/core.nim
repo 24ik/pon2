@@ -25,10 +25,11 @@ import ./corepkg/[cell, environment, field, misc, moveresult, pair, position]
 export cell.Cell, cell.ColorPuyo, cell.Puyo, cell.parseCell
 export environment.Environment, environment.Environments,
   environment.toTsuEnvironment, environment.toWaterEnvironment,
-  environment.addPair, environment.reset, environment.initEnvironment,
-  environment.initTsuEnvironment, environment.initWaterEnvironment,
-  environment.cellCount, environment.puyoCount, environment.colorCount,
-  environment.garbageCount, environment.move, environment.moveWithRoughTracking,
+  environment.flattenAnd, environment.addPair, environment.reset,
+  environment.initEnvironment, environment.initTsuEnvironment,
+  environment.initWaterEnvironment, environment.cellCount,
+  environment.puyoCount, environment.colorCount, environment.garbageCount,
+  environment.move, environment.moveWithRoughTracking,
   environment.moveWithDetailTracking, environment.moveWithFullTracking,
   environment.`$`, environment.toString, environment.parseEnvironment,
   environment.parseTsuEnvironment, environment.parseWaterEnvironment,
@@ -41,11 +42,12 @@ export field.TsuField, field.WaterField, field.zeroField, field.zeroTsuField,
   field.shiftedDown, field.shiftedRight, field.shiftedLeft, field.flippedV,
   field.flippedH, field.disappear, field.willDisappear, field.put, field.drop,
   field.toArray, field.parseField, field.Fields, field.rule, field.isDead,
-  field.invalidPositions, field.validPositions, field.validDoublePositions,
-  field.shiftUp, field.shiftDown, field.shiftRight, field.shiftLeft,
-  field.flipV, field.flipH, field.move, field.moveWithRoughTracking,
-  field.moveWithDetailTracking, field.moveWithFullTracking, field.parseTsuField,
-  field.parseWaterField, field.`$`, field.toUriQuery, field.parseFields
+  field.flattenAnd, field.invalidPositions, field.validPositions,
+  field.validDoublePositions, field.shiftUp, field.shiftDown, field.shiftRight,
+  field.shiftLeft, field.flipV, field.flipH, field.move,
+  field.moveWithRoughTracking, field.moveWithDetailTracking,
+  field.moveWithFullTracking, field.parseTsuField, field.parseWaterField,
+  field.`$`, field.toUriQuery, field.parseFields
 when UseAvx2:
   export field.`==`
 export misc.Height, misc.Width, misc.WaterHeight, misc.AirHeight, misc.Row,

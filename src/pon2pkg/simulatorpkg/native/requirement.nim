@@ -6,8 +6,8 @@
 import std/[options, sequtils, sugar]
 import nigui
 import ../[simulator]
-import ../../core/[misc]
-import ../../nazoPuyo/[nazoPuyo]
+import ../../corepkg/[misc]
+import ../../nazopuyopkg/[nazopuyo]
 
 type RequirementControl* = ref object of LayoutContainer
   ## Requirement control.

@@ -6,7 +6,7 @@
 import karax/[karaxdsl, vdom]
 import ./[misc]
 import ../[simulator]
-import ../../core/[cell]
+import ../../corepkg/[cell]
 import ../../private/simulator/[render]
 
 proc immediatePairsFrame*(simulator: var Simulator): VNode {.inline.} =

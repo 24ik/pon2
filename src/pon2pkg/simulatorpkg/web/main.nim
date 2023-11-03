@@ -8,8 +8,8 @@ import karax/[karax, karaxdsl, vdom]
 import ./[controller, field, immediatePairs, messages, misc, nextPair, pairs,
           palette, requirement, select, share]
 import ../[simulator]
-import ../../core/[environment, field, misc as coreMisc, pair, position]
-import ../../nazoPuyo/[nazoPuyo]
+import ../../corepkg/[environment, field, misc as coreMisc, pair, position]
+import ../../nazopuyopkg/[nazopuyo]
 
 export misc.toKeyEvent
 

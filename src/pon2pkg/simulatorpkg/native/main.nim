@@ -5,13 +5,14 @@
 
 {.experimental: "strictDefs".}
 
-import std/[options, setutils, sugar, uri]
+import std/[logging, options, setutils, sugar, uri]
 import docopt
 import nigui
-import puyo_core
 import ./[assets, field, immediatePairs, messages, misc, nextPair, pairs,
           requirement, select, share]
 import ../[simulator]
+import ../../corepkg/[environment, field, misc as coreMisc, position]
+import ../../nazopuyopkg/[nazopuyo]
 
 export misc.toKeyEvent
 
@@ -23,6 +24,8 @@ type
   PuyoSimulatorWindow* = ref object of WindowImpl
     ## Application window.
     simulator*: ref Simulator
+
+let logger = newConsoleLogger(lvlNotice, verboseFmtStr)
 
 # ------------------------------------------------
 # Keyboard Handler
@@ -205,27 +208,28 @@ proc runGui*(args: Table[string, Value]) {.inline.} =
   of vkNone:
     initTsuEnvironment(0, colorCount = 5, setPairs = false).runGui
   of vkStr:
+    let uri = parseUri $args["<uri>"]
+
     try:
       let
-        nazoPos = ($args["<uri>"]).parseUri.parseNazoPuyos
-        positions = nazoPos.positions
+        parseRes = uri.parseNazoPuyos
         mode =
-          if nazoPos.izumiyaMode.isSome: nazoPos.izumiyaMode.get
-          else: IshikawaModeToIzumiyaMode[nazoPos.ishikawaMode.get]
+          if parseRes.izumiyaMode.isSome: parseRes.izumiyaMode.get
+          else: IshikawaModeToIzumiyaMode[parseRes.ishikawaMode.get]
 
-      case nazoPos.rule
-      of Tsu: nazoPos.nazoPuyos.tsu.runGui positions, mode
-      of Water: nazoPos.nazoPuyos.water.runGui positions, mode
+      parseRes.nazoPuyos.flattenAnd:
+        nazoPuyo.runGui parseRes.positions, mode
     except ValueError:
-      let
-        envPos = ($args["<uri>"]).parseUri.parseEnvironments
-        positions = envPos.positions
-        mode =
-          if envPos.izumiyaMode.isSome: envPos.izumiyaMode.get
-          else: IshikawaModeToIzumiyaMode[envPos.ishikawaMode.get]
+      try:
+        let
+          parseRes = ($args["<uri>"]).parseUri.parseEnvironments
+          mode =
+            if parseRes.izumiyaMode.isSome: parseRes.izumiyaMode.get
+            else: IshikawaModeToIzumiyaMode[parseRes.ishikawaMode.get]
 
-      case envPos.rule
-      of Tsu: envPos.environments.tsu.runGui positions, mode
-      of Water: envPos.environments.water.runGui positions, mode
+        parseRes.environments.flattenAnd:
+          environment.runGui parseRes.positions, mode
+      except ValueError:
+        logger.log lvlError, "Invalid URI: ", $uri
   else:
     assert false

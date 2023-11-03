@@ -7,7 +7,7 @@ import std/[sugar]
 import karax/[karax, karaxdsl, kbase, vdom, vstyles]
 import ./[misc]
 import ../[simulator]
-import ../../core/[field, misc]
+import ../../corepkg/[field, misc]
 import ../../private/simulator/[render]
 
 func initClickHandler(simulator: var Simulator, row: Row, col: Column):

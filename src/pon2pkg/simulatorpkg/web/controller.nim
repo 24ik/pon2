@@ -6,7 +6,7 @@
 import std/[sugar]
 import karax/[karax, karaxdsl, vdom]
 import ../[simulator]
-import ../../core/[misc]
+import ../../corepkg/[misc]
 
 proc controllerFrame*(simulator: var Simulator): VNode {.inline.} =
   ## Returns the controller frame.

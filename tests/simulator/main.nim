@@ -1,9 +1,9 @@
 {.experimental: "strictDefs".}
 
 import std/[options, unittest, uri]
-import ../../src/pon2pkg/core/[environment, pair, position] # somehow needed
-import ../../src/pon2pkg/core/nazoPuyo/[nazoPuyo]
-import ../../src/pon2pkg/simulator/[simulator {.all.}]
+import ../../src/pon2pkg/corepkg/[environment, pair, position] # somehow needed
+import ../../src/pon2pkg/nazopuyopkg/[nazopuyo]
+import ../../src/pon2pkg/simulatorpkg/[simulator {.all.}]
 
 proc main* =
   # ------------------------------------------------
