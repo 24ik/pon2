@@ -4,10 +4,9 @@
 {.experimental: "strictDefs".}
 
 import std/[options, strformat, uri]
-import ./[simulator]
-import ../core/[cell, field, misc, pair, position]
-import ../core/nazoPuyo/[mark]
-
+import ../../simulator/[simulator]
+import ../../core/[cell, field, misc, pair, position]
+import ../../core/nazoPuyo/[mark]
 
 # ------------------------------------------------
 # Field
