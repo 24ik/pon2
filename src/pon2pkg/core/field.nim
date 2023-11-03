@@ -222,12 +222,12 @@ func moveWithFullTracking*[F: TsuField or WaterField](
 
 func parseTsuField*(arr: array[Row, array[Column, Cell]]): TsuField {.inline.} =
   ## Converts the array to the Tsu field.
-  parseField[TsuField] arr
+  arr.parseField[:TsuField]
 
 func parseWaterField*(arr: array[Row, array[Column, Cell]]): WaterField
                      {.inline.} =
   ## Converts the array to the Water field.
-  parseField[WaterField] arr
+  arr.parseField[:WaterField]
 
 # ------------------------------------------------
 # Field <-> string
@@ -266,16 +266,17 @@ func parseField*[F: TsuField or WaterField](str: string): F {.inline.} =
     for col in Column.low..Column.high:
       arr[row][col] = ($lines[row][col]).parseCell
 
-  result = parseField[F] arr
+  result = arr.parseField[:F]
 
-func parseTsuField*(str: string): TsuField {.inline.} = parseField[TsuField] str
+func parseTsuField*(str: string): TsuField {.inline.} =
   ## Converts the string representation to the Tsu field.
   ## If `str` is not a valid representation, `ValueError` is raised.
+  str.parseField[:TsuField]
 
 func parseWaterField*(str: string): WaterField {.inline.} =
   ## Converts the string representation to the Water field.
   ## If `str` is not a valid representation, `ValueError` is raised.
-  parseField[WaterField] str
+  str.parseField[:WaterField]
 
 # ------------------------------------------------
 # Field <-> URI
@@ -417,17 +418,17 @@ func parseField*[F: TsuField or WaterField](
       arr[row][col] = cell1
       arr[row][col.succ] = cell2
 
-  result = parseField[F] arr
+  result = arr.parseField[:F]
 
 func parseTsuField*(query: string, host: SimulatorHost): TsuField {.inline.} =
   ## Converts the URI query to the Tsu field.
   ## If `query` is not a valid URI, `ValueError` is raised.
-  parseField[TsuField](query, host)
+  query.parseField[:TsuField](host)
 
 func parseWaterField*(query: string, host: SimulatorHost): WaterField {.inline.} =
   ## Converts the URI query to the Water field.
   ## If `query` is not a valid URI, `ValueError` is raised.
-  parseField[WaterField](query, host)
+  query.parseField[:WaterField](host)
 
 func parseFields*(query: string, host: SimulatorHost): Fields {.inline.} =
   ## Converts the URI query to the fields.

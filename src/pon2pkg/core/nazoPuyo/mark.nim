@@ -3,7 +3,7 @@
 
 {.experimental: "strictDefs".}
 
-import std/[options, sequtils, tables, uri]
+import std/[options, sequtils, tables]
 import ./[nazoPuyo]
 import ../[cell, environment, field, moveResult, position]
 
@@ -34,8 +34,8 @@ func sum[T: SomeNumber or Natural](s: seq[T]): T {.inline.} =
 
 func accept[
     F: TsuField or WaterField,
-    M: MoveResult or RoughMoveResult or DetailMoveResult or FullMoveResult](
-      req: Requirement, moveResult: M, field: F,
+    R: MoveResult or RoughMoveResult or DetailMoveResult or FullMoveResult](
+      req: Requirement, moveResult: R, field: F,
       disappearColors: Option[set[ColorPuyo]],
       disappearCount: Option[Natural]): bool {.inline.} =
   ## Returns `true` if the requirement is satisfied.
@@ -72,11 +72,11 @@ func accept[
   var nowNums = newSeq[int] 0
   case req.kind
   of DisappearColorSametime, DisappearColorMoreSametime:
-    when M is DetailMoveResult:
+    when R is DetailMoveResult:
       for counts in moveResult.disappearCounts:
         nowNums.add counts[ColorPuyo.low..ColorPuyo.high].countIt it > 0
   of DisappearCountSametime, DisappearCountMoreSametime:
-    when M is DetailMoveResult:
+    when R is DetailMoveResult:
       case req.color.get
       of RequirementColor.All:
         nowNums = moveResult.puyoCounts
@@ -86,7 +86,7 @@ func accept[
         nowNums = moveResult.disappearCounts.mapIt it[
           RequirementColorToCell[req.color.get]].int
   of DisappearPlace, DisappearPlaceMore:
-    when M is FullMoveResult:
+    when R is FullMoveResult:
       case req.color.get
       of RequirementColor.All, RequirementColor.Color:
         for countsArr in moveResult.detailDisappearCounts:
@@ -97,7 +97,7 @@ func accept[
         nowNums = moveResult.detailDisappearCounts.mapIt it[
           RequirementColorToCell[req.color.get]].len
   of DisappearConnect, DisappearConnectMore:
-    when M is FullMoveResult:
+    when R is FullMoveResult:
       case req.color.get
       of RequirementColor.All, RequirementColor.Color:
         for countsArray in moveResult.detailDisappearCounts:
@@ -190,16 +190,15 @@ func mark[
 
   result = WrongAnswer
 
-func mark*[F: TsuField or WaterField](nazo: NazoPuyo[F], positions: Positions):
-    MarkResult {.inline.} =
+func mark*(nazo: NazoPuyo, positions: Positions): MarkResult {.inline.} =
   ## Marks the positions.
   case nazo.requirement.kind
   of Clear, Chain, ChainMore, ChainClear, ChainMoreClear:
-    nazo.mark(positions, environment.move[F])
+    nazo.mark(positions, environment.move[nazo.F])
   of DisappearColor, DisappearColorMore, DisappearCount, DisappearCountMore:
-    nazo.mark(positions, environment.moveWithRoughTracking[F])
+    nazo.mark(positions, environment.moveWithRoughTracking[nazo.F])
   of DisappearColorSametime, DisappearColorMoreSametime,
       DisappearCountSametime, DisappearCountMoreSametime:
-    nazo.mark(positions, environment.moveWithDetailTracking[F])
+    nazo.mark(positions, environment.moveWithDetailTracking[nazo.F])
   of DisappearPlace, DisappearPlaceMore, DisappearConnect, DisappearConnectMore:
-    nazo.mark(positions, environment.moveWithFullTracking[F])
+    nazo.mark(positions, environment.moveWithFullTracking[nazo.F])
