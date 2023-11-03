@@ -1,8 +1,8 @@
 {.experimental: "strictDefs".}
 
 import std/[unittest]
-import ../../src/pon2pkg/core/[cell, environment, field, moveResult {.all.},
-                               position]
+import ../../src/pon2pkg/corepkg/[cell, environment, field, moveresult {.all.},
+                                  position]
 
 proc main* =
   # ------------------------------------------------

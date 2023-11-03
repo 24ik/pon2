@@ -5,10 +5,11 @@
 
 import std/[dom, options, random, sequtils, strutils, sugar, tables, uri]
 import karax/[karax, karaxdsl, vdom]
-import puyo_core
 import ./[controller, field, immediatePairs, messages, misc, nextPair, pairs,
           palette, requirement, select, share]
 import ../[simulator]
+import ../../core/[environment, field, misc as coreMisc, pair, position]
+import ../../nazoPuyo/[nazoPuyo]
 
 export misc.toKeyEvent
 
@@ -88,8 +89,8 @@ proc initPuyoSimulatorDom*(simulator: var Simulator, setKeyHandler = true,
   else:
     result = simulator.initPuyoSimulatorDomCore idx
 
-proc initPuyoSimulatorDom*[F: TsuField or WaterField](
-    nazoEnv: NazoPuyo[F] or Environment[F], mode = IzumiyaSimulatorMode.Play,
+proc initPuyoSimulatorDom*(
+    nazoEnv: NazoPuyo or Environment, mode = IzumiyaSimulatorMode.Play,
     showCursor = false, setKeyHandler = true,
     wrapSection = true, idx = 0): VNode {.inline.} =
   ## Returns the simulator DOM.
@@ -98,8 +99,8 @@ proc initPuyoSimulatorDom*[F: TsuField or WaterField](
   var simulator = nazoEnv.initSimulator(mode, showCursor)
   result = simulator.initPuyoSimulatorDom(setKeyHandler, wrapSection, idx)
 
-proc initPuyoSimulatorDom*[F: TsuField or WaterField](
-    nazoEnv: NazoPuyo[F] or Environment[F], positions: Positions,
+proc initPuyoSimulatorDom*(
+    nazoEnv: NazoPuyo or Environment, positions: Positions,
     mode = IzumiyaSimulatorMode.Play, showCursor = false,
     setKeyHandler = true, wrapSection = true, idx = 0): VNode {.inline.} =
   ## Returns the simulator DOM.
@@ -250,54 +251,30 @@ proc initPuyoSimulatorDom(routerData: RouterData): VNode =
   uri.query = query
 
   try:
-    let nazoPos = uri.parseNazoPuyos
-    case nazoPos.rule
-    of Tsu:
-      let nazo = nazoPos.nazoPuyos.tsu
-
+    let parseRes = uri.parseNazoPuyos
+    parseRes.nazoPuyos.flattenAnd:
       globalSimulator =
-        if nazoPos.positions.isSome:
-          nazo.initSimulator(nazoPos.positions.get, nazoPos.izumiyaMode.get,
-                             not isMobile())
+        if parseRes.positions.isSome:
+          nazoPuyo.initSimulator(parseRes.positions.get,
+                                 parseRes.izumiyaMode.get, not isMobile())
         else:
-          nazo.initSimulator(nazoPos.izumiyaMode.get, not isMobile())
-    of Water:
-      let nazo = nazoPos.nazoPuyos.water
+          nazoPuyo.initSimulator(parseRes.izumiyaMode.get, not isMobile())
 
-      globalSimulator =
-        if nazoPos.positions.isSome:
-          nazo.initSimulator(nazoPos.positions.get, nazoPos.izumiyaMode.get,
-                             not isMobile())
-        else:
-          nazo.initSimulator(nazoPos.izumiyaMode.get, not isMobile())
-
-    return globalSimulator.initPuyoSimulatorDom
+    result = globalSimulator.initPuyoSimulatorDom
   except ValueError:
     try:
-      let envPos = uri.parseEnvironments
-      case envPos.rule
-      of Tsu:
-        let env = envPos.environments.tsu
-
+      let parseRes = uri.parseEnvironments
+      parseRes.environments.flattenAnd:
         globalSimulator =
-          if envPos.positions.isSome:
-            env.initSimulator(envPos.positions.get, envPos.izumiyaMode.get,
-                              not isMobile())
+          if parseRes.positions.isSome:
+            environment.initSimulator(parseRes.positions.get,
+                                      parseRes.izumiyaMode.get, not isMobile())
           else:
-            env.initSimulator(envPos.izumiyaMode.get, not isMobile())
-      of Water:
-        let env = envPos.environments.water
+            environment.initSimulator(parseRes.izumiyaMode.get, not isMobile())
 
-        globalSimulator =
-          if envPos.positions.isSome:
-            env.initSimulator(envPos.positions.get, envPos.izumiyaMode.get,
-                              not isMobile())
-          else:
-            env.initSimulator(envPos.izumiyaMode.get, not isMobile())
-
-      return globalSimulator.initPuyoSimulatorDom
+      result = globalSimulator.initPuyoSimulatorDom
     except ValueError:
-      return buildHtml(tdiv):
+      result = buildHtml(tdiv):
         text "URL形式エラー"
 
 proc initWebPage* {.inline.} =

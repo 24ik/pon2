@@ -1,8 +1,8 @@
 {.experimental: "strictDefs".}
 
 import std/[options, unittest, uri]
-import ../../src/pon2pkg/core/[position]
-import ../../src/pon2pkg/core/nazoPuyo/[mark {.all.}, nazoPuyo]
+import ../../src/pon2pkg/corepkg/[position]
+import ../../src/pon2pkg/nazopuyopkg/[mark {.all.}, nazopuyo]
 
 func mark(uriStr: string): MarkResult =
   let parseRes = uriStr.parseUri.parseNazoPuyos

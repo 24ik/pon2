@@ -7,7 +7,7 @@ import std/[options, strformat, sugar]
 import karax/[karax, karaxdsl, kbase, vdom]
 import ../[simulator]
 import ../../core/[misc]
-import ../../core/nazoPuyo/[nazoPuyo]
+import ../../nazoPuyo/[nazoPuyo]
 
 const
   KindSelectIdPrefix = "puyo-simulator-select-req-kind"

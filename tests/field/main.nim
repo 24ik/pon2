@@ -1,7 +1,7 @@
 {.experimental: "strictDefs".}
 
 import std/[setutils, strutils, unittest]
-import ../../src/pon2pkg/core/[cell, field {.all.}, misc, pair, position]
+import ../../src/pon2pkg/corepkg/[cell, field {.all.}, misc, pair, position]
 
 proc main* =
   # ------------------------------------------------

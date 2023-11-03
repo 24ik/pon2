@@ -5,7 +5,7 @@
 
 import std/[deques, options, sequtils, uri]
 import ../core/[cell, environment, field, misc, pair, position]
-import ../core/nazoPuyo/[nazoPuyo]
+import ../nazoPuyo/[nazoPuyo]
 
 type
   SimulatorState* {.pure.} = enum

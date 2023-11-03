@@ -6,14 +6,14 @@
 import std/[sugar]
 import nigui
 import ./[assets, misc]
-import ../[simulator, render]
+import ../[simulator]
 import ../../core/[field, misc]
+import ../../private/simulator/[render]
 
 type FieldControl* = ref object of LayoutContainer
   ## Field control.
   simulator: ref Simulator
   assets: ref Assets
-
 
 proc cellDrawHandler(control: FieldControl, event: DrawEvent, row: Row,
                      col: Column) {.inline.} =

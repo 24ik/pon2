@@ -7,7 +7,7 @@
 {.experimental: "strictDefs".}
 
 import std/[sequtils, setutils, strutils, sugar, tables]
-import ./[cell, misc, moveResult, pair, position]
+import ./[cell, misc, moveresult, pair, position]
 import ../private/core/[intrinsic]
 import ../private/core/field/[binary]
 

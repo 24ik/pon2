@@ -4,8 +4,9 @@
 import std/[sugar]
 import nigui
 import ./[assets, misc]
-import ../[simulator, render]
+import ../[simulator]
 import ../../core/[cell, pair, position]
+import ../../private/simulator/[render]
 
 type PairsControl* = ref object of LayoutContainer
   ## Pairs control.

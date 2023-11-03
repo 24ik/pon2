@@ -5,7 +5,8 @@
 
 import std/[browsers, sugar, uri]
 import nigui
-import ../[render, simulator]
+import ../[simulator]
+import ../../private/simulator/[render]
 
 type ShareControl* = ref object of LayoutContainer
   ## Share control.

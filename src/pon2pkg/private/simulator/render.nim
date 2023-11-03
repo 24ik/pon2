@@ -6,7 +6,7 @@
 import std/[options, strformat, uri]
 import ../../simulator/[simulator]
 import ../../core/[cell, field, misc, pair, position]
-import ../../core/nazoPuyo/[mark]
+import ../../nazoPuyo/[mark]
 
 # ------------------------------------------------
 # Field

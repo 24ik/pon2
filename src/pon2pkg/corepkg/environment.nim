@@ -5,7 +5,7 @@
 
 import std/[deques, options, random, sequtils, setutils, strutils, sugar,
             tables, uri]
-import ./[cell, field, misc, moveResult, pair, position]
+import ./[cell, field, misc, moveresult, pair, position]
 
 type
   Environment*[F: TsuField or WaterField] = object

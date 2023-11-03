@@ -1,7 +1,7 @@
 {.experimental: "strictDefs".}
 
 import std/[unittest]
-import ../../src/pon2pkg/core/[position {.all.}]
+import ../../src/pon2pkg/corepkg/[position {.all.}]
 
 proc main* =
   # ------------------------------------------------

@@ -5,9 +5,9 @@
 
 import std/[bitops, sequtils]
 import ./[binary]
-import ../[binary as commonBinary]
+import ../[binary]
 import ../../[unionFind]
-import ../../../../core/[cell, misc]
+import ../../../../corepkg/[cell, misc]
 
 type DisappearResult* = object
   ## Disappearing result.

@@ -5,8 +5,8 @@
 
 import std/[bitops]
 import ./[disappearResult]
-import ../[binary as commonBinary]
-import ../../../../core/[cell, misc, pair, position]
+import ../[binary]
+import ../../../../corepkg/[cell, misc, pair, position]
 
 when defined(cpu32):
   import ./bit32/binary

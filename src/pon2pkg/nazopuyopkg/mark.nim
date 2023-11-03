@@ -4,8 +4,8 @@
 {.experimental: "strictDefs".}
 
 import std/[options, sequtils, tables]
-import ./[nazoPuyo]
-import ../[cell, environment, field, moveResult, position]
+import ./[nazopuyo]
+import ../corepkg/[cell, environment, field, moveresult, position]
 
 type MarkResult* = enum
   ## Marking result.

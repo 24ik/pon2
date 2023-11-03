@@ -1,8 +1,8 @@
 {.experimental: "strictDefs".}
 
 import std/[options, sequtils, strformat, unittest, uri]
-import ../../src/pon2pkg/core/[field, environment, misc, pair, position]
-import ../../src/pon2pkg/core/nazoPuyo/[nazoPuyo {.all.}]
+import ../../src/pon2pkg/corepkg/[field, environment, misc, pair, position]
+import ../../src/pon2pkg/nazopuyopkg/[nazopuyo {.all.}]
 
 func moveCount(uriStr: string): int =
   ## Returns the number of moves.

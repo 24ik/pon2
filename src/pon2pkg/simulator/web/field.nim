@@ -6,8 +6,9 @@
 import std/[sugar]
 import karax/[karax, karaxdsl, kbase, vdom, vstyles]
 import ./[misc]
-import ../[render, simulator]
-import ../../core/[field, misc as coreMisc]
+import ../[simulator]
+import ../../core/[field, misc]
+import ../../private/simulator/[render]
 
 func initClickHandler(simulator: var Simulator, row: Row, col: Column):
     () -> void =

@@ -6,7 +6,7 @@
 import std/[bitops]
 import ./[binary, disappearResult]
 import ../[binary as commonBinary]
-import ../../../../core/[cell, misc, pair, position]
+import ../../../../corepkg/[cell, misc, pair, position]
 
 export binary.`==`
 
