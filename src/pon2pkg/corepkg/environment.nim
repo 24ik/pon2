@@ -21,10 +21,6 @@ type
     tsu*: Environment[TsuField]
     water*: Environment[WaterField]
 
-using
-  self: Environment
-  mSelf: var Environment
-
 # ------------------------------------------------
 # Convert
 # ------------------------------------------------
@@ -72,7 +68,7 @@ func randomPair(rng: var Rand, colors: set[ColorPuyo]): Pair {.inline.} =
 
   result = Pair.low.succ axisIdx * ColorPuyo.fullSet.card + childIdx
 
-func addPair*(mSelf) {.inline.} =
+func addPair*[F: TsuField or WaterField](mSelf: var Environment[F]) {.inline.} =
   ## Adds a random pair to the tail of the pairs.
   mSelf.pairs.addLast mSelf.rng.randomPair mSelf.colors
 
@@ -89,14 +85,16 @@ func randomColors(rng: var Rand, colorCount: range[1..5]): set[ColorPuyo]
   for i in 0..<colorCount:
     result.incl colors[i]
 
-func setInitialPairs(mSelf: var Environment) {.inline.} =
+func setInitialPairs[F: TsuField or WaterField](mSelf: var Environment[F])
+                    {.inline.} =
   ## Sets the first two pairs.
   let initialColors = mSelf.rng.randomColors min(mSelf.colors.card, 3)
   for _ in 0..<2:
     mSelf.pairs.addLast mSelf.rng.randomPair initialColors
 
-func reset(mSelf; seed: Option[int], resetColors: bool, setPairs: bool)
-          {.inline.} =
+func reset[F: TsuField or WaterField](
+    mSelf: var Environment[F], seed: Option[int], resetColors: bool,
+    setPairs: bool) {.inline.} =
   ## Resets the environment.
   if resetColors:
     var rng = if seed.isSome: seed.get.initRand else: mSelf.rng
@@ -112,13 +110,16 @@ func reset(mSelf; seed: Option[int], resetColors: bool, setPairs: bool)
     mSelf.setInitialPairs
     mSelf.addPair
 
-func reset*(mSelf; seed: int, resetColors = true, setPairs = true) {.inline.} =
+func reset*[F: TsuField or WaterField](
+    mSelf: var Environment[F], seed: int, resetColors = true, setPairs = true)
+    {.inline.} =
   ## Resets the environment.
   mSelf.reset some seed, resetColors, setPairs
 
-func reset*(mSelf; resetColors = true, setPairs = true) {.inline.} =
+func reset*[F: TsuField or WaterField](
+    mSelf: var Environment[F], resetColors = true, setPairs = true) {.inline.} =
   ## Resets the environment.
-  {.push warning[ProveInit]:off.}
+  {.push warning[ProveInit]: off.}
   mSelf.reset none int, resetColors, setPairs
   {.pop.}
 
@@ -177,11 +178,13 @@ proc initWaterEnvironment*(
 # Count - Cell
 # ------------------------------------------------
 
-func cellCount*(self; cell: Cell): int {.inline.} =
+func cellCount*[F: TsuField or WaterField](self: Environment[F], cell: Cell):
+    int {.inline.} =
   ## Returns the number of `cell` in the environment.
   self.field.cellCount(cell) + self.pairs.cellCount(cell)
 
-func cellCount*(self): int {.inline.} =
+func cellCount*[F: TsuField or WaterField](self: Environment[F]): int
+               {.inline.} =
   ## Returns the number of cells in the environment.
   self.field.cellCount + self.pairs.cellCount
 
@@ -189,7 +192,8 @@ func cellCount*(self): int {.inline.} =
 # Count - Puyo
 # ------------------------------------------------
 
-func puyoCount*(self): int {.inline.} =
+func puyoCount*[F: TsuField or WaterField](self: Environment[F]): int
+               {.inline.} =
   ## Returns the number of puyos in the environment.
   self.field.puyoCount + self.pairs.puyoCount
 
@@ -197,7 +201,8 @@ func puyoCount*(self): int {.inline.} =
 # Count - Color
 # ------------------------------------------------
 
-func colorCount*(self): int {.inline.} =
+func colorCount*[F: TsuField or WaterField](self: Environment[F]): int
+                {.inline.} =
   ## Returns the number of color puyos in the environment.
   self.field.colorCount + self.pairs.colorCount
 
@@ -205,19 +210,14 @@ func colorCount*(self): int {.inline.} =
 # Count - Garbage
 # ------------------------------------------------
 
-func garbageCount*(self: Environment): int {.inline.} =
+func garbageCount*[F: TsuField or WaterField](self: Environment[F]): int
+                  {.inline.} =
   ## Returns the number of garbage puyos in the environment.
   self.field.garbageCount + self.pairs.garbageCount
 
 # ------------------------------------------------
 # Move
 # ------------------------------------------------
-
-#[
-NOTE: Implicit generics cannot be applied to the `move***` functions
-since they must be instantiated explicitly when passed as an argument such as
-`mark`.
-]#
 
 func move*[F: TsuField or WaterField](
     mSelf: var Environment[F], pos: Position,
@@ -282,12 +282,16 @@ const
   PairPosSep = '|'
   PairsSep = "\n"
 
-func `$`*(self): string {.inline.} = $self.field & FieldPairsSep & $self.pairs
+func `$`*[F: TsuField or WaterField](self: Environment[F]): string {.inline.} =
+  $self.field & FieldPairsSep & $self.pairs
 
-func toString*(self: Environment): string {.inline.} = $self
+func toString*[F: TsuField or WaterField](self: Environment[F]): string
+              {.inline.} =
   ## Converts the environment to the string representation.
+  $self
 
-func toString*(self; positions: Positions): string {.inline.} =
+func toString*[F: TsuField or WaterField](
+    self: Environment[F], positions: Positions): string {.inline.} =
   ## Converts the environment and the positions to the string representation.
   ## If the pairs and the positions have different lengths,
   ## the longer one will be truncated.
@@ -313,7 +317,7 @@ func parseEnvironment*[F: TsuField or WaterField](
 
   result.environment.field = strs[0].parseField[:F]
 
-  {.push warning[ProveInit]:off.}
+  {.push warning[ProveInit]: off.}
   result.positions = none Positions
   {.pop.}
 
@@ -366,10 +370,10 @@ const
     for mode in IshikawaSimulatorMode:
       {"/simu/p" & $mode & ".html": mode}
 
-func toUri(self; positions: Option[Positions], host: SimulatorHost,
-           kind: IzumiyaSimulatorKind,
-           mode: IzumiyaSimulatorMode or IshikawaSimulatorMode): Uri
-          {.inline.} =
+func toUri[F: TsuField or WaterField](
+    self: Environment[F], positions: Option[Positions], host: SimulatorHost,
+    kind: IzumiyaSimulatorKind,
+    mode: IzumiyaSimulatorMode or IshikawaSimulatorMode): Uri {.inline.} =
   ## Converts the environment and the positions to the URI.
   ## The positions will be truncated if it is shorter than the pairs.
   ## If `host` and `mode` are incompatible, `ValueError` is raised.
@@ -410,15 +414,17 @@ func toUri(self; positions: Option[Positions], host: SimulatorHost,
     else:
       raise newException(ValueError, "Got incompatible `host` and `mode`")
 
-func toUri*(self; host = Izumiya, kind = Regular,
-            mode: IzumiyaSimulatorMode or IshikawaSimulatorMode = Play): Uri
-           {.inline.} =
+func toUri*[F: TsuField or WaterField](
+    self: Environment[F], host = Izumiya, kind = Regular,
+    mode: IzumiyaSimulatorMode or IshikawaSimulatorMode = Play): Uri
+    {.inline.} =
   ## Converts the environment and the positions to the URI.
   self.toUri(none Positions, host, kind, mode)
 
-func toUri*(self; positions: Positions, host = Izumiya, kind = Regular,
-            mode: IzumiyaSimulatorMode or IshikawaSimulatorMode = Play): Uri
-           {.inline.} =
+func toUri*[F: TsuField or WaterField](
+    self: Environment[F], positions: Positions, host = Izumiya, kind = Regular,
+    mode: IzumiyaSimulatorMode or IshikawaSimulatorMode = Play): Uri
+    {.inline.} =
   ## Converts the environment and the positions to the URI.
   ## The positions will be truncated if it is shorter than the pairs.
   self.toUri(some positions, host, kind, mode)
@@ -431,7 +437,7 @@ func parseEnvironment*[F: TsuField or WaterField](
       ishikawaMode: Option[IshikawaSimulatorMode]] {.inline.} =
   ## Converts the URI to the environment, positions and simulator mode.
   ## If `uri` is not a valid URI, `ValueError` is raised.
-  {.push warning[ProveInit]:off.}
+  {.push warning[ProveInit]: off.}
   result.positions = none Positions
   result.kind = none IzumiyaSimulatorKind
   result.izumiyaMode = none IzumiyaSimulatorMode
@@ -486,8 +492,8 @@ func parseEnvironment*[F: TsuField or WaterField](
 
       let pairsCount = strs[1].len div 2
       var
-        pairsSeq = newSeqOfCap[Pair] pairsCount
-        positions = newSeqOfCap[Option[Position]] pairsCount
+        pairsSeq = newSeqOfCap[Pair]pairsCount
+        positions = newSeqOfCap[Option[Position]]pairsCount
 
       for i in 0..<pairsCount:
         pairsSeq.add ($strs[1][2 * i]).parsePair host
@@ -543,7 +549,8 @@ func parseEnvironments*(
      result.ishikawaMode) = uri.parseTsuEnvironment(colors, seed)
     result.environments.rule = Tsu
   except ValueError:
-    (result.environments.water, result.positions, result.kind, result.izumiyaMode,
+    (result.environments.water, result.positions, result.kind,
+     result.izumiyaMode,
      result.ishikawaMode) = uri.parseWaterEnvironment(colors, seed)
     result.environments.rule = Water
 
@@ -551,8 +558,9 @@ func parseEnvironments*(
 # Environment <-> array
 # ------------------------------------------------
 
-func toArrays*(self): tuple[field: array[Row, array[Column, Cell]],
-                            pairs: seq[array[2, Cell]]] {.inline.} =
+func toArrays*[F: TsuField or WaterField](self: Environment[F]):
+    tuple[field: array[Row, array[Column, Cell]], pairs: seq[array[2, Cell]]]
+    {.inline.} =
   ## Converts the environment to the arrays.
   result.field = self.field.toArray
   result.pairs = self.pairs.toArray

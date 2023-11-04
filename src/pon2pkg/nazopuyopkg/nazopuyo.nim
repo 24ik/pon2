@@ -67,10 +67,6 @@ const
   NumberKinds* = NoNumberKinds.complement
     ## All requirement kinds containing 'n'.
 
-using
-  self: NazoPuyo
-  mSelf: var NazoPuyo
-
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
@@ -78,7 +74,7 @@ using
 func initNazoPuyo*[F: TsuField or WaterField]: NazoPuyo[F] {.inline.} =
   ## Returns the initial nazo puyo.
   result.environment = initEnvironment[F](0, colorCount = 5, setPairs = false)
-  {.push warning[ProveInit]:off.}
+  {.push warning[ProveInit]: off.}
   result.requirement = Requirement(
     kind: RequirementKind.low, color: some RequirementColor.All,
     number: none RequirementNumber)
@@ -110,8 +106,9 @@ func toWaterNazoPuyo*(self: NazoPuyo[TsuField]): NazoPuyo[WaterField]
 # Property
 # ------------------------------------------------
 
-func moveCount*(self): int {.inline.} = self.environment.pairs.len
+func moveCount*[F: TsuField or WaterField](self: NazoPuyo[F]): int {.inline.} =
   ## Returns the number of moves of the nazo puyo.
+  self.environment.pairs.len
 
 # ------------------------------------------------
 # Flatten
@@ -154,7 +151,7 @@ func parseRequirement*(str: string): Requirement {.inline.} =
 
   # NOTE: These variables should be const, but it makes compilation extremely
   # slow due to Nim's specification.
-  {.push warning[ProveInit]:off.}
+  {.push warning[ProveInit]: off.}
   let
     allRequirements = collect:
       for kind in RequirementKind:
@@ -179,13 +176,16 @@ func parseRequirement*(str: string): Requirement {.inline.} =
 
 const ReqEnvSep = "\n======\n"
 
-func `$`*(self): string {.inline.} =
+func `$`*[F: TsuField or WaterField](self: NazoPuyo[F]): string {.inline.} =
   $self.requirement & ReqEnvSep & $self.environment
 
-func toString*(self): string {.inline.} = $self
+func toString*[F: TsuField or WaterField](self: NazoPuyo[F]): string
+              {.inline.} =
   ## Converts the nazo puyo to the string representation.
+  $self
 
-func toString*(self; positions: Positions): string {.inline.} =
+func toString*[F: TsuField or WaterField](
+    self: NazoPuyo[F], positions: Positions): string {.inline.} =
   ## Converts the nazo puyo and the positions to the string representation.
   ## If the pairs and the positions have different lengths,
   ## the longer one will be truncated.
@@ -266,7 +266,7 @@ func parseRequirement*(query: string, host: SimulatorHost): Requirement
                       {.inline.} =
   ## Converts the URI query to the requirement.
   ## If `query` is not a valid URI, `ValueError` is raised.
-  {.push warning[ProveInit]:off.}
+  {.push warning[ProveInit]: off.}
   var
     kind = none RequirementKind
     color = none RequirementColor
@@ -334,9 +334,9 @@ const HostNameToHost = collect:
   for host in SimulatorHost:
     {$host: host}
 
-func toUri(self; positions: Option[Positions], host: SimulatorHost,
-           mode: IzumiyaSimulatorMode or IshikawaSimulatorMode): Uri
-          {.inline.} =
+func toUri[F: TsuField or WaterField](
+    self: NazoPuyo[F], positions: Option[Positions], host: SimulatorHost,
+    mode: IzumiyaSimulatorMode or IshikawaSimulatorMode): Uri {.inline.} =
   ## Converts the nazo puyo and the positions to the URI.
   ## The positions will be truncated if it is shorter than the pairs.
   result =
@@ -351,15 +351,17 @@ func toUri(self; positions: Option[Positions], host: SimulatorHost,
   of Ishikawa, Ips: "__"
   result.query &= sep & self.requirement.toUriQuery host
 
-func toUri*(self; host = Izumiya,
-            mode: IzumiyaSimulatorMode or IshikawaSimulatorMode = Play): Uri
-           {.inline.} =
+func toUri*[F: TsuField or WaterField](
+    self: NazoPuyo[F], host = Izumiya,
+    mode: IzumiyaSimulatorMode or IshikawaSimulatorMode = Play): Uri
+    {.inline.} =
   ## Converts the nazo puyo to the URI.
   self.toUri(none Positions, host, mode)
 
-func toUri*(self; positions: Positions, host = Izumiya,
-            mode: IzumiyaSimulatorMode or IshikawaSimulatorMode = Play): Uri
-           {.inline.} =
+func toUri*[F: TsuField or WaterField](
+    self: NazoPuyo[F], positions: Positions, host = Izumiya,
+    mode: IzumiyaSimulatorMode or IshikawaSimulatorMode = Play): Uri
+    {.inline.} =
   ## Converts the nazo puyo and the positions to the URI.
   ## The positions will be truncated if it is shorter than the pairs.
   self.toUri(some positions, host, mode)
@@ -375,7 +377,7 @@ func parseNazoPuyo*[F: TsuField or WaterField](uri: Uri): tuple[
 
   let host = HostNameToHost[uri.hostname]
 
-  {.push warning[ProveInit]:off.}
+  {.push warning[ProveInit]: off.}
   var
     envUri = uri
     req = none Requirement

@@ -64,7 +64,7 @@ func `+`[F: TsuField or WaterField](field1, field2: F): F {.inline.} =
   result.bit0 = field1.bit0 + field2.bit0
 
 func `*`[F: TsuField or WaterField](field1: F, field2: BinaryField): F
-                                   {.inline.} =
+        {.inline.} =
   result.bit2 = field1.bit2 * field2
   result.bit1 = field1.bit1 * field2
   result.bit0 = field1.bit0 * field2
@@ -75,7 +75,7 @@ func `+=`[F: TsuField or WaterField](field1: var F, field2: F) {.inline.} =
   field1.bit0 += field2.bit0
 
 func `-=`[F: TsuField or WaterField](field1: var F, field2: BinaryField)
-                                    {.inline.} =
+         {.inline.} =
   field1.bit2 -= field2
   field1.bit1 -= field2
   field1.bit0 -= field2
@@ -139,7 +139,7 @@ func toBits(cell: Cell): tuple[bit2: bool, bit1: bool, bit0: bool] {.inline.} =
   result.bit0 = c.testBit 0
 
 func `[]=`*[F: TsuField or WaterField](mSelf: var F; row, col; cell: Cell)
-                                      {.inline.} =
+           {.inline.} =
   let bits = cell.toBits
   mSelf.bit2[row, col] = bits.bit2
   mSelf.bit1[row, col] = bits.bit1
@@ -228,7 +228,7 @@ func purple[F: TsuField or WaterField](self: F): BinaryField {.inline.} =
 # ------------------------------------------------
 
 func cellCount*[F: TsuField or WaterField](self: F, cell: Cell): int
-                                          {.inline.} =
+               {.inline.} =
   ## Returns the number of `cell` in the field.
   case cell
   of None: Height * Width - self.exist.popcnt
@@ -355,7 +355,7 @@ func flippedH*[F: TsuField or WaterField](field: F): F {.inline.} =
 # ------------------------------------------------
 
 func disappear*[F: TsuField or WaterField](mSelf: var F): DisappearResult
-                                          {.inline, discardable.} =
+               {.inline, discardable.} =
   ## Removes puyos that should disappear.
   result.red = mSelf.red.disappeared
   result.green = mSelf.green.disappeared

@@ -5,6 +5,7 @@
 
 import std/[deques, sequtils, setutils, strutils, sugar, tables]
 import ./[cell, misc]
+import ../private/[misc]
 
 export deques.Deque, deques.`[]`, deques.`[]=`, deques.addFirst, deques.addLast,
   deques.clear, deques.contains, deques.len, deques.peekFirst, deques.peekLast,

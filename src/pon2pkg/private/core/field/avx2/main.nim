@@ -145,7 +145,7 @@ func toWhichColor(cell: Cell): tuple[
   result.yellowPurple.color2 = bitand(bit2, bit1, bit0)
 
 func `[]=`*[F: TsuField or WaterField](mSelf: var F; row, col; cell: Cell)
-                                      {.inline.} =
+           {.inline.} =
   let (hardGarbage, noneRed, greenBlue, yellowPurple) = cell.toWhichColor
   mSelf.hardGarbage[row, col] = hardGarbage
   mSelf.noneRed[row, col] = noneRed
@@ -205,7 +205,7 @@ func removeSqueeze*(mSelf: var WaterField; row, col) {.inline.} =
 # ------------------------------------------------
 
 func cellCount*[F: TsuField or WaterField](self: F, cell: Cell): int
-                                          {.inline.} =
+               {.inline.} =
   ## Returns the number of `cell` in the field.
   case cell
   of None:
@@ -349,7 +349,7 @@ func flippedH*[F: TsuField or WaterField](self: F): F {.inline.} =
 # ------------------------------------------------
 
 func disappear*[F: TsuField or WaterField](mSelf: var F): DisappearResult
-                                          {.inline, discardable.} =
+               {.inline, discardable.} =
   ## Removes puyos that should disappear.
   result.red = mSelf.noneRed.disappeared
   result.greenBlue = mSelf.greenBlue.disappeared

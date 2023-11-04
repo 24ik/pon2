@@ -4,7 +4,7 @@
 {.experimental: "strictDefs".}
 
 import std/[math, options, sequtils, setutils, sugar, tables]
-import ../../corepkg/[cell, field, environment, position]
+import ../../corepkg/[cell, field, environment, moveresult, position]
 import ../../nazopuyopkg/[nazopuyo]
 
 when not defined(js):
@@ -208,57 +208,58 @@ func child(node: Node, pos: Position): Node {.inline.} =
 
   # set the number corresponding to 'n' in the kind
   case node.nazo.requirement.kind
-  of CLEAR:
+  of Clear:
     discard
-  of DISAPPEAR_COLOR, DISAPPEAR_COLOR_MORE:
-    result.disappearColors =
-      some node.disappearColors.get + (ColorPuyo.toSeq.filterIt moveResult.totalDisappearCounts.get[it] > 0).toSet
-  of DISAPPEAR_COUNT, DISAPPEAR_COUNT_MORE:
+  of DisappearColor, DisappearColorMore:
+    var colors = node.disappearColors.get
+    for color in ColorPuyo:
+      if moveResult.totalDisappearCounts[color] > 0:
+        colors.incl color
+    result.disappearColors = some colors
+  of DisappearCount, DisappearCountMore:
     result.number = some node.number.get.succ(
       case node.nazo.requirement.color.get
-      of RequirementColor.AlL:
-        moveResult.puyoCount
-      of RequirementColor.COLOR:
-        moveResult.colorCount
-      else:
-        moveResult.totalDisappearCounts.get[RequirementColorToCell[node.nazo.requirement.color.get]]
+      of RequirementColor.All: moveResult.puyoCount
+      of RequirementColor.Color: moveResult.colorCount
+      else: moveResult.totalDisappearCounts[
+        RequirementColorToCell[node.nazo.requirement.color.get]]
     )
-  of CHAIN, CHAIN_MORE, CHAIN_CLEAR, CHAIN_MORE_CLEAR:
+  of Chain, ChainMore, ChainClear, ChainMoreClear:
     result.number = some moveResult.chainCount
-  of DISAPPEAR_COLOR_SAMETIME, DISAPPEAR_COLOR_MORE_SAMETIME:
+  of DisappearColorSametime, DisappearColorMoreSametime:
     let numbers = collect:
-      for countsArray in moveResult.disappearCounts.get:
-        countsArray[ColorPuyo.low .. ColorPuyo.high].countIt it > 0
+      for countsArray in moveResult.disappearCounts:
+        countsArray[ColorPuyo.low..ColorPuyo.high].countIt it > 0
     result.numbers = some numbers
-  of DISAPPEAR_COUNT_SAMETIME, DISAPPEAR_COUNT_MORE_SAMETIME:
+  of DisappearCountSametime, DisappearCountMoreSametime:
     let nums = case node.nazo.requirement.color.get
-    of RequirementColor.ALL:
-      moveResult.puyoCounts
-    of RequirementColor.COLOR:
-      moveResult.colorCounts
-    else:
-      moveResult.disappearCounts.get.mapIt it[RequirementColorToCell[node.nazo.requirement.color.get]].int
+    of RequirementColor.All: moveResult.puyoCounts
+    of RequirementColor.Color: moveResult.colorCounts
+    else: moveResult.disappearCounts.mapIt it[
+      RequirementColorToCell[node.nazo.requirement.color.get]].int
     result.numbers = some nums
-  of DISAPPEAR_PLACE, DISAPPEAR_PLACE_MORE:
-    var nums: seq[int]
+  of DisappearPlace, DisappearPlaceMore:
+    var nums = newSeq[int](0)
     case node.nazo.requirement.color.get
-    of RequirementColor.ALL, RequirementColor.COLOR:
-      for countsArray in moveResult.detailDisappearCounts.get:
-        nums.add sum countsArray[ColorPuyo.low .. ColorPuyo.high].mapIt it.len
+    of RequirementColor.All, RequirementColor.Color:
+      for countsArray in moveResult.detailDisappearCounts:
+        nums.add sum countsArray[ColorPuyo.low..ColorPuyo.high].mapIt it.len
     else:
       nums.add(
-        moveResult.detailDisappearCounts.get.mapIt it[RequirementColorToCell[node.nazo.requirement.color.get]].len)
+        moveResult.detailDisappearCounts.mapIt it[
+          RequirementColorToCell[node.nazo.requirement.color.get]].len)
     result.numbers = some nums
-  of DISAPPEAR_CONNECT, DISAPPEAR_CONNECT_MORE:
-    var nums: seq[int]
+  of DisappearConnect, DisappearConnectMore:
+    var nums = newSeq[int](0)
     case node.nazo.requirement.color.get
-    of RequirementColor.ALL, RequirementColor.COLOR:
-      for countsArray in moveResult.detailDisappearCounts.get:
-        for numsAtColor in countsArray[ColorPuyo.low .. ColorPuyo.high]:
+    of RequirementColor.All, RequirementColor.Color:
+      for countsArray in moveResult.detailDisappearCounts:
+        for numsAtColor in countsArray[ColorPuyo.low..ColorPuyo.high]:
           nums &= numsAtColor.mapIt it.int
     else:
-      for countsArray in moveResult.detailDisappearCounts.get:
-        nums &= countsArray[RequirementColorToCell[node.nazo.requirement.color.get]].mapIt it.int
+      for countsArray in moveResult.detailDisappearCounts:
+        nums &= countsArray[
+          RequirementColorToCell[node.nazo.requirement.color.get]].mapIt it.int
     result.numbers = some nums
 
   # set the number of puyoes in the field 
@@ -267,38 +268,40 @@ func child(node: Node, pos: Position): Node {.inline.} =
       addNum = 0
       disappearNum = 0
     case node.nazo.requirement.color.get
-    of RequirementColor.ALL:
+    of RequirementColor.All:
       addNum = 2
       disappearNum = moveResult.puyoCount
-    of RequirementColor.COLOR:
+    of RequirementColor.Color:
       addNum = 2
       disappearNum = moveResult.colorCount
-    of RequirementColor.GARBAGE:
-      disappearNum = moveResult.totalDisappearCounts.get[Cell.GARBAGE]
+    of RequirementColor.Garbage:
+      disappearNum = moveResult.totalDisappearCounts[Cell.Garbage]
     else:
       let color = RequirementColorToCell[node.nazo.requirement.color.get]
       addNum = pair.count color
-      disappearNum = moveResult.totalDisappearCounts.get[color]
+      disappearNum = moveResult.totalDisappearCounts[color]
     result.fieldCount = some node.fieldCount.get.succ(addNum).pred disappearNum
 
   # set the maximum number of puyoes that can disappear
   if node.puyoCount.isSome:
     result.puyoCount =
       some node.puyoCount.get.pred(
-        moveResult.totalDisappearCounts.get[RequirementColorToCell[node.nazo.requirement.color.get]])
+        moveResult.totalDisappearCounts[
+          RequirementColorToCell[node.nazo.requirement.color.get]])
   else:
     var puyoCounts: array[Puyo, Natural]
     for puyo in Puyo:
-      puyoCounts[puyo] = node.puyoCounts.get[puyo].pred moveResult.totalDisappearCounts.get[puyo]
+      puyoCounts[puyo] =
+        node.puyoCounts.get[puyo].pred moveResult.totalDisappearCounts[puyo]
     result.puyoCounts = some puyoCounts
 
 func children(node: Node): seq[Node] {.inline.} =
   ## Returns the children of the `node`.
   collect:
     for pos in (
-      if node.nazo.environment.pairs.peekFirst.isDouble: node.nazo.environment.field.validDoublePositions
-      else: node.nazo.environment.field.validPositions
-    ):
+        if node.nazo.environment.pairs.peekFirst.isDouble:
+          node.nazo.environment.field.validDoublePositions
+        else: node.nazo.environment.field.validPositions):
       node.child pos
 
 # ------------------------------------------------
@@ -322,7 +325,9 @@ func isAccepted(node: Node): bool {.inline.} =
         return false
   else:
     if node.number.isSome or node.disappearColors.isSome:
-      let nowNum = if node.number.isSome: node.number.get else: node.disappearColors.get.card
+      let nowNum =
+        if node.number.isSome: node.number.get
+        else: node.disappearColors.get.card
 
       if node.isExactKind:
         if nowNum != node.nazo.requirement.number.get:
@@ -338,8 +343,10 @@ func isAccepted(node: Node): bool {.inline.} =
 
 func isNotSupported(nazo: NazoPuyo): bool {.inline.} =
   ## Returns `true` if the nazo puyo is not supported, *i.e.*, unsolvable.
-  nazo.requirement.kind in {DISAPPEAR_PLACE, DISAPPEAR_PLACE_MORE, DISAPPEAR_CONNECT, DISAPPEAR_CONNECT_MORE} and
-  nazo.requirement.color.get == RequirementColor.GARBAGE
+  nazo.requirement.kind in {
+    DisappearPlace, DisappearPlaceMore, DisappearConnect,
+    DisappearConnectMore} and nazo.requirement.color.get ==
+    RequirementColor.Garbage
 
 func solveRec(node: Node): seq[Positions] {.inline.} =
   ## Solves the nazo puyo at the `node`.
@@ -354,14 +361,15 @@ func solveRec(node: Node): seq[Positions] {.inline.} =
     result &= child.solveRec
 
 proc solve*(
-  nazo: NazoPuyo, parallelCount = (when defined(js): 1 else: max(countProcessors(), 1)), showProgress = false
-): seq[Positions] {.inline.} =
+    nazo: NazoPuyo,
+    parallelCount = (when defined(js): 1 else: max(countProcessors(), 1)),
+    showProgress = false): seq[Positions] {.inline.} =
   ## Solves the nazo puyo.
   ## `parallelCount` and `showProgress` will be ignored on JS backend.
   if nazo.isNotSupported or nazo.moveCount == 0:
     return
 
-  let node = nazo.toNode
+  let node = nazo.initNode
   if node.canPrune:
     return
 
@@ -428,7 +436,8 @@ func `&=`(sol1: var InspectAnswers, sol2: InspectAnswers) {.inline.} =
   sol1.answers &= sol2.answers
   sol1.visitNodeCount.inc sol2.visitNodeCount
 
-func inspectSolveRec(node: Node, earlyStopping: bool): InspectAnswers {.inline.} =
+func inspectSolveRec(node: Node, earlyStopping: bool): InspectAnswers
+                    {.inline.} =
   ## Solves the nazo puyo at the node while keeping the number of visited nodes.
   result.visitNodeCount.inc
 
@@ -445,18 +454,18 @@ func inspectSolveRec(node: Node, earlyStopping: bool): InspectAnswers {.inline.}
       return
 
 proc inspectSolve*(
-  nazo: NazoPuyo,
-  parallelCount = (when defined(js): 1 else: max(countProcessors(), 1)),
-  showProgress = false,
-  earlyStopping = false,
-): InspectAnswers {.inline.} =
+    nazo: NazoPuyo,
+    parallelCount = (when defined(js): 1 else: max(countProcessors(), 1)),
+    showProgress = false,
+    earlyStopping = false): InspectAnswers {.inline.} =
   ## Solves the nazo puyo while keeping the number of visited nodes.
-  ## If `earlyStopping` is `true`, searching is interrupted if any solution is found.
+  ## If `earlyStopping` is `true`, searching is interrupted if any solution is
+  ## found.
   ## `parallelCount` and `showProgress` will be ignored on JS backend.
   if nazo.isNotSupported or nazo.moveCount == 0:
     return
 
-  let node = nazo.toNode
+  let node = nazo.initNode
   if node.canPrune:
     return
 
@@ -483,7 +492,8 @@ proc inspectSolve*(
 
     # run "first wave" node solving
     for cpuIdx in 0 ..< cpuCount:
-      futureAnswers.add spawn childNodes[nextNodeIdx].inspectSolveRec earlyStopping
+      futureAnswers.add spawn(
+        childNodes[nextNodeIdx].inspectSolveRec earlyStopping)
       runningNodeIdxes[cpuIdx] = nextNodeIdx
       nextNodeIdx.inc
 
@@ -495,7 +505,8 @@ proc inspectSolve*(
 
         # assign the next node to the processor
         if nextNodeIdx < childNodes.len:
-          futureAnswers.add spawn childNodes[nextNodeIdx].inspectSolveRec earlyStopping
+          futureAnswers.add spawn(
+            childNodes[nextNodeIdx].inspectSolveRec earlyStopping)
           runningNodeIdxes[cpuIdx] = nextNodeIdx
           nextNodeIdx.inc
 

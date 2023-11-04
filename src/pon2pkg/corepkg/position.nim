@@ -190,7 +190,7 @@ func parsePosition*(str: string): Option[Position] {.inline.} =
   ## If `str` is not a valid representation, `ValueError` is raised.
   ## If `str` means no-position, returns `none(Position)`.
   if str == NoPosStr:
-    {.push warning[ProveInit]:off.}
+    {.push warning[ProveInit]: off.}
     return none Position
     {.pop.}
 

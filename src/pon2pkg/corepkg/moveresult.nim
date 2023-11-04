@@ -6,6 +6,7 @@
 import std/math except sum
 import std/[sequtils, setutils, sugar]
 import ./[cell, misc]
+import ../private/[misc]
 
 type
   NotSupportDefect* = object of Defect
