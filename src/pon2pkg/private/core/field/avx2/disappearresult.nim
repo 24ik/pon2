@@ -28,18 +28,18 @@ func notDisappeared*(disRes): bool {.inline.} = disRes.color.isZero
   ## Returns `true` if no puyos disappeared.
 
 # ------------------------------------------------
-# Count - Color Puyo
+# Count - Color
 # ------------------------------------------------
 
-func colorPuyoCount*(disRes): int {.inline.} =
+func colorCount*(disRes): int {.inline.} =
   ## Returns the number of color puyos that disappeared.
   disRes.red.popcnt + disRes.greenBlue.popcnt + disRes.yellowPurple.popcnt
 
 # ------------------------------------------------
-# Count - Garbage Puyo
+# Count - Garbage
 # ------------------------------------------------
 
-func garbagePuyoCount*(disRes): int {.inline.} = disRes.garbage.popcnt
+func garbageCount*(disRes): int {.inline.} = disRes.garbage.popcnt
   ## Returns the number of garbage puyos that disappeared.
 
 # ------------------------------------------------
@@ -59,7 +59,7 @@ func puyoCount*(disRes; puyo: Puyo): int {.inline.} =
 
 func puyoCount*(disRes): int {.inline.} =
   ## Returns the number of puyos that disappeared.
-  disRes.colorPuyoCount + disRes.garbagePuyoCount
+  disRes.colorCount + disRes.garbageCount
 
 # ------------------------------------------------
 # Connection
@@ -76,7 +76,7 @@ func initDefaultComponents: array[
 
 const DefaultComponents = initDefaultComponents()
 
-func connectionCounts(field: BinaryField): array[2, seq[Natural]] {.inline.} =
+func connectionCounts(field: BinaryField): array[2, seq[int]] {.inline.} =
   ## Returns the number of cells for each connected component.
   ## `result[0]` for the first color, and `result[1]` for the second color.
   ## The order of the returned sequence is undefined.
@@ -122,8 +122,8 @@ func connectionCounts(field: BinaryField): array[2, seq[Natural]] {.inline.} =
           components[rowIdx][colIdx].idx = nextComponentIdx
           nextComponentIdx.inc
 
-  result[0] = 0.Natural.repeat nextComponentIdx
-  result[1] = 0.Natural.repeat nextComponentIdx
+  result[0] = 0.repeat nextComponentIdx
+  result[1] = 0.repeat nextComponentIdx
   for row in Row.low..Row.high:
     for col in Column.low..Column.high:
       let (color, idx) = components[row.ord.succ][col.ord.succ]
@@ -135,7 +135,7 @@ func connectionCounts(field: BinaryField): array[2, seq[Natural]] {.inline.} =
   result[0].keepItIf it > 0
   result[1].keepItIf it > 0
 
-func connectionCounts*(disRes): array[ColorPuyo, seq[Natural]] {.inline.} =
+func connectionCounts*(disRes): array[ColorPuyo, seq[int]] {.inline.} =
   ## Returns the number of color puyos in each connected component.
   let
     greenBlue = disRes.greenBlue.connectionCounts

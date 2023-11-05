@@ -421,6 +421,20 @@ oo.oo.
       check field.type is WaterField
 
   # ------------------------------------------------
+  # Count - None
+  # ------------------------------------------------
+
+  # noneCount
+  block:
+    var field = zeroTsuField()
+    check field.noneCount == Height * Width
+
+    field[1, 3] = Blue
+    field[2, 2] = Red
+    field[3, 1] = Garbage
+    check field.noneCount == Height * Width - 3
+
+  # ------------------------------------------------
   # Position
   # ------------------------------------------------
 

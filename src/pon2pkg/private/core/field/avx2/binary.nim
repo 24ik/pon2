@@ -98,13 +98,13 @@ func prod*(field1, field2, field3: BinaryField): BinaryField {.inline.} =
 # Population Count
 # ------------------------------------------------
 
-func popcnt*(self; color: 0..1): int {.inline.} =
+func popcnt*(self; color: static range[0..1]): int {.inline.} =
   ## Population count for the `color`.
   # NOTE: YMM[e3, e2, e1, e0] == array[e0, e1, e2, e3]
-  let
-    arr = cast[array[4, uint64]](self)
-    idx = 2 - 2 * color
-  result = arr[idx].popcount + arr[idx.succ].popcount
+  const Idx = 2 - 2 * color
+  let arr = cast[array[4, uint64]](self)
+
+  result = arr[Idx].popcount + arr[Idx.succ].popcount
   
 func popcnt*(self): int {.inline.} =
   ## Population count.

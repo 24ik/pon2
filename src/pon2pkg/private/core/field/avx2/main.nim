@@ -4,7 +4,7 @@
 {.experimental: "strictDefs".}
 
 import std/[bitops]
-import ./[binary, disappearResult]
+import ./[binary, disappearresult]
 import ../[binary as commonBinary]
 import ../../../../corepkg/[cell, misc, pair, position]
 
@@ -201,31 +201,20 @@ func removeSqueeze*(mSelf: var WaterField; row, col) {.inline.} =
   mSelf.removeSqueeze row, col, waterRemoveSqueeze
 
 # ------------------------------------------------
-# Count - Cell
+# Count - Puyo
 # ------------------------------------------------
 
-func cellCount*[F: TsuField or WaterField](self: F, cell: Cell): int
+func puyoCount*[F: TsuField or WaterField](self: F, puyo: Puyo): int
                {.inline.} =
-  ## Returns the number of `cell` in the field.
-  case cell
-  of None:
-    Height * Width - (self.hardGarbage.popcnt + self.noneRed.popcnt +
-      self.greenBlue.popcnt + self.yellowPurple.popcnt)
+  ## Returns the number of `puyo` in the field.
+  case puyo
   of Hard: self.hardGarbage.popcnt 0
   of Garbage: self.hardGarbage.popcnt 1
   of Red: self.noneRed.popcnt 1
-  of Green: self.greenBlue.popcnt 1
+  of Green: self.greenBlue.popcnt 0
   of Blue: self.greenBlue.popcnt 1
-  of Yellow: self.yellowPurple.popcnt 1
+  of Yellow: self.yellowPurple.popcnt 0
   of Purple: self.yellowPurple.popcnt 1
-
-func cellCount*[F: TsuField or WaterField](self: F): int {.inline.} =
-  ## Returns the number of cells in the field.
-  Height * Width
-
-# ------------------------------------------------
-# Count - Puyo
-# ------------------------------------------------
 
 func puyoCount*[F: TsuField or WaterField](self: F): int {.inline.} =
   ## Returns the number of puyos in the field.

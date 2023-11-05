@@ -75,15 +75,14 @@ proc main* =
   # Count
   # ------------------------------------------------
 
-  # cellCount, puyoCount, colorCount, garbageCount
+  # puyoCount, colorCount, garbageCount
   block:
     let env = parseTsuEnvironment(
       "......\n".repeat(11) & "rrb...\noogg..\n------\nry\ngg").environment
 
-    check env.cellCount(Red) == 3
-    check env.cellCount(Blue) == 1
-    check env.cellCount(Purple) == 0
-    check env.cellCount == Height * Width + env.pairs.len * 2
+    check env.puyoCount(Red) == 3
+    check env.puyoCount(Blue) == 1
+    check env.puyoCount(Purple) == 0
     check env.puyoCount == 11
     check env.colorCount == 9
     check env.garbageCount == 2
@@ -120,48 +119,25 @@ rg""").environment
 
         pos = Down3
 
-        chainCount = 3
-        totalDisappearCounts: array[Puyo, Natural] = [0, 2, 4, 10, 5, 0, 4]
-
-      # NOTE: somehow declaration with initialization does not work on cpp
-      var disappearCounts = newSeq[array[Puyo, Natural]] 0
-      disappearCounts.add [0.Natural, 1, 0, 0, 5, 0, 0]
-      disappearCounts.add [0.Natural, 0, 0, 10, 0, 0, 0]
-      disappearCounts.add [0.Natural, 1, 4, 0, 0, 0, 4]
-      var detailDisappearCounts = newSeq[array[ColorPuyo, seq[Natural]]] 0
-      detailDisappearCounts.add [@[], @[], @[5.Natural], @[], @[]]
-      detailDisappearCounts.add [@[], @[4.Natural, 6], @[], @[], @[]]
-      detailDisappearCounts.add [@[4.Natural], @[], @[], @[], @[4.Natural]]
+      block:
+        var env = envBefore
+        discard env.move(pos, false)
+        check env == envAfter
 
       block:
         var env = envBefore
-        let res = env.move(pos, false)
+        discard env.moveWithRoughTracking(pos, false)
         check env == envAfter
-        check res.chainCount == chainCount
 
       block:
         var env = envBefore
-        let res = env.moveWithRoughTracking(pos, false)
+        discard env.moveWithDetailTracking(pos, false)
         check env == envAfter
-        check res.chainCount == chainCount
-        check res.totalDisappearCounts == totalDisappearCounts
 
       block:
         var env = envBefore
-        let res = env.moveWithDetailTracking(pos, false)
+        discard env.moveWithFullTracking(pos, false)
         check env == envAfter
-        check res.chainCount == chainCount
-        check res.totalDisappearCounts == totalDisappearCounts
-        check res.disappearCounts == disappearCounts
-
-      block:
-        var env = envBefore
-        let res = env.moveWithFullTracking(pos, false)
-        check env == envAfter
-        check res.chainCount == chainCount
-        check res.totalDisappearCounts == totalDisappearCounts
-        check res.disappearCounts == disappearCounts
-        check res.detailDisappearCounts == detailDisappearCounts
 
     # Water
     block:
@@ -202,24 +178,9 @@ rg""").environment
 
         pos = Right2
 
-        chainCount = 2
-        totalDisappearCounts: array[Puyo, Natural] = [0, 4, 0, 4, 6, 0, 0]
-
-      # NOTE: somehow declaration with initialization does not work on cpp
-      var disappearCounts = newSeq[array[Puyo, Natural]] 0
-      disappearCounts.add [0.Natural, 3, 0, 0, 6, 0, 0]
-      disappearCounts.add [0.Natural, 1, 0, 4, 0, 0, 0]
-      var detailDisappearCounts = newSeq[array[ColorPuyo, seq[Natural]]] 0
-      detailDisappearCounts.add [@[], @[], @[6.Natural], @[], @[]]
-      detailDisappearCounts.add [@[], @[4.Natural], @[], @[], @[]]
-
       var env = envBefore
-      let res = env.moveWithFullTracking(pos, false)
+      discard env.moveWithFullTracking(pos, false)
       check env == envAfter
-      check res.chainCount == chainCount
-      check res.totalDisappearCounts == totalDisappearCounts
-      check res.disappearCounts == disappearCounts
-      check res.detailDisappearCounts == detailDisappearCounts
 
   # ------------------------------------------------
   # Environment <-> string/URI

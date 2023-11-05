@@ -4,7 +4,7 @@
 {.experimental: "strictDefs".}
 
 import std/[bitops]
-import ./[disappearResult]
+import ./[disappearresult]
 import ../[binary]
 import ../../../../corepkg/[cell, misc, pair, position]
 
@@ -224,14 +224,13 @@ func purple[F: TsuField or WaterField](self: F): BinaryField {.inline.} =
   prod(self.bit2, self.bit1, self.bit0)
 
 # ------------------------------------------------
-# Count - Cell
+# Count - Puyo
 # ------------------------------------------------
 
-func cellCount*[F: TsuField or WaterField](self: F, cell: Cell): int
+func puyoCount*[F: TsuField or WaterField](self: F, puyo: Puyo): int
                {.inline.} =
-  ## Returns the number of `cell` in the field.
-  case cell
-  of None: Height * Width - self.exist.popcnt
+  ## Returns the number of `puyo` in the field.
+  case puyo
   of Hard: self.hard.popcnt
   of Garbage: self.garbage.popcnt
   of Red: self.red.popcnt
@@ -239,14 +238,6 @@ func cellCount*[F: TsuField or WaterField](self: F, cell: Cell): int
   of Blue: self.blue.popcnt
   of Yellow: self.yellow.popcnt
   of Purple: self.purple.popcnt
-
-func cellCount*[F: TsuField or WaterField](self: F): int {.inline.} =
-  ## Returns the number of cells in the field.
-  Height * Width
-
-# ------------------------------------------------
-# Count - Puyo
-# ------------------------------------------------
 
 func puyoCount*[F: TsuField or WaterField](self: F): int {.inline.} =
   ## Returns the number of puyos in the field.

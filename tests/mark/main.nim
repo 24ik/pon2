@@ -17,12 +17,11 @@ proc main* =
   # ------------------------------------------------
   # Mark
   # ------------------------------------------------
-
   # Clear
   block:
     check "https://ishikawapuyo.net/simu/pn.html?r4AA3r_EGEs__200".mark ==
       Accept
-    check "https://ishikawapuyo.net/simu/pn.html?r4AA3r_EGEs__200".mark(
+    check "https://ishikawapuyo.net/simu/pn.html?r4AA3r_E1E1__200".mark(
       @[some Left3, some Down2]) == Accept
     check "https://ishikawapuyo.net/simu/pn.html?r4AA3r_EGE0__200".mark ==
       WrongAnswer
@@ -133,6 +132,8 @@ proc main* =
       Accept
     check "https://ishikawapuyo.net/simu/pn.html?8w0wAcw_A4Au__I02".mark ==
       WrongAnswer
+    check "https://ishikawapuyo.net/simu/pn.html?8w0wAcw_AuAE__I62".mark ==
+      NotSupport
 
   # DisappearPlaceMore
   block:

@@ -127,33 +127,23 @@ func swap*(mPair) {.inline.} = mPair = mPair.swapped
   ## Swaps the axis-puyo and child-puyo.
 
 # ------------------------------------------------
-# Count - Cell
-# ------------------------------------------------
-
-func cellCount*(pair; cell: Cell): int {.inline.} =
-  ## Returns the number of `cell` in the pair.
-  (pair.axis == cell).int + (pair.child == cell).int
-
-func cellCount*(pair): int {.inline.} = 2
-  ## Returns the number of cells in the pair.
-
-func cellCount*(pairs; cell: Cell): int {.inline.} =
-  ## Returns the number of `cell` in the pairs.
-  sum pairs.mapIt it.cellCount cell
-
-func cellCount*(pairs): int {.inline.} = pairs.len * 2
-  ## Returns the number of cells in the pairs.
-  
-# ------------------------------------------------
 # Count - Puyo
 # ------------------------------------------------
 
-func puyoCount*(pair): int {.inline.} = pair.cellCount
+func puyoCount*(pair; puyo: Puyo): int {.inline.} =
+  ## Returns the number of `puyo` in the pair.
+  (pair.axis == puyo).int + (pair.child == puyo).int
+
+func puyoCount*(pair): int {.inline.} = 2
   ## Returns the number of puyos in the pair.
 
-func puyoCount*(pairs): int {.inline.} = pairs.cellCount
+func puyoCount*(pairs; puyo: Puyo): int {.inline.} =
   ## Returns the number of `puyo` in the pairs.
+  sum pairs.mapIt it.puyoCount puyo
 
+func puyoCount*(pairs): int {.inline.} = pairs.len * 2
+  ## Returns the number of puyos in the pairs.
+  
 # ------------------------------------------------
 # Count - Color
 # ------------------------------------------------

@@ -175,22 +175,13 @@ proc initWaterEnvironment*(
   initEnvironment[WaterField](colors, colorCount, setPairs)
 
 # ------------------------------------------------
-# Count - Cell
-# ------------------------------------------------
-
-func cellCount*[F: TsuField or WaterField](self: Environment[F], cell: Cell):
-    int {.inline.} =
-  ## Returns the number of `cell` in the environment.
-  self.field.cellCount(cell) + self.pairs.cellCount(cell)
-
-func cellCount*[F: TsuField or WaterField](self: Environment[F]): int
-               {.inline.} =
-  ## Returns the number of cells in the environment.
-  self.field.cellCount + self.pairs.cellCount
-
-# ------------------------------------------------
 # Count - Puyo
 # ------------------------------------------------
+
+func puyoCount*[F: TsuField or WaterField](self: Environment[F], puyo: Puyo):
+    int {.inline.} =
+  ## Returns the number of `puyo` in the environment.
+  self.field.puyoCount(puyo) + self.pairs.puyoCount(puyo)
 
 func puyoCount*[F: TsuField or WaterField](self: Environment[F]): int
                {.inline.} =

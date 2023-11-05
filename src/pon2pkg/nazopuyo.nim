@@ -9,9 +9,11 @@
 ## - [Marking](./nazopuyopkg/mark.html)
 ##
 
+{.experimental: "strictDefs".}
+
 import ./nazopuyopkg/[mark, nazopuyo]
 
-export mark.MarkResult, mark.mark
+export mark.MarkResult, mark.isSupported, mark.mark
 export nazopuyo.RequirementKind, nazopuyo.RequirementColor,
   nazopuyo.RequirementNumber, nazopuyo.Requirement, nazopuyo.NazoPuyo,
   nazopuyo.NazoPuyos, nazopuyo.NoColorKinds, nazopuyo.NoNumberKinds,

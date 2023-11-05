@@ -20,6 +20,8 @@
 ## | `-d:bmi2=<bool>`      | Use BMI2 instructions. | `true`  |
 ##
 
+{.experimental: "strictDefs".}
+
 import ./corepkg/[cell, environment, field, misc, moveresult, pair, position]
 
 export cell.Cell, cell.ColorPuyo, cell.Puyo, cell.parseCell
@@ -27,22 +29,22 @@ export environment.Environment, environment.Environments,
   environment.toTsuEnvironment, environment.toWaterEnvironment,
   environment.flattenAnd, environment.addPair, environment.reset,
   environment.initEnvironment, environment.initTsuEnvironment,
-  environment.initWaterEnvironment, environment.cellCount,
-  environment.puyoCount, environment.colorCount, environment.garbageCount,
-  environment.move, environment.moveWithRoughTracking,
-  environment.moveWithDetailTracking, environment.moveWithFullTracking,
-  environment.`$`, environment.toString, environment.parseEnvironment,
-  environment.parseTsuEnvironment, environment.parseWaterEnvironment,
-  environment.toUri, environment.parseEnvironments, environment.toArrays
+  environment.initWaterEnvironment, environment.puyoCount,
+  environment.colorCount, environment.garbageCount, environment.move,
+  environment.moveWithRoughTracking, environment.moveWithDetailTracking,
+  environment.moveWithFullTracking, environment.`$`, environment.toString,
+  environment.parseEnvironment, environment.parseTsuEnvironment,
+  environment.parseWaterEnvironment, environment.toUri,
+  environment.parseEnvironments, environment.toArrays
 export field.TsuField, field.WaterField, field.zeroField, field.zeroTsuField,
   field.zeroWaterField, field.toTsuField, field.toWaterField, field.`[]`,
-  field.`[]=`, field.insert, field.removeSqueeze, field.cellCount,
-  field.puyoCount, field.colorCount, field.garbageCount, field.connect3,
-  field.connect3V, field.connect3H, field.connect3L, field.shiftedUp,
-  field.shiftedDown, field.shiftedRight, field.shiftedLeft, field.flippedV,
-  field.flippedH, field.disappear, field.willDisappear, field.put, field.drop,
-  field.toArray, field.parseField, field.Fields, field.rule, field.isDead,
-  field.flattenAnd, field.invalidPositions, field.validPositions,
+  field.`[]=`, field.insert, field.removeSqueeze, field.puyoCount,
+  field.colorCount, field.garbageCount, field.connect3, field.connect3V,
+  field.connect3H, field.connect3L, field.shiftedUp, field.shiftedDown,
+  field.shiftedRight, field.shiftedLeft, field.flippedV, field.flippedH,
+  field.disappear, field.willDisappear, field.put, field.drop, field.toArray,
+  field.parseField, field.Fields, field.rule, field.isDead, field.flattenAnd,
+  field.noneCount, field.invalidPositions, field.validPositions,
   field.validDoublePositions, field.shiftUp, field.shiftDown, field.shiftRight,
   field.shiftLeft, field.flipV, field.flipH, field.move,
   field.moveWithRoughTracking, field.moveWithDetailTracking,
@@ -56,17 +58,20 @@ export misc.Height, misc.Width, misc.WaterHeight, misc.AirHeight, misc.Row,
   misc.IshikawaSimulatorMode
 export moveresult.NotSupportDefect, moveresult.MoveResult,
   moveresult.RoughMoveResult, moveresult.DetailMoveResult,
-  moveresult.FullMoveResult, moveresult.cellCount, moveresult.puyoCount,
-  moveresult.colorCount, moveresult.garbageCount, moveresult.cellCounts,
-  moveresult.puyoCounts, moveresult.colorCounts, moveresult.garbageCounts,
+  moveresult.FullMoveResult, moveresult.initMoveResult,
+  moveresult.initRoughMoveResult, moveresult.initDetailMoveResult,
+  moveresult.initFullMoveResult, moveresult.chainCount, moveresult.puyoCount,
+  moveresult.colorCount, moveresult.garbageCount, moveresult.puyoCounts,
+  moveresult.colorCounts, moveresult.garbageCounts, moveresult.colors,
+  moveresult.colorsSeq, moveresult.colorPlaces, moveresult.colorConnects,
   moveresult.score
 export pair.Deque, pair.`[]`, pair.`[]=`, pair.addFirst, pair.addLast,
   pair.clear, pair.contains, pair.len, pair.peekFirst, pair.peekLast,
   pair.popFirst, pair.popLast, pair.shrink, pair.items, pair.mitems, pair.pairs,
   pair.Pair, pair.Pairs, pair.initPair, pair.initPairs, pair.axis, pair.child,
   pair.isDouble, pair.`axis=`, pair.`child=`, pair.`==`, pair.swapped,
-  pair.swap, pair.cellCount, pair.puyoCount, pair.colorCount, pair.garbageCount,
-  pair.parsePair, pair.`$`, pair.parsePairs, pair.toUriQuery, pair.toArray
+  pair.swap, pair.puyoCount, pair.colorCount, pair.garbageCount, pair.parsePair,
+  pair.`$`, pair.parsePairs, pair.toUriQuery, pair.toArray
 export position.Direction, position.Position, position.Positions,
   position.DoublePositions, position.initPosition, position.axisColumn,
   position.childColumn, position.childDirection, position.movedRight,
