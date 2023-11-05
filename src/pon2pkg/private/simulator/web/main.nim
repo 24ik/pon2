@@ -1,15 +1,15 @@
-## This module implements the entry point for making a web page.
+## This module implements the library entry point.
 ## 
 
 {.experimental: "strictDefs".}
 
-import std/[dom, options, random, sequtils, strutils, sugar, tables, uri]
+import std/[dom, sugar]
 import karax/[karax, karaxdsl, vdom]
-import ./[controller, field, immediatePairs, messages, misc, nextPair, pairs,
+import ./[controller, field, immediatepairs, messages, misc, nextpair, pairs,
           palette, requirement, select, share]
-import ../[simulator]
-import ../../corepkg/[environment, field, misc as coreMisc, pair, position]
-import ../../nazopuyopkg/[nazopuyo]
+import ../../../corepkg/[environment, misc as coreMisc, position]
+import ../../../nazopuyopkg/[nazopuyo]
+import ../../../simulatorpkg/[simulator]
 
 export misc.toKeyEvent
 
@@ -163,120 +163,3 @@ proc initPuyoSimulatorAnswerDom*(
         simulator.initPuyoSimulatorAnswerDomCore idx
   else:
     simulator.initPuyoSimulatorAnswerDomCore idx
-
-# ------------------------------------------------
-# Web Page Generator
-# ------------------------------------------------
-
-var
-  pageInitialized = false
-  globalSimulator: Simulator
-
-const
-  RandomQueryKey = "random"
-  RuleQueryKey = "rule"
-  MoveCountQueryKey = "move"
-  QueryToRule = {"t": Tsu, "w": Water}.toTable
-
-proc isMobile: bool {.importjs:
-  "navigator.userAgent.match(/iPhone|Android.+Mobile/)".}
-  ## Returns `true` if the host is mobile.
-
-proc initPuyoSimulatorDom(routerData: RouterData): VNode =
-  ## Returns the simulator DOM with izumiya-format URI.
-  if pageInitialized:
-    return globalSimulator.initPuyoSimulatorDom
-
-  pageInitialized = true
-  let query =
-    if routerData.queryString == cstring"": ""
-    else: ($routerData.queryString)[1..^1] # remove '?'
-
-  # random pairs
-  var keys = newSeq[string](0)
-  for key, _ in query.decodeQuery:
-    keys.add key
-  if RandomQueryKey in keys:
-    {.push warning[ProveInit]:off.}
-    var
-      rule = none Rule
-      moveCount = -1
-    {.pop.}
-
-    for key, val in query.decodeQuery:
-      case key
-      of RandomQueryKey:
-        discard
-      of RuleQueryKey:
-        if val in QueryToRule:
-          rule = some QueryToRule[val]
-        else:
-          return buildHtml(tdiv):
-            text "URL形式エラー"
-      of MoveCountQueryKey:
-        try:
-          moveCount = val.parseInt
-        except ValueError:
-          return buildHtml(tdiv):
-            text "URL形式エラー"
-      else:
-        return buildHtml(tdiv):
-          text "URL形式エラー"
-
-    if rule.isNone or moveCount < 3:
-      return buildHtml(tdiv):
-        text "URL形式エラー"
-
-    randomize()
-
-    case rule.get
-    of Tsu:
-      var env = initTsuEnvironment()
-      for _ in 0..<moveCount - 3:
-        env.addPair
-
-      globalSimulator = env.initSimulator(showCursor = not isMobile())
-    of Water:
-      var env = initWaterEnvironment()
-      for _ in 0..<moveCount - 3:
-        env.addPair
-
-      globalSimulator = env.initSimulator(showCursor = not isMobile())
-    return globalSimulator.initPuyoSimulatorDom
-
-  var uri = initUri()
-  uri.scheme = "https"
-  uri.hostname = $Izumiya
-  uri.path = "/puyo-simulator/playground/index.html"
-  uri.query = query
-
-  try:
-    let parseRes = uri.parseNazoPuyos
-    parseRes.nazoPuyos.flattenAnd:
-      globalSimulator =
-        if parseRes.positions.isSome:
-          nazoPuyo.initSimulator(parseRes.positions.get,
-                                 parseRes.izumiyaMode.get, not isMobile())
-        else:
-          nazoPuyo.initSimulator(parseRes.izumiyaMode.get, not isMobile())
-
-    result = globalSimulator.initPuyoSimulatorDom
-  except ValueError:
-    try:
-      let parseRes = uri.parseEnvironments
-      parseRes.environments.flattenAnd:
-        globalSimulator =
-          if parseRes.positions.isSome:
-            environment.initSimulator(parseRes.positions.get,
-                                      parseRes.izumiyaMode.get, not isMobile())
-          else:
-            environment.initSimulator(parseRes.izumiyaMode.get, not isMobile())
-
-      result = globalSimulator.initPuyoSimulatorDom
-    except ValueError:
-      result = buildHtml(tdiv):
-        text "URL形式エラー"
-
-proc initWebPage* {.inline.} =
-  ## Makes the web page.
-  initPuyoSimulatorDom.setRenderer

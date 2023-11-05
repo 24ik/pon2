@@ -4,9 +4,9 @@
 {.experimental: "strictDefs".}
 
 import std/[options, strformat, uri]
-import ../../simulatorpkg/[simulator]
 import ../../corepkg/[cell, field, misc, pair, position]
 import ../../nazopuyopkg/[mark]
+import ../../simulatorpkg/[simulator]
 
 # ------------------------------------------------
 # Field
@@ -103,7 +103,7 @@ func immediateDoubleNextPairCell*(simulator: Simulator, isAxis: bool): Cell
 const
   DeadMessage = "ばたんきゅ〜"
   NazoMessages: array[MarkResult, string] = [
-    "クリア！", "", "ばたんきゅ〜", "不可能な設置", "設置スキップ"]
+    "クリア！", "", "ばたんきゅ〜", "不可能な設置", "設置スキップ", "未対応"]
 
 func getMessage*(simulator: Simulator): string {.inline.} =
   ## Returns the message.
@@ -129,7 +129,7 @@ func getMessage*(simulator: Simulator): string {.inline.} =
 
 const RuleDescriptions: array[Rule, string] = ["通", "すいちゅう"]
 
-{.push warning[ProveInit]:off.}
+{.push warning[ProveInit]: off.}
 func makeXLink(text = "", hashTag = none string, uri = none Uri): Uri
               {.inline.} =
   ## Returns the URI for posting to X.
@@ -150,7 +150,7 @@ func makeXLink(text = "", hashTag = none string, uri = none Uri): Uri
 
 func toXLink*(simulator: Simulator, withPositions: bool): Uri {.inline.} =
   ## Returns the URI for posting to X.
-  {.push warning[ProveInit]:off.}
+  {.push warning[ProveInit]: off.}
   var
     text = ""
     hashTag = none string

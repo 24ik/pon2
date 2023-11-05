@@ -3,7 +3,7 @@
 
 import std/[math, tables, setutils]
 import nigui
-import ../[simulator]
+import ../../../simulatorpkg/[simulator]
 
 # ------------------------------------------------
 # Button

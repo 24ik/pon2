@@ -6,9 +6,9 @@
 import std/[sugar]
 import nigui
 import ./[assets, misc]
-import ../[simulator]
-import ../../corepkg/[field, misc]
-import ../../private/simulator/[render]
+import ../[render]
+import ../../../corepkg/[field, misc]
+import ../../../simulatorpkg/[simulator]
 
 type FieldControl* = ref object of LayoutContainer
   ## Field control.

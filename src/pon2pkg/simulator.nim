@@ -6,7 +6,7 @@
 ##
 ## Submodule Documentations:
 ## - [Simulator Core](./simulatorpkg/simulator.html)
-## - [Native Simulator](./simulatorpkg/native/main.html)
+## - [Native Simulator](./simulatorpkg/native.html)
 ## - Web Simulator
 ##
 
@@ -33,15 +33,15 @@ export simulator.SimulatorState, simulator.Simulator, simulator.KeyEvent,
   simulator.reset, simulator.toUri, simulator.operate
 
 when defined(js):
-  import ./simulatorpkg/web/[main]
+  import ./simulatorpkg/[web]
 
-  export main.toKeyEvent, main.runKeyboardEventHandler,
-    main.initKeyboardEventHandler, main.initPuyoSimulatorDom,
-    main.initPuyoSimulatorAnswerDom
+  export web.toKeyEvent, web.runKeyboardEventHandler,
+    web.initKeyboardEventHandler, web.initPuyoSimulatorDom,
+    web.initPuyoSimulatorAnswerDom
 else:
-  import ./simulatorpkg/native/[main]
+  import ./simulatorpkg/[native]
 
-  export main.toKeyEvent, main.PuyoSimulatorControl, main.PuyoSimulatorWindow,
-    main.runKeyboardEventHandler, main.initKeyboardEventHandler,
-    main.initPuyoSimulatorControl, main.initPuyoSimulatorWindow,
-    main.initPuyoSimulatorAnswerControl
+  export native.toKeyEvent, native.PuyoSimulatorControl, native.PuyoSimulatorWindow,
+    native.runKeyboardEventHandler, native.initKeyboardEventHandler,
+    native.initPuyoSimulatorControl, native.initPuyoSimulatorWindow,
+    native.initPuyoSimulatorAnswerControl

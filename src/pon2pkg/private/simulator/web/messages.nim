@@ -4,8 +4,8 @@
 {.experimental: "strictDefs".}
 
 import karax/[karaxdsl, vdom]
-import ../[simulator]
-import ../../private/simulator/[render]
+import ../[render]
+import ../../../simulatorpkg/[simulator]
 
 proc messagesFrame*(simulator: var Simulator): VNode {.inline.} =
   ## Returns the messages frame.

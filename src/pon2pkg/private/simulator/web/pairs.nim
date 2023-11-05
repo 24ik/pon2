@@ -6,9 +6,9 @@
 import std/[options, sugar]
 import karax/[karax, karaxdsl, kbase, vdom, vstyles]
 import ./[misc]
-import ../[simulator]
-import ../../corepkg/[cell, misc, pair]
-import ../../private/simulator/[render]
+import ../[render]
+import ../../../corepkg/[cell, misc, pair]
+import ../../../simulatorpkg/[simulator]
 
 func initDeleteClickHandler(simulator: var Simulator, idx: Natural):
     () -> void =

@@ -6,7 +6,7 @@
 import std/[httpclient, logging, net, options, appdirs, dirs, files, paths,
             strformat]
 import nigui
-import ../../corepkg/[cell]
+import ../../../corepkg/[cell]
 
 type Assets* = object
   cellImages*: array[Cell, Image]
@@ -35,7 +35,7 @@ proc initAssets*(timeoutSec = 180): Assets =
     if not fullPath.fileExists:
       logger.log lvlInfo, "Downloading ", path.string, " ..."
 
-      {.push warning[Uninit]:off.}
+      {.push warning[Uninit]: off.}
       client.downloadFile(
         "https://github.com/izumiya-keisuke/puyo-simulator/raw/main/" &
         &"assets/puyo-small/{path.string}",

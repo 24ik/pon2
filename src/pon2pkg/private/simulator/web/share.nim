@@ -6,8 +6,8 @@
 import std/[strformat, sugar, tables, uri]
 import karax/[karax, karaxdsl, kbase, kdom, vdom, vstyles]
 import ./[field, pairs, requirement]
-import ../[simulator]
-import ../../private/simulator/[render]
+import ../[render]
+import ../../../simulatorpkg/[simulator]
 
 const
   UrlCopyButtonIdPrefix = "puyo-simulator-button-url"

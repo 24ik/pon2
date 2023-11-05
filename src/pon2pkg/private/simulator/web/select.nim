@@ -5,8 +5,8 @@
 
 import std/[sugar]
 import karax/[karax, kbase, karaxdsl, vdom]
-import ../[simulator]
-import ../../corepkg/[misc]
+import ../../../corepkg/[misc]
+import ../../../simulatorpkg/[simulator]
 
 const SelectedClass = kstring"button is-selected is-primary"
 

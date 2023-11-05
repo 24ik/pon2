@@ -1,18 +1,16 @@
-## This module implements the entry point.
+## This module implements the library entry point.
 ##
-## This module may require `-d:ssl` compile option since `assets.loadAssets` may require it.
+## `-d:ssl` compile option is required since `assets.loadAssets` require it.
 ##
 
 {.experimental: "strictDefs".}
 
-import std/[logging, options, setutils, sugar, uri]
-import docopt
+import std/[sugar]
 import nigui
-import ./[assets, field, immediatePairs, messages, misc, nextPair, pairs,
+import ./[assets, field, immediatepairs, messages, misc, nextpair, pairs,
           requirement, select, share]
-import ../[simulator]
-import ../../corepkg/[environment, field, misc as coreMisc, position]
-import ../../nazopuyopkg/[nazopuyo]
+import ../../../corepkg/[misc as coreMisc]
+import ../../../simulatorpkg/[simulator]
 
 export misc.toKeyEvent
 
@@ -24,8 +22,6 @@ type
   PuyoSimulatorWindow* = ref object of WindowImpl
     ## Application window.
     simulator*: ref Simulator
-
-let logger = newConsoleLogger(lvlNotice, verboseFmtStr)
 
 # ------------------------------------------------
 # Keyboard Handler
@@ -168,68 +164,3 @@ proc initPuyoSimulatorAnswerControl*(simulator: ref Simulator):
   # set size
   reqControl.width = secondRow.naturalWidth
   messages.width = field.naturalWidth
-
-# ------------------------------------------------
-# Run GUI Application
-# ------------------------------------------------
-
-const IshikawaModeToIzumiyaMode: array[IshikawaSimulatorMode,
-                                       IzumiyaSimulatorMode] = [
-  IzumiyaSimulatorMode.Edit, Play, Replay, Play]
-
-proc runGui[F: TsuField or WaterField](
-    nazoEnv: NazoPuyo[F] or Environment[F], positions: Option[Positions],
-    mode: IzumiyaSimulatorMode) {.inline.} =
-  ## Runs the GUI application.
-  app.init
-
-  let simulator = new Simulator
-  simulator[] =
-    if positions.isSome: nazoEnv.initSimulator(positions.get, mode, true)
-    else: nazoEnv.initSimulator(mode, true)
-
-  simulator.initPuyoSimulatorWindow.show
-  app.run
-
-proc runGui[F: TsuField or WaterField](
-    nazoEnv: NazoPuyo[F] or Environment[F], mode = Play) {.inline.} =
-  ## Runs the GUI application.
-  nazoEnv.runGui none Positions, mode
-
-proc runGui[F: TsuField or WaterField](
-    nazoEnv: NazoPuyo[F] or Environment[F], positions: Positions, mode = Play)
-    {.inline.} =
-  ## Runs the GUI application.
-  nazoEnv.runGui some positions, mode
-
-proc runGui*(args: Table[string, Value]) {.inline.} =
-  ## Runs the GUI application.
-  case args["<uri>"].kind
-  of vkNone:
-    initTsuEnvironment(0, colorCount = 5, setPairs = false).runGui
-  of vkStr:
-    let uri = parseUri $args["<uri>"]
-
-    try:
-      let
-        parseRes = uri.parseNazoPuyos
-        mode =
-          if parseRes.izumiyaMode.isSome: parseRes.izumiyaMode.get
-          else: IshikawaModeToIzumiyaMode[parseRes.ishikawaMode.get]
-
-      parseRes.nazoPuyos.flattenAnd:
-        nazoPuyo.runGui parseRes.positions, mode
-    except ValueError:
-      try:
-        let
-          parseRes = ($args["<uri>"]).parseUri.parseEnvironments
-          mode =
-            if parseRes.izumiyaMode.isSome: parseRes.izumiyaMode.get
-            else: IshikawaModeToIzumiyaMode[parseRes.ishikawaMode.get]
-
-        parseRes.environments.flattenAnd:
-          environment.runGui parseRes.positions, mode
-      except ValueError:
-        logger.log lvlError, "Invalid URI: ", $uri
-  else:
-    assert false

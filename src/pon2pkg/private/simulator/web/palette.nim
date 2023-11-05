@@ -6,8 +6,8 @@
 import std/[sugar]
 import karax/[karax, karaxdsl, kbase, vdom, vstyles]
 import ./[misc]
-import ../[simulator]
-import ../../corepkg/[cell]
+import ../../../corepkg/[cell]
+import ../../../simulatorpkg/[simulator]
 
 const
   ButtonClass = kstring"button px-2"

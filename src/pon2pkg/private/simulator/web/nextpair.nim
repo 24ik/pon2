@@ -5,9 +5,9 @@
 
 import karax/[karaxdsl, vdom]
 import ./[misc]
-import ../[simulator]
-import ../../corepkg/[misc]
-import ../../private/simulator/[render]
+import ../[render]
+import ../../../corepkg/[misc]
+import ../../../simulatorpkg/[simulator]
 
 proc nextPairFrame*(simulator: var Simulator): VNode {.inline.} =
   ## Returns the next pair frame.

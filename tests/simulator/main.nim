@@ -1,7 +1,7 @@
 {.experimental: "strictDefs".}
 
 import std/[options, unittest, uri]
-import ../../src/pon2pkg/corepkg/[environment, pair, position] # somehow needed
+import ../../src/pon2pkg/corepkg/[environment, pair, position]
 import ../../src/pon2pkg/nazopuyopkg/[nazopuyo]
 import ../../src/pon2pkg/simulatorpkg/[simulator {.all.}]
 

@@ -6,8 +6,8 @@
 import std/[sugar]
 import nigui
 import ./[assets, misc]
-import ../[simulator]
-import ../../private/simulator/[render]
+import ../[render]
+import ../../../simulatorpkg/[simulator]
 
 type MessagesControl* = ref object of ControlImpl
   ## Messages control.

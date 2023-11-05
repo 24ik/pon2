@@ -6,9 +6,9 @@
 import std/[sugar]
 import nigui
 import ./[assets, misc]
-import ../[simulator]
-import ../../corepkg/[cell]
-import ../../private/simulator/[render]
+import ../[render]
+import ../../../corepkg/[cell]
+import ../../../simulatorpkg/[simulator]
 
 type ImmediatePairsControl* = ref object of LayoutContainer
   ## Immediate pairs control.
