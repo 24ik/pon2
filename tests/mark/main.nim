@@ -7,11 +7,11 @@ import ../../src/pon2pkg/nazopuyopkg/[mark {.all.}, nazopuyo]
 func mark(uriStr: string): MarkResult =
   let parseRes = uriStr.parseUri.parseNazoPuyos
   parseRes.nazoPuyos.flattenAnd:
-    result = nazoPuyo.mark parseRes.positions.get
+    result = parseRes.positions.get.mark nazoPuyo
 
 func mark(uriStr: string, positions: Positions): MarkResult =
   uriStr.parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
-    result = nazoPuyo.mark positions
+    result = positions.mark nazoPuyo
 
 proc main* =
   # ------------------------------------------------
