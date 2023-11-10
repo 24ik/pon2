@@ -50,31 +50,31 @@ const ReqColorToPuyo = {
   RequirementColor.Purple: Cell.Purple.Puyo}.toTable
 
 func disappearColorSatisfied*(
-    colors: set[ColorPuyo], req: Requirement,
+    req: Requirement, colors: set[ColorPuyo],
     kind: static RequirementKind): bool {.inline.} =
   ## Returns `true` if the requirement satisfied.
   req.satisfied(colors.card, kind)
   
 func disappearCountSatisfied*(
-    count: int, req: Requirement, kind: static RequirementKind): bool
+    req: Requirement, count: int, kind: static RequirementKind): bool
     {.inline.} =
   ## Returns `true` if the requirement satisfied.
   req.satisfied(count, kind)
 
 func chainSatisfied*(
-    moveRes: MoveResult, req: Requirement, kind: static RequirementKind): bool
+    req: Requirement, moveRes: MoveResult, kind: static RequirementKind): bool
     {.inline.} =
   ## Returns `true` if the requirement satisfied.
   req.satisfied(moveRes.chainCount, kind)
 
 func disappearColorSametimeSatisfied*(
-    moveRes: DetailMoveResult, req: Requirement,
+    req: Requirement, moveRes: DetailMoveResult,
     kind: static RequirementKind): bool {.inline.} =
   ## Returns `true` if the requirement satisfied.
   req.satisfied(moveRes.colorsSeq.mapIt it.card, kind)
 
 func disappearCountSametimeSatisfied*(
-    moveRes: DetailMoveResult, req: Requirement,
+    req: Requirement, moveRes: DetailMoveResult,
     kind: static RequirementKind): bool {.inline.} =
   ## Returns `true` if the requirement satisfied.
   let counts =
@@ -85,7 +85,7 @@ func disappearCountSametimeSatisfied*(
   result = req.satisfied(counts, kind)
 
 func disappearPlaceSatisfied*(
-    moveRes: FullMoveResult, req: Requirement,
+    req: Requirement, moveRes: FullMoveResult,
     kind: static RequirementKind): bool {.inline.} =
   ## Returns `true` if the requirement satisfied.
   let places =
@@ -97,7 +97,7 @@ func disappearPlaceSatisfied*(
   result = req.satisfied(places, kind)
 
 func disappearConnectSatisfied*(
-    moveRes: FullMoveResult, req: Requirement,
+    req: Requirement, moveRes: FullMoveResult,
     kind: static RequirementKind): bool {.inline.} =
   ## Returns `true` if the requirement satisfied.
   let connects =

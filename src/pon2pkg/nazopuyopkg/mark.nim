@@ -48,6 +48,8 @@ template markTmpl[
       moveFn: M, solvedBody: untyped): untyped =
   ## Marking framework.
   ##
+  ## Injects: `moveResult` (`MoveResult` or its child corresponding to `M`)
+  ##
   ## Requirement-specific process should be implemented in `solvedBody`
   ## just like:
   ## ```
@@ -112,7 +114,7 @@ func markDisappearColor[F: TsuField or WaterField](
   positions.markTmpl(nazo, false, environment.moveWithRoughTracking[F]):
     colors.incl moveResult.colors
 
-    if colors.disappearColorSatisfied(nazo.requirement, kind):
+    if nazo.requirement.disappearColorSatisfied(colors, kind):
       return Accept
 
 func markDisappearCount[F: TsuField or WaterField](
@@ -127,7 +129,7 @@ func markDisappearCount[F: TsuField or WaterField](
     of RequirementColor.Color: moveResult.colorCount
     else: moveResult.puyoCount ReqColorToPuyo[nazo.requirement.color.get]
 
-    if count.disappearCountSatisfied(nazo.requirement, kind):
+    if nazo.requirement.disappearCountSatisfied(count, kind):
       return Accept
 
 func markChain[F: TsuField or WaterField](
@@ -135,7 +137,7 @@ func markChain[F: TsuField or WaterField](
     kind: static RequirementKind): MarkResult {.inline.} =
   ## Marks the positions with `Chain[More]` requirement.
   positions.markTmpl(nazo, false, environment.move[F]):
-    if moveResult.chainSatisfied(nazo.requirement, kind):
+    if nazo.requirement.chainSatisfied(moveResult, kind):
       return Accept
 
 func markChainClear[F: TsuField or WaterField](
@@ -143,7 +145,7 @@ func markChainClear[F: TsuField or WaterField](
     kind: static RequirementKind): MarkResult {.inline.} =
   ## Marks the positions with `Chain[More]Clear` requirement.
   positions.markTmpl(nazo, true, environment.move[F]):
-    if moveResult.chainSatisfied(nazo.requirement, kind):
+    if nazo.requirement.chainSatisfied(moveResult, kind):
       return Accept
 
 func markDisappearColorSametime[F: TsuField or WaterField](
@@ -151,7 +153,7 @@ func markDisappearColorSametime[F: TsuField or WaterField](
     kind: static RequirementKind): MarkResult {.inline.} =
   ## Marks the positions with `DisappearColor[More]Sametime` requirement.
   positions.markTmpl(nazo, false, environment.moveWithDetailTracking[F]):
-    if moveResult.disappearColorSametimeSatisfied(nazo.requirement, kind):
+    if nazo.requirement.disappearColorSametimeSatisfied(moveResult, kind):
       return Accept
 
 func markDisappearCountSametime[F: TsuField or WaterField](
@@ -159,7 +161,7 @@ func markDisappearCountSametime[F: TsuField or WaterField](
     kind: static RequirementKind): MarkResult {.inline.} =
   ## Marks the positions with `DisappearCount[More]Sametime` requirement.
   positions.markTmpl(nazo, false, environment.moveWithDetailTracking[F]):
-    if moveResult.disappearCountSametimeSatisfied(nazo.requirement, kind):
+    if nazo.requirement.disappearCountSametimeSatisfied(moveResult, kind):
       return Accept
 
 func markDisappearPlace[F: TsuField or WaterField](
@@ -167,7 +169,7 @@ func markDisappearPlace[F: TsuField or WaterField](
     kind: static RequirementKind): MarkResult {.inline.} =
   ## Marks the positions with `DisappearPlace[More]Sametime` requirement.
   positions.markTmpl(nazo, false, environment.moveWithFullTracking[F]):
-    if moveResult.disappearPlaceSatisfied(nazo.requirement, kind):
+    if nazo.requirement.disappearPlaceSatisfied(moveResult, kind):
       return Accept
 
 func markDisappearConnect[F: TsuField or WaterField](
@@ -175,7 +177,7 @@ func markDisappearConnect[F: TsuField or WaterField](
     kind: static RequirementKind): MarkResult {.inline.} =
   ## Marks the positions with `DisappearConnect[More]Sametime` requirement.
   positions.markTmpl(nazo, false, environment.moveWithFullTracking[F]):
-    if moveResult.disappearConnectSatisfied(nazo.requirement, kind):
+    if nazo.requirement.disappearConnectSatisfied(moveResult, kind):
       return Accept
 
 # ------------------------------------------------
