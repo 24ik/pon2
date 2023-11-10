@@ -39,13 +39,13 @@ const ReqColorToPuyo = {
   RequirementColor.Yellow: Cell.Yellow.Puyo,
   RequirementColor.Purple: Cell.Purple.Puyo}.toTable
 
-template markTmpl[
-    F: TsuField or WaterField,
-    M: type(environment.move) or type(environment.moveWithRoughTracking) or
-    type(environment.moveWithDetailTracking) or
-    type(environment.moveWithFullTracking)](
-      positions: Positions, nazo: NazoPuyo[F], needClear: static bool,
-      moveFn: M, solvedBody: untyped): untyped =
+template markTmpl[F: TsuField or WaterField](
+    positions: Positions, nazo: NazoPuyo[F], needClear: static bool,
+    moveFn: type(environment.move) or
+      type(environment.moveWithRoughTracking) or
+      type(environment.moveWithDetailTracking) or
+      type(environment.moveWithFullTracking),
+    solvedBody: untyped): untyped =
   ## Marking framework.
   ##
   ## Injects: `moveResult` (`MoveResult` or its child corresponding to `M`)
@@ -74,7 +74,7 @@ template markTmpl[
 
     let moveResult {.inject.} = moveFn(nazo2.environment, pos.get, false)
 
-    # clear
+    # check if the requirement is satisfied
     when needClear:
       let fieldCount = case nazo.requirement.color.get
       of RequirementColor.All: nazo2.environment.field.puyoCount

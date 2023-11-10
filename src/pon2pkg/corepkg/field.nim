@@ -40,7 +40,7 @@ func rule*[F: TsuField or WaterField](self: F): Rule {.inline.} =
   ## Returns the rule.
   when F is TsuField: Tsu else: Water
 
-func isDead*[F: TsuField or WaterField](self: F): bool {.inline.} =
+func isDead*(self: TsuField or WaterField): bool {.inline.} =
   ## Returns `true` if the field is in a defeated state.
   self.exist.isDead self.rule
 
@@ -62,7 +62,7 @@ template flattenAnd*(fields: Fields, body: untyped): untyped =
 # Count - None
 # ------------------------------------------------
 
-func noneCount*[F: TsuField or WaterField](self: F): int {.inline.} =
+func noneCount*(self: TsuField or WaterField): int {.inline.} =
   ## Returns the number of `None` in the field.
   Height * Width - self.puyoCount
 
@@ -70,18 +70,16 @@ func noneCount*[F: TsuField or WaterField](self: F): int {.inline.} =
 # Position
 # ------------------------------------------------
 
-func invalidPositions*[F: TsuField or WaterField](self: F): set[Position]
-                                                 {.inline.} =
+func invalidPositions*(self: TsuField or WaterField): set[Position] {.inline.} =
   ## Returns the invalid positions.
   self.exist.invalidPositions
 
-func validPositions*[F: TsuField or WaterField](self: F): set[Position]
-                                               {.inline.} =
+func validPositions*(self: TsuField or WaterField): set[Position] {.inline.} =
   ## Returns the valid positions.
   self.exist.validPositions
 
-func validDoublePositions*[F: TsuField or WaterField](self: F): set[Position]
-                                                     {.inline.} =
+func validDoublePositions*(self: TsuField or WaterField): set[Position]
+                          {.inline.} =
   ## Returns the valid positions for a double pair.
   self.exist.validDoublePositions
 
@@ -89,19 +87,19 @@ func validDoublePositions*[F: TsuField or WaterField](self: F): set[Position]
 # Shift
 # ------------------------------------------------
 
-func shiftUp*[F: TsuField or WaterField](mSelf: var F) {.inline.} =
+func shiftUp*(mSelf: var (TsuField or WaterField)) {.inline.} =
   ## Shifts the field upward.
   mSelf = mSelf.shiftedUp
 
-func shiftDown*[F: TsuField or WaterField](mSelf: var F) {.inline.} =
+func shiftDown*(mSelf: var (TsuField or WaterField)) {.inline.} =
   ## Shifts the field downward.
   mSelf = mSelf.shiftedDown
 
-func shiftRight*[F: TsuField or WaterField](mSelf: var F) {.inline.} =
+func shiftRight*(mSelf: var (TsuField or WaterField)) {.inline.} =
   ## Shifts the field rightward.
   mSelf = mSelf.shiftedRight
 
-func shiftLeft*[F: TsuField or WaterField](mSelf: var F) {.inline.} =
+func shiftLeft*(mSelf: var (TsuField or WaterField)) {.inline.} =
   ## Shifts the field leftward.
   mSelf = mSelf.shiftedLeft
 
@@ -109,11 +107,11 @@ func shiftLeft*[F: TsuField or WaterField](mSelf: var F) {.inline.} =
 # Flip
 # ------------------------------------------------
 
-func flipV*[F: TsuField or WaterField](mSelf: var F) {.inline.} =
+func flipV*(mSelf: var (TsuField or WaterField)) {.inline.} =
   ## Flips the field vertically.
   mSelf = mSelf.flippedV
 
-func flipH*[F: TsuField or WaterField](mSelf: var F) {.inline.} =
+func flipH*(mSelf: var (TsuField or WaterField)) {.inline.} =
   ## Flips the field horizontally.
   mSelf = mSelf.flippedH
 
@@ -126,7 +124,7 @@ func initDefaultMoveResult: FullMoveResult {.inline.} =
   ## This function is only used to remove warning.
   initFullMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
 
-func move*[F: TsuField or WaterField](mSelf: var F, pair: Pair, pos: Position):
+func move*(mSelf: var (TsuField or WaterField), pair: Pair, pos: Position):
     MoveResult {.inline, discardable.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
@@ -145,8 +143,9 @@ func move*[F: TsuField or WaterField](mSelf: var F, pair: Pair, pos: Position):
 
   result = initDefaultMoveResult() # HACK: dummy to remove warning
 
-func moveWithRoughTracking*[F: TsuField or WaterField](
-  mSelf: var F, pair: Pair, pos: Position): RoughMoveResult {.inline.} =
+func moveWithRoughTracking*(
+    mSelf: var (TsuField or WaterField), pair: Pair,
+    pos: Position): RoughMoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
@@ -170,8 +169,9 @@ func moveWithRoughTracking*[F: TsuField or WaterField](
 
   result = initDefaultMoveResult() # HACK: dummy to remove warning
 
-func moveWithDetailTracking*[F: TsuField or WaterField](
-  mSelf: var F, pair: Pair, pos: Position): DetailMoveResult {.inline.} =
+func moveWithDetailTracking*(
+    mSelf: var (TsuField or WaterField), pair: Pair,
+    pos: Position): DetailMoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
@@ -204,8 +204,9 @@ func moveWithDetailTracking*[F: TsuField or WaterField](
 
   result = initDefaultMoveResult() # HACK: dummy to remove warning
 
-func moveWithFullTracking*[F: TsuField or WaterField](
-  mSelf: var F, pair: Pair, pos: Position): FullMoveResult {.inline.} =
+func moveWithFullTracking*(
+    mSelf: var (TsuField or WaterField), pair: Pair,
+    pos: Position): FullMoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
@@ -326,7 +327,7 @@ const
     for cell, idx in CellToIshikawaIdx:
       {idx: cell}
 
-func toUriQuery*[F: TsuField or WaterField](self: F, host: SimulatorHost):
+func toUriQuery*(self: TsuField or WaterField, host: SimulatorHost):
     string {.inline.} =
   ## Converts the field to the URI query.
   let arr = self.toArray

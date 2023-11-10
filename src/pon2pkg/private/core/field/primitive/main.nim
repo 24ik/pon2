@@ -100,7 +100,7 @@ func toWaterField*(self: TsuField): WaterField {.inline.} =
 # Property
 # ------------------------------------------------
 
-func exist*[F: TsuField or WaterField](self: F): BinaryField {.inline.} =
+func exist*(self: TsuField or WaterField): BinaryField {.inline.} =
   ## Returns the binary field where any puyo exists.
   sum(self.bit2, self.bit1, self.bit0)
 
@@ -114,7 +114,7 @@ func column[F: TsuField or WaterField](self: F; col): F {.inline.} =
   result.bit1 = self.bit1.column col
   result.bit0 = self.bit0.column col
 
-func clearColumn[F: TsuField or WaterField](mSelf: var F, col) {.inline.} =
+func clearColumn(mSelf: var (TsuField or WaterField), col) {.inline.} =
   ## Clears the given column.
   mSelf.bit2.clearColumn col
   mSelf.bit1.clearColumn col
@@ -128,7 +128,7 @@ func toCell(bit2, bit1, bit0: bool): Cell {.inline.} =
   ## Converts the bits to the cell.
   Cell.low.succ bit2.int * 4 + bit1.int * 2 + bit0.int
   
-func `[]`*[F: TsuField or WaterField](self: F; row, col): Cell {.inline.} =
+func `[]`*(self: TsuField or WaterField; row, col): Cell {.inline.} =
   toCell(self.bit2[row, col], self.bit1[row, col], self.bit0[row, col])
 
 func toBits(cell: Cell): tuple[bit2: bool, bit1: bool, bit0: bool] {.inline.} =
@@ -138,7 +138,7 @@ func toBits(cell: Cell): tuple[bit2: bool, bit1: bool, bit0: bool] {.inline.} =
   result.bit1 = c.testBit 1
   result.bit0 = c.testBit 0
 
-func `[]=`*[F: TsuField or WaterField](mSelf: var F; row, col; cell: Cell)
+func `[]=`*(mSelf: var (TsuField or WaterField); row, col; cell: Cell)
            {.inline.} =
   let bits = cell.toBits
   mSelf.bit2[row, col] = bits.bit2
@@ -149,8 +149,8 @@ func `[]=`*[F: TsuField or WaterField](mSelf: var F; row, col; cell: Cell)
 # Insert / RemoveSqueeze
 # ------------------------------------------------
 
-func insert[F: TsuField or WaterField](mSelf: var F; row, col; cell: Cell,
-                                       insertFn: tsuInsert.type) {.inline.} =
+func insert(mSelf: var (TsuField or WaterField); row, col; cell: Cell,
+            insertFn: type(tsuInsert)) {.inline.} =
   ## Inserts the cell and shifts the field.
   let bits = cell.toBits
 
@@ -171,8 +171,9 @@ func insert*(mSelf: var WaterField; row, col; cell: Cell) {.inline.} =
   ## where inserted.
   mSelf.insert row, col, cell, waterInsert
 
-func removeSqueeze[F: TsuField or WaterField](
-    mSelf: var F; row, col; removeSqueezeFn: tsuRemoveSqueeze.type) {.inline.} =
+func removeSqueeze(
+    mSelf: var (TsuField or WaterField); row, col;
+    removeSqueezeFn: type(tsuRemoveSqueeze)) {.inline.} =
   ## Removes the cell at `(row, col)` and shifts the field.
   mSelf.bit2.removeSqueezeFn row, col
   mSelf.bit1.removeSqueezeFn row, col
@@ -195,31 +196,31 @@ func removeSqueeze*(mSelf: var WaterField; row, col) {.inline.} =
 # Puyo Extract
 # ------------------------------------------------
 
-func hard[F: TsuField or WaterField](self: F): BinaryField {.inline.} =
+func hard(self: TsuField or WaterField): BinaryField {.inline.} =
   ## Returns the binary field where hard puyos exist.
   self.bit0 - (self.bit2 + self.bit1)
 
-func garbage[F: TsuField or WaterField](self: F): BinaryField {.inline.} =
+func garbage(self: TsuField or WaterField): BinaryField {.inline.} =
   ## Returns the binary field where garbage puyos exist.
   self.bit1 - (self.bit2 + self.bit0)
 
-func red[F: TsuField or WaterField](self: F): BinaryField {.inline.} =
+func red(self: TsuField or WaterField): BinaryField {.inline.} =
   ## Returns the binary field where red puyos exist.
   self.bit1 * self.bit0 - self.bit2
 
-func green[F: TsuField or WaterField](self: F): BinaryField {.inline.} =
+func green(self: TsuField or WaterField): BinaryField {.inline.} =
   ## Returns the binary field where green puyos exist.
   self.bit2 - (self.bit1 + self.bit0)
 
-func blue[F: TsuField or WaterField](self: F): BinaryField {.inline.} =
+func blue(self: TsuField or WaterField): BinaryField {.inline.} =
   ## Returns the binary field where blue puyos exist.
   self.bit2 * self.bit0 - self.bit1
 
-func yellow[F: TsuField or WaterField](self: F): BinaryField {.inline.} =
+func yellow(self: TsuField or WaterField): BinaryField {.inline.} =
   ## Returns the binary field where yellow puyos exist.
   self.bit2 * self.bit1 - self.bit0
 
-func purple[F: TsuField or WaterField](self: F): BinaryField {.inline.} =
+func purple(self: TsuField or WaterField): BinaryField {.inline.} =
   ## Returns the binary field where purple puyos exist.
   prod(self.bit2, self.bit1, self.bit0)
 
@@ -227,8 +228,7 @@ func purple[F: TsuField or WaterField](self: F): BinaryField {.inline.} =
 # Count - Puyo
 # ------------------------------------------------
 
-func puyoCount*[F: TsuField or WaterField](self: F, puyo: Puyo): int
-               {.inline.} =
+func puyoCount*(self: TsuField or WaterField, puyo: Puyo): int {.inline.} =
   ## Returns the number of `puyo` in the field.
   case puyo
   of Hard: self.hard.popcnt
@@ -239,7 +239,7 @@ func puyoCount*[F: TsuField or WaterField](self: F, puyo: Puyo): int
   of Yellow: self.yellow.popcnt
   of Purple: self.purple.popcnt
 
-func puyoCount*[F: TsuField or WaterField](self: F): int {.inline.} =
+func puyoCount*(self: TsuField or WaterField): int {.inline.} =
   ## Returns the number of puyos in the field.
   self.exist.popcnt
 
@@ -247,7 +247,7 @@ func puyoCount*[F: TsuField or WaterField](self: F): int {.inline.} =
 # Count - Color
 # ------------------------------------------------
 
-func colorCount*[F: TsuField or WaterField](self: F): int {.inline.} = 
+func colorCount*(self: TsuField or WaterField): int {.inline.} = 
   ## Returns the number of color puyos in the field.
   (self.bit2 + self.red).popcnt
 
@@ -255,7 +255,7 @@ func colorCount*[F: TsuField or WaterField](self: F): int {.inline.} =
 # Count - Garbage
 # ------------------------------------------------
   
-func garbageCount*[F: TsuField or WaterField](self: F): int {.inline.} =
+func garbageCount*(self: TsuField or WaterField): int {.inline.} =
   ## Returns the number of garbage puyos in the field.
   popcnt (self.bit0 xor self.bit1) - self.bit2
 
@@ -345,7 +345,7 @@ func flippedH*[F: TsuField or WaterField](field: F): F {.inline.} =
 # Disappear
 # ------------------------------------------------
 
-func disappear*[F: TsuField or WaterField](mSelf: var F): DisappearResult
+func disappear*(mSelf: var (TsuField or WaterField)): DisappearResult
                {.inline, discardable.} =
   ## Removes puyos that should disappear.
   result.red = mSelf.red.disappeared
@@ -360,7 +360,7 @@ func disappear*[F: TsuField or WaterField](mSelf: var F): DisappearResult
 
   mSelf -= result.color + result.garbage
 
-func willDisappear*[F: TsuField or WaterField](self: F): bool {.inline.} =
+func willDisappear*(self: TsuField or WaterField): bool {.inline.} =
   ## Returns `true` if any puyos will disappear.
   self.red.willDisappear or
   self.green.willDisappear or
@@ -470,8 +470,8 @@ func drop*(mSelf: var WaterField) {.inline.} =
 # Field <-> array
 # ------------------------------------------------
 
-func toArray*[F: TsuField or WaterField](self: F):
-    array[Row, array[Column, Cell]] {.inline.} =
+func toArray*(self: TsuField or WaterField): array[Row, array[Column, Cell]]
+             {.inline.} =
   ## Converts the field to the array.
   let
     arr2 = self.bit2.toArray

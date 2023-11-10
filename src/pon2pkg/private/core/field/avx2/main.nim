@@ -78,7 +78,7 @@ func toWaterField*(self: TsuField): WaterField {.inline.} =
 # Property
 # ------------------------------------------------
 
-func exist*[F: TsuField or WaterField](self: F): BinaryField {.inline.} =
+func exist*(self: TsuField or WaterField): BinaryField {.inline.} =
   ## Returns the binary field where any puyo exists.
   sum(self.hardGarbage, self.noneRed, self.greenBlue, self.yellowPurple).exist
 
@@ -93,7 +93,7 @@ func column[F: TsuField or WaterField](self: F; col): F {.inline.} =
   result.greenBlue = self.greenBlue.column col
   result.yellowPurple = self.yellowPurple.column col
 
-func clearColumn[F: TsuField or WaterField](mSelf: var F; col) {.inline.} =
+func clearColumn(mSelf: var (TsuField or WaterField); col) {.inline.} =
   ## Clears the given column.
   mSelf.hardGarbage.clearColumn col
   mSelf.noneRed.clearColumn col
@@ -118,7 +118,7 @@ func toCell(hardGarbage, noneRed, greenBlue, yellowPurple: WhichColor): Cell
     bitor(greenBlue.color1.int64, greenBlue.color2.int64,
           yellowPurple.color1.int64, yellowPurple.color2.int64) shl 2)
 
-func `[]`*[F: TsuField or WaterField](self: F; row, col): Cell {.inline.} =
+func `[]`*(self: TsuField or WaterField; row, col): Cell {.inline.} =
   toCell(self.hardGarbage[row, col], self.noneRed[row, col],
          self.greenBlue[row, col], self.yellowPurple[row, col])
 
@@ -144,7 +144,7 @@ func toWhichColor(cell: Cell): tuple[
   result.yellowPurple.color1 = bitand(bit2, bit1, notBit0)
   result.yellowPurple.color2 = bitand(bit2, bit1, bit0)
 
-func `[]=`*[F: TsuField or WaterField](mSelf: var F; row, col; cell: Cell)
+func `[]=`*(mSelf: var (TsuField or WaterField); row, col; cell: Cell)
            {.inline.} =
   let (hardGarbage, noneRed, greenBlue, yellowPurple) = cell.toWhichColor
   mSelf.hardGarbage[row, col] = hardGarbage
@@ -156,8 +156,8 @@ func `[]=`*[F: TsuField or WaterField](mSelf: var F; row, col; cell: Cell)
 # Insert / RemoveSqueeze
 # ------------------------------------------------
 
-func insert[F: TsuField or WaterField](mSelf: var F; row, col; cell: Cell,
-                                       insertFn: tsuInsert.type) {.inline.} =
+func insert(mSelf: var (TsuField or WaterField); row, col; cell: Cell,
+            insertFn: type(tsuInsert)) {.inline.} =
   ## Inserts the cell and shifts the field.
   let (hardGarbage, noneRed, greenBlue, yellowPurple) = cell.toWhichColor
 
@@ -179,8 +179,8 @@ func insert*(mSelf: var WaterField; row, col; cell: Cell) {.inline.} =
   ## where inserted.
   mSelf.insert row, col, cell, waterInsert
 
-func removeSqueeze[F: TsuField or WaterField](
-    mSelf: var F; row, col; removeSqueezeFn: tsuRemoveSqueeze.type) {.inline.} =
+func removeSqueeze(mSelf: var (TsuField or WaterField); row, col;
+                   removeSqueezeFn: type(tsuRemoveSqueeze)) {.inline.} =
   ## Removes the cell at `(row, col)` and shifts the field.
   mSelf.hardGarbage.removeSqueezeFn row, col
   mSelf.noneRed.removeSqueezeFn row, col
@@ -204,8 +204,7 @@ func removeSqueeze*(mSelf: var WaterField; row, col) {.inline.} =
 # Count - Puyo
 # ------------------------------------------------
 
-func puyoCount*[F: TsuField or WaterField](self: F, puyo: Puyo): int
-               {.inline.} =
+func puyoCount*(self: TsuField or WaterField, puyo: Puyo): int {.inline.} =
   ## Returns the number of `puyo` in the field.
   case puyo
   of Hard: self.hardGarbage.popcnt 0
@@ -216,7 +215,7 @@ func puyoCount*[F: TsuField or WaterField](self: F, puyo: Puyo): int
   of Yellow: self.yellowPurple.popcnt 0
   of Purple: self.yellowPurple.popcnt 1
 
-func puyoCount*[F: TsuField or WaterField](self: F): int {.inline.} =
+func puyoCount*(self: TsuField or WaterField): int {.inline.} =
   ## Returns the number of puyos in the field.
   self.exist.popcnt div 2
 
@@ -224,7 +223,7 @@ func puyoCount*[F: TsuField or WaterField](self: F): int {.inline.} =
 # Count - Color
 # ------------------------------------------------
 
-func colorCount*[F: TsuField or WaterField](self: F): int {.inline.} = 
+func colorCount*(self: TsuField or WaterField): int {.inline.} = 
   ## Returns the number of color puyos in the field.
   sum(self.noneRed, self.greenBlue, self.yellowPurple).popcnt
 
@@ -232,7 +231,7 @@ func colorCount*[F: TsuField or WaterField](self: F): int {.inline.} =
 # Count - Garbage
 # ------------------------------------------------
   
-func garbageCount*[F: TsuField or WaterField](self: F): int {.inline.} =
+func garbageCount*(self: TsuField or WaterField): int {.inline.} =
   ## Returns the number of garbage puyos in the field.
   self.hardGarbage.popcnt
 
@@ -337,7 +336,7 @@ func flippedH*[F: TsuField or WaterField](self: F): F {.inline.} =
 # Disappear
 # ------------------------------------------------
 
-func disappear*[F: TsuField or WaterField](mSelf: var F): DisappearResult
+func disappear*(mSelf: var (TsuField or WaterField)): DisappearResult
                {.inline, discardable.} =
   ## Removes puyos that should disappear.
   result.red = mSelf.noneRed.disappeared
@@ -352,7 +351,7 @@ func disappear*[F: TsuField or WaterField](mSelf: var F): DisappearResult
   mSelf.greenBlue -= result.greenBlue
   mSelf.yellowPurple -= result.yellowPurple
 
-func willDisappear*[F: TsuField or WaterField](self: F): bool {.inline.} =
+func willDisappear*(self: TsuField or WaterField): bool {.inline.} =
   ## Returns `true` if any puyos will disappear.
   self.greenBlue.willDisappear or
   self.yellowPurple.willDisappear or
@@ -469,8 +468,8 @@ func drop*(mSelf: var WaterField) {.inline.} =
 # Field <-> array
 # ------------------------------------------------
 
-func toArray*[F: TsuField or WaterField](self: F):
-    array[Row, array[Column, Cell]] {.inline.} =
+func toArray*(self: TsuField or WaterField): array[Row, array[Column, Cell]]
+             {.inline.} =
   ## Converts the field to the array.
   let
     hardGarbage = self.hardGarbage.toArray
