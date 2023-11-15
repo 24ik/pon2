@@ -119,11 +119,6 @@ func flipH*(mSelf: var (TsuField or WaterField)) {.inline.} =
 # Move
 # ------------------------------------------------
 
-func initDefaultMoveResult: FullMoveResult {.inline.} =
-  ## Returns the default moving result.
-  ## This function is only used to remove warning.
-  initFullMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
-
 func move*(mSelf: var (TsuField or WaterField), pair: Pair, pos: Position):
     MoveResult {.inline, discardable.} =
   ## Puts the pair and advance the field until chains end.
@@ -141,11 +136,11 @@ func move*(mSelf: var (TsuField or WaterField), pair: Pair, pos: Position):
 
     chainCount.inc
 
-  result = initDefaultMoveResult() # HACK: dummy to remove warning
+  result = 0.initMoveResult # HACK: dummy to remove warning
 
 func moveWithRoughTracking*(
-    mSelf: var (TsuField or WaterField), pair: Pair,
-    pos: Position): RoughMoveResult {.inline.} =
+    mSelf: var (TsuField or WaterField), pair: Pair, pos: Position): MoveResult
+    {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
@@ -159,7 +154,7 @@ func moveWithRoughTracking*(
   while true:
     let disappearResult = mSelf.disappear
     if disappearResult.notDisappeared:
-      return initRoughMoveResult(chainCount, totalDisappearCounts)
+      return initMoveResult(chainCount, totalDisappearCounts)
 
     mSelf.drop
 
@@ -167,11 +162,11 @@ func moveWithRoughTracking*(
     for puyo in Puyo:
       totalDisappearCounts[puyo].inc disappearResult.puyoCount puyo
 
-  result = initDefaultMoveResult() # HACK: dummy to remove warning
+  result = 0.initMoveResult # HACK: dummy to remove warning
 
 func moveWithDetailTracking*(
-    mSelf: var (TsuField or WaterField), pair: Pair,
-    pos: Position): DetailMoveResult {.inline.} =
+    mSelf: var (TsuField or WaterField), pair: Pair, pos: Position): MoveResult
+    {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
@@ -187,8 +182,7 @@ func moveWithDetailTracking*(
   while true:
     let disappearResult = mSelf.disappear
     if disappearResult.notDisappeared:
-      return initDetailMoveResult(chainCount, totalDisappearCounts,
-                                  disappearCounts)
+      return initMoveResult(chainCount, totalDisappearCounts, disappearCounts)
 
     mSelf.drop
 
@@ -202,17 +196,17 @@ func moveWithDetailTracking*(
       totalDisappearCounts[puyo].inc count
     disappearCounts.add counts
 
-  result = initDefaultMoveResult() # HACK: dummy to remove warning
+  result = 0.initMoveResult # HACK: dummy to remove warning
 
 func moveWithFullTracking*(
-    mSelf: var (TsuField or WaterField), pair: Pair,
-    pos: Position): FullMoveResult {.inline.} =
+    mSelf: var (TsuField or WaterField), pair: Pair, pos: Position): MoveResult
+    {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
   ## - Number of puyos that disappeared in each chain
-  ## - Number of color puyos in each connected component that disappeared
+  ## - Number of color puyos in each connected component that disappeared \
   ## in each chain
   var
     chainCount = 0
@@ -225,8 +219,8 @@ func moveWithFullTracking*(
   while true:
     let disappearResult = mSelf.disappear
     if disappearResult.notDisappeared:
-      return initFullMoveResult(chainCount, totalDisappearCounts,
-                                disappearCounts, detailDisappearCounts)
+      return initMoveResult(chainCount, totalDisappearCounts, disappearCounts,
+                            detailDisappearCounts)
 
     mSelf.drop
 
@@ -241,7 +235,7 @@ func moveWithFullTracking*(
     disappearCounts.add counts
     detailDisappearCounts.add disappearResult.connectionCounts
 
-  result = initDefaultMoveResult() # HACK: dummy to remove warning
+  result = 0.initMoveResult # HACK: dummy to remove warning
 
 # ------------------------------------------------
 # Field <-> array

@@ -5,7 +5,7 @@
 
 import std/[options, tables]
 import ./[nazopuyo]
-import ../corepkg/[cell, environment, field, moveresult as mrModule, position]
+import ../corepkg/[cell, environment, field, moveresult, position]
 import ../private/nazopuyo/[mark]
 
 type MarkResult* = enum
@@ -28,7 +28,7 @@ func isSupported*(req: Requirement): bool {.inline.} =
     DisappearConnectMore} or req.color != some RequirementColor.Garbage
 
 # ------------------------------------------------
-# Common
+# Mark
 # ------------------------------------------------
 
 const ReqColorToPuyo = {
@@ -39,26 +39,29 @@ const ReqColorToPuyo = {
   RequirementColor.Yellow: Cell.Yellow.Puyo,
   RequirementColor.Purple: Cell.Purple.Puyo}.toTable
 
-template markTmpl[F: TsuField or WaterField](
-    positions: Positions, nazo: NazoPuyo[F], needClear: static bool,
-    moveFn: type(environment.move) or
-      type(environment.moveWithRoughTracking) or
-      type(environment.moveWithDetailTracking) or
-      type(environment.moveWithFullTracking),
-    solvedBody: untyped): untyped =
-  ## Marking framework.
-  ##
-  ## Injects: `moveResult` (`MoveResult` or its child corresponding to `M`)
-  ##
-  ## Requirement-specific process should be implemented in `solvedBody`
-  ## just like:
-  ## ```
-  ## if <requirement is satisfied>:
-  ##   return Accept
-  ## ```
+func mark*[F: TsuField or WaterField](positions: Positions, nazo: NazoPuyo[F]):
+    MarkResult {.inline.} =
+  ## Marks the positions.
+  if not nazo.requirement.isSupported:
+    return NotSupport
+
   var
     nazo2 = nazo
     skipped = false
+    disappearColors = set[ColorPuyo]({}) # used for DisappearColor
+    disappearCount = 0 # used for DisappearCount
+
+  let moveFn = case nazo.requirement.kind
+  of Clear, Chain, ChainMore:
+    environment.move[F]
+  of DisappearColor, DisappearColorMore, DisappearCount, DisappearCountMore,
+      ChainClear, ChainMoreClear:
+    environment.moveWithRoughTracking[F]
+  of DisappearColorSametime, DisappearColorMoreSametime,
+      DisappearCountSametime, DisappearCountMoreSametime:
+    environment.moveWithDetailTracking[F]
+  of DisappearPlace, DisappearPlaceMore, DisappearConnect, DisappearConnectMore:
+    environment.moveWithFullTracking[F]
 
   for pos in positions:
     # skip
@@ -72,10 +75,24 @@ template markTmpl[F: TsuField or WaterField](
     if pos.get in nazo2.environment.field.invalidPositions:
       return ImpossibleMove
 
-    let moveResult {.inject.} = moveFn(nazo2.environment, pos.get, false)
+    # move and update intermediate result
+    let moveRes = nazo2.environment.moveFn(pos.get, false)
+    case nazo.requirement.kind
+    of DisappearColor, DisappearColorMore:
+      disappearColors.incl moveRes.colors
+    of DisappearCount, DisappearCountMore:
+      let addCount = case nazo.requirement.color.get
+      of RequirementColor.All: moveRes.puyoCount
+      of RequirementColor.Color: moveRes.colorCount
+      of RequirementColor.Garbage: moveRes.garbageCount
+      else: moveRes.puyoCount ReqColorToPuyo[nazo.requirement.color.get]
 
-    # check if the requirement is satisfied
-    when needClear:
+      disappearCount.inc addCount
+    else:
+      discard
+
+    # check if the field is clear
+    if nazo.requirement.kind in {Clear, ChainClear, ChainMoreClear}:
       let fieldCount = case nazo.requirement.color.get
       of RequirementColor.All: nazo2.environment.field.puyoCount
       of RequirementColor.Garbage: nazo2.environment.field.garbageCount
@@ -83,133 +100,57 @@ template markTmpl[F: TsuField or WaterField](
       else: nazo2.environment.field.puyoCount ReqColorToPuyo[
         nazo.requirement.color.get]
 
-      if fieldCount == 0:
-        solvedBody
-    else:
-      solvedBody
+      if fieldCount != 0:
+        continue
 
+    # check if the requirement is satisfied
+    let satisfied = case nazo.requirement.kind
+    of Clear:
+      true
+    of DisappearColor:
+      nazo.requirement.disappearColorSatisfied(disappearColors, DisappearColor)
+    of DisappearColorMore:
+      nazo.requirement.disappearColorSatisfied(
+        disappearColors, DisappearColorMore)
+    of DisappearCount:
+      nazo.requirement.disappearCountSatisfied(disappearCount, DisappearCount)
+    of DisappearCountMore:
+      nazo.requirement.disappearCountSatisfied(
+        disappearCount, DisappearCountMore)
+    of Chain:
+      nazo.requirement.chainSatisfied(moveRes, Chain)
+    of ChainMore:
+      nazo.requirement.chainSatisfied(moveRes, ChainMore)
+    of ChainClear:
+      nazo.requirement.chainSatisfied(moveRes, ChainClear)
+    of ChainMoreClear:
+      nazo.requirement.chainSatisfied(moveRes, ChainMoreClear)
+    of DisappearColorSametime:
+      nazo.requirement.disappearColorSametimeSatisfied(
+        moveRes, DisappearColorSametime)
+    of DisappearColorMoreSametime:
+      nazo.requirement.disappearColorSametimeSatisfied(
+        moveRes, DisappearColorMoreSametime)
+    of DisappearCountSametime:
+      nazo.requirement.disappearCountSametimeSatisfied(
+        moveRes, DisappearCountSametime)
+    of DisappearCountMoreSametime:
+      nazo.requirement.disappearCountSametimeSatisfied(
+        moveRes, DisappearCountMoreSametime)
+    of DisappearPlace:
+      nazo.requirement.disappearPlaceSatisfied(moveRes, DisappearPlace)
+    of DisappearPlaceMore:
+      nazo.requirement.disappearPlaceSatisfied(moveRes, DisappearPlaceMore)
+    of DisappearConnect:
+      nazo.requirement.disappearConnectSatisfied(moveRes, DisappearConnect)
+    of DisappearConnectMore:
+      nazo.requirement.disappearConnectSatisfied(moveRes, DisappearConnectMore)
+
+    if satisfied:
+      return Accept
+    
     # dead
     if nazo2.environment.field.isDead:
       return Dead
 
-  return WrongAnswer
-
-# ------------------------------------------------
-# Requirement-specific
-# ------------------------------------------------
-
-func markClear[F: TsuField or WaterField](
-    positions: Positions, nazo: NazoPuyo[F]): MarkResult {.inline.} =
-  ## Marks the positions with `Clear` requirement.
-  positions.markTmpl(nazo, true, environment.move[F]):
-    discard moveResult # HACK: remove warning
-    return Accept
-
-func markDisappearColor[F: TsuField or WaterField](
-    positions: Positions, nazo: NazoPuyo[F],
-    kind: static RequirementKind): MarkResult {.inline.} =
-  ## Marks the positions with `DisappearColor[More]` requirement.
-  var colors = set[ColorPuyo]({})
-
-  positions.markTmpl(nazo, false, environment.moveWithRoughTracking[F]):
-    colors.incl moveResult.colors
-
-    if nazo.requirement.disappearColorSatisfied(colors, kind):
-      return Accept
-
-func markDisappearCount[F: TsuField or WaterField](
-    positions: Positions, nazo: NazoPuyo[F],
-    kind: static RequirementKind): MarkResult {.inline.} =
-  ## Marks the positions with `DisappearCount[More]` requirement.
-  var count = 0
-
-  positions.markTmpl(nazo, false, environment.moveWithRoughTracking[F]):
-    count.inc case nazo.requirement.color.get
-    of RequirementColor.All: moveResult.puyoCount
-    of RequirementColor.Color: moveResult.colorCount
-    else: moveResult.puyoCount ReqColorToPuyo[nazo.requirement.color.get]
-
-    if nazo.requirement.disappearCountSatisfied(count, kind):
-      return Accept
-
-func markChain[F: TsuField or WaterField](
-    positions: Positions, nazo: NazoPuyo[F],
-    kind: static RequirementKind): MarkResult {.inline.} =
-  ## Marks the positions with `Chain[More]` requirement.
-  positions.markTmpl(nazo, false, environment.move[F]):
-    if nazo.requirement.chainSatisfied(moveResult, kind):
-      return Accept
-
-func markChainClear[F: TsuField or WaterField](
-    positions: Positions, nazo: NazoPuyo[F],
-    kind: static RequirementKind): MarkResult {.inline.} =
-  ## Marks the positions with `Chain[More]Clear` requirement.
-  positions.markTmpl(nazo, true, environment.move[F]):
-    if nazo.requirement.chainSatisfied(moveResult, kind):
-      return Accept
-
-func markDisappearColorSametime[F: TsuField or WaterField](
-    positions: Positions, nazo: NazoPuyo[F],
-    kind: static RequirementKind): MarkResult {.inline.} =
-  ## Marks the positions with `DisappearColor[More]Sametime` requirement.
-  positions.markTmpl(nazo, false, environment.moveWithDetailTracking[F]):
-    if nazo.requirement.disappearColorSametimeSatisfied(moveResult, kind):
-      return Accept
-
-func markDisappearCountSametime[F: TsuField or WaterField](
-    positions: Positions, nazo: NazoPuyo[F],
-    kind: static RequirementKind): MarkResult {.inline.} =
-  ## Marks the positions with `DisappearCount[More]Sametime` requirement.
-  positions.markTmpl(nazo, false, environment.moveWithDetailTracking[F]):
-    if nazo.requirement.disappearCountSametimeSatisfied(moveResult, kind):
-      return Accept
-
-func markDisappearPlace[F: TsuField or WaterField](
-    positions: Positions, nazo: NazoPuyo[F],
-    kind: static RequirementKind): MarkResult {.inline.} =
-  ## Marks the positions with `DisappearPlace[More]Sametime` requirement.
-  positions.markTmpl(nazo, false, environment.moveWithFullTracking[F]):
-    if nazo.requirement.disappearPlaceSatisfied(moveResult, kind):
-      return Accept
-
-func markDisappearConnect[F: TsuField or WaterField](
-    positions: Positions, nazo: NazoPuyo[F],
-    kind: static RequirementKind): MarkResult {.inline.} =
-  ## Marks the positions with `DisappearConnect[More]Sametime` requirement.
-  positions.markTmpl(nazo, false, environment.moveWithFullTracking[F]):
-    if nazo.requirement.disappearConnectSatisfied(moveResult, kind):
-      return Accept
-
-# ------------------------------------------------
-# Mark
-# ------------------------------------------------
-
-func mark*[F: TsuField or WaterField](
-    positions: Positions, nazo: NazoPuyo[F]): MarkResult {.inline.} =
-  ## Marks the positions.
-  if not nazo.requirement.isSupported:
-    return NotSupport
-
-  result = case nazo.requirement.kind
-  of Clear: positions.markClear nazo
-  of DisappearColor: positions.markDisappearColor(nazo, DisappearColor)
-  of DisappearColorMore: positions.markDisappearColor(nazo, DisappearColorMore)
-  of DisappearCount: positions.markDisappearCount(nazo, DisappearCount)
-  of DisappearCountMore: positions.markDisappearCount(nazo, DisappearCountMore)
-  of Chain: positions.markChain(nazo, Chain)
-  of ChainMore: positions.markChain(nazo, ChainMore)
-  of ChainClear: positions.markChainClear(nazo, ChainClear)
-  of ChainMoreClear: positions.markChainClear(nazo, ChainMoreClear)
-  of DisappearColorSametime:
-    positions.markDisappearColorSametime(nazo, DisappearColorSametime)
-  of DisappearColorMoreSametime:
-    positions.markDisappearColorSametime(nazo, DisappearColorMoreSametime)
-  of DisappearCountSametime:
-    positions.markDisappearCountSametime(nazo, DisappearCountSametime)
-  of DisappearCountMoreSametime:
-    positions.markDisappearCountSametime(nazo, DisappearCountMoreSametime)
-  of DisappearPlace: positions.markDisappearPlace(nazo, DisappearPlace)
-  of DisappearPlaceMore: positions.markDisappearPlace(nazo, DisappearPlaceMore)
-  of DisappearConnect: positions.markDisappearConnect(nazo, DisappearConnect)
-  of DisappearConnectMore:
-    positions.markDisappearConnect(nazo, DisappearConnectMore)
+  result = WrongAnswer

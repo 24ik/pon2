@@ -4,35 +4,18 @@
 {.experimental: "strictDefs".}
 
 import std/math except sum
-import std/[sequtils, setutils, sugar]
+import std/[options, sequtils, setutils, sugar]
 import ./[cell, misc]
 import ../private/[misc]
 
-type
-  NotSupportDefect* = object of Defect
+type MoveResult* = object
+  ## Moving result.
+  chainCount: int
+  totalDisappearCounts: Option[array[Puyo, int]]
+  disappearCounts: Option[seq[array[Puyo, int]]]
+  detailDisappearCounts: Option[seq[array[ColorPuyo, seq[int]]]]
 
-  MoveResult* = object of RootObj
-    ## Moving result.
-    ## No available methods.
-    chainCount: int
-
-  RoughMoveResult* = object of MoveResult
-    ## Moving result.
-    ## Available methods:
-    totalDisappearCounts: array[Puyo, int]
-
-  DetailMoveResult* = object of RoughMoveResult
-    disappearCounts: seq[array[Puyo, int]]
-
-  FullMoveResult* = object of DetailMoveResult
-    ## Moving result.
-    detailDisappearCounts: seq[array[ColorPuyo, seq[int]]]
-
-using
-  moveRes: MoveResult
-  roughRes: RoughMoveResult
-  detailRes: DetailMoveResult
-  fullRes: FullMoveResult
+using self: MoveResult
 
 # ------------------------------------------------
 # Constructor
@@ -41,161 +24,116 @@ using
 func initMoveResult*(chainCount: int): MoveResult {.inline.} =
   ## Constructor of `MoveResult`.
   result.chainCount = chainCount
+  {.push warning[ProveInit]: off.}
+  result.totalDisappearCounts = none array[Puyo, int]
+  result.disappearCounts = none seq[array[Puyo, int]]
+  result.detailDisappearCounts = none seq[array[ColorPuyo, seq[int]]]
+  {.pop.}
 
-func initRoughMoveResult*(
-    chainCount: int, totalDisappearCounts: array[Puyo, int]): RoughMoveResult
+func initMoveResult*(
+    chainCount: int, totalDisappearCounts: array[Puyo, int]): MoveResult
     {.inline.} =
   ## Constructor of `RoughMoveResult`.
   result.chainCount = chainCount
-  result.totalDisappearCounts = totalDisappearCounts
+  result.totalDisappearCounts = some totalDisappearCounts
+  {.push warning[ProveInit]: off.}
+  result.disappearCounts = none seq[array[Puyo, int]]
+  result.detailDisappearCounts = none seq[array[ColorPuyo, seq[int]]]
+  {.pop.}
 
-func initDetailMoveResult*(
+func initMoveResult*(
     chainCount: int, totalDisappearCounts: array[Puyo, int],
-    disappearCounts: seq[array[Puyo, int]]): DetailMoveResult {.inline.} =
+    disappearCounts: seq[array[Puyo, int]]): MoveResult {.inline.} =
   ## Constructor of `DetailMoveResult`.
   result.chainCount = chainCount
-  result.totalDisappearCounts = totalDisappearCounts
-  result.disappearCounts = disappearCounts
+  result.totalDisappearCounts = some totalDisappearCounts
+  result.disappearCounts = some disappearCounts
+  {.push warning[ProveInit]: off.}
+  result.detailDisappearCounts = none seq[array[ColorPuyo, seq[int]]]
+  {.pop.}
 
-func initFullMoveResult*(
+func initMoveResult*(
     chainCount: int, totalDisappearCounts: array[Puyo, int],
     disappearCounts: seq[array[Puyo, int]],
-    detailDisappearCounts: seq[array[ColorPuyo, seq[int]]]): FullMoveResult
+    detailDisappearCounts: seq[array[ColorPuyo, seq[int]]]): MoveResult
     {.inline.} =
   ## Constructor of `FullMoveResult`.
   result.chainCount = chainCount
-  result.totalDisappearCounts = totalDisappearCounts
-  result.disappearCounts = disappearCounts
-  result.detailDisappearCounts = detailDisappearCounts
+  result.totalDisappearCounts = some totalDisappearCounts
+  result.disappearCounts = some disappearCounts
+  result.detailDisappearCounts = some detailDisappearCounts
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-func chainCount*(moveRes): int {.inline.} = moveRes.chainCount
+func chainCount*(self): int {.inline.} = self.chainCount
   ## Returns the number of chains.
 
 # ------------------------------------------------
-# Count - Puyo
+# Count
 # ------------------------------------------------
 
-func puyoCount*(moveRes; puyo: Puyo): int {.inline.} =
+func puyoCount*(self; puyo: Puyo): int {.inline.} =
   ## Returns the number of `puyo` that disappeared.
-  result = 0
-  raise newException(NotSupportDefect, "Not support: `MoveResult.puyoCount")
+  ## `UnpackDefect` will be raised if not supported.
+  self.totalDisappearCounts.get[puyo]
 
-func puyoCount*(moveRes): int {.inline.} =
+func puyoCount*(self): int {.inline.} = self.totalDisappearCounts.get.sum
   ## Returns the number of puyos that disappeared.
-  result = 0
-  raise newException(NotSupportDefect, "Not support: `MoveResult.puyoCount")
+  ## `UnpackDefect` will be raised if not supported.
 
-func puyoCount*(roughRes; puyo: Puyo): int {.inline.} =
-  ## Returns the number of `puyo` that disappeared.
-  roughRes.totalDisappearCounts[puyo]
-
-func puyoCount*(roughRes): int {.inline.} =
-  ## Returns the number of puyos that disappeared.
-  roughRes.totalDisappearCounts.sum
-
-# ------------------------------------------------
-# Count - Color
-# ------------------------------------------------
-
-func colorCount*(moveRes): int {.inline.} =
+func colorCount*(self): int {.inline.} =
   ## Returns the number of color puyos that disappeared.
-  result = 0
-  raise newException(NotSupportDefect, "Not support: `MoveResult.colorCount")
+  ## `UnpackDefect` will be raised if not supported.
+  self.totalDisappearCounts.get[ColorPuyo.low..ColorPuyo.high].sum
 
-func colorCount*(roughRes): int {.inline.} =
-  ## Returns the number of color puyos that disappeared.
-  roughRes.totalDisappearCounts[ColorPuyo.low..ColorPuyo.high].sum
-
-# ------------------------------------------------
-# Count - Garbage
-# ------------------------------------------------
-
-func garbageCount*(moveRes): int {.inline.} =
+func garbageCount*(self): int {.inline.} =
   ## Returns the number of garbage puyos that disappeared.
-  result = 0
-  raise newException(NotSupportDefect, "Not support: `MoveResult.garbageCount")
-
-func garbageCount*(roughRes): int {.inline.} =
-  ## Returns the number of garbage puyos that disappeared.
-  roughRes.totalDisappearCounts[Hard] + roughRes.totalDisappearCounts[Garbage]
+  ## `UnpackDefect` will be raised if not supported.
+  self.totalDisappearCounts.get[Hard] + self.totalDisappearCounts.get[Garbage]
 
 # ------------------------------------------------
-# Counts - Puyo
+# Counts
 # ------------------------------------------------
 
-func puyoCounts*(moveRes; puyo: Puyo): seq[int] {.inline.} =
+func puyoCounts*(self; puyo: Puyo): seq[int] {.inline.} =
   ## Returns the number of `puyo` that disappeared in each chain.
-  result = newSeq[int] 0
-  raise newException(NotSupportDefect, "Not support: `MoveResult.puyoCounts")
+  ## `UnpackDefect` will be raised if not supported.
+  self.disappearCounts.get.mapIt it[puyo]
 
-func puyoCounts*(moveRes): seq[int] {.inline.} =
+func puyoCounts*(self): seq[int] {.inline.} =
   ## Returns the number of puyos that disappeared in each chain.
-  result = newSeq[int] 0
-  raise newException(NotSupportDefect, "Not support: `MoveResult.puyoCounts")
+  ## `UnpackDefect` will be raised if not supported.
+  self.disappearCounts.get.mapIt it.sum
 
-func puyoCounts*(detailRes; puyo: Puyo): seq[int] {.inline.} =
-  ## Returns the number of `puyo` that disappeared in each chain.
-  detailRes.disappearCounts.mapIt it[puyo]
-
-func puyoCounts*(detailRes): seq[int] {.inline.} =
-  ## Returns the number of puyos that disappeared in each chain.
-  detailRes.disappearCounts.mapIt it.sum
-
-# ------------------------------------------------
-# Counts - Color
-# ------------------------------------------------
-
-func colorCounts*(moveRes): seq[int] {.inline.} =
+func colorCounts*(self): seq[int] {.inline.} =
   ## Returns the number of color puyos that disappeared in each chain.
-  result = newSeq[int] 0
-  raise newException(NotSupportDefect, "Not support: `MoveResult.colorCounts")
+  ## `UnpackDefect` will be raised if not supported.
+  self.disappearCounts.get.mapIt it[ColorPuyo.low..ColorPuyo.high].sum
 
-func colorCounts*(detailRes): seq[int] {.inline.} =
-  ## Returns the number of color puyos that disappeared in each chain.
-  detailRes.disappearCounts.mapIt it[ColorPuyo.low..ColorPuyo.high].sum
-
-# ------------------------------------------------
-# Counts - Garbage
-# ------------------------------------------------
-
-func garbageCounts*(moveRes): seq[int] {.inline.} =
+func garbageCounts*(self): seq[int] {.inline.} =
   ## Returns the number of garbage puyos that disappeared in each chain.
-  result = newSeq[int] 0
-  raise newException(NotSupportDefect, "Not support: `MoveResult.garbageCounts")
-
-func garbageCounts*(detailRes): seq[int] {.inline.} =
-  ## Returns the number of garbage puyos that disappeared in each chain.
-  detailRes.disappearCounts.mapIt it[Hard] + it[Garbage]
+  ## `UnpackDefect` will be raised if not supported.
+  self.disappearCounts.get.mapIt it[Hard] + it[Garbage]
 
 # ------------------------------------------------
 # Colors
 # ------------------------------------------------
 
-func colors*(moveRes): set[ColorPuyo] {.inline.} =
+func colors*(self): set[ColorPuyo] {.inline.} =
   ## Returns the set of color puyos that disappeared.
-  result = {}
-  raise newException(NotSupportDefect, "Not support: `MoveResult.colors")
-
-func colors*(roughRes): set[ColorPuyo] {.inline.} =
-  ## Returns the set of color puyos that disappeared.
+  ## `UnpackDefect` will be raised if not supported.
   result = {}
   for color in ColorPuyo:
-    if roughRes.totalDisappearCounts[color] > 0:
+    if self.totalDisappearCounts.get[color] > 0:
       result.incl color
 
-func colorsSeq*(moveRes): seq[set[ColorPuyo]] {.inline.} =
+func colorsSeq*(self): seq[set[ColorPuyo]] {.inline.} =
   ## Returns the sequence of the set of color puyos that disappeared.
-  result = @[]
-  raise newException(NotSupportDefect, "Not support: `MoveResult.colorsSeq")
-
-func colorsSeq*(detailRes): seq[set[ColorPuyo]] {.inline.} =
-  ## Returns the sequence of the set of color puyos that disappeared.
+  ## `UnpackDefect` will be raised if not supported.
   collect:
-    for arr in detailRes.disappearCounts:
+    for arr in self.disappearCounts.get:
       var colors = set[ColorPuyo]({})
 
       for color in ColorPuyo:
@@ -208,47 +146,32 @@ func colorsSeq*(detailRes): seq[set[ColorPuyo]] {.inline.} =
 # Place
 # ------------------------------------------------
 
-func colorPlaces*(moveRes; color: ColorPuyo): seq[int] {.inline.} =
+func colorPlaces*(self; color: ColorPuyo): seq[int] {.inline.} =
   ## Returns the number of places where `color` disappeared in each chain.
-  result = newSeq[int] 0
-  raise newException(NotSupportDefect, "Not support: `MoveResult.colorPlaces")
+  ## `UnpackDefect` will be raised if not supported.
+  self.detailDisappearCounts.get.mapIt it[color].len
 
-func colorPlaces*(moveRes): seq[int] {.inline.} =
+func colorPlaces*(self): seq[int] {.inline.} =
   ## Returns the number of places where color puyos disappeared in each chain.
-  result = newSeq[int] 0
-  raise newException(NotSupportDefect, "Not support: `MoveResult.colorPlaces")
-
-func colorPlaces*(fullRes; color: ColorPuyo): seq[int] {.inline.} =
-  ## Returns the number of places where `color` disappeared in each chain.
-  fullRes.detailDisappearCounts.mapIt it[color].len
-
-func colorPlaces*(fullRes): seq[int] {.inline.} =
-  ## Returns the number of places where color puyos disappeared in each chain.
+  ## `UnpackDefect` will be raised if not supported.
   collect:
-    for countsArr in fullRes.detailDisappearCounts:
+    for countsArr in self.detailDisappearCounts.get:
       sum (ColorPuyo.low..ColorPuyo.high).mapIt countsArr[it].len
 
 # ------------------------------------------------
 # Connect
 # ------------------------------------------------
 
-func colorConnects*(moveRes; color: ColorPuyo): seq[int] {.inline.} =
+func colorConnects*(self; color: ColorPuyo): seq[int] {.inline.} =
   ## Returns the number of connections of `color` that disappeared.
-  result = newSeq[int] 0
-  raise newException(NotSupportDefect, "Not support: `MoveResult.colorConnects")
+  ## `UnpackDefect` will be raised if not supported.
+  concat self.detailDisappearCounts.get.mapIt it[color]
 
-func colorConnects*(moveRes): seq[int] {.inline.} =
+func colorConnects*(self): seq[int] {.inline.} =
   ## Returns the number of connections of color puyos that disappeared.
-  result = newSeq[int] 0
-  raise newException(NotSupportDefect, "Not support: `MoveResult.colorConnects")
-
-func colorConnects*(fullRes; color: ColorPuyo): seq[int] {.inline.} =
-  ## Returns the number of connections of `color` that disappeared.
-  concat fullRes.detailDisappearCounts.mapIt it[color]
-
-func colorConnects*(fullRes): seq[int] {.inline.} =
-  ## Returns the number of connections of color puyos that disappeared.
-  concat fullRes.detailDisappearCounts.mapIt it[ColorPuyo.low..ColorPuyo.high].concat
+  ## `UnpackDefect` will be raised if not supported.
+  concat self.detailDisappearCounts.get.mapIt it[
+    ColorPuyo.low..ColorPuyo.high].concat
 
 # ------------------------------------------------
 # Score
@@ -285,18 +208,15 @@ func connectBonus(puyoCounts: seq[int]): int {.inline.} =
   for count in puyoCounts:
     result.inc ConnectBonuses[count]
 
-func score*(moveRes): int {.inline.} =
-  result = 0
-  raise newException(NotSupportDefect, "Not support: MoveResult.score")
-
-func score*(fullRes): int {.inline.} =
+func score*(self): int {.inline.} =
   ## Returns the score.
+  ## `UnpackDefect` will be raised if not supported.
   result = 0
 
-  for chainIdx, countsArray in fullRes.detailDisappearCounts:
+  for chainIdx, countsArray in self.detailDisappearCounts.get:
     let
       disappearCounts =
-        fullRes.disappearCounts[chainIdx][ColorPuyo.low..ColorPuyo.high]
+        self.disappearCounts.get[chainIdx][ColorPuyo.low..ColorPuyo.high]
 
       chainBonus = ChainBonuses[chainIdx.succ]
       connectBonus =

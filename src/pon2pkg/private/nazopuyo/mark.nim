@@ -8,7 +8,7 @@ import ../../nazopuyopkg/[nazopuyo]
 import ../../corepkg/[cell, moveresult]
 
 # ------------------------------------------------
-# Common - Satisfy
+# Common
 # ------------------------------------------------
 
 const ExactKinds = {DisappearColor, DisappearCount, Chain, ChainClear,
@@ -38,7 +38,47 @@ func satisfied[T: SomeNumber or Natural](
     numbers.anyIt it >= req.number.get
 
 # ------------------------------------------------
-# Requirement-specific
+# DisappearColor
+# ------------------------------------------------
+
+func disappearColorSatisfied*(
+    req: Requirement, colors: set[ColorPuyo],
+    kind: static RequirementKind): bool {.inline.} =
+  ## Returns `true` if the requirement satisfied.
+  req.satisfied(colors.card, kind)
+  
+# ------------------------------------------------
+# DisappearCount
+# ------------------------------------------------
+
+func disappearCountSatisfied*(
+    req: Requirement, count: int, kind: static RequirementKind): bool
+    {.inline.} =
+  ## Returns `true` if the requirement satisfied.
+  req.satisfied(count, kind)
+
+# ------------------------------------------------
+# Chain
+# ------------------------------------------------
+
+func chainSatisfied*(
+    req: Requirement, moveRes: MoveResult, kind: static RequirementKind): bool
+    {.inline.} =
+  ## Returns `true` if the requirement satisfied.
+  req.satisfied(moveRes.chainCount, kind)
+
+# ------------------------------------------------
+# DisappearColorSametime
+# ------------------------------------------------
+
+func disappearColorSametimeSatisfied*(
+    req: Requirement, moveRes: MoveResult,
+    kind: static RequirementKind): bool {.inline.} =
+  ## Returns `true` if the requirement satisfied.
+  req.satisfied(moveRes.colorsSeq.mapIt it.card, kind)
+
+# ------------------------------------------------
+# DisappearCountSametime
 # ------------------------------------------------
 
 const ReqColorToPuyo = {
@@ -49,61 +89,84 @@ const ReqColorToPuyo = {
   RequirementColor.Yellow: Cell.Yellow.Puyo,
   RequirementColor.Purple: Cell.Purple.Puyo}.toTable
 
-func disappearColorSatisfied*(
-    req: Requirement, colors: set[ColorPuyo],
-    kind: static RequirementKind): bool {.inline.} =
-  ## Returns `true` if the requirement satisfied.
-  req.satisfied(colors.card, kind)
-  
-func disappearCountSatisfied*(
-    req: Requirement, count: int, kind: static RequirementKind): bool
-    {.inline.} =
-  ## Returns `true` if the requirement satisfied.
-  req.satisfied(count, kind)
-
-func chainSatisfied*(
-    req: Requirement, moveRes: MoveResult, kind: static RequirementKind): bool
-    {.inline.} =
-  ## Returns `true` if the requirement satisfied.
-  req.satisfied(moveRes.chainCount, kind)
-
-func disappearColorSametimeSatisfied*(
-    req: Requirement, moveRes: DetailMoveResult,
-    kind: static RequirementKind): bool {.inline.} =
-  ## Returns `true` if the requirement satisfied.
-  req.satisfied(moveRes.colorsSeq.mapIt it.card, kind)
-
 func disappearCountSametimeSatisfied*(
-    req: Requirement, moveRes: DetailMoveResult,
-    kind: static RequirementKind): bool {.inline.} =
+    req: Requirement, moveRes: MoveResult, kind: static RequirementKind,
+    color: static RequirementColor): bool {.inline.} =
   ## Returns `true` if the requirement satisfied.
+  assert req.color.get == color
+
   let counts =
-    if req.color.get == RequirementColor.All: moveRes.puyoCounts
-    elif req.color.get == RequirementColor.Color: moveRes.colorCounts
-    else: moveRes.puyoCounts ReqColorToPuyo[req.color.get]
+    when color == RequirementColor.All: moveRes.puyoCounts
+    elif color == RequirementColor.Color: moveRes.colorCounts
+    elif color == RequirementColor.Garbage: moveRes.garbageCounts
+    else: moveRes.puyoCounts ReqColorToPuyo[color]
 
   result = req.satisfied(counts, kind)
 
-func disappearPlaceSatisfied*(
-    req: Requirement, moveRes: FullMoveResult,
-    kind: static RequirementKind): bool {.inline.} =
+func disappearCountSametimeSatisfied*(
+    req: Requirement, moveRes: MoveResult, kind: static RequirementKind): bool
+    {.inline.} =
   ## Returns `true` if the requirement satisfied.
+  let counts = case req.color.get
+  of RequirementColor.All: moveRes.puyoCounts
+  of RequirementColor.Color: moveRes.colorCounts
+  of RequirementColor.Garbage: moveRes.garbageCounts
+  else: moveRes.puyoCounts ReqColorToPuyo[req.color.get]
+
+  result = req.satisfied(counts, kind)
+
+# ------------------------------------------------
+# DisappearPlace
+# ------------------------------------------------
+
+func disappearPlaceSatisfied*(
+    req: Requirement, moveRes: MoveResult, kind: static RequirementKind,
+    color: static RequirementColor): bool {.inline.} =
+  ## Returns `true` if the requirement satisfied.
+  assert req.color.get == color
+
   let places =
-    if req.color.get in {RequirementColor.All, RequirementColor.Color}:
+    when color in {RequirementColor.All, RequirementColor.Color}:
       moveRes.colorPlaces
     else:
-      moveRes.colorPlaces ReqColorToPuyo[req.color.get]
+      moveRes.colorPlaces ReqColorToPuyo[color]
 
   result = req.satisfied(places, kind)
 
-func disappearConnectSatisfied*(
-    req: Requirement, moveRes: FullMoveResult,
-    kind: static RequirementKind): bool {.inline.} =
+func disappearPlaceSatisfied*(
+    req: Requirement, moveRes: MoveResult, kind: static RequirementKind): bool
+    {.inline.} =
   ## Returns `true` if the requirement satisfied.
+  let places = case req.color.get
+  of RequirementColor.All, RequirementColor.Color: moveRes.colorPlaces
+  else: moveRes.colorPlaces ReqColorToPuyo[req.color.get]
+
+  result = req.satisfied(places, kind)
+
+# ------------------------------------------------
+# DisappearConnect
+# ------------------------------------------------
+
+func disappearConnectSatisfied*(
+    req: Requirement, moveRes: MoveResult, kind: static RequirementKind,
+    color: static RequirementColor): bool {.inline.} =
+  ## Returns `true` if the requirement satisfied.
+  assert req.color.get == color
+
   let connects =
-    if req.color.get in {RequirementColor.All, RequirementColor.Color}:
+    if color in {RequirementColor.All, RequirementColor.Color}:
       moveRes.colorConnects
     else:
-      moveRes.colorConnects ReqColorToPuyo[req.color.get]
+      moveRes.colorConnects ReqColorToPuyo[color]
+
+  result = req.satisfied(connects, kind)
+
+func disappearConnectSatisfied*(
+    req: Requirement, moveRes: MoveResult, kind: static RequirementKind): bool
+    {.inline.} =
+  ## Returns `true` if the requirement satisfied.
+  let connects = case req.color.get
+  of RequirementColor.All, RequirementColor.Color: moveRes.colorConnects
+  else: moveRes.colorConnects ReqColorToPuyo[req.color.get]
 
   result = req.satisfied(connects, kind)

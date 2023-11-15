@@ -211,8 +211,8 @@ func garbageCount*[F: TsuField or WaterField](self: Environment[F]): int
 # ------------------------------------------------
 
 func move*[F: TsuField or WaterField](
-    mSelf: var Environment[F], pos: Position,
-    addPair = true): MoveResult {.inline, discardable.} =
+    mSelf: var Environment[F], pos: Position, addPair = true): MoveResult
+    {.inline, discardable.} =
   ## Puts the pair and advance the field until chains end,
   ## and then adds a new pair to the environment (optional).
   ## This function tracks:
@@ -223,8 +223,8 @@ func move*[F: TsuField or WaterField](
     mSelf.addPair
 
 func moveWithRoughTracking*[F: TsuField or WaterField](
-    mSelf: var Environment[F], pos: Position,
-    addPair = true): RoughMoveResult {.inline.} =
+    mSelf: var Environment[F], pos: Position, addPair = true): MoveResult
+    {.inline.} =
   ## Puts the pair and advance the field until chains end,
   ## and then adds a new pair to the environment (optional).
   ## This function tracks:
@@ -236,8 +236,8 @@ func moveWithRoughTracking*[F: TsuField or WaterField](
     mSelf.addPair
 
 func moveWithDetailTracking*[F: TsuField or WaterField](
-    mSelf: var Environment[F], pos: Position,
-    addPair = true): DetailMoveResult {.inline.} =
+    mSelf: var Environment[F], pos: Position, addPair = true): MoveResult
+    {.inline.} =
   ## Puts the pair and advance the field until chains end,
   ## and then adds a new pair to the environment (optional).
   ## This function tracks:
@@ -250,15 +250,16 @@ func moveWithDetailTracking*[F: TsuField or WaterField](
     mSelf.addPair
 
 func moveWithFullTracking*[F: TsuField or WaterField](
-    mSelf: var Environment[F], pos: Position,
-    addPair = true): FullMoveResult {.inline.} =
+    mSelf: var Environment[F], pos: Position, addPair = true): MoveResult
+    {.inline.} =
   ## Puts the pair and advance the field until chains end,
   ## and then adds a new pair to the environment (optional).
   ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
   ## - Number of puyos that disappeared in each chain
-  ## - Number of color puyos in each connected component that disappeared
+  ## - Number of color puyos in each connected component that disappeared \
+  ## in each chain
   result = mSelf.field.moveWithFullTracking(mSelf.pairs.popFirst, pos)
 
   if addPair:
