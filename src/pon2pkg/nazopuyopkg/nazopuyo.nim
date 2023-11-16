@@ -4,7 +4,7 @@
 {.experimental: "strictDefs".}
 
 import std/[options, setutils, strutils, sugar, tables, uri]
-import ../corepkg/[environment, field, misc, position]
+import ../corepkg/[environment, field, misc, pair, position]
 
 type
   RequirementKind* {.pure.} = enum

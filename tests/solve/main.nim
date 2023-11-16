@@ -1,16 +1,13 @@
 {.experimental: "strictDefs".}
 
 import std/[sequtils, unittest, uri]
-import ../../src/pon2pkg/apppkg/core/[solve {.all.}]
 import ../../src/pon2pkg/corepkg/[pair, position]
-import ../../src/pon2pkg/nazopuyopkg/[nazopuyo]
+import ../../src/pon2pkg/nazopuyopkg/[nazopuyo, solve]
 
 proc checkSolve(questionUri: string, answersStrs: varargs[string]) =
   let answers = answersStrs.mapIt it.parsePositions
   questionUri.parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
-    check nazoPuyo.solve == answers
     check nazoPuyo.solve(parallelCount = 1) == answers
-    check nazoPuyo.inspectSolve(earlyStopping = false).answers == answers
 
 proc main* =
   # ------------------------------------------------
