@@ -1,12 +1,8 @@
-import options
-import sequtils
-import unittest
-import uri
+{.experimental: "strictDefs".}
 
-import nazopuyo_core
-import puyo_core
-
-import ../../src/pon2pkg/core/permute
+import std/[options, sequtils, unittest, uri]
+import ../../src/pon2pkg/nazopuyopkg/[nazopuyo, permute]
+import ../../src/pon2pkg/corepkg/[pair, position]
 
 proc main* =
   # ------------------------------------------------
@@ -16,25 +12,28 @@ proc main* =
   # permute
   block:
     let
-      query = "https://ishikawapuyo.net/simu/pn.html?S00r0Mm6iOi_g1g1__u03".parseUri.toNazoPuyo.get.nazoPuyo
+      nazo = "https://ishikawapuyo.net/simu/pn.html?S00r0Mm6iOi_g1g1__u03".
+        parseUri.parseTsuNazoPuyo.nazoPuyo
 
-      result1gbgb = ("gb\ngb".toPairs.get, "12\n12".toPositions.get)
-      result1gbbg = ("gb\nbg".toPairs.get, "12\n21".toPositions.get)
-      result1bgbg = ("bg\nbg".toPairs.get, "21\n21".toPositions.get)
-      result2 = ("gg\nbb".toPairs.get, "1N\n2N".toPositions.get)
+      result1gbgb = ("gb\ngb".parsePairs, "12\n12".parsePositions)
+      result1gbbg = ("gb\nbg".parsePairs, "12\n21".parsePositions)
+      result1bgbg = ("bg\nbg".parsePairs, "21\n21".parsePositions)
+      result2 = ("gg\nbb".parsePairs, "1N\n2N".parsePositions)
 
     # allow double
     # w/o fixMoves
-    check query.permute(newSeq[Positive](0), true, true, true).toSeq == @[result2, result1gbgb]
-    check query.permute(newSeq[Positive](0), true, true, false).toSeq == @[result2, result1gbgb]
+    check nazo.permute(newSeq[Positive](0), true, true, 1).toSeq == @[
+      result2, result1gbgb]
     # w/ fixMoves
-    check query.permute(@[2.Positive], true, true, true).toSeq == @[result1gbbg]
-    check query.permute(@[2.Positive], true, true, false).toSeq == @[result1gbbg]
-    check query.permute(@[1.Positive, 2.Positive], true, true, true).toSeq == @[result1bgbg]
-    check query.permute(@[1.Positive, 2.Positive], true, true, false).toSeq == @[result1bgbg]
+    check nazo.permute(@[2.Positive], true, true, 1).toSeq == @[
+      result1gbbg]
+    check nazo.permute(@[1.Positive, 2.Positive], true, true, 1).toSeq == @[
+      result1bgbg]
 
     # not allow last double
-    check query.permute(newSeq[Positive](0), true, false, true).toSeq == @[result1gbgb]
+    check nazo.permute(newSeq[Positive](0), true, false, 1).toSeq == @[
+      result1gbgb]
 
     # not allow double
-    check query.permute(newSeq[Positive](0), false, false, true).toSeq == @[result1gbgb]
+    check nazo.permute(newSeq[Positive](0), false, false, 1).toSeq == @[
+      result1gbgb]

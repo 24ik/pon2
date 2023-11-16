@@ -7,12 +7,13 @@
 ## Submodule Documentations:
 ## - [NazoPuyo Core](./nazopuyopkg/nazopuyo.html)
 ## - [Marking](./nazopuyopkg/mark.html)
-## - [Solver](./nazopuyopkg/solve.html)
+## - [Permute](./nazopuyopkg/permute.html)
+## - [Solve](./nazopuyopkg/solve.html)
 ##
 
 {.experimental: "strictDefs".}
 
-import ./nazopuyopkg/[mark, nazopuyo, solve]
+import ./nazopuyopkg/[mark, nazopuyo, permute, solve]
 
 export mark.MarkResult, mark.isSupported, mark.mark
 export nazopuyo.RequirementKind, nazopuyo.RequirementColor,
@@ -25,4 +26,5 @@ export nazopuyo.RequirementKind, nazopuyo.RequirementColor,
   nazopuyo.toString, nazopuyo.parseNazoPuyo, nazopuyo.parseTsuNazoPuyo,
   nazopuyo.parseWaterNazoPuyo, nazopuyo.toUriQuery, nazopuyo.toUri,
   nazopuyo.parseNazoPuyos
+export permute.permute
 export solve.solve

@@ -333,7 +333,7 @@ func solveRec[F: TsuField or WaterField](
 proc solve[F: TsuField or WaterField](
     nazo: NazoPuyo[F], reqKind: static RequirementKind,
     reqColor: static RequirementColor, parallelCount: Positive,
-    showProgress: bool): seq[Positions] {.inline.} =
+    showProgress: bool, earlyStopping: static bool): seq[Positions] {.inline.} =
   ## Solves the nazo puyo.
   ## `parallelCount` and `showProgress` will be ignored on JS backend.
   if not nazo.requirement.isSupported or nazo.moveCount == 0:
@@ -348,6 +348,10 @@ proc solve[F: TsuField or WaterField](
   when defined(js):
     for child in childNodes:
       result &= child.solveRec(reqKind, reqColor)
+
+      when earlyStopping:
+        if result.len > 1:
+          return
   else:
     # set up progress bar
     var bar: SuruBar
@@ -365,15 +369,17 @@ proc solve[F: TsuField or WaterField](
         bar.inc
         bar.update SuruBarUpdateMs * 1000 * 1000
 
+      if showProgress:
+        bar.finish
       return
 
     # prepare solving
     let parallelCount = min(parallelCount, childNodes.len)
     var
       futureAnswers = newSeqOfCap[FlowVar[seq[Positions]]] childNodes.len
-      nextNodeIdx = Natural 0
-      runningNodeIdxes = newSeq[Natural] parallelCount
-      completeNodeCount = 0
+      nextNodeIdx = 0'i16
+      runningNodeIdxes = newSeq[int16] parallelCount
+      completeNodeIdxes: set[int16] = {}
 
     # run "first wave" solving
     {.push warning[Effect]: off.}
@@ -387,8 +393,30 @@ proc solve[F: TsuField or WaterField](
     # solve
     while true:
       for parallelIdx in 0..<parallelCount:
-        if not futureAnswers[runningNodeIdxes[parallelIdx]].isReady:
+        # check if solving finished
+        let nodeIdx = runningNodeIdxes[parallelIdx]
+        if not futureAnswers[nodeIdx].isReady:
           continue
+
+        # update progress bar
+        bar.inc
+        bar.update SuruBarUpdateMs * 1000 * 1000
+
+        completeNodeIdxes.incl nodeIdx
+        result &= ^futureAnswers[nodeIdx]
+
+        # finish solving
+        if completeNodeIdxes.card == childNodes.len:
+          if showProgress:
+            bar.finish
+          return
+
+        # early stopping
+        when earlyStopping:
+          if result.len > 1:
+            if showProgress:
+              bar.finish
+            return
 
         # assign the next node to the processor
         if nextNodeIdx < childNodes.len:
@@ -397,24 +425,12 @@ proc solve[F: TsuField or WaterField](
           runningNodeIdxes[parallelIdx] = nextNodeIdx
           nextNodeIdx.inc
 
-        bar.inc
-        bar.update SuruBarUpdateMs * 1000 * 1000
-
-        # finish solving
-        completeNodeCount.inc
-        if completeNodeCount == childNodes.len:
-          for future in futureAnswers:
-            result &= ^future
-
-          if showProgress:
-            bar.finish
-          return
-
       sleep ParallelSolvingWaitIntervalMs
 
 proc solve[F: TsuField or WaterField](
     nazo: NazoPuyo[F], reqKind: static RequirementKind,
-    parallelCount: Positive, showProgress: bool): seq[Positions] {.inline.} =
+    parallelCount: Positive, showProgress: bool,
+    earlyStopping: static bool): seq[Positions] {.inline.} =
   ## Solves the nazo puyo.
   ## `parallelCount` and `showProgress` will be ignored on JS backend.
   assert reqKind in {
@@ -424,64 +440,79 @@ proc solve[F: TsuField or WaterField](
 
   case nazo.requirement.color.get
   of RequirementColor.All:
-    nazo.solve(reqKind, RequirementColor.All, parallelCount, showProgress)
+    nazo.solve(reqKind, RequirementColor.All, parallelCount, showProgress,
+               earlyStopping)
   of RequirementColor.Red:
-    nazo.solve(reqKind, RequirementColor.Red, parallelCount, showProgress)
+    nazo.solve(reqKind, RequirementColor.Red, parallelCount, showProgress,
+               earlyStopping)
   of RequirementColor.Green:
-    nazo.solve(reqKind, RequirementColor.Green, parallelCount, showProgress)
+    nazo.solve(reqKind, RequirementColor.Green, parallelCount, showProgress,
+               earlyStopping)
   of RequirementColor.Blue:
-    nazo.solve(reqKind, RequirementColor.Blue, parallelCount, showProgress)
+    nazo.solve(reqKind, RequirementColor.Blue, parallelCount, showProgress,
+               earlyStopping)
   of RequirementColor.Yellow:
-    nazo.solve(reqKind, RequirementColor.Yellow, parallelCount, showProgress)
+    nazo.solve(reqKind, RequirementColor.Yellow, parallelCount, showProgress,
+               earlyStopping)
   of RequirementColor.Purple:
-    nazo.solve(reqKind, RequirementColor.Purple, parallelCount, showProgress)
+    nazo.solve(reqKind, RequirementColor.Purple, parallelCount, showProgress,
+               earlyStopping)
   of RequirementColor.Garbage:
-    nazo.solve(reqKind, RequirementColor.Garbage, parallelCount, showProgress)
+    nazo.solve(reqKind, RequirementColor.Garbage, parallelCount, showProgress,
+               earlyStopping)
   of RequirementColor.Color:
-    nazo.solve(reqKind, RequirementColor.Color, parallelCount, showProgress)
+    nazo.solve(reqKind, RequirementColor.Color, parallelCount, showProgress,
+               earlyStopping)
   
 proc solve*[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
     parallelCount: Positive = (
       when defined(js): 1 else: max(countProcessors(), 1)),
-    showProgress = false): seq[Positions] {.inline.} =
+    showProgress = false, earlyStopping: static bool = false): seq[Positions]
+    {.inline.} =
   ## Solves the nazo puyo.
   ## `parallelCount` and `showProgress` will be ignored on JS backend.
   const DummyColor = RequirementColor.All
 
   case nazo.requirement.kind
   of Clear:
-    nazo.solve(Clear, parallelCount, showProgress)
+    nazo.solve(Clear, parallelCount, showProgress, earlyStopping)
   of DisappearColor:
-    nazo.solve(DisappearColor, DummyColor, parallelCount, showProgress)
+    nazo.solve(DisappearColor, DummyColor, parallelCount, showProgress,
+               earlyStopping)
   of DisappearColorMore:
-    nazo.solve(DisappearColorMore, DummyColor, parallelCount, showProgress)
+    nazo.solve(DisappearColorMore, DummyColor, parallelCount, showProgress,
+               earlyStopping)
   of DisappearCount:
-    nazo.solve(DisappearCount, parallelCount, showProgress)
+    nazo.solve(DisappearCount, parallelCount, showProgress, earlyStopping)
   of DisappearCountMore:
-    nazo.solve(DisappearCountMore, parallelCount, showProgress)
+    nazo.solve(DisappearCountMore, parallelCount, showProgress, earlyStopping)
   of Chain:
-    nazo.solve(Chain, DummyColor, parallelCount, showProgress)
+    nazo.solve(Chain, DummyColor, parallelCount, showProgress, earlyStopping)
   of ChainMore:
-    nazo.solve(ChainMore, DummyColor, parallelCount, showProgress)
+    nazo.solve(ChainMore, DummyColor, parallelCount, showProgress,
+               earlyStopping)
   of ChainClear:
-    nazo.solve(ChainClear, parallelCount, showProgress)
+    nazo.solve(ChainClear, parallelCount, showProgress, earlyStopping)
   of ChainMoreClear:
-    nazo.solve(ChainMoreClear, parallelCount, showProgress)
+    nazo.solve(ChainMoreClear, parallelCount, showProgress, earlyStopping)
   of DisappearColorSametime:
-    nazo.solve(DisappearColorSametime, DummyColor, parallelCount, showProgress)
+    nazo.solve(DisappearColorSametime, DummyColor, parallelCount, showProgress,
+               earlyStopping)
   of DisappearColorMoreSametime:
     nazo.solve(DisappearColorMoreSametime, DummyColor, parallelCount,
-               showProgress)
+               showProgress, earlyStopping)
   of DisappearCountSametime:
-    nazo.solve(DisappearCountSametime, parallelCount, showProgress)
+    nazo.solve(DisappearCountSametime, parallelCount, showProgress,
+               earlyStopping)
   of DisappearCountMoreSametime:
-    nazo.solve(DisappearCountMoreSametime, parallelCount, showProgress)
+    nazo.solve(DisappearCountMoreSametime, parallelCount, showProgress,
+               earlyStopping)
   of DisappearPlace:
-    nazo.solve(DisappearPlace, parallelCount, showProgress)
+    nazo.solve(DisappearPlace, parallelCount, showProgress, earlyStopping)
   of DisappearPlaceMore:
-    nazo.solve(DisappearPlaceMore, parallelCount, showProgress)
+    nazo.solve(DisappearPlaceMore, parallelCount, showProgress, earlyStopping)
   of DisappearConnect:
-    nazo.solve(DisappearConnect, parallelCount, showProgress)
+    nazo.solve(DisappearConnect, parallelCount, showProgress, earlyStopping)
   of DisappearConnectMore:
-    nazo.solve(DisappearConnectMore, parallelCount, showProgress)
+    nazo.solve(DisappearConnectMore, parallelCount, showProgress, earlyStopping)
