@@ -110,6 +110,12 @@ func moveCount*[F: TsuField or WaterField](self: NazoPuyo[F]): int {.inline.} =
   ## Returns the number of moves of the nazo puyo.
   self.environment.pairs.len
 
+func isSupported*(req: Requirement): bool {.inline.} =
+  ## Returns `true` if the requirement is supported.
+  req.kind notin {
+    DisappearPlace, DisappearPlaceMore, DisappearConnect,
+    DisappearConnectMore} or req.color != some RequirementColor.Garbage
+
 # ------------------------------------------------
 # Flatten
 # ------------------------------------------------

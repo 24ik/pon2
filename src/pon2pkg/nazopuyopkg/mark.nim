@@ -18,16 +18,6 @@ type MarkResult* = enum
   NotSupport
 
 # ------------------------------------------------
-# Support
-# ------------------------------------------------
-
-func isSupported*(req: Requirement): bool {.inline.} =
-  ## Returns `true` if the requirement is supported.
-  req.kind notin {
-    DisappearPlace, DisappearPlaceMore, DisappearConnect,
-    DisappearConnectMore} or req.color != some RequirementColor.Garbage
-
-# ------------------------------------------------
 # Mark
 # ------------------------------------------------
 

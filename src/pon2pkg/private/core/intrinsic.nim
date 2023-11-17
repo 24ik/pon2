@@ -15,8 +15,8 @@ const
   UseBmi2* = bmi2 and (defined(i386) or defined(amd64))
 
 static:
-  echo "[puyo-core] AVX2 is " & (if UseAvx2: "enabled." else: "disabled.")
-  echo "[puyo-core] BMI2 is " & (if UseBmi2: "enabled." else: "disabled.")
+  echo "[pon2] AVX2 is " & (if UseAvx2: "enabled." else: "disabled.")
+  echo "[pon2] BMI2 is " & (if UseBmi2: "enabled." else: "disabled.")
 
 # ------------------------------------------------
 # AVX2

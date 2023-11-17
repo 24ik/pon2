@@ -5,6 +5,7 @@
 ## submodules individually.
 ##
 ## Submodule Documentations:
+## - [Generate](./nazopuyopkg/generate.html)
 ## - [NazoPuyo Core](./nazopuyopkg/nazopuyo.html)
 ## - [Marking](./nazopuyopkg/mark.html)
 ## - [Permute](./nazopuyopkg/permute.html)
@@ -13,8 +14,9 @@
 
 {.experimental: "strictDefs".}
 
-import ./nazopuyopkg/[mark, nazopuyo, permute, solve]
+import ./nazopuyopkg/[generate, mark, nazopuyo, permute, solve]
 
+export generate.generate
 export mark.MarkResult, mark.isSupported, mark.mark
 export nazopuyo.RequirementKind, nazopuyo.RequirementColor,
   nazopuyo.RequirementNumber, nazopuyo.Requirement, nazopuyo.NazoPuyo,
@@ -22,9 +24,9 @@ export nazopuyo.RequirementKind, nazopuyo.RequirementColor,
   nazopuyo.ColorKinds, nazopuyo.NumberKinds, nazopuyo.initNazoPuyo,
   nazopuyo.initTsuNazoPuyo, nazopuyo.initWaterNazoPuyo,
   nazopuyo.toTsuNazoPuyo, nazopuyo.toWaterNazoPuyo, nazopuyo.moveCount,
-  nazopuyo.flattenAnd, nazopuyo.`$`, nazopuyo.parseRequirement,
-  nazopuyo.toString, nazopuyo.parseNazoPuyo, nazopuyo.parseTsuNazoPuyo,
-  nazopuyo.parseWaterNazoPuyo, nazopuyo.toUriQuery, nazopuyo.toUri,
-  nazopuyo.parseNazoPuyos
+  nazopuyo.isSupported, nazopuyo.flattenAnd, nazopuyo.`$`,
+  nazopuyo.parseRequirement, nazopuyo.toString, nazopuyo.parseNazoPuyo,
+  nazopuyo.parseTsuNazoPuyo, nazopuyo.parseWaterNazoPuyo, nazopuyo.toUriQuery,
+  nazopuyo.toUri, nazopuyo.parseNazoPuyos
 export permute.permute
 export solve.solve

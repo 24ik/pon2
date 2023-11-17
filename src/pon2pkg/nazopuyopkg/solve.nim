@@ -4,7 +4,7 @@
 {.experimental: "strictDefs".}
 
 import std/[options, sequtils, tables]
-import ./[mark, nazopuyo]
+import ./[nazopuyo]
 import ../corepkg/[cell, environment, field, moveresult, pair, position]
 import ../private/[misc]
 import ../private/nazopuyo/[mark]

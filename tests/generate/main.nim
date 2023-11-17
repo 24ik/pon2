@@ -1,14 +1,9 @@
-import deques
-import math
-import options
-import sequtils
-import unittest
+{.experimental: "strictDefs".}
 
-import nazopuyo_core
-import puyo_core
-
-import ../../src/pon2pkg/core/generate
-import ../../src/pon2pkg/core/solve
+import std/[options, sequtils, unittest]
+import ../../src/pon2pkg/corepkg/[cell, field, environment, misc, pair]
+import ../../src/pon2pkg/nazopuyopkg/[generate {.all.}, mark, nazopuyo, solve]
+import ../../src/pon2pkg/private/[misc]
 
 proc main* =
   # ------------------------------------------------
@@ -17,51 +12,49 @@ proc main* =
 
   # generate
   block:
+    {.push warning[ProveInit]: off.}
     let
-      rule = TSU
       moveCount = 3
-      kind = CHAIN_CLEAR
+      kind = ChainClear
       num = 5.RequirementNumber
       colorCount = 3
-      heights = [some 0.Natural, none Natural, none Natural, none Natural, some 0.Natural, some 0.Natural]
+      heights: array[Column, Option[Natural]] = [
+        some 0.Natural, none Natural, none Natural, none Natural,
+        some 0.Natural, some 0.Natural]
       puyoCounts = (color: 20.Natural, garbage: 2.Natural)
-      connect3Counts =
-        (total: none Natural, vertical: some 0.Natural, horizontal: some 1.Natural, lShape: none Natural)
-      nazo = generate(
-        42,
-        rule,
-        moveCount,
-        (kind: kind, color: some AbstractRequirementColor.ALL, number: some num),
-        colorCount,
-        heights,
-        puyoCounts,
-        connect3Counts,
-        false,
-        false).get
-      fieldArray = nazo.question.environment.field.toArray
+      connect3Counts = (total: none Natural, vertical: some 0.Natural,
+                        horizontal: some 1.Natural, lShape: none Natural)
+      genRes = generate[TsuField](
+        42, GenerateRequirement(
+          kind: kind, color: some GenerateRequirementColor.All,
+          number: some num),
+        moveCount, colorCount, heights, puyoCounts, connect3Counts, false,
+        false, 1)
+      nazo = genRes.question
+      fieldArr = nazo.environment.field.toArray
+    {.pop.}
 
-    check nazo.question.solve == @[nazo.answer]
-    check nazo.question.moveCount == moveCount
-    check nazo.question.requirement == (kind: kind, color: some RequirementColor.ALL, number: some num)
-    check ColorPuyo.countIt(nazo.question.environment.count(it) > 0) == colorCount
+    check nazo.solve == @[genRes.answer]
+    check genRes.answer.mark(nazo) == Accept
+    check nazo.moveCount == moveCount
+    check nazo.requirement == Requirement(
+      kind: kind, color: some RequirementColor.All, number: some num)
+    check (ColorPuyo.low..ColorPuyo.high).countIt(
+      nazo.environment.puyoCount(it) > 0) == colorCount
 
     for col, height in heights:
       if height.isNone:
-        check ((Row.low .. Row.high).mapIt (fieldArray[it][col] != NONE).int).sum > 0
+        check ((Row.low..Row.high).mapIt int fieldArr[it][col] != None).sum > 0
       else:
         if height.get == 0:
-          check (Row.low .. Row.high).allIt fieldArray[it][col] == NONE
+          check (Row.low..Row.high).allIt fieldArr[it][col] == None
 
-    check nazo.question.environment.countColor == puyoCounts.color
-    check nazo.question.environment.countGarbage == puyoCounts.garbage
+    check nazo.environment.colorCount == puyoCounts.color
+    check nazo.environment.garbageCount == puyoCounts.garbage
 
-    check connect3Counts.total.isNone or nazo.question.environment.field.connect3.countPuyo ==
-      connect3Counts.total.get * 3
-    check connect3Counts.vertical.isNone or nazo.question.environment.field.connect3V.countPuyo ==
+    check nazo.environment.field.connect3V.colorCount ==
       connect3Counts.vertical.get * 3
-    check connect3Counts.horizontal.isNone or nazo.question.environment.field.connect3H.countPuyo ==
+    check nazo.environment.field.connect3H.colorCount ==
       connect3Counts.horizontal.get * 3
-    check connect3Counts.lShape.isNone or nazo.question.environment.field.connect3L.countPuyo ==
-      connect3Counts.lShape.get * 3
 
-    check nazo.question.environment.pairs.toSeq.allIt(not it.isDouble)
+    check nazo.environment.pairs.toSeq.allIt(not it.isDouble)
