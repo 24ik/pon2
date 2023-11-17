@@ -16,8 +16,9 @@
 
 import ./nazopuyopkg/[generate, mark, nazopuyo, permute, solve]
 
-export generate.generate
-export mark.MarkResult, mark.isSupported, mark.mark
+export generate.GenerateError, generate.GenerateRequirementColor,
+  generate.GenerateRequirement, generate.generate
+export mark.MarkResult, mark.mark
 export nazopuyo.RequirementKind, nazopuyo.RequirementColor,
   nazopuyo.RequirementNumber, nazopuyo.Requirement, nazopuyo.NazoPuyo,
   nazopuyo.NazoPuyos, nazopuyo.NoColorKinds, nazopuyo.NoNumberKinds,
