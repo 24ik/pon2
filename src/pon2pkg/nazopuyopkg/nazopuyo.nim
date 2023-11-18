@@ -243,19 +243,19 @@ const
     for i, uri in NumberToIshikawaUri:
       {uri: i.RequirementNumber}
 
-  IzumiyaUriKindKey = "req-kind"
-  IzumiyaUriColorKey = "req-color"
-  IzumiyaUriNumberKey = "req-number"
+  KindKey = "req-kind"
+  ColorKey = "req-color"
+  NumberKey = "req-number"
 
 func toUriQuery*(req: Requirement, host: SimulatorHost): string {.inline.} =
   ## Converts the requirement to the URI query.
   case host
   of Izumiya:
-    var queries = @[(IzumiyaUriKindKey, $req.kind.ord)]
+    var queries = @[(KindKey, $req.kind.ord)]
     if req.kind in ColorKinds and req.color.isSome:
-      queries.add (IzumiyaUriColorKey, $req.color.get.ord)
+      queries.add (ColorKey, $req.color.get.ord)
     if req.kind in NumberKinds and req.number.isSome:
-      queries.add (IzumiyaUriNumberKey, $req.number.get)
+      queries.add (NumberKey, $req.number.get)
 
     result = queries.encodeQuery
   of Ishikawa, Ips:
@@ -283,21 +283,21 @@ func parseRequirement*(query: string, host: SimulatorHost): Requirement
   of Izumiya:
     for key, val in query.decodeQuery:
       case key
-      of IzumiyaUriKindKey:
+      of KindKey:
         let kindInt = val.parseInt
         if kindInt < RequirementKind.low.ord or
             RequirementKind.high.ord < kindInt:
           raise newException(ValueError, "Invalid requirement: " & query)
 
         kind = some kindInt.RequirementKind
-      of IzumiyaUriColorKey:
+      of ColorKey:
         var colorInt = val.parseInt
         if colorInt < RequirementColor.low.ord or
             RequirementColor.high.ord < colorInt:
           raise newException(ValueError, "Invalid requirement: " & query)
 
         color = some colorInt.RequirementColor
-      of IzumiyaUriNumberKey:
+      of NumberKey:
         let numberInt = val.parseInt
         if numberInt < RequirementNumber.low.ord or
             RequirementNumber.high.ord < numberInt:
@@ -342,15 +342,15 @@ const HostNameToHost = collect:
 
 func toUri[F: TsuField or WaterField](
     self: NazoPuyo[F], positions: Option[Positions], host: SimulatorHost,
-    mode: IzumiyaSimulatorMode or IshikawaSimulatorMode): Uri {.inline.} =
+    mode: SimulatorMode, editor: bool): Uri {.inline.} =
   ## Converts the nazo puyo and the positions to the URI.
   ## The positions will be truncated if it is shorter than the pairs.
+  ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
   result =
     if positions.isSome:
-      self.environment.toUri(positions.get, host, IzumiyaSimulatorKind.Nazo,
-                             mode)
+      self.environment.toUri(positions.get, host, Nazo, mode, editor)
     else:
-      self.environment.toUri(host, IzumiyaSimulatorKind.Nazo, mode)
+      self.environment.toUri(host, Nazo, mode, editor)
 
   let sep = case host
   of Izumiya: "&"
@@ -358,24 +358,21 @@ func toUri[F: TsuField or WaterField](
   result.query &= sep & self.requirement.toUriQuery host
 
 func toUri*[F: TsuField or WaterField](
-    self: NazoPuyo[F], host = Izumiya,
-    mode: IzumiyaSimulatorMode or IshikawaSimulatorMode = Play): Uri
+    self: NazoPuyo[F], host = Izumiya, mode = Play, editor = false): Uri
     {.inline.} =
   ## Converts the nazo puyo to the URI.
-  self.toUri(none Positions, host, mode)
+  self.toUri(none Positions, host, mode, editor)
 
 func toUri*[F: TsuField or WaterField](
     self: NazoPuyo[F], positions: Positions, host = Izumiya,
-    mode: IzumiyaSimulatorMode or IshikawaSimulatorMode = Play): Uri
-    {.inline.} =
+    mode = Play, editor = false): Uri {.inline.} =
   ## Converts the nazo puyo and the positions to the URI.
   ## The positions will be truncated if it is shorter than the pairs.
-  self.toUri(some positions, host, mode)
+  self.toUri(some positions, host, mode, editor)
 
 func parseNazoPuyo*[F: TsuField or WaterField](uri: Uri): tuple[
     nazoPuyo: NazoPuyo[F], positions: Option[Positions],
-    izumiyaMode: Option[IzumiyaSimulatorMode],
-    ishikawaMode: Option[IshikawaSimulatorMode]] {.inline.} =
+    mode: SimulatorMode, editor: bool] {.inline.} =
   ## Converts the URI to the nazo puyo, positions and simulator mode.
   ## If `uri` is invalid, `ValueError` is raised.
   if uri.hostname notin HostNameToHost:
@@ -396,7 +393,7 @@ func parseNazoPuyo*[F: TsuField or WaterField](uri: Uri): tuple[
       envQuery = newSeq[tuple[key: string, value: string]] 0
     for key, value in uri.query.decodeQuery:
       case key
-      of IzumiyaUriKindKey, IzumiyaUriColorKey, IzumiyaUriNumberKey:
+      of KindKey, ColorKey, NumberKey:
         reqQuery.add (key, value)
       else:
         envQuery.add (key, value)
@@ -415,37 +412,36 @@ func parseNazoPuyo*[F: TsuField or WaterField](uri: Uri): tuple[
     raise newException(ValueError, "Invalid nazo puyo: " & $uri)
 
   result.nazoPuyo.requirement = req.get
-  let kind: Option[IzumiyaSimulatorKind]
-  (result.nazoPuyo.environment, result.positions, kind, result.izumiyaMode,
-   result.ishikawaMode) = envUri.parseEnvironment[:F]
+  let kind: SimulatorKind
+  (result.nazoPuyo.environment, result.positions, kind, result.mode,
+   result.editor) = envUri.parseEnvironment[:F]
+  if kind != Nazo:
+    raise newException(ValueError, "Invalid nazo puyo: " & $uri)
 
 func parseTsuNazoPuyo*(uri: Uri): tuple[
     nazoPuyo: NazoPuyo[TsuField], positions: Option[Positions],
-    izumiyaMode: Option[IzumiyaSimulatorMode],
-    ishikawaMode: Option[IshikawaSimulatorMode]] {.inline.} =
+    mode: SimulatorMode, editor: bool] {.inline.} =
   ## Converts the URI to the Tsu nazo puyo, positions and simulator mode.
   ## If `uri` is invalid, `ValueError` is raised.
-  uri.parseNazoPuyo[:TsuField]
+  uri.parseNazoPuyo[:TsuField]()
 
 func parseWaterNazoPuyo*(uri: Uri): tuple[
     nazoPuyo: NazoPuyo[WaterField], positions: Option[Positions],
-    izumiyaMode: Option[IzumiyaSimulatorMode],
-    ishikawaMode: Option[IshikawaSimulatorMode]] {.inline.} =
+    mode: SimulatorMode, editor: bool] {.inline.} =
   ## Converts the URI to the Water nazo puyo, positions and simulator mode.
   ## If `uri` is invalid, `ValueError` is raised.
   uri.parseNazoPuyo[:WaterField]
 
 func parseNazoPuyos*(uri: Uri): tuple[
     nazoPuyos: NazoPuyos, positions: Option[Positions],
-    izumiyaMode: Option[IzumiyaSimulatorMode],
-    ishikawaMode: Option[IshikawaSimulatorMode]] {.inline.} =
+    mode: SimulatorMode, editor: bool] {.inline.} =
   ## Converts the URI to the nazo puyos, positions and simulator mode.
   ## If `uri` is invalid, `ValueError` is raised.
   try:
-    (result.nazoPuyos.tsu, result.positions, result.izumiyaMode,
-     result.ishikawaMode) = uri.parseTsuNazoPuyo
+    (result.nazoPuyos.tsu, result.positions, result.mode,
+     result.editor) = uri.parseTsuNazoPuyo
     result.nazoPuyos.rule = Tsu
   except ValueError:
-    (result.nazoPuyos.water, result.positions, result.izumiyaMode,
-     result.ishikawaMode) = uri.parseWaterNazoPuyo
+    (result.nazoPuyos.water, result.positions, result.mode,
+     result.editor) = uri.parseWaterNazoPuyo
     result.nazoPuyos.rule = Water

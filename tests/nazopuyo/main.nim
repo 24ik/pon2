@@ -169,37 +169,39 @@ yyyooy
       nazoStr = str & pairsStr
       nazoPosStr = str & pairsPosStr
 
-      izumiyaMode = IzumiyaSimulatorMode.Edit
-      ishikawaMode = IshikawaSimulatorMode.Edit
+      mode = Edit
+      editor = true
       izumiyaUri = parseUri "https://izumiya-keisuke.github.io" &
-        "/puyo-simulator/playground/index.html?" &
+        "/pon2/playground/index.html?" &
+        "editor&" &
         &"kind=n&" &
-        &"mode={izumiyaMode}&" &
+        &"mode={mode}&" &
         "field=t-oo...bbb...ooo...bbbyyyyyooy&" &
         "pairs=ybyb&" &
         "req-kind=5&" &
         "req-number=4"
       izumiyaUriWithPos = parseUri "https://izumiya-keisuke.github.io" &
-        "/puyo-simulator/playground/index.html?" &
+        "/pon2/playground/index.html?" &
+        "editor&" &
         &"kind=n&" &
-        &"mode={izumiyaMode}&" &
+        &"mode={mode}&" &
         "field=t-oo...bbb...ooo...bbbyyyyyooy&" &
         "pairs=ybyb&" &
         "positions=..23&" &
         "req-kind=5&" &
         "req-number=4"
       ishikawaUri = parseUri "https://ishikawapuyo.net" &
-        &"/simu/p{ishikawaMode}.html?S03r06S03rAACQ_u1u1__u04"
+        &"/simu/pn.html?S03r06S03rAACQ_u1u1__u04"
       ipsUri = parseUri "http://ips.karou.jp" &
-        &"/simu/p{ishikawaMode}.html?S03r06S03rAACQ_u1u1__u04"
+        &"/simu/pn.html?S03r06S03rAACQ_u1u1__u04"
       ishikawaUriWithPos = parseUri "https://ishikawapuyo.net" &
-        &"/simu/p{ishikawaMode}.html?S03r06S03rAACQ_u1ue__u04"
+        &"/simu/pn.html?S03r06S03rAACQ_u1ue__u04"
       ipsUriWithPos = parseUri "http://ips.karou.jp" &
-        &"/simu/p{ishikawaMode}.html?S03r06S03rAACQ_u1ue__u04"
+        &"/simu/pn.html?S03r06S03rAACQ_u1ue__u04"
       positions = @[none Position, some Right1]
 
       envUri = parseUri "https://ishikawapuyo.net" &
-        &"/simu/p{ishikawaMode}.html?S03r06S03rAACQ_u1u1"
+        &"/simu/pn.html?S03r06S03rAACQ_u1u1"
       nazo = NazoPuyo[TsuField](
         environment: parseTsuEnvironment(envUri).environment,
         requirement: "u04".parseRequirement(Ishikawa))
@@ -212,30 +214,19 @@ yyyooy
 
     # Nazo <-> URI
     block:
-      check nazo.toUri(host = Izumiya, mode = izumiyaMode) == izumiyaUri
-      check nazo.toUri(host = Ishikawa, mode = ishikawaMode) == ishikawaUri
-      check nazo.toUri(host = Ips, mode = ishikawaMode) == ipsUri
-      check nazo.toUri(positions, Izumiya, izumiyaMode) == izumiyaUriWithPos
-      check nazo.toUri(positions, Ishikawa, ishikawaMode) == ishikawaUriWithPos
-      check nazo.toUri(positions, Ips, ishikawaMode) == ipsUriWithPos
+      check nazo.toUri(Izumiya, mode, editor) == izumiyaUri
+      check nazo.toUri(Ishikawa, mode, editor) == ishikawaUri
+      check nazo.toUri(Ips, mode, editor) == ipsUri
+      check nazo.toUri(positions, Izumiya, mode, editor) == izumiyaUriWithPos
+      check nazo.toUri(positions, Ishikawa, mode, editor) == ishikawaUriWithPos
+      check nazo.toUri(positions, Ips, mode, editor) == ipsUriWithPos
 
       check izumiyaUri.parseTsuNazoPuyo == (
-        nazoPuyo: nazo,
-        positions: none Positions,
-        izumiyaMode: some izumiyaMode,
-        ishikawaMode: none IshikawaSimulatorMode)
+        nazoPuyo: nazo, positions: none Positions, mode: mode, editor: editor)
       check ishikawaUri.parseTsuNazoPuyo == (
-        nazoPuyo: nazo,
-        positions: some Position.none.repeat nazo.moveCount,
-        izumiyaMode: none IzumiyaSimulatorMode,
-        ishikawaMode: some ishikawaMode)
+        nazoPuyo: nazo, positions: some Position.none.repeat nazo.moveCount,
+        mode: Play, editor: editor)
       check izumiyaUriWithPos.parseTsuNazoPuyo == (
-        nazoPuyo: nazo,
-        positions: some positions,
-        izumiyaMode: some izumiyaMode,
-        ishikawaMode: none IshikawaSimulatorMode)
+        nazoPuyo: nazo, positions: some positions, mode: mode, editor: editor)
       check ishikawaUriWithPos.parseTsuNazoPuyo == (
-        nazoPuyo: nazo,
-        positions: some positions,
-        izumiyaMode: none IzumiyaSimulatorMode,
-        ishikawaMode: some ishikawaMode)
+        nazoPuyo: nazo,positions: some positions, mode: Play, editor: editor)
