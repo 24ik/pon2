@@ -30,20 +30,12 @@ type
     Ishikawa = "ishikawapuyo.net"
     Ips = "ips.karou.jp"
 
-  IzumiyaSimulatorKind* {.pure.} = enum
-    ## Kind of the web simulator with izumiya format.
+  SimulatorKind* {.pure.} = enum
+    ## Kind of the web simulator.
     Regular = "r"
     Nazo = "n"
 
-  IzumiyaSimulatorMode* {.pure.} = enum
-    ## Mode of the web simulator with izumiya format.
+  SimulatorMode* {.pure.} = enum
+    ## Mode of the web simulator.
     Play = "p"
     Edit = "e"
-    Replay = "r"
-
-  IshikawaSimulatorMode* {.pure.} = enum
-    ## Mode of the web simulator with ishikawa or ips format.
-    Edit = "e"
-    Simu = "s"
-    View = "v"
-    Nazo = "n"

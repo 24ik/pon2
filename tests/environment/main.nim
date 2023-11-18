@@ -198,28 +198,32 @@ rg""").environment
         envStr = &"{fieldStr}\n------\n{pairsStr}"
         envWithPosStr = &"{fieldStr}\n------\n{pairsWithPosStr}"
 
-        env = parseEnvironment[TsuField](envStr).environment
+        env = envStr.parseEnvironment[:TsuField].environment
         positions = @[none Position, some Left1]
         kind = Regular
-        izumiyaMode = IzumiyaSimulatorMode.Edit
-        ishikawaMode = IshikawaSimulatorMode.Edit
+        mode = SimulatorMode.Edit
+        ishikawaMode = IshikawaMode.Edit
+        editor = true
 
         izumiyaUri1 = parseUri "https://izumiya-keisuke.github.io" &
-          "/puyo-simulator/playground/index.html?" &
+          "/pon2/playground/index.html?" &
+          "editor&" &
           &"kind={kind}&" &
-          &"mode={izumiyaMode}&" &
+          &"mode={mode}&" &
           &"field=t-" & "rg.bo.&" &
           "pairs=yygp"
         izumiyaUri2 = parseUri "https://izumiya-keisuke.github.io" &
-          "/puyo-simulator/playground/index.html?" &
+          "/pon2/playground/index.html?" &
+          "editor&" &
           &"kind={kind}&" &
-          &"mode={izumiyaMode}&" &
+          &"mode={mode}&" &
           &"field=t-" & ".".repeat(72) & "rg.bo.&" &
           "pairs=yygp"
         izumiyaUriWithPos = parseUri "https://izumiya-keisuke.github.io" &
-          "/puyo-simulator/playground/index.html?" &
+          "/pon2/playground/index.html?" &
+          "editor&" &
           &"kind={kind}&" &
-          &"mode={izumiyaMode}&" &
+          &"mode={mode}&" &
           &"field=t-" & "rg.bo.&" &
           "pairs=yygp&" &
           "positions=..21"
@@ -238,83 +242,59 @@ rg""").environment
       check env.toString(positions) == envWithPosStr
 
       # env <- string
-      check parseEnvironment[TsuField](envWithPosStr) == (
+      check envWithPosStr.parseEnvironment[:TsuField] == (
         environment: env, positions: some positions)
       check envWithPosStr.parseTsuEnvironment == (
         environment: env, positions: some positions)
 
       # env -> URI
-      check env.toUri(Izumiya, kind, izumiyaMode) == izumiyaUri1
-      check env.toUri(Ishikawa, kind, ishikawaMode) == ishikawaUri
-      check env.toUri(Ips, kind, ishikawaMode) == ipsUri
-      check env.toUri(positions, Izumiya, kind, izumiyaMode) ==
+      check env.toUri(Izumiya, kind, mode, editor) == izumiyaUri1
+      check env.toUri(Ishikawa, kind, mode, editor) == ishikawaUri
+      check env.toUri(Ips, kind, mode, editor) == ipsUri
+      check env.toUri(positions, Izumiya, kind, mode, editor) ==
         izumiyaUriWithPos
-      check env.toUri(positions, Ishikawa, kind, ishikawaMode) ==
+      check env.toUri(positions, Ishikawa, kind, mode, editor) ==
         ishikawaUriWithPos
-      check env.toUri(positions, Ips, kind, mode = ishikawaMode) ==
+      check env.toUri(positions, Ips, kind, mode, editor) ==
         ipsUriWithPos
 
       # env <- URI
       check izumiyaUriWithPos.parseTsuEnvironment == (
-        environment: env,
-        positions: some positions,
-        kind: some kind,
-        izumiyaMode: some izumiyaMode,
-        ishikawaMode: none IshikawaSimulatorMode)
+        environment: env, positions: some positions, kind: kind, mode: mode,
+        editor: editor)
       check ishikawaUriWithPos.parseTsuEnvironment == (
-        environment: env,
-        positions: some positions,
-        kind: none IzumiyaSimulatorKind,
-        izumiyaMode: none IzumiyaSimulatorMode,
-        ishikawaMode: some ishikawaMode)
+        environment: env, positions: some positions, kind: kind, mode: mode,
+        editor: editor)
       check ipsUriWithPos.parseTsuEnvironment == (
-        environment: env,
-        positions: some positions,
-        kind: none IzumiyaSimulatorKind,
-        izumiyaMode: none IzumiyaSimulatorMode,
-        ishikawaMode: some ishikawaMode)
+        environment: env, positions: some positions, kind: kind, mode: mode,
+        editor: editor)
       check izumiyaUri1.parseTsuEnvironment == (
-        environment: env,
-        positions: none Positions,
-        kind: some kind,
-        izumiyaMode: some izumiyaMode,
-        ishikawaMode: none IshikawaSimulatorMode)
+        environment: env, positions: none Positions, kind: kind, mode: mode,
+        editor: editor)
       check izumiyaUri2.parseTsuEnvironment == (
-        environment: env,
-        positions: none Positions,
-        kind: some kind,
-        izumiyaMode: some izumiyaMode,
-        ishikawaMode: none IshikawaSimulatorMode)
+        environment: env, positions: none Positions, kind: kind, mode: mode,
+        editor: editor)
       check ishikawaUri.parseTsuEnvironment == (
-        environment: env,
-        positions: some Position.none.repeat env.pairs.len,
-        kind: none IzumiyaSimulatorKind,
-        izumiyaMode: none IzumiyaSimulatorMode,
-        ishikawaMode: some ishikawaMode)
+        environment: env, positions: some Position.none.repeat env.pairs.len,
+        kind: kind, mode: mode, editor: editor)
       check ipsUri.parseTsuEnvironment == (
-        environment: env,
-        positions: some Position.none.repeat env.pairs.len,
-        kind: none IzumiyaSimulatorKind,
-        izumiyaMode: none IzumiyaSimulatorMode,
-        ishikawaMode: some ishikawaMode)
-      check parseEnvironment[TsuField](izumiyaUriWithPos) == (
-        environment: env,
-        positions: some positions,
-        kind: some kind,
-        izumiyaMode: some izumiyaMode,
-        ishikawaMode: none IshikawaSimulatorMode)
+        environment: env, positions: some Position.none.repeat env.pairs.len,
+        kind: kind, mode: mode, editor: editor)
+      check izumiyaUriWithPos.parseEnvironment[:TsuField] == (
+        environment: env, positions: some positions, kind: kind, mode: mode,
+        editor: editor)
       expect ValueError:
         discard izumiyaUriWithPos.parseWaterEnvironment
       expect ValueError:
-        discard parseEnvironment[WaterField](izumiyaUriWithPos)
+        discard izumiyaUriWithPos.parseEnvironment[:WaterField]
       block:
         let res = izumiyaUriWithPos.parseEnvironments
         check res.environments.rule == Tsu
         check res.environments.tsu == env
         check res.positions == some positions
-        check res.kind == some kind
-        check res.izumiyaMode == some izumiyaMode
-        check res.ishikawaMode == none IshikawaSimulatorMode
+        check res.kind == kind
+        check res.mode == mode
+        check res.editor == editor
 
     # empty field
     block:
@@ -325,19 +305,22 @@ rg""").environment
 
         env = envStr.parseTsuEnvironment.environment
         kind = Regular
-        izumiyaMode = IzumiyaSimulatorMode.Edit
-        ishikawaMode = IshikawaSimulatorMode.Edit
+        mode = SimulatorMode.Edit
+        ishikawaMode = IshikawaMode.Edit
+        editor = true
 
         izumiyaUri1 = parseUri "https://izumiya-keisuke.github.io" &
-          "/puyo-simulator/playground/index.html?" &
+          "/pon2/playground/index.html?" &
+          "editor&" &
           &"kind={kind}&" &
-          &"mode={izumiyaMode}&" &
+          &"mode={mode}&" &
           &"field=t-&" &
           "pairs=rgbypp"
         izumiyaUri2 = parseUri "https://izumiya-keisuke.github.io" &
-          "/puyo-simulator/playground/index.html?" &
+          "/pon2/playground/index.html?" &
+          "editor&" &
           &"kind={kind}&" &
-          &"mode={izumiyaMode}&" &
+          &"mode={mode}&" &
           &"field=t-" & ".".repeat(78) & "&" &
           "pairs=rgbypp"
         ishikawaUri = parseUri "https://ishikawapuyo.net" &
@@ -348,8 +331,8 @@ rg""").environment
       check envStr.parseTsuEnvironment.environment == env
 
       # env <-> URI
-      check env.toUri(Izumiya, kind, izumiyaMode) == izumiyaUri1
-      check env.toUri(Ishikawa, kind, ishikawaMode) == ishikawaUri
+      check env.toUri(Izumiya, kind, mode, editor) == izumiyaUri1
+      check env.toUri(Ishikawa, kind, mode, editor) == ishikawaUri
       check izumiyaUri1.parseTsuEnvironment.environment == env
       check izumiyaUri2.parseTsuEnvironment.environment == env
       check ishikawaUri.parseTsuEnvironment.environment == env
@@ -363,13 +346,15 @@ rg""").environment
 
         env = envStr.parseTsuEnvironment.environment
         kind = Regular
-        izumiyaMode = IzumiyaSimulatorMode.Edit
-        ishikawaMode = IshikawaSimulatorMode.Edit
+        mode = SimulatorMode.Edit
+        ishikawaMode = IshikawaMode.Edit
+        editor = true
 
         izumiyaUri1 = parseUri "https://izumiya-keisuke.github.io" &
-          "/puyo-simulator/playground/index.html?" &
+          "/pon2/playground/index.html?" &
+          "editor&" &
           &"kind={kind}&" &
-          &"mode={izumiyaMode}&" &
+          &"mode={mode}&" &
           &"field=t-rgbyp.&" &
           "pairs"
         izumiyaUri2 = parseUri $izumiyaUri1 & "="
@@ -382,8 +367,8 @@ rg""").environment
       check envStr.parseTsuEnvironment.environment == env
 
       # env <-> URI
-      check env.toUri(Izumiya, kind, izumiyaMode) == izumiyaUri1
-      check env.toUri(Ishikawa, kind, ishikawaMode) == ishikawaUri1
+      check env.toUri(Izumiya, kind, mode, editor) == izumiyaUri1
+      check env.toUri(Ishikawa, kind, mode, editor) == ishikawaUri1
       check izumiyaUri1.parseTsuEnvironment.environment == env
       check izumiyaUri2.parseTsuEnvironment.environment == env
       check ishikawaUri1.parseTsuEnvironment.environment == env
@@ -398,13 +383,15 @@ rg""").environment
 
         env = envStr.parseTsuEnvironment.environment
         kind = Regular
-        izumiyaMode = IzumiyaSimulatorMode.Edit
-        ishikawaMode = IshikawaSimulatorMode.Edit
+        mode = SimulatorMode.Edit
+        ishikawaMode = IshikawaMode.Edit
+        editor = true
 
         izumiyaUri1 = parseUri "https://izumiya-keisuke.github.io" &
-          "/puyo-simulator/playground/index.html?" &
+          "/pon2/playground/index.html?" &
+          "editor&" &
           &"kind={kind}&" &
-          &"mode={izumiyaMode}&" &
+          &"mode={mode}&" &
           &"field=t-&" &
           "pairs"
         izumiyaUri2 = parseUri $izumiyaUri1 & "="
@@ -418,8 +405,8 @@ rg""").environment
       check envStr.parseTsuEnvironment.environment == env
 
       # env <-> URI
-      check env.toUri(Izumiya, kind, izumiyaMode) == izumiyaUri1
-      check env.toUri(Ishikawa, kind, ishikawaMode) == ishikawaUri1
+      check env.toUri(Izumiya, kind, mode, editor) == izumiyaUri1
+      check env.toUri(Ishikawa, kind, mode, editor) == ishikawaUri1
       check izumiyaUri1.parseTsuEnvironment.environment == env
       check izumiyaUri2.parseTsuEnvironment.environment == env
       check ishikawaUri1.parseTsuEnvironment.environment == env
@@ -436,34 +423,38 @@ rg""").environment
 
         env = envStr.parseWaterEnvironment.environment
         kind = Regular
-        izumiyaMode = IzumiyaSimulatorMode.Edit
+        mode = SimulatorMode.Edit
+        editor = true
 
         izumiyaUri1 = parseUri "https://izumiya-keisuke.github.io" &
-          "/puyo-simulator/playground/index.html?" &
+          "/pon2/playground/index.html?" &
+          "editor&" &
           &"kind={kind}&" &
-          &"mode={izumiyaMode}&" &
+          &"mode={mode}&" &
           &"field=w-rg....~....by&" &
           "pairs=pp"
         izumiyaUri2 = parseUri "https://izumiya-keisuke.github.io" &
-          "/puyo-simulator/playground/index.html?" &
+          "/pon2/playground/index.html?" &
+          "editor&" &
           &"kind={kind}&" &
-          &"mode={izumiyaMode}&" &
+          &"mode={mode}&" &
           &"field=w-" & "......".repeat(4) & "rg....~....by&" &
           "pairs=pp"
         izumiyaUri3 = parseUri "https://izumiya-keisuke.github.io" &
-          "/puyo-simulator/playground/index.html?" &
+          "/pon2/playground/index.html?" &
+          "editor&" &
           &"kind={kind}&" &
-          &"mode={izumiyaMode}&" &
+          &"mode={mode}&" &
           &"field=w-rg....~....by" & "......".repeat(7) & "&" &
           "pairs=pp"
 
       # env <-> string
       check $env == envStr
       check envStr.parseWaterEnvironment.environment == env
-      check parseEnvironment[WaterField](envStr).environment == env
+      check envStr.parseEnvironment[:WaterField].environment == env
 
       # env <-> URI
-      check env.toUri(Izumiya, kind, izumiyaMode) == izumiyaUri1
+      check env.toUri(Izumiya, kind, mode, editor) == izumiyaUri1
       check izumiyaUri1.parseWaterEnvironment.environment == env
       check izumiyaUri2.parseWaterEnvironment.environment == env
       check izumiyaUri3.parseWaterEnvironment.environment == env
@@ -481,5 +472,5 @@ rg""").environment
       "......\n".repeat(12) & "o.p...\n------\nbr").environment
 
     check env.toArrays == (field: arr, pairs: @[[Blue, Red]])
-    check parseEnvironment[TsuField](arr, [[ColorPuyo Blue, Red]]) == env
+    check arr.parseEnvironment[:TsuField]([[ColorPuyo Blue, Red]]) == env
     check arr.parseTsuEnvironment([[ColorPuyo Blue, Red]]) == env

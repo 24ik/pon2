@@ -1,6 +1,6 @@
 {.experimental: "strictDefs".}
 
-import std/[deques, unittest]
+import std/[unittest]
 import ../../src/pon2pkg/corepkg/[cell, pair {.all.}]
 
 proc main* =

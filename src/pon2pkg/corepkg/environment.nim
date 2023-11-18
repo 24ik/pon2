@@ -3,8 +3,7 @@
 
 {.experimental: "strictDefs".}
 
-import std/[deques, options, random, sequtils, setutils, strutils, sugar,
-            tables, uri]
+import std/[options, random, sequtils, setutils, strutils, sugar, tables, uri]
 import ./[cell, field, misc, moveresult, pair, position]
 
 type
@@ -20,6 +19,13 @@ type
     rule*: Rule
     tsu*: Environment[TsuField]
     water*: Environment[WaterField]
+
+  IshikawaMode = enum
+    ## Ishikawa-simulator mode.
+    Edit = "e"
+    Simu = "s"
+    View = "v"
+    Nazo = "n"
 
 # ------------------------------------------------
 # Convert
@@ -345,30 +351,30 @@ func parseWaterEnvironment*(str: string, colors = ColorPuyo.fullSet, seed = 0):
 # ------------------------------------------------
 
 const
-  IzumiyaUriToKind = collect:
-    for kind in IzumiyaSimulatorKind:
+  UriToKind = collect:
+    for kind in SimulatorKind:
       {$kind: kind}
-  IzumiyaUriToMode = collect:
-    for mode in IzumiyaSimulatorMode:
+  UriToMode = collect:
+    for mode in SimulatorMode:
       {$mode: mode}
 
-  IzumiyaUriKindKey = "kind"
-  IzumiyaUriModeKey = "mode"
-  IzumiyaUriFieldKey = "field"
-  IzumiyaUriPairsKey = "pairs"
-  IzumiyaUriPositionsKey = "positions"
-
-  IshikawaPathToMode = collect:
-    for mode in IshikawaSimulatorMode:
+  PathToIshikawaMode = collect:
+    for mode in IshikawaMode:
       {"/simu/p" & $mode & ".html": mode}
+
+  EditorKey = "editor"
+  KindKey = "kind"
+  ModeKey = "mode"
+  FieldKey = "field"
+  PairsKey = "pairs"
+  PositionsKey = "positions"
 
 func toUri[F: TsuField or WaterField](
     self: Environment[F], positions: Option[Positions], host: SimulatorHost,
-    kind: IzumiyaSimulatorKind,
-    mode: IzumiyaSimulatorMode or IshikawaSimulatorMode): Uri {.inline.} =
+    kind: SimulatorKind, mode: SimulatorMode, editor: bool): Uri {.inline.} =
   ## Converts the environment and the positions to the URI.
   ## The positions will be truncated if it is shorter than the pairs.
-  ## If `host` and `mode` are incompatible, `ValueError` is raised.
+  ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
   let positions2 =
     if positions.isNone: Position.none.repeat self.pairs.len
     elif positions.get.len > self.pairs.len: positions.get[0 ..< self.pairs.len]
@@ -379,98 +385,125 @@ func toUri[F: TsuField or WaterField](
 
   case host
   of Izumiya:
-    when mode is IzumiyaSimulatorMode:
-      result.path = "/puyo-simulator/playground/index.html"
+    result.path = "/pon2/playground/index.html"
 
-      var queries = @[(IzumiyaUriKindKey, $kind), (IzumiyaUriModeKey, $mode),
-                      (IzumiyaUriFieldKey, self.field.toUriQuery host),
-                      (IzumiyaUriPairsKey, self.pairs.toUriQuery host)]
-      if positions.isSome:
-        queries.add (IzumiyaUriPositionsKey, positions2.toUriQuery host)
-      result.query = queries.encodeQuery
-    else:
-      raise newException(ValueError, "Got incompatible `host` and `mode`")
+    var queries = newSeqOfCap[(string, string)] 6
+    if editor or mode == SimulatorMode.Edit:
+      queries.add (EditorKey, "")
+    queries &= [(KindKey, $kind), (ModeKey, $mode),
+                (FieldKey, self.field.toUriQuery host),
+                (PairsKey, self.pairs.toUriQuery host)]
+    if positions.isSome:
+      queries.add (PositionsKey, positions2.toUriQuery host)
+
+    result.query = queries.encodeQuery
   of Ishikawa, Ips:
-    when mode is IshikawaSimulatorMode:
-      result.path = "/simu/p" & $mode & ".html"
+    let ishikawaMode =
+      if editor:
+        case kind
+        of SimulatorKind.Regular:
+          case mode
+          of Play: Simu
+          of SimulatorMode.Edit: IshikawaMode.Edit
+        of SimulatorKind.Nazo: IshikawaMode.Nazo
+      else:
+        View
 
-      let
-        pairPositionUris = collect:
-          for i in 0..<self.pairs.len:
-            let
-              pair = self.pairs[i]
-              pos = positions2[i]
-            pair.toUriQuery(host) & pos.toUriQuery(host)
-        pairPositionUri = pairPositionUris.join
-      result.query = self.field.toUriQuery(host) & '_' & pairPositionUri
-    else:
-      raise newException(ValueError, "Got incompatible `host` and `mode`")
+    result.path = "/simu/p" & $ishikawaMode & ".html"
+
+    let
+      pairPositionUris = collect:
+        for i in 0..<self.pairs.len:
+          let
+            pair = self.pairs[i]
+            pos = positions2[i]
+          pair.toUriQuery(host) & pos.toUriQuery(host)
+      pairPositionUri = pairPositionUris.join
+    result.query = self.field.toUriQuery(host) & '_' & pairPositionUri
 
 func toUri*[F: TsuField or WaterField](
-    self: Environment[F], host = Izumiya, kind = Regular,
-    mode: IzumiyaSimulatorMode or IshikawaSimulatorMode = Play): Uri
-    {.inline.} =
+    self: Environment[F], host = Izumiya, kind = Regular, mode = Play,
+    editor = false): Uri {.inline.} =
   ## Converts the environment and the positions to the URI.
-  self.toUri(none Positions, host, kind, mode)
+  self.toUri(none Positions, host, kind, mode, editor)
 
 func toUri*[F: TsuField or WaterField](
     self: Environment[F], positions: Positions, host = Izumiya, kind = Regular,
-    mode: IzumiyaSimulatorMode or IshikawaSimulatorMode = Play): Uri
-    {.inline.} =
+    mode = Play, editor = false): Uri {.inline.} =
   ## Converts the environment and the positions to the URI.
   ## The positions will be truncated if it is shorter than the pairs.
-  self.toUri(some positions, host, kind, mode)
+  self.toUri(some positions, host, kind, mode, editor)
 
 func parseEnvironment*[F: TsuField or WaterField](
     uri: Uri, colors = ColorPuyo.fullSet, seed = 0): tuple[
       environment: Environment[F], positions: Option[Positions],
-      kind: Option[IzumiyaSimulatorKind],
-      izumiyaMode: Option[IzumiyaSimulatorMode],
-      ishikawaMode: Option[IshikawaSimulatorMode]] {.inline.} =
-  ## Converts the URI to the environment, positions and simulator mode.
+      kind: SimulatorKind, mode: SimulatorMode, editor: bool] {.inline.} =
+  ## Converts the URI to the environment, positions and simulator properties.
   ## If `uri` is not a valid URI, `ValueError` is raised.
   {.push warning[ProveInit]: off.}
   result.positions = none Positions
-  result.kind = none IzumiyaSimulatorKind
-  result.izumiyaMode = none IzumiyaSimulatorMode
-  result.ishikawaMode = none IshikawaSimulatorMode
-
+  result.editor = false
   var
     field = none F
     pairs = none Pairs
+    kind = none SimulatorKind
+    mode = none SimulatorMode
   {.pop.}
 
   case uri.hostname
   of $Izumiya:
-    if uri.path != "/puyo-simulator/playground/index.html":
+    if uri.path != "/pon2/playground/index.html":
       raise newException(ValueError, "Invalid environment: " & $uri)
 
     for (key, val) in uri.query.decodeQuery:
       case key
-      of IzumiyaUriKindKey:
-        if val notin IzumiyaUriToKind:
+      of EditorKey:
+        result.editor = val.toLowerAscii notin ["false", "off"]
+      of KindKey:
+        if val notin UriToKind:
           raise newException(ValueError, "Invalid environment: " & $uri)
-        result.kind = some IzumiyaUriToKind[val]
-      of IzumiyaUriModeKey:
-        if val notin IzumiyaUriToMode:
+        kind = some UriToKind[val]
+      of ModeKey:
+        if val notin UriToMode:
           raise newException(ValueError, "Invalid environment: " & $uri)
-        result.izumiyaMode = some IzumiyaUriToMode[val]
-      of IzumiyaUriFieldKey:
+        mode = some UriToMode[val]
+      of FieldKey:
         field = some val.parseField[:F](Izumiya)
-      of IzumiyaUriPairsKey:
+      of PairsKey:
         pairs = some val.parsePairs Izumiya
-      of IzumiyaUriPositionsKey:
+      of PositionsKey:
         result.positions = some val.parsePositions Izumiya
       else:
         raise newException(ValueError, "Invalid environment: " & $uri)
 
-    if result.kind.isNone or result.izumiyaMode.isNone:
+    if kind.isNone or mode.isNone:
       raise newException(ValueError, "Invalid environment: " & $uri)
-  of $Ishikawa, $Ips:
-    if uri.path notin IshikawaPathToMode:
-      raise newException(ValueError, "Invalid environment: " & $uri)
-    result.ishikawaMode = some IshikawaPathToMode[uri.path]
 
+    if mode.get == SimulatorMode.Edit:
+      result.editor = true
+  of $Ishikawa, $Ips:
+    # kind, mode, editor
+    if uri.path notin PathToIshikawaMode:
+      raise newException(ValueError, "Invalid environment: " & $uri)
+    case PathToIshikawaMode[uri.path]
+    of IshikawaMode.Edit:
+      kind = some Regular
+      mode = some SimulatorMode.Edit
+      result.editor = true
+    of Simu:
+      kind = some Regular
+      mode = some Play
+      result.editor = true
+    of View:
+      kind = some Regular
+      mode = some Play
+      result.editor = false
+    of IshikawaMode.Nazo:
+      kind = some SimulatorKind.Nazo
+      mode = some Play
+      result.editor = true
+
+    # field, pairs, positions
     let
       host = if uri.hostname == $Ishikawa: Ishikawa else: Ips
       strs = uri.query.split '_'
@@ -484,8 +517,8 @@ func parseEnvironment*[F: TsuField or WaterField](
 
       let pairsCount = strs[1].len div 2
       var
-        pairsSeq = newSeqOfCap[Pair]pairsCount
-        positions = newSeqOfCap[Option[Position]]pairsCount
+        pairsSeq = newSeqOfCap[Pair] pairsCount
+        positions = newSeqOfCap[Option[Position]] pairsCount
 
       for i in 0..<pairsCount:
         pairsSeq.add ($strs[1][2 * i]).parsePair host
@@ -507,13 +540,13 @@ func parseEnvironment*[F: TsuField or WaterField](
   result.environment.pairs = pairs.get
   result.environment.colors = colors
   result.environment.rng = seed.initRand
+  result.kind = kind.get
+  result.mode = mode.get
 
 func parseTsuEnvironment*(
     uri: Uri, colors = ColorPuyo.fullSet, seed = 0): tuple[
       environment: Environment[TsuField], positions: Option[Positions],
-      kind: Option[IzumiyaSimulatorKind],
-      izumiyaMode: Option[IzumiyaSimulatorMode],
-      ishikawaMode: Option[IshikawaSimulatorMode]] {.inline.} =
+      kind: SimulatorKind, mode: SimulatorMode, editor: bool] {.inline.} =
   ## Converts the URI to the Tsu environment, positions and simulator mode.
   ## If `uri` is not a valid URI, `ValueError` is raised.
   uri.parseEnvironment[:TsuField](colors, seed)
@@ -521,9 +554,7 @@ func parseTsuEnvironment*(
 func parseWaterEnvironment*(
     uri: Uri, colors = ColorPuyo.fullSet, seed = 0): tuple[
       environment: Environment[WaterField], positions: Option[Positions],
-      kind: Option[IzumiyaSimulatorKind],
-      izumiyaMode: Option[IzumiyaSimulatorMode],
-      ishikawaMode: Option[IshikawaSimulatorMode]] {.inline.} =
+      kind: SimulatorKind, mode: SimulatorMode, editor: bool] {.inline.} =
   ## Converts the URI to the Water environment, positions and simulator mode.
   ## If `uri` is not a valid URI, `ValueError` is raised.
   uri.parseEnvironment[:WaterField](colors, seed)
@@ -531,19 +562,16 @@ func parseWaterEnvironment*(
 func parseEnvironments*(
     uri: Uri, colors = ColorPuyo.fullSet, seed = 0): tuple[
       environments: Environments, positions: Option[Positions],
-      kind: Option[IzumiyaSimulatorKind],
-      izumiyaMode: Option[IzumiyaSimulatorMode],
-      ishikawaMode: Option[IshikawaSimulatorMode]] {.inline.} =
+      kind: SimulatorKind, mode: SimulatorMode, editor: bool] {.inline.} =
   ## Converts the URI to the environments, positions and simulator mode.
   ## If `uri` is not a valid URI, `ValueError` is raised.
   try:
-    (result.environments.tsu, result.positions, result.kind, result.izumiyaMode,
-     result.ishikawaMode) = uri.parseTsuEnvironment(colors, seed)
+    (result.environments.tsu, result.positions, result.kind, result.mode,
+     result.editor) = uri.parseTsuEnvironment(colors, seed)
     result.environments.rule = Tsu
   except ValueError:
-    (result.environments.water, result.positions, result.kind,
-     result.izumiyaMode,
-     result.ishikawaMode) = uri.parseWaterEnvironment(colors, seed)
+    (result.environments.water, result.positions, result.kind, result.mode,
+     result.editor) = uri.parseWaterEnvironment(colors, seed)
     result.environments.rule = Water
 
 # ------------------------------------------------

@@ -8,9 +8,9 @@ import ./[cell, misc]
 import ../private/[misc]
 
 export deques.Deque, deques.`[]`, deques.`[]=`, deques.addFirst, deques.addLast,
-  deques.clear, deques.contains, deques.len, deques.peekFirst, deques.peekLast,
-  deques.popFirst, deques.popLast, deques.shrink, deques.items, deques.mitems,
-  deques.pairs
+  deques.clear, deques.contains, deques.initDeque, deques.len, deques.peekFirst,
+  deques.peekLast, deques.popFirst, deques.popLast, deques.shrink,
+  deques.toDeque, deques.items, deques.mitems, deques.pairs
 
 type
   Pair* {.pure.} = enum
@@ -106,7 +106,8 @@ func `child=`*(mPair; color: ColorPuyo) {.inline.} =
   mPair.inc (color.ord - mPair.child.ord)
 
 func `==`*(pairs1, pairs2: Pairs): bool {.inline.} =
-  pairs1.toSeq == pairs2.toSeq
+  let len1 = pairs1.len
+  result = len1 == pairs2.len and (0..<len1).allIt pairs1[it] == pairs2[it]
 
 # ------------------------------------------------
 # Swap

@@ -54,20 +54,20 @@ when UseAvx2:
   export field.`==`
 export misc.Height, misc.Width, misc.WaterHeight, misc.AirHeight, misc.Row,
   misc.Column, misc.WaterRow, misc.AirRow, misc.Rule, misc.SimulatorHost,
-  misc.IzumiyaSimulatorKind, misc.IzumiyaSimulatorMode,
-  misc.IshikawaSimulatorMode
+  misc.SimulatorKind, misc.SimulatorMode
 export moveresult.MoveResult, moveresult.initMoveResult, moveresult.chainCount,
   moveresult.puyoCount, moveresult.colorCount, moveresult.garbageCount,
   moveresult.puyoCounts, moveresult.colorCounts, moveresult.garbageCounts,
   moveresult.colors, moveresult.colorsSeq, moveresult.colorPlaces,
   moveresult.colorConnects, moveresult.score
 export pair.Deque, pair.`[]`, pair.`[]=`, pair.addFirst, pair.addLast,
-  pair.clear, pair.contains, pair.len, pair.peekFirst, pair.peekLast,
-  pair.popFirst, pair.popLast, pair.shrink, pair.items, pair.mitems, pair.pairs,
-  pair.Pair, pair.Pairs, pair.initPair, pair.initPairs, pair.axis, pair.child,
-  pair.isDouble, pair.`axis=`, pair.`child=`, pair.`==`, pair.swapped,
-  pair.swap, pair.puyoCount, pair.colorCount, pair.garbageCount, pair.parsePair,
-  pair.`$`, pair.parsePairs, pair.toUriQuery, pair.toArray
+  pair.clear, pair.contains, pair.initDeque, pair.len, pair.peekFirst,
+  pair.peekLast, pair.popFirst, pair.popLast, pair.shrink, pair.toDeque,
+  pair.items, pair.mitems, pair.pairs, pair.Pair, pair.Pairs, pair.initPair,
+  pair.initPairs, pair.axis, pair.child, pair.isDouble, pair.`axis=`,
+  pair.`child=`, pair.`==`, pair.swapped, pair.swap, pair.puyoCount,
+  pair.colorCount, pair.garbageCount, pair.parsePair, pair.`$`, pair.parsePairs,
+  pair.toUriQuery, pair.toArray
 export position.Direction, position.Position, position.Positions,
   position.DoublePositions, position.initPosition, position.axisColumn,
   position.childColumn, position.childDirection, position.movedRight,
