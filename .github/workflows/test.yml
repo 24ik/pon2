@@ -39,8 +39,9 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      # NOTE: Test does not pass on Windows due to Github Action's bug
       - run: nimble -y test
         if: runner.os == 'Linux'
-      - run: nimble -y -d:avx2=false -d:bmi2=false test
+      - run: nimble -y -d:avx2=0 test
+        if: runner.os == 'Windows'
+      - run: nimble -y -d:avx2=0 -d:bmi2=0 test
         if: runner.os == 'macOS'
