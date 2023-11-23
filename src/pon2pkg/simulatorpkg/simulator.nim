@@ -16,14 +16,17 @@ type
 
   Simulator* = object
     ## Puyo Puyo simulator.
+    ## Note that `editor` field does not affect the behaviour; it is used
+    ## only by rendering.
     environments*: Environments
     originalEnvironments*: Environments
 
     positions*: Positions
     requirement*: Requirement
 
-    kind: IzumiyaSimulatorKind
-    mode: IzumiyaSimulatorMode
+    editor: bool
+    kind: SimulatorKind
+    mode: SimulatorMode
     state*: SimulatorState
 
     selectingCell*: Cell
@@ -43,7 +46,7 @@ type
 
   KeyEvent* = object
     ## Keyboard Event.
-    code: string ## [KeyboardEvent.code](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code)
+    code: string
     shift: bool
     control: bool
     alt: bool
@@ -75,10 +78,12 @@ const
   DefaultReq = Requirement(kind: Clear, color: some RequirementColor.All,
                            number: none RequirementNumber)
 
-func initSimulator*(env: Environment, positions: Positions, mode = Play,
-                    showCursor: bool): Simulator {.inline.} =
+func initSimulator*[F: TsuField or WaterField](
+    env: Environment[F], positions: Positions, mode = Play, editor = false,
+    showCursor = true): Simulator {.inline.} =
   ## Constructor of `Simulator`.
-  when env.F is TsuField:
+  ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
+  when F is TsuField:
     result.rule = Tsu
     result.environments.tsu = env
     result.environments.water = initWaterEnvironment 0
@@ -93,6 +98,7 @@ func initSimulator*(env: Environment, positions: Positions, mode = Play,
   result.positions.setLen env.pairs.len
   result.requirement = DefaultReq
 
+  result.editor = editor or mode == Edit
   result.kind = Regular
   result.mode = mode
   result.state = Stable
@@ -114,31 +120,44 @@ func initSimulator*(env: Environment, positions: Positions, mode = Play,
   result.nextIdx = Natural 0
   result.nextPosition = InitPos
 
-func initSimulator*(env: Environment, mode = Play,
-                    showCursor = true): Simulator {.inline.} =
-  ## Constructor of `Simulator`.
-  env.initSimulator(Position.none.repeat env.pairs.len, mode, showCursor)
-
 func initSimulator*[F: TsuField or WaterField](
-    nazo: NazoPuyo[F], positions: Positions, mode = Play,
+    env: Environment[F], mode = Play, editor = false,
     showCursor = true): Simulator {.inline.} =
   ## Constructor of `Simulator`.
-  result = nazo.environment.initSimulator(positions, mode, showCursor)
-  result.kind = IzumiyaSimulatorKind.Nazo
+  ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
+  env.initSimulator(Position.none.repeat env.pairs.len, mode, editor,
+                    showCursor)
+
+func initSimulator*[F: TsuField or WaterField](
+    nazo: NazoPuyo[F], positions: Positions, mode = Play, editor = false,
+    showCursor = true): Simulator {.inline.} =
+  ## Constructor of `Simulator`.
+  ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
+  result = nazo.environment.initSimulator(positions, mode, editor, showCursor)
+  result.kind = Nazo
   result.requirement = nazo.requirement
 
 func initSimulator*[F:TsuField or WaterField](
-    nazo: NazoPuyo[F], mode = Play, showCursor = true): Simulator {.inline.} =
+    nazo: NazoPuyo[F], mode = Play, editor = false,
+    showCursor = true): Simulator {.inline.} =
   ## Constructor of `Simulator`.
-  nazo.initSimulator(Position.none.repeat nazo.moveCount, mode, showCursor)
-  
+  ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
+  nazo.initSimulator(Position.none.repeat nazo.moveCount, mode, editor,
+                     showCursor)
+
+# ------------------------------------------------
+# Property - Editor
+# ------------------------------------------------
+
+func editor*(self): bool {.inline.} = self.editor
+
 # ------------------------------------------------
 # Property - Rule / Kind / Mode
 # ------------------------------------------------
 
-func `rule`*(self): Rule {.inline.} = self.environments.rule
-func `kind`*(self): IzumiyaSimulatorKind {.inline.} = self.kind
-func `mode`*(self): IzumiyaSimulatorMode {.inline.} = self.mode
+func rule*(self): Rule {.inline.} = self.environments.rule
+func kind*(self): SimulatorKind {.inline.} = self.kind
+func mode*(self): SimulatorMode {.inline.} = self.mode
 
 func `rule=`*(mSelf; rule: Rule) {.inline.} =
   if rule == mSelf.rule:
@@ -150,18 +169,20 @@ func `rule=`*(mSelf; rule: Rule) {.inline.} =
   of Tsu: mSelf.environments.tsu = mSelf.environments.water.toTsuEnvironment
   of Water: mSelf.environments.water = mSelf.environments.tsu.toWaterEnvironment
 
-func `kind=`*(mSelf; kind: IzumiyaSimulatorKind) {.inline.} =
+func `kind=`*(mSelf; kind: SimulatorKind) {.inline.} =
   if kind == mSelf.kind:
     return
 
   mSelf.kind = kind
 
-func `mode=`*(mSelf; mode: IzumiyaSimulatorMode) {.inline.} =
+func `mode=`*(mSelf; mode: SimulatorMode) {.inline.} =
   if mode == mSelf.mode:
     return
 
-  if mode == IzumiyaSimulatorMode.Edit or
-      mSelf.mode == IzumiyaSimulatorMode.Edit:
+  if mode == Edit:
+    mSelf.editor = true
+
+  if mode == Edit or mSelf.mode == Edit:
     mSelf.environments = mSelf.originalEnvironments
     mSelf.state = Stable
     mSelf.undoDeque.clear
@@ -638,13 +659,19 @@ func toUri*(self; withPositions = true): Uri {.inline.} =
   of Regular:
     self.withEnvironment:
       result =
-        if withPositions: environment.toUri(self.positions, mode = self.mode)
-        else: environment.toUri(mode = self.mode)
-  of IzumiyaSimulatorKind.Nazo:
+        if withPositions:
+          environment.toUri(self.positions, kind = self.kind, mode = self.mode,
+                            editor = self.editor)
+        else:
+          environment.toUri(kind = self.kind, mode = self.mode,
+                            editor = self.editor)
+  of Nazo:
     self.withNazoPuyo:
       result =
-        if withPositions: nazoPuyo.toUri(self.positions, mode = self.mode)
-        else: nazoPuyo.toUri(mode = self.mode)
+        if withPositions: nazoPuyo.toUri(self.positions, mode = self.mode,
+                                         editor = self.editor)
+        else:
+          nazoPuyo.toUri(mode = self.mode, editor = self.editor)
 
 # ------------------------------------------------
 # Keyboard Operation
@@ -656,7 +683,7 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
   result = true
 
   case mSelf.mode
-  of IzumiyaSimulatorMode.Edit:
+  of Edit:
     # insert, focus
     if event == initKeyEvent("KeyI"):
       mSelf.toggleInserting
@@ -727,15 +754,5 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
       mSelf.forward(skip = true)
     elif event == initKeyEvent("KeyN"):
       mSelf.forward(useNextPosition = false)
-    else:
-      result = false
-  of Replay:
-    # forward / backward / reset
-    if event == initKeyEvent("KeyW"):
-      mSelf.backward
-    elif event == initKeyEvent("KeyS"):
-      mSelf.forward(useNextPosition = false)
-    elif event == initKeyEvent("Digit0"):
-      mSelf.reset(resetPosition = false)
     else:
       result = false
