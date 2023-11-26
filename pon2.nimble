@@ -15,10 +15,10 @@ bin           = @["pon2"]
 requires "nim ^= 2.0.0"
 
 requires "docopt ^= 0.7.1"
+requires "karax ^= 1.3.3"
 requires "nigui ^= 0.2.7"
 requires "nimsimd ^= 1.2.6"
-requires "https://github.com/de-odex/suru#f6f1e60"
-requires "https://github.com/karaxnim/karax#ca6528d"
+requires "suru ^= 0.3.1"
 
 # Tasks
 
