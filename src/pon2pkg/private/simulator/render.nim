@@ -8,53 +8,70 @@ import ../../corepkg/[cell, field, misc, pair, position]
 import ../../nazopuyopkg/[mark]
 import ../../simulatorpkg/[simulator]
 
+type Color* = object
+  red*: byte
+  green*: byte
+  blue*: byte
+  alpha*: byte = 255
+
+const
+  SelectColor* = Color(red: 0, green: 209, blue: 178)
+  GhostColor* = Color(red: 230, green: 230, blue: 230)
+  WaterColor* = Color(red: 135, green: 206, blue: 250)
+  DefaultColor* = Color(red: 255, green: 255, blue: 255)
+
 # ------------------------------------------------
 # Field
 # ------------------------------------------------
 
-func fieldCellBackgroundColor*(
-    simulator: Simulator, row: Row, col: Column, hideCursor = false):
-    tuple[red: byte, green: byte, blue: byte] {.inline.} =
-  ## Returns the cell's background color.
-  if (
-    not hideCursor and
-    simulator.mode == IzumiyaSimulatorMode.Edit and
-    simulator.showCursor and
-    simulator.focusField and
-    (row, col) == simulator.selectingFieldPosition): (0, 209, 178)
-  elif row == Row.low: (230, 230, 230)
-  elif simulator.rule == Water and row in WaterRow.low..WaterRow.high:
-    (135, 206, 250)
-  else: (255, 255, 255)
+when defined(js):
+  proc isMobile: bool {.importjs:
+    "navigator.userAgent.match(/iPhone|Android.+Mobile/)".}
+
+proc fieldCellBackgroundColor*(
+    simulator: Simulator, row: Row, col: Column): Color {.inline.} =
+  ## Returns the cell's background color in the field.
+  let hideCursor = when defined(js): isMobile() else: false
+
+  result =
+    if (
+      not hideCursor and simulator.mode == Edit and
+      simulator.editing.focusField and
+      (row, col) == simulator.editing.field): SelectColor
+    elif row == Row.low: GhostColor
+    elif simulator.rule == Water and row in WaterRow.low..WaterRow.high:
+      WaterColor
+    else: DefaultColor
 
 # ------------------------------------------------
 # Pairs
 # ------------------------------------------------
 
-func pairSelected*(simulator: Simulator, idx: Natural,
-                   hideCursor = false): bool {.inline.} =
-  ## Returns `true` if `pairs[idx]` is selected.
-  not hideCursor and
-  simulator.mode != IzumiyaSimulatorMode.Edit and
-  simulator.state == Stable and
-  simulator.nextIdx == idx
+func needPairPointer*(simulator: Simulator, idx: Natural): bool {.inline.} =
+  ## Returns `true` if it is need to show the pointer to the pair.
+  simulator.mode != Edit and simulator.state == Stable and
+  simulator.next.index == idx
 
-func pairCellSelected*(simulator: Simulator, idx: Natural,
-                       isAxis: bool): bool {.inline.} =
-  ## Returns `true` if the cell in `pairs[idx]` is selected.
-  simulator.showCursor and
-  not simulator.focusField and
-  idx == simulator.selectingPairPosition.index and
-  isAxis == simulator.selectingPairPosition.isAxis
+proc pairCellBackgroundColor*(
+    simulator: Simulator, idx: Natural, axis: bool): Color {.inline.} =
+  ## Returns the cell's background color in the pairs.
+  let hideCursor = when defined(js): isMobile() else: false
+
+  result =
+    if (
+      not hideCursor and simulator.mode == Edit and
+      not simulator.editing.focusField and
+      (idx, axis) == simulator.editing.pair): SelectColor
+    else: DefaultColor
 
 # ------------------------------------------------
 # Next Pair
 # ------------------------------------------------
 
-func nextPairCell*(simulator: Simulator, idx: range[-1 .. 1], col: Column): Cell
+func nextPairCell*(simulator: Simulator, idx: range[-1..1], col: Column): Cell
                   {.inline.} =
   ## Returns the cell in the next pairs.
-  let pos = simulator.nextPosition
+  let pos = simulator.next.position
 
   result =
     if simulator.state != Stable: None
@@ -78,23 +95,23 @@ func nextPairCell*(simulator: Simulator, idx: range[-1 .. 1], col: Column): Cell
 # Immediate Pairs
 # ------------------------------------------------
 
-func immediateNextPairCell*(simulator: Simulator, isAxis: bool): Cell
+func immediateNextPairCell*(simulator: Simulator, axis: bool): Cell
                            {.inline.} =
   ## Returns the next-pair's cell in the immediate pairs.
   if simulator.pairs.len <= 1:
     return None
 
   let pair = simulator.pairs[1]
-  result = if isAxis: pair.axis else: pair.child
+  result = if axis: pair.axis else: pair.child
 
-func immediateDoubleNextPairCell*(simulator: Simulator, isAxis: bool): Cell
+func immediateDoubleNextPairCell*(simulator: Simulator, axis: bool): Cell
                                  {.inline.} =
   ## Returns the double-next-pair's cell in the immediate pairs.
   if simulator.pairs.len <= 2:
     return None
 
   let pair = simulator.pairs[2]
-  result = if isAxis: pair.axis else: pair.child
+  result = if axis: pair.axis else: pair.child
 
 # ------------------------------------------------
 # Message
@@ -111,17 +128,12 @@ func getMessage*(simulator: Simulator): string {.inline.} =
   of Regular:
     if simulator.state != Stable: ""
     else:
-      let dead = case simulator.rule
-      of Tsu: simulator.environments.tsu.field.isDead
-      of Water: simulator.environments.water.field.isDead
-
-      if dead: DeadMessage else: ""
-  of IzumiyaSimulatorKind.Nazo:
-    let positions = simulator.positions[0..<simulator.nextIdx]
-
-    case simulator.rule
-    of Tsu: NazoMessages[simulator.originalTsuNazoPuyo.mark positions]
-    of Water: NazoMessages[simulator.originalWaterNazoPuyo.mark positions]
+      simulator.withField:
+        if field.isDead: DeadMessage else: ""
+  of Nazo:
+    simulator.withOriginalNazoPuyo:
+      NazoMessages[
+        simulator.positions[0..<simulator.next.index].mark originalNazoPuyo]
 
 # ------------------------------------------------
 # X
@@ -156,7 +168,7 @@ func toXLink*(simulator: Simulator, withPositions: bool): Uri {.inline.} =
     hashTag = none string
   {.pop.}
 
-  if simulator.kind == IzumiyaSimulatorKind.Nazo:
+  if simulator.kind == Nazo:
     let
       ruleStr = RuleDescriptions[simulator.rule]
       moveCountStr = $simulator.pairs.len

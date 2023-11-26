@@ -20,29 +20,23 @@ type
     ## only by rendering.
     environments*: Environments
     originalEnvironments*: Environments
-
     positions*: Positions
     requirement*: Requirement
 
-    editor: bool
+    editor*: bool
+    state*: SimulatorState
     kind: SimulatorKind
     mode: SimulatorMode
-    state*: SimulatorState
-
-    selectingCell*: Cell
-    selectingFieldPosition*: tuple[row: Row, column: Column]
-    selectingPairPosition*: tuple[index: Natural, isAxis: bool]
-    inserting*: bool
-    showCursor*: bool
-    focusField*: bool
 
     undoDeque: Deque[tuple[environments: Environments,
                            requirement: Requirement]]
     redoDeque: Deque[tuple[environments: Environments,
                            requirement: Requirement]]
 
-    nextIdx*: Natural
-    nextPosition*: Position
+    next*: tuple[index: Natural, position: Position]
+    editing*: tuple[
+      cell: Cell, field: tuple[row: Row, column: Column],
+      pair: tuple[index: Natural, axis: bool], focusField: bool, insert: bool]
 
   KeyEvent* = object
     ## Keyboard Event.
@@ -79,8 +73,8 @@ const
                            number: none RequirementNumber)
 
 func initSimulator*[F: TsuField or WaterField](
-    env: Environment[F], positions: Positions, mode = Play, editor = false,
-    showCursor = true): Simulator {.inline.} =
+    env: Environment[F], positions: Positions, mode = Play,
+    editor = false): Simulator {.inline.} =
   ## Constructor of `Simulator`.
   ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
   when F is TsuField:
@@ -93,22 +87,14 @@ func initSimulator*[F: TsuField or WaterField](
     result.environments.water = env
   result.originalEnvironments.tsu = result.environments.tsu
   result.originalEnvironments.water = result.environments.water
-
   result.positions = positions
   result.positions.setLen env.pairs.len
   result.requirement = DefaultReq
 
   result.editor = editor or mode == Edit
+  result.state = Stable
   result.kind = Regular
   result.mode = mode
-  result.state = Stable
-
-  result.selectingCell = None
-  result.selectingFieldPosition = (Row.low, Column.low)
-  result.selectingPairPosition = (Natural.low, true)
-  result.inserting = false
-  result.showCursor = showCursor
-  result.focusField = true
 
   result.undoDeque = initDeque[
     tuple[environments: Environments,
@@ -117,39 +103,34 @@ func initSimulator*[F: TsuField or WaterField](
     tuple[environments: Environments,
           requirement: Requirement]] env.pairs.len
 
-  result.nextIdx = Natural 0
-  result.nextPosition = InitPos
+  result.next.index = Natural 0
+  result.next.position = InitPos
+  result.editing.cell = None
+  result.editing.field = (Row.low, Column.low)
+  result.editing.pair = (Natural 0, true)
+  result.editing.focusField = true
+  result.editing.insert = false
 
 func initSimulator*[F: TsuField or WaterField](
-    env: Environment[F], mode = Play, editor = false,
-    showCursor = true): Simulator {.inline.} =
+    env: Environment[F], mode = Play, editor = false): Simulator {.inline.} =
   ## Constructor of `Simulator`.
   ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
-  env.initSimulator(Position.none.repeat env.pairs.len, mode, editor,
-                    showCursor)
+  env.initSimulator(Position.none.repeat env.pairs.len, mode, editor)
 
 func initSimulator*[F: TsuField or WaterField](
-    nazo: NazoPuyo[F], positions: Positions, mode = Play, editor = false,
-    showCursor = true): Simulator {.inline.} =
+    nazo: NazoPuyo[F], positions: Positions, mode = Play,
+    editor = false): Simulator {.inline.} =
   ## Constructor of `Simulator`.
   ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
-  result = nazo.environment.initSimulator(positions, mode, editor, showCursor)
+  result = nazo.environment.initSimulator(positions, mode, editor)
   result.kind = Nazo
   result.requirement = nazo.requirement
 
 func initSimulator*[F:TsuField or WaterField](
-    nazo: NazoPuyo[F], mode = Play, editor = false,
-    showCursor = true): Simulator {.inline.} =
+    nazo: NazoPuyo[F], mode = Play, editor = false): Simulator {.inline.} =
   ## Constructor of `Simulator`.
   ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
-  nazo.initSimulator(Position.none.repeat nazo.moveCount, mode, editor,
-                     showCursor)
-
-# ------------------------------------------------
-# Property - Editor
-# ------------------------------------------------
-
-func editor*(self): bool {.inline.} = self.editor
+  nazo.initSimulator(Position.none.repeat nazo.moveCount, mode, editor)
 
 # ------------------------------------------------
 # Property - Rule / Kind / Mode
@@ -264,9 +245,25 @@ template withNazoPuyo*(self: Simulator, body: untyped): untyped =
     let nazoPuyo {.inject.} = self.waterNazoPuyo
     body
 
+template withOriginalNazoPuyo*(self: Simulator, body: untyped): untyped =
+  ## Runs `body` with `originalNazoPuyo` exposed.
+  case self.rule
+  of Tsu:
+    let originalNazoPuyo {.inject.} = self.originalTsuNazoPuyo
+    body
+  of Water:
+    let originalNazoPuyo {.inject.} = self.originalWaterNazoPuyo
+    body
+
 template withEnvironment*(self: Simulator, body: untyped): untyped =
   ## Runs `body` with `environment` exposed.
   self.environments.flattenAnd:
+    body
+
+template withOriginalEnvironment*(self: Simulator, body: untyped): untyped =
+  ## Runs `body` with `originalEnvironment` exposed.
+  self.originalEnvironments.flattenAnd:
+    let originalEnvironment {.inject.} = environment
     body
 
 template withField*(self: Simulator, body: untyped): untyped =
@@ -275,14 +272,22 @@ template withField*(self: Simulator, body: untyped): untyped =
     let field {.inject.} = environment.field
     body
 
+template withOriginalField*(self: Simulator, body: untyped): untyped =
+  ## Runs `body` with `originalField` exposed.
+  self.originalEnvironments.flattenAnd:
+    let originalField {.inject.} = environment.field
+    body
+
 # ------------------------------------------------
-# Edit
+# Edit - Other
 # ------------------------------------------------
 
-func toggleInserting*(mSelf) {.inline.} = mSelf.inserting = not mSelf.inserting
+func toggle(x: var bool) {.inline.} = x = not x ## Toggles the value.
+
+func toggleInserting*(mSelf) {.inline.} = mSelf.editing.insert.toggle
   ## Toggles inserting or not.
 
-func toggleFocus*(mSelf) {.inline.} = mSelf.focusField = not mSelf.focusField
+func toggleFocus*(mSelf) {.inline.} = mSelf.editing.focusField.toggle
   ## Toggles focusing field or not.
 
 func save(mSelf) {.inline.} =
@@ -300,51 +305,47 @@ template change(mSelf; body: untyped) =
 # Edit - Cursor
 # ------------------------------------------------
 
+func incRot[T: Ordinal](x: var T) {.inline.} =
+  ## Rotating `inc`.
+  if x == T.high: x = T.low else: x.inc
+
+func decRot[T: Ordinal](x: var T) {.inline.} =
+  ## Rotating `dec`.
+  if x == T.low: x = T.high else: x.dec
+
 func moveCursorUp*(mSelf) {.inline.} =
   ## Moves the cursor upward.
-  if mSelf.focusField:
-    if mSelf.selectingFieldPosition.row == Row.low:
-      mSelf.selectingFieldPosition.row = Row.high
-    else:
-      mSelf.selectingFieldPosition.row.dec
+  if mSelf.editing.focusField:
+    mSelf.editing.field.row.decRot
   else:
-    if mSelf.selectingPairPosition.index == Natural.low:
-      mSelf.selectingPairPosition.index = mSelf.pairs.len
+    if mSelf.editing.pair.index == 0:
+      mSelf.editing.pair.index = mSelf.pairs.len
     else:
-      mSelf.selectingPairPosition.index.dec
+      mSelf.editing.pair.index.dec
 
 func moveCursorDown*(mSelf) {.inline.} =
   ## Moves the cursor downward.
-  if mSelf.focusField:
-    if mSelf.selectingFieldPosition.row == Row.high:
-      mSelf.selectingFieldPosition.row = Row.low
-    else:
-      mSelf.selectingFieldPosition.row.inc
+  if mSelf.editing.focusField:
+    mSelf.editing.field.row.incRot
   else:
-    if mSelf.selectingPairPosition.index == mSelf.pairs.len:
-      mSelf.selectingPairPosition.index = Natural.low
+    if mSelf.editing.pair.index == mSelf.pairs.len:
+      mSelf.editing.pair.index = Natural 0
     else:
-      mSelf.selectingPairPosition.index.inc
+      mSelf.editing.pair.index.inc
 
 func moveCursorRight*(mSelf) {.inline.} =
   ## Moves the cursor rightward.
-  if mSelf.focusField:
-    if mSelf.selectingFieldPosition.column == Column.high:
-      mSelf.selectingFieldPosition.column = Column.low
-    else:
-      mSelf.selectingFieldPosition.column.inc
+  if mSelf.editing.focusField:
+    mSelf.editing.field.column.incRot
   else:
-    mSelf.selectingPairPosition.isAxis = not mSelf.selectingPairPosition.isAxis
+    mSelf.editing.pair.axis.toggle
 
 func moveCursorLeft*(mSelf) {.inline.} =
   ## Moves the cursor leftward.
-  if mSelf.focusField:
-    if mSelf.selectingFieldPosition.column == Column.low:
-      mSelf.selectingFieldPosition.column = Column.high
-    else:
-      mSelf.selectingFieldPosition.column.dec
+  if mSelf.editing.focusField:
+    mSelf.editing.field.column.decRot
   else:
-    mSelf.selectingPairPosition.isAxis = not mSelf.selectingPairPosition.isAxis
+    mSelf.editing.pair.axis.toggle
 
 # ------------------------------------------------
 # Edit - Delete
@@ -366,7 +367,7 @@ func deletePair*(mSelf; idx: Natural) {.inline.} =
 
 func deletePair*(mSelf) {.inline.} =
   ## Deletes the pair at selecting index.
-  mSelf.deletePair mSelf.selectingPairPosition.index
+  mSelf.deletePair mSelf.editing.pair.index
 
 # ------------------------------------------------
 # Edit - Write
@@ -380,7 +381,7 @@ func insert[T](deque: var Deque[T], item: T, idx: Natural) {.inline.} =
 func writeCell(mSelf; row: Row, col: Column, cell: Cell) {.inline.} =
   ## Writes the cell to the field.
   mSelf.change:
-    if mSelf.inserting:
+    if mSelf.editing.insert:
       if cell == None:
         case mSelf.rule
         of Tsu: mSelf.environments.tsu.field.removeSqueeze row, col
@@ -396,9 +397,9 @@ func writeCell(mSelf; row: Row, col: Column, cell: Cell) {.inline.} =
 
 func writeCell*(mSelf; row: Row, col: Column) {.inline.} =
   ## Writes the selecting cell to the field.
-  mSelf.writeCell row, col, mSelf.selectingCell
+  mSelf.writeCell row, col, mSelf.editing.cell
 
-func writeCell(mSelf; idx: Natural, isAxis: bool, cell: Cell) {.inline.} =
+func writeCell(mSelf; idx: Natural, axis: bool, cell: Cell) {.inline.} =
   ## Writes the cell to the pairs.
   case cell
   of None:
@@ -412,27 +413,25 @@ func writeCell(mSelf; idx: Natural, isAxis: bool, cell: Cell) {.inline.} =
         mSelf.pairs.addLast initPair(color, color)
         mSelf.positions.add none Position
       else:
-        if mSelf.inserting:
+        if mSelf.editing.insert:
           mSelf.pairs.insert initPair(color, color), idx
           mSelf.positions.insert Position.none, idx
         else:
-          if isAxis:
+          if axis:
             mSelf.pairs[idx].axis = color
           else:
             mSelf.pairs[idx].child = color
 
-func writeCell*(mSelf; idx: Natural, isAxis: bool) {.inline.} =
+func writeCell*(mSelf; idx: Natural, axis: bool) {.inline.} =
   ## Writes the selecting cell to the pairs.
-  mSelf.writeCell idx, isAxis, mSelf.selectingCell
+  mSelf.writeCell idx, axis, mSelf.editing.cell
 
 func writeCell*(mSelf; cell: Cell) {.inline.} =
   ## Writes the cell to the field or pairs.
-  if mSelf.focusField:
-    mSelf.writeCell mSelf.selectingFieldPosition.row,
-      mSelf.selectingFieldPosition.column, cell
+  if mSelf.editing.focusField:
+    mSelf.writeCell mSelf.editing.field.row, mSelf.editing.field.column, cell
   else:
-    mSelf.writeCell mSelf.selectingPairPosition.index,
-      mSelf.selectingPairPosition.isAxis, cell
+    mSelf.writeCell mSelf.editing.pair.index, mSelf.editing.pair.axis, cell
 
 # ------------------------------------------------
 # Edit - Shift
@@ -547,16 +546,17 @@ func redo*(mSelf) {.inline.} =
 # Play - Position
 # ------------------------------------------------
 
-func moveNextPositionRight*(mSelf) {.inline.} = mSelf.nextPosition.moveRight
+func moveNextPositionRight*(mSelf) {.inline.} = mSelf.next.position.moveRight
   ## Moves the next position right.
 
-func moveNextPositionLeft*(mSelf) {.inline.} = mSelf.nextPosition.moveLeft
+func moveNextPositionLeft*(mSelf) {.inline.} = mSelf.next.position.moveLeft
   ## Moves the next position left.
 
-func rotateNextPositionRight*(mSelf) {.inline.} = mSelf.nextPosition.rotateRight
+func rotateNextPositionRight*(mSelf) {.inline.} =
   ## Rotates the next position right.
+  mSelf.next.position.rotateRight
 
-func rotateNextPositionLeft*(mSelf) {.inline.} = mSelf.nextPosition.rotateLeft
+func rotateNextPositionLeft*(mSelf) {.inline.} = mSelf.next.position.rotateLeft
   ## Rotates the next position left.
 
 # ------------------------------------------------
@@ -574,15 +574,15 @@ func forward*(mSelf; useNextPosition = true, skip = false) {.inline.} =
     mSelf.save
 
     if useNextPosition:
-      mSelf.positions[mSelf.nextIdx] = some mSelf.nextPosition
+      mSelf.positions[mSelf.next.index] = some mSelf.next.position
     if skip:
-      mSelf.positions[mSelf.nextIdx] = none Position
+      mSelf.positions[mSelf.next.index] = none Position
 
     # put
     block:
       let
         pair = mSelf.pairs.popFirst
-        pos = mSelf.positions[mSelf.nextIdx]
+        pos = mSelf.positions[mSelf.next.index]
 
       if pos.isSome:
         case mSelf.rule
@@ -601,8 +601,8 @@ func forward*(mSelf; useNextPosition = true, skip = false) {.inline.} =
         mSelf.state = WillDisappear
       else:
         mSelf.state = Stable
-        mSelf.nextIdx.inc
-        mSelf.nextPosition = InitPos
+        mSelf.next.index.inc
+        mSelf.next.position = InitPos
   of WillDisappear:
     case mSelf.rule
     of Tsu: mSelf.environments.tsu.field.disappear
@@ -622,8 +622,8 @@ func forward*(mSelf; useNextPosition = true, skip = false) {.inline.} =
       mSelf.state = WillDisappear
     else:
       mSelf.state = Stable
-      mSelf.nextIdx.inc
-      mSelf.nextPosition = InitPos
+      mSelf.next.index.inc
+      mSelf.next.position = InitPos
 
 func backward*(mSelf) {.inline.} =
   ## Backwards the simulator.
@@ -631,11 +631,11 @@ func backward*(mSelf) {.inline.} =
     return
 
   if mSelf.state == Stable:
-    mSelf.nextIdx.dec
+    mSelf.next.index.dec
 
   (mSelf.environments, mSelf.requirement) = mSelf.undoDeque.popLast
   mSelf.state = Stable
-  mSelf.nextPosition = InitPos
+  mSelf.next.position = InitPos
 
 func reset*(mSelf; resetPosition = true) {.inline.} =
   ## Resets the simulator.
@@ -643,8 +643,8 @@ func reset*(mSelf; resetPosition = true) {.inline.} =
   mSelf.environments = mSelf.originalEnvironments
   mSelf.undoDeque.clear
   mSelf.redoDeque.clear
-  mSelf.nextIdx = 0
-  mSelf.nextPosition = InitPos
+  mSelf.next.index = 0
+  mSelf.next.position = InitPos
 
   if resetPosition:
     mSelf.positions = Position.none.repeat mSelf.pairs.len
