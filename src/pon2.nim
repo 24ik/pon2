@@ -11,19 +11,96 @@
 {.experimental: "strictDefs".}
 
 when defined(js):
-  discard
+  import std/[options, sequtils, uri]
+  import karax/[karax, karaxdsl, vdom]
+  import ./pon2pkg/corepkg/[environment, field, misc]
+  import ./pon2pkg/nazopuyopkg/[nazopuyo]
+  import ./pon2pkg/simulatorpkg/[simulator, web]
+
+  var
+    pageInitialized = false
+    globalSimulator: Simulator
+
+  proc initSimulatorDom(routerData: RouterData): VNode =
+    ## Returns the simulator DOM.
+    if pageInitialized:
+      return globalSimulator.initSimulatorDom
+
+    pageInitialized = true
+    let query =
+      if routerData.queryString == cstring"": ""
+      else: ($routerData.queryString)[1..^1] # remove '?'
+
+    var uri = initUri()
+    uri.scheme = "https"
+    uri.hostname = $Izumiya
+    uri.path = "/pon2/playground/index.html"
+    uri.query = query
+
+    try:
+      let parseRes = uri.parseNazoPuyos
+      parseRes.nazoPuyos.flattenAnd:
+        globalSimulator =
+          if parseRes.positions.isSome:
+            nazoPuyo.initSimulator(parseRes.positions.get, parseRes.mode,
+                                   parseRes.editor)
+          else:
+            nazoPuyo.initSimulator(parseRes.mode, parseRes.editor)
+    except ValueError:
+      try:
+        let parseRes = uri.parseEnvironments
+        parseRes.environments.flattenAnd:
+          globalSimulator =
+            if parseRes.positions.isSome:
+              environment.initSimulator(parseRes.positions.get, parseRes.mode,
+                                        parseRes.editor)
+            else:
+              environment.initSimulator(parseRes.mode, parseRes.editor)
+      except ValueError:
+        return buildHtml(tdiv):
+          text "URL形式エラー"
+
+    result = globalSimulator.initSimulatorDom
+
+  when isMainModule:
+    initSimulatorDom.setRenderer
 else:
   import std/[browsers, options, random, sequtils, strformat, strutils, uri]
   import docopt
   import nigui
   import ./pon2pkg/corepkg/[environment, field, misc]
   import ./pon2pkg/nazopuyopkg/[generate, nazopuyo, permute, solve]
-  import ./pon2pkg/private/[misc]
   import ./pon2pkg/simulatorpkg/[native, simulator]
 
   # ------------------------------------------------
   # Parse
   # ------------------------------------------------
+
+  func parseNatural(val: Value, allowNone = false): Option[Natural] {.inline.} =
+    ## Converts the value to the Natural integer.
+    ## If the conversion fails, `ValueError` will be raised.
+    ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is
+    ## returned.
+    {.push warning[ProveInit]: off.}
+    result = none Natural # HACK: dummy to remove warning
+    {.pop.}
+
+    case val.kind
+    of vkNone:
+      {.push warning[ProveInit]: off.}
+      if allowNone:
+        result = none Natural
+      else:
+        raise newException(ValueError, "必須の数値入力が省略されています．")
+      {.pop.}
+    of vkStr:
+      result = some Natural parseInt $val
+    else:
+      assert false
+
+  func parseNatural(val: char or string): Natural {.inline.} = parseInt $val
+    ## Converts the char or string to the Natural integer.
+    ## If the conversion fails, `ValueError` will be raised.
 
   func parseRequirementKind(val: Value, allowNone = false):
       Option[RequirementKind] {.inline.} =

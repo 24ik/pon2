@@ -57,19 +57,11 @@ task web, "Make Web Page":
   exec &"nim js -d:danger={danger} -o:www/index.js src/pon2.nim"
   let cmd =
     if minify:
-      "npx --yes google-closure-compiler " & (if verbose: "" else: "-W QUIET") &
+      "npx --yes google-closure-compiler " &
+      (if verbose: "" else: "-W QUIET ") &
       "--js www/index.js --js_output_file www/index.min.js"
     else:
       "cp www/index.js www/index.min.js"
   exec cmd
-
-  # worker
-  let cmd2 =
-    if minify:
-      "npx --yes google-closure-compiler " & (if verbose: "" else: "-W QUIET") &
-      "--js www/worker.js --js_output_file www/worker.min.js"
-    else:
-      "cp www/worker.js www/worker.min.js"
-  exec cmd2
 
   exec "cp -r assets www"
