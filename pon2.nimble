@@ -48,11 +48,28 @@ task documentation, "Make Documentation":
   rmDir "src/htmldocs2"
 
 task web, "Make Web Page":
-  const danger {.booldefine.} = true
+  const
+    danger {.booldefine.} = true
+    minify {.booldefine.} = true
+    verbose {.booldefine.} = false
 
+  # main script
   exec &"nim js -d:danger={danger} -o:www/index.js src/pon2.nim"
-  exec "npx --yes google-closure-compiler -W QUIET --js www/index.js --js_output_file www/index.min.js"
-  exec &"nim js -d:danger={danger} -o:www/worker.js src/pon2pkg/web/worker.nim"
-  exec "npx --yes google-closure-compiler -W QUIET --js www/worker.js --js_output_file www/worker.min.js"
+  let cmd =
+    if minify:
+      "npx --yes google-closure-compiler " & (if verbose: "" else: "-W QUIET") &
+      "--js www/index.js --js_output_file www/index.min.js"
+    else:
+      "cp www/index.js www/index.min.js"
+  exec cmd
+
+  # worker
+  let cmd =
+    if minify:
+      "npx --yes google-closure-compiler " & (if verbose: "" else: "-W QUIET") &
+      "--js www/worker.js --js_output_file www/worker.min.js"
+    else:
+      "cp www/worker.js www/worker.min.js"
+  exec cmd
 
   exec "cp -r assets www"
