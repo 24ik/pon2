@@ -1,4 +1,4 @@
-## This module implements the field control.
+## This module implements the field node.
 ##
 
 {.experimental: "strictDefs".}

@@ -1,4 +1,4 @@
-## This module implements the requirement frame.
+## This module implements the requirement node.
 ##
 
 {.experimental: "strictDefs".}
@@ -10,9 +10,9 @@ import ../../../nazopuyopkg/[nazopuyo]
 import ../../../simulatorpkg/[simulator]
 
 const
-  KindSelectIdPrefix = "puyo-simulator-select-req-kind"
-  ColorSelectIdPrefix = "puyo-simulator-select-req-color"
-  NumberSelectIdPrefix = "puyo-simulator-select-req-number"
+  KindSelectIdPrefix = "pon2-req-kind"
+  ColorSelectIdPrefix = "pon2-req-color"
+  NumberSelectIdPrefix = "pon2-req-number"
 
 proc getSelectedKindIndex(idx: int): int {.importjs:
   &"document.getElementById('{KindSelectIdPrefix}' + (#)).selectedIndex".}
@@ -28,25 +28,28 @@ proc getSelectedNumberIndex(idx: int): int {.importjs:
 
 func initKindHandler(simulator: var Simulator, idx: int): () -> void =
   ## Returns the handler for the kind.
+  # NOTE: cannot inline due to lazy evaluation
   () => (simulator.requirementKind = idx.getSelectedKindIndex.RequirementKind)
 
 func initColorHandler(simulator: var Simulator, idx: int): () -> void =
   ## Returns the handler for the kind.
+  # NOTE: cannot inline due to lazy evaluation
   () => (simulator.requirementColor =
     idx.getSelectedColorIndex.RequirementColor)
 
 func initNumberHandler(simulator: var Simulator, idx: int): () -> void =
   ## Returns the handler for the kind.
+  # NOTE: cannot inline due to lazy evaluation
   () => (simulator.requirementNumber =
     idx.getSelectedNumberIndex.RequirementNumber)
 
-proc requirementFrame*(simulator: var Simulator, simple = false, idx = 0): VNode
-                      {.inline.} =
-  ## Returns the requirement frame.
+proc requirementNode*(
+    simulator: var Simulator, displayMode = false, idx = 0): VNode {.inline.} =
+  ## Returns the requirement node.
   if simulator.kind == Regular:
     return buildHtml(text "　")
 
-  if simple or simulator.mode in {Play, Replay}:
+  if displayMode or simulator.mode != Edit:
     return buildHtml(bold):
       text $simulator.requirement
 

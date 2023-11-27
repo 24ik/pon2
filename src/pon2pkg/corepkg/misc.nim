@@ -37,5 +37,6 @@ type
 
   SimulatorMode* {.pure.} = enum
     ## Mode of the web simulator.
-    Play = "p"
     Edit = "e"
+    Play = "p"
+    Replay = "r"

@@ -1,21 +1,20 @@
-## This module implements the select frame.
+## This module implements the select node.
 ##
 
 {.experimental: "strictDefs".}
 
 import std/[sugar]
-import karax/[karax, kbase, karaxdsl, vdom]
+import karax/[karax, karaxdsl, kbase, vdom]
 import ../../../corepkg/[misc]
 import ../../../simulatorpkg/[simulator]
 
 const SelectedClass = kstring"button is-selected is-primary"
 
-proc selectFrame*(simulator: var Simulator): VNode {.inline.} =
-  ## Returns the select frame.
+proc selectNode*(simulator: var Simulator): VNode {.inline.} =
+  ## Returns the select node.
   let
     editButtonClass =
-      if simulator.mode == IzumiyaSimulatorMode.Edit: SelectedClass
-      else: kstring"button"
+      if simulator.mode == Edit: SelectedClass else: kstring"button"
     playButtonClass =
       if simulator.mode == Play: SelectedClass else: kstring"button"
     replayButtonClass =
@@ -31,17 +30,14 @@ proc selectFrame*(simulator: var Simulator): VNode {.inline.} =
     regularButtonClass =
       if simulator.kind == Regular: SelectedClass else: kstring"button"
     nazoButtonClass =
-      if simulator.kind == IzumiyaSimulatorKind.Nazo: SelectedClass
-      else: kstring"button"
+      if simulator.kind == Nazo: SelectedClass else: kstring"button"
 
   result = buildHtml(tdiv):
     tdiv(class = "buttons has-addons mb-0"):
-      button(class = editButtonClass,
-             onclick = () => (simulator.mode = IzumiyaSimulatorMode.Edit)):
+      button(class = editButtonClass, onclick = () => (simulator.mode = Edit)):
         span(class = "icon"):
           italic(class = "fa-solid fa-pen-to-square")
-      button(class = playButtonClass,
-             onclick = () => (simulator.mode = Play)):
+      button(class = playButtonClass, onclick = () => (simulator.mode = Play)):
         span(class = "icon"):
           italic(class = "fa-solid fa-gamepad")
       button(class = replayButtonClass,
@@ -58,6 +54,5 @@ proc selectFrame*(simulator: var Simulator): VNode {.inline.} =
       button(class = regularButtonClass,
              onclick = () => (simulator.kind = Regular)):
         text "とこ"
-      button(class = nazoButtonClass,
-             onclick = () => (simulator.kind = IzumiyaSimulatorKind.Nazo)):
+      button(class = nazoButtonClass, onclick = () => (simulator.kind = Nazo)):
         text "なぞ"

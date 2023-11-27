@@ -29,13 +29,14 @@ when defined(js):
     "navigator.userAgent.match(/iPhone|Android.+Mobile/)".}
 
 proc fieldCellBackgroundColor*(
-    simulator: Simulator, row: Row, col: Column): Color {.inline.} =
+    simulator: Simulator, row: Row, col: Column, displayMode = false): Color
+    {.inline.} =
   ## Returns the cell's background color in the field.
   let hideCursor = when defined(js): isMobile() else: false
 
   result =
     if (
-      not hideCursor and simulator.mode == Edit and
+      not hideCursor and not displayMode and simulator.mode == Edit and
       simulator.editing.focusField and
       (row, col) == simulator.editing.field): SelectColor
     elif row == Row.low: GhostColor

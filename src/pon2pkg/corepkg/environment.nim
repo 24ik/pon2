@@ -375,6 +375,7 @@ func toUri[F: TsuField or WaterField](
   ## Converts the environment and the positions to the URI.
   ## The positions will be truncated if it is shorter than the pairs.
   ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
+  ## If `host` is not `Izumiya`, `editor` will be ignored.
   let positions2 =
     if positions.isNone: Position.none.repeat self.pairs.len
     elif positions.get.len > self.pairs.len: positions.get[0 ..< self.pairs.len]
@@ -398,16 +399,13 @@ func toUri[F: TsuField or WaterField](
 
     result.query = queries.encodeQuery
   of Ishikawa, Ips:
-    let ishikawaMode =
-      if editor:
-        case kind
-        of SimulatorKind.Regular:
-          case mode
-          of Play: Simu
-          of SimulatorMode.Edit: IshikawaMode.Edit
-        of SimulatorKind.Nazo: IshikawaMode.Nazo
-      else:
-        View
+    let ishikawaMode = case kind
+    of Regular:
+      case mode
+      of SimulatorMode.Edit: IshikawaMode.Edit
+      of Play: Simu
+      of Replay: View
+    of SimulatorKind.Nazo: IshikawaMode.Nazo
 
     result.path = "/simu/p" & $ishikawaMode & ".html"
 
@@ -440,6 +438,7 @@ func parseEnvironment*[F: TsuField or WaterField](
       kind: SimulatorKind, mode: SimulatorMode, editor: bool] {.inline.} =
   ## Converts the URI to the environment, positions and simulator properties.
   ## If `uri` is not a valid URI, `ValueError` is raised.
+  ## If the host is not `Izumiya`, `result.editor` is always `true`.
   {.push warning[ProveInit]: off.}
   result.positions = none Positions
   result.editor = false
@@ -482,26 +481,24 @@ func parseEnvironment*[F: TsuField or WaterField](
     if mode.get == SimulatorMode.Edit:
       result.editor = true
   of $Ishikawa, $Ips:
-    # kind, mode, editor
+    result.editor = true
+
+    # kind, mode
     if uri.path notin PathToIshikawaMode:
       raise newException(ValueError, "Invalid environment: " & $uri)
     case PathToIshikawaMode[uri.path]
     of IshikawaMode.Edit:
       kind = some Regular
       mode = some SimulatorMode.Edit
-      result.editor = true
     of Simu:
       kind = some Regular
       mode = some Play
-      result.editor = true
     of View:
       kind = some Regular
-      mode = some Play
-      result.editor = false
+      mode = some Replay
     of IshikawaMode.Nazo:
       kind = some SimulatorKind.Nazo
       mode = some Play
-      result.editor = true
 
     # field, pairs, positions
     let

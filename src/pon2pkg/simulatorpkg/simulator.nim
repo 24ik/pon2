@@ -756,3 +756,13 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
       mSelf.forward(useNextPosition = false)
     else:
       result = false
+  of Replay:
+    # forward / backward / reset
+    if event == initKeyEvent("KeyW"):
+      mSelf.backward
+    elif event == initKeyEvent("KeyS"):
+      mSelf.forward(useNextPosition = false)
+    elif event == initKeyEvent("Digit0"):
+      mSelf.reset(resetPosition = false)
+    else:
+      result = false

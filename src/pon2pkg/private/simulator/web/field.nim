@@ -1,4 +1,4 @@
-## This module implements the field frame.
+## This module implements the field node.
 ##
 
 {.experimental: "strictDefs".}
@@ -13,11 +13,12 @@ import ../../../simulatorpkg/[simulator]
 func initClickHandler(simulator: var Simulator, row: Row, col: Column):
     () -> void =
   ## Returns the click handler.
-  # NOTE: inline handler does not work due to specifications
+  # NOTE: cannot inline due to lazy evaluation
   () => simulator.writeCell(row, col)
 
-proc fieldFrame*(simulator: var Simulator, simple = false): VNode {.inline.} =
-  ## Returns the field frame.
+proc fieldNode*(simulator: var Simulator, displayMode = false): VNode
+               {.inline.} =
+  ## Returns the field node.
   let arr = simulator.withField:
     field.toArray
 
@@ -29,9 +30,10 @@ proc fieldFrame*(simulator: var Simulator, simple = false): VNode {.inline.} =
           for col in Column.low..Column.high:
             let cellStyle = style(
               StyleAttr.backgroundColor,
-              simulator.fieldCellBackgroundColor(row, col, simple).toColorCode)
+              simulator.fieldCellBackgroundColor(row, col, displayMode).
+              toColorCode)
             td:
-              if not simple and simulator.mode == IzumiyaSimulatorMode.Edit:
+              if not displayMode and simulator.mode == Edit:
                 button(class = "button p-0",
                        style = style(StyleAttr.maxHeight, kstring"24px"),
                        onclick = simulator.initClickHandler(row, col)):

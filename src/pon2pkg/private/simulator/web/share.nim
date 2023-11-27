@@ -1,4 +1,4 @@
-## This module implements the share frame.
+## This module implements the share node.
 ##
 
 {.experimental: "strictDefs".}
@@ -10,17 +10,17 @@ import ../[render]
 import ../../../simulatorpkg/[simulator]
 
 const
-  UrlCopyButtonIdPrefix = "puyo-simulator-button-url"
-  PosUrlCopyButtonIdPrefix = "puyo-simulator-button-url-pos"
+  UrlCopyButtonIdPrefix = "pon2-button-url"
+  PosUrlCopyButtonIdPrefix = "pon2-button-url-pos"
 
-  SimpleDivIdPrefix = "puyo-simulator-div-simple"
-  SimplePairDivIdPrefix = "puyo-simulator-div-simple-pair"
-  SimplePairPosDivIdPrefix = "puyo-simulator-div-simple-pair-pos"
+  DisplayDivIdPrefix = "pon2-div-display"
+  DisplayPairDivIdPrefix = "pon2-div-display-pair"
+  DisplayPairPosDivIdPrefix = "pon2-div-display-pair-pos"
 
   UrlCopyMessageShowMs = 500
 
-proc downloadSimpleImage(idx: int) {.importjs: &"""
-const div = document.getElementById('{SimpleDivIdPrefix}' + (#));
+proc downloadDisplayImage(idx: int) {.importjs: &"""
+const div = document.getElementById('{DisplayDivIdPrefix}' + (#));
 div.style.display = 'block';
 html2canvas(div).then((canvas) => {{
   div.style.display = 'none';
@@ -34,15 +34,16 @@ html2canvas(div).then((canvas) => {{
 
 func initDownloadHandler(idx: int, withPositions: bool): () -> void =
   ## Returns the handler for downloading.
+  # NOTE: cannot inline due to lazy evaluation
   () => (
     block:
       document.getElementById(
-        cstring &"{SimplePairDivIdPrefix}{idx}").style.display = (
+        cstring &"{DisplayPairDivIdPrefix}{idx}").style.display = (
           if withPositions: "none" else: "block")
       document.getElementById(
-        cstring &"{SimplePairPosDivIdPrefix}{idx}").style.display = (
+        cstring &"{DisplayPairPosDivIdPrefix}{idx}").style.display = (
           if withPositions: "block" else: "none")
-      downloadSimpleImage(idx))
+      downloadDisplayImage(idx))
 
 proc showFlashMessage(element: Element, messageHtml: string,
                       timeoutMs = Natural 500) {.inline.} =
@@ -61,7 +62,7 @@ It works on the first call, but an error occurs on the second call.
 The direct cause is access to `undefined`, but the root cause is unknown.
 It appears that `simulator` becomes `undefined` on the second call.
 So, as a workaround, we store `simulator` in the global container and use it
-in the second call.
+in the second (or later) call.
 
 func initCopyHandler(simulator: Simulator, idx: int,
                      withPosition: bool): () -> void =
@@ -105,8 +106,8 @@ proc initCopyHandler(simulator: Simulator, idx: int,
         UrlCopyMessageShowMs)
       discard setTimeout(() => (btn.disabled = false), UrlCopyMessageShowMs))
 
-proc shareFrame*(simulator: var Simulator, idx = 0): VNode {.inline.} =
-  ## Returns the share frame.
+proc shareNode*(simulator: var Simulator, idx = 0): VNode {.inline.} =
+  ## Returns the share node.
   buildHtml(tdiv):
     tdiv(class = "block"):
       text "URLをシェア"
@@ -144,20 +145,20 @@ proc shareFrame*(simulator: var Simulator, idx = 0): VNode {.inline.} =
                class = "button is-size-7",
                onclick = simulator.initCopyHandler(idx, true)):
           text "操作有"
-    tdiv(id = kstring &"{SimpleDivIdPrefix}{idx}",
+    tdiv(id = kstring &"{DisplayDivIdPrefix}{idx}",
          style = style(StyleAttr.display, kstring"none")):
       tdiv(class = "block"):
-        simulator.requirementFrame(true)
+        simulator.requirementNode(true, -idx)
       tdiv(class = "block"):
         tdiv(class = "columns is-mobile is-variable is-1"):
           tdiv(class = "column is-narrow"):
             tdiv(class = "block"):
-              simulator.fieldFrame(true)
-          tdiv(id = kstring &"{SimplePairDivIdPrefix}{idx}",
+              simulator.fieldNode(true)
+          tdiv(id = kstring &"{DisplayPairDivIdPrefix}{idx}",
                class = "column is-narrow"):
             tdiv(class = "block"):
-              simulator.pairsFrame(true, false)
-          tdiv(id = kstring &"{SimplePairPosDivIdPrefix}{idx}",
+              simulator.pairsNode(true, false)
+          tdiv(id = kstring &"{DisplayPairPosDivIdPrefix}{idx}",
                class = "column is-narrow"):
             tdiv(class = "block"):
-              simulator.pairsFrame(true, true)
+              simulator.pairsNode(true, true)

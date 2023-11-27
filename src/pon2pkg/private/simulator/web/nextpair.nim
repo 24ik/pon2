@@ -1,4 +1,4 @@
-## This module implements the next pair frame.
+## This module implements the next pair node.
 ##
 
 {.experimental: "strictDefs".}
@@ -9,8 +9,8 @@ import ../[render]
 import ../../../corepkg/[misc]
 import ../../../simulatorpkg/[simulator]
 
-proc nextPairFrame*(simulator: var Simulator): VNode {.inline.} =
-  ## Returns the next pair frame.
+proc nextPairNode*(simulator: var Simulator): VNode {.inline.} =
+  ## Returns the next pair node.
   buildHtml(table):
     tbody:
       for idx in -1..1:

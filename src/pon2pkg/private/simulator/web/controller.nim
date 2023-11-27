@@ -1,4 +1,4 @@
-## This module implements the controller frame.
+## This module implements the controller node.
 ##
 
 {.experimental: "strictDefs".}
@@ -8,17 +8,17 @@ import karax/[karax, karaxdsl, vdom]
 import ../../../corepkg/[misc]
 import ../../../simulatorpkg/[simulator]
 
-proc controllerFrame*(simulator: var Simulator): VNode {.inline.} =
-  ## Returns the controller frame.
+proc controllerNode*(simulator: var Simulator): VNode {.inline.} =
+  ## Returns the controller node.
   buildHtml(tdiv):
     case simulator.mode
-    of IzumiyaSimulatorMode.Edit:
+    of Edit:
       tdiv(class = "buttons is-centered mb-0"):
         button(
-          class = (if simulator.inserting: "button is-selected is-primary"
-                   else: "button"),
-          onclick = () => simulator.toggleInserting,
-        ):
+            class = (
+              if simulator.editing.insert: "button is-selected is-primary"
+              else: "button"),
+            onclick = () => simulator.toggleInserting):
           span(class = "icon"):
             italic(class = "fa-solid fa-indent")
         button(class = "button is-light", onclick = () => simulator.flipFieldH):

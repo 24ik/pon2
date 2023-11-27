@@ -1,4 +1,4 @@
-## This module implements the immediate pairs frame.
+## This module implements the immediate pairs node.
 ##
 
 {.experimental: "strictDefs".}
@@ -9,16 +9,16 @@ import ../[render]
 import ../../../corepkg/[cell]
 import ../../../simulatorpkg/[simulator]
 
-proc immediatePairsFrame*(simulator: var Simulator): VNode {.inline.} =
-  ## Returns the immediate pairs frame.
+proc immediatePairsNode*(simulator: var Simulator): VNode {.inline.} =
+  ## Returns the immediate pairs node.
   buildHtml(table):
     tbody:
       # indent
-      for _ in 0..<4:
+      for _ in 1..4:
         tr:
           td:
             figure(class = "image is-24x24"):
-              img(src = cellImageSrc(Cell.None))
+              img(src = cellImageSrc(None))
 
       # next-puyo
       tr:
@@ -34,7 +34,7 @@ proc immediatePairsFrame*(simulator: var Simulator): VNode {.inline.} =
       tr:
         td:
           figure(class = "image is-24x24"):
-            img(src = cellImageSrc(Cell.None))
+            img(src = cellImageSrc(None))
 
       # double-next-puyo
       tr:

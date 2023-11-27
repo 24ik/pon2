@@ -1,4 +1,4 @@
-## This module implements the palette frame.
+## This module implements the palette node.
 ##
 
 {.experimental: "strictDefs".}
@@ -15,11 +15,11 @@ const
 
 func initClickHandler(simulator: var Simulator, cell: Cell): () -> void =
   ## Returns the click handler.
-  # NOTE: inline handler does not work (due to Karax's specifications)
-  () => (simulator.selectingCell = cell)
+  # NOTE: cannot inline due to lazy evaluation
+  () => (simulator.editing.cell = cell)
 
-proc paletteFrame*(simulator: var Simulator): VNode {.inline.} =
-  ## Returns the palette frame.
+proc paletteNode*(simulator: var Simulator): VNode {.inline.} =
+  ## Returns the palette node.
   buildHtml(tdiv):
     table(style = style(StyleAttr.border, kstring"1px black solid")):
       tbody:
@@ -27,21 +27,19 @@ proc paletteFrame*(simulator: var Simulator): VNode {.inline.} =
           for cell in [None, Red, Green, Blue]:
             td:
               button(
-                class =
-                  if cell == simulator.selectingCell: SelectedButtonClass
-                  else: ButtonClass,
-                onclick = simulator.initClickHandler(cell),
-              ):
+                  class =
+                    if cell == simulator.editing.cell: SelectedButtonClass
+                    else: ButtonClass,
+                  onclick = simulator.initClickHandler(cell)):
                 figure(class = "image is-24x24"):
                   img(src = cell.cellImageSrc)
         tr:
-          for i, cell in [Cell.Yellow, Purple, Garbage]:
+          for i, cell in [Yellow, Purple, Garbage]:
             td:
               button(
-                class =
-                  if cell == simulator.selectingCell: SelectedButtonClass
-                  else: ButtonClass,
-                onclick = simulator.initClickHandler(cell),
-              ):
+                  class =
+                    if cell == simulator.editing.cell: SelectedButtonClass
+                    else: ButtonClass,
+                  onclick = simulator.initClickHandler(cell)):
                 figure(class = "image is-24x24"):
                   img(src = cell.cellImageSrc)
