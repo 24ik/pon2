@@ -40,15 +40,6 @@ else:
 
     result = some RequirementKind idx.get
 
-  func parseRequirementKind(val: char or string): RequirementKind {.inline.} =
-    ## Converts the char or string to the requirement kind.
-    ## If the conversion fails, `ValueError` will be raised.
-    let idx = val.parseNatural
-    if idx notin RequirementKind.low.ord..RequirementKind.high.ord:
-      raise newException(ValueError, "クリア条件を表す整数が不適切な値です．")
-
-    result = RequirementKind idx
-
   func parseGenerateRequirementColor(
       val: Value, allowNone = false): Option[GenerateRequirementColor]
       {.inline.} =
@@ -100,15 +91,6 @@ else:
       raise newException(ValueError, "ルールを表す整数が不適切な値です．")
 
     result = some Rule idx.get
-
-  func parseRule(val: char or string): Rule {.inline.} =
-    ## Converts the char or string to the rule.
-    ## If the conversion fails, `ValueError` will be raised.
-    let idx = val.parseNatural
-    if idx notin Rule.low.ord..Rule.high.ord:
-      raise newException(ValueError, "ルールを表す整数が不適切な値です．")
-
-    result = Rule idx
 
   # ------------------------------------------------
   # Solve
