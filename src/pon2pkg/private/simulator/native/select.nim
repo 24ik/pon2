@@ -17,7 +17,7 @@ type SelectControl* = ref object of LayoutContainer
 proc modeHandler(control: SelectControl, event: ClickEvent, mode: SimulatorMode,
                  reqControl: RequirementControl) {.inline.} =
   ## Changes the simulator mode.
-  const ModeToIndex: array[SimulatorMode, Natural] = [1, 0, 2]
+  const ModeToIndex: array[SimulatorMode, Natural] = [0, 1, 2]
 
   control.simulator[].mode = mode
 

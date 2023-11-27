@@ -90,7 +90,7 @@ iterator permute*[F: TsuField or WaterField](
     var nazo2 = nazo
     nazo2.environment.pairs = pairs
 
-    let answers = nazo2.solve(parallelCount, showProgress, true)
+    let answers = nazo2.solve(parallelCount, earlyStopping = true)
 
     when not defined(js):
       bar.inc

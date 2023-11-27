@@ -15,9 +15,11 @@ when defined(js):
 else:
   import std/[browsers, options, random, sequtils, strformat, strutils, uri]
   import docopt
-  import ./pon2pkg/corepkg/[field, misc]
+  import nigui
+  import ./pon2pkg/corepkg/[environment, field, misc]
   import ./pon2pkg/nazopuyopkg/[generate, nazopuyo, permute, solve]
   import ./pon2pkg/private/[misc]
+  import ./pon2pkg/simulatorpkg/[native, simulator]
 
   # ------------------------------------------------
   # Parse
@@ -190,7 +192,7 @@ else:
     {.push warning[UnsafeSetLen]: off.}
     ($args["<question>"]).parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
       for (pairs, answer) in nazoPuyo.permute(
-          ($args["-f"]).mapIt(it.parseNatural.Positive),
+          args["-f"].mapIt(it.parseNatural.Positive),
           not args["-D"].to_bool, args["-d"].to_bool, showProgress = true):
         var nazo = nazoPuyo
         nazo.environment.pairs = pairs
@@ -211,14 +213,55 @@ else:
     {.pop.}
     {.pop.}
 
+  # ------------------------------------------------
+  # Editor
+  # ------------------------------------------------
+
+  proc runEditor(args: Table[string, Value]) {.inline.} =
+    ## Runs the GUI Editor.
+    # prepare simulator
+    let simulator = new Simulator
+    case args["<uri>"].kind
+    of vkNone:
+      simulator[] = initTsuEnvironment().initSimulator
+    of vkStr:
+      let inputUri = ($args["<uri>"]).parseUri
+      try:
+        let parseRes = inputUri.parseNazoPuyos
+        parseRes.nazoPuyos.flattenAnd:
+          if parseRes.positions.isSome:
+            simulator[] = nazoPuyo.initSimulator(
+              parseRes.positions.get, parseRes.mode, parseRes.editor)
+          else:
+            simulator[] = nazoPuyo.initSimulator(parseRes.mode, parseRes.editor)
+      except ValueError:
+        let parseRes = inputUri.parseEnvironments
+        parseRes.environments.flattenAnd:
+          if parseRes.positions.isSome:
+            simulator[] = environment.initSimulator(
+              parseRes.positions.get, parseRes.mode, parseRes.editor)
+          else:
+            simulator[] = environment.initSimulator(
+              parseRes.mode, parseRes.editor)
+    else:
+      assert false
+
+    app.init
+    simulator.initSimulatorWindow.show
+    app.run
+
+  # ------------------------------------------------
+  # Entry Point
+  # ------------------------------------------------
+
   when isMainModule:
     const Document = """
 ぷよぷよ・なぞぷよ用アプリケーション．
-機能一覧：
-* ぷよぷよ・なぞぷよシミュレータ
+機能一覧（使用方法はUsageの節を参照）：
 * なぞぷよ解探索
 * なぞぷよ生成
 * なぞぷよツモ探索
+* ぷよぷよ（なぞぷよ）シミュレータ・エディタ
 
 Usage:
   pon2 (solve | s) <question> [-bB] [-h | --help]
@@ -298,4 +341,4 @@ Options:
     elif args["permute"] or args["p"]:
       args.runPermuter
     else:
-      discard
+      args.runEditor
