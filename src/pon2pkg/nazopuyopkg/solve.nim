@@ -353,7 +353,7 @@ proc solve[F: TsuField or WaterField](
         if result.len > 1:
           return
   else:
-    # set up progress bar
+    # set up the progress bar
     var bar: SuruBar
     if showProgress:
       bar = initSuruBar()
@@ -374,16 +374,16 @@ proc solve[F: TsuField or WaterField](
       return
 
     # prepare solving
-    let parallelCount = min(parallelCount, childNodes.len)
+    let parallelCount2 = min(parallelCount, childNodes.len)
     var
       futureAnswers = newSeqOfCap[FlowVar[seq[Positions]]] childNodes.len
       nextNodeIdx = 0'i16
-      runningNodeIdxes = newSeq[int16] parallelCount
+      runningNodeIdxes = newSeq[int16] parallelCount2
       completeNodeIdxes: set[int16] = {}
 
     # run "first wave" solving
     {.push warning[Effect]: off.}
-    for parallelIdx in 0..<parallelCount:
+    for parallelIdx in 0..<parallelCount2:
       futureAnswers.add spawn childNodes[nextNodeIdx].solveRec(
         reqKind, reqColor)
       runningNodeIdxes[parallelIdx] = nextNodeIdx
@@ -392,10 +392,14 @@ proc solve[F: TsuField or WaterField](
 
     # solve
     while true:
-      for parallelIdx in 0..<parallelCount:
+      for parallelIdx in 0..<parallelCount2:
         # check if solving finished
         let nodeIdx = runningNodeIdxes[parallelIdx]
         if not futureAnswers[nodeIdx].isReady:
+          continue
+
+        # skip if the solution is already registered
+        if nodeIdx in completeNodeIdxes:
           continue
 
         # update progress bar
