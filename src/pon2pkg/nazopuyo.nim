@@ -1,4 +1,4 @@
-## This module implements Nazo Puyo.
+## This module implements [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 ## With `import pon2pkg/nazopuyo`, you can use all features provided by this
 ## module.
 ## Also, you can write such as `import pon2pkg/nazopuyopkg/nazopuyo` to import
@@ -17,7 +17,7 @@
 import ./nazopuyopkg/[generate, mark, nazopuyo, permute, solve]
 
 export generate.GenerateError, generate.GenerateRequirementColor,
-  generate.GenerateRequirement, generate.generate
+  generate.GenerateRequirement, generate.generate, generate.generates
 export mark.MarkResult, mark.mark
 export nazopuyo.RequirementKind, nazopuyo.RequirementColor,
   nazopuyo.RequirementNumber, nazopuyo.Requirement, nazopuyo.NazoPuyo,

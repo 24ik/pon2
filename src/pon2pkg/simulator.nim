@@ -1,4 +1,5 @@
-## This module implements Puyo Puyo simulators.
+## This module implements [Puyo Puyo](https://puyo.sega.jp/) and
+## [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/) simulators.
 ## With `import pon2pkg/simulator`, you can use all features provided by this
 ## module.
 ## Also, you can write such as `import pon2pkg/simulatorpkg/simulator` to import

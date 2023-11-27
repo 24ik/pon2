@@ -44,7 +44,7 @@ task documentation, "Make Documentation":
   mvDir "src/htmldocs", "src/htmldocs2"
 
   exec &"nim doc --project -d:avx2=false src/pon2.nim" 
-  exec "cp -r src/htmldocs2/* src/htmldocs/"
+  exec "cp -r src/htmldocs2 src/htmldocs"
   rmDir "src/htmldocs2"
 
 task web, "Make Web Page":
@@ -64,12 +64,12 @@ task web, "Make Web Page":
   exec cmd
 
   # worker
-  let cmd =
+  let cmd2 =
     if minify:
       "npx --yes google-closure-compiler " & (if verbose: "" else: "-W QUIET") &
       "--js www/worker.js --js_output_file www/worker.min.js"
     else:
       "cp www/worker.js www/worker.min.js"
-  exec cmd
+  exec cmd2
 
   exec "cp -r assets www"

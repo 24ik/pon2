@@ -25,8 +25,7 @@ proc initAssets*(timeoutSec = 180): Assets =
   ## Downloading requires the compile option `-d:ssl`.
   let client = newHttpClient(timeout = timeoutSec * 1000)
 
-  let assetsDir = getDataDir() / "puyo-simulator".Path / "assets".Path /
-    "puyo-small".Path
+  let assetsDir = getDataDir() / "pon2".Path / "assets".Path / "puyo-small".Path
   assetsDir.createDir
 
   result.cellImages[None] = newImage() # dummy to remove warning
@@ -37,7 +36,7 @@ proc initAssets*(timeoutSec = 180): Assets =
 
       {.push warning[Uninit]: off.}
       client.downloadFile(
-        "https://github.com/izumiya-keisuke/puyo-simulator/raw/main/" &
+        "https://github.com/izumiya-keisuke/pon2/raw/main/" &
         &"assets/puyo-small/{path.string}",
         fullPath.string)
       {.pop.}

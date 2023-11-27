@@ -115,9 +115,9 @@ func split(rng: var Rand, total: Natural, ratios: openArray[Option[Natural]]):
       GenerateError, "`ratios` should have at least one element.")
 
   if ratios.allIt it.isSome:
-    let ratios = ratios.mapIt it.get
+    let ratios2 = ratios.mapIt it.get
 
-    let sumRatio = ratios.sum
+    let sumRatio = ratios2.sum
     if sumRatio == 0:
       return rng.split(total, ratios.len, true)
 
@@ -125,12 +125,12 @@ func split(rng: var Rand, total: Natural, ratios: openArray[Option[Natural]]):
       result = newSeqOfCap[int] ratios.len
       var last = total
 
-      for mean in ratios.mapIt total * it / sumRatio:
+      for mean in ratios2.mapIt total * it / sumRatio:
         let count = rng.round mean
         result.add count
         last.dec count
 
-      if (ratios[^1] == 0 and last == 0) or (ratios[^1] > 0 and last > 0):
+      if (ratios2[^1] == 0 and last == 0) or (ratios2[^1] > 0 and last > 0):
         result.add last
         return
       else:
@@ -167,7 +167,7 @@ func sample[T](rng: var Rand, arr: openArray[T], count: Natural): seq[T]
   ## Selects and returns `count` elements in the array without duplicates.
   var arr2 = arr.toSeq
   rng.shuffle arr2
-  return arr2[0..<count]
+  result = arr2[0..<count]
 
 # ------------------------------------------------
 # Environment
@@ -383,5 +383,65 @@ proc generate*[F: TsuField or WaterField](
   ## Returns a randomly generated nazo puyo that has a unique solution.
   ## If generation fails, `GenerateError` will be raised.
   ## `parallelCount` will be ignored on JS backend.
-  generate[F](none int, req, moveCount, colorCount, heights, puyoCounts,
-              connect3Counts, allowDouble, allowLastDouble, parallelCount)
+  {.push warning[ProveInit]: off.}
+  result = generate[F](
+    none int, req, moveCount, colorCount, heights, puyoCounts, connect3Counts,
+    allowDouble, allowLastDouble, parallelCount)
+  {.pop.}
+
+proc generates*(
+    seed: SomeSignedInt, rule: Rule, req: GenerateRequirement,
+    moveCount: Positive, colorCount: range[1..5],
+    heights: array[Column, Option[Natural]],
+    puyoCounts: tuple[color: Natural, garbage: Natural],
+    connect3Counts: tuple[total: Option[Natural], vertical: Option[Natural],
+                          horizontal: Option[Natural], lShape: Option[Natural]],
+    allowDouble: bool,
+    allowLastDouble: bool,
+    parallelCount: Positive = (
+      when defined(js): 1 else: max(countProcessors(), 1))):
+    tuple[question: NazoPuyos, answer: Positions] {.inline.} =
+  ## Returns a randomly generated nazo puyo that has a unique solution.
+  ## If generation fails, `GenerateError` will be raised.
+  ## `parallelCount` will be ignored on JS backend.
+  result.question.rule = rule
+
+  case rule
+  of Tsu:
+    (result.question.tsu, result.answer) = generate[TsuField](
+      seed, req, moveCount, colorCount, heights, puyoCounts, connect3Counts,
+      allowDouble, allowLastDouble, parallelCount)
+    result.question.water = initWaterNazoPuyo()
+  of Water:
+    result.question.tsu = initTsuNazoPuyo()
+    (result.question.water, result.answer) = generate[WaterField](
+      seed, req, moveCount, colorCount, heights, puyoCounts, connect3Counts,
+      allowDouble, allowLastDouble, parallelCount)
+
+proc generates*(
+    rule: Rule, req: GenerateRequirement, moveCount: Positive,
+    colorCount: range[1..5], heights: array[Column, Option[Natural]],
+    puyoCounts: tuple[color: Natural, garbage: Natural],
+    connect3Counts: tuple[total: Option[Natural], vertical: Option[Natural],
+                          horizontal: Option[Natural], lShape: Option[Natural]],
+    allowDouble: bool,
+    allowLastDouble: bool,
+    parallelCount: Positive = (
+      when defined(js): 1 else: max(countProcessors(), 1))):
+    tuple[question: NazoPuyos, answer: Positions] {.inline.} =
+  ## Returns a randomly generated nazo puyo that has a unique solution.
+  ## If generation fails, `GenerateError` will be raised.
+  ## `parallelCount` will be ignored on JS backend.
+  result.question.rule = rule
+
+  case rule
+  of Tsu:
+    (result.question.tsu, result.answer) = generate[TsuField](
+      req, moveCount, colorCount, heights, puyoCounts, connect3Counts,
+      allowDouble, allowLastDouble, parallelCount)
+    result.question.water = initWaterNazoPuyo()
+  of Water:
+    result.question.tsu = initTsuNazoPuyo()
+    (result.question.water, result.answer) = generate[WaterField](
+      req, moveCount, colorCount, heights, puyoCounts, connect3Counts,
+      allowDouble, allowLastDouble, parallelCount)
