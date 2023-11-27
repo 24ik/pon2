@@ -1,4 +1,4 @@
-## This module implements APIs for Web GUI application.
+## This module implements APIs for web GUI application.
 ##
 
 {.experimental: "strictDefs".}
@@ -41,8 +41,7 @@ func initKeyboardEventHandler*(simulator: var Simulator):
 # DOM
 # ------------------------------------------------
 
-proc initPuyoSimulatorDomCore(simulator: var Simulator, idx: int): VNode
-                             {.inline.} =
+proc initSimulatorDom(simulator: var Simulator, idx: int): VNode {.inline.} =
   ## Returns the DOM without the external section.
   ## If this procedure is called multiple times,
   ## different `idx` need to be given.
@@ -78,8 +77,8 @@ proc initPuyoSimulatorDomCore(simulator: var Simulator, idx: int): VNode
           tdiv(class = "block"):
             simulator.pairsNode
 
-proc initPuyoSimulatorDom*(simulator: var Simulator, setKeyHandler = true,
-                           wrapSection = true, idx = 0): VNode {.inline.} =
+proc initSimulatorDom*(simulator: var Simulator, setKeyHandler = true,
+                       wrapSection = true, idx = 0): VNode {.inline.} =
   ## Returns the simulator DOM.
   ## If this procedure is called multiple times,
   ## different `idx` need to be given.
@@ -88,20 +87,20 @@ proc initPuyoSimulatorDom*(simulator: var Simulator, setKeyHandler = true,
 
   if wrapSection:
     result = buildHtml(section(class = "section")):
-      simulator.initPuyoSimulatorDomCore idx
+      simulator.initSimulatorDom idx
   else:
-    result = simulator.initPuyoSimulatorDomCore idx
+    result = simulator.initSimulatorDom idx
 
-proc initPuyoSimulatorDom*[F: TsuField or WaterField](
+proc initSimulatorDom*[F: TsuField or WaterField](
     nazoEnv: NazoPuyo[F] or Environment[F], mode = Play, editor = false,
     setKeyHandler = true, wrapSection = true, idx = 0): VNode {.inline.} =
   ## Returns the simulator DOM.
   ## If this procedure is called multiple times,
   ## different `idx` need to be given.
   var simulator = nazoEnv.initSimulator(mode, editor)
-  result = simulator.initPuyoSimulatorDom(setKeyHandler, wrapSection, idx)
+  result = simulator.initSimulatorDom(setKeyHandler, wrapSection, idx)
 
-proc initPuyoSimulatorDom*[F: TsuField or WaterField](
+proc initSimulatorDom*[F: TsuField or WaterField](
     nazoEnv: NazoPuyo[F] or Environment[F], positions: Positions, mode = Play,
     editor = false, setKeyHandler = true, wrapSection = true, idx = 0): VNode
     {.inline.} =
@@ -109,4 +108,4 @@ proc initPuyoSimulatorDom*[F: TsuField or WaterField](
   ## If this procedure is called multiple times,
   ## different `idx` need to be given.
   var simulator = nazoEnv.initSimulator(positions, mode, editor)
-  result = simulator.initPuyoSimulatorDom(setKeyHandler, wrapSection, idx)
+  result = simulator.initSimulatorDom(setKeyHandler, wrapSection, idx)

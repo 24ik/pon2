@@ -1,4 +1,4 @@
-## This module implements the share frame.
+## This module implements the share control.
 ##
 
 {.experimental: "strictDefs".}

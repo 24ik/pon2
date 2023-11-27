@@ -1,4 +1,4 @@
-## This module implements the field node.
+## This module implements the field control.
 ##
 
 {.experimental: "strictDefs".}
@@ -21,17 +21,17 @@ proc cellDrawHandler(control: FieldControl, event: DrawEvent, row: Row,
   let canvas = event.control.canvas
 
   canvas.areaColor =
-    control.simulator[].fieldCellBackgroundColor(row, col).toColor
+    control.simulator[].fieldCellBackgroundColor(row, col).toNiguiColor
   canvas.fill
 
   let cell = control.simulator[].withField:
     field[row, col]
   canvas.drawImage control.assets[].cellImages[cell]
 
-func initeCellDrawHandler(control: FieldControl, row: Row, col: Column):
+func initCellDrawHandler(control: FieldControl, row: Row, col: Column):
     (event: DrawEvent) -> void =
   ## Returns the handler.
-  # NOTE: inline handler does not work due to specifications
+  # NOTE: cannot inline due to lazy evaluation
   (event: DrawEvent) => control.cellDrawHandler(event, row, col)
 
 proc initFieldControl*(simulator: ref Simulator, assets: ref Assets):
@@ -51,10 +51,10 @@ proc initFieldControl*(simulator: ref Simulator, assets: ref Assets):
     line.spacing = 0
     line.padding = 0
 
-    for col in Column.low .. Column.high:
+    for col in Column.low..Column.high:
       let cell = newControl()
       line.add cell
 
       cell.height = assets[].cellImageSize.height
       cell.width = assets[].cellImageSize.width
-      cell.onDraw = result.initeCellDrawHandler(row, col)
+      cell.onDraw = result.initCellDrawHandler(row, col)

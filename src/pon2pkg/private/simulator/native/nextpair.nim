@@ -7,7 +7,7 @@ import std/[sugar]
 import nigui
 import ./[assets, misc]
 import ../[render]
-import ../../../corepkg/[misc]
+import ../../../corepkg/[cell, misc]
 import ../../../simulatorpkg/[simulator]
 
 type NextPairControl* = ref object of LayoutContainer
@@ -20,16 +20,17 @@ proc cellDrawHandler(control: NextPairControl, event: DrawEvent,
   ## Draws cell.
   let canvas = event.control.canvas
 
-  canvas.areaColor = DefaultColor
+  canvas.areaColor = DefaultColor.toNiguiColor
   canvas.fill
 
   canvas.drawImage control.assets[].cellImages[
-    control.simulator[].nextPairCell(idx, col)]
+    if control.simulator[].mode == Edit: None
+    else: control.simulator[].nextPairCell(idx, col)]
 
 func initCellDrawHandler(control: NextPairControl, idx: range[-1..1],
                          col: Column): (event: DrawEvent) -> void =
   ## Returns the handler.
-  # NOTE: inline handler does not work due to specifications
+  # NOTE: cannot inline due to lazy evaluation
   (event: DrawEvent) => control.cellDrawHandler(event, idx, col)
 
 proc initNextPairControl*(simulator: ref Simulator, assets: ref Assets):

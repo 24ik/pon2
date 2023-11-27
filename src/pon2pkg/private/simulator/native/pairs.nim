@@ -18,25 +18,24 @@ type PairsControl* = ref object of LayoutContainer
 # ------------------------------------------------
 
 proc cellDrawHandler(control: PairsControl, event: DrawEvent, idx: Natural,
-                     isAxis: bool) {.inline.} =
+                     axis: bool) {.inline.} =
   ## Draws the cell.
   let canvas = event.control.canvas
 
   canvas.areaColor =
-    if control.simulator[].pairCellSelected(idx, isAxis): SelectColor
-    else: DefaultColor
+    control.simulator[].pairCellBackgroundColor(idx, axis).toNiguiColor
   canvas.fill
 
   var cell = None
   if idx < control.simulator[].originalPairs.len:
     let pair = control.simulator[].originalPairs[idx]
-    cell = if isAxis: pair.axis else: pair.child
+    cell = if axis: pair.axis else: pair.child
   canvas.drawImage control.assets[].cellImages[cell]
 
 func initCellDrawHandler(control: PairsControl, idx: Natural, isAxis: bool):
     (event: DrawEvent) -> void =
   ## Returns the pair's draw handler.
-  # NOTE: inline handler does not work due to specifications
+  # NOTE: cannot inline due to lazy evaluation
   (event: DrawEvent) => control.cellDrawHandler(event, idx, isAxis)
 
 proc initPairControl(control: PairsControl, idx: Natural, assets: ref Assets):
@@ -70,16 +69,16 @@ proc indexDrawHandler(control: PairsControl, event: DrawEvent, idx: Natural)
   ## Draws the index.
   let canvas = event.control.canvas
 
-  canvas.areaColor = DefaultColor
+  canvas.areaColor = DefaultColor.toNiguiColor
   canvas.fill
 
-  let nextArrow = if control.simulator[].pairSelected(idx): "> " else: "  "
+  let nextArrow = if control.simulator[].needPairPointer(idx): "> " else: "  "
   canvas.drawText nextArrow & $idx.succ
 
 func initIndexDrawHandler(control: PairsControl, idx: Natural):
     (event: DrawEvent) -> void =
   ## Returns the index's draw handler.
-  # NOTE: inline handler does not work due to specifications
+  # NOTE: cannot inline due to lazy evaluation
   (event: DrawEvent) => control.indexDrawHandler(event, idx)
 
 proc initIndexControl(control: PairsControl, idx: Natural): Control {.inline.} =
@@ -96,7 +95,7 @@ proc positionDrawHandler(control: PairsControl, event: DrawEvent, idx: Natural)
   ## Draws the position.
   let canvas = event.control.canvas
 
-  canvas.areaColor = DefaultColor
+  canvas.areaColor = DefaultColor.toNiguiColor
   canvas.fill
 
   canvas.drawText if idx < control.simulator[].positions.len:
@@ -105,7 +104,7 @@ proc positionDrawHandler(control: PairsControl, event: DrawEvent, idx: Natural)
 func initPositionDrawHandler(control: PairsControl, idx: Natural):
     (event: DrawEvent) -> void =
   ## Returns the position's draw handler.
-  # NOTE: inline handler does not work due to specifications
+  # NOTE: cannot inline due to lazy evaluation
   (event: DrawEvent) => control.positionDrawHandler(event, idx)
 
 proc initPositionControl(control: PairsControl, idx: Natural): Control

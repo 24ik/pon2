@@ -7,7 +7,7 @@ import std/[sugar]
 import nigui
 import ./[assets, misc]
 import ../[render]
-import ../../../corepkg/[cell]
+import ../../../corepkg/[cell, misc]
 import ../../../simulatorpkg/[simulator]
 
 type ImmediatePairsControl* = ref object of LayoutContainer
@@ -20,23 +20,27 @@ proc cellDrawHandler(control: ImmediatePairsControl, event: DrawEvent,
   ## Draws the cell.
   let canvas = event.control.canvas
 
-  canvas.areaColor = DefaultColor
+  canvas.areaColor = DefaultColor.toNiguiColor
   canvas.fill
 
-  let cell = case idx
-  of 0..2: Cell.None
-  of 3: control.simulator[].immediateNextPairCell false
-  of 4: control.simulator[].immediateNextPairCell true
-  of 5: Cell.None
-  of 6: control.simulator[].immediateDoubleNextPairCell false
-  of 7: control.simulator[].immediateDoubleNextPairCell true
-  else: Cell.None
+  let cell =
+    if control.simulator[].mode == Edit:
+      None
+    else:
+      case idx
+      of 0..2: Cell.None
+      of 3: control.simulator[].immediateNextPairCell false
+      of 4: control.simulator[].immediateNextPairCell true
+      of 5: Cell.None
+      of 6: control.simulator[].immediateDoubleNextPairCell false
+      of 7: control.simulator[].immediateDoubleNextPairCell true
+      else: Cell.None
   canvas.drawImage control.assets[].cellImages[cell]
 
 func initCellDrawHandler(control: ImmediatePairsControl, idx: Natural):
     (event: DrawEvent) -> void =
   ## Returns the draw handler.
-  # NOTE: inline handler does not work due to specifications
+  # NOTE: cannot inline due to lazy evaluation
   (event: DrawEvent) => control.cellDrawHandler(event, idx)
 
 proc initImmediatePairsControl*(simulator: ref Simulator, assets: ref Assets):

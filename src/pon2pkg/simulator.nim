@@ -1,4 +1,4 @@
-## This module implements simulators.
+## This module implements Puyo Puyo simulators.
 ## With `import pon2pkg/simulator`, you can use all features provided by this
 ## module.
 ## Also, you can write such as `import pon2pkg/simulatorpkg/simulator` to import
@@ -42,7 +42,6 @@ when defined(js):
 else:
   import ./simulatorpkg/[native]
 
-  export native.toKeyEvent, native.PuyoSimulatorControl, native.PuyoSimulatorWindow,
+  export native.toKeyEvent, native.SimulatorControl, native.SimulatorWindow,
     native.runKeyboardEventHandler, native.initKeyboardEventHandler,
-    native.initPuyoSimulatorControl, native.initPuyoSimulatorWindow,
-    native.initPuyoSimulatorAnswerControl
+    native.initSimulatorControl, native.initSimulatorWindow

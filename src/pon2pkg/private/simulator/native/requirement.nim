@@ -79,19 +79,19 @@ proc numberHandler(control: RequirementControl, event: ComboBoxChangeEvent) =
 func initKindHandler(control: RequirementControl):
     (event: ComboBoxChangeEvent) -> void =
   ## Returns the kind handler.
-  # NOTE: inline handler does not work due to specifications.
+  # NOTE: cannot inline due to lazy evaluation
   (event: ComboBoxChangeEvent) => control.kindHandler event
 
 func initColorHandler(control: RequirementControl):
     (event: ComboBoxChangeEvent) -> void =
   ## Returns the color handler.
-  # NOTE: inline handler does not work due to specifications.
+  # NOTE: cannot inline due to lazy evaluation
   (event: ComboBoxChangeEvent) => control.colorHandler event
 
 func initNumberHandler(control: RequirementControl):
     (event: ComboBoxChangeEvent) -> void =
   ## Returns the number handler.
-  # NOTE: inline handler does not work due to specifications.
+  # NOTE: cannot inline due to lazy evaluation
   (event: ComboBoxChangeEvent) => control.numberHandler event
 
 proc initRequirementControl*(simulator: ref Simulator): RequirementControl
@@ -134,11 +134,7 @@ proc initRequirementControl*(simulator: ref Simulator): RequirementControl
   num.onChange = result.initNumberHandler
 
   # set index
-  if simulator[].mode != IzumiyaSimulatorMode.Edit:
-    kind.enabled = false
-    color.enabled = false
-    num.enabled = false
-  else:
+  if simulator[].mode == Edit:
     let req = simulator[].requirement
 
     kind.index = req.kind.ord
@@ -150,6 +146,10 @@ proc initRequirementControl*(simulator: ref Simulator): RequirementControl
       num.index = req.number.get.ord
     else:
       num.enabled = false
+  else:
+    kind.enabled = false
+    color.enabled = false
+    num.enabled = false
 
 # ------------------------------------------------
 # API
@@ -177,7 +177,7 @@ proc updateRequirementControl*(control: RequirementControl, event: ClickEvent)
     numberBox.enabled = false
   else:
     descLabel.text = $control.simulator[].requirement
-    if control.simulator[].mode == IzumiyaSimulatorMode.Edit:
+    if control.simulator[].mode == Edit:
       kindBox.enabled = true
       colorBox.enabled = control.simulator[].requirement.kind in ColorKinds
       numberBox.enabled =

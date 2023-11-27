@@ -6,6 +6,7 @@
 import std/[sugar]
 import nigui
 import ./[misc, requirement]
+import ../[render]
 import ../../../corepkg/[misc]
 import ../../../simulatorpkg/[simulator]
 
@@ -13,17 +14,16 @@ type SelectControl* = ref object of LayoutContainer
   ## Select control.
   simulator: ref Simulator
 
-proc modeHandler(control: SelectControl, event: ClickEvent,
-                 mode: IzumiyaSimulatorMode,
+proc modeHandler(control: SelectControl, event: ClickEvent, mode: SimulatorMode,
                  reqControl: RequirementControl) {.inline.} =
   ## Changes the simulator mode.
-  const ModeToIndex: array[IzumiyaSimulatorMode, Natural] = [1, 0, 2]
+  const ModeToIndex: array[SimulatorMode, Natural] = [1, 0, 2]
 
   control.simulator[].mode = mode
 
-  for mode2 in IzumiyaSimulatorMode:
+  for mode2 in SimulatorMode:
     control.childControls[0].childControls[ModeToIndex[mode2]].backgroundColor =
-      if mode2 == mode: SelectColor else: DefaultColor
+      if mode2 == mode: SelectColor.toNiguiColor else: DefaultColor.toNiguiColor
 
   reqControl.updateRequirementControl event
   event.control.parentWindow.control.forceRedraw
@@ -37,43 +37,42 @@ proc ruleHandler(control: SelectControl, event: ClickEvent, rule: Rule)
 
   for rule2 in Rule:
     control.childControls[1].childControls[RuleToIndex[rule2]].backgroundColor =
-      if rule2 == rule: SelectColor else: DefaultColor
+      if rule2 == rule: SelectColor.toNiguiColor else: DefaultColor.toNiguiColor
 
   event.control.parentWindow.control.forceRedraw
 
-proc kindHandler(control: SelectControl, event: ClickEvent,
-                 kind: IzumiyaSimulatorKind,
+proc kindHandler(control: SelectControl, event: ClickEvent, kind: SimulatorKind,
                  reqControl: RequirementControl) {.inline.} =
   ## Changes the simulator kind.
-  const KindToIndex: array[IzumiyaSimulatorKind, Natural] = [0, 1]
+  const KindToIndex: array[SimulatorKind, Natural] = [0, 1]
 
   control.simulator[].kind = kind
 
-  for kind2 in IzumiyaSimulatorKind:
+  for kind2 in SimulatorKind:
     control.childControls[2].childControls[KindToIndex[kind2]].backgroundColor =
-      if kind2 == kind: SelectColor else: DefaultColor
+      if kind2 == kind: SelectColor.toNiguiColor else: DefaultColor.toNiguiColor
 
   reqControl.updateRequirementControl event
   event.control.parentWindow.control.forceRedraw
 
-func initModeHandler(control: SelectControl, mode: IzumiyaSimulatorMode,
+func initModeHandler(control: SelectControl, mode: SimulatorMode,
                      reqControl: RequirementControl):
                     (event: ClickEvent) -> void =
   ## Returns the mode handler.
-  # NOTE: inline hanler does not work due to specifications
+  # NOTE: cannot inline due to lazy evaluation
   (event: ClickEvent) => control.modeHandler(event, mode, reqControl)
 
 func initRuleHandler(control: SelectControl, rule: Rule):
     (event: ClickEvent) -> void =
   ## Returns the rule handler.
-  # NOTE: inline hanler does not work due to specifications
+  # NOTE: cannot inline due to lazy evaluation
   (event: ClickEvent) => control.ruleHandler(event, rule)
 
-func initKindHandler(control: SelectControl, kind: IzumiyaSimulatorKind,
+func initKindHandler(control: SelectControl, kind: SimulatorKind,
                      reqControl: RequirementControl):
                     (event: ClickEvent) -> void =
   ## Returns the kind handler.
-  # NOTE: inline hanler does not work due to specifications
+  # NOTE: cannot inline due to lazy evaluation
   (event: ClickEvent) => control.kindHandler(event, kind, reqControl)
 
 proc initSelectControl*(simulator: ref Simulator,
@@ -98,8 +97,7 @@ proc initSelectControl*(simulator: ref Simulator,
   modeButtons.add playButton
   modeButtons.add replayButton
 
-  editButton.onClick = result.initModeHandler(IzumiyaSimulatorMode.Edit,
-                                              reqControl)
+  editButton.onClick = result.initModeHandler(Edit, reqControl)
   playButton.onClick = result.initModeHandler(Play, reqControl)
   replayButton.onClick = result.initModeHandler(Replay, reqControl)
 
@@ -127,26 +125,34 @@ proc initSelectControl*(simulator: ref Simulator,
   kindButtons.add nazoButton
 
   regularButton.onClick = result.initKindHandler(Regular, reqControl)
-  nazoButton.onClick = result.initKindHandler(IzumiyaSimulatorKind.Nazo,
-                                              reqControl)
+  nazoButton.onClick = result.initKindHandler(Nazo, reqControl)
 
   # set color
   case simulator[].mode
-  of IzumiyaSimulatorMode.Edit:
-    editButton.backgroundColor = SelectColor
+  of Edit:
+    editButton.backgroundColor = SelectColor.toNiguiColor
   of Play:
-    playButton.backgroundColor = SelectColor
+    playButton.backgroundColor = SelectColor.toNiguiColor
   of Replay:
-    replayButton.backgroundColor = SelectColor
+    replayButton.backgroundColor = SelectColor.toNiguiColor
 
   case simulator[].rule
   of Tsu:
-    tsuButton.backgroundColor = SelectColor
+    tsuButton.backgroundColor = SelectColor.toNiguiColor
   of Water:
-    waterButton.backgroundColor = SelectColor
+    waterButton.backgroundColor = SelectColor.toNiguiColor
 
   case simulator[].kind
   of Regular:
-    regularButton.backgroundColor = SelectColor
-  of IzumiyaSimulatorKind.Nazo:
-    nazoButton.backgroundColor = SelectColor
+    regularButton.backgroundColor = SelectColor.toNiguiColor
+  of Nazo:
+    nazoButton.backgroundColor = SelectColor.toNiguiColor
+
+  # set enabled
+  editButton.enabled = simulator[].editor
+  playButton.enabled = simulator[].editor
+  replayButton.enabled = simulator[].editor
+  tsuButton.enabled = simulator[].editor
+  waterButton.enabled = simulator[].editor
+  regularButton.enabled = simulator[].editor
+  nazoButton.enabled = simulator[].editor

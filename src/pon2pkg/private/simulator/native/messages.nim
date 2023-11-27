@@ -7,6 +7,7 @@ import std/[sugar]
 import nigui
 import ./[assets, misc]
 import ../[render]
+import ../../../corepkg/[misc]
 import ../../../simulatorpkg/[simulator]
 
 type MessagesControl* = ref object of ControlImpl
@@ -22,15 +23,16 @@ proc messagesDrawHandler(control: MessagesControl, event: DrawEvent)
   ## Draws the message.
   let canvas = event.control.canvas
 
-  canvas.areaColor = DefaultColor
+  canvas.areaColor = DefaultColor.toNiguiColor
   canvas.fill
 
-  canvas.drawText control.simulator[].getMessage
+  if control.simulator[].mode != Edit:
+    canvas.drawText control.simulator[].getMessage
 
 func initMessageDrawHandler(control: MessagesControl):
     (event: DrawEvent) -> void =
   ## Returns the handler.
-  # NOTE: inline handler does not work due to specifications
+  # NOTE: cannot inline due to lazy evaluation
   (event: DrawEvent) => control.messagesDrawHandler event
 
 proc initMessagesControl*(simulator: ref Simulator, assets: ref Assets):

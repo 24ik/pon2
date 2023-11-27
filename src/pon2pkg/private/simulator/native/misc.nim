@@ -3,6 +3,7 @@
 
 import std/[math, tables, setutils]
 import nigui
+import ../[render]
 import ../../../simulatorpkg/[simulator]
 
 # ------------------------------------------------
@@ -31,14 +32,9 @@ method handleDrawEvent*(control: ColorButton, event: DrawEvent) =
 # Color
 # ------------------------------------------------
 
-const
-  DefaultColor* = rgb(255, 255, 255)
-  SelectColor* = rgb(0, 209, 178)
-
-func toColor*(color: tuple[red: byte, green: byte, blue: byte]): Color
-             {.inline.} =
-  ## Returns the color.
-  rgb(color.red, color.green, color.blue)
+func toNiguiColor*(color: render.Color): nigui.Color {.inline.} =
+  ## Converts the `render.Color` to `nigui.Color`.
+  rgb(color.red, color.green, color.blue, color.alpha)
 
 # ------------------------------------------------
 # Key
@@ -63,14 +59,13 @@ const KeyToCode = {
   Key_Pause: "Pause", Key_CapsLock: "CapsLock"}.toTable
 
 func toKeyEvent*(event: KeyboardEvent, keys = downKeys()): KeyEvent {.inline.} =
-  ## Converts `event` to the KeyEvent.
+  ## Converts the KeyboardEvent to the KeyEvent.
   ##
   ## Notes:
   ## - This function only works with JIS keyboard.
-  ## - Some modifiers (Control with non-alphabet, Alt, Meta) does not work
+  ## - Some modifiers (Control with non-alphabet, Alt, Meta) does not work \
   ## on Windows.
   # TODO: support US keyboard
-  # TODO: test on macOS
   let keysSet = keys.toSet
 
   var
@@ -151,7 +146,7 @@ func toKeyEvent*(event: KeyboardEvent, keys = downKeys()): KeyEvent {.inline.} =
 
 const Dpi = when defined(windows): 144 else: 120 # TODO: better implementation
 
-func pt*(px: int): float {.inline.} = px / Dpi * 72 ## Converts `px` to pt.
+func pt*(px: int): float {.inline.} = px / Dpi * 72 ## Converts px to pt.
 
 func px*(pt: float): int {.inline.} = (pt / 72 * Dpi).round.int 
-  ## Converts `pt` to px.
+  ## Converts pt to px.
