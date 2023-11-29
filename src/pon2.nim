@@ -1,85 +1,349 @@
-## The `pon2` module provides some tools for Nazo Puyo.
-## With `import pon2`, you can use all features provided by this module.
+## The `pon2` module provides applications and APIs for
+## [Puyo Puyo](https://puyo.sega.jp/) and
+## [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 ##
-## Documentations:
-## - [Database](./pon2pkg/core/db.html)
-## - [Generate](./pon2pkg/core/generate.html)
-## - [Permute](./pon2pkg/core/permute.html)
-## - [Solve](./pon2pkg/core/solve.html)
-## - [Editor Manager](./pon2pkg/core/manager/editor.html)
-## - [GUI Editor](./pon2pkg/gui/editor/main.html)
-## - Web Editor
-##
-## This module uses [puyo-core](https://github.com/izumiya-keisuke/puyo-core),
-## [nazopuyo-core](https://github.com/izumiya-keisuke/nazopuyo-core) and
-## [puyo-simulator](https://github.com/izumiya-keisuke/puyo-simulator), so please refer to them for details.
+## API Documentations:
+## - [Puyo Puyo](./pon2pkg/core.html)
+## - [Nazo Puyo](./pon2pkg/nazopuyo.html)
+## - [Puyo Puyo Simulator](./pon2pkg/simulator.html)
 ##
 
-# ------------------------------------------------
-# API
-# ------------------------------------------------
-
-when not defined(js):
-  import ./pon2pkg/core/db
-  export db.NazoPuyoProperties, db.NazoPuyoDatabase, db.hash, db.loadDatabase, db.saveDatabase, db.add, db.find
-
-import ./pon2pkg/core/generate
-export generate.AbstractRequirementColor, generate.AbstractRequirement, generate.generate
-
-import ./pon2pkg/core/manager/editor
-export
-  editor.EditorManager,
-  editor.toEditorManager,
-  editor.toggleFocus,
-  editor.updateAnswerSimulator,
-  editor.nextAnswer,
-  editor.prevAnswer
-
-import ./pon2pkg/core/permute
-export permute.permute
-
-import ./pon2pkg/core/solve
-export solve.InspectAnswers, solve.solve, solve.inspectSolve
-
-# ------------------------------------------------
-# GUI Editor
-# ------------------------------------------------
+{.experimental: "strictDefs".}
 
 when defined(js):
-  import ./pon2pkg/web/editor/main
-  export main.solve, main.operate, main.keyboardEventHandler, main.makePon2EditorDom
+  import std/[options, sequtils, uri]
+  import karax/[karax, karaxdsl, vdom]
+  import ./pon2pkg/corepkg/[environment, field, misc]
+  import ./pon2pkg/nazopuyopkg/[nazopuyo]
+  import ./pon2pkg/simulatorpkg/[simulator, web]
+
+  var
+    pageInitialized = false
+    globalSimulator: Simulator
+
+  proc initSimulatorDom(routerData: RouterData): VNode =
+    ## Returns the simulator DOM.
+    if pageInitialized:
+      return globalSimulator.initSimulatorDom
+
+    pageInitialized = true
+    let query =
+      if routerData.queryString == cstring"": ""
+      else: ($routerData.queryString)[1..^1] # remove '?'
+
+    var uri = initUri()
+    uri.scheme = "https"
+    uri.hostname = $Izumiya
+    uri.path = "/pon2/playground/index.html"
+    uri.query = query
+
+    try:
+      let parseRes = uri.parseNazoPuyos
+      parseRes.nazoPuyos.flattenAnd:
+        globalSimulator =
+          if parseRes.positions.isSome:
+            nazoPuyo.initSimulator(parseRes.positions.get, parseRes.mode,
+                                   parseRes.editor)
+          else:
+            nazoPuyo.initSimulator(parseRes.mode, parseRes.editor)
+    except ValueError:
+      try:
+        let parseRes = uri.parseEnvironments
+        parseRes.environments.flattenAnd:
+          globalSimulator =
+            if parseRes.positions.isSome:
+              environment.initSimulator(parseRes.positions.get, parseRes.mode,
+                                        parseRes.editor)
+            else:
+              environment.initSimulator(parseRes.mode, parseRes.editor)
+      except ValueError:
+        return buildHtml(tdiv):
+          text "URL形式エラー"
+
+    result = globalSimulator.initSimulatorDom
 
   when isMainModule:
-    makePon2EditorWebPage()
+    initSimulatorDom.setRenderer
 else:
-  import ./pon2pkg/gui/editor/main
-  export
-    main.solve,
-    main.Pon2EditorControl,
-    main.Pon2EditorWindow,
-    main.operate,
-    main.keyboardEventHandler,
-    main.makePon2EditorControl,
-    main.makePon2EditorWindow
+  import std/[browsers, options, random, sequtils, strformat, strutils, uri]
+  import docopt
+  import nigui
+  import ./pon2pkg/corepkg/[environment, field, misc]
+  import ./pon2pkg/nazopuyopkg/[generate, nazopuyo, permute, solve]
+  import ./pon2pkg/simulatorpkg/[native, simulator]
+
+  # ------------------------------------------------
+  # Parse
+  # ------------------------------------------------
+
+  func parseNatural(val: Value, allowNone = false): Option[Natural] {.inline.} =
+    ## Converts the value to the Natural integer.
+    ## If the conversion fails, `ValueError` will be raised.
+    ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is
+    ## returned.
+    {.push warning[ProveInit]: off.}
+    result = none Natural # HACK: dummy to remove warning
+    {.pop.}
+
+    case val.kind
+    of vkNone:
+      {.push warning[ProveInit]: off.}
+      if allowNone:
+        result = none Natural
+      else:
+        raise newException(ValueError, "必須の数値入力が省略されています．")
+      {.pop.}
+    of vkStr:
+      result = some Natural parseInt $val
+    else:
+      assert false
+
+  func parseNatural(val: char or string): Natural {.inline.} = parseInt $val
+    ## Converts the char or string to the Natural integer.
+    ## If the conversion fails, `ValueError` will be raised.
+
+  func parseRequirementKind(val: Value, allowNone = false):
+      Option[RequirementKind] {.inline.} =
+    ## Converts the value to the requirement kind.
+    ## If the conversion fails, `ValueError` will be raised.
+    ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is
+    ## returned.
+    let idx = val.parseNatural allowNone
+    {.push warning[ProveInit]: off.}
+    if idx.isNone:
+      return none RequirementKind
+    {.pop.}
+
+    if idx.get notin RequirementKind.low.ord..RequirementKind.high.ord:
+      raise newException(ValueError, "クリア条件を表す整数が不適切な値です．")
+
+    result = some RequirementKind idx.get
+
+  func parseGenerateRequirementColor(
+      val: Value, allowNone = false): Option[GenerateRequirementColor]
+      {.inline.} =
+    ## Converts the value to the generate requirement color.
+    ## If the conversion fails, `ValueError` will be raised.
+    ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is
+    ## returned.
+    let idx = val.parseNatural allowNone
+    {.push warning[ProveInit]: off.}
+    if idx.isNone:
+      return none GenerateRequirementColor
+    {.pop.}
+
+    if idx.get notin GenerateRequirementColor.low.ord..
+        GenerateRequirementColor.high.ord:
+      raise newException(ValueError, "クリア条件の色を表す整数が不適切な値です．")
+
+    result = some GenerateRequirementColor idx.get
+
+  func parseRequirementNumber(val: Value, allowNone = false):
+      Option[RequirementNumber] {.inline.} =
+    ## Converts the value to the requirement number.
+    ## If the conversion fails, `ValueError` will be raised.
+    ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is
+    ## returned.
+    let idx = val.parseNatural allowNone
+    {.push warning[ProveInit]: off.}
+    if idx.isNone:
+      return none RequirementNumber
+    {.pop.}
+
+    if idx.get notin RequirementNumber.low.ord..RequirementNumber.high.ord:
+      raise newException(ValueError, "クリア条件の数字を表す整数が不適切な値です．")
+
+    result = some RequirementNumber idx.get
+
+  func parseRule(val: Value, allowNone = false): Option[Rule] {.inline.} =
+    ## Converts the value to the rule.
+    ## If the conversion fails, `ValueError` will be raised.
+    ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is
+    ## returned.
+    let idx = val.parseNatural allowNone
+    {.push warning[ProveInit]: off.}
+    if idx.isNone:
+      return none Rule
+    {.pop.}
+
+    if idx.get notin Rule.low.ord..Rule.high.ord:
+      raise newException(ValueError, "ルールを表す整数が不適切な値です．")
+
+    result = some Rule idx.get
+
+  # ------------------------------------------------
+  # Solve
+  # ------------------------------------------------
+
+  proc runSolver(args: Table[string, Value]) {.inline.} =
+    ## Runs the CUI solver.
+    let questionUriStr = $args["<question>"]
+    if args["-B"].to_bool:
+      questionUriStr.openDefaultBrowser
+
+    questionUriStr.parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
+      for answerIdx, answer in nazoPuyo.solve(showProgress = true):
+        let answerUri = nazoPuyo.toUri(answer, mode = Replay, editor = true)
+        echo &"({answerIdx.succ}) {answerUri}"
+
+        if args["-b"].to_bool:
+          ($answerUri).openDefaultBrowser
+
+  # ------------------------------------------------
+  # Generate
+  # ------------------------------------------------
+
+  proc runGenerator*(args: Table[string, Value]) {.inline.} =
+    ## Runs the CUI generator.
+    # RNG
+    var rng =
+      if args["-s"].kind == vkNone: initRand()
+      else: args["-s"].parseNatural.get.initRand
+
+    # requirement
+    {.push warning[ProveInit]: off.}
+    let
+      kind = args["--rk"].parseRequirementKind.get
+      req = GenerateRequirement(
+        kind: kind,
+        color: (
+          if kind in ColorKinds: args["--rc"].parseGenerateRequirementColor
+          else: none GenerateRequirementColor),
+        number: (
+          if kind in NumberKinds: args["--rn"].parseRequirementNumber
+          else: none RequirementNumber))
+    {.pop.}
+
+    # heights
+    if ($args["-H"]).len != 6:
+      raise newException(ValueError, "`-H`オプションには長さ6の文字列のみ指定できます．")
+    var heights: array[Column, Option[Natural]]
+    {.push warning[ProveInit]: off.}
+    heights[Column.low] = none Natural # HACK: dummy to remove warning
+    for i, c in ($args["-H"]):
+      heights[Column i] = if c == '+': none Natural else: some c.parseNatural
+    {.pop.}
+
+    # generate
+    for nazoIdx in 0..<args["-n"].parseNatural.get:
+      let (question, answer) = generates(
+        (rng.rand int.low..int.high),
+        args["-r"].parseRule.get,
+        req,
+        args["-m"].parseNatural.get,
+        args["-c"].parseNatural.get,
+        heights,
+        (color: args["--nc"].parseNatural.get,
+         garbage: args["--ng"].parseNatural.get),
+        (
+          total: args["--tt"].parseNatural true,
+          vertical: args["--tv"].parseNatural true,
+          horizontal: args["--th"].parseNatural true,
+          lShape: args["--tl"].parseNatural true),
+        not args["-D"].to_bool,
+        args["-d"].to_bool)
+
+      let
+        questionUri: Uri
+        answerUri: Uri
+      question.flattenAnd:
+        questionUri = nazoPuyo.toUri
+        answerUri = nazoPuyo.toUri answer
+      echo &"(Q{nazoIdx.succ}) {questionUri}"
+      echo &"(A{nazoIdx.succ}) {answerUri}"
+      echo ""
+
+      if args["-B"].to_bool:
+        openDefaultBrowser $questionUri
+      if args["-b"].to_bool:
+        openDefaultBrowser $answerUri
+
+  # ------------------------------------------------
+  # Permute
+  # ------------------------------------------------
+
+  proc runPermuter*(args: Table[string, Value]) {.inline.} =
+    ## Runs the CUI permuter.
+    var idx = 0
+    {.push warning[UnsafeDefault]: off.}
+    {.push warning[UnsafeSetLen]: off.}
+    ($args["<question>"]).parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
+      for (pairs, answer) in nazoPuyo.permute(
+          args["-f"].mapIt(it.parseNatural.Positive),
+          not args["-D"].to_bool, args["-d"].to_bool, showProgress = true):
+        var nazo = nazoPuyo
+        nazo.environment.pairs = pairs
+
+        let
+          questionUri = nazo.toUri
+          answerUri = nazo.toUri answer
+        echo &"(Q{idx.succ}) {questionUri}"
+        echo &"(A{idx.succ}) {answerUri}"
+        echo ""
+
+        if args["-B"].to_bool:
+          openDefaultBrowser $questionUri
+        if args["-b"].to_bool:
+          openDefaultBrowser $answerUri
+
+        idx.inc
+    {.pop.}
+    {.pop.}
+
+  # ------------------------------------------------
+  # Editor
+  # ------------------------------------------------
+
+  proc runEditor(args: Table[string, Value]) {.inline.} =
+    ## Runs the GUI Editor.
+    # prepare simulator
+    let simulator = new Simulator
+    case args["<uri>"].kind
+    of vkNone:
+      simulator[] = initTsuEnvironment().initSimulator
+    of vkStr:
+      let inputUri = ($args["<uri>"]).parseUri
+      try:
+        let parseRes = inputUri.parseNazoPuyos
+        parseRes.nazoPuyos.flattenAnd:
+          if parseRes.positions.isSome:
+            simulator[] = nazoPuyo.initSimulator(
+              parseRes.positions.get, parseRes.mode, parseRes.editor)
+          else:
+            simulator[] = nazoPuyo.initSimulator(parseRes.mode, parseRes.editor)
+      except ValueError:
+        let parseRes = inputUri.parseEnvironments
+        parseRes.environments.flattenAnd:
+          if parseRes.positions.isSome:
+            simulator[] = environment.initSimulator(
+              parseRes.positions.get, parseRes.mode, parseRes.editor)
+          else:
+            simulator[] = environment.initSimulator(
+              parseRes.mode, parseRes.editor)
+    else:
+      assert false
+
+    app.init
+    simulator.initSimulatorWindow.show
+    app.run
+
+  # ------------------------------------------------
+  # Entry Point
+  # ------------------------------------------------
 
   when isMainModule:
-    import docopt
-
-    import ./pon2pkg/cui/db as cuiDb
-    import ./pon2pkg/cui/generate as cuiGenerate
-    import ./pon2pkg/cui/permute as cuiPermute
-    import ./pon2pkg/cui/solve as cuiSolve
-
     const Document = """
-なぞぷよツール．ソルバー・ジェネレーター・ツモ探索・データベース機能とGUIアプリケーションが提供されている．
+ぷよぷよ・なぞぷよ用アプリケーション．
+機能一覧（使用方法はUsageの節を参照）：
+* なぞぷよ解探索
+* なぞぷよ生成
+* なぞぷよツモ探索
+* ぷよぷよ（なぞぷよ）シミュレータ・エディタ
 
 Usage:
   pon2 (solve | s) <question> [-bB] [-h | --help]
   pon2 (generate | g) [-bBdD] [options] [-h | --help]
-  pon2 (permute | p) <question> [(-f <>)... -bBdDS] [-h | --help]
-  pon2 (database | d) (add | a) <question> [<answers>...] [-h | --help]
-  pon2 (database | d) (remove | r) <questions>... [-h | --help]
-  pon2 (database | d) (find | f) [(--fr <>)... (--fk <>)... (--fm <>)...] [-h | --help]
+  pon2 (permute | p) <question> [(-f <>)... -bBdD] [-h | --help]
   pon2 [<uri>] [-h | --help]
 
 Options:
@@ -108,11 +372,6 @@ Options:
   -s <>       シード．
 
   -f <>...    何手目を固定するか．
-  -S          ハチイチを同一視するか．    [default: true]
-
-  --fr <>...  検索したいルール．
-  --fk <>...  検索したいクリア条件．
-  --fm <>...  検索したい手数．
 
 非自明なオプションの指定方法は以下の通り．
 
@@ -158,7 +417,5 @@ Options:
       args.runGenerator
     elif args["permute"] or args["p"]:
       args.runPermuter
-    elif args["database"] or args["d"]:
-      args.runDb
     else:
-      args.runPon2EditorGui
+      args.runEditor

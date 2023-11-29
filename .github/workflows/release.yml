@@ -69,14 +69,14 @@ jobs:
       - uses: actions/download-artifact@v3
 
       - run: |-
-          tar -zcvf Linux.tar.gz ./Linux
+          zip -rv Linux.zip ./Linux
           zip -rv Windows.zip ./Windows
           zip -rv macOS.zip ./macOS
 
       - uses: softprops/action-gh-release@v1
         with:
           files: |-
-              ./Linux.tar.gz
+              ./Linux.zip
               ./Windows.zip
               ./macOS.zip
           generate_release_notes: true
