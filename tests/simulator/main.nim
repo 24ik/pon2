@@ -18,7 +18,7 @@ proc main* =
     check simulator.tsuNazoPuyo == nazo
     check simulator.originalTsuNazoPuyo == nazo
 
-    simulator.nextPosition = Down5
+    simulator.next.position = Down5
     simulator.forward
     while simulator.state != Stable:
       simulator.forward
@@ -36,14 +36,14 @@ proc main* =
     var simulator = "https://ishikawapuyo.net/simu/pn.html?Mp6j92mS_o1q1__u03".
       parseUri.parseTsuNazoPuyo.nazoPuyo.initSimulator
 
-    simulator.nextPosition = Up5
+    simulator.next.position = Up5
     simulator.forward
     check simulator.state == WillDisappear
     check simulator.tsuNazoPuyo ==
       "https://ishikawapuyo.net/simu/pn.html?30010Mp6j92mS_q1__u03".
       parseUri.parseTsuNazoPuyo.nazoPuyo
     check simulator.positions == @[some Up5, none Position]
-    check simulator.nextIdx == 0
+    check simulator.next.index == 0
 
     simulator.forward
     check simulator.state == Disappearing
@@ -51,7 +51,7 @@ proc main* =
       "https://ishikawapuyo.net/simu/pn.html?30000Mo6j02m0_q1__u03".
       parseUri.parseTsuNazoPuyo.nazoPuyo
     check simulator.positions == @[some Up5, none Position]
-    check simulator.nextIdx == 0
+    check simulator.next.index == 0
 
     simulator.forward
     check simulator.state == Stable
@@ -59,7 +59,7 @@ proc main* =
       "https://ishikawapuyo.net/simu/pn.html?M06j02mr_q1__u03".
       parseUri.parseTsuNazoPuyo.nazoPuyo
     check simulator.positions == @[some Up5, none Position]
-    check simulator.nextIdx == 1
+    check simulator.next.index == 1
 
   # forward w/ arguments
   block:
@@ -88,38 +88,38 @@ proc main* =
       parseUri.parseTsuNazoPuyo.nazoPuyo
     var simulator = nazo.initSimulator
 
-    simulator.nextPosition = Up5
+    simulator.next.position = Up5
     simulator.forward
     simulator.backward
     check simulator.tsuNazoPuyo == nazo
     check simulator.state == Stable
     check simulator.positions == @[some Up5, none Position]
-    check simulator.nextIdx == 0
+    check simulator.next.index == 0
 
-    simulator.nextPosition = Up5
-    simulator.forward
-    simulator.forward
-    simulator.backward
-    check simulator.tsuNazoPuyo == nazo
-    check simulator.state == Stable
-    check simulator.positions == @[some Up5, none Position]
-    check simulator.nextIdx == 0
-
-    simulator.nextPosition = Up5
-    simulator.forward
+    simulator.next.position = Up5
     simulator.forward
     simulator.forward
     simulator.backward
     check simulator.tsuNazoPuyo == nazo
     check simulator.state == Stable
     check simulator.positions == @[some Up5, none Position]
-    check simulator.nextIdx == 0
+    check simulator.next.index == 0
 
-    simulator.nextPosition = Up5
+    simulator.next.position = Up5
     simulator.forward
     simulator.forward
     simulator.forward
-    simulator.nextPosition = Right0
+    simulator.backward
+    check simulator.tsuNazoPuyo == nazo
+    check simulator.state == Stable
+    check simulator.positions == @[some Up5, none Position]
+    check simulator.next.index == 0
+
+    simulator.next.position = Up5
+    simulator.forward
+    simulator.forward
+    simulator.forward
+    simulator.next.position = Right0
     simulator.forward
     simulator.backward
     check simulator.tsuNazoPuyo ==
@@ -127,16 +127,16 @@ proc main* =
       parseUri.parseTsuNazoPuyo.nazoPuyo
     check simulator.state == Stable
     check simulator.positions == @[some Up5, some Right0]
-    check simulator.nextIdx == 1
+    check simulator.next.index == 1
 
     simulator.reset false
     check simulator.tsuNazoPuyo == nazo
     check simulator.state == Stable
     check simulator.positions == @[some Up5, some Right0]
-    check simulator.nextIdx == 0
+    check simulator.next.index == 0
 
     simulator.reset
     check simulator.tsuNazoPuyo == nazo
     check simulator.state == Stable
     check simulator.positions == newSeq[Option[Position]] nazo.moveCount
-    check simulator.nextIdx == 0
+    check simulator.next.index == 0
