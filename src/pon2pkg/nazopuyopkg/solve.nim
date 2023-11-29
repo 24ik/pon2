@@ -406,8 +406,10 @@ proc solve[F: TsuField or WaterField](
         bar.inc
         bar.update SuruBarUpdateMs * 1000 * 1000
 
+        {.push warning[Uninit]: off.}
         completeNodeIdxes.incl nodeIdx
         result &= ^futureAnswers[nodeIdx]
+        {.pop.}
 
         # finish solving
         if completeNodeIdxes.card == childNodes.len:
