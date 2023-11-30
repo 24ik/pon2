@@ -18,7 +18,7 @@ requires "docopt ^= 0.7.1"
 requires "karax ^= 1.3.3"
 requires "nigui ^= 0.2.7"
 requires "nimsimd ^= 1.2.6"
-requires "https://github.com/de-odex/suru#head"
+requires "https://github.com/de-odex/suru#f6f1e60"
 
 # Tasks
 

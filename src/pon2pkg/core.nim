@@ -4,20 +4,20 @@
 ## submodules individually.
 ##
 ## Submodule Documentations:
-## - [Cell](./corepkg/cell.html)
-## - [Environment](./corepkg/environment.html)
-## - [Field](./corepkg/field.html)
-## - [Misc](./corepkg/misc.html)
-## - [MoveResult](./corepkg/moveresult.html)
-## - [Pair](./corepkg/pair.html)
-## - [Position](./corepkg/position.html)
+## - [cell](./corepkg/cell.html)
+## - [environment](./corepkg/environment.html)
+## - [field](./corepkg/field.html)
+## - [misc](./corepkg/misc.html)
+## - [moveresult](./corepkg/moveresult.html)
+## - [pair](./corepkg/pair.html)
+## - [position](./corepkg/position.html)
 ##
 ## Compile Options:
-## | Option                | Description            | Default |
-## | --------------------- | ---------------------- | ------- |
-## | `-d:WaterHeight=<int> | Height of the water.   | `8`     |
-## | `-d:avx2=<bool>`      | Use AVX2 instructions. | `true`  |
-## | `-d:bmi2=<bool>`      | Use BMI2 instructions. | `true`  |
+## | Option                 | Description            | Default |
+## | ---------------------- | ---------------------- | ------- |
+## | `-d:WaterHeight=<int>` | Height of the water.   | `8`     |
+## | `-d:avx2=<bool>`       | Use AVX2 instructions. | `true`  |
+## | `-d:bmi2=<bool>`       | Use BMI2 instructions. | `true`  |
 ##
 
 {.experimental: "strictDefs".}

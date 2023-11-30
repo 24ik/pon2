@@ -5,10 +5,10 @@
 ## Also, you can write such as `import pon2pkg/simulatorpkg/simulator` to import
 ## submodules individually.
 ##
-## Submodule Documentations:
-## - [Simulator Core](./simulatorpkg/simulator.html)
-## - [Native Simulator](./simulatorpkg/native.html)
-## - Web Simulator
+## Submodule Documentations (module names are shown in `typewriter font`):
+## - [simulator](./simulatorpkg/simulator.html)
+## - [native](./simulatorpkg/native.html)
+## - web
 ##
 
 {.experimental: "strictDefs".}
