@@ -1,6 +1,6 @@
 # ツモ探索
 
-ツモ部分のぷよを入れ替えたなぞぷよのうち，一意解であるものを求めることができる．
+ツモ部分のぷよを入れ替えたなぞぷよのうち，一意解であるものを求める．
 
 ## 使い方
 
@@ -14,7 +14,7 @@ pon2 p <question> [options]
 例：
 
 ```shell
-pon2 p https://ishikawapuyo.net/simu/pn.html?Mp6j92mS_o1q1__u03 -d
+pon2 p https://ishikawapuyo.net/simu/pn.html?Mp6j92mS_o1q1__u03 -d -f 2
 ```
 
 ## オプション
@@ -27,4 +27,3 @@ pon2 p https://ishikawapuyo.net/simu/pn.html?Mp6j92mS_o1q1__u03 -d
 | -d         | 最終手がゾロになるのを許可する．         | 禁止         |
 | -D         | いずれかのツモがゾロになるのを許可する． | 許可         |
 | -f         | 何手目を固定するか．                     | 固定なし     |
-| -S         | 軸ぷよと子ぷよを入れ替えたツモは飛ばす． | 飛ばす       |

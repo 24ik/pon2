@@ -39,7 +39,7 @@ See the documentations:
 - [Solver](./docs/solve.md)
 - [Generator](./docs/generate.md)
 - [Permuter](./docs/permute.md)
-- [Editor+Simulator](./docs/editor.md)
+- [Editor+Simulator](./docs/edit.md)
 
 ## For Developers
 
