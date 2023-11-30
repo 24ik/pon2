@@ -5,11 +5,11 @@
 ## submodules individually.
 ##
 ## Submodule Documentations:
-## - [Generate](./nazopuyopkg/generate.html)
-## - [NazoPuyo Core](./nazopuyopkg/nazopuyo.html)
-## - [Marking](./nazopuyopkg/mark.html)
-## - [Permute](./nazopuyopkg/permute.html)
-## - [Solve](./nazopuyopkg/solve.html)
+## - [generate](./nazopuyopkg/generate.html)
+## - [nazopuyo](./nazopuyopkg/nazopuyo.html)
+## - [mark](./nazopuyopkg/mark.html)
+## - [permute](./nazopuyopkg/permute.html)
+## - [solve](./nazopuyopkg/solve.html)
 ##
 
 {.experimental: "strictDefs".}

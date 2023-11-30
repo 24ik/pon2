@@ -419,3 +419,13 @@ Options:
       args.runPermuter
     else:
       args.runEditor
+
+when defined(nimdoc):
+  # HACK: to generate documentation
+  import ./pon2pkg/core as coreDoc
+  import ./pon2pkg/nazopuyo as nazoDoc
+  import ./pon2pkg/simulator as simDoc
+
+  discard coreDoc.Cell.None
+  discard nazoDoc.MarkResult.Accept
+  discard simDoc.SimulatorState.Stable
