@@ -40,10 +40,10 @@ task benchmark, "Benchmarking":
   exec &"nim c -r -d:avx2={avx2} -d:bmi2={bmi2} benchmark/main.nim"
 
 task documentation, "Make Documentation":
-  exec &"nim doc --project -d:avx2=false src/pon2.nim" 
+  exec &"nim doc --project -d:avx2=true src/pon2.nim" 
   mvDir "src/htmldocs", "src/htmldocs2"
 
-  exec &"nim doc --project -d:avx2=true src/pon2.nim" 
+  exec &"nim doc --project -d:avx2=false src/pon2.nim" 
   exec "cp -r src/htmldocs2 src/htmldocs"
   rmDir "src/htmldocs2"
 
