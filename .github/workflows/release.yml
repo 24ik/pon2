@@ -33,7 +33,7 @@ jobs:
           path: ~/.nimble
           key: ${{ runner.os }}-nimble-${{ hashFiles('*.nimble') }}
           restore-keys: |
-              ${{ runner.os }}-nimble-
+            ${{ runner.os }}-nimble-
         if: runner.os != 'Windows'
       - uses: jiro4989/setup-nim-action@v1
         with:
@@ -76,7 +76,7 @@ jobs:
       - uses: softprops/action-gh-release@v1
         with:
           files: |-
-              ./Linux.zip
-              ./Windows.zip
-              ./macOS.zip
+            ./Linux.zip
+            ./Windows.zip
+            ./macOS.zip
           generate_release_notes: true

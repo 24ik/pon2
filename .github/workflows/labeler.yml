@@ -19,7 +19,7 @@ on:
 jobs:
   labeler:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v3
 
@@ -36,37 +36,37 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |-
-              const commit_messages = ${{ steps.labeler-commits.outputs.COMMIT_MESSAGES }}.trim().split(" ");
-              const all_labels = ${{ steps.labeler-labels.outputs.ALL_LABELS }}.trim().split(" ");
+            const commit_messages = ${{ steps.labeler-commits.outputs.COMMIT_MESSAGES }}.trim().split(" ");
+            const all_labels = ${{ steps.labeler-labels.outputs.ALL_LABELS }}.trim().split(" ");
 
-              const old_labels_response = await github.rest.issues.listLabelsOnIssue({
+            const old_labels_response = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+            });
+            const old_labels = old_labels_response.data.map(label => label.name);
+
+            for (const old_label of old_labels) {
+              await github.rest.issues.removeLabel({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.payload.pull_request.number,
+                name: old_label,
               });
-              const old_labels = old_labels_response.data.map(label => label.name);
+            }
 
-              for (const old_label of old_labels) {
-                await github.rest.issues.removeLabel({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.payload.pull_request.number,
-                  name: old_label,
-                });
+            const new_labels = new Set();
+            for (const commit_message of commit_messages) {
+              for (const label of all_labels) {
+                if (commit_message.includes("[" + label + "]")) new_labels.add(label);
               }
+            }
 
-              const new_labels = new Set();
-              for (const commit_message of commit_messages) {
-                for (const label of all_labels) {
-                  if (commit_message.includes("[" + label + "]")) new_labels.add(label);
-                }
-              }
-
-              if (new_labels.size > 0) {
-                await github.rest.issues.addLabels({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.payload.pull_request.number,
-                  labels: Array.from(new_labels),
-                });
-              }
+            if (new_labels.size > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                labels: Array.from(new_labels),
+              });
+            }
