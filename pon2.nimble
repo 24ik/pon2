@@ -1,24 +1,24 @@
 # Package
 
-version       = "0.7.0"
-author        = "Keisuke Izumiya"
-description   = "Puyo Puyo Library"
-license       = "Apache-2.0 OR MPL-2.0"
+version = "0.7.1"
+author = "Keisuke Izumiya"
+description = "Puyo Puyo Library"
+license = "Apache-2.0 OR MPL-2.0"
 
-srcDir        = "src"
-installExt    = @["nim"]
-bin           = @["pon2"]
+srcDir = "src"
+installExt = @["nim"]
+bin = @["pon2"]
 
 
 # Dependencies
 
-requires "nim ^= 2.0.0"
+requires "nim ^= 2.0.2"
 
 requires "docopt ^= 0.7.1"
 requires "karax ^= 1.3.3"
 requires "nigui ^= 0.2.7"
 requires "nimsimd ^= 1.2.6"
-requires "https://github.com/de-odex/suru#f6f1e60"
+requires "suru#f6f1e607c585b2bc2f71309996643f0555ff6349"
 
 # Tasks
 
@@ -40,10 +40,10 @@ task benchmark, "Benchmarking":
   exec &"nim c -r -d:avx2={avx2} -d:bmi2={bmi2} benchmark/main.nim"
 
 task documentation, "Make Documentation":
-  exec &"nim doc --project -d:avx2=true src/pon2.nim" 
+  exec &"nim doc --project -d:avx2=true src/pon2.nim"
   mvDir "src/htmldocs", "src/htmldocs2"
 
-  exec &"nim doc --project -d:avx2=false src/pon2.nim" 
+  exec &"nim doc --project -d:avx2=false src/pon2.nim"
   exec "cp -r src/htmldocs2 src/htmldocs"
   rmDir "src/htmldocs2"
 
