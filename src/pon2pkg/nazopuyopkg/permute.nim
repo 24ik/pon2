@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[deques, sequtils, sugar]
 import ../corepkg/[cell, field, pair, position]
@@ -26,7 +28,7 @@ func allPairsSeq(
   # NOTE: Swapped pair sometimes gives a different solution, but this function
   # does not consider it.
   if idx == moveCount:
-    return @[initDeque[Pair] moveCount]
+    return @[initDeque[Pair](moveCount)]
 
   result = @[]
   let nowLast = idx == moveCount.pred

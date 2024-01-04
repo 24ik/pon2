@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[deques, sequtils, setutils, strutils, sugar, tables]
 import ./[cell, misc]
@@ -144,7 +146,7 @@ func puyoCount*(pairs; puyo: Puyo): int {.inline.} =
 
 func puyoCount*(pairs): int {.inline.} = pairs.len * 2
   ## Returns the number of puyos in the pairs.
-  
+
 # ------------------------------------------------
 # Count - Color
 # ------------------------------------------------
@@ -218,7 +220,7 @@ func toUriQuery*(pair; host: SimulatorHost): string {.inline.} =
   of Izumiya: $pair
   of Ishikawa, Ips: $PairToIshikawaUri[pair.ord]
 
-func parsePair*(query: string, host: SimulatorHost): Pair {.inline.} =
+func parsePair*(query: string; host: SimulatorHost): Pair {.inline.} =
   ## Converts the URI query to the pair.
   ## If `query` is not a valid URI, `ValueError` is raised.
   case host
@@ -238,7 +240,7 @@ func toUriQuery*(pairs; host: SimulatorHost): string {.inline.} =
   ## Converts the pairs to the URI query.
   join pairs.mapIt it.toUriQuery host
 
-func parsePairs*(query: string, host: SimulatorHost): Pairs {.inline.} =
+func parsePairs*(query: string; host: SimulatorHost): Pairs {.inline.} =
   ## Converts the URI query to the pairs.
   ## If `query` is not a valid URI, `ValueError` is raised.
   let pairsSeq = case host

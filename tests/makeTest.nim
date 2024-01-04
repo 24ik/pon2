@@ -1,4 +1,6 @@
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[algorithm, dirs, paths, strformat, strutils, sugar]
 

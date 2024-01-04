@@ -1,4 +1,6 @@
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[options, unittest, uri]
 import ../../src/pon2pkg/corepkg/[position]

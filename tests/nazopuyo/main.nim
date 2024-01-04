@@ -1,4 +1,6 @@
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[options, sequtils, strformat, unittest, uri]
 import ../../src/pon2pkg/corepkg/[field, environment, misc, pair, position]
@@ -51,7 +53,7 @@ proc main* =
   # ------------------------------------------------
   # Property
   # ------------------------------------------------
-  
+
   # moveCount
   block:
     check initTsuNazoPuyo().moveCount == 0
@@ -229,4 +231,4 @@ yyyooy
       check izumiyaUriWithPos.parseTsuNazoPuyo == (
         nazoPuyo: nazo, positions: some positions, mode: mode, editor: editor)
       check ishikawaUriWithPos.parseTsuNazoPuyo == (
-        nazoPuyo: nazo,positions: some positions, mode: Play, editor: editor)
+        nazoPuyo: nazo, positions: some positions, mode: Play, editor: editor)

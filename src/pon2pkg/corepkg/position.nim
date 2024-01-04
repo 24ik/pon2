@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[options, sequtils, strutils, sugar, tables]
 import ./[misc]
@@ -216,7 +218,7 @@ func parsePositions*(str: string): Positions {.inline.} =
   ## Converts the string representation to the positions.
   ## If `str` is not a valid representation, `ValueError` is raised.
   if str == "":
-    return newSeq[Option[Position]] 0
+    return newSeq[Option[Position]](0)
 
   result = str.split(PositionsSep).mapIt(it.parsePosition)
 

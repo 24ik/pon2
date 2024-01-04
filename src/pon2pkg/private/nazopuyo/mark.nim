@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[options, sequtils, tables]
 import ../../nazopuyopkg/[nazopuyo]
@@ -46,7 +48,7 @@ func disappearColorSatisfied*(
     kind: static RequirementKind): bool {.inline.} =
   ## Returns `true` if the requirement satisfied.
   req.satisfied(colors.card, kind)
-  
+
 # ------------------------------------------------
 # DisappearCount
 # ------------------------------------------------

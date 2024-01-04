@@ -13,6 +13,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import ./nazopuyopkg/[generate, mark, nazopuyo, permute, solve]
 

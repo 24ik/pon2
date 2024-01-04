@@ -12,6 +12,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import ./simulatorpkg/[simulator]
 

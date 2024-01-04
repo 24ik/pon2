@@ -1,4 +1,6 @@
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[options, unittest]
 import ../../src/pon2pkg/corepkg/[cell, environment, moveresult {.all.},
@@ -148,7 +150,7 @@ rg""").environment
     # colorsSeq
     block:
       let colorsSeq = @[{Blue.ColorPuyo}, {Green}, {Red, Purple}]
-      
+
       expect UnpackDefect:
         discard moveRes.colorsSeq
       expect UnpackDefect:
@@ -199,7 +201,7 @@ rg""").environment
       expect UnpackDefect:
         discard detailRes.colorConnects
       check fullRes.colorConnects == color
-      
+
     # score
     block:
       let score = 2720

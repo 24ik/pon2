@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[options, sequtils, tables]
 import ./[nazopuyo]
@@ -9,9 +11,11 @@ import ../corepkg/[cell, environment, field, moveresult, pair, position]
 import ../private/[misc]
 import ../private/nazopuyo/[mark]
 
+{.push warning[Deprecated]: off.}
 when not defined(js):
   import std/[cpuinfo, os, threadpool]
   import suru
+{.pop.}
 
 type Node[F: TsuField or WaterField] = object
   ## Node of solution search tree.
@@ -40,7 +44,7 @@ func initNode[F: TsuField or WaterField](nazo: NazoPuyo[F]): Node[F]
   result.environment = nazo.environment
   result.requirement = nazo.requirement
 
-  result.positions = newSeqOfCap[Option[Position]] nazo.moveCount
+  result.positions = newSeqOfCap[Option[Position]](nazo.moveCount)
   result.moveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
 
   result.disappearedColors = {}
@@ -193,7 +197,7 @@ func isAccepted[F: TsuField or WaterField](
       node.moveResult, reqKind, reqColor)
   else:
     assert false
-    
+
 # ------------------------------------------------
 # Prune
 # ------------------------------------------------
@@ -308,9 +312,7 @@ func canPrune[F: TsuField or WaterField](
 # Solve
 # ------------------------------------------------
 
-const
-  SuruBarUpdateMs = 100
-  ParallelSolvingWaitIntervalMs = 100
+const ParallelSolvingWaitIntervalMs = 8
 
 func solveRec[F: TsuField or WaterField](
     node: Node[F], reqKind: static RequirementKind,
@@ -367,7 +369,7 @@ proc solve[F: TsuField or WaterField](
           result.add child.positions
 
         bar.inc
-        bar.update SuruBarUpdateMs * 1000 * 1000
+        bar.update
 
       if showProgress:
         bar.finish
@@ -376,9 +378,9 @@ proc solve[F: TsuField or WaterField](
     # prepare solving
     let parallelCount2 = min(parallelCount, childNodes.len)
     var
-      futureAnswers = newSeqOfCap[FlowVar[seq[Positions]]] childNodes.len
+      futureAnswers = newSeqOfCap[FlowVar[seq[Positions]]](childNodes.len)
       nextNodeIdx = 0'i16
-      runningNodeIdxes = newSeq[int16] parallelCount2
+      runningNodeIdxes = newSeq[int16](parallelCount2)
       completeNodeIdxes: set[int16] = {}
 
     # run "first wave" solving
@@ -404,7 +406,7 @@ proc solve[F: TsuField or WaterField](
 
         # update progress bar
         bar.inc
-        bar.update SuruBarUpdateMs * 1000 * 1000
+        bar.update
 
         {.push warning[Uninit]: off.}
         completeNodeIdxes.incl nodeIdx
@@ -469,7 +471,7 @@ proc solve[F: TsuField or WaterField](
   of RequirementColor.Color:
     nazo.solve(reqKind, RequirementColor.Color, parallelCount, showProgress,
                earlyStopping)
-  
+
 proc solve*[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
     parallelCount: Positive = (

@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[algorithm, options, random, sequtils, sugar]
 import ../corepkg/[cell, environment, field, misc, pair, position]
@@ -122,7 +124,7 @@ func split(rng: var Rand, total: Natural, ratios: openArray[Option[Natural]]):
       return rng.split(total, ratios.len, true)
 
     for _ in 0..<MaxTrialCountSplit:
-      result = newSeqOfCap[int] ratios.len
+      result = newSeqOfCap[int](ratios.len)
       var last = total
 
       for mean in ratios2.mapIt total * it / sumRatio:
@@ -143,7 +145,7 @@ func split(rng: var Rand, total: Natural, ratios: openArray[Option[Natural]]):
       GenerateError,
       "If `ratios` contains `none`, it can contain only `none` and `some(0).")
 
-  result = newSeqOfCap[int] ratios.len
+  result = newSeqOfCap[int](ratios.len)
   let counts = rng.split(total, ratios.countIt it.isNone, false)
   var idx = 0
   for ratio in ratios:
@@ -189,7 +191,7 @@ func generateEnvironment[F: TsuField or WaterField](
     extras = rng.split(extraCount, useColors.len, true)
 
   # shuffle for pairs
-  var puyos = newSeqOfCap[Puyo] puyoCounts.color + puyoCounts.garbage
+  var puyos = newSeqOfCap[Puyo](puyoCounts.color + puyoCounts.garbage)
   for color, chain, surplus in zip(useColors, chains, extras):
     puyos &= color.Puyo.repeat chain * 4 + surplus
   rng.shuffle puyos

@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[bitops]
 import ../../../[intrinsic]
@@ -22,7 +24,7 @@ const
     ## Binary field with all elements one.
   FloorBinaryField* = BinaryField(
     left: 0x0001_0001_0001_0001'u64, right: 0x0001_0001_0001_0001'u64)
-    ## Binary field with floor bits one. 
+    ## Binary field with floor bits one.
   WaterHighField* = BinaryField(
     left: 0x0100_0100_0100_0100'u64, right: 0x0100_0100_0100_0100'u64)
     ## Binary field with `row==WaterRow.low` bits one.
@@ -144,7 +146,7 @@ const ColMasks: array[Column, BinaryField] = [
 func row*(self, row): BinaryField {.inline.} =
   ## Returns the binary field with only the row `row`.
   self * BinaryField(left: 0x0000_2000_2000_2000'u64 shr row,
-                     right: 0x2000_2000_2000_0000'u64 shr row) 
+                     right: 0x2000_2000_2000_0000'u64 shr row)
 
 func column*(self, col): BinaryField {.inline.} = self * ColMasks[col]
   ## Returns the binary field with only the given column.
@@ -156,14 +158,14 @@ func clearColumn*(mSelf, col) {.inline.} = mSelf -= mSelf.column col
 # Indexer
 # ------------------------------------------------
 
-func leftRightMasks(col): tuple[left: uint64, right: uint64] {.inline.} =
+func leftRightMasks(col): tuple[left: uint64; right: uint64] {.inline.} =
   ## Returns `(uint64.high, 0)` if `col` is in {0, 1, 2};
   ## otherwise returns `(0, uint64.high)`.
   let left = [uint64.high, uint64.high, uint64.high, 0, 0, 0][col]
   result.left = left
   result.right = uint64.high - left
 
-func cellMasks(row, col): tuple[left: uint64, right: uint64] {.inline.} =
+func cellMasks(row, col): tuple[left: uint64; right: uint64] {.inline.} =
   ## Returns two masks with only the bit at position `(row, col)` set to `1`.
   let (leftMask, rightMask) = col.leftRightMasks
   result.left = (0x0000_2000_0000_0000'u64 shr (16 * col + row)) and leftMask
@@ -177,7 +179,7 @@ func `[]`*(self, row, col): bool {.inline.} =
 func exist*(self, row, col): int {.inline.} = int self[row, col]
   ## Returns `1` if the bit `(row, col)` is set; otherwise, returns `0`.
 
-func `[]=`*(mSelf, row, col; val: bool) {.inline.} =
+func `[]=`*(mSelf, row; col; val: bool) {.inline.} =
   let
     (leftMask, rightMask) = cellMasks(row, col)
     cellMask = BinaryField(left: leftMask, right: rightMask)
@@ -188,7 +190,7 @@ func `[]=`*(mSelf, row, col; val: bool) {.inline.} =
 # Insert / RemoveSqueeze
 # ------------------------------------------------
 
-func aboveMasks(row, col): tuple[left: uint64, right: uint64] {.inline.} =
+func aboveMasks(row, col): tuple[left: uint64; right: uint64] {.inline.} =
   ## Returns two masks with only the bits above `(row, col)` set to `1`.
   ## Including `(row, col)`.
   let (leftMask, rightMask) = col.leftRightMasks
@@ -199,7 +201,7 @@ func aboveMasks(row, col): tuple[left: uint64, right: uint64] {.inline.} =
     uint64.high.masked 16 * (6 - col) + Row.high - row + 1 ..< 16 * (7 - col),
     rightMask)
 
-func belowMasks(row, col): tuple[left: uint64, right: uint64] {.inline.} =
+func belowMasks(row, col): tuple[left: uint64; right: uint64] {.inline.} =
   ## Returns two masks with only the bits above `(row, col)` set to `1`.
   ## Including `(row, col)`.
   let (leftMask, rightMask) = col.leftRightMasks
@@ -210,7 +212,7 @@ func belowMasks(row, col): tuple[left: uint64, right: uint64] {.inline.} =
     uint64.high.masked 16 * (6 - col) .. 16 * (6 - col) + Row.high - row + 1,
     rightMask)
 
-func tsuInsert*(mSelf, row, col; val: bool) {.inline.} =
+func tsuInsert*(mSelf, row; col; val: bool) {.inline.} =
   ## Inserts `val` and shifts the binary field upward
   ## above the location where `val` is inserted.
   let
@@ -223,7 +225,7 @@ func tsuInsert*(mSelf, row, col; val: bool) {.inline.} =
     mSelf - moveField, moveField shl 1,
     (moveMask xor (moveMask shl 1)) * cast[uint64](-val.int64)).trimmed
 
-func waterInsert*(mSelf, row, col; val: bool) {.inline.} =
+func waterInsert*(mSelf, row; col; val: bool) {.inline.} =
   ## Inserts `val` and shifts the field and shifts the field.
   ## If `(row, col)` is in the air, shifts the field upward above
   ## the location where inserted.
@@ -303,7 +305,7 @@ func isZero*(self): bool {.inline.} = self == ZeroBinaryField
 # ------------------------------------------------
 # Shift
 # ------------------------------------------------
-  
+
 func shiftedUpWithoutTrim*(self; amount = 1'i32): BinaryField {.inline.} =
   ## Returns the binary field shifted upward.
   self shl amount

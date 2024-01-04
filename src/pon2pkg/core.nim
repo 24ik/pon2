@@ -21,6 +21,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import ./corepkg/[cell, environment, field, misc, moveresult, pair, position]
 

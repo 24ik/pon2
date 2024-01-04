@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[sequtils]
 import ../../[unionfind]
@@ -40,7 +42,7 @@ func colorCount*(disRes): int {.inline.} =
   ## Returns the number of color puyos that disappeared.
   disRes.red.popcnt + disRes.green.popcnt + disRes.blue.popcnt +
     disRes.yellow.popcnt + disRes.purple.popcnt
-    
+
 # ------------------------------------------------
 # Count - Garbage
 # ------------------------------------------------
@@ -71,7 +73,8 @@ func puyoCount*(disRes): int {.inline.} =
 # Connection
 # ------------------------------------------------
 
-func initDefaultComponents: array[Height + 2, array[Width + 2, Natural]] {.inline.} =
+func initDefaultComponents: array[Height + 2, array[Width + 2, Natural]]
+                            {.inline.} =
   ## Constructor of `DefaultComponents`.
   result[0][0] = 0 # dummy to remove warning
   for i in 0..<Height.succ 2:

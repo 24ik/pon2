@@ -1,4 +1,6 @@
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[options, sequtils, unittest, uri]
 import ../../src/pon2pkg/nazopuyopkg/[nazopuyo, permute]

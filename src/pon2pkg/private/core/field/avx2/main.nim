@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[bitops]
 import ./[binary, disappearresult]
@@ -73,7 +75,7 @@ func toWaterField*(self: TsuField): WaterField {.inline.} =
   result.noneRed = self.noneRed
   result.greenBlue = self.greenBlue
   result.yellowPurple = self.yellowPurple
-  
+
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
@@ -223,14 +225,14 @@ func puyoCount*(self: TsuField or WaterField): int {.inline.} =
 # Count - Color
 # ------------------------------------------------
 
-func colorCount*(self: TsuField or WaterField): int {.inline.} = 
+func colorCount*(self: TsuField or WaterField): int {.inline.} =
   ## Returns the number of color puyos in the field.
   sum(self.noneRed, self.greenBlue, self.yellowPurple).popcnt
 
 # ------------------------------------------------
 # Count - Garbage
 # ------------------------------------------------
-  
+
 func garbageCount*(self: TsuField or WaterField): int {.inline.} =
   ## Returns the number of garbage puyos in the field.
   self.hardGarbage.popcnt
