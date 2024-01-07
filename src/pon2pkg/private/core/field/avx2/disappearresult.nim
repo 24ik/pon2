@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[bitops, sequtils]
 import ./[binary]
@@ -66,7 +68,7 @@ func puyoCount*(disRes): int {.inline.} =
 # ------------------------------------------------
 
 func initDefaultComponents: array[
-  Height + 2, array[Width + 2, tuple[color: 0..2, idx: Natural]]] {.inline.} =
+    Height + 2, array[Width + 2, tuple[color: 0..2; idx: Natural]]] {.inline.} =
   ## Constructor of `DefaultComponents`.
   result[0][0] = (0, 0) # dummy to remove warning
   for i in 0..<Height.succ 2:

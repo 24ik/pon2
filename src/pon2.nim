@@ -9,6 +9,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 when defined(js):
   import std/[options, sequtils, uri]
@@ -132,7 +134,7 @@ else:
       return none GenerateRequirementColor
     {.pop.}
 
-    if idx.get notin GenerateRequirementColor.low.ord..
+    if idx.get notin GenerateRequirementColor.low.ord ..
         GenerateRequirementColor.high.ord:
       raise newException(ValueError, "クリア条件の色を表す整数が不適切な値です．")
 
@@ -204,14 +206,13 @@ else:
     {.push warning[ProveInit]: off.}
     let
       kind = args["--rk"].parseRequirementKind.get
-      req = GenerateRequirement(
-        kind: kind,
-        color: (
-          if kind in ColorKinds: args["--rc"].parseGenerateRequirementColor
-          else: none GenerateRequirementColor),
-        number: (
-          if kind in NumberKinds: args["--rn"].parseRequirementNumber
-          else: none RequirementNumber))
+      color =
+        if kind in ColorKinds: args["--rc"].parseGenerateRequirementColor
+        else: none GenerateRequirementColor
+      number =
+        if kind in NumberKinds: args["--rn"].parseRequirementNumber
+        else: none RequirementNumber
+      req = GenerateRequirement(kind: kind, color: color, number: number)
     {.pop.}
 
     # heights

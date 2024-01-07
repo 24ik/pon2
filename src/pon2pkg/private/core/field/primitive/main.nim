@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[bitops]
 import ./[disappearresult]
@@ -127,7 +129,7 @@ func clearColumn(mSelf: var (TsuField or WaterField), col) {.inline.} =
 func toCell(bit2, bit1, bit0: bool): Cell {.inline.} =
   ## Converts the bits to the cell.
   Cell.low.succ bit2.int * 4 + bit1.int * 2 + bit0.int
-  
+
 func `[]`*(self: TsuField or WaterField; row, col): Cell {.inline.} =
   toCell(self.bit2[row, col], self.bit1[row, col], self.bit0[row, col])
 
@@ -247,14 +249,14 @@ func puyoCount*(self: TsuField or WaterField): int {.inline.} =
 # Count - Color
 # ------------------------------------------------
 
-func colorCount*(self: TsuField or WaterField): int {.inline.} = 
+func colorCount*(self: TsuField or WaterField): int {.inline.} =
   ## Returns the number of color puyos in the field.
   (self.bit2 + self.red).popcnt
 
 # ------------------------------------------------
 # Count - Garbage
 # ------------------------------------------------
-  
+
 func garbageCount*(self: TsuField or WaterField): int {.inline.} =
   ## Returns the number of garbage puyos in the field.
   popcnt (self.bit0 xor self.bit1) - self.bit2

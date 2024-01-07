@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[options, setutils, strutils, sugar, tables, uri]
 import ../corepkg/[environment, field, misc, pair, position]
@@ -61,7 +63,7 @@ const
   NoColorKinds* = {DisappearColor, DisappearColorMore, Chain, ChainMore,
                    DisappearColorSametime, DisappearColorMoreSametime}
     ## All requirement kinds not containing 'c'.
-  NoNumberKinds* = {Clear} ## All requirement kinds not containing 'n'.
+  NoNumberKinds* = {Clear}              ## All requirement kinds not containing 'n'.
 
   ColorKinds* = NoColorKinds.complement ## All requirement kinds containing 'c'.
   NumberKinds* = NoNumberKinds.complement
@@ -161,10 +163,14 @@ func parseRequirement*(str: string): Requirement {.inline.} =
   let
     allRequirements = collect:
       for kind in RequirementKind:
-        for color in (if kind in ColorKinds: Allcolors
-                      else: @[none RequirementColor]):
-          for num in (if kind in NumberKinds: AllNumbers
-                      else: @[none RequirementNumber]):
+        let
+          colors =
+            if kind in ColorKinds: Allcolors else: @[none RequirementColor]
+          numbers =
+            if kind in NumberKinds: AllNumbers else: @[none RequirementNumber]
+
+        for color in colors:
+          for num in numbers:
             Requirement(kind: kind, color: color, number: num)
     strToRequirement = collect:
       for req in allRequirements:
@@ -267,7 +273,7 @@ func toUriQuery*(req: Requirement, host: SimulatorHost): string {.inline.} =
         else: EmptyIshikawaUri
 
     result = kindChar & colorChar & numChar
-  
+
 func parseRequirement*(query: string, host: SimulatorHost): Requirement
                       {.inline.} =
   ## Converts the URI query to the requirement.
@@ -389,8 +395,8 @@ func parseNazoPuyo*[F: TsuField or WaterField](uri: Uri): tuple[
   case host
   of Izumiya:
     var
-      reqQuery = newSeq[tuple[key: string, value: string]] 0
-      envQuery = newSeq[tuple[key: string, value: string]] 0
+      reqQuery = newSeq[tuple[key: string, value: string]](0)
+      envQuery = newSeq[tuple[key: string, value: string]](0)
     for key, value in uri.query.decodeQuery:
       case key
       of KindKey, ColorKey, NumberKey:

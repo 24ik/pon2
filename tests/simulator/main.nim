@@ -1,4 +1,6 @@
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[options, unittest, uri]
 import ../../src/pon2pkg/corepkg/[environment, pair, position]
@@ -138,5 +140,5 @@ proc main* =
     simulator.reset
     check simulator.tsuNazoPuyo == nazo
     check simulator.state == Stable
-    check simulator.positions == newSeq[Option[Position]] nazo.moveCount
+    check simulator.positions == newSeq[Option[Position]](nazo.moveCount)
     check simulator.next.index == 0

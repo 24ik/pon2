@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[options, tables]
 import ./[nazopuyo]
@@ -39,7 +41,7 @@ func mark*[F: TsuField or WaterField](positions: Positions, nazo: NazoPuyo[F]):
     nazo2 = nazo
     skipped = false
     disappearColors = set[ColorPuyo]({}) # used for DisappearColor
-    disappearCount = 0 # used for DisappearCount
+    disappearCount = 0                   # used for DisappearCount
 
   let moveFn = case nazo.requirement.kind
   of Clear, Chain, ChainMore:
@@ -138,7 +140,7 @@ func mark*[F: TsuField or WaterField](positions: Positions, nazo: NazoPuyo[F]):
 
     if satisfied:
       return Accept
-    
+
     # dead
     if nazo2.environment.field.isDead:
       return Dead

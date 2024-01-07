@@ -2,8 +2,10 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
-import std/[options, sequtils, strutils, sugar, tables]
+import std/[options, sequtils, setutils, strutils, sugar, tables]
 import ./[misc]
 
 type
@@ -45,8 +47,10 @@ type
   Positions* = seq[Option[Position]]
     ## The position sequence. `none(Position)` means no-position.
 
-const DoublePositions* = {Up0 .. Right4}
-  ## All positions for double pairs; deduplicated.
+const
+  AllPositions* = Position.fullSet
+  DoublePositions* = {Up0 .. Right4}
+    ## All positions for double pairs; deduplicated.
 
 using
   pos: Position
@@ -216,7 +220,7 @@ func parsePositions*(str: string): Positions {.inline.} =
   ## Converts the string representation to the positions.
   ## If `str` is not a valid representation, `ValueError` is raised.
   if str == "":
-    return newSeq[Option[Position]] 0
+    return newSeq[Option[Position]](0)
 
   result = str.split(PositionsSep).mapIt(it.parsePosition)
 

@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[bitops, setutils]
 import ../[intrinsic]
@@ -70,7 +72,7 @@ func invalidPositions*(self): set[Position] {.inline.} =
     let row12 = self.exist(1, col)
     usableColumns.excl OuterColumns[row12][col]
     result.incl LiftPositions[row12][col]
-      
+
   # If there is a usable column with height 11, or the heights of the 2nd and
   # 4th columns are both 12, all columns are usable.
   var allColumnsUsable = bitand(self.exist(1, 1), self.exist(1, 3))

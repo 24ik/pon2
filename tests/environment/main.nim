@@ -1,4 +1,6 @@
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[options, sequtils, strformat, strutils, unittest, uri]
 import ../../src/pon2pkg/corepkg/[cell, environment {.all.}, field, misc,
@@ -96,7 +98,8 @@ proc main* =
     # Tsu
     block:
       let
-        envBefore = parseTsuEnvironment("""
+        envBefore = parseTsuEnvironment(
+            """
 ....g.
 ....g.
 ....pg
@@ -142,7 +145,8 @@ rg""").environment
     # Water
     block:
       let
-        envBefore = parseWaterEnvironment("""
+        envBefore = parseWaterEnvironment(
+            """
 ......
 ......
 ......
@@ -159,7 +163,8 @@ rbb...
 ------
 rb
 rg""").environment
-        envAfter = parseWaterEnvironment("""
+        envAfter = parseWaterEnvironment(
+            """
 ......
 ......
 ......

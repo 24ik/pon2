@@ -1,4 +1,6 @@
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[sequtils, unittest, uri]
 import ../../src/pon2pkg/corepkg/[pair, position]
@@ -7,7 +9,7 @@ import ../../src/pon2pkg/nazopuyopkg/[nazopuyo, solve]
 proc checkSolve(questionUri: string, answersStrs: varargs[string]) =
   let answers = answersStrs.mapIt it.parsePositions
   questionUri.parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
-    check nazoPuyo.solve(parallelCount = 1) == answers
+    check nazoPuyo.solve == answers
 
 proc main* =
   # ------------------------------------------------
@@ -26,10 +28,12 @@ proc main* =
     checkSolve "https://ishikawapuyo.net/simu/pn.html?2p3j9_g1c1__a03", "3F\n65"
 
     # DisappearColorMore
-    checkSolve "https://ishikawapuyo.net/simu/pn.html?uo9cA_41E1__b03", "4F\n56", "4F\n6F"
+    checkSolve "https://ishikawapuyo.net/simu/pn.html?uo9cA_41E1__b03",
+        "4F\n56", "4F\n6F"
 
     # DisappearCount
-    checkSolve "https://ishikawapuyo.net/simu/pn.html?o00w0ig0SM0SPr_G1i1__c0i", "1N\n2F", "12\n4N"
+    checkSolve "https://ishikawapuyo.net/simu/pn.html?o00w0ig0SM0SPr_G1i1__c0i",
+        "1N\n2F", "12\n4N"
 
     # DisappearCountMore
     checkSolve "https://ishikawapuyo.net/simu/pn.html?1Oo1bo3hg3p81bM2bo_o1o1__d0s", "1N\n1F"
@@ -57,7 +61,8 @@ proc main* =
     checkSolve "https://ishikawapuyo.net/simu/pn.html?11011M16Me69S6Nc4CA4Ne6N96N_G161__G0o", "3N\n34"
 
     # DisappearCountMoreSametime
-    checkSolve "https://ishikawapuyo.net/simu/pn.html?pp9b9rpr_o1o1o1__H0b", "34\n3N\n23", "34\n34\n23"
+    checkSolve "https://ishikawapuyo.net/simu/pn.html?pp9b9rpr_o1o1o1__H0b",
+        "34\n3N\n23", "34\n34\n23"
 
     # DisappearPlace
     checkSolve "https://ishikawapuyo.net/simu/pn.html?8w0wAcw_A1A1__I02", "4F\n32"

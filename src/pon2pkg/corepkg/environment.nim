@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[options, random, sequtils, setutils, strutils, sugar, tables, uri]
 import ./[cell, field, misc, moveresult, pair, position]
@@ -388,7 +390,7 @@ func toUri[F: TsuField or WaterField](
   of Izumiya:
     result.path = "/pon2/playground/index.html"
 
-    var queries = newSeqOfCap[(string, string)] 6
+    var queries = newSeqOfCap[(string, string)](6)
     if editor or mode == SimulatorMode.Edit:
       queries.add (EditorKey, "")
     queries &= [(KindKey, $kind), (ModeKey, $mode),
@@ -514,8 +516,8 @@ func parseEnvironment*[F: TsuField or WaterField](
 
       let pairsCount = strs[1].len div 2
       var
-        pairsSeq = newSeqOfCap[Pair] pairsCount
-        positions = newSeqOfCap[Option[Position]] pairsCount
+        pairsSeq = newSeqOfCap[Pair](pairsCount)
+        positions = newSeqOfCap[Option[Position]](pairsCount)
 
       for i in 0..<pairsCount:
         pairsSeq.add ($strs[1][2 * i]).parsePair host

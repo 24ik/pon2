@@ -1,4 +1,6 @@
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[options, sequtils, unittest]
 import ../../src/pon2pkg/corepkg/[cell, field, environment, misc, pair]
@@ -29,7 +31,7 @@ proc main* =
           kind: kind, color: some GenerateRequirementColor.All,
           number: some num),
         moveCount, colorCount, heights, puyoCounts, connect3Counts, false,
-        false, 1)
+        false)
       nazo = genRes.question
       fieldArr = nazo.environment.field.toArray
     {.pop.}

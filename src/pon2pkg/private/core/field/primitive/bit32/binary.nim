@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[bitops]
 import ../../../[intrinsic]
@@ -180,7 +182,7 @@ func clearColumn*(mSelf, col) {.inline.} = mSelf -= mSelf.column col
 # ------------------------------------------------
 
 func leftCenterRightMasks(col):
-    tuple[left: uint32, center: uint32, right: uint32] {.inline.} =
+    tuple[left: uint32; center: uint32; right: uint32] {.inline.} =
   ## Returns `(l, c, r)`; among `l`, `c`, and `r`,
   ## those corresponding to `col` is `uint32.high`, and the rest are `0`.
   let
@@ -191,8 +193,8 @@ func leftCenterRightMasks(col):
   result.center = uint32.high - left - right
   result.right = right
 
-func cellMasks(row, col): tuple[left: uint32, center: uint32, right: uint32]
-              {.inline.} =
+func cellMasks(row, col):
+    tuple[left: uint32; center: uint32; right: uint32] {.inline.} =
   ## Returns three masks with only the bit at position `(row, col)` set to `1`.
   const Mask = 0x2000_0000'u32
 
@@ -204,13 +206,13 @@ func cellMasks(row, col): tuple[left: uint32, center: uint32, right: uint32]
 func `[]`*(self, row, col): bool {.inline.} =
   let (leftMask, centerMask, rightMask) = cellMasks(row, col)
   result = bool bitor(
-    bitand(self.left, leftMask),bitand(self.center, centerMask),
+    bitand(self.left, leftMask), bitand(self.center, centerMask),
     bitand(self.right, rightMask))
 
 func exist*(self, row, col): int {.inline.} = int self[row, col]
   ## Returns `1` if the bit `(row, col)` is set; otherwise, returns `0`.
 
-func `[]=`*(mSelf, row, col; val: bool) {.inline.} =
+func `[]=`*(mSelf; row; col; val: bool) {.inline.} =
   let
     (leftMask, centerMask, rightMask) = cellMasks(row, col)
     cellMask = BinaryField(left: leftMask, center: centerMask, right: rightMask)
@@ -221,7 +223,7 @@ func `[]=`*(mSelf, row, col; val: bool) {.inline.} =
 # Insert / RemoveSqueeze
 # ------------------------------------------------
 
-func aboveMasks(row, col): tuple[left: uint32, center: uint32, right: uint32]
+func aboveMasks(row, col): tuple[left: uint32; center: uint32; right: uint32]
                {.inline.} =
   ## Returns three masks with only the bits above `(row, col)` set to `1`.
   ## Including `(row, col)`.
@@ -236,7 +238,7 @@ func aboveMasks(row, col): tuple[left: uint32, center: uint32, right: uint32]
     uint32.high.masked 16 * (5 - col) + Row.high - row + 1 ..< 16 * (6 - col),
     rightMask)
 
-func belowMasks(row, col): tuple[left: uint32, center: uint32, right: uint32]
+func belowMasks(row, col): tuple[left: uint32; center: uint32; right: uint32]
                {.inline.} =
   ## Returns three masks with only the bits below `(row, col)` set to `1`.
   ## Including `(row, col)`.
@@ -251,7 +253,7 @@ func belowMasks(row, col): tuple[left: uint32, center: uint32, right: uint32]
     uint32.high.masked 16 * (5 - col) .. 16 * (5 - col) + Row.high - row + 1,
     rightMask)
 
-func tsuInsert*(mSelf, row, col; val: bool) {.inline.} =
+func tsuInsert*(mSelf; row; col; val: bool) {.inline.} =
   ## Inserts `val` and shifts the binary field upward
   ## above the location where `val` is inserted.
   let
@@ -265,7 +267,7 @@ func tsuInsert*(mSelf, row, col; val: bool) {.inline.} =
     mSelf - moveField, moveField shl 1,
     (moveMask xor (moveMask shl 1)) * cast[uint32](-val.int32)).trimmed
 
-func waterInsert*(mSelf, row, col; val: bool) {.inline.} =
+func waterInsert*(mSelf; row; col; val: bool) {.inline.} =
   ## Inserts `val` and shifts the field and shifts the field.
   ## If `(row, col)` is in the air, shifts the field upward above
   ## the location where inserted.
@@ -354,7 +356,7 @@ func isZero*(self): bool {.inline.} = self == ZeroBinaryField
 # ------------------------------------------------
 # Shift
 # ------------------------------------------------
-  
+
 func shiftedUpWithoutTrim*(self; amount = 1'i32): BinaryField {.inline.} =
   ## Returns the binary field shifted upward.
   self shl amount

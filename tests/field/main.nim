@@ -1,4 +1,6 @@
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[setutils, strutils, unittest]
 import ../../src/pon2pkg/corepkg/[cell, field {.all.}, misc, pair, position]
@@ -186,7 +188,7 @@ r.....
       var field = field1
       field.flipH
       check field == field3
-    
+
   # ------------------------------------------------
   # Disappear
   # ------------------------------------------------

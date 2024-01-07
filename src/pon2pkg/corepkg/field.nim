@@ -2,9 +2,11 @@
 ## The following implementations are supported:
 ## - Bitboard with AVX2
 ## - Bitboard with primitive types
-## 
+##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[sequtils, setutils, strutils, sugar, tables]
 import ./[cell, misc, moveresult, pair, position]
@@ -278,7 +280,7 @@ func parseField*[F: TsuField or WaterField](str: string): F {.inline.} =
   ## Converts the string representation to the field.
   ## If `str` is not a valid representation, `ValueError` is raised.
   let lines = str.split '\n'
-  if lines.len != Height or lines.anyIt it.len != Width: 
+  if lines.len != Height or lines.anyIt it.len != Width:
     raise newException(ValueError, "Invalid field: " & str)
 
   var arr: array[Row, array[Column, Cell]]
@@ -353,9 +355,9 @@ func toUriQuery*(self: TsuField or WaterField, host: SimulatorHost):
 
     result = $self.rule & IzumiyaUriRuleFieldSep & cellsStr
   of Ishikawa, Ips:
-    var lines = newSeqOfCap[string] Height
+    var lines = newSeqOfCap[string](Height)
     for row in Row.low..Row.high:
-      var chars = newSeqOfCap[char] Height div 2
+      var chars = newSeqOfCap[char](Height div 2)
       for i in 0 ..< Width div 2:
         let
           col = Column 2 * i

@@ -1,4 +1,6 @@
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[unittest]
 import ../../src/pon2pkg/corepkg/[cell, pair {.all.}]

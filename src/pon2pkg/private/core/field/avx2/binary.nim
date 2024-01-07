@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[bitops]
 import nimsimd/[avx2]
@@ -105,7 +107,7 @@ func popcnt*(self; color: static range[0..1]): int {.inline.} =
   let arr = cast[array[4, uint64]](self)
 
   result = arr[Idx].popcount + arr[Idx.succ].popcount
-  
+
 func popcnt*(self): int {.inline.} =
   ## Population count.
   let arr = cast[array[4, uint64]](self)
@@ -127,7 +129,7 @@ func visible*(self): BinaryField {.inline.} =
   ## Returns the binary field with only the visible area.
   self * initMask(0x0000_1FFE_1FFE_1FFE'u64, 0x1FFE_1FFE_1FFE_0000'u64)
 
-func initAirTrimMasks: tuple[left: uint64, right: uint64] {.inline.} =
+func initAirTrimMasks: tuple[left: uint64; right: uint64] {.inline.} =
   ## Constructor of `AirTrimMasks`.
   result.left = 0
   result.left.setMask (13 - AirHeight + 1)..13
@@ -154,7 +156,7 @@ func row*(self, row): BinaryField {.inline.} =
   self * initMask(0x0000_2000_2000_2000'u64 shr row,
                   0x2000_2000_2000_0000'u64 shr row)
 
-func leftRightMasks(col): tuple[left: int64, right: int64] {.inline.} =
+func leftRightMasks(col): tuple[left: int64; right: int64] {.inline.} =
   ## Returns `(-1, 0)` if `col` is in {0, 1, 2}; otherwise returns `(0, -1)`.
   let left = [-1, -1, -1, 0, 0, 0][col]
   result.left = left
@@ -173,12 +175,12 @@ func column*(self, col): BinaryField {.inline.} =
 
 func clearColumn*(mSelf, col) {.inline.} = mSelf -= mSelf.column col
   ## Clears the given column.
-  
+
 # ------------------------------------------------
 # Indexer
 # ------------------------------------------------
 
-func cellMasks(row, col): tuple[left: int64, right: int64] {.inline.} =
+func cellMasks(row, col): tuple[left: int64; right: int64] {.inline.} =
   ## Returns two masks with only the bit at position `(row, col)` set to `1`.
   let (leftMask, rightMask) = col.leftRightMasks
   result.left = bitand(0x0000_2000_0000_0000'i64 shr (16 * col + row), leftMask)
@@ -196,7 +198,7 @@ func exist*(self, row, col): int {.inline.} =
   let which = self[row, col]
   result = int bitor(which.color1, which.color2)
 
-func `[]=`*(mSelf, row, col; which: WhichColor) {.inline.} =
+func `[]=`*(mSelf, row; col; which: WhichColor) {.inline.} =
   let
     (left, right) = cellMasks(row, col)
     color1 = -which.color1
@@ -210,7 +212,7 @@ func `[]=`*(mSelf, row, col; which: WhichColor) {.inline.} =
 # Insert / RemoveSqueeze
 # ------------------------------------------------
 
-func aboveMasks(row, col): tuple[left: int64, right: int64] {.inline.} =
+func aboveMasks(row, col): tuple[left: int64; right: int64] {.inline.} =
   ## Returns two masks with only the bits above `(row, col)` set to `1`.
   ## Including `(row, col)`.
   let (left, right) = col.leftRightMasks
@@ -219,7 +221,7 @@ func aboveMasks(row, col): tuple[left: int64, right: int64] {.inline.} =
   result.right = bitand(
     -1'i64.masked 16 * (6 - col) + Row.high - row + 1 ..< 16 * (7 - col), right)
 
-func belowMasks(row, col): tuple[left: int64, right: int64] {.inline.} =
+func belowMasks(row, col): tuple[left: int64; right: int64] {.inline.} =
   ## Returns two masks with only the bits below `(row, col)` set to `1`.
   ## Including `(row, col)`.
   let (left, right) = col.leftRightMasks
@@ -228,7 +230,7 @@ func belowMasks(row, col): tuple[left: int64, right: int64] {.inline.} =
   result.right = bitand(
     -1'i64.masked 16 * (6 - col) .. 16 * (6 - col) + Row.high - row + 1, right)
 
-func tsuInsert*(mSelf, row, col; which: WhichColor) {.inline.} =
+func tsuInsert*(mSelf, row; col; which: WhichColor) {.inline.} =
   ## Inserts `which` and shifts the field upward above the location
   ## where `which` is inserted.
   let
@@ -244,7 +246,7 @@ func tsuInsert*(mSelf, row, col; which: WhichColor) {.inline.} =
 
   mSelf = mSelf - moveField + ((moveField shl 1).trimmed + insertField)
 
-func waterInsert*(mSelf, row, col; which: WhichColor) {.inline.} =
+func waterInsert*(mSelf, row; col; which: WhichColor) {.inline.} =
   ## Inserts `which` and shifts the field and shifts the field.
   ## If `(row, col)` is in the air, shifts the field upward above
   ## the location where inserted.
