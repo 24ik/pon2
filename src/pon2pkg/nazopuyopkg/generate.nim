@@ -10,9 +10,6 @@ import ../corepkg/[cell, environment, field, misc, pair, position]
 import ../nazopuyopkg/[nazopuyo, solve]
 import ../private/[misc]
 
-when not defined(js):
-  import std/[cpuinfo]
-
 type
   GenerateError* = object of CatchableError
     ## Exception in generation.
@@ -283,7 +280,7 @@ proc generate[F: TsuField or WaterField](
     puyoCounts: tuple[color: Natural, garbage: Natural],
     connect3Counts: tuple[total: Option[Natural], vertical: Option[Natural],
                           horizontal: Option[Natural], lShape: Option[Natural]],
-    allowDouble: bool, allowLastDouble: bool, parallelCount: Positive):
+    allowDouble: bool, allowLastDouble: bool):
     tuple[question: NazoPuyo[F], answer: Positions] {.inline.} =
   ## Returns a randomly generated nazo puyo that has a unique solution.
   ## If generation fails, `GenerateError` will be raised.
@@ -345,7 +342,7 @@ proc generate[F: TsuField or WaterField](
       continue
 
     result.question.requirement = req
-    let answers = result.question.solve(parallelCount, earlyStopping = true)
+    let answers = result.question.solve(earlyStopping = true)
     if answers.len == 1 and answers[0].len == result.question.moveCount:
       result.answer = answers[0]
       return
@@ -360,16 +357,12 @@ proc generate*[F: TsuField or WaterField](
     puyoCounts: tuple[color: Natural, garbage: Natural],
     connect3Counts: tuple[total: Option[Natural], vertical: Option[Natural],
                           horizontal: Option[Natural], lShape: Option[Natural]],
-    allowDouble: bool,
-    allowLastDouble: bool,
-    parallelCount: Positive = (
-      when defined(js): 1 else: max(countProcessors(), 1))):
+    allowDouble: bool, allowLastDouble: bool):
     tuple[question: NazoPuyo[F], answer: Positions] {.inline.} =
   ## Returns a randomly generated nazo puyo that has a unique solution.
   ## If generation fails, `GenerateError` will be raised.
-  ## `parallelCount` will be ignored on JS backend.
   generate[F](some seed, req, moveCount, colorCount, heights, puyoCounts,
-              connect3Counts, allowDouble, allowLastDouble, parallelCount)
+              connect3Counts, allowDouble, allowLastDouble)
 
 proc generate*[F: TsuField or WaterField](
     req: GenerateRequirement, moveCount: Positive, colorCount: range[1..5],
@@ -377,18 +370,14 @@ proc generate*[F: TsuField or WaterField](
     puyoCounts: tuple[color: Natural, garbage: Natural],
     connect3Counts: tuple[total: Option[Natural], vertical: Option[Natural],
                           horizontal: Option[Natural], lShape: Option[Natural]],
-    allowDouble: bool,
-    allowLastDouble: bool,
-    parallelCount: Positive = (
-      when defined(js): 1 else: max(countProcessors(), 1))):
+    allowDouble: bool, allowLastDouble: bool):
     tuple[question: NazoPuyo[F], answer: Positions] {.inline.} =
   ## Returns a randomly generated nazo puyo that has a unique solution.
   ## If generation fails, `GenerateError` will be raised.
-  ## `parallelCount` will be ignored on JS backend.
   {.push warning[ProveInit]: off.}
   result = generate[F](
     none int, req, moveCount, colorCount, heights, puyoCounts, connect3Counts,
-    allowDouble, allowLastDouble, parallelCount)
+    allowDouble, allowLastDouble)
   {.pop.}
 
 proc generates*(
@@ -398,27 +387,23 @@ proc generates*(
     puyoCounts: tuple[color: Natural, garbage: Natural],
     connect3Counts: tuple[total: Option[Natural], vertical: Option[Natural],
                           horizontal: Option[Natural], lShape: Option[Natural]],
-    allowDouble: bool,
-    allowLastDouble: bool,
-    parallelCount: Positive = (
-      when defined(js): 1 else: max(countProcessors(), 1))):
+    allowDouble: bool, allowLastDouble: bool):
     tuple[question: NazoPuyos, answer: Positions] {.inline.} =
   ## Returns a randomly generated nazo puyo that has a unique solution.
   ## If generation fails, `GenerateError` will be raised.
-  ## `parallelCount` will be ignored on JS backend.
   result.question.rule = rule
 
   case rule
   of Tsu:
     (result.question.tsu, result.answer) = generate[TsuField](
       seed, req, moveCount, colorCount, heights, puyoCounts, connect3Counts,
-      allowDouble, allowLastDouble, parallelCount)
+      allowDouble, allowLastDouble)
     result.question.water = initWaterNazoPuyo()
   of Water:
     result.question.tsu = initTsuNazoPuyo()
     (result.question.water, result.answer) = generate[WaterField](
       seed, req, moveCount, colorCount, heights, puyoCounts, connect3Counts,
-      allowDouble, allowLastDouble, parallelCount)
+      allowDouble, allowLastDouble)
 
 proc generates*(
     rule: Rule, req: GenerateRequirement, moveCount: Positive,
@@ -426,24 +411,20 @@ proc generates*(
     puyoCounts: tuple[color: Natural, garbage: Natural],
     connect3Counts: tuple[total: Option[Natural], vertical: Option[Natural],
                           horizontal: Option[Natural], lShape: Option[Natural]],
-    allowDouble: bool,
-    allowLastDouble: bool,
-    parallelCount: Positive = (
-      when defined(js): 1 else: max(countProcessors(), 1))):
+    allowDouble: bool, allowLastDouble: bool):
     tuple[question: NazoPuyos, answer: Positions] {.inline.} =
   ## Returns a randomly generated nazo puyo that has a unique solution.
   ## If generation fails, `GenerateError` will be raised.
-  ## `parallelCount` will be ignored on JS backend.
   result.question.rule = rule
 
   case rule
   of Tsu:
     (result.question.tsu, result.answer) = generate[TsuField](
       req, moveCount, colorCount, heights, puyoCounts, connect3Counts,
-      allowDouble, allowLastDouble, parallelCount)
+      allowDouble, allowLastDouble)
     result.question.water = initWaterNazoPuyo()
   of Water:
     result.question.tsu = initTsuNazoPuyo()
     (result.question.water, result.answer) = generate[WaterField](
       req, moveCount, colorCount, heights, puyoCounts, connect3Counts,
-      allowDouble, allowLastDouble, parallelCount)
+      allowDouble, allowLastDouble)

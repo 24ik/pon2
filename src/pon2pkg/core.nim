@@ -71,9 +71,9 @@ export pair.Deque, pair.`[]`, pair.`[]=`, pair.addFirst, pair.addLast,
   pair.colorCount, pair.garbageCount, pair.parsePair, pair.`$`, pair.parsePairs,
   pair.toUriQuery, pair.toArray
 export position.Direction, position.Position, position.Positions,
-  position.DoublePositions, position.initPosition, position.axisColumn,
-  position.childColumn, position.childDirection, position.movedRight,
-  position.movedLeft, position.moveRight, position.moveLeft,
-  position.rotatedRight, position.rotatedLeft, position.rotateRight,
-  position.rotateLeft, position.`$`, position.parsePosition,
-  position.parsePositions, position.toUriQuery
+  position.AllPositions, position.DoublePositions, position.initPosition,
+  position.axisColumn, position.childColumn, position.childDirection,
+  position.movedRight, position.movedLeft, position.moveRight,
+  position.moveLeft, position.rotatedRight, position.rotatedLeft,
+  position.rotateRight, position.rotateLeft, position.`$`,
+  position.parsePosition, position.parsePositions, position.toUriQuery
