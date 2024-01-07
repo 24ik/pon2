@@ -338,87 +338,88 @@ func solve[F: TsuField or WaterField](
       if result.len > 1:
         return
 
-template monitor(futures: seq[FlowVar[seq[Positions]]],
-                 solvingFutureIdxes: var set[int16],
-                 solvedFutureIdxes: var set[int16],
-                 answers: var seq[Positions], progressBar: var SuruBar) =
-  ## Monitors the futures.
-  # NOTE: we use template instead of proc to remove warning
-  for futureIdx in solvingFutureIdxes:
-    let solved = futures[futureIdx].isReady
-    solvedFutureIdxes[futureIdx] = solved
-    solvingFutureIdxes[futureIdx] = not solved
+when not defined(js):
+  template monitor(futures: seq[FlowVar[seq[Positions]]],
+                  solvingFutureIdxes: var set[int16],
+                  solvedFutureIdxes: var set[int16],
+                  answers: var seq[Positions], progressBar: var SuruBar) =
+    ## Monitors the futures.
+    # NOTE: we use template instead of proc to remove warning
+    for futureIdx in solvingFutureIdxes:
+      let solved = futures[futureIdx].isReady
+      solvedFutureIdxes[futureIdx] = solved
+      solvingFutureIdxes[futureIdx] = not solved
 
-    if solved:
-      answers &= ^futures[futureIdx]
+      if solved:
+        answers &= ^futures[futureIdx]
 
-      progressBar.inc
+        progressBar.inc
+        progressBar.update
+
+  proc setCompleted(progressBar: var SuruBar) {.inline.} =
+    ## Sets the progress bar completed.
+    progressBar.inc progressBar[0].total - progressBar[0].progress
+    progressBar.update
+
+  proc solve[F: TsuField or WaterField](
+      node: Node[F], reqKind: static RequirementKind,
+      reqColor: static RequirementColor, earlyStopping: static bool,
+      spawnDepth: Natural, progressBar: var SuruBar,
+      incValues: openArray[Natural]): seq[Positions] {.inline.} =
+    ## Solves the nazo puyo.
+    ## This version should be used on non-JS backend.
+    if node.isAccepted(reqKind, reqColor):
+      progressBar.inc incValues[node.depth]
       progressBar.update
+      return @[node.positions]
+    if node.isLeaf or node.canPrune(reqKind, reqColor):
+      progressBar.inc incValues[node.depth]
+      progressBar.update
+      return @[]
 
-proc setCompleted(progressBar: var SuruBar) {.inline.} =
-  ## Sets the progress bar completed.
-  progressBar.inc progressBar[0].total - progressBar[0].progress
-  progressBar.update
+    result = @[]
+    let childNodes = node.children(reqKind, reqColor)
+    if node.depth == spawnDepth:
+      var
+        futures = newSeqOfCap[FlowVar[seq[Positions]]](childNodes.len)
+        nextChildIdx = 0'i16
+        solvingFutureIdxes: set[int16] = {}
+        solvedFutureIdxes: set[int16] = {}
+      while nextChildIdx < childNodes.len.int16:
+        if preferSpawn():
+          {.push warning[Effect]: off.}
+          futures.add spawn childNodes[nextChildIdx].solve(
+            reqKind, reqColor, earlyStopping)
+          solvingFutureIdxes.incl nextChildIdx
+          nextChildIdx.inc
+          {.pop.}
+        else:
+          futures.monitor solvingFutureIdxes, solvedFutureIdxes, result,
+            progressBar
+          sleep ParallelSolvingWaitIntervalMs
 
-proc solve[F: TsuField or WaterField](
-    node: Node[F], reqKind: static RequirementKind,
-    reqColor: static RequirementColor, earlyStopping: static bool,
-    spawnDepth: Natural, progressBar: var SuruBar,
-    incValues: openArray[Natural]): seq[Positions] {.inline.} =
-  ## Solves the nazo puyo.
-  ## This version should be used on non-JS backend.
-  if node.isAccepted(reqKind, reqColor):
-    progressBar.inc incValues[node.depth]
-    progressBar.update
-    return @[node.positions]
-  if node.isLeaf or node.canPrune(reqKind, reqColor):
-    progressBar.inc incValues[node.depth]
-    progressBar.update
-    return @[]
+          when earlyStopping:
+            if result.len > 1:
+              progressBar.setCompleted
+              return
 
-  result = @[]
-  let childNodes = node.children(reqKind, reqColor)
-  if node.depth == spawnDepth:
-    var
-      futures = newSeqOfCap[FlowVar[seq[Positions]]](childNodes.len)
-      nextChildIdx = 0'i16
-      solvingFutureIdxes: set[int16] = {}
-      solvedFutureIdxes: set[int16] = {}
-    while nextChildIdx < childNodes.len.int16:
-      if preferSpawn():
-        {.push warning[Effect]: off.}
-        futures.add spawn childNodes[nextChildIdx].solve(
-          reqKind, reqColor, earlyStopping)
-        solvingFutureIdxes.incl nextChildIdx
-        nextChildIdx.inc
-        {.pop.}
-      else:
-        futures.monitor solvingFutureIdxes, solvedFutureIdxes, result,
-          progressBar
+      while solvedFutureIdxes.card < childNodes.len:
+        futures.monitor solvingFutureIdxes, solvedFutureIdxes, result, progressBar
         sleep ParallelSolvingWaitIntervalMs
 
         when earlyStopping:
           if result.len > 1:
             progressBar.setCompleted
             return
+    else:
+      for child in childNodes:
+        result &= child.solve(reqKind, reqColor, earlyStopping, spawnDepth,
+                              progressBar, incValues)
 
-    while solvedFutureIdxes.card < childNodes.len:
-      futures.monitor solvingFutureIdxes, solvedFutureIdxes, result, progressBar
-      sleep ParallelSolvingWaitIntervalMs
-
-      when earlyStopping:
-        if result.len > 1:
-          progressBar.setCompleted
-          return
-  else:
-    for child in childNodes:
-      result &= child.solve(reqKind, reqColor, earlyStopping, spawnDepth,
-                            progressBar, incValues)
-
-      when earlyStopping:
-        if result.len > 1:
-          progressBar.setCompleted
-          return
+        when earlyStopping:
+          if result.len > 1:
+            progressBar.setCompleted
+            return
 
 proc solve[F: TsuField or WaterField](
     nazo: NazoPuyo[F], reqKind: static RequirementKind,
@@ -433,7 +434,7 @@ proc solve[F: TsuField or WaterField](
   when defined(js):
     result = @[]
     for child in rootNode.children(reqKind, reqColor):
-      result &= child.solve(reqKind, reqColor)
+      result &= child.solve(reqKind, reqColor, earlyStopping)
 
       when earlyStopping:
         if result.len > 1:
