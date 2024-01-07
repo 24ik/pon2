@@ -31,7 +31,7 @@ proc main* =
           kind: kind, color: some GenerateRequirementColor.All,
           number: some num),
         moveCount, colorCount, heights, puyoCounts, connect3Counts, false,
-        false, 1)
+        false)
       nazo = genRes.question
       fieldArr = nazo.environment.field.toArray
     {.pop.}

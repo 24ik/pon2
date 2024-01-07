@@ -41,5 +41,7 @@ jobs:
 
       - run: nimble -y test
         if: runner.os == 'Linux'
+      - run: nimble -y -d:avx2=0 test
+        if: runner.os == 'Windows'
       - run: nimble -y -d:avx2=0 -d:bmi2=0 test
         if: runner.os == 'macOS'

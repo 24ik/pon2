@@ -24,18 +24,18 @@ proc main* =
 
     # allow double
     # w/o fixMoves
-    check nazo.permute(newSeq[Positive](0), true, true, 1).toSeq == @[
+    check nazo.permute(newSeq[Positive](0), true, true).toSeq == @[
       result2, result1gbgb]
     # w/ fixMoves
-    check nazo.permute(@[2.Positive], true, true, 1).toSeq == @[
+    check nazo.permute(@[2.Positive], true, true).toSeq == @[
       result1gbbg]
-    check nazo.permute(@[1.Positive, 2.Positive], true, true, 1).toSeq == @[
+    check nazo.permute(@[1.Positive, 2.Positive], true, true).toSeq == @[
       result1bgbg]
 
     # not allow last double
-    check nazo.permute(newSeq[Positive](0), true, false, 1).toSeq == @[
+    check nazo.permute(newSeq[Positive](0), true, false).toSeq == @[
       result1gbgb]
 
     # not allow double
-    check nazo.permute(newSeq[Positive](0), false, false, 1).toSeq == @[
+    check nazo.permute(newSeq[Positive](0), false, false).toSeq == @[
       result1gbgb]
