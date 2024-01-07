@@ -71,7 +71,7 @@ func depth[F: TsuField or WaterField](node: Node[F]): int {.inline.} =
 
 func isLeaf[F: TsuField or WaterField](node: Node[F]): bool {.inline.} =
   ## Returns `true` if the node is a leaf; *i.e.*, all moves are completed.
-  node.environment.pairs.len == 0
+  node.environment.pairs.len == 0 or node.environment.field.isDead
 
 # ------------------------------------------------
 # Child
