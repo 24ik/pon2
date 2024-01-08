@@ -324,7 +324,7 @@ func solve[F: TsuField or WaterField](
     reqColor: static RequirementColor, earlyStopping: static bool):
     seq[Positions] {.inline.} =
   ## Solves the nazo puyo.
-  ## This version should be used in spawned threads or on JS backend.
+  ## This version is assumed to be used in spawned threads or on JS backend.
   if node.isAccepted(reqKind, reqColor):
     return @[node.positions]
   if node.isLeaf or node.canPrune(reqKind, reqColor):
@@ -340,9 +340,9 @@ func solve[F: TsuField or WaterField](
 
 when not defined(js):
   template monitor(futures: seq[FlowVar[seq[Positions]]],
-                  solvingFutureIdxes: var set[int16],
-                  solvedFutureIdxes: var set[int16],
-                  answers: var seq[Positions], progressBar: var SuruBar) =
+                   solvingFutureIdxes: var set[int16],
+                   solvedFutureIdxes: var set[int16],
+                   answers: var seq[Positions], progressBar: var SuruBar) =
     ## Monitors the futures.
     # NOTE: we use template instead of proc to remove warning
     for futureIdx in solvingFutureIdxes:
@@ -367,7 +367,7 @@ when not defined(js):
       spawnDepth: Natural, progressBar: var SuruBar,
       incValues: openArray[Natural]): seq[Positions] {.inline.} =
     ## Solves the nazo puyo.
-    ## This version should be used on non-JS backend.
+    ## This version is assumed to be used on non-JS backend.
     if node.isAccepted(reqKind, reqColor):
       progressBar.inc incValues[node.depth]
       progressBar.update
@@ -377,8 +377,13 @@ when not defined(js):
       progressBar.update
       return @[]
 
-    result = @[]
     let childNodes = node.children(reqKind, reqColor)
+    progressBar.inc incValues[node.depth.succ] * ((
+      if node.environment.pairs.peekFirst.isDouble: DoublePositions
+      else: AllPositions).card - childNodes.len)
+    progressBar.update
+
+    result = @[]
     if node.depth == spawnDepth:
       var
         futures = newSeqOfCap[FlowVar[seq[Positions]]](childNodes.len)
@@ -443,11 +448,11 @@ proc solve[F: TsuField or WaterField](
     let spawnDepth = max(nazo.moveCount - 7, 0) # determined experimentally
 
     var incValues = 0.Natural.repeat spawnDepth.succ 2
-    incValues[^1] = 1 # HACK: this is dummy to simplify the code
+    incValues[^1] = 1 # NOTE: the last 1 is necessary
     for depth in countdown(spawnDepth, 0):
       incValues[depth] = incValues[depth.succ] * (
-        if nazo.environment.pairs[depth].isDouble: DoublePositions.card
-        else: AllPositions.card)
+        if nazo.environment.pairs[depth].isDouble: DoublePositions
+        else: AllPositions).card
 
     var progressBar: SuruBar
     if showProgress:
