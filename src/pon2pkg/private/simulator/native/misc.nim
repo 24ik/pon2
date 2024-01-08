@@ -1,6 +1,10 @@
 ## This module implements miscellaneous things.
 ##
 
+{.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
+
 import std/[math, tables, setutils]
 import nigui
 import ../[render]
@@ -148,5 +152,5 @@ const Dpi = when defined(windows): 144 else: 120 # TODO: better implementation
 
 func pt*(px: int): float {.inline.} = px / Dpi * 72 ## Converts px to pt.
 
-func px*(pt: float): int {.inline.} = (pt / 72 * Dpi).round.int 
+func px*(pt: float): int {.inline.} = (pt / 72 * Dpi).round.int
   ## Converts pt to px.

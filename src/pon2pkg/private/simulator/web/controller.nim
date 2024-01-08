@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[sugar]
 import karax/[karax, karaxdsl, vdom]
@@ -14,10 +16,10 @@ proc controllerNode*(simulator: var Simulator): VNode {.inline.} =
     case simulator.mode
     of Edit:
       tdiv(class = "buttons is-centered mb-0"):
-        button(
-            class = (
-              if simulator.editing.insert: "button is-selected is-primary"
-              else: "button"),
+        let insertButtonClass =
+          if simulator.editing.insert: kstring"button is-selected is-primary"
+          else: kstring"button"
+        button(class = insertButtonClass,
             onclick = () => simulator.toggleInserting):
           span(class = "icon"):
             italic(class = "fa-solid fa-indent")

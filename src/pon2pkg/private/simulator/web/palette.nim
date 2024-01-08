@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[sugar]
 import karax/[karax, karaxdsl, kbase, vdom, vstyles]
@@ -26,20 +28,20 @@ proc paletteNode*(simulator: var Simulator): VNode {.inline.} =
         tr:
           for cell in [None, Red, Green, Blue]:
             td:
-              button(
-                  class =
-                    if cell == simulator.editing.cell: SelectedButtonClass
-                    else: ButtonClass,
-                  onclick = simulator.initClickHandler(cell)):
+              let cellClass =
+                if cell == simulator.editing.cell: SelectedButtonClass
+                else: ButtonClass
+              button(class = cellClass,
+                     onclick = simulator.initClickHandler(cell)):
                 figure(class = "image is-24x24"):
                   img(src = cell.cellImageSrc)
         tr:
           for i, cell in [Yellow, Purple, Garbage]:
             td:
-              button(
-                  class =
-                    if cell == simulator.editing.cell: SelectedButtonClass
-                    else: ButtonClass,
-                  onclick = simulator.initClickHandler(cell)):
+              let cellClass =
+                if cell == simulator.editing.cell: SelectedButtonClass
+                else: ButtonClass
+              button(class = cellClass,
+                     onclick = simulator.initClickHandler(cell)):
                 figure(class = "image is-24x24"):
                   img(src = cell.cellImageSrc)

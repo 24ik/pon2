@@ -1,6 +1,10 @@
 ## This module implements the pairs control.
 ##
 
+{.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
+
 import std/[sugar]
 import nigui
 import ./[assets, misc]

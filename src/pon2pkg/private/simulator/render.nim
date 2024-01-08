@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[options, strformat, uri]
 import ../../corepkg/[cell, field, misc, pair, position]
@@ -121,7 +123,8 @@ func immediateDoubleNextPairCell*(simulator: Simulator, axis: bool): Cell
 const
   DeadMessage = "ばたんきゅ〜"
   NazoMessages: array[MarkResult, string] = [
-    "クリア！", "", "ばたんきゅ〜", "不可能な設置", "設置スキップ", "未対応"]
+    "クリア！", "", "ばたんきゅ〜", "不可能な設置",
+    "設置スキップ", "未対応"]
 
 func getMessage*(simulator: Simulator): string {.inline.} =
   ## Returns the message.

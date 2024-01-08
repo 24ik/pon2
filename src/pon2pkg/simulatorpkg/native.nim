@@ -4,6 +4,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 
 import std/[sugar]
@@ -49,7 +51,7 @@ func initKeyboardEventHandler*: (event: KeyboardEvent) -> void {.inline.} =
 # ------------------------------------------------
 # Control
 # ------------------------------------------------
- 
+
 proc initSimulatorControl*(simulator: ref Simulator): SimulatorControl
                           {.inline.} =
   ## Returns the root control of GUI window.

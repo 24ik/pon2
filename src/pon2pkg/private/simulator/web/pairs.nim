@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[options, sugar]
 import karax/[karax, karaxdsl, kbase, vdom, vstyles]
@@ -38,10 +40,12 @@ proc pairsNode*(simulator: var Simulator, displayMode = false,
   result = buildHtml(table(class = "table is-narrow")):
     tbody:
       for idx, pair in simulator.originalPairs:
-        tr(class =
-            if simulator.needPairPointer(idx) and not displayMode:
-              kstring"is-selected"
-            else: kstring""):
+        let rowClass =
+          if simulator.needPairPointer(idx) and not displayMode:
+            kstring"is-selected"
+          else:
+            kstring""
+        tr(class = rowClass):
           # delete button
           if editMode:
             td:

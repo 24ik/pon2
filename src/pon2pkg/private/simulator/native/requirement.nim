@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[options, sequtils, sugar]
 import nigui
@@ -52,7 +54,7 @@ proc updateDescription(control: RequirementControl) =
 proc kindHandler(control: RequirementControl, event: ComboBoxChangeEvent) =
   ## Changes the requirement kind.
   let
-    kindBox = control.kindComboBox 
+    kindBox = control.kindComboBox
     newKind = RequirementKind kindBox.index
 
   control.simulator[].requirementKind = newKind
@@ -166,9 +168,9 @@ proc updateRequirementControl*(control: RequirementControl, event: ClickEvent)
   ## Updates the requirement control.
   let
     descLabel = control.descriptionLabel
-    kindBox = control.kindComboBox 
-    colorBox = control.colorComboBox 
-    numberBox = control.numberComboBox 
+    kindBox = control.kindComboBox
+    colorBox = control.colorComboBox
+    numberBox = control.numberComboBox
 
   if control.simulator[].kind == Regular:
     descLabel.text = ""

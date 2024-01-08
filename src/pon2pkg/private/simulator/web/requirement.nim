@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[options, strformat, sugar]
 import karax/[karax, karaxdsl, kbase, vdom]

@@ -4,6 +4,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[sugar]
 import nigui
@@ -48,7 +50,7 @@ func initKeyboardEventHandler*: (event: KeyboardEvent) -> void {.inline.} =
 # ------------------------------------------------
 # Control
 # ------------------------------------------------
- 
+
 proc initPuyoSimulatorControl*(simulator: ref Simulator): PuyoSimulatorControl
                               {.inline.} =
   ## Returns the root control of GUI window.

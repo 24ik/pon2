@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[strformat, sugar, tables, uri]
 import karax/[karax, karaxdsl, kbase, kdom, vdom, vstyles]
@@ -37,13 +39,13 @@ func initDownloadHandler(idx: int, withPositions: bool): () -> void =
   # NOTE: cannot inline due to lazy evaluation
   () => (
     block:
-      document.getElementById(
-        cstring &"{DisplayPairDivIdPrefix}{idx}").style.display = (
-          if withPositions: "none" else: "block")
-      document.getElementById(
-        cstring &"{DisplayPairPosDivIdPrefix}{idx}").style.display = (
-          if withPositions: "block" else: "none")
-      downloadDisplayImage(idx))
+    document.getElementById(
+      cstring &"{DisplayPairDivIdPrefix}{idx}").style.display = (
+        if withPositions: "none" else: "block")
+    document.getElementById(
+      cstring &"{DisplayPairPosDivIdPrefix}{idx}").style.display = (
+        if withPositions: "block" else: "none")
+    downloadDisplayImage(idx))
 
 proc showFlashMessage(element: Element, messageHtml: string,
                       timeoutMs = Natural 500) {.inline.} =
@@ -90,21 +92,21 @@ proc initCopyHandler(simulator: Simulator, idx: int,
   if idx notin globalSimulators:
     globalSimulators[idx] = simulator
 
-  () => (
-    block:
-      let
-        idPrefix =
-          if withPositions: PosUrlCopyButtonIdPrefix else: UrlCopyButtonIdPrefix
-        btn = document.getElementById(cstring &"{idPrefix}{idx}")
-      btn.disabled = true
+  () => (block:
+    let
+      idPrefix =
+        if withPositions: PosUrlCopyButtonIdPrefix
+          else: UrlCopyButtonIdPrefix
+      btn = document.getElementById(cstring &"{idPrefix}{idx}")
+    btn.disabled = true
 
-      copyToClipboard cstring $globalSimulators[idx].toUri withPositions
+    copyToClipboard cstring $globalSimulators[idx].toUri withPositions
 
-      btn.showFlashMessage(
-        "<span class='icon'><i class='fa-solid fa-check'></i></span>" &
-        "<span>コピー</span>",
-        UrlCopyMessageShowMs)
-      discard setTimeout(() => (btn.disabled = false), UrlCopyMessageShowMs))
+    btn.showFlashMessage(
+      "<span class='icon'><i class='fa-solid fa-check'></i></span>" &
+      "<span>コピー</span>",
+      UrlCopyMessageShowMs)
+    discard setTimeout(() => (btn.disabled = false), UrlCopyMessageShowMs))
 
 proc shareNode*(simulator: var Simulator, idx = 0): VNode {.inline.} =
   ## Returns the share node.

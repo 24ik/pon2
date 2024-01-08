@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[deques, options, sequtils, uri]
 import ../corepkg/[cell, environment, field, misc, pair, position]
@@ -98,10 +100,10 @@ func initSimulator*[F: TsuField or WaterField](
 
   result.undoDeque = initDeque[
     tuple[environments: Environments,
-          requirement: Requirement]] env.pairs.len
+          requirement: Requirement]](env.pairs.len)
   result.redoDeque = initDeque[
     tuple[environments: Environments,
-          requirement: Requirement]] env.pairs.len
+          requirement: Requirement]](env.pairs.len)
 
   result.next.index = Natural 0
   result.next.position = InitPos
@@ -126,7 +128,7 @@ func initSimulator*[F: TsuField or WaterField](
   result.kind = Nazo
   result.requirement = nazo.requirement
 
-func initSimulator*[F:TsuField or WaterField](
+func initSimulator*[F: TsuField or WaterField](
     nazo: NazoPuyo[F], mode = Play, editor = false): Simulator {.inline.} =
   ## Constructor of `Simulator`.
   ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
@@ -352,9 +354,9 @@ func moveCursorLeft*(mSelf) {.inline.} =
 # ------------------------------------------------
 
 func delete[T](deque: var Deque[T], idx: Natural) {.inline.} =
-    var s = deque.toSeq
-    s.delete idx
-    deque = s.toDeque
+  var s = deque.toSeq
+  s.delete idx
+  deque = s.toDeque
 
 func deletePair*(mSelf; idx: Natural) {.inline.} =
   ## Deletes the pair.
@@ -374,9 +376,9 @@ func deletePair*(mSelf) {.inline.} =
 # ------------------------------------------------
 
 func insert[T](deque: var Deque[T], item: T, idx: Natural) {.inline.} =
-    var s = deque.toSeq
-    s.insert item, idx
-    deque = s.toDeque
+  var s = deque.toSeq
+  s.insert item, idx
+  deque = s.toDeque
 
 func writeCell(mSelf; row: Row, col: Column, cell: Cell) {.inline.} =
   ## Writes the cell to the field.

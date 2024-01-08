@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[httpclient, logging, net, options, appdirs, dirs, files, paths,
             strformat]

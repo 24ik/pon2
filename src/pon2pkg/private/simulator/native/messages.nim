@@ -2,6 +2,8 @@
 ##
 
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[sugar]
 import nigui
@@ -38,7 +40,7 @@ func initMessageDrawHandler(control: MessagesControl):
 proc initMessagesControl*(simulator: ref Simulator, assets: ref Assets):
     MessagesControl {.inline.} =
   ## Returns a messages control.
-  result = new MessagesControl 
+  result = new MessagesControl
   result.init
 
   result.simulator = simulator
