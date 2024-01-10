@@ -54,7 +54,9 @@ task web, "Make Web Page":
     verbose {.booldefine.} = false
 
   # main script
-  exec &"nim js -d:danger={danger} -o:www/index.js src/pon2.nim"
+  # TODO: incorrect danger
+  #exec &"nim js -d:danger={danger} -o:www/index.js src/pon2.nim"
+  exec &"nim js -o:www/index.js src/pon2.nim"
   let cmd =
     if minify:
       "npx --yes google-closure-compiler " &
@@ -63,5 +65,18 @@ task web, "Make Web Page":
     else:
       "cp www/index.js www/index.min.js"
   exec cmd
+
+  # TODO: refactor
+  # worker
+  #exec &"nim js -d:danger={danger} -d:worker -o:www/worker.js src/pon2.nim"
+  exec &"nim js -d:worker -o:www/worker.js src/pon2.nim"
+  let cmd2 =
+    if minify:
+      "npx --yes google-closure-compiler " &
+      (if verbose: "" else: "-W QUIET ") &
+      "--js www/worker.js --js_output_file www/worker.min.js"
+    else:
+      "cp www/worker.js www/worker.min.js"
+  exec cmd2
 
   exec "cp -r assets www"

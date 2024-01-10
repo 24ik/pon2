@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 import std/[sugar]
-import karax/[karax, karaxdsl, vdom]
+import karax/[karax, karaxdsl, kbase, vdom]
 import ../../../corepkg/[misc]
 import ../../../simulatorpkg/[simulator]
 

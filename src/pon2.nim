@@ -15,18 +15,19 @@
 when defined(js):
   import std/[options, sequtils, uri]
   import karax/[karax, karaxdsl, vdom]
+  import ./pon2pkg/apppkg/[editorpermuter]
   import ./pon2pkg/corepkg/[environment, field, misc]
   import ./pon2pkg/nazopuyopkg/[nazopuyo]
   import ./pon2pkg/simulatorpkg/[simulator, web]
 
   var
     pageInitialized = false
-    globalSimulator: Simulator
+    globalEditorPermuter: EditorPermuter
 
-  proc initSimulatorDom(routerData: RouterData): VNode =
-    ## Returns the simulator DOM.
+  proc initEditorPermuterDom(routerData: RouterData): VNode =
+    ## Returns the editor&permuter DOM.
     if pageInitialized:
-      return globalSimulator.initSimulatorDom
+      return globalEditorPermuter.initEditorPermuterDom
 
     pageInitialized = true
     let query =
@@ -42,30 +43,49 @@ when defined(js):
     try:
       let parseRes = uri.parseNazoPuyos
       parseRes.nazoPuyos.flattenAnd:
-        globalSimulator =
+        globalEditorPermuter =
           if parseRes.positions.isSome:
-            nazoPuyo.initSimulator(parseRes.positions.get, parseRes.mode,
-                                   parseRes.editor)
+            nazoPuyo.initEditorPermuter(parseRes.positions.get, parseRes.mode,
+                                        parseRes.editor)
           else:
-            nazoPuyo.initSimulator(parseRes.mode, parseRes.editor)
+            nazoPuyo.initEditorPermuter(parseRes.mode, parseRes.editor)
     except ValueError:
       try:
         let parseRes = uri.parseEnvironments
         parseRes.environments.flattenAnd:
-          globalSimulator =
+          globalEditorPermuter =
             if parseRes.positions.isSome:
-              environment.initSimulator(parseRes.positions.get, parseRes.mode,
-                                        parseRes.editor)
+              environment.initEditorPermuter(parseRes.positions.get,
+                                             parseRes.mode, parseRes.editor)
             else:
-              environment.initSimulator(parseRes.mode, parseRes.editor)
+              environment.initEditorPermuter(parseRes.mode, parseRes.editor)
       except ValueError:
         return buildHtml(tdiv):
           text "URL形式エラー"
 
-    result = globalSimulator.initSimulatorDom
+    result = globalEditorPermuter.initEditorPermuterDom
 
   when isMainModule:
-    initSimulatorDom.setRenderer
+    # TODO: refactor
+    when defined(worker):
+      import std/[sugar]
+      import ./pon2pkg/private/app/web/[webworker]
+      import ./pon2pkg/corepkg/[position]
+      import ./pon2pkg/nazopuyopkg/[solve]
+
+      proc solveTask(args: seq[string]): tuple[returnCode: WorkerReturnCode,
+                                               messages: seq[string]] =
+        if args.len != 1:
+          result.returnCode = Failure
+          result.messages = @["Caught invalid number of arguments: " & $args]
+        else:
+          result.returnCode = Success
+          args[0].parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
+            result.messages = nazoPuyo.solve.mapIt it.toUriQuery Izumiya
+
+      solveTask.assignToWorker
+    else:
+      initEditorPermuterDom.setRenderer
 else:
   import std/[browsers, options, random, sequtils, strformat, strutils, uri]
   import docopt
