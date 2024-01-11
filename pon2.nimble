@@ -22,7 +22,7 @@ requires "suru#f6f1e607c585b2bc2f71309996643f0555ff6349"
 
 # Tasks
 
-import strformat
+import std/[os, sequtils, strformat, strutils]
 
 task test, "Run Tests":
   const
@@ -53,30 +53,33 @@ task web, "Make Web Page":
     minify {.booldefine.} = true
     verbose {.booldefine.} = false
 
-  # main script
-  # TODO: incorrect danger
-  #exec &"nim js -d:danger={danger} -o:www/index.js src/pon2.nim"
-  exec &"nim js -o:www/index.js src/pon2.nim"
-  let cmd =
-    if minify:
-      "npx --yes google-closure-compiler " &
-      (if verbose: "" else: "-W QUIET ") &
-      "--js www/index.js --js_output_file www/index.min.js"
-    else:
-      "cp www/index.js www/index.min.js"
-  exec cmd
+  proc compileAndMinify(src: string, dst: string,
+                        compileOptions: varargs[string]) =
+    let
+      (_, tail) = dst.splitPath
+      rawJs = getTempDir() / &"raw-{tail}"
 
-  # TODO: refactor
-  # worker
-  #exec &"nim js -d:danger={danger} -d:worker -o:www/worker.js src/pon2.nim"
-  exec &"nim js -d:worker -o:www/worker.js src/pon2.nim"
-  let cmd2 =
-    if minify:
-      "npx --yes google-closure-compiler " &
-      (if verbose: "" else: "-W QUIET ") &
-      "--js www/worker.js --js_output_file www/worker.min.js"
-    else:
-      "cp www/worker.js www/worker.min.js"
-  exec cmd2
+    if verbose:
+      echo "[pon2] Raw JS output file: ", rawJs
 
-  exec "cp -r assets www"
+    var cmds = @["nim", "js"] & compileOptions.toSeq
+    if danger:
+      cmds.add "-d:danger"
+    cmds &= [&"-o:{rawJs}", &"{src}"]
+
+    exec cmds.join " "
+
+    if minify:
+      var cmds2 = @["npx", "--yes", "google-closure-compiler"]
+      if not verbose:
+        cmds2 &= ["-W", "QUIET"]
+      cmds2 &= ["--js", &"{rawJs}", "--js_output_file", &"{dst}"]
+
+      exec cmds2.join " "
+    else:
+      cpFile rawJs, dst
+
+  "src/pon2.nim".compileAndMinify "www/index.min.js"
+  "src/pon2.nim".compileAndMinify "www/worker.min.js", "-d:worker"
+
+  cpDir "assets", "www/assets"
