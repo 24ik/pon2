@@ -8,7 +8,8 @@
 const
   Height* = 13
   Width* = 6
-  WaterHeight* {.intdefine.} = 8
+  Pon2WaterHeight {.intdefine.} = 8
+  WaterHeight* = Pon2WaterHeight
   AirHeight* = Height - WaterHeight
 
 static:

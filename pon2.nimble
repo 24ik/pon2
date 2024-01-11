@@ -26,24 +26,26 @@ import std/[os, sequtils, strformat, strutils]
 
 task test, "Run Tests":
   const
-    avx2 {.intdefine.} = 2
-    bmi2 {.intdefine.} = 2
+    Pon2Avx2 {.intdefine.} = 2
+    Pon2Bmi2 {.intdefine.} = 2
 
-  exec &"nim c -r -d:avx2={avx2} -d:bmi2={bmi2} tests/makeTest.nim"
+  exec "nim c -r -d:Pon2Avx2={Pon2Avx2} -d:Pon2Bmi2={Pon2Bmi2} " &
+    "tests/makeTest.nim"
   exec "testament all"
 
 task benchmark, "Benchmarking":
   const
-    avx2 {.booldefine.} = true
-    bmi2 {.booldefine.} = true
+    Pon2Avx2 {.booldefine.} = true
+    Pon2Bmi2 {.booldefine.} = true
 
-  exec &"nim c -r -d:avx2={avx2} -d:bmi2={bmi2} benchmark/main.nim"
+  exec &"nim c -r -d:Pon2Avx2={Pon2Avx2} -d:Pon2Bmi2={Pon2Bmi2} " &
+    "benchmark/main.nim"
 
 task documentation, "Make Documentation":
-  exec &"nim doc --project -d:avx2=true src/pon2.nim"
+  exec &"nim doc --project -d:Pon2Avx2=true src/pon2.nim"
   mvDir "src/htmldocs", "src/htmldocs2"
 
-  exec &"nim doc --project -d:avx2=false src/pon2.nim"
+  exec &"nim doc --project -d:Pon2Avx2=false src/pon2.nim"
   exec "cp -r src/htmldocs2 src/htmldocs"
   rmDir "src/htmldocs2"
 

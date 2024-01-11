@@ -23,7 +23,8 @@ runnableExamples:
 runnableExamples:
   # Worker File
   # The name of the output file should be `worker.min.js`.
-  # This is customizable by the compile option `-d:WorkerFileName=<fileName>`.
+  # To change this, specify the compile option
+  # `-d:Pon2WorkerFileName=<fileName>`.
   import std/[strutils]
   import ./pon2pkg/private/app/web/webworker # change path if needed
 
@@ -62,7 +63,7 @@ type
   Worker* = JsObject ## Web Worker.
 
 const
-  WorkerFileName {.strdefine.} = "worker.min.js"
+  Pon2WorkerFileName {.strdefine.} = "worker.min.js"
 
   DefaultWorkerTask*: WorkerTask =
     (args: seq[string]) => (Success, newSeq[string](0))
@@ -102,7 +103,7 @@ proc run*(worker: Worker, args: varargs[string]) {.inline.} =
 # Constructor
 # ------------------------------------------------
 
-proc initWebWorker: JsObject {.importjs: &"new Worker('{WorkerFileName}')".}
+proc initWebWorker: JsObject {.importjs: &"new Worker('{Pon2WorkerFileName}')".}
   ## Returns the web worker launched by the caller.
 
 proc initWorker*(completeHandler = DefaultWorkerCompleteHandler): Worker

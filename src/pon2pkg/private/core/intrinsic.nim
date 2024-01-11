@@ -10,11 +10,11 @@
 {.experimental: "views".}
 
 const
-  avx2 {.booldefine.} = true
-  bmi2 {.booldefine.} = true
+  Pon2Avx2 {.booldefine.} = true
+  Pon2Bmi2 {.booldefine.} = true
 
-  UseAvx2* = avx2 and (defined(i386) or defined(amd64))
-  UseBmi2* = bmi2 and (defined(i386) or defined(amd64))
+  UseAvx2* = Pon2Avx2 and (defined(i386) or defined(amd64))
+  UseBmi2* = Pon2Bmi2 and (defined(i386) or defined(amd64))
 
 static:
   echo "[pon2] AVX2 is " & (if UseAvx2: "enabled." else: "disabled.")

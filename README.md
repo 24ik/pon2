@@ -30,7 +30,7 @@ You can get the binary at the
 ### Manual Installation
 
 ```shell
-nimble install https://github.com/izumiya-keisuke/pon2 -p:-d:danger -p:-d:avx2=<bool> -p:-d:bmi2=<bool>
+nimble install https://github.com/izumiya-keisuke/pon2 -p:-d:danger -p:-d:Pon2Avx2=<bool> -p:-d:Pon2Bmi2=<bool>
 ```
 
 ## Usage
