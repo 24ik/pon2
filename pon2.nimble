@@ -82,6 +82,6 @@ task web, "Make Web Page":
       cpFile rawJs, dst
 
   "src/pon2.nim".compileAndMinify "www/index.min.js"
-  "src/pon2.nim".compileAndMinify "www/worker.min.js", "-d:worker"
+  "src/pon2.nim".compileAndMinify "www/worker.min.js", "-d:Pon2Worker"
 
   cpDir "assets", "www/assets"

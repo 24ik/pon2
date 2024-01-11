@@ -7,84 +7,87 @@
 ## - [Nazo Puyo](./pon2pkg/nazopuyo.html)
 ## - [Puyo Puyo Simulator](./pon2pkg/simulator.html)
 ##
+## To generate a static web page, compile this file on JS backend.
+## With the compile option `-d:Pon2Worker`, generates the web worker file.
+##
 
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 when defined(js):
-  import std/[options, sequtils, uri]
-  import karax/[karax, karaxdsl, vdom]
-  import ./pon2pkg/apppkg/[editorpermuter]
-  import ./pon2pkg/corepkg/[environment, field, misc]
-  import ./pon2pkg/nazopuyopkg/[nazopuyo]
-  import ./pon2pkg/simulatorpkg/[simulator, web]
+  when defined(Pon2Worker):
+    import std/[sequtils, uri]
+    import ./pon2pkg/private/app/web/[webworker]
+    import ./pon2pkg/corepkg/[misc, position]
+    import ./pon2pkg/nazopuyopkg/[nazopuyo, solve]
 
-  var
-    pageInitialized = false
-    globalEditorPermuter: EditorPermuter
+    proc solveTask(args: seq[string]): tuple[returnCode: WorkerReturnCode,
+                                              messages: seq[string]] =
+      if args.len != 1:
+        result.returnCode = Failure
+        result.messages = @["Caught invalid number of arguments: " & $args]
+      else:
+        result.returnCode = Success
+        args[0].parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
+          result.messages = nazoPuyo.solve.mapIt it.toUriQuery Izumiya
 
-  proc initEditorPermuterDom(routerData: RouterData): VNode =
-    ## Returns the editor&permuter DOM.
-    if pageInitialized:
-      return globalEditorPermuter.initEditorPermuterDom
+    when isMainModule:
+      assignToWorker solveTask
+  else:
+    import std/[options, sequtils, uri]
+    import karax/[karax, karaxdsl, vdom]
+    import ./pon2pkg/apppkg/[editorpermuter]
+    import ./pon2pkg/corepkg/[environment, field, misc]
+    import ./pon2pkg/nazopuyopkg/[nazopuyo]
+    import ./pon2pkg/simulatorpkg/[simulator, web]
 
-    pageInitialized = true
-    let query =
-      if routerData.queryString == cstring"": ""
-      else: ($routerData.queryString)[1..^1] # remove '?'
+    var
+      pageInitialized = false
+      globalEditorPermuter: EditorPermuter
 
-    var uri = initUri()
-    uri.scheme = "https"
-    uri.hostname = $Izumiya
-    uri.path = "/pon2/playground/index.html"
-    uri.query = query
+    proc initEditorPermuterDom(routerData: RouterData): VNode =
+      ## Returns the editor&permuter DOM.
+      if pageInitialized:
+        return globalEditorPermuter.initEditorPermuterDom
 
-    try:
-      let parseRes = uri.parseNazoPuyos
-      parseRes.nazoPuyos.flattenAnd:
-        globalEditorPermuter =
-          if parseRes.positions.isSome:
-            nazoPuyo.initEditorPermuter(parseRes.positions.get, parseRes.mode,
-                                        parseRes.editor)
-          else:
-            nazoPuyo.initEditorPermuter(parseRes.mode, parseRes.editor)
-    except ValueError:
+      pageInitialized = true
+      let query =
+        if routerData.queryString == cstring"": ""
+        else: ($routerData.queryString)[1..^1]             # remove '?'
+
+      var uri = initUri()
+      uri.scheme = "https"
+      uri.hostname = $Izumiya
+      uri.path = "/pon2/playground/index.html"
+      uri.query = query
+
       try:
-        let parseRes = uri.parseEnvironments
-        parseRes.environments.flattenAnd:
+        let parseRes = uri.parseNazoPuyos
+        parseRes.nazoPuyos.flattenAnd:
           globalEditorPermuter =
             if parseRes.positions.isSome:
-              environment.initEditorPermuter(parseRes.positions.get,
-                                             parseRes.mode, parseRes.editor)
+              nazoPuyo.initEditorPermuter(parseRes.positions.get, parseRes.mode,
+                                          parseRes.editor)
             else:
-              environment.initEditorPermuter(parseRes.mode, parseRes.editor)
+              nazoPuyo.initEditorPermuter(parseRes.mode, parseRes.editor)
       except ValueError:
-        return buildHtml(tdiv):
-          text "URL形式エラー"
+        try:
+          let parseRes = uri.parseEnvironments
+          parseRes.environments.flattenAnd:
+            globalEditorPermuter =
+              if parseRes.positions.isSome:
+                environment.initEditorPermuter(parseRes.positions.get,
+                                              parseRes.mode, parseRes.editor)
+              else:
+                environment.initEditorPermuter(parseRes.mode, parseRes.editor)
+        except ValueError:
+          return buildHtml(tdiv):
+            text "URL形式エラー"
 
-    result = globalEditorPermuter.initEditorPermuterDom
+      result = globalEditorPermuter.initEditorPermuterDom
 
-  when isMainModule:
-    # TODO: refactor
-    when defined(worker):
-      import std/[sugar]
-      import ./pon2pkg/private/app/web/[webworker]
-      import ./pon2pkg/corepkg/[position]
-      import ./pon2pkg/nazopuyopkg/[solve]
-
-      proc solveTask(args: seq[string]): tuple[returnCode: WorkerReturnCode,
-                                               messages: seq[string]] =
-        if args.len != 1:
-          result.returnCode = Failure
-          result.messages = @["Caught invalid number of arguments: " & $args]
-        else:
-          result.returnCode = Success
-          args[0].parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
-            result.messages = nazoPuyo.solve.mapIt it.toUriQuery Izumiya
-
-      solveTask.assignToWorker
-    else:
+    when isMainModule:
       initEditorPermuterDom.setRenderer
 else:
   import std/[browsers, options, random, sequtils, strformat, strutils, uri]
