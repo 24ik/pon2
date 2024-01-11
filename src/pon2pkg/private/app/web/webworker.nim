@@ -87,13 +87,8 @@ func split2(str: string, sep: string): seq[string] {.inline.} =
 proc assignToWorker*(task: WorkerTask) {.inline.} =
   ## Assigns the task to the worker.
   proc runTask(event: JsObject) =
-    let args = ($event.data.to(cstring)).split2 MessageSep
-    if args.len == 0:
-      # HACK: Somehow the worker runs unintentionally after `assignToWorker()`,
-      # so we need to branch here.
-      return
-
-    let (returnCode, messages) = task args
+    let (returnCode, messages) = task(
+      ($event.data.to(cstring)).split2 MessageSep)
     getSelf().postMessage(
       cstring &"{returnCode}{HeaderSep}{messages.join MessageSep}")
 
