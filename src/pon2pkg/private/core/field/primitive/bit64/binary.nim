@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 import std/[bitops]
-import ../../../[intrinsic]
+import ../../../../[intrinsic]
 import ../../../../../corepkg/[misc]
 
 type
@@ -179,7 +179,7 @@ func `[]`*(self, row, col): bool {.inline.} =
 func exist*(self, row, col): int {.inline.} = int self[row, col]
   ## Returns `1` if the bit `(row, col)` is set; otherwise, returns `0`.
 
-func `[]=`*(mSelf, row; col; val: bool) {.inline.} =
+func `[]=`*(mSelf; row; col; val: bool) {.inline.} =
   let
     (leftMask, rightMask) = cellMasks(row, col)
     cellMask = BinaryField(left: leftMask, right: rightMask)
@@ -212,7 +212,7 @@ func belowMasks(row, col): tuple[left: uint64; right: uint64] {.inline.} =
     uint64.high.masked 16 * (6 - col) .. 16 * (6 - col) + Row.high - row + 1,
     rightMask)
 
-func tsuInsert*(mSelf, row; col; val: bool) {.inline.} =
+func tsuInsert*(mSelf; row; col; val: bool) {.inline.} =
   ## Inserts `val` and shifts the binary field upward
   ## above the location where `val` is inserted.
   let
@@ -225,7 +225,7 @@ func tsuInsert*(mSelf, row; col; val: bool) {.inline.} =
     mSelf - moveField, moveField shl 1,
     (moveMask xor (moveMask shl 1)) * cast[uint64](-val.int64)).trimmed
 
-func waterInsert*(mSelf, row; col; val: bool) {.inline.} =
+func waterInsert*(mSelf; row; col; val: bool) {.inline.} =
   ## Inserts `val` and shifts the field and shifts the field.
   ## If `(row, col)` is in the air, shifts the field upward above
   ## the location where inserted.

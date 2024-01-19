@@ -5,70 +5,100 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[jsffi, options, sequtils, strformat, strutils, sugar, uri]
-import karax/[karax, karaxdsl, kbase, kdom, vdom]
-import ./[misc, webworker]
-import ../../../apppkg/[editorpermuter]
-import ../../../corepkg/[environment, field, misc, position]
-import ../../../nazopuyopkg/[nazopuyo]
-import ../../../simulatorpkg/[simulator, web]
+import std/[sugar]
+import karax/[karax, kbase, karaxdsl, vdom]
+import ../../../apppkg/[simulator]
+import ../../../corepkg/[misc]
 
-const
-  UriCopyButtonId = "pon2-button-uri"
-  UriCopyMessageShowMs = 500
-
-# FIXME: now multiple editors use the same worker
-var worker: Worker
-
-proc solve*(editorPermuter: var EditorPermuter) {.inline.} =
-  ## Solves the nazo puyo.
-  if (editorPermuter.solving or editorPermuter.editSimulator[].kind != Nazo):
-    return
-
-  editorPermuter.solving = true
-
-  editorPermuter.editSimulator[].withNazoPuyo:
-    proc showAnswers(returnCode: WorkerReturnCode, messages: seq[string]) =
-      case returnCode
-      of Success:
-        editorPermuter.answers = some messages.mapIt it.parsePositions Izumiya
-        editorPermuter.updateAnswer nazoPuyo
-        editorPermuter.solving = false
-
-        if not kxi.surpressRedraws:
-          kxi.redraw
-      of Failure:
-        discard
-
-    worker = initWorker showAnswers
-    worker.run $nazoPuyo.toUri
-
-proc controllerNode*(editorPermuter: var EditorPermuter): VNode {.inline.} =
+proc initControllerNode*(simulator: var Simulator): VNode {.inline.} =
   ## Returns the controller node.
-  result = buildHtml(tdiv(class = "buttons")):
-    let focusButtonClass =
-      if editorPermuter.focusAnswer: kstring"button is-selected is-primary"
-      else: kstring"button"
-    button(class = focusButtonClass,
-           onclick = () => editorPermuter.toggleFocus):
-      text "解答を操作"
+  let insertingButtonClass =
+    if simulator.editing.insert: kstring"button is-selected is-primary"
+    else: kstring"button"
 
-    let solveButtonClass =
-      if editorPermuter.solving: kstring"button is-loading"
-      else: kstring"button"
-    button(class = solveButtonClass, disabled = editorPermuter.solving,
-           onclick = () => editorPermuter.solve):
-      text "解探索"
-
-    let copyButtonClickHandler = () => (block:
-      let btn = document.getElementById UriCopyButtonId
-      btn.disabled = true;
-      copyToClipboard kstring $editorPermuter.editSimulator[].toUri
-      btn.showFlashMessage(
-        "<span class='icon'><i class='fa-solid fa-check'></i></span>" &
-        "<span>コピー</span>", UriCopyMessageShowMs);
-      discard setTimeout(() => (btn.disabled = false),
-                        UriCopyMessageShowMs))
-    button(id = UriCopyButtonId, class = "button",
-           onclick = copyButtonClickHandler):
-      text "Pon!通URLをコピー"
+  result = buildHtml(tdiv):
+    case simulator.mode
+    of Edit:
+      tdiv(class = "buttons is-centered mb-0"):
+        button(class = insertingButtonClass,
+               onclick = () => simulator.toggleInserting):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-indent")
+        button(class = "button is-light", onclick = () => simulator.flipFieldH):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-arrow-right-arrow-left")
+        button(class = "button is-light", onclick = () => simulator.undo):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-circle-arrow-left")
+        button(class = "button is-light", onclick = () => simulator.redo):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-circle-arrow-right")
+      tdiv(class = "buttons is-centered"):
+        button(class = "button is-light",
+               onclick = () => simulator.shiftFieldLeft):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-angles-left")
+        button(class = "button is-light",
+               onclick = () => simulator.shiftFieldDown):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-angles-down")
+        button(class = "button is-light",
+               onclick = () => simulator.shiftFieldUp):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-angles-up")
+        button(class = "button is-light",
+               onclick = () => simulator.shiftFieldRight):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-angles-right")
+    of Play:
+      tdiv(class = "buttons is-centered mb-0"):
+        button(class = "button is-light",
+               onclick = () => simulator.reset(resetPosition = false)):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-backward-fast")
+        button(class = "button is-light",
+               onclick = () => simulator.forward(useNextPosition = false)):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-forward-step")
+        button(class = "button is-light",
+               onclick = () => simulator.forward(skip = true)):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-angles-right")
+      tdiv(class = "buttons is-centered mb-0"):
+        button(class = "button is-info",
+               onclick = () => simulator.rotateNextPositionLeft):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-arrow-rotate-left")
+        button(class = "button is-light",
+               onclick = () => simulator.backward):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-backward-step")
+        button(class = "button is-info",
+               onclick = () => simulator.rotateNextPositionRight):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-arrow-rotate-right")
+      tdiv(class = "buttons is-centered mb-0"):
+        button(class = "button is-info",
+               onclick = () => simulator.moveNextPositionLeft):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-arrow-left")
+        button(class = "button is-info", onclick = () => simulator.forward):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-arrow-down")
+        button(class = "button is-info",
+               onclick = () => simulator.moveNextPositionRight):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-arrow-right")
+    of Replay:
+      tdiv(class = "buttons is-centered"):
+        button(class = "button is-light",
+               onclick = () => simulator.reset(resetPosition = false)):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-backward-fast")
+        button(class = "button is-light", onclick = () => simulator.backward):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-backward-step")
+        button(class = "button is-light",
+               onclick = () => simulator.forward(useNextPosition = false)):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-forward-step")

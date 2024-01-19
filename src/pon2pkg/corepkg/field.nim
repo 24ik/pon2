@@ -10,7 +10,7 @@
 
 import std/[sequtils, setutils, strutils, sugar, tables]
 import ./[cell, misc, moveresult, pair, position]
-import ../private/core/[intrinsic]
+import ../private/[intrinsic]
 import ../private/core/field/[binary]
 
 when UseAvx2:

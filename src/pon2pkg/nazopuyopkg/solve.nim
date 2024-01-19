@@ -166,9 +166,9 @@ func isAccepted[F: TsuField or WaterField](
   when reqKind in {Clear, ChainClear, ChainMoreClear}:
     let fieldCount: int
     when reqColor == RequirementColor.All:
-      fieldCount = node.fieldCounts.sum + node.garbageCount
+      fieldCount = node.fieldCounts.sum2 + node.garbageCount
     elif reqColor == RequirementColor.Color:
-      fieldCount = node.fieldCounts.sum
+      fieldCount = node.fieldCounts.sum2
     elif reqColor == RequirementColor.Garbage:
       fieldCount = node.garbageCount
     else:
@@ -263,7 +263,7 @@ func canPrune[F: TsuField or WaterField](
     when reqColor in {RequirementColor.All, RequirementColor.Color,
                       RequirementColor.Garbage}:
       let colorPossibleCount = (ColorPuyo.low..ColorPuyo.high).mapIt(
-        node.colorCount(it).filter4).sum
+        node.colorCount(it).filter4).sum2
 
       nowPossibleCount =
         when reqColor == RequirementColor.All:
@@ -292,7 +292,7 @@ func canPrune[F: TsuField or WaterField](
     result = possibleCount < node.requirement.number.get
   elif reqKind in {Chain, ChainMore, ChainClear, ChainMoreClear}:
     let possibleChain =
-      sum (ColorPuyo.low..ColorPuyo.high).mapIt node.colorCount(it) div 4
+      sum2 (ColorPuyo.low..ColorPuyo.high).mapIt node.colorCount(it) div 4
     result = possibleChain < node.requirement.number.get
   elif reqKind in {DisappearColorSametime, DisappearColorMoreSametime}:
     let possibleColorCount =
@@ -302,7 +302,7 @@ func canPrune[F: TsuField or WaterField](
     let possiblePlace: int
     when reqColor in {RequirementColor.All, RequirementColor.Color}:
       possiblePlace =
-        sum (ColorPuyo.low..ColorPuyo.high).mapIt (node.colorCount(it) div 4)
+        sum2 (ColorPuyo.low..ColorPuyo.high).mapIt (node.colorCount(it) div 4)
     elif reqColor == RequirementColor.Garbage:
       assert false
       possiblePlace = 0

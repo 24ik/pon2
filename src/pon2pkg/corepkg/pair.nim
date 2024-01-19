@@ -142,7 +142,7 @@ func puyoCount*(pair): int {.inline.} = 2
 
 func puyoCount*(pairs; puyo: Puyo): int {.inline.} =
   ## Returns the number of `puyo` in the pairs.
-  sum pairs.mapIt it.puyoCount puyo
+  sum2 pairs.mapIt it.puyoCount puyo
 
 func puyoCount*(pairs): int {.inline.} = pairs.len * 2
   ## Returns the number of puyos in the pairs.

@@ -1,5 +1,10 @@
 ## This module implements miscellaneous things.
 ##
+## Compile Options:
+## | Option                     | Description            | Default |
+## | -------------------------- | ---------------------- | ------- |
+## | `-d:Pon2WaterHeight=<int>` | Height of the water.   | `8`     |
+##
 
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}

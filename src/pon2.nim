@@ -37,24 +37,23 @@ when defined(js):
   else:
     import std/[options, sequtils, uri]
     import karax/[karax, karaxdsl, vdom]
-    import ./pon2pkg/apppkg/[editorpermuter]
-    import ./pon2pkg/corepkg/[environment, field, misc]
+    import ./pon2pkg/apppkg/[editorpermuter, simulator]
+    import ./pon2pkg/corepkg/[environment, misc]
     import ./pon2pkg/nazopuyopkg/[nazopuyo]
-    import ./pon2pkg/simulatorpkg/[simulator, web]
 
     var
       pageInitialized = false
       globalEditorPermuter: EditorPermuter
 
-    proc initEditorPermuterDom(routerData: RouterData): VNode =
-      ## Returns the editor&permuter DOM.
+    proc initEditorPermuterNode(routerData: RouterData): VNode =
+      ## Returns the editor&permuter node.
       if pageInitialized:
-        return globalEditorPermuter.initEditorPermuterDom
+        return globalEditorPermuter.initEditorPermuterNode
 
       pageInitialized = true
       let query =
         if routerData.queryString == cstring"": ""
-        else: ($routerData.queryString)[1..^1]             # remove '?'
+        else: ($routerData.queryString)[1..^1]
 
       var uri = initUri()
       uri.scheme = "https"
@@ -85,17 +84,17 @@ when defined(js):
           return buildHtml(tdiv):
             text "URL形式エラー"
 
-      result = globalEditorPermuter.initEditorPermuterDom
+      result = globalEditorPermuter.initEditorPermuterNode
 
     when isMainModule:
-      initEditorPermuterDom.setRenderer
+      initEditorPermuterNode.setRenderer
 else:
   import std/[browsers, options, random, sequtils, strformat, strutils, uri]
   import docopt
   import nigui
+  import ./pon2pkg/apppkg/[simulator]
   import ./pon2pkg/corepkg/[environment, field, misc]
   import ./pon2pkg/nazopuyopkg/[generate, nazopuyo, permute, solve]
-  import ./pon2pkg/simulatorpkg/[native, simulator]
 
   # ------------------------------------------------
   # Parse

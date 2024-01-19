@@ -5,8 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/math except sum
-import std/[options, sequtils, setutils, sugar]
+import std/[math, options, sequtils, setutils, sugar]
 import ./[cell, misc]
 import ../private/[misc]
 
@@ -81,14 +80,14 @@ func puyoCount*(self; puyo: Puyo): int {.inline.} =
   ## `UnpackDefect` will be raised if not supported.
   self.totalDisappearCounts.get[puyo]
 
-func puyoCount*(self): int {.inline.} = self.totalDisappearCounts.get.sum
+func puyoCount*(self): int {.inline.} = self.totalDisappearCounts.get.sum2
   ## Returns the number of puyos that disappeared.
   ## `UnpackDefect` will be raised if not supported.
 
 func colorCount*(self): int {.inline.} =
   ## Returns the number of color puyos that disappeared.
   ## `UnpackDefect` will be raised if not supported.
-  self.totalDisappearCounts.get[ColorPuyo.low..ColorPuyo.high].sum
+  self.totalDisappearCounts.get[ColorPuyo.low..ColorPuyo.high].sum2
 
 func garbageCount*(self): int {.inline.} =
   ## Returns the number of garbage puyos that disappeared.
@@ -107,12 +106,12 @@ func puyoCounts*(self; puyo: Puyo): seq[int] {.inline.} =
 func puyoCounts*(self): seq[int] {.inline.} =
   ## Returns the number of puyos that disappeared in each chain.
   ## `UnpackDefect` will be raised if not supported.
-  self.disappearCounts.get.mapIt it.sum
+  self.disappearCounts.get.mapIt it.sum2
 
 func colorCounts*(self): seq[int] {.inline.} =
   ## Returns the number of color puyos that disappeared in each chain.
   ## `UnpackDefect` will be raised if not supported.
-  self.disappearCounts.get.mapIt it[ColorPuyo.low..ColorPuyo.high].sum
+  self.disappearCounts.get.mapIt it[ColorPuyo.low..ColorPuyo.high].sum2
 
 func garbageCounts*(self): seq[int] {.inline.} =
   ## Returns the number of garbage puyos that disappeared in each chain.
@@ -158,7 +157,7 @@ func colorPlaces*(self): seq[int] {.inline.} =
   ## `UnpackDefect` will be raised if not supported.
   collect:
     for countsArr in self.detailDisappearCounts.get:
-      sum (ColorPuyo.low..ColorPuyo.high).mapIt countsArr[it].len
+      sum2 (ColorPuyo.low..ColorPuyo.high).mapIt countsArr[it].len
 
 # ------------------------------------------------
 # Connect
@@ -222,8 +221,8 @@ func score*(self): int {.inline.} =
 
       chainBonus = ChainBonuses[chainIdx.succ]
       connectBonus =
-        sum countsArray[ColorPuyo.low..ColorPuyo.high].mapIt it.connectBonus
+        sum2 countsArray[ColorPuyo.low..ColorPuyo.high].mapIt it.connectBonus
       colorBonus = ColorBonuses[disappearCounts.countIt it > 0]
 
-    result.inc 10 * disappearCounts.sum *
+    result.inc 10 * disappearCounts.sum2 *
       max(chainBonus + connectBonus + colorBonus, 1)

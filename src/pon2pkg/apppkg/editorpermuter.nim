@@ -1,4 +1,4 @@
-## This module implements the editor and permuter.
+## This module implements editor-permuters.
 ##
 
 {.experimental: "strictDefs".}
@@ -6,9 +6,14 @@
 {.experimental: "views".}
 
 import std/[options, sequtils]
+import ./[misc, simulator]
 import ../corepkg/[environment, field, misc, pair, position]
 import ../nazopuyopkg/[nazopuyo]
-import ../simulatorpkg/[simulator]
+import ../private/[misc]
+
+when defined(js):
+  import karax/[karax, karaxdsl, vdom]
+  import ../private/[webworker]
 
 type
   EditorPermuter* = object
@@ -65,8 +70,10 @@ proc initEditorPermuter*[F: TsuField or WaterField](
   result.answerSimulator = new Simulator
   result.answerSimulator[] = initNazoPuyo[F]().initSimulator(Replay, editor)
 
+  {.push warning[ProveInit]: off.}
   result.answers = none seq[Positions]
   result.answerIdx = 0
+  {.pop.}
 
   result.editor = editor
   result.focusAnswer = false
@@ -82,15 +89,12 @@ proc initEditorPermuter*[F: TsuField or WaterField](
 # Edit - Other
 # ------------------------------------------------
 
-func toggleFocus*(mSelf) {.inline.} =
+func toggleFocus*(mSelf) {.inline.} = mSelf.focusAnswer.toggle
   ## Toggles focusing answer or not.
-  mSelf.focusAnswer = not mSelf.focusAnswer
 
 # ------------------------------------------------
 # Solve
 # ------------------------------------------------
-
-# NOTE: solve procedure should be implemented in backend-specific modules.
 
 proc updateAnswer*[F: TsuField or WaterField](mSelf; nazo: NazoPuyo[F])
                   {.inline.} =
@@ -107,6 +111,31 @@ proc updateAnswer*[F: TsuField or WaterField](mSelf; nazo: NazoPuyo[F])
       mSelf.answerSimulator[].editor)
   else:
     mSelf.focusAnswer = false
+
+proc solve*(editorPermuter: var EditorPermuter) {.inline.} =
+  ## Solves the nazo puyo.
+  if (editorPermuter.solving or editorPermuter.editSimulator[].kind != Nazo):
+    return
+
+  editorPermuter.solving = true
+
+  editorPermuter.editSimulator[].withNazoPuyo:
+    when defined(js):
+      proc showAnswers(returnCode: WorkerReturnCode, messages: seq[string]) =
+        case returnCode
+        of Success:
+          editorPermuter.answers = some messages.mapIt it.parsePositions Izumiya
+          editorPermuter.updateAnswer nazoPuyo
+          editorPermuter.solving = false
+
+          if not kxi.surpressRedraws:
+            kxi.redraw
+        of Failure:
+          discard
+
+      showAnswers.initWorker.run $nazoPuyo.toUri
+    else:
+      discard # TODO
 
 # ------------------------------------------------
 # Answer
@@ -142,14 +171,6 @@ proc prevAnswer*(mSelf) {.inline.} =
 # Keyboard Operation
 # ------------------------------------------------
 
-# import (and export) `EditorPermuter.solve`
-when defined(js):
-  import ../private/app/web/[controller]
-  export solve
-else:
-  # TODO: placeholder
-  proc solve(mSelf) = discard
-
 proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
   ## Handler for keyboard input.
   ## Returns `true` if any action is executed.
@@ -181,20 +202,12 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
 # ------------------------------------------------
 
 when defined(js):
-  import std/[jsffi, dom, sugar]
-  import karax/[karax, karaxdsl, vdom]
-  import ../private/app/web/[answer, controller]
-  import ../simulatorpkg/[web]
+  import std/[dom, sugar]
+  import ../private/app/web/answer/[controller, pagination, simulator]
 
   # ------------------------------------------------
   # JS - Keyboard Handler
   # ------------------------------------------------
-
-  # TODO: refactor; duplicate it
-  func toKeyEvent*(event: KeyboardEvent): KeyEvent {.inline.} =
-    ## Converts KeyboardEvent to the KeyEvent.
-    initKeyEvent($event.code, event.shiftKey, event.ctrlKey, event.altKey,
-                event.metaKey)
 
   proc runKeyboardEventHandler*(mSelf; event: KeyEvent) {.inline.} =
     ## Keyboard event handler.
@@ -213,61 +226,59 @@ when defined(js):
     (event: dom.Event) => mSelf.runKeyboardEventHandler event
 
   # ------------------------------------------------
-  # JS - DOM
+  # JS - Node
   # ------------------------------------------------
 
-  proc initEditorPermuterDom(mSelf; idx: int): VNode {.inline.} =
-    ## Returns the editor&permuter DOM without the external section.
-    ## If this procedure is called multiple times,
-    ## different `idx` need to be given.
-    let simulatorDom = mSelf.editSimulator[].initSimulatorDom(
-      setKeyHandler = false, idx = idx)
+  proc initEditorPermuterNode(mSelf; id: string): VNode {.inline.} =
+    ## Returns the editor&permuter node without the external section.
+    ## `id` is shared with other node-creating procedures and need to be unique.
+    let simulatorNode = mSelf.editSimulator[].initSimulatorNode(
+      setKeyHandler = false, id = id)
 
     result = buildHtml(tdiv(class = "columns is-mobile is-variable is-1")):
       tdiv(class = "column is-narrow"):
-        simulatorDom
+        simulatorNode
       tdiv(class = "column is-narrow"):
         section(class = "section"):
           tdiv(class = "block"):
-            mSelf.controllerNode
+            mSelf.initAnswerControllerNode
+          tdiv(class = "block"):
+            mSelf.initAnswerPaginationNode
           if mSelf.answers.isSome:
             tdiv(class = "block"):
-              mSelf.answerNode
+              mSelf.initAnswerSimulatorNode
 
-  proc initEditorPermuterDom*(mSelf; setKeyHandler = true, wrapSection = true,
-                              idx = 0): VNode {.inline.} =
-    ## Returns the editor&permuter DOM.
-    ## If this procedure is called multiple times,
-    ## different `idx` need to be given.
+  proc initEditorPermuterNode*(mSelf; setKeyHandler = true, wrapSection = true,
+                               id = ""): VNode {.inline.} =
+    ## Returns the editor&permuter node.
+    ## `id` is shared with other node-creating procedures and need to be unique.
     if setKeyHandler:
       document.onkeydown = mSelf.initKeyboardEventHandler
 
     if wrapSection:
       result = buildHtml(section(class = "section")):
-        mSelf.initEditorPermuterDom idx
+        mSelf.initEditorPermuterNode id
     else:
-      result = mSelf.initEditorPermuterDom idx
+      result = mSelf.initEditorPermuterNode id
 
-  proc initEditorPermuterDom*[F: TsuField or WaterField](
+  proc initEditorPermuterNode*[F: TsuField or WaterField](
       nazoEnv: NazoPuyo[F] or Environment[F], positions: Positions, mode = Play,
-      editor = false, setKeyHandker = true, wrapSection = true, idx = 0): VNode
+      editor = false, setKeyHandker = true, wrapSection = true, id = ""): VNode
       {.inline.} =
-    ## Returns the editor&permuter DOM.
-    ## If this procedure is called multiple times,
-    ## different `idx` need to be given.
+    ## Returns the editor&permuter node.
+    ## `id` is shared with other node-creating procedures and need to be unique.
     var editorPermuter = nazoEnv.initEditorPermuter(positions, mode, editor)
-    result = editorPermuter.initEditorPermuterDom(setKeyHandker, wrapSection,
-                                                  idx)
+    result = editorPermuter.initEditorPermuterNode(setKeyHandker, wrapSection,
+                                                   id)
 
-  proc initEditorPermuterDom*[F: TsuField or WaterField](
+  proc initEditorPermuterNode*[F: TsuField or WaterField](
       nazoEnv: NazoPuyo[F] or Environment[F], mode = Play, editor = false,
-      setKeyHandker = true, wrapSection = true, idx = 0): VNode {.inline.} =
-    ## Returns the editor&permuter DOM.
-    ## If this procedure is called multiple times,
-    ## different `idx` need to be given.
+      setKeyHandker = true, wrapSection = true, id = ""): VNode {.inline.} =
+    ## Returns the editor&permuter node.
+    ## `id` is shared with other node-creating procedures and need to be unique.
     var editorPermuter = nazoEnv.initEditorPermuter(mode, editor)
-    result = editorPermuter.initEditorPermuterDom(setKeyHandker, wrapSection,
-                                                  idx)
-
+    result = editorPermuter.initEditorPermuterNode(setKeyHandker, wrapSection,
+                                                   id)
 else:
+  # TODO: implement
   discard
