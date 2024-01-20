@@ -9,6 +9,7 @@ import std/[deques, options, sequtils, uri]
 import ./[misc]
 import ../corepkg/[cell, environment, field, misc, pair, position]
 import ../nazopuyopkg/[nazopuyo]
+import ../private/[misc]
 
 type
   SimulatorState* {.pure.} = enum
@@ -263,8 +264,6 @@ template withOriginalField*(self: Simulator, body: untyped): untyped =
 # ------------------------------------------------
 # Edit - Other
 # ------------------------------------------------
-
-func toggle(x: var bool) {.inline.} = x = not x ## Toggles the value.
 
 func toggleInserting*(mSelf) {.inline.} = mSelf.editing.insert.toggle
   ## Toggles inserting or not.
@@ -862,11 +861,11 @@ else:
 
   type
     SimulatorControl* = ref object of LayoutContainer
-      ## Root control of the application window.
+      ## Root control of the simulator.
       simulator*: ref Simulator
 
     SimulatorWindow* = ref object of WindowImpl
-      ## Application window.
+      ## Application window for the simulator.
       simulator*: ref Simulator
 
   # ------------------------------------------------
@@ -897,7 +896,7 @@ else:
 
   proc initSimulatorControl*(simulator: ref Simulator): SimulatorControl
                             {.inline.} =
-    ## Returns the root control of GUI window.
+    ## Returns the simulator control.
     result = new SimulatorControl
     result.init
     result.layout = Layout_Vertical
@@ -940,7 +939,7 @@ else:
 
   proc initSimulatorWindow*(simulator: ref Simulator, title = "ぷよぷよシミュレータ",
                             setKeyHandler = true): SimulatorWindow {.inline.} =
-    ## Returns the GUI window.
+    ## Returns the simulator window.
     result = new SimulatorWindow
     result.init
 

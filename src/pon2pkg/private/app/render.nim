@@ -9,6 +9,7 @@ import std/[options, strformat, uri]
 import ../../apppkg/[misc, simulator]
 import ../../corepkg/[cell, field, misc, pair, position]
 import ../../nazopuyopkg/[mark]
+import ../../private/[misc]
 
 when defined(js):
   import ./web/[misc]
@@ -24,14 +25,16 @@ proc fieldCellBackgroundColor*(
   let hideCursor = when defined(js): isMobile() else: false
 
   result =
-    if (
-      not hideCursor and not displayMode and simulator.mode == Edit and
-      simulator.editing.focusField and
-      (row, col) == simulator.editing.field): SelectColor
-    elif row == Row.low: GhostColor
+    if (not hideCursor and not displayMode and simulator.mode == Edit and
+        simulator.editing.focusField and
+        (row, col) == simulator.editing.field):
+      SelectColor
+    elif row == Row.low:
+      GhostColor
     elif simulator.rule == Water and row in WaterRow.low..WaterRow.high:
       WaterColor
-    else: DefaultColor
+    else:
+      DefaultColor
 
 # ------------------------------------------------
 # Pairs
@@ -132,32 +135,9 @@ func getMessage*(simulator: Simulator): string {.inline.} =
 
 const RuleDescriptions: array[Rule, string] = ["通", "すいちゅう"]
 
-{.push warning[ProveInit]: off.}
-func makeXLink(text = "", hashTag = none string, uri = none Uri): Uri
-              {.inline.} =
-  ## Returns the URI for posting to X.
-  result = initUri()
-  result.scheme = "https"
-  result.hostname = "twitter.com"
-  result.path = "/intent/tweet"
-
-  var queries = @[
-    ("ref_src", "twsrc^tfw|twcamp^buttonembed|twterm^share|twgr^"),
-    ("text", text)]
-  if hashTag.isSome:
-    queries.add ("hashtags", hashTag.get)
-  if uri.isSome:
-    queries.add ("url", $uri.get)
-  result.query = queries.encodeQuery
-{.pop.}
-
 func toXLink*(simulator: Simulator, withPositions: bool): Uri {.inline.} =
   ## Returns the URI for posting to X.
-  {.push warning[ProveInit]: off.}
-  var
-    text = ""
-    hashTag = none string
-  {.pop.}
+  let simulatorUri = simulator.toUri withPositions
 
   if simulator.kind == Nazo:
     let
@@ -165,7 +145,7 @@ func toXLink*(simulator: Simulator, withPositions: bool): Uri {.inline.} =
       moveCountStr = $simulator.pairs.len
       reqStr = $simulator.requirement
 
-    text = &"{ruleStr}・{moveCountStr}手・{reqStr}"
-    hashTag = some "なぞぷよ"
-
-  result = makeXLink(text, hashTag, some simulator.toUri withPositions)
+    result = initXLink(&"{ruleStr}・{moveCountStr}手・{reqStr}", "なぞぷよ",
+                       simulatorUri)
+  else:
+    result = initXLink(uri = simulatorUri)

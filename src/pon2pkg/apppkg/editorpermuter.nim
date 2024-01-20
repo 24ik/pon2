@@ -14,6 +14,12 @@ import ../private/[misc]
 when defined(js):
   import karax/[karax, karaxdsl, vdom]
   import ../private/[webworker]
+else:
+  {.push warning[Deprecated]: off.}
+  import std/[sugar, threadpool]
+  import nigui
+  import ../nazopuyopkg/[solve]
+  {.pop.}
 
 type
   EditorPermuter* = object
@@ -135,7 +141,17 @@ proc solve*(editorPermuter: var EditorPermuter) {.inline.} =
 
       showAnswers.initWorker.run $nazoPuyo.toUri
     else:
-      discard # TODO
+      proc solveWrite =
+        let answers = nazoPuyo.solve
+
+        # FIXME: redraw
+        {.gcsafe.}:
+          app.queueMain () => (block:
+            editorPermuter.answers = some answers
+            editorPermuter.updateAnswer nazoPuyo
+            editorPermuter.solving = false)
+
+      spawn solveWrite()
 
 # ------------------------------------------------
 # Answer
@@ -238,15 +254,17 @@ when defined(js):
     result = buildHtml(tdiv(class = "columns is-mobile is-variable is-1")):
       tdiv(class = "column is-narrow"):
         simulatorNode
-      tdiv(class = "column is-narrow"):
-        section(class = "section"):
-          tdiv(class = "block"):
-            mSelf.initAnswerControllerNode
-          tdiv(class = "block"):
-            mSelf.initAnswerPaginationNode
-          if mSelf.answers.isSome:
+      if mSelf.editor:
+        tdiv(class = "column is-narrow"):
+          section(class = "section"):
             tdiv(class = "block"):
-              mSelf.initAnswerSimulatorNode
+              mSelf.initAnswerControllerNode
+            if mSelf.answers.isSome:
+              tdiv(class = "block"):
+                mSelf.initAnswerPaginationNode
+              if mSelf.answers.isSome:
+                tdiv(class = "block"):
+                  mSelf.initAnswerSimulatorNode
 
   proc initEditorPermuterNode*(mSelf; setKeyHandler = true, wrapSection = true,
                                id = ""): VNode {.inline.} =
@@ -280,5 +298,90 @@ when defined(js):
     result = editorPermuter.initEditorPermuterNode(setKeyHandker, wrapSection,
                                                    id)
 else:
-  # TODO: implement
-  discard
+  import ../private/app/native/answer/[controller, pagination, simulator]
+
+  type
+    EditorPermuterControl* = ref object of LayoutContainer
+      ## Root control of the editor&permuter.
+      editorPermuter*: ref EditorPermuter
+
+    EditorPermuterWindow* = ref object of WindowImpl
+      ## Application window for the editor&permuter.
+      editorPermuter*: ref EditorPermuter
+
+  # ------------------------------------------------
+  # Native - Keyboard Handler
+  # ------------------------------------------------
+
+  proc runKeyboardEventHandler*(
+      window: EditorPermuterWindow, event: KeyboardEvent,
+      keys = downKeys()) {.inline.} =
+    ## Keyboard event handler.
+    let needRedraw = window.editorPermuter[].operate event.toKeyEvent keys
+    if needRedraw:
+      event.window.control.forceRedraw
+
+  proc keyboardEventHandler(event: KeyboardEvent) =
+    ## Keyboard event handler.
+    let rawWindow = event.window
+    assert rawWindow of EditorPermuterWindow
+
+    cast[EditorPermuterWindow](rawWindow).runKeyboardEventHandler event
+
+  func initKeyboardEventHandler*: (event: KeyboardEvent) -> void {.inline.} =
+    ## Returns the keyboard event handler.
+    keyboardEventHandler
+
+  # ------------------------------------------------
+  # Native - Control
+  # ------------------------------------------------
+
+  proc initEditorPermuterControl*(editorPermuter: ref EditorPermuter):
+      EditorPermuterControl {.inline.} =
+    ## Returns the editor&permuter control.
+    result = new EditorPermuterControl
+    result.init
+    result.layout = Layout_Horizontal
+
+    result.editorPermuter = editorPermuter
+
+    # col=0
+    let simulatorControl = editorPermuter[].editSimulator.initSimulatorControl
+    result.add simulatorControl
+
+    # col=1
+    let secondCol = newLayoutContainer Layout_Vertical
+    result.add secondCol
+
+    secondCol.padding = 10.scaleToDpi
+    secondCol.spacing = 10.scaleToDpi
+
+    secondCol.add editorPermuter.initAnswerControllerControl
+    secondCol.add editorPermuter.initAnswerPaginationControl
+    secondCol.add editorPermuter.initAnswerSimulatorControl
+
+  proc initEditorPermuterWindow*(
+      editorPermuter: ref EditorPermuter, title = "Pon!通",
+      setKeyHandler = true): EditorPermuterWindow {.inline.} =
+    ## Returns the editor&permuter window.
+    result = new EditorPermuterWindow
+    result.init
+
+    result.editorPermuter = editorPermuter
+
+    result.title = title
+    result.resizable = false
+    if setKeyHandler:
+      result.onKeyDown = keyboardEventHandler
+
+    let rootControl = editorPermuter.initEditorPermuterControl
+    result.add rootControl
+
+    when defined(windows):
+      # HACK: somehow this adjustment is needed on Windows
+      # TODO: better implementation
+      result.width = (rootControl.naturalWidth.float * 1.1).int
+      result.height = (rootControl.naturalHeight.float * 1.1).int
+    else:
+      result.width = rootControl.naturalWidth
+      result.height = rootControl.naturalHeight

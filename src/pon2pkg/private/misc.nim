@@ -52,14 +52,21 @@ func initXLink*(text = "", hashTag = "", uri = initUri()): Uri {.inline.} =
 # Parse
 # ------------------------------------------------
 
-func parseInt*[T: SomeInteger or Natural or Positive](val: char or string): T
-              {.inline.} =
+func parseSomeInt*[T: SomeNumber or Natural or Positive](val: char): T
+                  {.inline.} =
   ## Converts the char or string to the given type `T`.
   ## If the conversion fails, `ValueError` will be raised.
+  # NOTE: somehow generics for `val` does not work
   T parseInt $val
 
+func parseSomeInt*[T: SomeNumber or Natural or Positive](val: string): T
+                  {.inline.} =
+  ## Converts the char or string to the given type `T`.
+  ## If the conversion fails, `ValueError` will be raised.
+  T parseInt val
+
 when not defined(js):
-  func parseInt*[T: SomeInteger or Natural or Positive](
+  func parseSomeInt*[T: SomeInteger or Natural or Positive](
       val: Value, allowNone = false): Option[T] {.inline.} =
     ## Converts the value to the given type `T`.
     ## If the conversion fails, `ValueError` will be raised.
@@ -74,7 +81,7 @@ when not defined(js):
       if not allowNone:
         raise newException(ValueError, "`val` should have a value.")
     of vkStr:
-      result = some T parseInt $val
+      result = some parseSomeInt[T] $val
     else:
       raise newException(ValueError, "`val` should be `vkNone` or `vkStr`.")
 

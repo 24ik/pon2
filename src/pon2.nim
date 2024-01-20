@@ -18,12 +18,12 @@
 when defined(js):
   when defined(Pon2Worker):
     import std/[sequtils, uri]
-    import ./pon2pkg/private/app/web/[webworker]
     import ./pon2pkg/corepkg/[misc, position]
     import ./pon2pkg/nazopuyopkg/[nazopuyo, solve]
+    import ./pon2pkg/private/app/web/[webworker]
 
     proc solveTask(args: seq[string]): tuple[returnCode: WorkerReturnCode,
-                                              messages: seq[string]] =
+                                             messages: seq[string]] =
       if args.len != 1:
         result.returnCode = Failure
         result.messages = @["Caught invalid number of arguments: " & $args]
@@ -95,36 +95,11 @@ else:
   import ./pon2pkg/apppkg/[simulator]
   import ./pon2pkg/corepkg/[environment, field, misc]
   import ./pon2pkg/nazopuyopkg/[generate, nazopuyo, permute, solve]
+  import ./pon2pkg/private/[misc]
 
   # ------------------------------------------------
   # Parse
   # ------------------------------------------------
-
-  func parseNatural(val: Value, allowNone = false): Option[Natural] {.inline.} =
-    ## Converts the value to the Natural integer.
-    ## If the conversion fails, `ValueError` will be raised.
-    ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is
-    ## returned.
-    {.push warning[ProveInit]: off.}
-    result = none Natural # HACK: dummy to remove warning
-    {.pop.}
-
-    case val.kind
-    of vkNone:
-      {.push warning[ProveInit]: off.}
-      if allowNone:
-        result = none Natural
-      else:
-        raise newException(ValueError, "必須の数値入力が省略されています．")
-      {.pop.}
-    of vkStr:
-      result = some Natural parseInt $val
-    else:
-      assert false
-
-  func parseNatural(val: char or string): Natural {.inline.} = parseInt $val
-    ## Converts the char or string to the Natural integer.
-    ## If the conversion fails, `ValueError` will be raised.
 
   func parseRequirementKind(val: Value, allowNone = false):
       Option[RequirementKind] {.inline.} =
@@ -132,14 +107,14 @@ else:
     ## If the conversion fails, `ValueError` will be raised.
     ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is
     ## returned.
-    let idx = val.parseNatural allowNone
+    let idx = val.parseSomeInt[:int](allowNone)
     {.push warning[ProveInit]: off.}
     if idx.isNone:
       return none RequirementKind
     {.pop.}
 
     if idx.get notin RequirementKind.low.ord..RequirementKind.high.ord:
-      raise newException(ValueError, "クリア条件を表す整数が不適切な値です．")
+      raise newException(ValueError, "Invalid requirement kind.")
 
     result = some RequirementKind idx.get
 
@@ -150,7 +125,7 @@ else:
     ## If the conversion fails, `ValueError` will be raised.
     ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is
     ## returned.
-    let idx = val.parseNatural allowNone
+    let idx = val.parseSomeInt[:int](allowNone)
     {.push warning[ProveInit]: off.}
     if idx.isNone:
       return none GenerateRequirementColor
@@ -158,7 +133,7 @@ else:
 
     if idx.get notin GenerateRequirementColor.low.ord ..
         GenerateRequirementColor.high.ord:
-      raise newException(ValueError, "クリア条件の色を表す整数が不適切な値です．")
+      raise newException(ValueError, "Invalid requirement color.")
 
     result = some GenerateRequirementColor idx.get
 
@@ -168,14 +143,14 @@ else:
     ## If the conversion fails, `ValueError` will be raised.
     ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is
     ## returned.
-    let idx = val.parseNatural allowNone
+    let idx = val.parseSomeInt[:int](allowNone)
     {.push warning[ProveInit]: off.}
     if idx.isNone:
       return none RequirementNumber
     {.pop.}
 
     if idx.get notin RequirementNumber.low.ord..RequirementNumber.high.ord:
-      raise newException(ValueError, "クリア条件の数字を表す整数が不適切な値です．")
+      raise newException(ValueError, "Invalid requirement number.")
 
     result = some RequirementNumber idx.get
 
@@ -184,14 +159,14 @@ else:
     ## If the conversion fails, `ValueError` will be raised.
     ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is
     ## returned.
-    let idx = val.parseNatural allowNone
+    let idx = val.parseSomeInt[:int](allowNone)
     {.push warning[ProveInit]: off.}
     if idx.isNone:
       return none Rule
     {.pop.}
 
     if idx.get notin Rule.low.ord..Rule.high.ord:
-      raise newException(ValueError, "ルールを表す整数が不適切な値です．")
+      raise newException(ValueError, "Invalid rule.")
 
     result = some Rule idx.get
 
@@ -222,7 +197,7 @@ else:
     # RNG
     var rng =
       if args["-s"].kind == vkNone: initRand()
-      else: args["-s"].parseNatural.get.initRand
+      else: args["-s"].parseSomeInt[:Natural].get.initRand
 
     # requirement
     {.push warning[ProveInit]: off.}
@@ -239,30 +214,32 @@ else:
 
     # heights
     if ($args["-H"]).len != 6:
-      raise newException(ValueError, "`-H`オプションには長さ6の文字列のみ指定できます．")
+      raise newException(ValueError, "`-H` option should be the length 6.")
     var heights: array[Column, Option[Natural]]
     {.push warning[ProveInit]: off.}
     heights[Column.low] = none Natural # HACK: dummy to remove warning
     for i, c in ($args["-H"]):
-      heights[Column i] = if c == '+': none Natural else: some c.parseNatural
+      heights[Column i] =
+        if c == '+': none Natural
+        else: some c.parseSomeInt[:Natural]
     {.pop.}
 
     # generate
-    for nazoIdx in 0..<args["-n"].parseNatural.get:
+    for nazoIdx in 0..<args["-n"].parseSomeInt[:Natural].get:
       let (question, answer) = generates(
         (rng.rand int.low..int.high),
         args["-r"].parseRule.get,
         req,
-        args["-m"].parseNatural.get,
-        args["-c"].parseNatural.get,
+        args["-m"].parseSomeInt[:Natural].get,
+        args["-c"].parseSomeInt[:Natural].get,
         heights,
-        (color: args["--nc"].parseNatural.get,
-         garbage: args["--ng"].parseNatural.get),
+        (color: args["--nc"].parseSomeInt[:Natural].get,
+         garbage: args["--ng"].parseSomeInt[:Natural].get),
         (
-          total: args["--tt"].parseNatural true,
-          vertical: args["--tv"].parseNatural true,
-          horizontal: args["--th"].parseNatural true,
-          lShape: args["--tl"].parseNatural true),
+          total: args["--tt"].parseSomeInt[:Natural](true),
+          vertical: args["--tv"].parseSomeInt[:Natural](true),
+          horizontal: args["--th"].parseSomeInt[:Natural](true),
+          lShape: args["--tl"].parseSomeInt[:Natural](true)),
         not args["-D"].to_bool,
         args["-d"].to_bool)
 
@@ -292,7 +269,7 @@ else:
     {.push warning[UnsafeSetLen]: off.}
     ($args["<question>"]).parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
       for (pairs, answer) in nazoPuyo.permute(
-          args["-f"].mapIt(it.parseNatural.Positive),
+          args["-f"].mapIt(it.parseSomeInt[:Positive]),
           not args["-D"].to_bool, args["-d"].to_bool, showProgress = true):
         var nazo = nazoPuyo
         nazo.environment.pairs = pairs
@@ -445,10 +422,9 @@ Options:
 
 when defined(nimdoc):
   # HACK: to generate documentation
+  import ./pon2pkg/app as appDoc
   import ./pon2pkg/core as coreDoc
   import ./pon2pkg/nazopuyo as nazoDoc
-  import ./pon2pkg/simulator as simDoc
-
   discard coreDoc.Cell.None
   discard nazoDoc.MarkResult.Accept
-  discard simDoc.SimulatorState.Stable
+  discard appDoc.SimulatorState.Stable
