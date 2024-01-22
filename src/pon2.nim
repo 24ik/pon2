@@ -18,9 +18,10 @@
 
 when defined(js):
   when defined(Pon2Worker):
-    import std/[sequtils, uri]
-    import ./pon2pkg/corepkg/[misc, position]
+    import std/[sequtils, strutils, sugar, uri]
+    import ./pon2pkg/corepkg/[misc, pair, position]
     import ./pon2pkg/nazopuyopkg/[nazopuyo, solve]
+    import ./pon2pkg/private/[misc]
     import ./pon2pkg/private/app/web/[webworker]
 
     proc workerTask(args: seq[string]): tuple[returnCode: WorkerReturnCode,
@@ -42,9 +43,21 @@ when defined(js):
           result.returnCode = Failure
           result.messages = @["Caught invalid number of arguments: " & $args]
       of $Permute:
-        # TODO
-        result.returnCode = Failure
-        result.messages = @["TODO"]
+        if args2.len >= 3:
+          let fixMoves =
+            if args2.len == 3: newSeq[Positive](0)
+            else: args2[3..^1].mapIt it.parseSomeInt[:Positive]
+
+          result.returnCode = Success
+          args2[0].parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
+            let permuteRes = collect:
+              for (pairs, answer) in nazoPuyo.permute(
+                  fixMoves, args2[1].parseBool, args2[2].parseBool):
+                @[pairs.toUriQuery Izumiya, answer.toUriQuery Izumiya]
+            result.messages = permuteRes.concat
+        else:
+          result.returnCode = Failure
+          result.messages = @["Caught invalid number of arguments: " & $args]
       else:
         result.returnCode = Failure
         result.messages = @["Caught invalid task: " & args[0]]

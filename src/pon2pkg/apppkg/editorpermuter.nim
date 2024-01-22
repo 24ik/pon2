@@ -12,7 +12,7 @@ import ../nazopuyopkg/[nazopuyo]
 import ../private/[misc]
 
 when defined(js):
-  import std/[uri]
+  import std/[sugar, uri]
   import karax/[karax, karaxdsl, vdom]
   import ../private/[webworker]
 else:
@@ -177,9 +177,11 @@ proc permute*(mSelf; fixMoves: seq[Positive], allowDouble: bool,
       proc showReplay(returnCode: WorkerReturnCode, messages: seq[string]) =
         case returnCode
         of Success:
-          # TODO
-          mSelf.replayData = some messages.mapIt (
-            nazoPuyo.environment.pairs, it.parsePositions Izumiya)
+          let replayData = collect:
+            for i in 0 ..< messages.len div 2:
+              (messages[2 * i].parsePairs Izumiya,
+               messages[2 * i + 1].parsePositions Izumiya)
+          mSelf.replayData = some replayData
           mSelf.updateReplaySimulator nazoPuyo
           mSelf.workerRunning = false
 
