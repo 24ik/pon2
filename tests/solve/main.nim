@@ -2,14 +2,16 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, unittest, uri]
+import std/[sequtils, sets, unittest, uri]
 import ../../src/pon2pkg/corepkg/[pair, position]
 import ../../src/pon2pkg/nazopuyopkg/[nazopuyo, solve]
 
 proc checkSolve(questionUri: string, answersStrs: varargs[string]) =
-  let answers = answersStrs.mapIt it.parsePositions
+  {.push warning[ProveInit]: off.}
+  let answers = answersStrs.mapIt(it.parsePositions).toHashSet
   questionUri.parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
-    check nazoPuyo.solve == answers
+    check nazoPuyo.solve.toHashSet == answers
+  {.pop.}
 
 proc main* =
   # ------------------------------------------------
