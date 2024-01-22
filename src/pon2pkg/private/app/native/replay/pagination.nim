@@ -1,4 +1,4 @@
-## This module implements the answer pagination control.
+## This module implements the replay pagination control.
 ##
 
 {.experimental: "strictDefs".}
@@ -9,22 +9,22 @@ import std/[options, strformat, sugar]
 import nigui
 import ../../../../apppkg/[editorpermuter, misc]
 
-type AnswerPaginationControl* = ref object of LayoutContainer
-  ## Answer pagination control.
+type ReplayPaginationControl* = ref object of LayoutContainer
+  ## Replay pagination control.
   editorPermuter: ref EditorPermuter
 
-proc initPrevNextHandler(control: AnswerPaginationControl, next: bool):
+proc initPrevNextHandler(control: ReplayPaginationControl, next: bool):
     (event: ClickEvent) -> void =
   ## Returns the click handler.
   # NOTE: inlining does not work due to lazy evaluation
   (event: ClickEvent) => (block:
     if next:
-      control.editorPermuter[].nextAnswer
+      control.editorPermuter[].nextReplay
     else:
-      control.editorPermuter[].prevAnswer)
+      control.editorPermuter[].prevReplay)
 
-proc drawHandler(control: AnswerPaginationControl): (event: DrawEvent) -> void =
-  ## Draws the answer index.
+proc drawHandler(control: ReplayPaginationControl): (event: DrawEvent) -> void =
+  ## Draws the replay index.
   # NOTE: inlining does not work due to lazy evaluation
   proc handler(event: DrawEvent) =
     let canvas = event.control.canvas
@@ -34,21 +34,21 @@ proc drawHandler(control: AnswerPaginationControl): (event: DrawEvent) -> void =
 
     let
       showIdx =
-        if control.editorPermuter[].answers.isNone: 0
-        elif control.editorPermuter[].answers.get.len == 0: 0
-        else: control.editorPermuter[].answerIdx
+        if control.editorPermuter[].replayData.isNone: 0
+        elif control.editorPermuter[].replayData.get.len == 0: 0
+        else: control.editorPermuter[].replayIdx
       showLen =
-        if control.editorPermuter[].answers.isNone: 0
-        else: control.editorPermuter[].answers.get.len
+        if control.editorPermuter[].replayData.isNone: 0
+        else: control.editorPermuter[].replayData.get.len
 
     canvas.drawText &"{showIdx} / {showLen}"
 
   result = handler
 
-proc initAnswerPaginationControl*(editorPermuter: ref EditorPermuter):
-    AnswerPaginationControl {.inline.} =
-  ## Returns the answer pagination control.
-  result = new AnswerPaginationControl
+proc initReplayPaginationControl*(editorPermuter: ref EditorPermuter):
+    ReplayPaginationControl {.inline.} =
+  ## Returns the replay pagination control.
+  result = new ReplayPaginationControl
   result.init
   result.layout = Layout_Horizontal
 
@@ -56,12 +56,12 @@ proc initAnswerPaginationControl*(editorPermuter: ref EditorPermuter):
 
   let
     prevButton = newButton "前の解"
-    answerIdxControl = newControl()
+    replayIdxControl = newControl()
     nextButton = newButton "次の解"
   result.add prevButton
-  result.add answerIdxControl
+  result.add replayIdxControl
   result.add nextButton
 
   prevButton.onClick = result.initPrevNextHandler false
-  answerIdxControl.onDraw = result.drawHandler
+  replayIdxControl.onDraw = result.drawHandler
   nextButton.onClick = result.initPrevNextHandler true
