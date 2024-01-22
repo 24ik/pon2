@@ -1,5 +1,10 @@
 ## This module implements miscellaneous things.
 ##
+## Compile Options:
+## | Option                     | Description            | Default |
+## | -------------------------- | ---------------------- | ------- |
+## | `-d:Pon2WaterHeight=<int>` | Height of the water.   | `8`     |
+##
 
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
@@ -8,7 +13,8 @@
 const
   Height* = 13
   Width* = 6
-  WaterHeight* {.intdefine.} = 8
+  Pon2WaterHeight {.intdefine.} = 8
+  WaterHeight* = Pon2WaterHeight
   AirHeight* = Height - WaterHeight
 
 static:

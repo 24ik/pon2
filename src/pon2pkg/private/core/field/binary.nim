@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 import std/[bitops, setutils]
-import ../[intrinsic]
+import ../../[intrinsic]
 import ../../../corepkg/[misc, position]
 
 when UseAvx2:

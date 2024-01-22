@@ -8,7 +8,7 @@
 import std/[bitops, sequtils]
 import ./[binary]
 import ../[binary]
-import ../../[unionfind]
+import ../../../[unionfind]
 import ../../../../corepkg/[cell, misc]
 
 type DisappearResult* = object

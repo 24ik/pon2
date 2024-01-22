@@ -3,7 +3,7 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2pkg/private/core/[intrinsic {.all.}]
+import ../../src/pon2pkg/private/[intrinsic {.all.}]
 
 proc main* =
   # ------------------------------------------------

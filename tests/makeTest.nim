@@ -10,8 +10,8 @@ type TestMode = enum
   Both
 
 const
-  avx2 {.intdefine.} = Both
-  bmi2 {.intdefine.} = Both
+  Pon2Avx2 {.intdefine.} = Both
+  Pon2Bmi2 {.intdefine.} = Both
 
 when isMainModule:
   const
@@ -33,13 +33,13 @@ main()
 
     # boolean flags
     BoolValues = [Off: @[false], On: @[true], Both: @[true, false]]
-    Avx2Seq = BoolValues[avx2]
-    Bmi2Seq = BoolValues[bmi2]
+    Avx2Seq = BoolValues[Pon2Avx2]
+    Bmi2Seq = BoolValues[Pon2Bmi2]
 
   let
     matrixSeq = collect:
       for values in product([Avx2Seq, Bmi2Seq]):
-        &"-d:avx2={values[0]} -d:bmi2={values[1]}"
+        &"-d:Pon2Avx2={values[0]} -d:Pon2Bmi2={values[1]}"
 
     # NOTE: On Windows and cpp backend, the test fails due to Nim's bug
     fileContent = FileContentTemplate.replace(

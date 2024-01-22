@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 import std/[bitops]
-import ../../../[intrinsic]
+import ../../../../[intrinsic]
 import ../../../../../corepkg/[misc]
 
 type

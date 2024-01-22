@@ -64,14 +64,15 @@ func colorCount[F: TsuField or WaterField](node: Node[F], color: ColorPuyo): int
   ## Returns the number of `color` puyos that do not disappear yet
   node.fieldCounts[color] + node.pairsCounts[color]
 
-func depth[F: TsuField or WaterField](node: Node[F]): int {.inline.} =
-  ## Returns the node's depth.
-  ## Root's depth is zero.
-  node.positions.len
-
 func isLeaf[F: TsuField or WaterField](node: Node[F]): bool {.inline.} =
   ## Returns `true` if the node is a leaf; *i.e.*, all moves are completed.
   node.environment.pairs.len == 0 or node.environment.field.isDead
+
+when not defined(js): # HACK: suppress warning
+  func depth[F: TsuField or WaterField](node: Node[F]): int {.inline.} =
+    ## Returns the node's depth.
+    ## Root's depth is zero.
+    node.positions.len
 
 # ------------------------------------------------
 # Child
@@ -166,9 +167,9 @@ func isAccepted[F: TsuField or WaterField](
   when reqKind in {Clear, ChainClear, ChainMoreClear}:
     let fieldCount: int
     when reqColor == RequirementColor.All:
-      fieldCount = node.fieldCounts.sum + node.garbageCount
+      fieldCount = node.fieldCounts.sum2 + node.garbageCount
     elif reqColor == RequirementColor.Color:
-      fieldCount = node.fieldCounts.sum
+      fieldCount = node.fieldCounts.sum2
     elif reqColor == RequirementColor.Garbage:
       fieldCount = node.garbageCount
     else:
@@ -263,7 +264,7 @@ func canPrune[F: TsuField or WaterField](
     when reqColor in {RequirementColor.All, RequirementColor.Color,
                       RequirementColor.Garbage}:
       let colorPossibleCount = (ColorPuyo.low..ColorPuyo.high).mapIt(
-        node.colorCount(it).filter4).sum
+        node.colorCount(it).filter4).sum2
 
       nowPossibleCount =
         when reqColor == RequirementColor.All:
@@ -292,7 +293,7 @@ func canPrune[F: TsuField or WaterField](
     result = possibleCount < node.requirement.number.get
   elif reqKind in {Chain, ChainMore, ChainClear, ChainMoreClear}:
     let possibleChain =
-      sum (ColorPuyo.low..ColorPuyo.high).mapIt node.colorCount(it) div 4
+      sum2 (ColorPuyo.low..ColorPuyo.high).mapIt node.colorCount(it) div 4
     result = possibleChain < node.requirement.number.get
   elif reqKind in {DisappearColorSametime, DisappearColorMoreSametime}:
     let possibleColorCount =
@@ -302,7 +303,7 @@ func canPrune[F: TsuField or WaterField](
     let possiblePlace: int
     when reqColor in {RequirementColor.All, RequirementColor.Color}:
       possiblePlace =
-        sum (ColorPuyo.low..ColorPuyo.high).mapIt (node.colorCount(it) div 4)
+        sum2 (ColorPuyo.low..ColorPuyo.high).mapIt (node.colorCount(it) div 4)
     elif reqColor == RequirementColor.Garbage:
       assert false
       possiblePlace = 0
@@ -316,8 +317,6 @@ func canPrune[F: TsuField or WaterField](
 # ------------------------------------------------
 # Solve
 # ------------------------------------------------
-
-const ParallelSolvingWaitIntervalMs = 8
 
 func solve[F: TsuField or WaterField](
     node: Node[F], reqKind: static RequirementKind,
@@ -339,6 +338,8 @@ func solve[F: TsuField or WaterField](
         return
 
 when not defined(js):
+  const ParallelSolvingWaitIntervalMs = 8
+
   template monitor(futures: seq[FlowVar[seq[Positions]]],
                    solvingFutureIdxes: var set[int16],
                    solvedFutureIdxes: var set[int16],
@@ -351,7 +352,9 @@ when not defined(js):
       solvingFutureIdxes[futureIdx] = not solved
 
       if solved:
+        {.push warning[Uninit]: off.}
         answers &= ^futures[futureIdx]
+        {.pop.}
 
         progressBar.inc
         progressBar.update

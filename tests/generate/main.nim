@@ -46,7 +46,7 @@ proc main* =
 
     for col, height in heights:
       if height.isNone:
-        check ((Row.low..Row.high).mapIt int fieldArr[it][col] != None).sum > 0
+        check ((Row.low..Row.high).mapIt int fieldArr[it][col] != None).sum2 > 0
       else:
         if height.get == 0:
           check (Row.low..Row.high).allIt fieldArr[it][col] == None

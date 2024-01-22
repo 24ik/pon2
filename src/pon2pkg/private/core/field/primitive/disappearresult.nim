@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 import std/[sequtils]
-import ../../[unionfind]
+import ../../../[unionfind]
 import ../../../../corepkg/[cell, misc]
 
 when defined(cpu32):

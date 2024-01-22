@@ -13,11 +13,11 @@
 ## - [position](./corepkg/position.html)
 ##
 ## Compile Options:
-## | Option                 | Description            | Default |
-## | ---------------------- | ---------------------- | ------- |
-## | `-d:WaterHeight=<int>` | Height of the water.   | `8`     |
-## | `-d:avx2=<bool>`       | Use AVX2 instructions. | `true`  |
-## | `-d:bmi2=<bool>`       | Use BMI2 instructions. | `true`  |
+## | Option                     | Description            | Default |
+## | -------------------------- | ---------------------- | ------- |
+## | `-d:Pon2WaterHeight=<int>` | Height of the water.   | `8`     |
+## | `-d:Pon2Avx2=<bool>`       | Use AVX2 instructions. | `true`  |
+## | `-d:Pon2Bmi2=<bool>`       | Use BMI2 instructions. | `true`  |
 ##
 
 {.experimental: "strictDefs".}

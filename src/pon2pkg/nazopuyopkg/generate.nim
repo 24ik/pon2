@@ -51,7 +51,7 @@ func split(rng: var Rand, total: Natural, chunkCount: Positive,
 
     var rng = 123.initRand
     let numbers = rng.split(10, 3, false)
-    assert numbers.sum == 10
+    assert numbers.sum2 == 10
     assert numbers.len == 3
     assert numbers.allIt it > 0
 
@@ -116,7 +116,7 @@ func split(rng: var Rand, total: Natural, ratios: openArray[Option[Natural]]):
   if ratios.allIt it.isSome:
     let ratios2 = ratios.mapIt it.get
 
-    let sumRatio = ratios2.sum
+    let sumRatio = ratios2.sum2
     if sumRatio == 0:
       return rng.split(total, ratios.len, true)
 

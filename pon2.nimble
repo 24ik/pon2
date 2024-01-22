@@ -1,6 +1,6 @@
 # Package
 
-version = "0.8.2"
+version = "0.9.0"
 author = "Keisuke Izumiya"
 description = "Puyo Puyo Library"
 license = "Apache-2.0 OR MPL-2.0"
@@ -22,28 +22,30 @@ requires "suru#f6f1e607c585b2bc2f71309996643f0555ff6349"
 
 # Tasks
 
-import strformat
+import std/[os, sequtils, strformat, strutils]
 
 task test, "Run Tests":
   const
-    avx2 {.intdefine.} = 2
-    bmi2 {.intdefine.} = 2
+    Pon2Avx2 {.intdefine.} = 2
+    Pon2Bmi2 {.intdefine.} = 2
 
-  exec &"nim c -r -d:avx2={avx2} -d:bmi2={bmi2} tests/makeTest.nim"
+  exec &"nim c -r -d:Pon2Avx2={Pon2Avx2} -d:Pon2Bmi2={Pon2Bmi2} " &
+    "tests/makeTest.nim"
   exec "testament all"
 
 task benchmark, "Benchmarking":
   const
-    avx2 {.booldefine.} = true
-    bmi2 {.booldefine.} = true
+    Pon2Avx2 {.booldefine.} = true
+    Pon2Bmi2 {.booldefine.} = true
 
-  exec &"nim c -r -d:avx2={avx2} -d:bmi2={bmi2} benchmark/main.nim"
+  exec &"nim c -r -d:Pon2Avx2={Pon2Avx2} -d:Pon2Bmi2={Pon2Bmi2} " &
+    "benchmark/main.nim"
 
 task documentation, "Make Documentation":
-  exec &"nim doc --project -d:avx2=true src/pon2.nim"
+  exec &"nim doc --project -d:Pon2Avx2=true src/pon2.nim"
   mvDir "src/htmldocs", "src/htmldocs2"
 
-  exec &"nim doc --project -d:avx2=false src/pon2.nim"
+  exec &"nim doc --project -d:Pon2Avx2=false src/pon2.nim"
   exec "cp -r src/htmldocs2 src/htmldocs"
   rmDir "src/htmldocs2"
 
@@ -53,15 +55,33 @@ task web, "Make Web Page":
     minify {.booldefine.} = true
     verbose {.booldefine.} = false
 
-  # main script
-  exec &"nim js -d:danger={danger} -o:www/index.js src/pon2.nim"
-  let cmd =
-    if minify:
-      "npx --yes google-closure-compiler " &
-      (if verbose: "" else: "-W QUIET ") &
-      "--js www/index.js --js_output_file www/index.min.js"
-    else:
-      "cp www/index.js www/index.min.js"
-  exec cmd
+  proc compileAndMinify(src: string, dst: string,
+                        compileOptions: varargs[string]) =
+    let
+      (_, tail) = dst.splitPath
+      rawJs = getTempDir() / &"raw-{tail}"
 
-  exec "cp -r assets www"
+    if verbose:
+      echo "[pon2] Raw JS output file: ", rawJs
+
+    var cmds = @["nim", "js"] & compileOptions.toSeq
+    if danger:
+      cmds.add "-d:danger"
+    cmds &= [&"-o:{rawJs}", &"{src}"]
+
+    exec cmds.join " "
+
+    if minify:
+      var cmds2 = @["npx", "--yes", "google-closure-compiler"]
+      if not verbose:
+        cmds2 &= ["-W", "QUIET"]
+      cmds2 &= ["--js", &"{rawJs}", "--js_output_file", &"{dst}"]
+
+      exec cmds2.join " "
+    else:
+      cpFile rawJs, dst
+
+  "src/pon2.nim".compileAndMinify "www/index.min.js"
+  "src/pon2.nim".compileAndMinify "www/worker.min.js", "-d:Pon2Worker"
+
+  cpDir "assets", "www/assets"

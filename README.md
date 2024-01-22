@@ -8,12 +8,10 @@ Features:
 - Generator: Generates the Nazo Puyo.
 - Permuter: Permutes the pairs in the Nazo Puyo to find a unique-solution
 problem.
-- Editor+Simulator: Edits and Plays the Puyo Puyo and Nazo Puyo.
+- GUI Application: GUI simulator for Puyo Puyo and Nazo Puyo.
 
 Not supported now:
-- Wall cell
-- Hard-garbage puyo
-- Iron puyo
+- Wall, Hard-garbage, Iron
 - Fever rule
 - Dropping garbage
 
@@ -30,7 +28,7 @@ You can get the binary at the
 ### Manual Installation
 
 ```shell
-nimble install https://github.com/izumiya-keisuke/pon2 -p:-d:danger -p:-d:avx2=<bool> -p:-d:bmi2=<bool>
+nimble install https://github.com/izumiya-keisuke/pon2 -p:-d:danger -p:-d:Pon2Avx2=<bool> -p:-d:Pon2Bmi2=<bool>
 ```
 
 ## Usage
@@ -39,7 +37,7 @@ See the documentations:
 - [Solver](./docs/solve.md)
 - [Generator](./docs/generate.md)
 - [Permuter](./docs/permute.md)
-- [Editor+Simulator](./docs/edit.md)
+- [GUI Application](./docs/edit.md)
 
 ## For Developers
 

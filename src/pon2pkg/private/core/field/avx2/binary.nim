@@ -7,7 +7,7 @@
 
 import std/[bitops]
 import nimsimd/[avx2]
-import ../../[intrinsic]
+import ../../../[intrinsic]
 import ../../../../corepkg/[misc]
 
 type
@@ -198,7 +198,7 @@ func exist*(self, row, col): int {.inline.} =
   let which = self[row, col]
   result = int bitor(which.color1, which.color2)
 
-func `[]=`*(mSelf, row; col; which: WhichColor) {.inline.} =
+func `[]=`*(mSelf; row; col; which: WhichColor) {.inline.} =
   let
     (left, right) = cellMasks(row, col)
     color1 = -which.color1
@@ -230,7 +230,7 @@ func belowMasks(row, col): tuple[left: int64; right: int64] {.inline.} =
   result.right = bitand(
     -1'i64.masked 16 * (6 - col) .. 16 * (6 - col) + Row.high - row + 1, right)
 
-func tsuInsert*(mSelf, row; col; which: WhichColor) {.inline.} =
+func tsuInsert*(mSelf; row; col; which: WhichColor) {.inline.} =
   ## Inserts `which` and shifts the field upward above the location
   ## where `which` is inserted.
   let
@@ -246,7 +246,7 @@ func tsuInsert*(mSelf, row; col; which: WhichColor) {.inline.} =
 
   mSelf = mSelf - moveField + ((moveField shl 1).trimmed + insertField)
 
-func waterInsert*(mSelf, row; col; which: WhichColor) {.inline.} =
+func waterInsert*(mSelf; row; col; which: WhichColor) {.inline.} =
   ## Inserts `which` and shifts the field and shifts the field.
   ## If `(row, col)` is in the air, shifts the field upward above
   ## the location where inserted.

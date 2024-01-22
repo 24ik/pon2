@@ -39,9 +39,12 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - run: brew install gtk+3
+        if: runner.os == 'macOS'
+
       - run: nimble -y test
         if: runner.os == 'Linux'
-      - run: nimble -y -d:avx2=0 test
+      - run: nimble -y -d:Pon2Avx2=0 test
         if: runner.os == 'Windows'
-      - run: nimble -y -d:avx2=0 -d:bmi2=0 test
+      - run: nimble -y -d:Pon2Avx2=0 -d:Pon2Bmi2=0 test
         if: runner.os == 'macOS'
