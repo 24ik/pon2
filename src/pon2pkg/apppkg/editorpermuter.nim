@@ -53,8 +53,10 @@ proc initEditorPermuter*[F: TsuField or WaterField](
   result.answerSimulator = new Simulator
   result.answerSimulator[] = 0.initEnvironment[:F].initSimulator(Replay, editor)
 
+  {.push warning[ProveInit]: off.}
   result.answers = none seq[Positions]
   result.answerIdx = 0
+  {.pop.}
 
   result.editor = editor
   result.focusAnswer = false
@@ -103,8 +105,8 @@ func toggleFocus*(mSelf) {.inline.} = mSelf.focusAnswer.toggle
 # Solve
 # ------------------------------------------------
 
-proc updateAnswer*[F: TsuField or WaterField](mSelf; nazo: NazoPuyo[F])
-                  {.inline.} =
+proc updateAnswer[F: TsuField or WaterField](mSelf; nazo: NazoPuyo[F])
+                 {.inline.} =
   ## Updates the answer simulator.
   ## This function is assumed to be called after `mSelf.answers` is set.
   assert mSelf.answers.isSome
@@ -142,17 +144,11 @@ proc solve*(editorPermuter: var EditorPermuter) {.inline.} =
 
       showAnswers.initWorker.run $nazoPuyo.toUri
     else:
-      proc solveWrite =
-        let answers = nazoPuyo.solve
-
-        # FIXME: redraw
-        {.gcsafe.}:
-          app.queueMain () => (block:
-            editorPermuter.answers = some answers
-            editorPermuter.updateAnswer nazoPuyo
-            editorPermuter.solving = false)
-
-      spawn solveWrite()
+      # FIXME: make asynchronous
+      # FIXME: redraw
+      editorPermuter.answers = some nazoPuyo.solve
+      editorPermuter.updateAnswer nazoPuyo
+      editorPermuter.solving = false
 
 # ------------------------------------------------
 # Answer

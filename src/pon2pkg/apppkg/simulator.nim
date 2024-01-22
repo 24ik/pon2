@@ -963,5 +963,3 @@ else:
     else:
       result.width = rootControl.naturalWidth
       result.height = rootControl.naturalHeight
-
-export toKeyEvent

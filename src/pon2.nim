@@ -5,10 +5,11 @@
 ## API Documentations:
 ## - [Puyo Puyo](./pon2pkg/core.html)
 ## - [Nazo Puyo](./pon2pkg/nazopuyo.html)
-## - [Puyo Puyo Simulator](./pon2pkg/simulator.html)
+## - [GUI Application](./pon2pkg/app.html)
 ##
 ## To generate a static web page, compile this file on JS backend.
-## With the compile option `-d:Pon2Worker`, generates the web worker file.
+## With the compile option `-d:Pon2Worker`, generates the web worker file
+## instead of the main JS file.
 ##
 
 {.experimental: "strictDefs".}
@@ -92,7 +93,7 @@ else:
   import std/[browsers, options, random, sequtils, strformat, strutils, uri]
   import docopt
   import nigui
-  import ./pon2pkg/apppkg/[simulator]
+  import ./pon2pkg/apppkg/[editorpermuter]
   import ./pon2pkg/corepkg/[environment, field, misc]
   import ./pon2pkg/nazopuyopkg/[generate, nazopuyo, permute, solve]
   import ./pon2pkg/private/[misc]
@@ -192,7 +193,7 @@ else:
   # Generate
   # ------------------------------------------------
 
-  proc runGenerator*(args: Table[string, Value]) {.inline.} =
+  proc runGenerator(args: Table[string, Value]) {.inline.} =
     ## Runs the CUI generator.
     # RNG
     var rng =
@@ -262,7 +263,7 @@ else:
   # Permute
   # ------------------------------------------------
 
-  proc runPermuter*(args: Table[string, Value]) {.inline.} =
+  proc runPermuter(args: Table[string, Value]) {.inline.} =
     ## Runs the CUI permuter.
     var idx = 0
     {.push warning[UnsafeDefault]: off.}
@@ -294,37 +295,37 @@ else:
   # Editor
   # ------------------------------------------------
 
-  proc runEditor(args: Table[string, Value]) {.inline.} =
-    ## Runs the GUI Editor.
-    # prepare simulator
-    let simulator = new Simulator
+  proc runEditorPermuter(args: Table[string, Value]) {.inline.} =
+    ## Runs the GUI editor&permuter.
+    let editorPermuter = new EditorPermuter
     case args["<uri>"].kind
     of vkNone:
-      simulator[] = initTsuEnvironment().initSimulator
+      editorPermuter[] = initTsuEnvironment().initEditorPermuter
     of vkStr:
       let inputUri = ($args["<uri>"]).parseUri
       try:
         let parseRes = inputUri.parseNazoPuyos
         parseRes.nazoPuyos.flattenAnd:
           if parseRes.positions.isSome:
-            simulator[] = nazoPuyo.initSimulator(
+            editorPermuter[] = nazoPuyo.initEditorPermuter(
               parseRes.positions.get, parseRes.mode, parseRes.editor)
           else:
-            simulator[] = nazoPuyo.initSimulator(parseRes.mode, parseRes.editor)
+            editorPermuter[] = nazoPuyo.initEditorPermuter(
+              parseRes.mode, parseRes.editor)
       except ValueError:
         let parseRes = inputUri.parseEnvironments
         parseRes.environments.flattenAnd:
           if parseRes.positions.isSome:
-            simulator[] = environment.initSimulator(
+            editorPermuter[] = environment.initEditorPermuter(
               parseRes.positions.get, parseRes.mode, parseRes.editor)
           else:
-            simulator[] = environment.initSimulator(
+            editorPermuter[] = environment.initEditorPermuter(
               parseRes.mode, parseRes.editor)
     else:
       assert false
 
     app.init
-    simulator.initSimulatorWindow.show
+    editorPermuter.initEditorPermuterWindow.show
     app.run
 
   # ------------------------------------------------
@@ -338,7 +339,7 @@ else:
 * なぞぷよ解探索
 * なぞぷよ生成
 * なぞぷよツモ探索
-* ぷよぷよ（なぞぷよ）シミュレータ・エディタ
+* GUIアプリケーション
 
 Usage:
   pon2 (solve | s) <question> [-bB] [-h | --help]
@@ -418,7 +419,7 @@ Options:
     elif args["permute"] or args["p"]:
       args.runPermuter
     else:
-      args.runEditor
+      args.runEditorPermuter
 
 when defined(nimdoc):
   # HACK: to generate documentation

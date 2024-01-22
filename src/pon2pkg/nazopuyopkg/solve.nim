@@ -352,7 +352,9 @@ when not defined(js):
       solvingFutureIdxes[futureIdx] = not solved
 
       if solved:
+        {.push warning[Uninit]: off.}
         answers &= ^futures[futureIdx]
+        {.pop.}
 
         progressBar.inc
         progressBar.update

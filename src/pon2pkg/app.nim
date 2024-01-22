@@ -16,36 +16,45 @@
 
 import ./apppkg/[editorpermuter, misc, simulator]
 
-#[
-export simulator.SimulatorState, simulator.Simulator, simulator.KeyEvent,
-  simulator.initKeyEvent, simulator.initSimulator, simulator.`rule`,
-  simulator.`kind`, simulator.`mode`, simulator.`rule=`, simulator.`kind=`,
-  simulator.`mode=`, simulator.tsuNazoPuyo, simulator.waterNazoPuyo,
-  simulator.originalTsuNazoPuyo, simulator.originalWaterNazoPuyo,
-  simulator.pairs, simulator.originalPairs, simulator.withNazoPuyo,
-  simulator.withOriginalNazoPuyo, simulator.withEnvironment,
-  simulator.withOriginalEnvironment, simulator.withField,
-  simulator.withOriginalField, simulator.toggleInserting, simulator.toggleFocus,
-  simulator.moveCursorUp, simulator.moveCursorDown, simulator.moveCursorRight,
-  simulator.moveCursorLeft, simulator.deletePair, simulator.writeCell,
-  simulator.shiftFieldUp, simulator.shiftFieldDown, simulator.shiftFieldRight,
-  simulator.shiftFieldLeft, simulator.flipFieldV, simulator.flipFieldH,
-  simulator.`requirementKind=`, simulator.`requirementColor=`,
-  simulator.`requirementNumber=`, simulator.undo, simulator.redo,
-  simulator.moveNextPositionRight, simulator.moveNextPositionLeft,
-  simulator.rotateNextPositionRight, simulator.rotateNextPositionLeft,
-  simulator.forward, simulator.backward, simulator.reset, simulator.toUri,
-  simulator.operate
+export editorpermuter.EditorPermuter, editorpermuter.initEditorPermuter,
+  editorpermuter.toggleFocus, editorpermuter.solve, editorpermuter.nextAnswer,
+  editorpermuter.prevAnswer, editorpermuter.operate
+export misc.KeyEvent, misc.Color, misc.SelectColor, misc.GhostColor,
+  misc.WaterColor, misc.DefaultColor, misc.initKeyEvent
+export simulator.SimulatorState, simulator.Simulator, simulator.initSimulator,
+  simulator.`rule`, simulator.`kind`, simulator.`mode`, simulator.`rule=`,
+  simulator.`kind=`, simulator.`mode=`, simulator.tsuNazoPuyo,
+  simulator.waterNazoPuyo, simulator.originalTsuNazoPuyo,
+  simulator.originalWaterNazoPuyo, simulator.pairs, simulator.originalPairs,
+  simulator.withNazoPuyo, simulator.withOriginalNazoPuyo,
+  simulator.withEnvironment, simulator.withOriginalEnvironment,
+  simulator.withField, simulator.withOriginalField, simulator.toggleInserting,
+  simulator.toggleFocus, simulator.moveCursorUp, simulator.moveCursorDown,
+  simulator.moveCursorRight, simulator.moveCursorLeft, simulator.deletePair,
+  simulator.writeCell, simulator.shiftFieldUp, simulator.shiftFieldDown,
+  simulator.shiftFieldRight, simulator.shiftFieldLeft, simulator.flipFieldV,
+  simulator.flipFieldH, simulator.`requirementKind=`,
+  simulator.`requirementColor=`, simulator.`requirementNumber=`, simulator.undo,
+  simulator.redo, simulator.moveNextPositionRight,
+  simulator.moveNextPositionLeft, simulator.rotateNextPositionRight,
+  simulator.rotateNextPositionLeft, simulator.forward, simulator.backward,
+  simulator.reset, simulator.toUri, simulator.operate
 
 when defined(js):
-  import ./simulatorpkg/[web]
-
-  export web.toKeyEvent, web.runKeyboardEventHandler,
-    web.initKeyboardEventHandler, web.initPuyoSimulatorDom
+  export editorpermuter.runKeyboardEventHandler,
+    editorpermuter.initKeyboardEventHandler,
+    editorpermuter.initEditorPermuterNode
+  export misc.toColorCode, misc.toKeyEvent
+  export simulator.runKeyboardEventHandler, simulator.initKeyboardEventHandler,
+    simulator.initSimulatorNode
 else:
-  import ./simulatorpkg/[native]
-
-  export native.toKeyEvent, native.SimulatorControl, native.SimulatorWindow,
-    native.runKeyboardEventHandler, native.initKeyboardEventHandler,
-    native.initSimulatorControl, native.initSimulatorWindow
-]#
+  export editorpermuter.EditorPermuterControl,
+    editorpermuter.EditorPermuterWindow, editorpermuter.runKeyboardEventHandler,
+    editorpermuter.initKeyboardEventHandler,
+    editorpermuter.initEditorPermuterControl,
+    editorpermuter.initEditorPermuterWindow
+  export misc.ColorButton, misc.initColorButton, misc.handleDrawEvent,
+    misc.toNiguiColor, misc.toKeyEvent
+  export simulator.SimulatorControl, simulator.SimulatorWindow,
+    simulator.runKeyboardEventHandler, simulator.initKeyboardEventHandler,
+    simulator.initSimulatorControl, simulator.initSimulatorWindow
