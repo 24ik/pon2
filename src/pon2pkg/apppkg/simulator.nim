@@ -133,6 +133,8 @@ func `rule=`*(mSelf; rule: Rule) {.inline.} =
   of Tsu: mSelf.environments.tsu = mSelf.environments.water.toTsuEnvironment
   of Water: mSelf.environments.water = mSelf.environments.tsu.toWaterEnvironment
 
+  mSelf.originalEnvironments = mSelf.environments
+
 func `kind=`*(mSelf; kind: SimulatorKind) {.inline.} =
   if kind == mSelf.kind:
     return

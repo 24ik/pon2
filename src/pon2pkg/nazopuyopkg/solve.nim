@@ -64,14 +64,15 @@ func colorCount[F: TsuField or WaterField](node: Node[F], color: ColorPuyo): int
   ## Returns the number of `color` puyos that do not disappear yet
   node.fieldCounts[color] + node.pairsCounts[color]
 
-func depth[F: TsuField or WaterField](node: Node[F]): int {.inline.} =
-  ## Returns the node's depth.
-  ## Root's depth is zero.
-  node.positions.len
-
 func isLeaf[F: TsuField or WaterField](node: Node[F]): bool {.inline.} =
   ## Returns `true` if the node is a leaf; *i.e.*, all moves are completed.
   node.environment.pairs.len == 0 or node.environment.field.isDead
+
+when not defined(js): # HACK: suppress warning
+  func depth[F: TsuField or WaterField](node: Node[F]): int {.inline.} =
+    ## Returns the node's depth.
+    ## Root's depth is zero.
+    node.positions.len
 
 # ------------------------------------------------
 # Child
@@ -317,8 +318,6 @@ func canPrune[F: TsuField or WaterField](
 # Solve
 # ------------------------------------------------
 
-const ParallelSolvingWaitIntervalMs = 8
-
 func solve[F: TsuField or WaterField](
     node: Node[F], reqKind: static RequirementKind,
     reqColor: static RequirementColor, earlyStopping: static bool):
@@ -339,6 +338,8 @@ func solve[F: TsuField or WaterField](
         return
 
 when not defined(js):
+  const ParallelSolvingWaitIntervalMs = 8
+
   template monitor(futures: seq[FlowVar[seq[Positions]]],
                    solvingFutureIdxes: var set[int16],
                    solvedFutureIdxes: var set[int16],

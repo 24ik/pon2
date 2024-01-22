@@ -93,7 +93,7 @@ proc initShareNode*(simulator: var Simulator, id = ""): VNode {.inline.} =
           text "操作有"
     if simulator.editor:
       tdiv(class = "block"):
-        text "URLコピー（編集者モード）"
+        text "編集者URLコピー"
         tdiv(class = "buttons"):
           button(id = editorUrlCopyButtonId.kstring, class = "button is-size-7",
                  onclick = initCopyButtonHandler(

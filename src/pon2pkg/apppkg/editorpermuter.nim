@@ -12,6 +12,7 @@ import ../nazopuyopkg/[nazopuyo]
 import ../private/[misc]
 
 when defined(js):
+  import std/[uri]
   import karax/[karax, karaxdsl, vdom]
   import ../private/[webworker]
 else:
