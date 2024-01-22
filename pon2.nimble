@@ -29,7 +29,7 @@ task test, "Run Tests":
     Pon2Avx2 {.intdefine.} = 2
     Pon2Bmi2 {.intdefine.} = 2
 
-  exec "nim c -r -d:Pon2Avx2={Pon2Avx2} -d:Pon2Bmi2={Pon2Bmi2} " &
+  exec &"nim c -r -d:Pon2Avx2={Pon2Avx2} -d:Pon2Bmi2={Pon2Bmi2} " &
     "tests/makeTest.nim"
   exec "testament all"
 
