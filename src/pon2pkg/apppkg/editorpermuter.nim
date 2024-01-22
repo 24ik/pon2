@@ -19,7 +19,7 @@ else:
   {.push warning[Deprecated]: off.}
   import std/[sugar, threadpool]
   import nigui
-  import ../nazopuyopkg/[solve]
+  import ../nazopuyopkg/[permute, solve]
   {.pop.}
 
 type
@@ -34,6 +34,11 @@ type
     editor: bool
     focusReplay*: bool
     workerRunning*: bool
+
+  TaskKind* = enum
+    ## Worker task kind.
+    Solve = "solve"
+    Permute = "permute"
 
 using
   self: EditorPermuter
@@ -54,7 +59,7 @@ proc initEditorPermuter*[F: TsuField or WaterField](
   result.replaySimulator[] = 0.initEnvironment[:F].initSimulator(Replay, editor)
 
   {.push warning[ProveInit]: off.}
-  result.replayData = none seq[tuple[pairs: Pairs, positions: Positions]]
+  result.replayData = default type result.replayData
   result.replayIdx = 0
   {.pop.}
 
@@ -80,7 +85,7 @@ proc initEditorPermuter*[F: TsuField or WaterField](
   result.replaySimulator[] = initNazoPuyo[F]().initSimulator(Replay, editor)
 
   {.push warning[ProveInit]: off.}
-  result.replayData = none seq[tuple[pairs: Pairs, positions: Positions]]
+  result.replayData = default type result.replayData
   result.replayIdx = 0
   {.pop.}
 
@@ -146,12 +151,52 @@ proc solve*(mSelf) {.inline.} =
         of Failure:
           discard
 
-      showReplay.initWorker.run $nazoPuyo.toUri
+      showReplay.initWorker.run $Solve, $nazoPuyo.toUri
     else:
       # FIXME: make asynchronous
       # FIXME: redraw
       mSelf.replayData = some nazoPuyo.solve.mapIt (
         nazoPuyo.environment.pairs, it)
+      mSelf.updateReplaySimulator nazoPuyo
+      mSelf.workerRunning = false
+
+# ------------------------------------------------
+# Permute
+# ------------------------------------------------
+
+proc permute*(mSelf; fixMoves: seq[Positive], allowDouble: bool,
+              allowLastDouble: bool) {.inline.} =
+  ## Permutes the nazo puyo.
+  if (mSelf.workerRunning or mSelf.simulator[].kind != Nazo):
+    return
+
+  mSelf.workerRunning = true
+
+  mSelf.simulator[].withNazoPuyo:
+    when defined(js):
+      proc showReplay(returnCode: WorkerReturnCode, messages: seq[string]) =
+        case returnCode
+        of Success:
+          # TODO
+          mSelf.replayData = some messages.mapIt (
+            nazoPuyo.environment.pairs, it.parsePositions Izumiya)
+          mSelf.updateReplaySimulator nazoPuyo
+          mSelf.workerRunning = false
+
+          if not kxi.surpressRedraws:
+            kxi.redraw
+        of Failure:
+          discard
+
+      showReplay.initWorker.run $nazoPuyo.toUri
+    else:
+      # FIXME: make asynchronous
+      # FIXME: redraw
+      let permuteRes = collect:
+        for (pairs, answer) in nazoPuyo.permute(
+            fixMoves, allowDouble, allowLastDouble):
+          (pairs, answer)
+      mSelf.replayData = some permuteRes
       mSelf.updateReplaySimulator nazoPuyo
       mSelf.workerRunning = false
 
