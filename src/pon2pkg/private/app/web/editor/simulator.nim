@@ -1,4 +1,4 @@
-## This module implements the replay simulator node.
+## This module implements the editor simulator node.
 ##
 
 {.experimental: "strictDefs".}
@@ -8,8 +8,8 @@
 import karax/[vdom]
 import ../../../../apppkg/[editorpermuter, simulator]
 
-proc initReplaySimulatorNode*(editorPermuter: var EditorPermuter, id = ""):
+proc initEditorSimulatorNode*(editorPermuter: var EditorPermuter, id = ""):
     VNode {.inline.} =
-  ## Returns the replay simulator node.
+  ## Returns the editor simulator node.
   ## `id` is shared with other node-creating procedures and need to be unique.
   editorPermuter.replaySimulator[].initSimulatorNode(false, false, id)

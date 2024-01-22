@@ -19,8 +19,9 @@
 when defined(js):
   when defined(Pon2Worker):
     import std/[sequtils, strutils, sugar, uri]
+    import ./pon2pkg/apppkg/[editorpermuter]
     import ./pon2pkg/corepkg/[misc, pair, position]
-    import ./pon2pkg/nazopuyopkg/[nazopuyo, solve]
+    import ./pon2pkg/nazopuyopkg/[nazopuyo, permute, solve]
     import ./pon2pkg/private/[misc]
     import ./pon2pkg/private/app/web/[webworker]
 

@@ -1,4 +1,4 @@
-## This module implements the replay simulator control.
+## This module implements the editor simulator control.
 ##
 
 {.experimental: "strictDefs".}
@@ -7,7 +7,7 @@
 
 import ../../../../apppkg/[editorpermuter, simulator]
 
-proc initReplaySimulatorControl*(editorPermuter: ref EditorPermuter):
+proc initEditorSimulatorControl*(editorPermuter: ref EditorPermuter):
     SimulatorControl {.inline.} =
-  ## Returns the replay simulator control.
+  ## Returns the editor simulator control.
   editorPermuter[].replaySimulator.initSimulatorControl

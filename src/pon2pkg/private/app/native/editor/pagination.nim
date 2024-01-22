@@ -1,4 +1,4 @@
-## This module implements the replay pagination control.
+## This module implements the editor pagination control.
 ##
 
 {.experimental: "strictDefs".}
@@ -9,11 +9,11 @@ import std/[options, strformat, sugar]
 import nigui
 import ../../../../apppkg/[editorpermuter, misc]
 
-type ReplayPaginationControl* = ref object of LayoutContainer
-  ## Replay pagination control.
+type EditorPaginationControl* = ref object of LayoutContainer
+  ## Editor pagination control.
   editorPermuter: ref EditorPermuter
 
-proc initPrevNextHandler(control: ReplayPaginationControl, next: bool):
+proc initPrevNextHandler(control: EditorPaginationControl, next: bool):
     (event: ClickEvent) -> void =
   ## Returns the click handler.
   # NOTE: inlining does not work due to lazy evaluation
@@ -23,7 +23,7 @@ proc initPrevNextHandler(control: ReplayPaginationControl, next: bool):
     else:
       control.editorPermuter[].prevReplay)
 
-proc drawHandler(control: ReplayPaginationControl): (event: DrawEvent) -> void =
+proc drawHandler(control: EditorPaginationControl): (event: DrawEvent) -> void =
   ## Draws the replay index.
   # NOTE: inlining does not work due to lazy evaluation
   proc handler(event: DrawEvent) =
@@ -45,10 +45,10 @@ proc drawHandler(control: ReplayPaginationControl): (event: DrawEvent) -> void =
 
   result = handler
 
-proc initReplayPaginationControl*(editorPermuter: ref EditorPermuter):
-    ReplayPaginationControl {.inline.} =
-  ## Returns the replay pagination control.
-  result = new ReplayPaginationControl
+proc initEditorPaginationControl*(editorPermuter: ref EditorPermuter):
+    EditorPaginationControl {.inline.} =
+  ## Returns the editor pagination control.
+  result = new EditorPaginationControl
   result.init
   result.layout = Layout_Horizontal
 

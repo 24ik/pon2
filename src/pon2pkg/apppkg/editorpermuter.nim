@@ -32,7 +32,7 @@ type
     replayIdx*: Natural
 
     editor: bool
-    focusReplay*: bool
+    focusEditor*: bool
     workerRunning*: bool
 
   TaskKind* = enum
@@ -64,7 +64,7 @@ proc initEditorPermuter*[F: TsuField or WaterField](
   {.pop.}
 
   result.editor = editor
-  result.focusReplay = false
+  result.focusEditor = false
   result.workerRunning = false
 
 proc initEditorPermuter*[F: TsuField or WaterField](
@@ -90,7 +90,7 @@ proc initEditorPermuter*[F: TsuField or WaterField](
   {.pop.}
 
   result.editor = editor
-  result.focusReplay = false
+  result.focusEditor = false
   result.workerRunning = false
 
 proc initEditorPermuter*[F: TsuField or WaterField](
@@ -103,8 +103,8 @@ proc initEditorPermuter*[F: TsuField or WaterField](
 # Edit - Other
 # ------------------------------------------------
 
-func toggleFocus*(mSelf) {.inline.} = mSelf.focusReplay.toggle
-  ## Toggles focusing replay or not.
+func toggleFocus*(mSelf) {.inline.} = mSelf.focusEditor.toggle
+  ## Toggles focusing to editor tab or not.
 
 # ------------------------------------------------
 # Solve
@@ -117,7 +117,7 @@ proc updateReplaySimulator[F: TsuField or WaterField](mSelf; nazo: NazoPuyo[F])
   assert mSelf.replayData.isSome
 
   if mSelf.replayData.get.len > 0:
-    mSelf.focusReplay = true
+    mSelf.focusEditor = true
     mSelf.replayIdx = 0
 
     var nazo2 = nazo
@@ -127,7 +127,7 @@ proc updateReplaySimulator[F: TsuField or WaterField](mSelf; nazo: NazoPuyo[F])
       mSelf.replaySimulator[].mode,
       mSelf.replaySimulator[].editor)
   else:
-    mSelf.focusReplay = false
+    mSelf.focusEditor = false
 
 proc solve*(mSelf) {.inline.} =
   ## Solves the nazo puyo.
@@ -251,7 +251,7 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
     mSelf.toggleFocus
     return true
 
-  if mSelf.focusReplay:
+  if mSelf.focusEditor:
     # move replay
     if event == initKeyEvent("KeyA"):
       mSelf.prevReplay
@@ -275,8 +275,8 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
 # ------------------------------------------------
 
 when defined(js):
-  import std/[dom, sugar]
-  import ../private/app/web/replay/[controller, pagination, simulator]
+  import std/[dom]
+  import ../private/app/web/editor/[controller, pagination, simulator]
 
   # ------------------------------------------------
   # JS - Keyboard Handler
@@ -315,13 +315,13 @@ when defined(js):
         tdiv(class = "column is-narrow"):
           section(class = "section"):
             tdiv(class = "block"):
-              mSelf.initReplayControllerNode
+              mSelf.initEditorControllerNode
             if mSelf.replayData.isSome:
               tdiv(class = "block"):
-                mSelf.initReplayPaginationNode
+                mSelf.initEditorPaginationNode
               if mSelf.replayData.isSome:
                 tdiv(class = "block"):
-                  mSelf.initReplaySimulatorNode
+                  mSelf.initEditorSimulatorNode
 
   proc initEditorPermuterNode*(mSelf; setKeyHandler = true, wrapSection = true,
                                id = ""): VNode {.inline.} =
@@ -355,7 +355,7 @@ when defined(js):
     result = editorPermuter.initEditorPermuterNode(setKeyHandker, wrapSection,
                                                    id)
 else:
-  import ../private/app/native/replay/[controller, pagination, simulator]
+  import ../private/app/native/editor/[controller, pagination, simulator]
 
   type
     EditorPermuterControl* = ref object of LayoutContainer
@@ -413,9 +413,9 @@ else:
     secondCol.padding = 10.scaleToDpi
     secondCol.spacing = 10.scaleToDpi
 
-    secondCol.add editorPermuter.initReplayControllerControl
-    secondCol.add editorPermuter.initReplayPaginationControl
-    secondCol.add editorPermuter.initReplaySimulatorControl
+    secondCol.add editorPermuter.initEditorControllerControl
+    secondCol.add editorPermuter.initEditorPaginationControl
+    secondCol.add editorPermuter.initEditorSimulatorControl
 
   proc initEditorPermuterWindow*(
       editorPermuter: ref EditorPermuter, title = "Pon!通",

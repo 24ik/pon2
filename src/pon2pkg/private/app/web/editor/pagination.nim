@@ -1,4 +1,4 @@
-## This module implements the replay pagination node.
+## This module implements the editor pagination node.
 ##
 
 {.experimental: "strictDefs".}
@@ -9,9 +9,9 @@ import std/[options, strformat, sugar]
 import karax/[karax, karaxdsl, vdom]
 import ../../../../apppkg/[editorpermuter]
 
-proc initReplayPaginationNode*(editorPermuter: var EditorPermuter): VNode
+proc initEditorPaginationNode*(editorPermuter: var EditorPermuter): VNode
                               {.inline.} =
-  ## Returns the replay pagination node.
+  ## Returns the editor pagination node.
   let showIdx =
     if editorPermuter.replayData.get.len == 0: 0
     else: editorPermuter.replayIdx.succ

@@ -1,4 +1,4 @@
-## This module implements the replay controller control.
+## This module implements the editor controller control.
 ##
 
 {.experimental: "strictDefs".}
@@ -9,31 +9,31 @@ import std/[sugar]
 import nigui
 import ../../../../apppkg/[editorpermuter, misc]
 
-type ReplayControllerControl* = ref object of LayoutContainer
-  ## Replay controller control.
+type EditorControllerControl* = ref object of LayoutContainer
+  ## Editor controller control.
   editorPermuter: ref EditorPermuter
 
-var globalControl: ReplayControllerControl = nil # FIXME: remove global control
+var globalControl: EditorControllerControl = nil # FIXME: remove global control
 
-proc initToggleHandler(control: ReplayControllerControl):
+proc initToggleHandler(control: EditorControllerControl):
     (event: ClickEvent) -> void =
   ## Returns the toggler handler.
   # NOTE: inlining does not work due to lazy evaluation
   (event: ClickEvent) => (block:
     control.editorPermuter[].toggleFocus
     control.childControls[0].backgroundColor = toNiguiColor(
-      if control.editorPermuter[].focusReplay: SelectColor else: DefaultColor))
+      if control.editorPermuter[].focusEditor: SelectColor else: DefaultColor))
 
-proc initSolveHandler(control: ReplayControllerControl):
+proc initSolveHandler(control: EditorControllerControl):
     (event: ClickEvent) -> void =
   ## Returns the solve handler.
   # NOTE: inlining does not work due to lazy evaluation
   (event: ClickEvent) => control.editorPermuter[].solve
 
-proc initReplayControllerControl*(editorPermuter: ref EditorPermuter):
-    ReplayControllerControl {.inline.} =
-  ## Returns a new replay controller control.
-  result = new ReplayControllerControl
+proc initEditorControllerControl*(editorPermuter: ref EditorPermuter):
+    EditorControllerControl {.inline.} =
+  ## Returns a new editor controller control.
+  result = new EditorControllerControl
   result.init
   result.layout = Layout_Horizontal
 
@@ -53,4 +53,4 @@ proc initReplayControllerControl*(editorPermuter: ref EditorPermuter):
 
   # set color
   toggleButton.backgroundColor = toNiguiColor(
-    if editorPermuter[].focusReplay: SelectColor else: DefaultColor)
+    if editorPermuter[].focusEditor: SelectColor else: DefaultColor)

@@ -1,4 +1,4 @@
-## This module implements the replay controller node.
+## This module implements the editor controller node.
 ##
 
 {.experimental: "strictDefs".}
@@ -9,12 +9,12 @@ import std/[sugar]
 import karax/[karax, karaxdsl, kbase, vdom]
 import ../../../../apppkg/[editorpermuter]
 
-proc initReplayControllerNode*(editorPermuter: var EditorPermuter): VNode
+proc initEditorControllerNode*(editorPermuter: var EditorPermuter): VNode
                               {.inline.} =
-  ## Returns the replay controller node.
+  ## Returns the editor controller node.
   let
     focusButtonClass =
-      if editorPermuter.focusReplay: kstring"button is-selected is-primary"
+      if editorPermuter.focusEditor: kstring"button is-selected is-primary"
       else: kstring"button"
     solveButtonClass =
       if editorPermuter.workerRunning: kstring"button is-loading"
