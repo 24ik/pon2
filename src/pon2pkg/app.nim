@@ -17,8 +17,8 @@
 import ./apppkg/[editorpermuter, misc, simulator]
 
 export editorpermuter.EditorPermuter, editorpermuter.initEditorPermuter,
-  editorpermuter.toggleFocus, editorpermuter.solve, editorpermuter.nextAnswer,
-  editorpermuter.prevAnswer, editorpermuter.operate
+  editorpermuter.toggleFocus, editorpermuter.solve, editorpermuter.nextReplay,
+  editorpermuter.prevReplay, editorpermuter.operate
 export misc.KeyEvent, misc.Color, misc.SelectColor, misc.GhostColor,
   misc.WaterColor, misc.DefaultColor, misc.initKeyEvent
 export simulator.SimulatorState, simulator.Simulator, simulator.initSimulator,
