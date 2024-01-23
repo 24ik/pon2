@@ -1,4 +1,4 @@
-## This module implements the answer controller control.
+## This module implements the editor controller control.
 ##
 
 {.experimental: "strictDefs".}
@@ -9,31 +9,31 @@ import std/[sugar]
 import nigui
 import ../../../../apppkg/[editorpermuter, misc]
 
-type AnswerControllerControl* = ref object of LayoutContainer
-  ## Answer controller control.
+type EditorControllerControl* = ref object of LayoutContainer
+  ## Editor controller control.
   editorPermuter: ref EditorPermuter
 
-var globalControl: AnswerControllerControl = nil # FIXME: remove global control
+var globalControl: EditorControllerControl = nil # FIXME: remove global control
 
-proc initToggleHandler(control: AnswerControllerControl):
+proc initToggleHandler(control: EditorControllerControl):
     (event: ClickEvent) -> void =
   ## Returns the toggler handler.
   # NOTE: inlining does not work due to lazy evaluation
   (event: ClickEvent) => (block:
     control.editorPermuter[].toggleFocus
     control.childControls[0].backgroundColor = toNiguiColor(
-      if control.editorPermuter[].focusAnswer: SelectColor else: DefaultColor))
+      if control.editorPermuter[].focusEditor: SelectColor else: DefaultColor))
 
-proc initSolveHandler(control: AnswerControllerControl):
+proc initSolveHandler(control: EditorControllerControl):
     (event: ClickEvent) -> void =
   ## Returns the solve handler.
   # NOTE: inlining does not work due to lazy evaluation
   (event: ClickEvent) => control.editorPermuter[].solve
 
-proc initAnswerControllerControl*(editorPermuter: ref EditorPermuter):
-    AnswerControllerControl {.inline.} =
-  ## Returns a new answer controller control.
-  result = new AnswerControllerControl
+proc initEditorControllerControl*(editorPermuter: ref EditorPermuter):
+    EditorControllerControl {.inline.} =
+  ## Returns a new editor controller control.
+  result = new EditorControllerControl
   result.init
   result.layout = Layout_Horizontal
 
@@ -53,4 +53,4 @@ proc initAnswerControllerControl*(editorPermuter: ref EditorPermuter):
 
   # set color
   toggleButton.backgroundColor = toNiguiColor(
-    if editorPermuter[].focusAnswer: SelectColor else: DefaultColor)
+    if editorPermuter[].focusEditor: SelectColor else: DefaultColor)

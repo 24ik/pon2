@@ -1,4 +1,4 @@
-## This module implements the answer pagination node.
+## This module implements the editor pagination node.
 ##
 
 {.experimental: "strictDefs".}
@@ -9,22 +9,22 @@ import std/[options, strformat, sugar]
 import karax/[karax, karaxdsl, vdom]
 import ../../../../apppkg/[editorpermuter]
 
-proc initAnswerPaginationNode*(editorPermuter: var EditorPermuter): VNode
+proc initEditorPaginationNode*(editorPermuter: var EditorPermuter): VNode
                               {.inline.} =
-  ## Returns the answer pagination node.
+  ## Returns the editor pagination node.
   let showIdx =
-    if editorPermuter.answers.get.len == 0: 0
-    else: editorPermuter.answerIdx.succ
+    if editorPermuter.replayData.get.len == 0: 0
+    else: editorPermuter.replayIdx.succ
 
   result = buildHtml(nav(class = "pagination", role = "navigation",
                          aria-label = "pagination")):
     button(class = "button pagination-link",
-           onclick = () => editorPermuter.prevAnswer):
+           onclick = () => editorPermuter.prevReplay):
       span(class = "icon"):
         italic(class = "fa-solid fa-backward-step")
     button(class = "button pagination-link is-static"):
-      text &"{showIdx} / {editorPermuter.answers.get.len}"
+      text &"{showIdx} / {editorPermuter.replayData.get.len}"
     button(class = "button pagination-link",
-           onclick = () => editorPermuter.nextAnswer):
+           onclick = () => editorPermuter.nextReplay):
       span(class = "icon"):
         italic(class = "fa-solid fa-forward-step")

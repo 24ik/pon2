@@ -18,23 +18,53 @@
 
 when defined(js):
   when defined(Pon2Worker):
-    import std/[sequtils, uri]
-    import ./pon2pkg/corepkg/[misc, position]
-    import ./pon2pkg/nazopuyopkg/[nazopuyo, solve]
+    import std/[sequtils, strutils, sugar, uri]
+    import ./pon2pkg/apppkg/[editorpermuter]
+    import ./pon2pkg/corepkg/[misc, pair, position]
+    import ./pon2pkg/nazopuyopkg/[nazopuyo, permute, solve]
+    import ./pon2pkg/private/[misc]
     import ./pon2pkg/private/app/web/[webworker]
 
-    proc solveTask(args: seq[string]): tuple[returnCode: WorkerReturnCode,
-                                             messages: seq[string]] =
-      if args.len != 1:
+    proc workerTask(args: seq[string]): tuple[returnCode: WorkerReturnCode,
+                                              messages: seq[string]] =
+      ## Worker's task.
+      if args.len == 0:
         result.returnCode = Failure
-        result.messages = @["Caught invalid number of arguments: " & $args]
+        result.messages = @["No arguments."]
+        return
+
+      let args2 = args[1..^1]
+      case args[0]
+      of $Solve:
+        if args2.len == 1:
+          result.returnCode = Success
+          args2[0].parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
+            result.messages = nazoPuyo.solve.mapIt it.toUriQuery Izumiya
+        else:
+          result.returnCode = Failure
+          result.messages = @["Caught invalid number of arguments: " & $args]
+      of $Permute:
+        if args2.len >= 3:
+          let fixMoves =
+            if args2.len == 3: newSeq[Positive](0)
+            else: args2[3..^1].mapIt it.parseSomeInt[:Positive]
+
+          result.returnCode = Success
+          args2[0].parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
+            let permuteRes = collect:
+              for (pairs, answer) in nazoPuyo.permute(
+                  fixMoves, args2[1].parseBool, args2[2].parseBool):
+                @[pairs.toUriQuery Izumiya, answer.toUriQuery Izumiya]
+            result.messages = permuteRes.concat
+        else:
+          result.returnCode = Failure
+          result.messages = @["Caught invalid number of arguments: " & $args]
       else:
-        result.returnCode = Success
-        args[0].parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
-          result.messages = nazoPuyo.solve.mapIt it.toUriQuery Izumiya
+        result.returnCode = Failure
+        result.messages = @["Caught invalid task: " & args[0]]
 
     when isMainModule:
-      assignToWorker solveTask
+      assignToWorker workerTask
   else:
     import std/[options, sequtils, uri]
     import karax/[karax, karaxdsl, vdom]
