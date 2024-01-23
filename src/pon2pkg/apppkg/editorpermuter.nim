@@ -211,7 +211,6 @@ proc permute*(mSelf; fixMoves: seq[Positive], allowDouble: bool,
 
 proc nextReplay*(mSelf) {.inline.} =
   ## Shows the next replay.
-  echo mSelf.replayData
   if mSelf.replayData.isNone or mSelf.replayData.get.len == 0:
     return
 
@@ -328,7 +327,7 @@ when defined(js):
             if mSelf.replayData.isSome:
               tdiv(class = "block"):
                 mSelf.initEditorPaginationNode
-              if mSelf.replayData.isSome:
+              if mSelf.replayData.get.len > 0:
                 tdiv(class = "block"):
                   mSelf.initEditorSimulatorNode
 
