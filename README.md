@@ -41,6 +41,11 @@ See the documentations:
 
 ## For Developers
 
+### Known Issues
+
+- cpp backend does not work on Windows
+- AVX2 does not work on Windows
+
 ### API Usage
 
 See the [API documentation](https://izumiya-keisuke.github.io/pon2/pon2.html).
