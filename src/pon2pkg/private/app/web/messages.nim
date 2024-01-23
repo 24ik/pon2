@@ -11,4 +11,4 @@ import ../../../apppkg/[simulator]
 
 proc initMessagesNode*(simulator: var Simulator): VNode {.inline.} =
   ## Returns the messages node.
-  buildHtml(text simulator.getMessage)
+  buildHtml(text simulator.getMessages.state)

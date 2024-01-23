@@ -29,7 +29,7 @@ proc messagesDrawHandler(control: MessagesControl, event: DrawEvent)
   canvas.fill
 
   if control.simulator[].mode != Edit:
-    canvas.drawText control.simulator[].getMessage
+    canvas.drawText control.simulator[].getMessages.state
 
 func initMessageDrawHandler(control: MessagesControl):
     (event: DrawEvent) -> void =
