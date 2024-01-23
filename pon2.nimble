@@ -1,6 +1,6 @@
 # Package
 
-version = "0.10.1"
+version = "0.10.2"
 author = "Keisuke Izumiya"
 description = "Puyo Puyo Library"
 license = "Apache-2.0 OR MPL-2.0"
@@ -46,7 +46,7 @@ task documentation, "Make Documentation":
   mvDir "src/htmldocs", "src/htmldocs2"
 
   exec &"nim doc --project -d:Pon2Avx2=false src/pon2.nim"
-  exec "cp -r src/htmldocs2 src/htmldocs"
+  cpDir "src/htmldocs2", "src/htmldocs"
   rmDir "src/htmldocs2"
 
 task web, "Make Web Page":
