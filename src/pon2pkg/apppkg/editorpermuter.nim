@@ -33,7 +33,8 @@ type
 
     editor: bool
     focusEditor*: bool
-    workerRunning*: bool
+    solving*: bool
+    permuting*: bool
 
   TaskKind* = enum
     ## Worker task kind.
@@ -65,7 +66,8 @@ proc initEditorPermuter*[F: TsuField or WaterField](
 
   result.editor = editor
   result.focusEditor = false
-  result.workerRunning = false
+  result.solving = false
+  result.permuting = false
 
 proc initEditorPermuter*[F: TsuField or WaterField](
     env: Environment[F], mode = Play, editor = false): EditorPermuter
@@ -91,7 +93,8 @@ proc initEditorPermuter*[F: TsuField or WaterField](
 
   result.editor = editor
   result.focusEditor = false
-  result.workerRunning = false
+  result.solving = false
+  result.permuting = false
 
 proc initEditorPermuter*[F: TsuField or WaterField](
     nazo: NazoPuyo[F], mode = Play, editor = false): EditorPermuter {.inline.} =
@@ -123,18 +126,17 @@ proc updateReplaySimulator[F: TsuField or WaterField](mSelf; nazo: NazoPuyo[F])
     var nazo2 = nazo
     nazo2.environment.pairs = mSelf.replayData.get[0].pairs
     mSelf.replaySimulator[] = nazo2.initSimulator(
-      mSelf.replayData.get[mSelf.replayIdx].positions,
-      mSelf.replaySimulator[].mode,
+      mSelf.replayData.get[0].positions, mSelf.replaySimulator[].mode,
       mSelf.replaySimulator[].editor)
   else:
     mSelf.focusEditor = false
 
 proc solve*(mSelf) {.inline.} =
   ## Solves the nazo puyo.
-  if (mSelf.workerRunning or mSelf.simulator[].kind != Nazo):
+  if mSelf.solving or mSelf.permuting or mSelf.simulator[].kind != Nazo:
     return
 
-  mSelf.workerRunning = true
+  mSelf.solving = true
 
   mSelf.simulator[].withNazoPuyo:
     when defined(js):
@@ -144,7 +146,7 @@ proc solve*(mSelf) {.inline.} =
           mSelf.replayData = some messages.mapIt (
             nazoPuyo.environment.pairs, it.parsePositions Izumiya)
           mSelf.updateReplaySimulator nazoPuyo
-          mSelf.workerRunning = false
+          mSelf.solving = false
 
           if not kxi.surpressRedraws:
             kxi.redraw
@@ -158,7 +160,7 @@ proc solve*(mSelf) {.inline.} =
       mSelf.replayData = some nazoPuyo.solve.mapIt (
         nazoPuyo.environment.pairs, it)
       mSelf.updateReplaySimulator nazoPuyo
-      mSelf.workerRunning = false
+      mSelf.solving = false
 
 # ------------------------------------------------
 # Permute
@@ -167,10 +169,10 @@ proc solve*(mSelf) {.inline.} =
 proc permute*(mSelf; fixMoves: seq[Positive], allowDouble: bool,
               allowLastDouble: bool) {.inline.} =
   ## Permutes the nazo puyo.
-  if (mSelf.workerRunning or mSelf.simulator[].kind != Nazo):
+  if mSelf.solving or mSelf.permuting or mSelf.simulator[].kind != Nazo:
     return
 
-  mSelf.workerRunning = true
+  mSelf.permuting = true
 
   mSelf.simulator[].withNazoPuyo:
     when defined(js):
@@ -183,14 +185,15 @@ proc permute*(mSelf; fixMoves: seq[Positive], allowDouble: bool,
                messages[2 * i + 1].parsePositions Izumiya)
           mSelf.replayData = some replayData
           mSelf.updateReplaySimulator nazoPuyo
-          mSelf.workerRunning = false
+          mSelf.permuting = false
 
           if not kxi.surpressRedraws:
             kxi.redraw
         of Failure:
           discard
 
-      showReplay.initWorker.run $nazoPuyo.toUri
+      showReplay.initWorker.run @[$Permute, $nazoPuyo.toUri, $allowDouble,
+                                  $allowLastDouble] & fixMoves.mapIt $it
     else:
       # FIXME: make asynchronous
       # FIXME: redraw
@@ -200,7 +203,7 @@ proc permute*(mSelf; fixMoves: seq[Positive], allowDouble: bool,
           (pairs, answer)
       mSelf.replayData = some permuteRes
       mSelf.updateReplaySimulator nazoPuyo
-      mSelf.workerRunning = false
+      mSelf.permuting = false
 
 # ------------------------------------------------
 # Replay
@@ -208,6 +211,7 @@ proc permute*(mSelf; fixMoves: seq[Positive], allowDouble: bool,
 
 proc nextReplay*(mSelf) {.inline.} =
   ## Shows the next replay.
+  echo mSelf.replayData
   if mSelf.replayData.isNone or mSelf.replayData.get.len == 0:
     return
 
@@ -216,12 +220,13 @@ proc nextReplay*(mSelf) {.inline.} =
   else:
     mSelf.replayIdx.inc
 
-  (mSelf.replaySimulator[].pairs, mSelf.replaySimulator[].positions) =
-    mSelf.replayData.get[mSelf.replayIdx]
-  mSelf.replaySimulator[].reset false
+  mSelf.replaySimulator[].pairs = mSelf.replayData.get[mSelf.replayIdx].pairs
+  mSelf.replaySimulator[].originalPairs =
+    mSelf.replayData.get[mSelf.replayIdx].pairs
+  mSelf.replaySimulator[].positions =
+    mSelf.replayData.get[mSelf.replayIdx].positions
 
-  mSelf.replaySimulator[].originalEnvironments =
-    mSelf.replaySimulator[].environments
+  mSelf.replaySimulator[].reset false
 
 proc prevReplay*(mSelf) {.inline.} =
   ## Shows the previous replay.
@@ -233,12 +238,13 @@ proc prevReplay*(mSelf) {.inline.} =
   else:
     mSelf.replayIdx.dec
 
-  (mSelf.replaySimulator[].pairs, mSelf.replaySimulator[].positions) =
-    mSelf.replayData.get[mSelf.replayIdx]
-  mSelf.replaySimulator[].reset false
+  mSelf.replaySimulator[].pairs = mSelf.replayData.get[mSelf.replayIdx].pairs
+  mSelf.replaySimulator[].originalPairs =
+    mSelf.replayData.get[mSelf.replayIdx].pairs
+  mSelf.replaySimulator[].positions =
+    mSelf.replayData.get[mSelf.replayIdx].positions
 
-  mSelf.replaySimulator[].originalEnvironments =
-    mSelf.replaySimulator[].environments
+  mSelf.replaySimulator[].reset false
 
 # ------------------------------------------------
 # Keyboard Operation
@@ -276,7 +282,8 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
 
 when defined(js):
   import std/[dom]
-  import ../private/app/web/editor/[controller, pagination, simulator]
+  import ../private/app/web/editor/[controller, pagination,
+                                    permute as webPermute, simulator]
 
   # ------------------------------------------------
   # JS - Keyboard Handler
@@ -315,7 +322,9 @@ when defined(js):
         tdiv(class = "column is-narrow"):
           section(class = "section"):
             tdiv(class = "block"):
-              mSelf.initEditorControllerNode
+              mSelf.initEditorControllerNode id
+            tdiv(class = "block"):
+              mSelf.initEditorPermuteNode id
             if mSelf.replayData.isSome:
               tdiv(class = "block"):
                 mSelf.initEditorPaginationNode
