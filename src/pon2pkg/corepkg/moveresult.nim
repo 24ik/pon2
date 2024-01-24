@@ -11,10 +11,10 @@ import ../private/[misc]
 
 type MoveResult* = object
   ## Moving result.
-  chainCount: int
-  totalDisappearCounts: Option[array[Puyo, int]]
-  disappearCounts: Option[seq[array[Puyo, int]]]
-  detailDisappearCounts: Option[seq[array[ColorPuyo, seq[int]]]]
+  chainCount*: int
+  totalDisappearCounts*: Option[array[Puyo, int]]
+  disappearCounts*: Option[seq[array[Puyo, int]]]
+  detailDisappearCounts*: Option[seq[array[ColorPuyo, seq[int]]]]
 
 using self: MoveResult
 
@@ -226,3 +226,25 @@ func score*(self): int {.inline.} =
 
     result.inc 10 * disappearCounts.sum2 *
       max(chainBonus + connectBonus + colorBonus, 1)
+
+# ------------------------------------------------
+# Notice Garbage
+# ------------------------------------------------
+
+const NoticeUnits: array[NoticeGarbage, Natural] =
+  [1, 6, 30, 180, 360, 720, 1440]
+
+func noticeGarbages*(score: Natural): array[NoticeGarbage, int] {.inline.} =
+  ## Returns the number of notice garbages.
+  result[Small] = 0 # HACK: dummy to remove warning
+
+  var score2 = score
+  for notice in countdown(NoticeGarbage.high, NoticeGarbage.low):
+    let unit = NoticeUnits[notice]
+    result[notice] = score2 div unit
+    score2.dec result[notice] * unit
+
+func noticeGarbages*(self): array[NoticeGarbage, int] {.inline.} =
+  ## Returns the number of notice garbages.
+  ## Note that this function calls `score()`.
+  self.score.noticeGarbages

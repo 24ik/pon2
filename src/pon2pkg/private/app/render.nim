@@ -7,7 +7,7 @@
 
 import std/[options, strformat, uri]
 import ../../apppkg/[misc, simulator]
-import ../../corepkg/[cell, field, misc, pair, position]
+import ../../corepkg/[cell, field, misc, moveresult, pair, position]
 import ../../nazopuyopkg/[mark]
 import ../../private/[misc]
 
@@ -115,7 +115,9 @@ const
   NazoMessages: array[MarkResult, string] = [
     "クリア！", "", DeadMessage, "不可能な設置", "設置スキップ", "未対応"]
 
-func getMessages*(simulator: Simulator): tuple[state: string] {.inline.} =
+func getMessages*(simulator: Simulator): tuple[
+    state: string, score: int, noticeGarbages: array[NoticeGarbage, int]]
+    {.inline.} =
   ## Returns the messages.
   result.state = case simulator.kind
   of Regular:
@@ -127,6 +129,9 @@ func getMessages*(simulator: Simulator): tuple[state: string] {.inline.} =
     simulator.withOriginalNazoPuyo:
       NazoMessages[
         simulator.positions[0..<simulator.next.index].mark originalNazoPuyo]
+
+  result.score = simulator.score
+  result.noticeGarbages = result.score.noticeGarbages
 
 # ------------------------------------------------
 # X

@@ -48,3 +48,13 @@ type
     Edit = "e"
     Play = "p"
     Replay = "r"
+
+  NoticeGarbage* {.pure.} = enum
+    ## Notice garbage.
+    Small
+    Big
+    Rock
+    Star
+    Moon
+    Crown
+    Comet
