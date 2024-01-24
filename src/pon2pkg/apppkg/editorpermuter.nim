@@ -317,7 +317,7 @@ when defined(js):
     result = buildHtml(tdiv(class = "columns is-mobile is-variable is-1")):
       tdiv(class = "column is-narrow"):
         simulatorNode
-      if mSelf.editor:
+      if mSelf.editor and mSelf.simulator[].kind == Nazo:
         tdiv(class = "column is-narrow"):
           section(class = "section"):
             tdiv(class = "block"):

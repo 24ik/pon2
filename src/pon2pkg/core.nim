@@ -13,11 +13,13 @@
 ## - [position](./corepkg/position.html)
 ##
 ## Compile Options:
-## | Option                     | Description            | Default |
-## | -------------------------- | ---------------------- | ------- |
-## | `-d:Pon2WaterHeight=<int>` | Height of the water.   | `8`     |
-## | `-d:Pon2Avx2=<bool>`       | Use AVX2 instructions. | `true`  |
-## | `-d:Pon2Bmi2=<bool>`       | Use BMI2 instructions. | `true`  |
+## | Option                          | Description                 | Default |
+## | ------------------------------- | --------------------------- | ------- |
+## | `-d:Pon2WaterHeight=<int>`      | Height of the water.        | `8`     |
+## | `-d:Pon2TsuGarbageRate=<int>`   | Garbage rate in Tsu rule.   | `70`    |
+## | `-d:Pon2WaterGarbageRate=<int>` | Garbage rate in Water rule. | `90`    |
+## | `-d:Pon2Avx2=<bool>`            | Use AVX2 instructions.      | `true`  |
+## | `-d:Pon2Bmi2=<bool>`            | Use BMI2 instructions.      | `true`  |
 ##
 
 {.experimental: "strictDefs".}
@@ -56,12 +58,12 @@ when UseAvx2:
   export field.`==`
 export misc.Height, misc.Width, misc.WaterHeight, misc.AirHeight, misc.Row,
   misc.Column, misc.WaterRow, misc.AirRow, misc.Rule, misc.SimulatorHost,
-  misc.SimulatorKind, misc.SimulatorMode
+  misc.SimulatorKind, misc.SimulatorMode, misc.NoticeGarbage, misc.GarbageRates
 export moveresult.MoveResult, moveresult.initMoveResult, moveresult.chainCount,
   moveresult.puyoCount, moveresult.colorCount, moveresult.garbageCount,
   moveresult.puyoCounts, moveresult.colorCounts, moveresult.garbageCounts,
   moveresult.colors, moveresult.colorsSeq, moveresult.colorPlaces,
-  moveresult.colorConnects, moveresult.score
+  moveresult.colorConnects, moveresult.score, moveresult.noticeGarbageCounts
 export pair.Deque, pair.`[]`, pair.`[]=`, pair.addFirst, pair.addLast,
   pair.clear, pair.contains, pair.initDeque, pair.len, pair.peekFirst,
   pair.peekLast, pair.popFirst, pair.popLast, pair.shrink, pair.toDeque,

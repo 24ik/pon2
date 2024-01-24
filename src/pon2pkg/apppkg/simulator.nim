@@ -7,9 +7,14 @@
 
 import std/[deques, options, sequtils, uri]
 import ./[misc]
-import ../corepkg/[cell, environment, field, misc, pair, position]
+import ../corepkg/[cell, environment, field, misc, moveresult, pair, position]
 import ../nazopuyopkg/[nazopuyo]
-import ../private/[misc]
+import ../private/[intrinsic, misc]
+
+when UseAvx2:
+  import ../private/core/field/avx2/[disappearresult]
+else:
+  import ../private/core/field/primitive/[disappearresult]
 
 type
   SimulatorState* {.pure.} = enum
@@ -41,6 +46,8 @@ type
     editing*: tuple[
       cell: Cell, field: tuple[row: Row, column: Column],
       pair: tuple[index: Natural, axis: bool], focusField: bool, insert: bool]
+
+    moveResult: MoveResult
 
 using
   self: Simulator
@@ -93,6 +100,8 @@ func initSimulator*[F: TsuField or WaterField](
   result.editing.pair = (Natural 0, true)
   result.editing.focusField = true
   result.editing.insert = false
+
+  result.moveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
 
 func initSimulator*[F: TsuField or WaterField](
     env: Environment[F], mode = Play, editor = false): Simulator {.inline.} =
@@ -227,6 +236,12 @@ func `originalPairs=`*(mSelf; pairs: Pairs) {.inline.} =
   case mSelf.rule
   of Tsu: mSelf.originalEnvironments.tsu.pairs = pairs
   of Water: mSelf.originalEnvironments.water.pairs = pairs
+
+# ------------------------------------------------
+# Property - Score
+# ------------------------------------------------
+
+func score*(self): int {.inline.} = self.moveResult.score ## Returns the score.
 
 # ------------------------------------------------
 # With
@@ -566,6 +581,7 @@ func forward*(mSelf; useNextPosition = true, skip = false) {.inline.} =
     if mSelf.pairs.len == 0:
       return
 
+    mSelf.moveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
     mSelf.save
 
     if useNextPosition:
@@ -599,9 +615,17 @@ func forward*(mSelf; useNextPosition = true, skip = false) {.inline.} =
         mSelf.next.index.inc
         mSelf.next.position = InitPos
   of WillDisappear:
-    case mSelf.rule
+    let disappearRes = case mSelf.rule
     of Tsu: mSelf.environments.tsu.field.disappear
     of Water: mSelf.environments.water.field.disappear
+
+    var counts: array[Puyo, int] = [0, 0, 0, 0, 0, 0, 0]
+    for puyo in Puyo.low..Puyo.high:
+      let count = disappearRes.puyoCount puyo
+      counts[puyo] = count
+      mSelf.moveResult.totalDisappearCounts.get[puyo].inc count
+    mSelf.moveResult.disappearCounts.get.add counts
+    mSelf.moveResult.detailDisappearCounts.get.add disappearRes.connectionCounts
 
     mSelf.state = Disappearing
   of Disappearing:
@@ -625,6 +649,8 @@ func backward*(mSelf) {.inline.} =
   if mSelf.undoDeque.len == 0:
     return
 
+  mSelf.moveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
+
   if mSelf.state == Stable:
     mSelf.next.index.dec
 
@@ -640,6 +666,7 @@ func reset*(mSelf; resetPosition = true) {.inline.} =
   mSelf.redoDeque.clear
   mSelf.next.index = 0
   mSelf.next.position = InitPos
+  mSelf.moveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
 
   if resetPosition:
     mSelf.positions = Position.none.repeat mSelf.pairs.len

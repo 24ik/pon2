@@ -7,7 +7,7 @@
 
 import std/[options, strformat, uri]
 import ../../apppkg/[misc, simulator]
-import ../../corepkg/[cell, field, misc, pair, position]
+import ../../corepkg/[cell, field, misc, moveresult, pair, position]
 import ../../nazopuyopkg/[mark]
 import ../../private/[misc]
 
@@ -113,12 +113,16 @@ func immediateDoubleNextPairCell*(simulator: Simulator, axis: bool): Cell
 const
   DeadMessage = "ばたんきゅ〜"
   NazoMessages: array[MarkResult, string] = [
-    "クリア！", "", "ばたんきゅ〜", "不可能な設置",
+    "クリア！", "　", DeadMessage, "不可能な設置",
     "設置スキップ", "未対応"]
 
-func getMessage*(simulator: Simulator): string {.inline.} =
-  ## Returns the message.
-  case simulator.kind
+func getMessages*(simulator: Simulator): tuple[
+    state: string, score: int, noticeGarbages: array[NoticeGarbage, int]]
+    {.inline.} =
+  ## Returns the messages.
+  ## Note that `noticeGarbages` is not correct; it has bigger 6 notice garbages
+  ## since this function is assumed to be used in rendering.
+  result.state = case simulator.kind
   of Regular:
     if simulator.state != Stable: ""
     else:
@@ -128,6 +132,19 @@ func getMessage*(simulator: Simulator): string {.inline.} =
     simulator.withOriginalNazoPuyo:
       NazoMessages[
         simulator.positions[0..<simulator.next.index].mark originalNazoPuyo]
+
+  result.score = simulator.score
+
+  result.noticeGarbages = [0, 0, 0, 0, 0, 0, 0]
+  let originalNoticeGarbages = result.score.noticeGarbageCounts simulator.rule
+  var count = 0
+  for notice in countdown(Comet, Small):
+    result.noticeGarbages[notice] = originalNoticeGarbages[notice]
+    count.inc originalNoticeGarbages[notice]
+    if count > 6:
+      result.noticeGarbages[notice].dec count - 6
+    if count >= 6:
+      break
 
 # ------------------------------------------------
 # X
