@@ -234,17 +234,19 @@ func score*(self): int {.inline.} =
 const NoticeUnits: array[NoticeGarbage, Natural] =
   [1, 6, 30, 180, 360, 720, 1440]
 
-func noticeGarbages*(score: Natural): array[NoticeGarbage, int] {.inline.} =
+func noticeGarbageCounts*(score: Natural, rule: Rule): array[NoticeGarbage, int]
+                         {.inline.} =
   ## Returns the number of notice garbages.
   result[Small] = 0 # HACK: dummy to remove warning
 
-  var score2 = score
+  var score2 = score div GarbageRates[rule]
   for notice in countdown(NoticeGarbage.high, NoticeGarbage.low):
     let unit = NoticeUnits[notice]
     result[notice] = score2 div unit
     score2.dec result[notice] * unit
 
-func noticeGarbages*(self): array[NoticeGarbage, int] {.inline.} =
+func noticeGarbageCounts*(self; rule: Rule): array[NoticeGarbage, int]
+                         {.inline.} =
   ## Returns the number of notice garbages.
   ## Note that this function calls `score()`.
-  self.score.noticeGarbages
+  self.score.noticeGarbageCounts rule

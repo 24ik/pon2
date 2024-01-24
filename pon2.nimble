@@ -1,6 +1,6 @@
 # Package
 
-version = "0.10.2"
+version = "0.10.3"
 author = "Keisuke Izumiya"
 description = "Puyo Puyo Library"
 license = "Apache-2.0 OR MPL-2.0"
