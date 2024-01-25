@@ -46,25 +46,25 @@ func initCopyButtonHandler*(copyStr: () -> string, id: string,
 func cellImageSrc*(cell: Cell): kstring {.inline.} =
   ## Returns the cell image src.
   kstring case cell
-  of None: "./assets/puyo/none.png"
-  of Hard: "./assets/puyo/hard.png"
-  of Garbage: "./assets/puyo/garbage.png"
-  of Red: "./assets/puyo/red.png"
-  of Green: "./assets/puyo/green.png"
-  of Blue: "./assets/puyo/blue.png"
-  of Yellow: "./assets/puyo/yellow.png"
-  of Purple: "./assets/puyo/purple.png"
+  of None: "../assets/puyo/none.png"
+  of Hard: "../assets/puyo/hard.png"
+  of Garbage: "../assets/puyo/garbage.png"
+  of Red: "../assets/puyo/red.png"
+  of Green: "../assets/puyo/green.png"
+  of Blue: "../assets/puyo/blue.png"
+  of Yellow: "../assets/puyo/yellow.png"
+  of Purple: "../assets/puyo/purple.png"
 
 func noticeGarbageImageSrc*(notice: NoticeGarbage): kstring {.inline.} =
   ## Returns the notice garbage image src.
   kstring case notice
-  of Small: "./assets/noticegarbage/small.png"
-  of Big: "./assets/noticegarbage/big.png"
-  of Rock: "./assets/noticegarbage/rock.png"
-  of Star: "./assets/noticegarbage/star.png"
-  of Moon: "./assets/noticegarbage/moon.png"
-  of Crown: "./assets/noticegarbage/crown.png"
-  of Comet: "./assets/noticegarbage/comet.png"
+  of Small: "../assets/noticegarbage/small.png"
+  of Big: "../assets/noticegarbage/big.png"
+  of Rock: "../assets/noticegarbage/rock.png"
+  of Star: "../assets/noticegarbage/star.png"
+  of Moon: "../assets/noticegarbage/moon.png"
+  of Crown: "../assets/noticegarbage/crown.png"
+  of Comet: "../assets/noticegarbage/comet.png"
 
 # ------------------------------------------------
 # Others

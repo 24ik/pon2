@@ -49,14 +49,13 @@ task documentation, "Make Documentation":
   cpDir "src/htmldocs2", "src/htmldocs"
   rmDir "src/htmldocs2"
 
-task web, "Make Web Page":
+task web, "Make Web Pages":
   const
     danger {.booldefine.} = true
     minify {.booldefine.} = true
     verbose {.booldefine.} = false
 
-  proc compileAndMinify(src: string, dst: string,
-                        compileOptions: varargs[string]) =
+  proc compile(src: string, dst: string, options: varargs[string]) =
     let
       (_, tail) = dst.splitPath
       rawJs = getTempDir() / &"raw-{tail}"
@@ -64,7 +63,7 @@ task web, "Make Web Page":
     if verbose:
       echo "[pon2] Raw JS output file: ", rawJs
 
-    var cmds = @["nim", "js"] & compileOptions.toSeq
+    var cmds = @["nim", "js"] & options.toSeq
     if danger:
       cmds.add "-d:danger"
     cmds &= [&"-o:{rawJs}", &"{src}"]
@@ -81,7 +80,17 @@ task web, "Make Web Page":
     else:
       cpFile rawJs, dst
 
-  "src/pon2.nim".compileAndMinify "www/index.min.js"
-  "src/pon2.nim".compileAndMinify "www/worker.min.js", "-d:Pon2Worker"
+  # documentation
+  exec "nimble -y documentation"
+  cpDir "src/htmldocs", "www/docs"
+  rmDir "src/htmldocs"
 
+  # playground
+  "src/pon2.nim".compile "www/playground/index.min.js"
+  "src/pon2.nim".compile "www/playground/worker.min.js", "-d:Pon2Worker"
+
+  # pairs database
+  "src/pon2.nim".compile "www/pairs/index.min.js", "-d:Pon2Pairs"
+
+  # assets
   cpDir "assets", "www/assets"

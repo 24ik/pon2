@@ -15,6 +15,9 @@ Not supported now:
 - Fever rule
 - Dropping garbage
 
+Note that now I am working hard on CUI and web-GUI development, and the
+native-GUI application is beta version.
+
 ## Installation
 
 ### Downloading Binary
@@ -48,7 +51,7 @@ See the documentations:
 
 ### API Usage
 
-See the [API documentation](https://izumiya-keisuke.github.io/pon2/pon2.html).
+See the [API documentation](https://izumiya-keisuke.github.io/pon2/docs/pon2.html).
 
 ### Running Tests
 

@@ -7,9 +7,12 @@
 ## - [Nazo Puyo](./pon2pkg/nazopuyo.html)
 ## - [GUI Application](./pon2pkg/app.html)
 ##
-## To generate a static web page, compile this file on JS backend.
-## With the compile option `-d:Pon2Worker`, generates the web worker file
-## instead of the main JS file.
+## Generate Static Web Pages on JS Backend:
+## | Compile Option  | Generated File                |
+## | --------------- | ----------------------------- |
+## | No Option       | Main file.                    |
+## | `-d:Pon2Worker` | Web worker file.              |
+## | `-d:Pon2Pairs`  | Main file for pairs database. |
 ##
 
 {.experimental: "strictDefs".}
@@ -23,6 +26,12 @@ when isMainModule:
       import ./pon2pkg/private/main/[web]
 
       assignToWorker workerTask
+    elif defined(Pon2Pairs):
+      import std/[sugar]
+      import karax/[karax]
+      import ./pon2pkg/apppkg/[pairs]
+
+      setRenderer () => initPairsDatabaseNode()
     else:
       import std/[sugar]
       import ./pon2pkg/apppkg/[editorpermuter]

@@ -15,6 +15,19 @@ func initPairsDatabase*: CritBitTree[void] {.inline.} =
   ## Returns a new pairs database.
   RawPairsTxt.splitLines.toCritBitTree
 
-when isMainModule:
-  import std/sequtils
-  echo initPairsDatabase().itemsWithPrefix("rgbb").toSeq.len
+# ------------------------------------------------
+# Backend-specific Implementation
+# ------------------------------------------------
+
+when defined(js):
+  import karax/[karaxdsl, vdom]
+  import ../private/app/pairs/web/[searchbar]
+
+  # ------------------------------------------------
+  # JS - Node
+  # ------------------------------------------------
+
+  proc initPairsDatabaseNode*: VNode {.inline.} =
+    ## Returns the node of pairs database.
+    buildHtml(tdiv):
+      initSearchBarNode()
