@@ -7,8 +7,7 @@
 
 import std/[options, sequtils, strutils, sugar, uri]
 import karax/[karax, karaxdsl, vdom]
-import ../[misc]
-import ../app/web/[webworker]
+import ../[misc, webworker]
 import ../../apppkg/[editorpermuter, simulator]
 import ../../corepkg/[environment, misc, pair, position]
 import ../../nazopuyopkg/[nazopuyo, permute, solve]

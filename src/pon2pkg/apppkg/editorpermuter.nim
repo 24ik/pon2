@@ -281,7 +281,7 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
 
 when defined(js):
   import std/[dom]
-  import ../private/app/web/editorpermuter/editor/[
+  import ../private/app/editorpermuter/web/editor/[
     controller, pagination, permute as webPermute, simulator]
 
   # ------------------------------------------------

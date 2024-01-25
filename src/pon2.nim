@@ -19,7 +19,7 @@
 when isMainModule:
   when defined(js):
     when defined(Pon2Worker):
-      import ./pon2pkg/private/app/web/[webworker]
+      import ./pon2pkg/private/[webworker]
       import ./pon2pkg/private/main/[web]
 
       assignToWorker workerTask
