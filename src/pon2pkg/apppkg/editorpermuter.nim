@@ -281,8 +281,8 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
 
 when defined(js):
   import std/[dom]
-  import ../private/app/web/editor/[controller, pagination,
-                                    permute as webPermute, simulator]
+  import ../private/app/web/editorpermuter/editor/[
+    controller, pagination, permute as webPermute, simulator]
 
   # ------------------------------------------------
   # JS - Keyboard Handler
@@ -363,7 +363,8 @@ when defined(js):
     result = editorPermuter.initEditorPermuterNode(setKeyHandker, wrapSection,
                                                    id)
 else:
-  import ../private/app/native/editor/[controller, pagination, simulator]
+  import ../private/app/editorpermuter/native/editor/[
+    controller, pagination, simulator]
 
   type
     EditorPermuterControl* = ref object of LayoutContainer

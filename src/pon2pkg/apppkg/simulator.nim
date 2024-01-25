@@ -801,9 +801,9 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
 when defined(js):
   import std/[dom, sugar]
   import karax/[karax, karaxdsl, vdom]
-  import ../private/app/web/[controller, field, immediatepairs, messages,
-                             nextpair, pairs as pairsModule, palette,
-                             requirement, select, share]
+  import ../private/app/editorpermuter/web/[
+    controller, field, immediatepairs, messages, nextpair, pairs as pairsModule,
+    palette, requirement, select, share]
 
   # ------------------------------------------------
   # JS - Keyboard Handler
@@ -896,9 +896,9 @@ when defined(js):
 else:
   import std/[sugar]
   import nigui
-  import ../private/app/native/[assets, field, immediatepairs, messages,
-                                nextpair, pairs as pairsModule, requirement,
-                                select, share]
+  import ../private/app/editorpermuter/native/[
+    assets, field, immediatepairs, messages, nextpair, pairs as pairsModule,
+    requirement, select, share]
 
   type
     SimulatorControl* = ref object of LayoutContainer
