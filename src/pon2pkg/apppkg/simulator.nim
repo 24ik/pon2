@@ -209,11 +209,17 @@ func pairs*(mSelf): var Pairs {.inline.} =
   of Tsu: result = mSelf.environments.tsu.pairs
   of Water: result = mSelf.environments.water.pairs
 
+func adjustPositions(mSelf) {.inline.} = mSelf.positions.setLen mSelf.pairs.len
+  ## Adjust the positions' length.
+
 func `pairs=`*(mSelf; pairs: Pairs) {.inline.} =
   ## Sets the pairs.
+  ## Note that this function calles `adjustPositions()` internally.
   case mSelf.rule
   of Tsu: mSelf.environments.tsu.pairs = pairs
   of Water: mSelf.environments.water.pairs = pairs
+
+  mSelf.adjustPositions
 
 # ------------------------------------------------
 # Property - Pairs - Original
@@ -233,6 +239,7 @@ func originalPairs*(mSelf): var Pairs {.inline.} =
 
 func `originalPairs=`*(mSelf; pairs: Pairs) {.inline.} =
   ## Sets the original pairs.
+  ## Note that this function does **NOT** call `adjustPositions()` internally.
   case mSelf.rule
   of Tsu: mSelf.originalEnvironments.tsu.pairs = pairs
   of Water: mSelf.originalEnvironments.water.pairs = pairs
@@ -526,9 +533,6 @@ func `requirementNumber=`*(mSelf; num: RequirementNumber) {.inline.} =
 # ------------------------------------------------
 # Edit - Undo / Redo
 # ------------------------------------------------
-
-func adjustPositions(mSelf) {.inline.} = mSelf.positions.setLen mSelf.pairs.len
-  ## Adjust the positions' length.
 
 func undo*(mSelf) {.inline.} =
   ## Performs undo.

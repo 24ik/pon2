@@ -6,8 +6,8 @@
 {.experimental: "views".}
 
 import karax/[karaxdsl, vdom]
-import ./[misc]
 import ../[render]
+import ../../[misc]
 import ../../../../apppkg/[simulator]
 import ../../../../corepkg/[misc]
 

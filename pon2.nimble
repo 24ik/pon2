@@ -1,6 +1,6 @@
 # Package
 
-version = "0.10.3"
+version = "0.11.0"
 author = "Keisuke Izumiya"
 description = "Puyo Puyo Library"
 license = "Apache-2.0 OR MPL-2.0"
@@ -80,17 +80,17 @@ task web, "Make Web Pages":
     else:
       cpFile rawJs, dst
 
-  # documentation
-  exec "nimble -y documentation"
-  cpDir "src/htmldocs", "www/docs"
-  rmDir "src/htmldocs"
-
   # playground
   "src/pon2.nim".compile "www/playground/index.min.js"
   "src/pon2.nim".compile "www/playground/worker.min.js", "-d:Pon2Worker"
 
-  # pairs database
-  "src/pon2.nim".compile "www/pairs/index.min.js", "-d:Pon2Pairs"
+  # marathon
+  "src/pon2.nim".compile "www/marathon/index.min.js", "-d:Pon2Marathon"
+
+  # documentation
+  exec "nimble -y documentation"
+  cpDir "src/htmldocs", "www/docs"
+  rmDir "src/htmldocs"
 
   # assets
   cpDir "assets", "www/assets"

@@ -8,11 +8,11 @@
 ## - [GUI Application](./pon2pkg/app.html)
 ##
 ## Generate Static Web Pages on JS Backend:
-## | Compile Option  | Generated File                |
-## | --------------- | ----------------------------- |
-## | No Option       | Main file.                    |
-## | `-d:Pon2Worker` | Web worker file.              |
-## | `-d:Pon2Pairs`  | Main file for pairs database. |
+## | Compile Option    | Generated File                  |
+## | ----------------- | ------------------------------- |
+## | No Option         | Main file.                      |
+## | `-d:Pon2Worker`   | Web worker file.                |
+## | `-d:Pon2Marathon` | Main file for marathon manager. |
 ##
 
 {.experimental: "strictDefs".}
@@ -26,12 +26,13 @@ when isMainModule:
       import ./pon2pkg/private/main/[web]
 
       assignToWorker workerTask
-    elif defined(Pon2Pairs):
+    elif defined(Pon2Marathon):
       import std/[sugar]
       import karax/[karax]
-      import ./pon2pkg/apppkg/[pairs]
+      import ./pon2pkg/apppkg/[marathon as marathonModule]
 
-      setRenderer () => initPairsDatabaseNode()
+      var marathon = initMarathon()
+      setRenderer () => marathon.initMarathonNode
     else:
       import std/[sugar]
       import ./pon2pkg/apppkg/[editorpermuter]

@@ -7,8 +7,9 @@
 
 import std/[strformat, sugar, uri]
 import karax/[karax, karaxdsl, kbase, kdom, vdom, vstyles]
-import ./[field, misc, pairs, requirement]
+import ./[field, pairs, requirement]
 import ../[render]
+import ../../[misc]
 import ../../../../apppkg/[simulator]
 
 const

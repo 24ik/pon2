@@ -6,13 +6,10 @@
 {.experimental: "views".}
 
 import std/[options, strformat, uri]
+import ../../[misc]
 import ../../../apppkg/[misc, simulator]
 import ../../../corepkg/[cell, field, misc, moveresult, pair, position]
 import ../../../nazopuyopkg/[mark]
-import ../../[misc]
-
-when defined(js):
-  import ./web/[misc]
 
 # ------------------------------------------------
 # Field

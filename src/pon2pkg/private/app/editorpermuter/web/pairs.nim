@@ -7,8 +7,8 @@
 
 import std/[options, sugar]
 import karax/[karax, karaxdsl, kbase, vdom, vstyles]
-import ./[misc]
 import ../[render]
+import ../../[misc]
 import ../../../../apppkg/[misc, simulator]
 import ../../../../corepkg/[cell, misc, pair]
 

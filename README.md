@@ -9,6 +9,7 @@ Features:
 - Permuter: Permutes the pairs in the Nazo Puyo to find a unique-solution
 problem.
 - GUI Application: GUI simulator for Puyo Puyo and Nazo Puyo.
+- [Marathon](https://izumiya-keisuke.github.io/pon2/marathon/index.html): Search for pairs sequence and play a marathon mode.
 
 Not supported now:
 - Wall, Hard-garbage, Iron

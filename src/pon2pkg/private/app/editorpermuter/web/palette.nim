@@ -7,7 +7,7 @@
 
 import std/[sugar]
 import karax/[karax, karaxdsl, kbase, vdom, vstyles]
-import ./[misc]
+import ../../[misc]
 import ../../../../apppkg/[simulator]
 import ../../../../corepkg/[cell]
 
