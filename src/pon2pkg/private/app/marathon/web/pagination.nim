@@ -1,0 +1,29 @@
+## This module implements the marathon pagination node.
+##
+
+{.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
+
+import std/[strformat, sugar]
+import karax/[karax, karaxdsl, vdom]
+import ../../../../apppkg/[marathon]
+
+proc initMarathonPaginationNode*(marathon: var Marathon): VNode {.inline.} =
+  ## Returns the marathon pagination node.
+  let showIdx =
+    if marathon.matchResultPageCount == 0: 0
+    else: marathon.matchResultPageIdx.succ
+
+  result = buildHtml(nav(class = "pagination", role = "navigation",
+                aria-label = "pagination")):
+    button(class = "button pagination-link",
+           onclick = () => marathon.prevResultPage):
+      span(class = "icon"):
+        italic(class = "fa-solid fa-backward-step")
+    button(class = "button pagination-link is-static"):
+      text &"{showIdx} / {marathon.matchResultPageCount}"
+    button(class = "button pagination-link",
+           onclick = () => marathon.nextResultPage):
+      span(class = "icon"):
+        italic(class = "fa-solid fa-forward-step")

@@ -10,8 +10,10 @@
 /src/htmldocs/
 
 /www/assets/
-/www/index.min.js
-/www/worker.min.js
+/www/docs/
+/www/marathon/index.min.js
+/www/playground/index.min.js
+/www/playground/worker.min.js
 
 /pon2
 /pon2.exe

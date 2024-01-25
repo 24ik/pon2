@@ -9,11 +9,15 @@ Features:
 - Permuter: Permutes the pairs in the Nazo Puyo to find a unique-solution
 problem.
 - GUI Application: GUI simulator for Puyo Puyo and Nazo Puyo.
+- [Marathon](https://izumiya-keisuke.github.io/pon2/marathon/index.html): Search for pairs sequence and play a marathon mode.
 
 Not supported now:
 - Wall, Hard-garbage, Iron
 - Fever rule
 - Dropping garbage
+
+Note that now I am working hard on CUI and web-GUI development, and the
+native-GUI application is beta version.
 
 ## Installation
 
@@ -48,7 +52,7 @@ See the documentations:
 
 ### API Usage
 
-See the [API documentation](https://izumiya-keisuke.github.io/pon2/pon2.html).
+See the [API documentation](https://izumiya-keisuke.github.io/pon2/docs/pon2.html).
 
 ### Running Tests
 

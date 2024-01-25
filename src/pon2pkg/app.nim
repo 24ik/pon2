@@ -14,11 +14,14 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./apppkg/[editorpermuter, misc, simulator]
+import ./apppkg/[editorpermuter, marathon, misc, simulator]
 
 export editorpermuter.EditorPermuter, editorpermuter.initEditorPermuter,
   editorpermuter.toggleFocus, editorpermuter.solve, editorpermuter.nextReplay,
   editorpermuter.prevReplay, editorpermuter.operate
+export marathon.Marathon, marathon.initMarathon, marathon.toggleFocus,
+  marathon.nextResultPage, marathon.prevResultPage, marathon.match,
+  marathon.operate
 export misc.KeyEvent, misc.Color, misc.SelectColor, misc.GhostColor,
   misc.WaterColor, misc.DefaultColor, misc.initKeyEvent
 export simulator.SimulatorState, simulator.Simulator, simulator.initSimulator,
@@ -45,6 +48,8 @@ when defined(js):
   export editorpermuter.runKeyboardEventHandler,
     editorpermuter.initKeyboardEventHandler,
     editorpermuter.initEditorPermuterNode
+  export marathon.runKeyboardEventHandler, marathon.initKeyboardEventHandler,
+    marathon.initMarathonNode
   export misc.toColorCode, misc.toKeyEvent
   export simulator.runKeyboardEventHandler, simulator.initKeyboardEventHandler,
     simulator.initSimulatorNode
