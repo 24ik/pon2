@@ -10,6 +10,9 @@ import ./[misc, simulator]
 import ../corepkg/[environment, misc, pair]
 import ../private/[misc]
 
+when defined(js):
+  import ../nazopuyopkg/[nazopuyo]
+
 type Marathon* = object
   ## Marathon manager.
   simulator*: ref Simulator
