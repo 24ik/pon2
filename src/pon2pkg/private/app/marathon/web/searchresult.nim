@@ -37,7 +37,8 @@ proc initMarathonSearchResultNode*(marathon: var Marathon): VNode {.inline.} =
               span(class = "icon"):
                 italic(class = "fa-solid fa-gamepad")
 
-          let pairs = marathon.matchPairsStrsSeq[pairsIdx].toPairs
+          let pairs = marathon.matchPairsStrsSeq[pairsIdx][
+            0 ..< ShowPairCount * 2].toPairs
           for pairIdx in 0..<ShowPairCount:
             let pair = pairs[pairIdx]
 
