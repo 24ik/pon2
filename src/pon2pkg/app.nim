@@ -6,6 +6,7 @@
 ##
 ## Submodule Documentations:
 ## - [editorpermuter](./apppkg/editorpermuter.html)
+## - [marathon](./apppkg/marathon.html)
 ## - [misc](./apppkg/misc.html)
 ## - [simulator](./apppkg/simulator.html)
 ##

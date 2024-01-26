@@ -1,5 +1,7 @@
 ## This module implements marathon mode.
 ##
+# TODO: ランダム選択
+# TODO: app.nimのdoc追加
 
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
