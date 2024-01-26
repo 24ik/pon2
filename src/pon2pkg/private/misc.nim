@@ -11,6 +11,10 @@ import std/[algorithm, options, os, parsecfg, sequtils, streams, strutils,
 when not defined(js):
   import docopt
 
+static:
+  for path in (currentSourcePath().parentDir.parentDir.parentDir.parentDir).walkDir:
+    echo path
+
 const Version* = staticRead(
   currentSourcePath().parentDir.parentDir.parentDir.parentDir /
     "pon2.nimble").newStringStream.loadConfig.getSectionValue("", "version")
