@@ -684,21 +684,21 @@ func toUri*(self; editor: bool, withPositions: bool): Uri {.inline.} =
   ## `self.editor` will be overridden with `editor`.
   case self.kind
   of Regular:
-    self.withEnvironment:
+    self.withOriginalEnvironment:
       result =
         if withPositions:
-          environment.toUri(self.positions, kind = self.kind, mode = self.mode,
-                            editor = editor)
+          originalEnvironment.toUri(self.positions, kind = self.kind,
+                                    mode = self.mode, editor = editor)
         else:
-          environment.toUri(kind = self.kind, mode = self.mode,
-                            editor = editor)
+          originalEnvironment.toUri(kind = self.kind, mode = self.mode,
+                                    editor = editor)
   of Nazo:
-    self.withNazoPuyo:
+    self.withOriginalNazoPuyo:
       result =
-        if withPositions: nazoPuyo.toUri(self.positions, mode = self.mode,
-                                         editor = editor)
+        if withPositions: originalNazoPuyo.toUri(
+          self.positions, mode = self.mode, editor = editor)
         else:
-          nazoPuyo.toUri(mode = self.mode, editor = editor)
+          originalNazoPuyo.toUri(mode = self.mode, editor = editor)
 
 func toUri*(self; withPositions: bool): Uri {.inline.} =
   ## Converts the simulator to the URI.
