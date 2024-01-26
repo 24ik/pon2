@@ -5,10 +5,10 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, sequtils, strutils, sugar, uri]
+import std/[options, sequtils, strformat, strutils, sugar, uri]
 import karax/[karax, karaxdsl, vdom]
 import ../[misc, webworker]
-import ../../apppkg/[editorpermuter, simulator]
+import ../../apppkg/[editorpermuter, marathon, simulator]
 import ../../corepkg/[environment, misc, pair, position]
 import ../../nazopuyopkg/[nazopuyo, permute, solve]
 
@@ -59,12 +59,18 @@ proc workerTask*(args: seq[string]): tuple[returnCode: WorkerReturnCode,
 # Web - Main
 # ------------------------------------------------
 
-proc initEditorPermuterNode*(
+proc initFooterNode: VNode {.inline.} =
+  ## Returns the footer node.
+  buildHtml(footer(class = "footer")):
+    tdiv(class = "content has-text-centered"):
+      text &"Pon!通 Version {Version}"
+
+proc initMainEditorPermuterNode*(
     routerData: RouterData, pageInitialized: var bool,
-    globalEditorPermuter: var EditorPermuter): VNode {.inline.} =
-  ## Returns the editor&permuter node.
+    editorPermuter: var EditorPermuter): VNode {.inline.} =
+  ## Returns the main editor&permuter node.
   if pageInitialized:
-    return globalEditorPermuter.initEditorPermuterNode
+    return editorPermuter.initEditorPermuterNode
 
   pageInitialized = true
   let query =
@@ -80,7 +86,7 @@ proc initEditorPermuterNode*(
   try:
     let parseRes = uri.parseNazoPuyos
     parseRes.nazoPuyos.flattenAnd:
-      globalEditorPermuter =
+      editorPermuter =
         if parseRes.positions.isSome:
           nazoPuyo.initEditorPermuter(parseRes.positions.get, parseRes.mode,
                                       parseRes.editor)
@@ -90,7 +96,7 @@ proc initEditorPermuterNode*(
     try:
       let parseRes = uri.parseEnvironments
       parseRes.environments.flattenAnd:
-        globalEditorPermuter =
+        editorPermuter =
           if parseRes.positions.isSome:
             environment.initEditorPermuter(parseRes.positions.get,
                                           parseRes.mode, parseRes.editor)
@@ -100,4 +106,12 @@ proc initEditorPermuterNode*(
       return buildHtml(tdiv):
         text "URL形式エラー"
 
-  result = globalEditorPermuter.initEditorPermuterNode
+  result = buildHtml(tdiv):
+    editorPermuter.initEditorPermuterNode
+    initFooterNode()
+
+proc initMainMarathonNode*(marathon: var Marathon): VNode {.inline.} =
+  ## Returns the main marathon node.
+  buildHtml(tdiv):
+    marathon.initMarathonNode
+    initFooterNode()
