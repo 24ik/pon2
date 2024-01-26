@@ -11,9 +11,18 @@ import ../../../../apppkg/[marathon]
 
 proc initMarathonPaginationNode*(marathon: var Marathon): VNode {.inline.} =
   ## Returns the marathon pagination node.
-  let showIdx =
-    if marathon.matchResultPageCount == 0: 0
-    else: marathon.matchResultPageIdx.succ
+  let
+    firstIdx = marathon.matchResultPageIdx * MatchResultPairsCountPerPage + 1
+    lastIdx = min(
+      marathon.matchResultPageIdx.succ * MatchResultPairsCountPerPage,
+      marathon.matchPairsStrsSeq.len)
+    ratio = marathon.matchPairsStrsSeq.len / AllPairsCount
+    pageTxt =
+      if marathon.matchPairsStrsSeq.len > 0:
+        &"{firstIdx}〜{lastIdx} / {marathon.matchPairsStrsSeq.len} " &
+          &"({ratio * 100 : .1f}%)"
+      else:
+        "0 / 0 (0.0%)"
 
   result = buildHtml(nav(class = "pagination", role = "navigation",
                 aria-label = "pagination")):
@@ -22,7 +31,7 @@ proc initMarathonPaginationNode*(marathon: var Marathon): VNode {.inline.} =
       span(class = "icon"):
         italic(class = "fa-solid fa-backward-step")
     button(class = "button pagination-link is-static"):
-      text &"{showIdx} / {marathon.matchResultPageCount}"
+      text pageTxt
     button(class = "button pagination-link",
            onclick = () => marathon.nextResultPage):
       span(class = "icon"):

@@ -1,13 +1,16 @@
 ## This module implements marathon mode.
 ##
+# NOTE (Implementation approach): To prevent slow page loading and rendering,
+# data is basically handled as `string` and conversion to `Pairs` is performed
+# when necessary.
 
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[critbits, math, os, strutils, sugar]
+import std/[algorithm, critbits, math, os, sequtils, strutils, sugar, random]
 import ./[misc, simulator]
-import ../corepkg/[environment, misc, pair]
+import ../corepkg/[cell, environment, misc, pair]
 import ../private/[misc]
 
 when defined(js):
@@ -17,19 +20,23 @@ type Marathon* = object
   ## Marathon manager.
   simulator*: ref Simulator
 
-  matchPairsSeq*: seq[Pairs]
+  matchPairsStrsSeq*: seq[string]
   matchResultPageCount*: Natural
   matchResultPageIdx*: Natural
 
-  allPairsTree: CritBitTree[void]
+  allPairsStrsSeq: seq[string]
+  allPairsStrsTree: CritBitTree[void]
 
   focusSimulator*: bool
+
+  rng: Rand
 
 const
   RawPairsTxt =
     staticRead currentSourcePath().parentDir.parentDir.parentDir.parentDir /
       "assets/pairs/haipuyo.txt"
   MatchResultPairsCountPerPage* = 10
+  AllPairsCount* = 65536
 
 using
   self: Marathon
@@ -45,12 +52,27 @@ proc initMarathon*: Marathon {.inline.} =
   result.simulator[] =
     0.initTsuEnvironment(setPairs = false).initSimulator(Play, true)
 
-  result.matchPairsSeq = @[]
+  result.matchPairsStrsSeq = @[]
   result.matchResultPageCount = 0
   result.matchResultPageIdx = 0
-  result.allPairsTree = RawPairsTxt.splitLines.toCritBitTree
+
+  result.allPairsStrsSeq = RawPairsTxt.splitLines
+  result.allPairsStrsTree = result.allPairsStrsSeq.toCritBitTree
+  assert result.allPairsStrsSeq.len == AllPairsCount
 
   result.focusSimulator = false
+
+  result.rng = initRand()
+
+# ------------------------------------------------
+# Pairs
+# ------------------------------------------------
+
+func toPairs*(str: string): Pairs {.inline.} =
+  ## Converts the flattened string to the pairs.
+  result = initDeque[Pair](str.len div 2)
+  for i in countup(0, str.len.pred, 2):
+    result.addLast str[i..i.succ].parsePair
 
 # ------------------------------------------------
 # Edit - Other
@@ -87,26 +109,177 @@ proc prevResultPage*(mSelf) {.inline.} =
 # Match
 # ------------------------------------------------
 
-func toPairs(str: string): Pairs {.inline.} =
-  ## Converts the flattened string to the pairs.
-  result = initDeque[Pair](128)
-  for i in countup(0, 255, 2):
-    result.addLast str[i..i.succ].parsePair
+func swappedPrefixes(prefix: string): seq[string] {.inline.} =
+  ## Returns all prefixes with all pairs swapped.
+  ## `prefix` need to be capital.
+  assert prefix.len mod 2 == 0
 
-func match*(mSelf; prefix: string) {.inline.} =
-  ## Updates `mSelf.matchPairsSeq`.
-  {.push warning[ProveInit]: off.}
-  if prefix == "":
-    mSelf.matchPairsSeq = @[]
+  # If a non-double pair (AB) exists and cells in the pair (A and B) do not
+  # appear in the others pairs, A and B are symmetric; no need to swap in this
+  # function.
+  # This process is applied to only one of all AB (fixing the concrete colors of
+  # A and B).
+  var
+    pairIdx = [0, 0, 0, 0, 0, 0] # AB, AC, AD, BC, BD, CD
+    pairCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # AB, ..., CD, AA, BB, CC, DD
+  for i in countup(0, prefix.len.pred, 2):
+    case prefix[i..i.succ]
+    of "AA":
+      pairCounts[6].inc
+    of "BB":
+      pairCounts[7].inc
+    of "CC":
+      pairCounts[8].inc
+    of "DD":
+      pairCounts[9].inc
+    of "AB", "BA":
+      pairCounts[0].inc
+      pairIdx[0] = i
+    of "AC", "CA":
+      pairCounts[1].inc
+      pairIdx[1] = i
+    of "AD", "DA":
+      pairCounts[2].inc
+      pairIdx[2] = i
+    of "BC", "CB":
+      pairCounts[3].inc
+      pairIdx[3] = i
+    of "BD", "DB":
+      pairCounts[4].inc
+      pairIdx[4] = i
+    of "CD", "DC":
+      pairCounts[5].inc
+      pairIdx[5] = i
+
+  let
+    notDoublePairCount = pairCounts[0..<6].sum2
+    fixIdx =
+      if pairCounts[0] > 0 and notDoublePairCount == pairCounts[0] and
+        pairCounts[6] + pairCounts[7] == 0: pairIdx[0]
+      elif pairCounts[1] > 0 and notDoublePairCount == pairCounts[1] and
+        pairCounts[6] + pairCounts[8] == 0: pairIdx[1]
+      elif pairCounts[2] > 0 and notDoublePairCount == pairCounts[2] and
+        pairCounts[6] + pairCounts[9] == 0: pairIdx[2]
+      elif pairCounts[3] > 0 and notDoublePairCount == pairCounts[3] and
+        pairCounts[7] + pairCounts[8] == 0: pairIdx[3]
+      elif pairCounts[4] > 0 and notDoublePairCount == pairCounts[4] and
+        pairCounts[7] + pairCounts[9] == 0: pairIdx[4]
+      elif pairCounts[5] > 0 and notDoublePairCount == pairCounts[5] and
+        pairCounts[8] + pairCounts[9] == 0: pairIdx[5]
+      else: -1
+
+    pairsSeq = collect:
+      for i in countup(0, prefix.len.pred, 2):
+        let
+          c1 = prefix[i]
+          c2 = prefix[i.succ]
+
+        if c1 == c2 or i == fixIdx: @[c1 & c2] else: @[c1 & c2, c2 & c1]
+
+  result = pairsSeq.product2.mapIt it.join
+
+func initReplaceData(keys: string): seq[seq[(string, string)]] {.inline.} =
+  ## Returns arguments for prefix replacing.
+  result = @[] # HACK: dummy to remove warning
+
+  case keys.len
+  of 1:
+    result = collect:
+      for p0 in ColorPuyo.low..ColorPuyo.high:
+        @[($keys[0], $p0)]
+  of 2:
+    result = collect:
+      for p0 in ColorPuyo.low..ColorPuyo.high:
+        for p1 in ColorPuyo.low..ColorPuyo.high:
+          if p0 != p1:
+            @[($keys[0], $p0), ($keys[1], $p1)]
+  of 3:
+    result = collect:
+      for p0 in ColorPuyo.low..ColorPuyo.high:
+        for p1 in ColorPuyo.low..ColorPuyo.high:
+          for p2 in ColorPuyo.low..ColorPuyo.high:
+            if {p0, p1, p2}.card == 3:
+              @[($keys[0], $p0), ($keys[1], $p1), ($keys[2], $p2)]
+  of 4:
+    result = collect:
+      for p0 in ColorPuyo.low..ColorPuyo.high:
+        for p1 in ColorPuyo.low..ColorPuyo.high:
+          for p2 in ColorPuyo.low..ColorPuyo.high:
+            for p3 in ColorPuyo.low..ColorPuyo.high:
+              if {p0, p1, p2, p3}.card == 4:
+                @[($keys[0], $p0), ($keys[1], $p1), ($keys[2], $p2),
+                  ($keys[3], $p3)]
   else:
-    mSelf.matchPairsSeq = collect:
-      for str in mSelf.allPairsTree.itemsWithPrefix prefix:
-        str.toPairs
-  {.pop.}
+    assert false
+
+const
+  ReplaceDataSeq = ["A".initReplaceData, "AB".initReplaceData,
+                    "ABC".initReplaceData, "ABCD".initReplaceData]
+  NeedReplaceKeysSeq = ["a".toSet2, "ab".toSet2, "abc".toSet2, "abcd".toSet2]
+
+{.push warning[Uninit]: off.}
+func match*(mSelf; prefix: string) {.inline.} =
+  if prefix == "":
+    mSelf.matchPairsStrsSeq = @[]
+  else:
+    var keys = prefix.toSet2
+    if keys in NeedReplaceKeysSeq:
+      if prefix.len mod 2 == 1:
+        return
+
+      let prefix2 = prefix.toUpperAscii # HACK: prevent to confuse 'b' with Blue
+
+      mSelf.matchPairsStrsSeq = newSeqOfCap[string](45000)
+      for replaceData in ReplaceDataSeq[keys.card.pred]:
+        for prefix3 in prefix2.swappedPrefixes:
+          {.push warning[ProveInit]: off.}
+          mSelf.matchPairsStrsSeq &= mSelf.allPairsStrsTree.itemsWithPrefix(
+            prefix3.multiReplace replaceData).toSeq
+          {.pop.}
+    else:
+      {.push warning[ProveInit]: off.}
+      mSelf.matchPairsStrsSeq =
+        mSelf.allPairsStrsTree.itemsWithPrefix(prefix).toSeq
+      {.pop.}
 
   mSelf.matchResultPageCount =
-    ceil(mSelf.matchPairsSeq.len / MatchResultPairsCountPerPage).Natural
+    ceil(mSelf.matchPairsStrsSeq.len / MatchResultPairsCountPerPage).Natural
   mSelf.matchResultPageIdx = 0
+
+  if mSelf.matchPairsStrsSeq.len > 0:
+    mSelf.focusSimulator = false
+{.pop.}
+
+# ------------------------------------------------
+# Play
+# ------------------------------------------------
+
+proc play(mSelf; pairsStr: string) {.inline.} =
+  ## Plays a marathon mode with the given pairs.
+  let pairs = pairsStr.toPairs
+
+  mSelf.simulator[].reset true
+  mSelf.simulator[].pairs = pairs
+  mSelf.simulator[].originalPairs = pairs
+
+  mSelf.focusSimulator = true
+
+proc play*(mSelf; pairsIdx: Natural) {.inline.} =
+  ## Plays a marathon mode with the given pairs.
+  mSelf.play mSelf.matchPairsStrsSeq[pairsIdx]
+
+proc play*(mSelf; onlyMatched = true) {.inline.} =
+  ## Plays a marathon mode with the random mathced pairs.
+  ## If `onlyMatched` is true, the pairs are chosen from the matched result;
+  ## otherwise, chosen from all pairs.
+  if not onlyMatched:
+    mSelf.play mSelf.rng.sample mSelf.allPairsStrsSeq
+    return
+
+  if mSelf.matchPairsStrsSeq.len == 0:
+    return
+
+  mSelf.play mSelf.rng.sample mSelf.matchPairsStrsSeq
 
 # ------------------------------------------------
 # Keyboard Operation
@@ -121,13 +294,6 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
 
   if mSelf.focusSimulator:
     return mSelf.simulator[].operate event
-
-  if event == initKeyEvent("KeyA"):
-    mSelf.prevResultPage
-    return true
-  if event == initKeyEvent("KeyD"):
-    mSelf.nextResultPage
-    return true
 
   result = false
 
@@ -170,14 +336,18 @@ when defined(js):
     ## `id` is shared with other node-creating procedures and need to be unique.
     buildHtml(tdiv(class = "columns is-mobile")):
       tdiv(class = "column is-narrow"):
-        mSelf.initMarathonSimulatorNode id
+        tdiv(class = "block"):
+          mSelf.initMarathonPlayControllerNode
+        tdiv(class = "block"):
+          mSelf.initMarathonSimulatorNode id
       tdiv(class = "column is-narrow"):
         tdiv(class = "block"):
           mSelf.initMarathonSearchBarNode id
-          mSelf.initMarathonControllerNode
-        if mSelf.matchPairsSeq.len > 0:
-          tdiv(class = "block"):
-            mSelf.initMarathonPaginationNode
+        tdiv(class = "block"):
+          mSelf.initMarathonFocusControllerNode
+        tdiv(class = "block"):
+          mSelf.initMarathonPaginationNode
+        if mSelf.matchPairsStrsSeq.len > 0:
           tdiv(class = "block"):
             mSelf.initMarathonSearchResultNode
 
