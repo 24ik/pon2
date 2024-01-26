@@ -14,6 +14,9 @@ when not defined(js):
 static:
   for path in (currentSourcePath().parentDir.parentDir.parentDir.parentDir).walkDir:
     echo path
+  echo fileExists currentSourcePath().parentDir.parentDir.parentDir.parentDir / "pon2.nimble"
+  echo staticRead(currentSourcePath().parentDir.parentDir.parentDir.parentDir /
+      "pon2.nimble")[0..10]
 
 const Version* = staticRead(
   currentSourcePath().parentDir.parentDir.parentDir.parentDir /
