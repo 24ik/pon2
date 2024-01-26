@@ -11,10 +11,8 @@
 import std/[algorithm, critbits, math, os, sequtils, strutils, sugar, random]
 import ./[misc, simulator]
 import ../corepkg/[cell, environment, misc, pair]
+import ../nazopuyopkg/[nazopuyo] # HACK: somehow this is necessary
 import ../private/[misc]
-
-when defined(js):
-  import ../nazopuyopkg/[nazopuyo]
 
 type Marathon* = object
   ## Marathon manager.
@@ -34,7 +32,7 @@ type Marathon* = object
 const
   RawPairsTxt =
     staticRead currentSourcePath().parentDir.parentDir.parentDir.parentDir /
-      "assets/pairs/haipuyo.txt"
+      "assets/all-pairs.txt"
   MatchResultPairsCountPerPage* = 10
   AllPairsCount* = 65536
 

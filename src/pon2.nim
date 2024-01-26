@@ -30,21 +30,23 @@ when isMainModule:
       import std/[sugar]
       import karax/[karax]
       import ./pon2pkg/apppkg/[marathon as marathonModule]
+      import ./pon2pkg/private/main/[web]
 
       var marathon = initMarathon()
-      setRenderer () => marathon.initMarathonNode
+
+      setRenderer () => marathon.initMainMarathonNode
     else:
       import std/[sugar]
-      import ./pon2pkg/apppkg/[editorpermuter]
+      import ./pon2pkg/apppkg/[editorpermuter as editorPermuterModule]
       import ./pon2pkg/private/main/[web]
       import karax/[karax]
 
       var
         pageInitialized = false
-        globalEditorPermuter: EditorPermuter
+        editorPermuter: EditorPermuter
 
-      setRenderer (routerData: RouterData) => routerData.initEditorPermuterNode(
-        pageInitialized, globalEditorPermuter)
+      setRenderer (routerData: RouterData) =>
+        routerData.initMainEditorPermuterNode(pageInitialized, editorPermuter)
   else:
     import std/[tables]
     import ./pon2pkg/private/main/[native]

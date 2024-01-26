@@ -5,10 +5,15 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[algorithm, options, sequtils, strutils, typetraits, uri]
+import std/[algorithm, options, os, parsecfg, sequtils, streams, strutils,
+            typetraits, uri]
 
 when not defined(js):
   import docopt
+
+const Version* = staticRead(
+  currentSourcePath().parentDir.parentDir.parentDir.parentDir /
+    "pon2.nimble").newStringStream.loadConfig.getSectionValue("", "version")
 
 # ------------------------------------------------
 # Warning-suppress Version
