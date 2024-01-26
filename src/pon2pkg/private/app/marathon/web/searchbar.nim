@@ -24,6 +24,5 @@ proc initMarathonSearchBarNode*(
       tdiv(class = "field"):
         tdiv(class = "control"):
           input(id = inputId, class = "input", `type` = "text",
-                placeholder = "rgrb",
-                onkeyup = () => (marathon.match $inputId.getVNodeById.value;
-                                 marathon.focusSimulator = false))
+                placeholder = "例：rgrb もしくは abac", maxlength = "16",
+                oninput = () => marathon.match($inputId.getVNodeById.value))

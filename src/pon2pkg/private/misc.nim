@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, strutils, typetraits, uri]
+import std/[algorithm, options, sequtils, strutils, typetraits, uri]
 
 when not defined(js):
   import docopt
@@ -90,3 +90,11 @@ when not defined(js):
 # ------------------------------------------------
 
 func toggle*(b: var bool) {.inline.} = b = not b ## Toggles the value.
+
+func product2*[T](x: openArray[seq[T]]): seq[seq[T]] {.inline.} =
+  ## Returns a cartesian product.
+  ## This version works on any length.
+  case x.len
+  of 0: @[newSeq[T](0)]
+  of 1: x[0].mapIt @[it]
+  else: x.product

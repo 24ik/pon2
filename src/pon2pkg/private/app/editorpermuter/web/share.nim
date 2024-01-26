@@ -57,21 +57,17 @@ proc initShareNode*(simulator: var Simulator, id = ""): VNode {.inline.} =
 
   result = buildHtml(tdiv):
     tdiv(class = "block"):
-      text "URLをシェア"
-      tdiv:
-        a(class = "button", target = "_blank", rel = "noopener noreferrer",
-          href = kstring $simulator.toXlink false):
-          span(class = "icon"):
-            italic(class = "fa-brands fa-x-twitter")
-          span:
-            text "操作無URL"
-      tdiv:
-        a(class = "button", target = "_blank", rel = "noopener noreferrer",
-          href = kstring $simulator.toXlink true):
-          span(class = "icon"):
-            italic(class = "fa-brands fa-x-twitter")
-          span:
-            text "操作有URL"
+      span(class = "icon"):
+        italic(class = "fa-brands fa-x-twitter")
+      span:
+        text "でシェア"
+      tdiv(class = "buttons"):
+        a(class = "button is-size-7", target = "_blank",
+          rel = "noopener noreferrer", href = kstring $simulator.toXlink false):
+          text "操作無"
+        a(class = "button is-size-7", target = "_blank",
+          rel = "noopener noreferrer", href = kstring $simulator.toXlink true):
+          text "操作有"
     tdiv(class = "block"):
       text "画像ダウンロード"
       tdiv(class = "buttons"):
