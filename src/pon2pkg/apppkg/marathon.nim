@@ -1,13 +1,14 @@
 ## This module implements marathon mode.
 ##
-# TODO: ランダム選択
-# TODO: app.nimのdoc追加
+# NOTE (Implementation approach): To prevent slow page loading and rendering,
+# data is basically handled as `string` and conversion to `Pairs` is performed
+# when necessary.
 
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[critbits, math, os, strutils, sugar]
+import std/[critbits, math, os, sequtils, strutils, random]
 import ./[misc, simulator]
 import ../corepkg/[environment, misc, pair]
 import ../private/[misc]
@@ -19,13 +20,16 @@ type Marathon* = object
   ## Marathon manager.
   simulator*: ref Simulator
 
-  matchPairsSeq*: seq[Pairs]
+  matchPairsStrsSeq*: seq[string]
   matchResultPageCount*: Natural
   matchResultPageIdx*: Natural
 
-  allPairsTree: CritBitTree[void]
+  allPairsStrsSeq: seq[string]
+  allPairsStrsTree: CritBitTree[void]
 
   focusSimulator*: bool
+
+  rng: Rand
 
 const
   RawPairsTxt =
@@ -47,12 +51,26 @@ proc initMarathon*: Marathon {.inline.} =
   result.simulator[] =
     0.initTsuEnvironment(setPairs = false).initSimulator(Play, true)
 
-  result.matchPairsSeq = @[]
+  result.matchPairsStrsSeq = @[]
   result.matchResultPageCount = 0
   result.matchResultPageIdx = 0
-  result.allPairsTree = RawPairsTxt.splitLines.toCritBitTree
+
+  result.allPairsStrsSeq = RawPairsTxt.splitLines
+  result.allPairsStrsTree = result.allPairsStrsSeq.toCritBitTree
 
   result.focusSimulator = false
+
+  result.rng = initRand()
+
+# ------------------------------------------------
+# Pairs
+# ------------------------------------------------
+
+func toPairs*(str: string): Pairs {.inline.} =
+  ## Converts the flattened string to the pairs.
+  result = initDeque[Pair](str.len div 2)
+  for i in countup(0, str.len.pred, 2):
+    result.addLast str[i..i.succ].parsePair
 
 # ------------------------------------------------
 # Edit - Other
@@ -89,26 +107,50 @@ proc prevResultPage*(mSelf) {.inline.} =
 # Match
 # ------------------------------------------------
 
-func toPairs(str: string): Pairs {.inline.} =
-  ## Converts the flattened string to the pairs.
-  result = initDeque[Pair](128)
-  for i in countup(0, 255, 2):
-    result.addLast str[i..i.succ].parsePair
-
+{.push warning[Uninit]: off.}
 func match*(mSelf; prefix: string) {.inline.} =
-  ## Updates `mSelf.matchPairsSeq`.
+  ## Updates `mSelf.matchPairsStrsSeq`.
   {.push warning[ProveInit]: off.}
-  if prefix == "":
-    mSelf.matchPairsSeq = @[]
-  else:
-    mSelf.matchPairsSeq = collect:
-      for str in mSelf.allPairsTree.itemsWithPrefix prefix:
-        str.toPairs
+  mSelf.matchPairsStrsSeq =
+    if prefix == "": newSeq[string](0)
+    else: toSeq mSelf.allPairsStrsTree.itemsWithPrefix prefix
   {.pop.}
 
   mSelf.matchResultPageCount =
-    ceil(mSelf.matchPairsSeq.len / MatchResultPairsCountPerPage).Natural
+    ceil(mSelf.matchPairsStrsSeq.len / MatchResultPairsCountPerPage).Natural
   mSelf.matchResultPageIdx = 0
+{.pop.}
+
+# ------------------------------------------------
+# Play
+# ------------------------------------------------
+
+proc play(mSelf; pairsStr: string) {.inline.} =
+  ## Plays a marathon mode with the given pairs.
+  let pairs = pairsStr.toPairs
+
+  mSelf.simulator[].reset true
+  mSelf.simulator[].pairs = pairs
+  mSelf.simulator[].originalPairs = pairs
+
+  mSelf.focusSimulator = true
+
+proc play*(mSelf; pairsIdx: Natural) {.inline.} =
+  ## Plays a marathon mode with the given pairs.
+  mSelf.play mSelf.matchPairsStrsSeq[pairsIdx]
+
+proc play*(mSelf; onlyMatched = true) {.inline.} =
+  ## Plays a marathon mode with the random mathced pairs.
+  ## If `onlyMatched` is true, the pairs are chosen from the matched result;
+  ## otherwise, chosen from all pairs.
+  if not onlyMatched:
+    mSelf.play mSelf.rng.sample mSelf.allPairsStrsSeq
+    return
+
+  if mSelf.matchPairsStrsSeq.len == 0:
+    return
+
+  mSelf.play mSelf.rng.sample mSelf.matchPairsStrsSeq
 
 # ------------------------------------------------
 # Keyboard Operation
@@ -138,7 +180,7 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
 # ------------------------------------------------
 
 when defined(js):
-  import std/[dom]
+  import std/[dom, sugar]
   import karax/[karax, karaxdsl, vdom]
   import ../private/app/marathon/web/[controller, pagination, searchbar,
                                       searchresult, simulator]
@@ -177,7 +219,7 @@ when defined(js):
         tdiv(class = "block"):
           mSelf.initMarathonSearchBarNode id
           mSelf.initMarathonControllerNode
-        if mSelf.matchPairsSeq.len > 0:
+        if mSelf.matchPairsStrsSeq.len > 0:
           tdiv(class = "block"):
             mSelf.initMarathonPaginationNode
           tdiv(class = "block"):

@@ -16,6 +16,10 @@ proc initMarathonControllerNode*(marathon: var Marathon): VNode {.inline.} =
     else: kstring"button is-selected is-primary"
 
   result = buildHtml(tdiv(class = "buttons")):
-    button(class = focusButtonClass,
-           onclick = () => marathon.toggleFocus):
+    button(class = "button", onclick = () => marathon.play,
+           disabled = marathon.matchPairsStrsSeq.len == 0):
+      text "検索結果からランダム"
+    button(class = "button", onclick = () => marathon.play(false)):
+      text "全ツモからランダム"
+    button(class = focusButtonClass, onclick = () => marathon.toggleFocus):
       text "検索結果を操作"

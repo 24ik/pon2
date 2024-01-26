@@ -22,7 +22,7 @@ export editorpermuter.EditorPermuter, editorpermuter.initEditorPermuter,
   editorpermuter.prevReplay, editorpermuter.operate
 export marathon.Marathon, marathon.initMarathon, marathon.toggleFocus,
   marathon.nextResultPage, marathon.prevResultPage, marathon.match,
-  marathon.operate
+  marathon.play, marathon.operate
 export misc.KeyEvent, misc.Color, misc.SelectColor, misc.GhostColor,
   misc.WaterColor, misc.DefaultColor, misc.initKeyEvent
 export simulator.SimulatorState, simulator.Simulator, simulator.initSimulator,

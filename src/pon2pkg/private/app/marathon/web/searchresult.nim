@@ -8,7 +8,7 @@
 import std/[sugar]
 import karax/[karax, karaxdsl, vdom]
 import ../../[misc]
-import ../../../../apppkg/[marathon, simulator]
+import ../../../../apppkg/[marathon]
 import ../../../../corepkg/[pair]
 
 const ShowPairCount = 8
@@ -16,13 +16,7 @@ const ShowPairCount = 8
 proc initPlayHandler(marathon: var Marathon, pairsIdx: Natural): () -> void =
   ## Returns a new click handler for play buttons.
   # NOTE: inlining does not work due to lazy evaluation
-  proc handler =
-    marathon.simulator[].reset true
-    marathon.simulator[].pairs = marathon.matchPairsSeq[pairsIdx]
-    marathon.simulator[].originalPairs = marathon.matchPairsSeq[pairsIdx]
-    marathon.focusSimulator = true
-
-  result = handler
+  () => (marathon.play pairsIdx)
 
 proc initMarathonSearchResultNode*(marathon: var Marathon): VNode {.inline.} =
   ## Returns the search result node for pairs DB.
@@ -33,7 +27,7 @@ proc initMarathonSearchResultNode*(marathon: var Marathon): VNode {.inline.} =
           marathon.matchResultPageIdx * MatchResultPairsCountPerPage
         endPairIdx = min(
           marathon.matchResultPageIdx.succ * MatchResultPairsCountPerPage,
-          marathon.matchPairsSeq.len)
+          marathon.matchPairsStrsSeq.len)
 
       for pairsIdx in beginPairIdx..<endPairIdx:
         tr:
@@ -43,8 +37,9 @@ proc initMarathonSearchResultNode*(marathon: var Marathon): VNode {.inline.} =
               span(class = "icon"):
                 italic(class = "fa-solid fa-gamepad")
 
+          let pairs = marathon.matchPairsStrsSeq[pairsIdx].toPairs
           for pairIdx in 0..<ShowPairCount:
-            let pair = marathon.matchPairsSeq[pairsIdx][pairIdx]
+            let pair = pairs[pairIdx]
 
             td:
               figure(class = "image is-16x16"):
