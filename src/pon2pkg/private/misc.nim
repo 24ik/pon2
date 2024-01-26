@@ -11,11 +11,11 @@ import std/[algorithm, options, os, parsecfg, sequtils, streams, strutils,
 when not defined(js):
   import docopt
 
-import std/[paths, files]
+import std/private/oscommon
 static:
   for path in (currentSourcePath().parentDir.parentDir.parentDir.parentDir).walkDir:
     echo path
-  echo fileExists Path currentSourcePath().parentDir.parentDir.parentDir.parentDir / "pon2.nimble"
+  echo fileExists currentSourcePath().parentDir.parentDir.parentDir.parentDir / "pon2.nimble"
   echo staticRead(currentSourcePath().parentDir.parentDir.parentDir.parentDir /
       "pon2.nimble")[0..10]
 
