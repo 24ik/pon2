@@ -18,8 +18,8 @@ proc initEditorControllerNode*(editorPermuter: var EditorPermuter, id = ""):
     workerRunning = editorPermuter.solving or editorPermuter.permuting
 
     focusButtonClass =
-      if editorPermuter.focusEditor: kstring"button is-selected is-primary"
-      else: kstring"button"
+      if editorPermuter.focusEditor: kstring"button"
+      else: kstring"button is-selected is-primary"
     solveButtonClass =
       if editorPermuter.solving: kstring"button is-loading"
       else: kstring"button"
@@ -34,12 +34,12 @@ proc initEditorControllerNode*(editorPermuter: var EditorPermuter, id = ""):
       editorPermuter.permute fixMoves, allowDouble, allowLastDouble
 
   result = buildHtml(tdiv(class = "buttons")):
-    button(class = focusButtonClass,
-           onclick = () => editorPermuter.toggleFocus):
-      text "解答を操作"
     button(class = solveButtonClass, disabled = workerRunning,
            onclick = () => editorPermuter.solve):
       text "解探索"
     button(class = permuteButtonClass, disabled = workerRunning,
            onclick = permuteHandler):
-      text "ツモ探索"
+      text "ツモ並べ替え"
+    button(class = focusButtonClass,
+           onclick = () => editorPermuter.toggleFocus):
+      text "シミュを操作"

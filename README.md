@@ -47,8 +47,9 @@ See the documentations:
 
 ### Known Issues
 
-- cpp backend does not work on Windows
-- AVX2 does not work on Windows
+- On Windows, the followings does not work:
+    - cpp and JS backend
+    - AVX2
 
 ### API Usage
 
