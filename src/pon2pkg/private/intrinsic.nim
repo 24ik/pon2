@@ -62,7 +62,7 @@ else:
   type PextMask*[T: uint64 or uint32 or uint16] = object
     ## Mask used in `pext`.
     mask: T
-    bits: array[BitNum64, T] # HACK: cannot use BitNUm32/16 due to Nim's bug
+    bits: array[BitNum64, T] # HACK: cannot use BitNum32/16 due to Nim's bug
 
   func toPextMask*[T: uint64 or uint32 or uint16](mask: T): PextMask[T]
                   {.inline.} =

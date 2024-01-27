@@ -8,7 +8,7 @@ Features:
 - Generator: Generates the Nazo Puyo.
 - Permuter: Permutes the pairs in the Nazo Puyo to find a unique-solution
 problem.
-- GUI Application: GUI simulator for Puyo Puyo and Nazo Puyo.
+- [GUI Application](https://izumiya-keisuke.github.io/pon2/playground/?editor&kind=n&mode=e&field=t-&pairs&positions&req-kind=0&req-color=0): GUI simulator for Puyo Puyo and Nazo Puyo.
 - [Marathon](https://izumiya-keisuke.github.io/pon2/marathon/index.html): Search for pairs sequence and play a marathon mode.
 
 Not supported now:
