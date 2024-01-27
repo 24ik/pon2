@@ -24,9 +24,9 @@ proc initMarathonFocusControllerNode*(marathon: var Marathon): VNode
                                      {.inline.} =
   ## Returns the marathon focus controller node.
   let focusButtonClass =
-    if marathon.focusSimulator: kstring"button"
-    else: kstring"button is-selected is-primary"
+    if marathon.focusSimulator: kstring"button is-selected is-primary"
+    else: kstring"button"
 
   result = buildHtml(button(class = focusButtonClass,
                             onclick = () => marathon.toggleFocus)):
-    text "検索結果を操作"
+    text "シミュを操作"

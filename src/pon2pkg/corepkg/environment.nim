@@ -375,7 +375,7 @@ func toUri[F: TsuField or WaterField](
     self: Environment[F], positions: Option[Positions], host: SimulatorHost,
     kind: SimulatorKind, mode: SimulatorMode, editor: bool): Uri {.inline.} =
   ## Converts the environment and the positions to the URI.
-  ## The positions will be truncated if it is shorter than the pairs.
+  ## The positions will be truncated if it is longer than the pairs.
   ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
   ## If `host` is not `Izumiya`, `editor` will be ignored.
   let positions2 =
@@ -397,7 +397,8 @@ func toUri[F: TsuField or WaterField](
                 (FieldKey, self.field.toUriQuery host),
                 (PairsKey, self.pairs.toUriQuery host)]
     if positions.isSome:
-      queries.add (PositionsKey, positions2.toUriQuery host)
+      queries.add (PositionsKey,
+                   positions2.toUriQuery(host).dup(removeSuffix('.')))
 
     result.query = queries.encodeQuery
   of Ishikawa, Ips:
@@ -431,7 +432,7 @@ func toUri*[F: TsuField or WaterField](
     self: Environment[F], positions: Positions, host = Izumiya, kind = Regular,
     mode = Play, editor = false): Uri {.inline.} =
   ## Converts the environment and the positions to the URI.
-  ## The positions will be truncated if it is shorter than the pairs.
+  ## The positions will be truncated if it is longer than the pairs.
   self.toUri(some positions, host, kind, mode, editor)
 
 func parseEnvironment*[F: TsuField or WaterField](
