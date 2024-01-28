@@ -13,7 +13,7 @@ import ../private/[misc]
 
 when defined(js):
   import std/[sugar, uri]
-  import karax/[karax, karaxdsl, vdom]
+  import karax/[karax, karaxdsl, kdom, vdom]
   import ../private/[webworker]
 else:
   {.push warning[Deprecated]: off.}
@@ -35,6 +35,10 @@ type
     focusEditor*: bool
     solving*: bool
     permuting*: bool
+
+    when defined(js):
+      solveResults*: seq[seq[Positions]]
+      solveThreadInterval: Interval
 
   TaskKind* = enum
     ## Worker task kind.
@@ -69,6 +73,10 @@ proc initEditorPermuter*[F: TsuField or WaterField](
   result.solving = false
   result.permuting = false
 
+  when defined(js):
+    result.solveResults = newSeq[seq[Positions]](0)
+    result.solveThreadInterval = Interval()
+
 proc initEditorPermuter*[F: TsuField or WaterField](
     env: Environment[F], mode = Play, editor = false): EditorPermuter
     {.inline.} =
@@ -96,6 +104,10 @@ proc initEditorPermuter*[F: TsuField or WaterField](
   result.solving = false
   result.permuting = false
 
+  when defined(js):
+    result.solveResults = newSeq[seq[Positions]](0)
+    result.solveThreadInterval = Interval()
+
 proc initEditorPermuter*[F: TsuField or WaterField](
     nazo: NazoPuyo[F], mode = Play, editor = false): EditorPermuter {.inline.} =
   ## Returns a new `EditorManager`.
@@ -112,6 +124,13 @@ func toggleFocus*(mSelf) {.inline.} = mSelf.focusEditor.toggle
 # ------------------------------------------------
 # Solve
 # ------------------------------------------------
+
+when defined(js):
+  const
+    WorkerMonitorSleepMs = 100
+    AllPositionsSeq = collect:
+      for pos in AllPositions:
+        pos
 
 proc updateReplaySimulator[F: TsuField or WaterField](mSelf; nazo: NazoPuyo[F])
                  {.inline.} =
@@ -131,8 +150,9 @@ proc updateReplaySimulator[F: TsuField or WaterField](mSelf; nazo: NazoPuyo[F])
   else:
     mSelf.focusEditor = false
 
-proc solve*(mSelf) {.inline.} =
+proc solve*(mSelf; parallelCount: Positive = 12) {.inline.} =
   ## Solves the nazo puyo.
+  ## `parallelCount` will be ignored on non-JS backend.
   if mSelf.solving or mSelf.permuting or mSelf.simulator[].kind != Nazo:
     return
 
@@ -143,17 +163,44 @@ proc solve*(mSelf) {.inline.} =
       proc showReplay(returnCode: WorkerReturnCode, messages: seq[string]) =
         case returnCode
         of Success:
-          mSelf.replayData = some messages.mapIt (
-            nazoPuyo.environment.pairs, it.parsePositions Izumiya)
+          # TODO: lock
+          mSelf.solveResults.add messages.mapIt(it.parsePositions Izumiya)
+          if mSelf.solveResults.len < AllPositions.card:
+            return
+
+          mSelf.replayData = some mSelf.solveResults.concat.mapIt (
+            nazoPuyo.environment.pairs, it)
           mSelf.updateReplaySimulator nazoPuyo
           mSelf.solving = false
+          mSelf.solveThreadInterval.clearInterval
 
           if not kxi.surpressRedraws:
             kxi.redraw
         of Failure:
           discard
 
-      showReplay.initWorker.run $Solve, $nazoPuyo.toUri
+      var workers = collect:
+        for _ in 1..parallelCount:
+          initWorker()
+      for worker in workers.mitems:
+        worker.completeHandler = showReplay
+
+      # FIXME: not correct
+      var taskIdx = 0
+      proc runWorkers =
+        for i in 0..<parallelCount:
+          if taskIdx >= AllPositions.card:
+            break
+
+          if workers[i].running:
+            continue
+
+          var nazo = nazoPuyo
+          nazo.environment.move(AllPositionsSeq[taskIdx], false)
+          workers[i].run $Solve, $nazo.toUri
+
+          taskIdx.inc
+      mSelf.solveThreadInterval = runWorkers.setInterval WorkerMonitorSleepMs
     else:
       # FIXME: make asynchronous
       # FIXME: redraw
@@ -192,8 +239,10 @@ proc permute*(mSelf; fixMoves: seq[Positive], allowDouble: bool,
         of Failure:
           discard
 
-      showReplay.initWorker.run @[$Permute, $nazoPuyo.toUri, $allowDouble,
-                                  $allowLastDouble] & fixMoves.mapIt $it
+      var worker = initWorker()
+      worker.completeHandler = showReplay
+      worker.run @[$Permute, $nazoPuyo.toUri, $allowDouble, $allowLastDouble] &
+          fixMoves.mapIt $it
     else:
       # FIXME: make asynchronous
       # FIXME: redraw

@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, sequtils, setutils, strutils, sugar, tables]
+import std/[options, sequtils, strutils, sugar, tables]
 import ./[misc]
 
 type
@@ -48,9 +48,8 @@ type
     ## The position sequence. `none(Position)` means no-position.
 
 const
-  AllPositions* = Position.fullSet
-  DoublePositions* = {Up0 .. Right4}
-    ## All positions for double pairs; deduplicated.
+  AllPositions* = {Position.low..Position.high}
+  DoublePositions* = {Up0..Right4} ## All positions for double pairs.
 
 using
   pos: Position

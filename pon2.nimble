@@ -1,4 +1,7 @@
 # Package
+# MEMO
+# http://localhost:8000/playground/index.html?editor&kind=n&mode=e&field=t-ogg...ogb...obb...bgg...bbg...ooo..&pairs=brbrgrgr&req-kind=5&req-number=5
+# ↑1スレッドjsだとこれ18秒
 
 version = "0.11.3"
 author = "Keisuke Izumiya"
@@ -85,12 +88,12 @@ task web, "Make Web Pages":
   "src/pon2.nim".compile "www/playground/worker.min.js", "-d:Pon2Worker"
 
   # marathon
-  "src/pon2.nim".compile "www/marathon/index.min.js", "-d:Pon2Marathon"
+  #"src/pon2.nim".compile "www/marathon/index.min.js", "-d:Pon2Marathon"
 
   # documentation
-  exec "nimble -y documentation"
-  cpDir "src/htmldocs", "www/docs"
-  rmDir "src/htmldocs"
+  #exec "nimble -y documentation"
+  #cpDir "src/htmldocs", "www/docs"
+  #rmDir "src/htmldocs"
 
   # assets
-  cpDir "assets", "www/assets"
+  #cpDir "assets", "www/assets"
