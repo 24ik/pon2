@@ -14,7 +14,7 @@ import ../private/[misc]
 when defined(js):
   import std/[sugar, uri]
   import karax/[karax, karaxdsl, kdom, vdom]
-  import ../private/[webworker]
+  import ../private/[lock, webworker]
 else:
   {.push warning[Deprecated]: off.}
   import std/[sugar, threadpool]
@@ -37,7 +37,6 @@ type
     permuting*: bool
 
     when defined(js):
-      solveResults*: seq[seq[Positions]]
       solveThreadInterval: Interval
 
   TaskKind* = enum
@@ -74,7 +73,6 @@ proc initEditorPermuter*[F: TsuField or WaterField](
   result.permuting = false
 
   when defined(js):
-    result.solveResults = newSeq[seq[Positions]](0)
     result.solveThreadInterval = Interval()
 
 proc initEditorPermuter*[F: TsuField or WaterField](
@@ -105,7 +103,6 @@ proc initEditorPermuter*[F: TsuField or WaterField](
   result.permuting = false
 
   when defined(js):
-    result.solveResults = newSeq[seq[Positions]](0)
     result.solveThreadInterval = Interval()
 
 proc initEditorPermuter*[F: TsuField or WaterField](
@@ -127,6 +124,7 @@ func toggleFocus*(mSelf) {.inline.} = mSelf.focusEditor.toggle
 
 when defined(js):
   const
+    WorkerLockName = "pon2-worker-lock"
     WorkerMonitorSleepMs = 100
     AllPositionsSeq = collect:
       for pos in AllPositions:
@@ -160,22 +158,26 @@ proc solve*(mSelf; parallelCount: Positive = 12) {.inline.} =
 
   mSelf.simulator[].withNazoPuyo:
     when defined(js):
+      # NOTE: I think `solveResults` should be alive after this this procedure
+      # finished so should be global (e.g. EditorPermuter's field), but somehow
+      # local `solveResults` works.
+      var solveResults = newSeqOfCap[seq[Positions]](AllPositions.card)
       proc showReplay(returnCode: WorkerReturnCode, messages: seq[string]) =
         case returnCode
         of Success:
-          # TODO: lock
-          mSelf.solveResults.add messages.mapIt(it.parsePositions Izumiya)
-          if mSelf.solveResults.len < AllPositions.card:
-            return
+          WorkerLockName.withLock:
+            solveResults.add messages.mapIt(it.parsePositions Izumiya)
+            if solveResults.len < AllPositions.card:
+              return
 
-          mSelf.replayData = some mSelf.solveResults.concat.mapIt (
-            nazoPuyo.environment.pairs, it)
-          mSelf.updateReplaySimulator nazoPuyo
-          mSelf.solving = false
-          mSelf.solveThreadInterval.clearInterval
+            mSelf.replayData = some solveResults.concat.mapIt (
+              nazoPuyo.environment.pairs, it)
+            mSelf.updateReplaySimulator nazoPuyo
+            mSelf.solving = false
+            mSelf.solveThreadInterval.clearInterval
 
-          if not kxi.surpressRedraws:
-            kxi.redraw
+            if not kxi.surpressRedraws:
+              kxi.redraw
         of Failure:
           discard
 

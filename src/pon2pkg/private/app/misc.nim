@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 when defined(js):
-  import std/[sugar]
+  import std/[jsffi, sugar]
   import karax/[kbase, kdom]
   import ../../corepkg/[cell, misc]
 
@@ -14,9 +14,9 @@ when defined(js):
   # Clipboard
   # ------------------------------------------------
 
-  proc copyToClipboard(text: kstring)
-    {.importjs: "navigator.clipboard.writeText(#);".}
-    ## Sets the text to the clipboard.
+  proc getNavigator: JsObject {.importjs: "(navigator)".} ## Returns navigator.
+
+  proc copyToClipboard(text: kstring) = getNavigator().clipboard.writeText text
 
   proc showFlashMessage(element: Element, messageHtml: string,
                         timeMs = Natural 500) {.inline.} =
