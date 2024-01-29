@@ -165,6 +165,7 @@ proc solve*(mSelf; parallelCount: Positive = 12) {.inline.} =
       proc showReplay(returnCode: WorkerReturnCode, messages: seq[string]) =
         case returnCode
         of Success:
+          # FIXME: multiple editor&permuters use the same lock
           WorkerLockName.withLock:
             solveResults.add messages.mapIt(it.parsePositions Izumiya)
             if solveResults.len < AllPositions.card:
