@@ -469,6 +469,59 @@ proc solve[F: TsuField or WaterField](
     if showProgress:
       progressBar.finish
 
+when defined(js):
+  import std/[dom, sugar, strformat]
+  import nuuid
+  import ../private/[webworker]
+
+  var lockIdx = 0'i64
+  const LockPrefix = "pon2-solve-lock"
+
+  proc asyncSolve*[F: TsuField or WaterField](
+      nazo: NazoPuyo[F], reqKind: static RequirementKind,
+      reqColor: static RequirementColor, earlyStopping: static bool,
+      result: var Option[seq[Positions]]) {.inline.} =
+    ## Solves the nazo puyo.
+    ## JS
+    if not nazo.requirement.isSupported or nazo.moveCount == 0:
+      result = some @[]
+      return
+
+    let childNodes = rootNode.children(reqKind, reqColor)
+
+    var interval: Interval
+    var solveResults = newSeqOfCap[seq[Positions]](childNodes.len)
+    proc handler(returnCode: WorkerReturnCode, messages: seq[string]) =
+      case returnCode
+      of Success:
+        withLock &"{LockPrefix}-{generateUUID()}":
+          solveResults.add messages.mapIt it.parsePositions Izumiya
+          if solveResults.len < childNodes.len:
+            return
+
+          result = some solveResults.concat
+          interval.clearInterval
+      of Failure:
+        discard
+
+    const ParallelCount = 12
+    var workers = collect:
+      for _ in 1..ParallelCount:
+        initWorker()
+    for worker in workers.mitems:
+      worker.completeHandler = handler
+
+    var childIdx = 0
+    proc runWorkers =
+      for i in 0..<ParallelCount:
+        if childIdx >= childNodes.len:
+          break
+        if workers[i].running:
+          continue
+        workers[i].run $Solve, $childNodes[childIdx]
+        childIdx.inc
+    interval = runWorkers.setInterval ParallelSolvingWaitIntervalMs
+
 proc solve[F: TsuField or WaterField](
     nazo: NazoPuyo[F], reqKind: static RequirementKind, showProgress: bool,
     earlyStopping: static bool): seq[Positions] {.inline.} =
