@@ -1,9 +1,6 @@
 # Package
-# MEMO
-# http://localhost:8000/playground/index.html?editor&kind=n&mode=e&field=t-ogg...ogb...obb...bgg...bbg...ooo..&pairs=brbrgrgr&req-kind=5&req-number=5
-# ↑1スレッドjsだとこれ18秒
 
-version = "0.11.3"
+version = "0.11.4"
 author = "Keisuke Izumiya"
 description = "Puyo Puyo Library"
 license = "Apache-2.0 OR MPL-2.0"
@@ -21,7 +18,6 @@ requires "docopt ^= 0.7.1"
 requires "karax ^= 1.3.3"
 requires "nigui ^= 0.2.7"
 requires "nimsimd ^= 1.2.6"
-requires "nuuid ^= 0.1.0"
 requires "suru#f6f1e607c585b2bc2f71309996643f0555ff6349"
 
 # Tasks
@@ -89,12 +85,12 @@ task web, "Make Web Pages":
   "src/pon2.nim".compile "www/playground/worker.min.js", "-d:Pon2Worker"
 
   # marathon
-  #"src/pon2.nim".compile "www/marathon/index.min.js", "-d:Pon2Marathon"
+  "src/pon2.nim".compile "www/marathon/index.min.js", "-d:Pon2Marathon"
 
   # documentation
-  #exec "nimble -y documentation"
-  #cpDir "src/htmldocs", "www/docs"
-  #rmDir "src/htmldocs"
+  exec "nimble -y documentation"
+  cpDir "src/htmldocs", "www/docs"
+  rmDir "src/htmldocs"
 
   # assets
-  #cpDir "assets", "www/assets"
+  cpDir "assets", "www/assets"

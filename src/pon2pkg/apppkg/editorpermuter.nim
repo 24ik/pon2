@@ -12,10 +12,9 @@ import ../nazopuyopkg/[nazopuyo]
 import ../private/[misc]
 
 when defined(js):
-  import std/[strformat, sugar, uri]
+  import std/[sugar, uri]
   import karax/[karax, karaxdsl, kdom, vdom]
-  import nuuid
-  import ../private/[lock, webworker]
+  import ../private/[webworker]
   import ../private/app/editorpermuter/web/editor/[webworker]
 else:
   {.push warning[Deprecated]: off.}
@@ -149,10 +148,9 @@ proc solve*(mSelf; parallelCount: Positive = 12) {.inline.} =
 
   mSelf.simulator[].withNazoPuyo:
     when defined(js):
-      # NOTE: I think `results` should be alive after this this procedure
-      # finished so should be global (e.g. EditorPermuter's field), but somehow
-      # local `results` works.
+      {.push warning[ProveInit]: off.}
       var results = @[none seq[Positions]]
+      {.pop.}
       nazoPuyo.asyncSolve results
 
       proc showReplay =
@@ -181,6 +179,7 @@ proc solve*(mSelf; parallelCount: Positive = 12) {.inline.} =
 proc permute*(mSelf; fixMoves: seq[Positive], allowDouble: bool,
               allowLastDouble: bool) {.inline.} =
   ## Permutes the nazo puyo.
+  # TODO: async
   if mSelf.solving or mSelf.permuting or mSelf.simulator[].kind != Nazo:
     return
 

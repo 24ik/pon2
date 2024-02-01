@@ -8,13 +8,10 @@
 import std/[options, sequtils, setutils, tables]
 import ./[nazopuyo]
 import ../corepkg/[field, pair, position]
-import ../private/[misc, webworker]
 import ../private/nazopuyo/[node]
 
 when defined(js):
-  import std/[dom, strformat, sugar]
-  import nuuid
-  import ../private/[lock, webworker]
+  import std/[dom]
 else:
   {.push warning[Deprecated]: off.}
   import std/[cpuinfo, os, threadpool]
@@ -61,10 +58,11 @@ proc solve[F: TsuField or WaterField](
       progressBar[0].total = childNodes.len
       progressBar.setup
 
-    proc shutDownProgressBar =
-      progressBar.inc progressBar[0].total - progressBar[0].progress
-      progressBar.update
-      progressBar.finish
+    when earlyStopping:
+      proc shutDownProgressBar =
+        progressBar.inc progressBar[0].total - progressBar[0].progress
+        progressBar.update
+        progressBar.finish
 
     # spawn tasks
     {.push warning[Effect]: off.}
@@ -78,7 +76,9 @@ proc solve[F: TsuField or WaterField](
       while not spawned:
         for threadIdx in 0..<parallelCount:
           if threadsRunning[threadIdx] and futures[threadIdx].isReady:
+            {.push warning[Uninit]: off.}
             results.add ^futures[threadIdx]
+            {.pop.}
             threadsRunning[threadIdx] = false
 
             progressBar.inc

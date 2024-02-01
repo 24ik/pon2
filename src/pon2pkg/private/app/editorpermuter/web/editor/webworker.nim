@@ -1,4 +1,4 @@
-## This module implements functions that use web workers.
+## This module implements procedures that use web workers.
 ##
 
 {.experimental: "strictDefs".}
@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 import std/[dom, options, sequtils, sugar]
-import ../../../../[lock, webworker]
+import ../../../../[webworker]
 import ../../../../nazopuyo/[node]
 import ../../../../../corepkg/[field, position]
 import ../../../../../nazopuyopkg/[nazopuyo]
