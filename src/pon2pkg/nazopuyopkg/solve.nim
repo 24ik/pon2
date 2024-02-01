@@ -15,6 +15,7 @@ when defined(js):
 else:
   {.push warning[Deprecated]: off.}
   import std/[cpuinfo, os, threadpool]
+  import ../private/[misc]
   {.pop.}
   import suru
 
