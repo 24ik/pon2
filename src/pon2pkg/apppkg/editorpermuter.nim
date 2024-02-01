@@ -13,8 +13,9 @@ import ../private/[misc]
 
 when defined(js):
   import std/[sugar, uri]
-  import karax/[karax, karaxdsl, vdom]
+  import karax/[karax, karaxdsl, kdom, vdom]
   import ../private/[webworker]
+  import ../private/app/editorpermuter/web/editor/[webworker]
 else:
   {.push warning[Deprecated]: off.}
   import std/[sugar, threadpool]
@@ -22,24 +23,21 @@ else:
   import ../nazopuyopkg/[permute, solve]
   {.pop.}
 
-type
-  EditorPermuter* = object
-    ## Editor and Permuter.
-    simulator*: ref Simulator
-    replaySimulator*: ref Simulator
+type EditorPermuter* = object
+  ## Editor and Permuter.
+  simulator*: ref Simulator
+  replaySimulator*: ref Simulator
 
-    replayData*: Option[seq[tuple[pairs: Pairs, positions: Positions]]]
-    replayIdx*: Natural
+  replayData*: Option[seq[tuple[pairs: Pairs, positions: Positions]]]
+  replayIdx*: Natural
 
-    editor: bool
-    focusEditor*: bool
-    solving*: bool
-    permuting*: bool
+  editor: bool
+  focusEditor*: bool
+  solving*: bool
+  permuting*: bool
 
-  TaskKind* = enum
-    ## Worker task kind.
-    Solve = "solve"
-    Permute = "permute"
+  when defined(js):
+    solveThreadInterval: Interval
 
 using
   self: EditorPermuter
@@ -69,6 +67,9 @@ proc initEditorPermuter*[F: TsuField or WaterField](
   result.solving = false
   result.permuting = false
 
+  when defined(js):
+    result.solveThreadInterval = Interval()
+
 proc initEditorPermuter*[F: TsuField or WaterField](
     env: Environment[F], mode = Play, editor = false): EditorPermuter
     {.inline.} =
@@ -96,6 +97,9 @@ proc initEditorPermuter*[F: TsuField or WaterField](
   result.solving = false
   result.permuting = false
 
+  when defined(js):
+    result.solveThreadInterval = Interval()
+
 proc initEditorPermuter*[F: TsuField or WaterField](
     nazo: NazoPuyo[F], mode = Play, editor = false): EditorPermuter {.inline.} =
   ## Returns a new `EditorManager`.
@@ -112,6 +116,9 @@ func toggleFocus*(mSelf) {.inline.} = mSelf.focusEditor.toggle
 # ------------------------------------------------
 # Solve
 # ------------------------------------------------
+
+when defined(js):
+  const ResultMonitorIntervalMs = 100
 
 proc updateReplaySimulator[F: TsuField or WaterField](mSelf; nazo: NazoPuyo[F])
                  {.inline.} =
@@ -131,8 +138,9 @@ proc updateReplaySimulator[F: TsuField or WaterField](mSelf; nazo: NazoPuyo[F])
   else:
     mSelf.focusEditor = false
 
-proc solve*(mSelf) {.inline.} =
+proc solve*(mSelf; parallelCount: Positive = 12) {.inline.} =
   ## Solves the nazo puyo.
+  ## `parallelCount` will be ignored on non-JS backend.
   if mSelf.solving or mSelf.permuting or mSelf.simulator[].kind != Nazo:
     return
 
@@ -140,20 +148,22 @@ proc solve*(mSelf) {.inline.} =
 
   mSelf.simulator[].withNazoPuyo:
     when defined(js):
-      proc showReplay(returnCode: WorkerReturnCode, messages: seq[string]) =
-        case returnCode
-        of Success:
-          mSelf.replayData = some messages.mapIt (
-            nazoPuyo.environment.pairs, it.parsePositions Izumiya)
+      {.push warning[ProveInit]: off.}
+      var results = @[none seq[Positions]]
+      {.pop.}
+      nazoPuyo.asyncSolve results
+
+      proc showReplay =
+        if results.allIt it.isSome:
+          mSelf.replayData = some results.mapIt(it.get).concat.mapIt (
+            nazoPuyo.environment.pairs, it)
           mSelf.updateReplaySimulator nazoPuyo
           mSelf.solving = false
+          mSelf.solveThreadInterval.clearInterval
 
           if not kxi.surpressRedraws:
             kxi.redraw
-        of Failure:
-          discard
-
-      showReplay.initWorker.run $Solve, $nazoPuyo.toUri
+      mSelf.solveThreadInterval = showReplay.setInterval ResultMonitorIntervalMs
     else:
       # FIXME: make asynchronous
       # FIXME: redraw
@@ -169,6 +179,7 @@ proc solve*(mSelf) {.inline.} =
 proc permute*(mSelf; fixMoves: seq[Positive], allowDouble: bool,
               allowLastDouble: bool) {.inline.} =
   ## Permutes the nazo puyo.
+  # TODO: async
   if mSelf.solving or mSelf.permuting or mSelf.simulator[].kind != Nazo:
     return
 
@@ -192,8 +203,10 @@ proc permute*(mSelf; fixMoves: seq[Positive], allowDouble: bool,
         of Failure:
           discard
 
-      showReplay.initWorker.run @[$Permute, $nazoPuyo.toUri, $allowDouble,
-                                  $allowLastDouble] & fixMoves.mapIt $it
+      var worker = initWorker()
+      worker.completeHandler = showReplay
+      worker.run @[$Permute, $nazoPuyo.toUri, $allowDouble, $allowLastDouble] &
+          fixMoves.mapIt $it
     else:
       # FIXME: make asynchronous
       # FIXME: redraw

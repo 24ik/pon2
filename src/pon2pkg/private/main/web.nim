@@ -8,8 +8,10 @@
 import std/[options, sequtils, strformat, strutils, sugar, uri]
 import karax/[karax, karaxdsl, vdom]
 import ../[misc, webworker]
+import ../app/editorpermuter/web/editor/[webworker]
+import ../nazopuyo/[node]
 import ../../apppkg/[editorpermuter, marathon, simulator]
-import ../../corepkg/[environment, misc, pair, position]
+import ../../corepkg/[environment, field, misc, pair, position]
 import ../../nazopuyopkg/[nazopuyo, permute, solve]
 
 # ------------------------------------------------
@@ -28,10 +30,14 @@ proc workerTask*(args: seq[string]): tuple[returnCode: WorkerReturnCode,
   let args2 = args[1..^1]
   case args[0]
   of $Solve:
-    if args2.len == 1:
+    if args2.len == 2:
+      result.messages = case args2[0].parseRule
+      of Tsu:
+        args2[1].parseNode[:TsuField].solve.mapIt it.toUriQuery Izumiya
+      of Water:
+        args2[1].parseNode[:WaterField].solve.mapIt it.toUriQuery Izumiya
+
       result.returnCode = Success
-      args2[0].parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
-        result.messages = nazoPuyo.solve.mapIt it.toUriQuery Izumiya
     else:
       result.returnCode = Failure
       result.messages = @["Caught invalid number of arguments: " & $args]

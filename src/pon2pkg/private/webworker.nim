@@ -1,11 +1,11 @@
 ## This module implements the web worker.
 ## Outline of the processing flow:
 ##
-## 1. The main file launches the web worker by `initWorker()`. You can set the
-## handler that executed after the task is done by the argument.
+## 1. The main file launches the web worker by `initWorker()`.
+## 1. The main file assigns the handler that executed after the task is done.
 ## 1. The main file makes the worker do the task. The task is implemented in the
 ## worker file by `assignToWorker()`.
-## 1. The handler is executed (if set).
+## 1. The handler is executed.
 ##
 ## ## Examples
 ##
@@ -17,7 +17,8 @@ runnableExamples:
   proc show(returnCode: WorkerReturnCode, messages: seq[string]) =
     echo "returnCode: ", returnCode, " messages: ", messages
 
-  let worker = initWorker(show)
+  let worker = initWorker
+  worker.completeHandler = show
   worker.run 6
 
 runnableExamples:
@@ -60,7 +61,10 @@ type
       (returnCode: WorkerReturnCode, messages: seq[string]) -> void)
     ## Handler executed after the `WorkerTask` completed.
 
-  Worker* = JsObject ## Web Worker.
+  Worker* = object
+    ## Web worker.
+    running*: bool
+    webWorker: JsObject
 
 const
   Pon2WorkerFileName {.strdefine.} = "worker.min.js"
@@ -72,6 +76,10 @@ const
 
   HeaderSep = "|-<pon2-webworker-header-sep>-|"
   MessageSep = "|-<pon2-webworker-sep>-|"
+
+using
+  self: Worker
+  mSelf: var Worker
 
 # ------------------------------------------------
 # Task
@@ -95,9 +103,10 @@ proc assignToWorker*(task: WorkerTask) {.inline.} =
 
   getSelf().onmessage = runTask
 
-proc run*(worker: Worker, args: varargs[string]) {.inline.} =
+proc run*(mSelf; args: varargs[string]) {.inline.} =
   ## Runs the task and sends the message to the caller of the worker.
-  worker.postMessage cstring args.join MessageSep
+  mSelf.running = true
+  mSelf.webWorker.postMessage cstring args.join MessageSep
 
 # ------------------------------------------------
 # Constructor
@@ -106,10 +115,10 @@ proc run*(worker: Worker, args: varargs[string]) {.inline.} =
 proc initWebWorker: JsObject {.importjs: &"new Worker('{Pon2WorkerFileName}')".}
   ## Returns the web worker launched by the caller.
 
-proc initWorker*(completeHandler = DefaultWorkerCompleteHandler): Worker
-                {.inline.} =
-  ## Returns the worker.
-  proc runCompleteHandler(event: JsObject) =
+proc `completeHandler=`*(mSelf; handler: WorkerCompleteHandler) {.inline.} =
+  proc runHandler(event: JsObject) =
+    mSelf.running = false
+
     let messages = ($event.data.to(cstring)).split HeaderSep
     if messages.len != 2:
       echo "Invalid arguments are passed to the complete handler: ", $messages
@@ -117,11 +126,16 @@ proc initWorker*(completeHandler = DefaultWorkerCompleteHandler): Worker
 
     case messages[0]
     of $Success:
-      completeHandler(Success, messages[1].split2 MessageSep)
+      handler(Success, messages[1].split2 MessageSep)
     of $Failure:
       echo "The task failed; error message: ", messages[1]
     else:
       echo "Invalid return code is passed to the complete handler: ", messages[0]
 
-  result = initWebWorker()
-  result.onmessage = runCompleteHandler
+  mSelf.webWorker.onmessage = runHandler
+
+proc initWorker*: Worker {.inline.} =
+  ## Returns the worker.
+  result.running = false
+  result.webWorker = initWebWorker()
+  result.completeHandler = DefaultWorkerCompleteHandler

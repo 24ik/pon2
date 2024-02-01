@@ -25,10 +25,10 @@ func sum2*[T: SomeNumber or Natural](arr: openArray[T]): T {.inline.} =
   for e in arr:
     result.inc e
 
-template toSet2*(arr: untyped): untyped =
+template toSet2*(iter: untyped): untyped =
   ## Converts the iterable to a built-in set type.
-  var res: set[arr.elementType] = {}
-  for e in arr:
+  var res: set[iter.elementType] = {}
+  for e in iter:
     res.incl e
 
   res
