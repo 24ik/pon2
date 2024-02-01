@@ -119,12 +119,7 @@ func toggleFocus*(mSelf) {.inline.} = mSelf.focusEditor.toggle
 # ------------------------------------------------
 
 when defined(js):
-  const
-    LockNamePrefix = "pon2-editorpermuter-lock"
-    ResultMonitorIntervalMs = 100
-    AllPositionsSeq = collect:
-      for pos in AllPositions:
-        pos
+  const ResultMonitorIntervalMs = 100
 
 proc updateReplaySimulator[F: TsuField or WaterField](mSelf; nazo: NazoPuyo[F])
                  {.inline.} =
@@ -157,13 +152,13 @@ proc solve*(mSelf; parallelCount: Positive = 12) {.inline.} =
       # NOTE: I think `results` should be alive after this this procedure
       # finished so should be global (e.g. EditorPermuter's field), but somehow
       # local `results` works.
-      var results = @[none Positions].toAtomic2
+      var results = @[none seq[Positions]]
       nazoPuyo.asyncSolve results
 
       proc showReplay =
-        if results[].allIt it.isSome:
-          mSelf.replayData = some results[].concat.mapIt (
-            nazoPuyo.environment.pairs, it.get)
+        if results.allIt it.isSome:
+          mSelf.replayData = some results.mapIt(it.get).concat.mapIt (
+            nazoPuyo.environment.pairs, it)
           mSelf.updateReplaySimulator nazoPuyo
           mSelf.solving = false
           mSelf.solveThreadInterval.clearInterval

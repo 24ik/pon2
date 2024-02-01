@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[macros, sugar]
+import std/[jsffi, macros, sugar]
 import karax/[kbase]
 import nuuid
 
@@ -18,12 +18,13 @@ type Atomic2*[T] = object
 # Lock
 # ------------------------------------------------
 
-proc acquireThen(lockName: kstring, bodyProc: () -> void) {.importjs:
+proc acquireThen(lockName: kstring, bodyProc: (lock: JsObject) ->
+    void) {.importjs:
   "navigator.locks.request(#, #)".} ## Runs the procedure with the lock.
 
 template withLock*(lockName: kstring, body: untyped): untyped =
   ## Runs the body with the lock.
-  lockName.acquireThen () => body
+  lockName.acquireThen (lock: JsObject) => body
 
 # ------------------------------------------------
 # Atomic
@@ -36,9 +37,19 @@ func toAtomic2*[T](data: T, lockName = generateUUID()): Atomic2[T] {.inline.} =
 
 proc `[]`*[T](atomic: Atomic2[T]): T {.inline.} =
   ## Returns the data.
-  var res: T
+  var res: T = default(T)
   atomic.lockName.withLock:
+    debugEcho "atomic.data: ", atomic.data
+    debugEcho "res before: ", res
     res = atomic.data # HACK: directly set to `result` raises error
+    debugEcho "res after: ", res
+  debugEcho "res block out: ", res
+  result = res
+
+proc foo*[T](atomic: Atomic2[T]): T {.inline.} =
+  ## Returns the data.
+  var res: T
+  res = atomic.data
   result = res
 
 proc `[]=`*[T](atomic: var Atomic2[T], data: T) {.inline.} =

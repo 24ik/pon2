@@ -417,7 +417,7 @@ func toStr(moveResult: MoveResult): string {.inline.} =
 
   strs.add $moveResult.totalDisappearCounts.isSome
   if moveResult.totalDisappearCounts.isSome:
-    strs &= $moveResult.totalDisappearCounts.get.mapIt $it
+    strs &= moveResult.totalDisappearCounts.get.mapIt $it
 
   strs.add $moveResult.disappearCounts.isSome
   if moveResult.disappearCounts.isSome:

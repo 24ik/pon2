@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[dom, options, sugar]
+import std/[dom, options, sequtils, sugar]
 import ../../../../[lock, webworker]
 import ../../../../nazopuyo/[node]
 import ../../../../../corepkg/[field, position]
@@ -20,33 +20,35 @@ type TaskKind* = enum
 # Solve (async)
 # ------------------------------------------------
 
-const ParallelSolvingWaitIntervalMs = 100
+const ParallelSolvingWaitIntervalMs = 50
 
 proc asyncSolve[F: TsuField or WaterField](
-    nazo: NazoPuyo[F], results: var Atomic2[seq[Option[Positions]]],
+    nazo: NazoPuyo[F], results: var seq[Option[seq[Positions]]],
     reqKind: static RequirementKind, reqColor: static RequirementColor,
     earlyStopping: static bool, parallelCount: Positive) {.inline.} =
   ## Solves the nazo puyo.
   ## Solve results will be stored in `results`.
   if not nazo.requirement.isSupported or nazo.moveCount == 0:
-    results[] = @[some newSeq[Option[Position]](0)]
+    results = @[some newSeq[Positions](0)]
     return
 
   let rootNode = nazo.initNode
   if rootNode.canPrune(reqKind, reqColor):
-    results[] = @[some newSeq[Option[Position]](0)]
+    results = @[some newSeq[Positions](0)]
     return
 
   let childNodes = rootNode.children(reqKind, reqColor)
-  results[] = newSeqOfCap[Option[Positions]](childNodes.len)
+  results = newSeqOfCap[Option[seq[Positions]]](childNodes.len.succ)
+  results.add none seq[Positions] # HACK: represent incompletion
 
   # result-register handler
   var interval: Interval
   proc handler(returnCode: WorkerReturnCode, messages: seq[string]) =
     case returnCode
     of Success:
-      results~>add(messages.mapIt some it.parsePositions Izumiya)
-      if results[].len == childNodes.len:
+      results.add some messages.mapIt it.parsePositions Izumiya
+      if results.len == childNodes.len.succ:
+        results.del 0
         interval.clearInterval
     of Failure:
       discard
@@ -73,7 +75,7 @@ proc asyncSolve[F: TsuField or WaterField](
   interval = runWorkers.setInterval ParallelSolvingWaitIntervalMs
 
 proc asyncSolve[F: TsuField or WaterField](
-    nazo: NazoPuyo[F], results: var Atomic2[seq[Option[Positions]]],
+    nazo: NazoPuyo[F], results: var seq[Option[seq[Positions]]],
     reqKind: static RequirementKind, earlyStopping: static bool,
     parallelCount: Positive) {.inline.} =
   ## Solves the nazo puyo.
@@ -110,7 +112,7 @@ proc asyncSolve[F: TsuField or WaterField](
       parallelCount
 
 proc asyncSolve*[F: TsuField or WaterField](
-    nazo: NazoPuyo[F], results: var Atomic2[seq[Option[Positions]]],
+    nazo: NazoPuyo[F], results: var seq[Option[seq[Positions]]],
     showProgress = false, earlyStopping: static bool = false,
     parallelCount: Positive = 6) {.inline.} =
   ## Solves the nazo puyo.
