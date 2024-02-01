@@ -12,9 +12,11 @@ import ../nazopuyopkg/[nazopuyo]
 import ../private/[misc]
 
 when defined(js):
-  import std/[sugar, uri]
+  import std/[strformat, sugar, uri]
   import karax/[karax, karaxdsl, kdom, vdom]
+  import nuuid
   import ../private/[lock, webworker]
+  import ../private/app/editorpermuter/web/editor/[webworker]
 else:
   {.push warning[Deprecated]: off.}
   import std/[sugar, threadpool]
@@ -22,27 +24,21 @@ else:
   import ../nazopuyopkg/[permute, solve]
   {.pop.}
 
-type
-  EditorPermuter* = object
-    ## Editor and Permuter.
-    simulator*: ref Simulator
-    replaySimulator*: ref Simulator
+type EditorPermuter* = object
+  ## Editor and Permuter.
+  simulator*: ref Simulator
+  replaySimulator*: ref Simulator
 
-    replayData*: Option[seq[tuple[pairs: Pairs, positions: Positions]]]
-    replayIdx*: Natural
+  replayData*: Option[seq[tuple[pairs: Pairs, positions: Positions]]]
+  replayIdx*: Natural
 
-    editor: bool
-    focusEditor*: bool
-    solving*: bool
-    permuting*: bool
+  editor: bool
+  focusEditor*: bool
+  solving*: bool
+  permuting*: bool
 
-    when defined(js):
-      solveThreadInterval: Interval
-
-  TaskKind* = enum
-    ## Worker task kind.
-    Solve = "solve"
-    Permute = "permute"
+  when defined(js):
+    solveThreadInterval: Interval
 
 using
   self: EditorPermuter
@@ -124,8 +120,8 @@ func toggleFocus*(mSelf) {.inline.} = mSelf.focusEditor.toggle
 
 when defined(js):
   const
-    WorkerLockName = "pon2-worker-lock"
-    WorkerMonitorSleepMs = 100
+    LockNamePrefix = "pon2-editorpermuter-lock"
+    ResultMonitorIntervalMs = 100
     AllPositionsSeq = collect:
       for pos in AllPositions:
         pos
@@ -158,52 +154,23 @@ proc solve*(mSelf; parallelCount: Positive = 12) {.inline.} =
 
   mSelf.simulator[].withNazoPuyo:
     when defined(js):
-      # NOTE: I think `solveResults` should be alive after this this procedure
+      # NOTE: I think `results` should be alive after this this procedure
       # finished so should be global (e.g. EditorPermuter's field), but somehow
-      # local `solveResults` works.
-      var solveResults = newSeqOfCap[seq[Positions]](AllPositions.card)
-      proc showReplay(returnCode: WorkerReturnCode, messages: seq[string]) =
-        case returnCode
-        of Success:
-          # FIXME: multiple editor&permuters use the same lock
-          WorkerLockName.withLock:
-            solveResults.add messages.mapIt(it.parsePositions Izumiya)
-            if solveResults.len < AllPositions.card:
-              return
+      # local `results` works.
+      var results = @[none Positions].toAtomic2
+      nazoPuyo.asyncSolve results
 
-            mSelf.replayData = some solveResults.concat.mapIt (
-              nazoPuyo.environment.pairs, it)
-            mSelf.updateReplaySimulator nazoPuyo
-            mSelf.solving = false
-            mSelf.solveThreadInterval.clearInterval
+      proc showReplay =
+        if results[].allIt it.isSome:
+          mSelf.replayData = some results[].concat.mapIt (
+            nazoPuyo.environment.pairs, it.get)
+          mSelf.updateReplaySimulator nazoPuyo
+          mSelf.solving = false
+          mSelf.solveThreadInterval.clearInterval
 
-            if not kxi.surpressRedraws:
-              kxi.redraw
-        of Failure:
-          discard
-
-      var workers = collect:
-        for _ in 1..parallelCount:
-          initWorker()
-      for worker in workers.mitems:
-        worker.completeHandler = showReplay
-
-      # FIXME: not correct
-      var taskIdx = 0
-      proc runWorkers =
-        for i in 0..<parallelCount:
-          if taskIdx >= AllPositions.card:
-            break
-
-          if workers[i].running:
-            continue
-
-          var nazo = nazoPuyo
-          nazo.environment.move(AllPositionsSeq[taskIdx], false)
-          workers[i].run $Solve, $nazo.toUri
-
-          taskIdx.inc
-      mSelf.solveThreadInterval = runWorkers.setInterval WorkerMonitorSleepMs
+          if not kxi.surpressRedraws:
+            kxi.redraw
+      mSelf.solveThreadInterval = showReplay.setInterval ResultMonitorIntervalMs
     else:
       # FIXME: make asynchronous
       # FIXME: redraw

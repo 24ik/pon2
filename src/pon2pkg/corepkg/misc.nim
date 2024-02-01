@@ -12,6 +12,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
+import std/[sugar, tables]
+
 const
   Height* = 13
   Width* = 6
@@ -68,3 +70,19 @@ type
 
 const GarbageRates*: array[Rule, Positive] = [
   Pon2TsuGarbageRate.Positive, Pon2WaterGarbageRate]
+
+# ------------------------------------------------
+# Rule <-> string
+# ------------------------------------------------
+
+const StrToRule = collect:
+  for rule in Rule:
+    {$rule: rule}
+
+func parseRule*(str: string): Rule {.inline.} =
+  ## Converts the string representation to the rule.
+  ## If `str` is not a valid representation, `ValueError` is raised.
+  if str notin StrToRule:
+    raise newException(ValueError, "Invalid rule: " & str)
+
+  result = StrToRule[str]
