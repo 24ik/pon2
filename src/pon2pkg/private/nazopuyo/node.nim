@@ -7,6 +7,7 @@
 
 import std/[options, sequtils, setutils, strutils, sugar, tables, uri]
 import ./[mark]
+import ../[misc]
 import ../../corepkg/[cell, environment, field, misc, moveresult, pair,
                       position]
 import ../../nazopuyopkg/[nazopuyo]
