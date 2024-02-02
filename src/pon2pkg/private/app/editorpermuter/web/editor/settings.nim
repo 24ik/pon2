@@ -30,12 +30,8 @@ proc initEditorSettingsNode*(editorPermuter: var EditorPermuter, id = ""): VNode
       tdiv(class = "select"):
         select(id = kstring &"{ParallelCountSelectIdPrefix}{id}"):
           for count in 1..AllPositions.card:
-            if count == 6:
-              option(selected = true):
-                text $count
-            else:
-              option:
-                text $count
+            option(selected = count == 6):
+              text $count
     tdiv(class = "block"):
       bold: text "ツモ並べ替え設定"
       tdiv(class = "field"):

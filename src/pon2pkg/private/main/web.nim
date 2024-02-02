@@ -5,14 +5,14 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, sequtils, strformat, strutils, sugar, uri]
+import std/[options, sequtils, strformat, strutils, uri]
 import karax/[karax, karaxdsl, vdom]
 import ../[misc, webworker]
 import ../app/editorpermuter/web/editor/[webworker]
 import ../nazopuyo/[node]
 import ../../apppkg/[editorpermuter, marathon, simulator]
 import ../../corepkg/[environment, field, misc, pair, position]
-import ../../nazopuyopkg/[nazopuyo, permute, solve]
+import ../../nazopuyopkg/[nazopuyo, solve]
 
 # ------------------------------------------------
 # Web - Worker
@@ -42,18 +42,15 @@ proc workerTask*(args: seq[string]): tuple[returnCode: WorkerReturnCode,
       result.returnCode = Failure
       result.messages = @["Caught invalid number of arguments: " & $args]
   of $Permute:
-    if args2.len >= 3:
-      let fixMoves =
-        if args2.len == 3: newSeq[Positive](0)
-        else: args2[3..^1].mapIt it.parseSomeInt[:Positive]
-
+    if args2.len == 2:
       result.returnCode = Success
-      args2[0].parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
-        let permuteRes = collect:
-          for (pairs, answer) in nazoPuyo.permute(
-              fixMoves, args2[1].parseBool, args2[2].parseBool):
-            @[pairs.toUriQuery Izumiya, answer.toUriQuery Izumiya]
-        result.messages = permuteRes.concat
+
+      args2[1].parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
+        let answers = nazoPuyo.solve(earlyStopping = true)
+        if answers.len == 1:
+          result.messages = @[$true, args2[0], answers[0].toUriQuery Izumiya]
+        else:
+          result.messages = @[$false]
     else:
       result.returnCode = Failure
       result.messages = @["Caught invalid number of arguments: " & $args]

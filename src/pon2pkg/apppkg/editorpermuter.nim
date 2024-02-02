@@ -15,6 +15,7 @@ when defined(js):
   import std/[sugar, uri]
   import karax/[karax, karaxdsl, kdom, vdom]
   import ../private/[webworker]
+  import ../private/nazopuyo/[permute]
   import ../private/app/editorpermuter/web/editor/[webworker]
 else:
   {.push warning[Deprecated]: off.}
@@ -37,7 +38,6 @@ type EditorPermuter* = object
   permuting*: bool
 
   when defined(js):
-    solveThreadInterval: Interval
     progressBarData*: tuple[now: Natural, total: Natural]
 
 using
@@ -69,7 +69,6 @@ proc initEditorPermuter*[F: TsuField or WaterField](
   result.permuting = false
 
   when defined(js):
-    result.solveThreadInterval = Interval()
     result.progressBarData.now = 0
     result.progressBarData.total = 0
 
@@ -101,7 +100,6 @@ proc initEditorPermuter*[F: TsuField or WaterField](
   result.permuting = false
 
   when defined(js):
-    result.solveThreadInterval = Interval()
     result.progressBarData.now = 0
     result.progressBarData.total = 0
 
@@ -165,6 +163,7 @@ proc solve*(mSelf; parallelCount: Positive =
           nazoPuyo.environment.field.validPositions.len
       mSelf.progressBarData.now = 0
 
+      var interval: Interval
       proc showReplay =
         mSelf.progressBarData.now = results.len.pred
         if results.allIt it.isSome:
@@ -173,11 +172,11 @@ proc solve*(mSelf; parallelCount: Positive =
             nazoPuyo.environment.pairs, it)
           mSelf.updateReplaySimulator nazoPuyo
           mSelf.solving = false
-          mSelf.solveThreadInterval.clearInterval
+          interval.clearInterval
 
         if not kxi.surpressRedraws:
           kxi.redraw
-      mSelf.solveThreadInterval = showReplay.setInterval ResultMonitorIntervalMs
+      interval = showReplay.setInterval ResultMonitorIntervalMs
     else:
       # FIXME: make asynchronous
       # FIXME: redraw
@@ -192,9 +191,11 @@ proc solve*(mSelf; parallelCount: Positive =
 # ------------------------------------------------
 
 proc permute*(mSelf; fixMoves: seq[Positive], allowDouble: bool,
-              allowLastDouble: bool) {.inline.} =
+              allowLastDouble: bool,
+              parallelCount =
+                when defined(js): 6 else: max(1, countProcessors()))
+             {.inline.} =
   ## Permutes the nazo puyo.
-  # TODO: async
   if mSelf.solving or mSelf.permuting or mSelf.simulator[].kind != Nazo:
     return
 
@@ -202,26 +203,30 @@ proc permute*(mSelf; fixMoves: seq[Positive], allowDouble: bool,
 
   mSelf.simulator[].withNazoPuyo:
     when defined(js):
-      proc showReplay(returnCode: WorkerReturnCode, messages: seq[string]) =
-        case returnCode
-        of Success:
-          let replayData = collect:
-            for i in 0 ..< messages.len div 2:
-              (messages[2 * i].parsePairs Izumiya,
-               messages[2 * i + 1].parsePositions Izumiya)
-          mSelf.replayData = some replayData
+      {.push warning[ProveInit]: off.}
+      var results = @[none tuple[pairs: Pairs, answer: Positions]]
+      {.pop.}
+      nazoPuyo.asyncPermute(results, fixMoves, allowDouble, allowLastDouble,
+                            parallelCount)
+
+      mSelf.progressBarData.total =
+        nazoPuyo.allPairsSeq(fixMoves, allowDouble, allowLastDouble).len
+      mSelf.progressBarData.now = 0
+
+      var interval: Interval
+      proc showReplay =
+        mSelf.progressBarData.now = results.len.pred
+        if results.allIt it.isSome:
+          mSelf.progressBarData.total = 0
+          mSelf.replayData = some results.mapIt(it.get).mapIt (
+            it.pairs, it.answer)
           mSelf.updateReplaySimulator nazoPuyo
           mSelf.permuting = false
+          interval.clearInterval
 
-          if not kxi.surpressRedraws:
-            kxi.redraw
-        of Failure:
-          discard
-
-      var worker = initWorker()
-      worker.completeHandler = showReplay
-      worker.run @[$Permute, $nazoPuyo.toUri, $allowDouble, $allowLastDouble] &
-          fixMoves.mapIt $it
+        if not kxi.surpressRedraws:
+          kxi.redraw
+      interval = showReplay.setInterval ResultMonitorIntervalMs
     else:
       # FIXME: make asynchronous
       # FIXME: redraw
