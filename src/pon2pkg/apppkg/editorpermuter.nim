@@ -38,6 +38,7 @@ type EditorPermuter* = object
 
   when defined(js):
     solveThreadInterval: Interval
+    progressBarData*: tuple[now: Natural, total: Natural]
 
 using
   self: EditorPermuter
@@ -69,6 +70,8 @@ proc initEditorPermuter*[F: TsuField or WaterField](
 
   when defined(js):
     result.solveThreadInterval = Interval()
+    result.progressBarData.now = 0
+    result.progressBarData.total = 0
 
 proc initEditorPermuter*[F: TsuField or WaterField](
     env: Environment[F], mode = Play, editor = false): EditorPermuter
@@ -99,6 +102,8 @@ proc initEditorPermuter*[F: TsuField or WaterField](
 
   when defined(js):
     result.solveThreadInterval = Interval()
+    result.progressBarData.now = 0
+    result.progressBarData.total = 0
 
 proc initEditorPermuter*[F: TsuField or WaterField](
     nazo: NazoPuyo[F], mode = Play, editor = false): EditorPermuter {.inline.} =
@@ -153,16 +158,25 @@ proc solve*(mSelf; parallelCount: Positive = 12) {.inline.} =
       {.pop.}
       nazoPuyo.asyncSolve results
 
+      mSelf.progressBarData.total =
+        if nazoPuyo.environment.pairs.peekFirst.isDouble:
+          nazoPuyo.environment.field.validDoublePositions.len
+        else:
+          nazoPuyo.environment.field.validPositions.len
+      mSelf.progressBarData.now = 0
+
       proc showReplay =
+        mSelf.progressBarData.now = results.len.pred
         if results.allIt it.isSome:
+          mSelf.progressBarData.total = 0
           mSelf.replayData = some results.mapIt(it.get).concat.mapIt (
             nazoPuyo.environment.pairs, it)
           mSelf.updateReplaySimulator nazoPuyo
           mSelf.solving = false
           mSelf.solveThreadInterval.clearInterval
 
-          if not kxi.surpressRedraws:
-            kxi.redraw
+        if not kxi.surpressRedraws:
+          kxi.redraw
       mSelf.solveThreadInterval = showReplay.setInterval ResultMonitorIntervalMs
     else:
       # FIXME: make asynchronous
@@ -295,7 +309,7 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
 when defined(js):
   import std/[dom]
   import ../private/app/editorpermuter/web/editor/[
-    controller, pagination, permute as webPermute, simulator]
+    controller, pagination, permute as webPermute, progress, simulator]
 
   # ------------------------------------------------
   # JS - Keyboard Handler
@@ -337,6 +351,8 @@ when defined(js):
               mSelf.initEditorControllerNode id
             tdiv(class = "block"):
               mSelf.initEditorPermuteNode id
+            if mSelf.progressBarData.total > 0:
+              mSelf.initEditorProgressBarNode
             if mSelf.replayData.isSome:
               tdiv(class = "block"):
                 mSelf.initEditorPaginationNode
