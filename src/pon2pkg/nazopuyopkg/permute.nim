@@ -5,75 +5,27 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[deques, sequtils, sugar]
-import ../corepkg/[cell, field, pair, position]
-import ../nazopuyopkg/[nazopuyo, solve]
+import std/[deques]
+import ./[nazopuyo, solve]
+import ../corepkg/[field, pair, position]
+import ../private/nazopuyo/[permute]
 
 when not defined(js):
+  import std/[cpuinfo]
   import suru
 
 # ------------------------------------------------
 # Permute
 # ------------------------------------------------
 
-func allPairsSeq(
-    originalPairs: Pairs, fixMoves: openArray[Positive], allowDouble: bool,
-    allowLastDouble: bool, colorCounts: array[ColorPuyo, Natural],
-    idx: Natural, moveCount: Positive): seq[Pairs] {.inline.} =
-  ## Returns all possible pairs in ascending order that can be obtained by
-  ## permuting puyos contained in the `originalPairs`.
-  # NOTE: Swapped pair sometimes gives a different solution, but this function
-  # does not consider it.
-  if idx == moveCount:
-    return @[initDeque[Pair](moveCount)]
-
-  result = @[]
-  let nowLast = idx == moveCount.pred
-
-  for axis in ColorPuyo:
-    if colorCounts[axis] == 0:
-      continue
-
-    var newColorCountsMid = colorCounts
-    newColorCountsMid[axis].dec
-
-    for child in axis..ColorPuyo.high:
-      if axis == child and (
-          not allowDouble or (nowLast and not allowLastDouble)):
-        continue
-      if newColorCountsMid[child] == 0:
-        continue
-
-      var newColorCounts = newColorCountsMid
-      newColorCounts[child].dec
-
-      let
-        nowPairTmp = initPair(axis, child)
-        nowPair: Pair
-      if idx.succ in fixMoves:
-        if originalPairs[idx] notin {nowPairTmp, nowPairTmp.swapped}:
-          continue
-
-        nowPair = originalPairs[idx]
-      else:
-        nowPair = nowPairTmp
-
-      result &= originalPairs.allPairsSeq(
-        fixMoves, allowDouble, allowLastDouble, newColorCounts, idx.succ,
-        moveCount).mapIt it.dup addFirst(nowPair)
-
 iterator permute*[F: TsuField or WaterField](
     nazo: NazoPuyo[F], fixMoves: seq[Positive], allowDouble: bool,
-    allowLastDouble: bool, showProgress = false):
+    allowLastDouble: bool, showProgress = false, parallelCount: Positive =
+      when defined(js): 1 else: max(1, countProcessors())):
     tuple[pairs: Pairs, answer: Positions] {.inline.} =
   ## Yields pairs and answer of the nazo puyo that is obtained by permuting
   ## pairs and has a unique solution.
-  var colorCounts: array[ColorPuyo, Natural] = [0, 0, 0, 0, 0]
-  for color in ColorPuyo:
-    colorCounts[color] = nazo.environment.pairs.puyoCount color
-  let pairsSeq = nazo.environment.pairs.allPairsSeq(
-    fixMoves.deduplicate true, allowDouble, allowLastDouble, colorCounts, 0,
-    nazo.moveCount)
+  let pairsSeq = nazo.allPairsSeq(fixMoves, allowDouble, allowLastDouble)
 
   when not defined(js):
     var bar: SuruBar
@@ -86,7 +38,8 @@ iterator permute*[F: TsuField or WaterField](
     var nazo2 = nazo
     nazo2.environment.pairs = pairs
 
-    let answers = nazo2.solve(earlyStopping = true)
+    let answers =
+      nazo2.solve(earlyStopping = true, parallelCount = parallelCount)
 
     when not defined(js):
       bar.inc

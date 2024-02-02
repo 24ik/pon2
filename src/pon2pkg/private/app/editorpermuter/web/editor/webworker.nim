@@ -5,10 +5,10 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[dom, options, sequtils, sugar]
+import std/[dom, options, sequtils, strutils, sugar, uri]
 import ../../../../[webworker]
-import ../../../../nazopuyo/[node]
-import ../../../../../corepkg/[field, position]
+import ../../../../nazopuyo/[node, permute]
+import ../../../../../corepkg/[field, misc, pair, position]
 import ../../../../../nazopuyopkg/[nazopuyo]
 
 type TaskKind* = enum
@@ -20,7 +20,7 @@ type TaskKind* = enum
 # Solve (async)
 # ------------------------------------------------
 
-const ParallelSolvingWaitIntervalMs = 50
+const WaitLoopIntervalMs = 50
 
 proc asyncSolve[F: TsuField or WaterField](
     nazo: NazoPuyo[F], results: var seq[Option[seq[Positions]]],
@@ -72,7 +72,7 @@ proc asyncSolve[F: TsuField or WaterField](
       worker.run $Solve, $nazo.environment.field.rule,
         childNodes[childIdx].toStr
       childIdx.inc
-  interval = runWorkers.setInterval ParallelSolvingWaitIntervalMs
+  interval = runWorkers.setInterval WaitLoopIntervalMs
 
 proc asyncSolve[F: TsuField or WaterField](
     nazo: NazoPuyo[F], results: var seq[Option[seq[Positions]]],
@@ -160,3 +160,58 @@ proc asyncSolve*[F: TsuField or WaterField](
     nazo.asyncSolve results, DisappearConnect, earlyStopping, parallelCount
   of DisappearConnectMore:
     nazo.asyncSolve results, DisappearConnectMore, earlyStopping, parallelCount
+
+# ------------------------------------------------
+# Permute (async)
+# ------------------------------------------------
+
+proc asyncPermute*[F: TsuField or WaterField](
+    nazo: NazoPuyo[F],
+    results: var seq[Option[tuple[pairs: Pairs, answer: Positions]]],
+    fixMoves: seq[Positive], allowDouble: bool, allowLastDouble: bool,
+    parallelCount: Positive = 6) {.inline.} =
+  ## Permutes the pairs.
+  ## Results will be stored in `results`.
+  let pairsSeq = nazo.allPairsSeq(fixMoves, allowDouble, allowLastDouble)
+  results = newSeqOfCap[Option[tuple[pairs: Pairs, answer: Positions]]](
+    pairsSeq.len.succ)
+  results.add none tuple[pairs: Pairs, answer: Positions]
+
+  # result-register handler
+  var interval: Interval
+  proc handler(returnCode: WorkerReturnCode, messages: seq[string]) =
+    case returnCode
+    of Success:
+      if messages[0].parseBool:
+        results.add some (pairs: pairsSeq[messages[1].parseInt],
+                          answer: messages[2].parsePositions Izumiya)
+      else:
+        results.add none tuple[pairs: Pairs, answer: Positions]
+
+      if results.len == pairsSeq.len.succ:
+        results.keepItIf it.isSome
+        interval.clearInterval
+    of Failure:
+      discard
+
+  # setup workers
+  var workers = collect:
+    for _ in 1..parallelCount:
+      initWorker()
+  for worker in workers.mitems:
+    worker.completeHandler = handler
+
+  # run workers
+  var pairsIdx = 0
+  proc runWorkers =
+    for worker in workers.mitems:
+      if pairsIdx >= pairsSeq.len:
+        break
+      if worker.running:
+        continue
+
+      var nazo2 = nazo
+      nazo2.environment.pairs = pairsSeq[pairsIdx]
+      worker.run $Permute, $pairsIdx, $nazo2.toUri
+      pairsIdx.inc
+  interval = runWorkers.setInterval WaitLoopIntervalMs

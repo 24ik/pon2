@@ -7,8 +7,9 @@
 
 import std/[sugar]
 import karax/[karax, karaxdsl, kbase, vdom]
-import ./[permute]
+import ./[settings]
 import ../../../../../apppkg/[editorpermuter, simulator]
+import ../../../../../corepkg/[pair]
 import ../../../../../nazopuyopkg/[nazopuyo]
 
 proc initEditorControllerNode*(editorPermuter: var EditorPermuter, id = ""):
@@ -16,6 +17,7 @@ proc initEditorControllerNode*(editorPermuter: var EditorPermuter, id = ""):
   ## Returns the editor controller node.
   let
     workerRunning = editorPermuter.solving or editorPermuter.permuting
+    workerDisable = workerRunning or editorPermuter.simulator[].pairs.len == 0
 
     focusButtonClass =
       if editorPermuter.focusEditor: kstring"button"
@@ -29,15 +31,16 @@ proc initEditorControllerNode*(editorPermuter: var EditorPermuter, id = ""):
 
   proc permuteHandler =
     editorPermuter.simulator[].withNazoPuyo:
-      let (fixMoves, allowDouble, allowLastDouble) = getPermuteData(
+      let (_, fixMoves, allowDouble, allowLastDouble) = getSettings(
         id, nazoPuyo.moveCount)
       editorPermuter.permute fixMoves, allowDouble, allowLastDouble
 
   result = buildHtml(tdiv(class = "buttons")):
-    button(class = solveButtonClass, disabled = workerRunning,
-           onclick = () => editorPermuter.solve):
+    button(class = solveButtonClass, disabled = workerDisable,
+           onclick = () => (
+            editorPermuter.solve getSettings(id, 1).parallelCount)):
       text "解探索"
-    button(class = permuteButtonClass, disabled = workerRunning,
+    button(class = permuteButtonClass, disabled = workerDisable,
            onclick = permuteHandler):
       text "ツモ並べ替え"
     button(class = focusButtonClass,
