@@ -18,7 +18,7 @@ when defined(js):
   import ../private/app/editorpermuter/web/editor/[webworker]
 else:
   {.push warning[Deprecated]: off.}
-  import std/[sugar, threadpool]
+  import std/[cpuinfo, sugar, threadpool]
   import nigui
   import ../nazopuyopkg/[permute, solve]
   {.pop.}
@@ -143,9 +143,9 @@ proc updateReplaySimulator[F: TsuField or WaterField](mSelf; nazo: NazoPuyo[F])
   else:
     mSelf.focusEditor = false
 
-proc solve*(mSelf; parallelCount: Positive = 12) {.inline.} =
+proc solve*(mSelf; parallelCount: Positive =
+    when defined(js): 6 else: max(1, countProcessors())) {.inline.} =
   ## Solves the nazo puyo.
-  ## `parallelCount` will be ignored on non-JS backend.
   if mSelf.solving or mSelf.permuting or mSelf.simulator[].kind != Nazo:
     return
 
@@ -156,7 +156,7 @@ proc solve*(mSelf; parallelCount: Positive = 12) {.inline.} =
       {.push warning[ProveInit]: off.}
       var results = @[none seq[Positions]]
       {.pop.}
-      nazoPuyo.asyncSolve results
+      nazoPuyo.asyncSolve(results, parallelCount = parallelCount)
 
       mSelf.progressBarData.total =
         if nazoPuyo.environment.pairs.peekFirst.isDouble:
@@ -181,8 +181,9 @@ proc solve*(mSelf; parallelCount: Positive = 12) {.inline.} =
     else:
       # FIXME: make asynchronous
       # FIXME: redraw
-      mSelf.replayData = some nazoPuyo.solve.mapIt (
-        nazoPuyo.environment.pairs, it)
+      mSelf.replayData =
+        some nazoPuyo.solve(parallelCount = parallelCount).mapIt (
+          nazoPuyo.environment.pairs, it)
       mSelf.updateReplaySimulator nazoPuyo
       mSelf.solving = false
 
@@ -309,7 +310,7 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
 when defined(js):
   import std/[dom]
   import ../private/app/editorpermuter/web/editor/[
-    controller, pagination, permute as webPermute, progress, simulator]
+    controller, pagination, settings, progress, simulator]
 
   # ------------------------------------------------
   # JS - Keyboard Handler
@@ -350,7 +351,7 @@ when defined(js):
             tdiv(class = "block"):
               mSelf.initEditorControllerNode id
             tdiv(class = "block"):
-              mSelf.initEditorPermuteNode id
+              mSelf.initEditorSettingsNode id
             if mSelf.progressBarData.total > 0:
               mSelf.initEditorProgressBarNode
             if mSelf.replayData.isSome:
