@@ -76,7 +76,9 @@ proc initMainEditorPermuterNode*(
     editorPermuter: var EditorPermuter): VNode {.inline.} =
   ## Returns the main editor&permuter node.
   if pageInitialized:
-    return editorPermuter.initEditorPermuterNode
+    return buildHtml(tdiv):
+      editorPermuter.initEditorPermuterNode
+      initFooterNode()
 
   pageInitialized = true
   let query =
