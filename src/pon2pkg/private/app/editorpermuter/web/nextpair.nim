@@ -9,7 +9,7 @@ import karax/[karaxdsl, vdom]
 import ../[render]
 import ../../[misc]
 import ../../../../apppkg/[simulator]
-import ../../../../corepkg/[misc]
+import ../../../../corepkg/[fieldtype]
 
 proc initNextPairNode*(simulator: var Simulator): VNode {.inline.} =
   ## Returns the next pair node.

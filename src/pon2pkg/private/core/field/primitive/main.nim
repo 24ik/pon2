@@ -8,7 +8,7 @@
 import std/[bitops]
 import ./[disappearresult]
 import ../[binary]
-import ../../../../corepkg/[cell, misc, pair, position]
+import ../../../../corepkg/[cell, fieldtype, pair, position]
 
 when defined(cpu32):
   import ./bit32/binary

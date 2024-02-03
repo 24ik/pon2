@@ -7,8 +7,8 @@
 
 import std/[deques, options, sequtils, uri]
 import ./[misc]
-import ../corepkg/[cell, environment, field, misc, moveresult, pair, position,
-                   rule]
+import ../corepkg/[cell, environment, field, fieldtype, misc, moveresult, pair,
+                   position, rule]
 import ../nazopuyopkg/[nazopuyo]
 import ../private/[intrinsic, misc]
 

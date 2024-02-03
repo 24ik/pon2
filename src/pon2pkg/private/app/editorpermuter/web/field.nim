@@ -10,7 +10,7 @@ import karax/[karax, karaxdsl, kbase, vdom, vstyles]
 import ../[render]
 import ../../[misc]
 import ../../../../apppkg/[misc, simulator]
-import ../../../../corepkg/[field, misc]
+import ../../../../corepkg/[field, fieldtype, misc]
 
 func initClickHandler(simulator: var Simulator, row: Row, col: Column):
     () -> void =

@@ -10,7 +10,7 @@ import nigui
 import ./[assets]
 import ../[render]
 import ../../../../apppkg/[misc, simulator]
-import ../../../../corepkg/[cell, misc]
+import ../../../../corepkg/[cell, fieldtype, misc]
 
 type NextPairControl* = ref object of LayoutContainer
   ## Next pair control.

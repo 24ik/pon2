@@ -7,6 +7,7 @@
 ## - [cell](./corepkg/cell.html)
 ## - [environment](./corepkg/environment.html)
 ## - [field](./corepkg/field.html)
+## - [fieldtype](./corepkg/fieldtype.html)
 ## - [misc](./corepkg/misc.html)
 ## - [moveresult](./corepkg/moveresult.html)
 ## - [pair](./corepkg/pair.html)
@@ -16,7 +17,7 @@
 ## Compile Options:
 ## | Option                          | Description                 | Default |
 ## | ------------------------------- | --------------------------- | ------- |
-## | `-d:Pon2WaterHeight=<int>`      | Height of the water.        | `8`     |
+## | `-d:pon2.waterheight=<int>`     | Height of the water.        | `8`     |
 ## | `-d:Pon2TsuGarbageRate=<int>`   | Garbage rate in Tsu rule.   | `70`    |
 ## | `-d:Pon2WaterGarbageRate=<int>` | Garbage rate in Water rule. | `90`    |
 ## | `-d:Pon2Avx2=<bool>`            | Use AVX2 instructions.      | `true`  |
@@ -27,8 +28,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./corepkg/[cell, environment, field, misc, moveresult, pair, position,
-                  rule]
+import ./corepkg/[cell, environment, field, fieldtype, misc, moveresult, pair,
+                  position, rule]
 
 export cell.Cell, cell.ColorPuyo, cell.Puyo, cell.parseCell
 export environment.Environment, environment.Environments,
@@ -58,9 +59,11 @@ export field.TsuField, field.WaterField, field.zeroField, field.zeroTsuField,
   field.`$`, field.toUriQuery, field.parseFields
 when UseAvx2:
   export field.`==`
-export misc.Height, misc.Width, misc.WaterHeight, misc.AirHeight, misc.Row,
-  misc.Column, misc.WaterRow, misc.AirRow, misc.SimulatorHost,
-  misc.SimulatorKind, misc.SimulatorMode, misc.NoticeGarbage, misc.GarbageRates
+export fieldtype.Height, fieldtype.Width, fieldtype.WaterHeight,
+  fieldtype.AirHeight, fieldtype.Row, fieldtype.Column, fieldtype.WaterRow,
+  fieldtype.AirRow
+export misc.SimulatorHost, misc.SimulatorKind, misc.SimulatorMode,
+  misc.NoticeGarbage, misc.GarbageRates
 export moveresult.MoveResult, moveresult.initMoveResult, moveresult.chainCount,
   moveresult.puyoCount, moveresult.colorCount, moveresult.garbageCount,
   moveresult.puyoCounts, moveresult.colorCounts, moveresult.garbageCounts,

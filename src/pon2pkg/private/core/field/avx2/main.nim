@@ -8,7 +8,7 @@
 import std/[bitops]
 import ./[binary, disappearresult]
 import ../[binary as commonBinary]
-import ../../../../corepkg/[cell, misc, pair, position]
+import ../../../../corepkg/[cell, fieldtype, pair, position]
 
 export binary.`==`
 

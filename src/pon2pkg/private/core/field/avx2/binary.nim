@@ -8,7 +8,7 @@
 import std/[bitops]
 import nimsimd/[avx2]
 import ../../../[intrinsic]
-import ../../../../corepkg/[misc]
+import ../../../../corepkg/[fieldtype]
 
 type
   BinaryField* = M256i

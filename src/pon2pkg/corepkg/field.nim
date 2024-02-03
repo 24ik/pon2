@@ -9,7 +9,7 @@
 {.experimental: "views".}
 
 import std/[sequtils, setutils, strutils, sugar, tables]
-import ./[cell, misc, moveresult, pair, position, rule]
+import ./[cell, fieldtype, misc, moveresult, pair, position, rule]
 import ../private/[intrinsic]
 import ../private/core/field/[binary]
 

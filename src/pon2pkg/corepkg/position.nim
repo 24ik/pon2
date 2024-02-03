@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 import std/[options, sequtils, strutils, sugar, tables]
-import ./[misc]
+import ./[fieldtype, misc]
 
 type
   Direction* {.pure.} = enum

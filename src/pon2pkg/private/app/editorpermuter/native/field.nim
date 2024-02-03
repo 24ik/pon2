@@ -10,7 +10,7 @@ import nigui
 import ./[assets]
 import ../[render]
 import ../../../../apppkg/[misc, simulator]
-import ../../../../corepkg/[field, misc]
+import ../../../../corepkg/[field, fieldtype]
 
 type FieldControl* = ref object of LayoutContainer
   ## Field control.

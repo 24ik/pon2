@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 import std/[options, random, sequtils, setutils, strutils, sugar, tables, uri]
-import ./[cell, field, misc, moveresult, pair, position, rule]
+import ./[cell, field, fieldtype, misc, moveresult, pair, position, rule]
 
 type
   Environment*[F: TsuField or WaterField] = object
