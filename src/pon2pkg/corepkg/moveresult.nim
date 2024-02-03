@@ -1,29 +1,54 @@
 ## This module implements moving results.
 ##
+## Compile Options:
+## | Option                            | Description                 | Default  |
+## | --------------------------------- | --------------------------- | -------- |
+## | `-d:pon2.garbagerate.tsu=<int>`   | Garbage rate in Tsu rule.   | `70`     |
+## | `-d:pon2.garbagerate.water=<int>` | Garbage rate in Water rule. | `90`     |
+##
 
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[math, options, sequtils, setutils, sugar]
-import ./[cell, fieldtype, misc, rule]
+import ./[cell, fieldtype, rule]
 import ../private/[misc]
 
-type MoveResult* = object
-  ## Moving result.
-  chainCount*: int
-  totalDisappearCounts*: Option[array[Puyo, int]]
-  disappearCounts*: Option[seq[array[Puyo, int]]]
-  detailDisappearCounts*: Option[seq[array[ColorPuyo, seq[int]]]]
+type
+  MoveResult* = object
+    ## Moving result.
+    chainCount*: int
+    totalDisappearCounts*: Option[array[Puyo, int]]
+    disappearCounts*: Option[seq[array[Puyo, int]]]
+    detailDisappearCounts*: Option[seq[array[ColorPuyo, seq[int]]]]
 
-using self: MoveResult
+  NoticeGarbage* {.pure.} = enum
+    ## Notice garbage puyo.
+    Small
+    Big
+    Rock
+    Star
+    Moon
+    Crown
+    Comet
+
+const
+  TsuGarbageRate {.define: "pon2.garbagerate.tsu".} = 70
+  WaterGarbageRate {.define: "pon2.garbagerate.water".} = 90
+  GarbageRates: array[Rule, Positive] = [
+    TsuGarbageRate.Positive, WaterGarbageRate]
+
+using
+  self: MoveResult
+  mSelf: var MoveResult
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
 func initMoveResult*(chainCount: int): MoveResult {.inline.} =
-  ## Constructor of `MoveResult`.
+  ## Returns a new move result.
   result.chainCount = chainCount
   {.push warning[ProveInit]: off.}
   result.totalDisappearCounts = none array[Puyo, int]
@@ -34,7 +59,7 @@ func initMoveResult*(chainCount: int): MoveResult {.inline.} =
 func initMoveResult*(
     chainCount: int, totalDisappearCounts: array[Puyo, int]): MoveResult
     {.inline.} =
-  ## Constructor of `RoughMoveResult`.
+  ## Returns a new move result.
   result.chainCount = chainCount
   result.totalDisappearCounts = some totalDisappearCounts
   {.push warning[ProveInit]: off.}
@@ -45,7 +70,7 @@ func initMoveResult*(
 func initMoveResult*(
     chainCount: int, totalDisappearCounts: array[Puyo, int],
     disappearCounts: seq[array[Puyo, int]]): MoveResult {.inline.} =
-  ## Constructor of `DetailMoveResult`.
+  ## Returns a new move result.
   result.chainCount = chainCount
   result.totalDisappearCounts = some totalDisappearCounts
   result.disappearCounts = some disappearCounts
@@ -58,18 +83,11 @@ func initMoveResult*(
     disappearCounts: seq[array[Puyo, int]],
     detailDisappearCounts: seq[array[ColorPuyo, seq[int]]]): MoveResult
     {.inline.} =
-  ## Constructor of `FullMoveResult`.
+  ## Returns a new move result.
   result.chainCount = chainCount
   result.totalDisappearCounts = some totalDisappearCounts
   result.disappearCounts = some disappearCounts
   result.detailDisappearCounts = some detailDisappearCounts
-
-# ------------------------------------------------
-# Property
-# ------------------------------------------------
-
-func chainCount*(self): int {.inline.} = self.chainCount
-  ## Returns the number of chains.
 
 # ------------------------------------------------
 # Count
@@ -237,7 +255,7 @@ const NoticeUnits: array[NoticeGarbage, Natural] =
 func noticeGarbageCounts*(score: Natural, rule: Rule): array[NoticeGarbage, int]
                          {.inline.} =
   ## Returns the number of notice garbages.
-  result[Small] = 0 # HACK: dummy to remove warning
+  result[Small] = 0 # HACK: dummy to suppress warning
 
   var score2 = score div GarbageRates[rule]
   for notice in countdown(NoticeGarbage.high, NoticeGarbage.low):

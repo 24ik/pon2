@@ -15,13 +15,13 @@
 ## - [rule](./corepkg/rule.html)
 ##
 ## Compile Options:
-## | Option                          | Description                 | Default |
-## | ------------------------------- | --------------------------- | ------- |
-## | `-d:pon2.waterheight=<int>`     | Height of the water.        | `8`     |
-## | `-d:Pon2TsuGarbageRate=<int>`   | Garbage rate in Tsu rule.   | `70`    |
-## | `-d:Pon2WaterGarbageRate=<int>` | Garbage rate in Water rule. | `90`    |
-## | `-d:Pon2Avx2=<bool>`            | Use AVX2 instructions.      | `true`  |
-## | `-d:Pon2Bmi2=<bool>`            | Use BMI2 instructions.      | `true`  |
+## | Option                            | Description                 | Default |
+## | --------------------------------- | --------------------------- | ------- |
+## | `-d:pon2.waterheight=<int>`       | Height of the water.        | `8`     |
+## | `-d:pon2.garbagerate.tsu=<int>`   | Garbage rate in Tsu rule.   | `70`    |
+## | `-d:pon2.garbagerate.water=<int>` | Garbage rate in Water rule. | `90`    |
+## | `-d:Pon2Avx2=<bool>`              | Use AVX2 instructions.      | `true`  |
+## | `-d:Pon2Bmi2=<bool>`              | Use BMI2 instructions.      | `true`  |
 ##
 
 {.experimental: "strictDefs".}
