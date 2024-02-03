@@ -5,14 +5,9 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[deques, sequtils, setutils, strutils, sugar, tables]
+import std/[sequtils, setutils, strutils, sugar, tables]
 import ./[cell, misc]
 import ../private/[misc]
-
-export deques.Deque, deques.`[]`, deques.`[]=`, deques.addFirst, deques.addLast,
-  deques.clear, deques.contains, deques.initDeque, deques.len, deques.peekFirst,
-  deques.peekLast, deques.popFirst, deques.popLast, deques.shrink,
-  deques.toDeque, deques.items, deques.mitems, deques.pairs
 
 type
   Pair* {.pure.} = enum
@@ -47,39 +42,36 @@ type
     PurpleYellow = $Purple & $Yellow
     PurplePurple = $Purple & $Purple
 
-  Pairs* = Deque[Pair]
+  Pairs* = seq[Pair]
 
 using
-  pair: Pair
-  pairs: Pairs
-  mPair: var Pair
-  mPairs: var Pairs
+  self: Pair
+  mSelf: var Pair
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
-func initPair*(axis, child: ColorPuyo): Pair {.inline.} =
-  ## Constructor of `Pair`.
-  Pair.low.succ (axis.ord - ColorPuyo.low.ord) * ColorPuyo.fullSet.card +
-    (child.ord - ColorPuyo.low.ord)
+const FirstPairs: array[ColorPuyo, Pair] = [
+  RedRed, GreenRed, BlueRed, YellowRed, PurpleRed]
 
-func initPairs*(pairs: varargs[Pair]): Pairs {.inline.} = pairs.toDeque
-  ## Constructor of `Pairs`.
+func initPair*(axis, child: ColorPuyo): Pair {.inline.} =
+  ## Returns a new Pair.
+  FirstPairs[axis].succ child.ord - ColorPuyo.low.ord
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
 func initPairToAxis: array[Pair, Cell] {.inline.} =
-  ## Constructor of `PairToAxis`.
-  result[Pair.low] = Cell.low # dummy to remove warning
+  ## Returns `PairToAxis`.
+  result[Pair.low] = Cell.low # HACK: dummy to suppress warning
   for pair in Pair:
     result[pair] = ColorPuyo.low.succ pair.ord div ColorPuyo.fullSet.card
 
 func initPairToChild: array[Pair, Cell] {.inline.} =
-  ## Constructor of `PairToChild`.
-  result[Pair.low] = Cell.low # dummy to remove warning
+  ## Returns `PairToChild`.
+  result[Pair.low] = Cell.low # HACK: dummy to suppress warning
   for pair in Pair:
     result[pair] = ColorPuyo.low.succ pair.ord mod ColorPuyo.fullSet.card
 
@@ -87,84 +79,81 @@ const
   PairToAxis = initPairToAxis()
   PairToChild = initPairToChild()
 
-func axis*(pair): Cell {.inline.} = PairToAxis[pair] ## Returns the axis-puyo.
-func child*(pair): Cell {.inline.} = PairToChild[pair]
+func axis*(self): Cell {.inline.} = PairToAxis[self] ## Returns the axis-puyo.
+
+func child*(self): Cell {.inline.} = PairToChild[self]
   ## Returns the child-puyo.
 
-func isDouble*(pair): bool {.inline.} =
+func isDouble*(self): bool {.inline.} =
   ## Returns `true` if the pair is double (monochromatic).
-  pair in {RedRed, GreenGreen, BlueBlue, YellowYellow, PurplePurple}
+  self in {RedRed, GreenGreen, BlueBlue, YellowYellow, PurplePurple}
 
 # ------------------------------------------------
 # Operator
 # ------------------------------------------------
 
-func `axis=`*(mPair; color: ColorPuyo) {.inline.} =
+func `axis=`*(mSelf; color: ColorPuyo) {.inline.} =
   ## Sets the axis-puyo.
-  mPair.inc (color.ord - mPair.axis.ord) * ColorPuyo.fullSet.card
+  mSelf.inc (color.ord - mSelf.axis.ord) * ColorPuyo.fullSet.card
 
-func `child=`*(mPair; color: ColorPuyo) {.inline.} =
+func `child=`*(mSelf; color: ColorPuyo) {.inline.} =
   ## Sets the child-puyo.
-  mPair.inc (color.ord - mPair.child.ord)
-
-func `==`*(pairs1, pairs2: Pairs): bool {.inline.} =
-  let len1 = pairs1.len
-  result = len1 == pairs2.len and (0..<len1).allIt pairs1[it] == pairs2[it]
+  mSelf.inc color.ord - mSelf.child.ord
 
 # ------------------------------------------------
 # Swap
 # ------------------------------------------------
 
 func initPairToSwapPair: array[Pair, Pair] {.inline.} =
-  ## Constructor of `PairToSwapPair`.
-  result[Pair.low] = Pair.low # dummy to remove warning
+  ## Returns `PairToSwapPair`.
+  result[Pair.low] = Pair.low # HACK: dummy to suppress warning
   for pair in Pair:
     result[pair] = initPair(pair.child, pair.axis)
 
 const PairToSwapPair = initPairToSwapPair()
 
-func swapped*(pair): Pair {.inline.} = PairToSwapPair[pair]
+func swapped*(self): Pair {.inline.} = PairToSwapPair[self]
   ## Returns the pair with axis-puyo and child-puyo swapped.
 
-func swap*(mPair) {.inline.} = mPair = mPair.swapped
+func swap*(mSelf) {.inline.} = mSelf = mSelf.swapped
   ## Swaps the axis-puyo and child-puyo.
 
 # ------------------------------------------------
 # Count - Puyo
 # ------------------------------------------------
 
-func puyoCount*(pair; puyo: Puyo): int {.inline.} =
+func puyoCount*(self; puyo: Puyo): int {.inline.} =
   ## Returns the number of `puyo` in the pair.
-  (pair.axis == puyo).int + (pair.child == puyo).int
+  (self.axis == puyo).int + (self.child == puyo).int
 
-func puyoCount*(pair): int {.inline.} = 2
+func puyoCount*(self): int {.inline.} = 2
   ## Returns the number of puyos in the pair.
 
-func puyoCount*(pairs; puyo: Puyo): int {.inline.} =
+func puyoCount*(pairs: Pairs; puyo: Puyo): int {.inline.} =
   ## Returns the number of `puyo` in the pairs.
   sum2 pairs.mapIt it.puyoCount puyo
 
-func puyoCount*(pairs): int {.inline.} = pairs.len * 2
+func puyoCount*(pairs: Pairs): int {.inline.} = pairs.len * 2
   ## Returns the number of puyos in the pairs.
 
 # ------------------------------------------------
 # Count - Color
 # ------------------------------------------------
 
-func colorCount*(pair): int {.inline.} = pair.puyoCount
+func colorCount*(self): int {.inline.} = self.puyoCount
   ## Returns the number of color puyos in the pair.
 
-func colorCount*(pairs): int {.inline.} = pairs.puyoCount
+func colorCount*(pairs: Pairs): int {.inline.} = pairs.puyoCount
   ## Returns the number of color puyos in the pairs.
 
 # ------------------------------------------------
 # Count - Garbage
 # ------------------------------------------------
 
-func garbageCount*(pair): int {.inline.} = 0
+func garbageCount*(self): int {.inline.} = 0
   ## Returns the number of garbage puyos in the pair.
 
-func garbageCount*(pairs): int {.inline.} = 0
+func garbageCount*(pairs: Pairs): int {.inline.} = 0
   ## Returns the number of garbage puyos in the pairs.
 
 # ------------------------------------------------
@@ -178,10 +167,11 @@ const StrToPair = collect:
 func parsePair*(str: string): Pair {.inline.} =
   ## Converts the string representation to the pair.
   ## If `str` is not a valid representation, `ValueError` is raised.
-  if str notin StrToPair:
+  try:
+    result = StrToPair[str]
+  except KeyError:
+    result = Pair.low # HACK: dummy to suppress warning
     raise newException(ValueError, "Invalid pair: " & str)
-
-  result = StrToPair[str]
 
 # ------------------------------------------------
 # Pairs <-> string
@@ -189,7 +179,7 @@ func parsePair*(str: string): Pair {.inline.} =
 
 const PairsSep = "\n"
 
-func `$`*(pairs): string {.inline.} =
+func `$`*(pairs: Pairs): string {.inline.} =
   let strs = collect:
     for pair in pairs:
       $pair
@@ -199,10 +189,8 @@ func `$`*(pairs): string {.inline.} =
 func parsePairs*(str: string): Pairs {.inline.} =
   ## Converts the string representation to the pairs.
   ## If `str` is not a valid representation, `ValueError` is raised.
-  if str == "":
-    return initDeque[Pair]()
-
-  result = str.split(PairsSep).mapIt(it.parsePair).toDeque
+  if str == "": newSeq[Pair](0)
+  else: str.split(PairsSep).mapIt it.parsePair
 
 # ------------------------------------------------
 # Pair <-> URI
@@ -211,64 +199,62 @@ func parsePairs*(str: string): Pairs {.inline.} =
 const
   PairToIshikawaUri = "0coAM2eqCO4gsEQ6iuGS8kwIU"
   IshikawaUriToPair = collect:
-    for i, url in PairToIshikawaUri:
-      {$url: i.Pair}
+    for pair in Pair:
+      {$PairToIshikawaUri[pair.ord]: pair}
 
-func toUriQuery*(pair; host: SimulatorHost): string {.inline.} =
+func toUriQuery*(self; host: SimulatorHost): string {.inline.} =
   ## Converts the pair to the URI query.
   case host
-  of Izumiya: $pair
-  of Ishikawa, Ips: $PairToIshikawaUri[pair.ord]
+  of Izumiya: $self
+  of Ishikawa, Ips: $PairToIshikawaUri[self.ord]
 
 func parsePair*(query: string; host: SimulatorHost): Pair {.inline.} =
   ## Converts the URI query to the pair.
   ## If `query` is not a valid URI, `ValueError` is raised.
   case host
   of Izumiya:
-    query.parsePair
+    result = query.parsePair
   of Ishikawa, Ips:
-    if query notin IshikawaUriToPair:
+    try:
+      result = IshikawaUriToPair[query]
+    except KeyError:
+      result = Pair.low # HACK: dummy to suppress warning
       raise newException(ValueError, "Invalid pair: " & query)
-
-    IshikawaUriToPair[query]
 
 # ------------------------------------------------
 # Pairs <-> URI
 # ------------------------------------------------
 
-func toUriQuery*(pairs; host: SimulatorHost): string {.inline.} =
+func toUriQuery*(pairs: Pairs; host: SimulatorHost): string {.inline.} =
   ## Converts the pairs to the URI query.
   join pairs.mapIt it.toUriQuery host
 
 func parsePairs*(query: string; host: SimulatorHost): Pairs {.inline.} =
   ## Converts the URI query to the pairs.
   ## If `query` is not a valid URI, `ValueError` is raised.
-  let pairsSeq = case host
+  case host
   of Izumiya:
     if query.len mod 2 != 0:
       raise newException(ValueError, "Invalid pairs: " & query)
 
-    collect:
-      for i in 0..<query.len div 2:
-        query[2 * i ..< 2 * i.succ].parsePair host
+    result = collect:
+      for i in countup(0, query.len.pred, 2):
+        query[i..i.succ].parsePair host
   of Ishikawa, Ips:
-    collect:
+    result = collect:
       for c in query:
         ($c).parsePair host
-
-  result = pairsSeq.toDeque
 
 # ------------------------------------------------
 # Pair <-> array
 # ------------------------------------------------
 
-func toArray*(pair): array[2, Cell] {.inline.} = [pair.axis, pair.child]
+func toArray*(self): array[2, Cell] {.inline.} = [self.axis, self.child]
   ## Converts the pair to the array.
 
 func parsePair*(arr: array[2, ColorPuyo]): Pair {.inline.} =
   ## Converts the array to the pair.
-  Pair.low.succ (arr[0].ord - ColorPuyo.low.ord) * ColorPuyo.fullSet.card +
-    (arr[1].ord - ColorPuyo.low.ord)
+  initPair(arr[0], arr[1])
 
 # ------------------------------------------------
 # Pairs <-> array
@@ -282,8 +268,6 @@ func toArray*(pairs: Pairs): seq[array[2, Cell]] {.inline.} =
 
 func parsePairs*(arr: openArray[array[2, ColorPuyo]]): Pairs {.inline.} =
   ## Converts the array to the pairs.
-  let pairsSeq = collect:
+  collect:
     for pairArray in arr:
       pairArray.parsePair
-
-  result = pairsSeq.toDeque

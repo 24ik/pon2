@@ -184,7 +184,7 @@ const StrToPos = collect:
     {$pos: pos}
 
 func parsePosition*(str: string): Position {.inline.} =
-  ## Converts the string representation to a position.
+  ## Converts the string representation to the position.
   ## If `str` is not a valid representation, `ValueError` is raised.
   try:
     result = StrToPos[str]
@@ -206,7 +206,7 @@ func `$`*(positions: Positions): string {.inline.} =
   result = strs.join PositionsSep
 
 func parsePositions*(str: string): Positions {.inline.} =
-  ## Converts the string representation to positions.
+  ## Converts the string representation to the positions.
   ## If `str` is not a valid representation, `ValueError` is raised.
   if str == "": newSeq[Position](0)
   else: str.split(PositionsSep).mapIt it.parsePosition
@@ -222,28 +222,34 @@ const
       {$PosToIshikawaUri[pos.ord]: pos}
 
 func toUriQuery*(self; host: SimulatorHost): string {.inline.} =
-  ## Converts the position to a URI query.
+  ## Converts the position to the URI query.
   case host
   of Izumiya: $self
   of Ishikawa, Ips: $PosToIshikawaUri[self.ord]
 
 func parsePosition*(query: string, host: SimulatorHost): Position {.inline.} =
-  ## Converts the URI query to a position.
+  ## Converts the URI query to the position.
   ## If `query` is not a vaid URI, `ValueError` is raised.
   case host
-  of Izumiya: query.parsePosition
-  of Ishikawa, Ips: IshikawaUriToPos[query]
+  of Izumiya:
+    result = query.parsePosition
+  of Ishikawa, Ips:
+    try:
+      result = IshikawaUriToPos[query]
+    except KeyError:
+      result = Position.low # HACK: dummy to suppress warning
+      raise newException(ValueError, "Invalid position: " & query)
 
 # ------------------------------------------------
 # Positions <-> URI
 # ------------------------------------------------
 
 func toUriQuery*(positions: Positions, host: SimulatorHost): string {.inline.} =
-  ## Converts the positions to a URI query.
+  ## Converts the positions to the URI query.
   join positions.mapIt it.toUriQuery host
 
 func parsePositions*(query: string, host: SimulatorHost): Positions {.inline.} =
-  ## Converts the URI query to positions.
+  ## Converts the URI query to the positions.
   ## If `query` is not a vaid URI, `ValueError` is raised.
   case host
   of Izumiya:
