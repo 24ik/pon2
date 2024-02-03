@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, sequtils, strutils, sugar, tables]
+import std/[sequtils, strutils, sugar, tables]
 import ./[fieldtype, misc]
 
 type
@@ -18,6 +18,8 @@ type
 
   Position* {.pure.} = enum
     ## The location where a pair is put.
+    None = ".."
+
     Up0 = "1N"
     Up1 = "2N"
     Up2 = "3N"
@@ -44,19 +46,15 @@ type
     Left4 = "54"
     Left5 = "65"
 
-  Positions* = seq[Option[Position]]
-    ## The position sequence. `none(Position)` means no-position.
+  Positions* = seq[Position]
 
 const
-  AllPositions* = {Position.low..Position.high}
-  DoublePositions* = {Up0..Right4} ## All positions for double pairs.
+  AllPositions* = {Up0..Left5}
+  AllDoublePositions* = {Up0..Right4}
 
 using
-  pos: Position
-  optPos: Option[Position]
-  positions: Positions
-  mPos: var Position
-  mPositions: var Positions
+  self: Position
+  mSelf: var Position
 
 # ------------------------------------------------
 # Constructor
@@ -67,7 +65,7 @@ const
   StartColumns: array[Direction, Column] = [0, 0, 0, 1]
 
 func initPosition*(axisCol: Column, childDir: Direction): Position {.inline.} =
-  ## Position constructor.
+  ## Returns a new position.
   StartPositions[childDir].succ axisCol - StartColumns[childDir]
 
 # ------------------------------------------------
@@ -75,8 +73,8 @@ func initPosition*(axisCol: Column, childDir: Direction): Position {.inline.} =
 # ------------------------------------------------
 
 func initPosToAxisCol: array[Position, Column] {.inline.} =
-  ## Constructor of `PosToAxisCol`.
-  result[Position.low] = Column.low # dummy to remove warning
+  ## Returns `PosToAxisCol`.
+  result[None] = Column.low
   for pos in Up0..Up5:
     result[pos] = StartColumns[Up].succ pos.ord - StartPositions[Up].ord
   for pos in Right0..Right4:
@@ -89,8 +87,8 @@ func initPosToAxisCol: array[Position, Column] {.inline.} =
 const PosToAxisCol = initPosToAxisCol()
 
 func initPosToChildCol: array[Position, Column] {.inline.} =
-  ## Constructor of `PosToChildCol`.
-  result[Position.low] = Column.low # dummy to remove warning
+  ## Returns `PosToChildCol`.
+  result[None] = Column.low
   for pos in Up0..Up5: result[pos] = PosToAxisCol[pos]
   for pos in Right0..Right4: result[pos] = PosToAxisCol[pos].succ
   for pos in Down0..Down5: result[pos] = PosToAxisCol[pos]
@@ -99,8 +97,8 @@ func initPosToChildCol: array[Position, Column] {.inline.} =
 const PosToChildCol = initPosToChildCol()
 
 func initPosToChildDir: array[Position, Direction] {.inline.} =
-  ## Constructor of `PosToChildDir`.
-  result[Position.low] = Direction.low # dummy to remove warning
+  ## Returns `PosToChildDir`.
+  result[None] = Direction.low
   for pos in Up0..Up5: result[pos] = Up
   for pos in Right0..Right4: result[pos] = Right
   for pos in Down0..Down5: result[pos] = Down
@@ -108,13 +106,13 @@ func initPosToChildDir: array[Position, Direction] {.inline.} =
 
 const PosToChildDir = initPosToChildDir()
 
-func axisColumn*(pos): Column {.inline.} = PosToAxisCol[pos]
+func axisColumn*(self): Column {.inline.} = PosToAxisCol[self]
   ## Returns the axis-puyo's column.
 
-func childColumn*(pos): Column {.inline.} = PosToChildCol[pos]
+func childColumn*(self): Column {.inline.} = PosToChildCol[self]
   ## Returns the child-puyo's column.
 
-func childDirection*(pos): Direction {.inline.} = PosToChildDir[pos]
+func childDirection*(self): Direction {.inline.} = PosToChildDir[self]
   ## Returns the child-puyo's direction.
 
 # ------------------------------------------------
@@ -123,26 +121,28 @@ func childDirection*(pos): Direction {.inline.} = PosToChildDir[pos]
 
 const
   RightPositions: array[Position, Position] = [
+    None,
     Up1, Up2, Up3, Up4, Up5, Up5,
     Right1, Right2, Right3, Right4, Right4,
     Down1, Down2, Down3, Down4, Down5, Down5,
     Left2, Left3, Left4, Left5, Left5]
   LeftPositions: array[Position, Position] = [
+    None,
     Up0, Up0, Up1, Up2, Up3, Up4,
     Right0, Right0, Right1, Right2, Right3,
     Down0, Down0, Down1, Down2, Down3, Down4,
     Left1, Left1, Left2, Left3, Left4]
 
-func movedRight*(pos): Position {.inline.} = RightPositions[pos]
+func movedRight*(self): Position {.inline.} = RightPositions[self]
   ## Returns the position moved rightward.
 
-func movedLeft*(pos): Position {.inline.} = LeftPositions[pos]
+func movedLeft*(self): Position {.inline.} = LeftPositions[self]
   ## Returns the position moved leftward.
 
-func moveRight*(mPos) {.inline.} = mPos = mPos.movedRight
+func moveRight*(mSelf) {.inline.} = mSelf = mSelf.movedRight
   ## Moves the position rightward.
 
-func moveLeft*(mPos) {.inline.} = mPos = mPos.movedLeft
+func moveLeft*(mSelf) {.inline.} = mSelf = mSelf.movedLeft
   ## Moves the position leftward.
 
 # ------------------------------------------------
@@ -151,56 +151,46 @@ func moveLeft*(mPos) {.inline.} = mPos = mPos.movedLeft
 
 const
   RightRotatePositions: array[Position, Position] = [
+    None,
     Right0, Right1, Right2, Right3, Right4, Right4,
     Down0, Down1, Down2, Down3, Down4,
     Left1, Left1, Left2, Left3, Left4, Left5,
     Up1, Up2, Up3, Up4, Up5]
   LeftRotatePositions: array[Position, Position] = [
+    None,
     Left1, Left1, Left2, Left3, Left4, Left5,
     Up0, Up1, Up2, Up3, Up4,
     Right0, Right1, Right2, Right3, Right4, Right4,
     Down1, Down2, Down3, Down4, Down5]
 
-func rotatedRight*(pos): Position {.inline.} =
+func rotatedRight*(self): Position {.inline.} = RightRotatePositions[self]
   ## Returns the position rotated right (clockwise).
-  RightRotatePositions[pos]
 
-func rotatedLeft*(pos): Position {.inline.} =
+func rotatedLeft*(self): Position {.inline.} = LeftRotatePositions[self]
   ## Returns the position rotated left (counterclockwise).
-  LeftRotatePositions[pos]
 
-func rotateRight*(mPos: var Position) {.inline.} = mPos = mPos.rotatedRight
+func rotateRight*(mSelf) {.inline.} = mSelf = mSelf.rotatedRight
   ## Rotates the position right.
 
-func rotateLeft*(mPos: var Position) {.inline.} = mPos = mPos.rotatedLeft
+func rotateLeft*(mSelf) {.inline.} = mSelf = mSelf.rotatedLeft
   ## Rotates the position left.
 
 # ------------------------------------------------
 # Position <-> string
 # ------------------------------------------------
 
-const
-  NoPosStr = ".."
-  StrToOptPos = collect:
-    for pos in Position:
-      {$pos: some pos}
+const StrToPos = collect:
+  for pos in Position:
+    {$pos: pos}
 
-func `$`*(optPos): string {.inline.} =
-  if optPos.isSome: $optPos.get else: NoPosStr
-
-func parsePosition*(str: string): Option[Position] {.inline.} =
-  ## Converts the string representation to the position.
+func parsePosition*(str: string): Position {.inline.} =
+  ## Converts the string representation to a position.
   ## If `str` is not a valid representation, `ValueError` is raised.
-  ## If `str` means no-position, returns `none(Position)`.
-  if str == NoPosStr:
-    {.push warning[ProveInit]: off.}
-    return none Position
-    {.pop.}
-
-  if str notin StrToOptPos:
+  try:
+    result = StrToPos[str]
+  except KeyError:
+    result = Position.low # HACK: dummy to suppress warning
     raise newException(ValueError, "Invalid position: " & str)
-
-  result = StrToOptPos[str]
 
 # ------------------------------------------------
 # Positions <-> string
@@ -208,7 +198,7 @@ func parsePosition*(str: string): Option[Position] {.inline.} =
 
 const PositionsSep = "\n"
 
-func `$`*(positions): string {.inline.} =
+func `$`*(positions: Positions): string {.inline.} =
   let strs = collect:
     for pos in positions:
       $pos
@@ -216,64 +206,54 @@ func `$`*(positions): string {.inline.} =
   result = strs.join PositionsSep
 
 func parsePositions*(str: string): Positions {.inline.} =
-  ## Converts the string representation to the positions.
+  ## Converts the string representation to positions.
   ## If `str` is not a valid representation, `ValueError` is raised.
-  if str == "":
-    return newSeq[Option[Position]](0)
-
-  result = str.split(PositionsSep).mapIt(it.parsePosition)
+  if str == "": newSeq[Position](0)
+  else: str.split(PositionsSep).mapIt it.parsePosition
 
 # ------------------------------------------------
 # Position <-> URI
 # ------------------------------------------------
 
 const
-  PosToIshikawaUri = "02468acegikoqsuwyCEGIK"
-  NoPosIshikawaUri = "1"
-  IshikawaUriToOptPos = collect:
-    for i, url in PosToIshikawaUri:
-      {$url: some i.Position}
+  PosToIshikawaUri = "102468acegikoqsuwyCEGIK"
+  IshikawaUriToPos = collect:
+    for pos in Position:
+      {$PosToIshikawaUri[pos.ord]: pos}
 
-func toUriQuery*(optPos; host: SimulatorHost): string {.inline.} =
-  ## Converts the position to the URI query.
+func toUriQuery*(self; host: SimulatorHost): string {.inline.} =
+  ## Converts the position to a URI query.
   case host
-  of Izumiya: $optPos
-  of Ishikawa, Ips:
-    if optPos.isSome: $PosToIshikawaUri[optPos.get.ord] else: NoPosIshikawaUri
+  of Izumiya: $self
+  of Ishikawa, Ips: $PosToIshikawaUri[self.ord]
 
-func parsePosition*(query: string, host: SimulatorHost): Option[Position]
-                   {.inline.} =
-  ## Converts the URI query to the position.
+func parsePosition*(query: string, host: SimulatorHost): Position {.inline.} =
+  ## Converts the URI query to a position.
   ## If `query` is not a vaid URI, `ValueError` is raised.
-  ## If `query` means no-position, returns `none(Position)`.
   case host
   of Izumiya: query.parsePosition
-  of Ishikawa, Ips:
-    if query == NoPosIshikawaUri: none Position
-    elif query notin IshikawaUriToOptPos:
-      raise newException(ValueError, "Invalid position: " & query)
-    else: IshikawaUriToOptPos[query]
+  of Ishikawa, Ips: IshikawaUriToPos[query]
 
 # ------------------------------------------------
 # Positions <-> URI
 # ------------------------------------------------
 
-func toUriQuery*(positions; host: SimulatorHost): string {.inline.} =
-  ## Converts the positions to the URI query.
+func toUriQuery*(positions: Positions, host: SimulatorHost): string {.inline.} =
+  ## Converts the positions to a URI query.
   join positions.mapIt it.toUriQuery host
 
 func parsePositions*(query: string, host: SimulatorHost): Positions {.inline.} =
-  ## Converts the URI query to the positions.
+  ## Converts the URI query to positions.
   ## If `query` is not a vaid URI, `ValueError` is raised.
   case host
   of Izumiya:
     if query.len mod 2 != 0:
       raise newException(ValueError, "Invalid positions: " & query)
 
-    collect:
-      for i in 0..<query.len div 2:
-        query[2 * i ..< 2 * i.succ].parsePosition host
+    result = collect:
+      for i in countup(0, query.len.pred, 2):
+        query[i..i.succ].parsePosition host
   of Ishikawa, Ips:
-    collect:
+    result = collect:
       for c in query:
         ($c).parsePosition host

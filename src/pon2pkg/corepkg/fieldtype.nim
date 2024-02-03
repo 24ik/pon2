@@ -19,6 +19,7 @@ const
 static:
   doAssert WaterHeight >= 2
   doAssert AirHeight >= 3
+
 type
   Row* = range[0..Height.pred]
   Column* = range[0..Width.pred]

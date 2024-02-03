@@ -10,4 +10,5 @@
 - editorpermuterはrenameする
 - defineプラグマをpon2.waterheightみたいに指定できるように
 - corepkg -> core
+- positionにNoneを追加
 ]#
