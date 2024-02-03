@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 import std/[algorithm, options, random, sequtils, sugar]
-import ../corepkg/[cell, environment, field, misc, pair, position]
+import ../corepkg/[cell, environment, field, misc, pair, position, rule]
 import ../nazopuyopkg/[nazopuyo, solve]
 import ../private/[misc]
 

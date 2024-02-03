@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 import std/[options, setutils, strutils, sugar, tables, uri]
-import ../corepkg/[environment, field, misc, pair, position]
+import ../corepkg/[environment, field, misc, pair, position, rule]
 
 type
   RequirementKind* {.pure.} = enum

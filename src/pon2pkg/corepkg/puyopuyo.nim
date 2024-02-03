@@ -8,4 +8,5 @@
   - coreにnazopuyoも入れる
   - appとcoreはrename可能性あり
 - editorpermuterはrenameする
+- defineプラグマをpon2.waterheightみたいに指定できるように
 ]#

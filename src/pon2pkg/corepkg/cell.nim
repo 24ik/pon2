@@ -35,5 +35,5 @@ func parseCell*(str: string): Cell {.inline.} =
   try:
     result = StrToCell[str]
   except KeyError:
-    result = None # HACK: dummy to suppress warning
+    result = Cell.low # HACK: dummy to suppress warning
     raise newException(ValueError, "Invalid cell: " & str)

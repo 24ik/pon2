@@ -12,7 +12,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sugar, tables]
+import ./[rule]
 
 const
   Height* = 13
@@ -35,11 +35,6 @@ type
   Column* = range[0..Width.pred]
   WaterRow* = range[AirHeight..Height.pred]
   AirRow* = range[0..AirHeight.pred]
-
-  Rule* {.pure.} = enum
-    ## Puyo Puyo rule.
-    Tsu = "t"
-    Water = "w"
 
   SimulatorHost* {.pure.} = enum
     ## URI host of the web simulator.
@@ -70,19 +65,3 @@ type
 
 const GarbageRates*: array[Rule, Positive] = [
   Pon2TsuGarbageRate.Positive, Pon2WaterGarbageRate]
-
-# ------------------------------------------------
-# Rule <-> string
-# ------------------------------------------------
-
-const StrToRule = collect:
-  for rule in Rule:
-    {$rule: rule}
-
-func parseRule*(str: string): Rule {.inline.} =
-  ## Converts the string representation to the rule.
-  ## If `str` is not a valid representation, `ValueError` is raised.
-  if str notin StrToRule:
-    raise newException(ValueError, "Invalid rule: " & str)
-
-  result = StrToRule[str]

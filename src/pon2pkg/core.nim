@@ -11,6 +11,7 @@
 ## - [moveresult](./corepkg/moveresult.html)
 ## - [pair](./corepkg/pair.html)
 ## - [position](./corepkg/position.html)
+## - [rule](./corepkg/rule.html)
 ##
 ## Compile Options:
 ## | Option                          | Description                 | Default |
@@ -26,7 +27,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./corepkg/[cell, environment, field, misc, moveresult, pair, position]
+import ./corepkg/[cell, environment, field, misc, moveresult, pair, position,
+                  rule]
 
 export cell.Cell, cell.ColorPuyo, cell.Puyo, cell.parseCell
 export environment.Environment, environment.Environments,
@@ -57,7 +59,7 @@ export field.TsuField, field.WaterField, field.zeroField, field.zeroTsuField,
 when UseAvx2:
   export field.`==`
 export misc.Height, misc.Width, misc.WaterHeight, misc.AirHeight, misc.Row,
-  misc.Column, misc.WaterRow, misc.AirRow, misc.Rule, misc.SimulatorHost,
+  misc.Column, misc.WaterRow, misc.AirRow, misc.SimulatorHost,
   misc.SimulatorKind, misc.SimulatorMode, misc.NoticeGarbage, misc.GarbageRates
 export moveresult.MoveResult, moveresult.initMoveResult, moveresult.chainCount,
   moveresult.puyoCount, moveresult.colorCount, moveresult.garbageCount,
@@ -79,3 +81,4 @@ export position.Direction, position.Position, position.Positions,
   position.moveLeft, position.rotatedRight, position.rotatedLeft,
   position.rotateRight, position.rotateLeft, position.`$`,
   position.parsePosition, position.parsePositions, position.toUriQuery
+export rule.Rule, rule.parseRule

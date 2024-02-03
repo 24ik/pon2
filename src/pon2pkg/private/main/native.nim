@@ -10,7 +10,7 @@ import docopt
 import nigui
 import ../[misc]
 import ../../apppkg/[editorpermuter]
-import ../../corepkg/[environment, field, misc]
+import ../../corepkg/[environment, field, misc, rule]
 import ../../nazopuyopkg/[generate, nazopuyo, permute, solve]
 
 # ------------------------------------------------

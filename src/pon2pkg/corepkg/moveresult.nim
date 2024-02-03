@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 import std/[math, options, sequtils, setutils, sugar]
-import ./[cell, misc]
+import ./[cell, misc, rule]
 import ../private/[misc]
 
 type MoveResult* = object

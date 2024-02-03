@@ -7,7 +7,7 @@
 
 import std/[bitops, setutils]
 import ../../[intrinsic]
-import ../../../corepkg/[misc, position]
+import ../../../corepkg/[misc, position, rule]
 
 when UseAvx2:
   import ./avx2/binary

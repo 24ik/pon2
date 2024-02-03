@@ -9,7 +9,7 @@ import std/[sugar]
 import nigui
 import ./[requirement]
 import ../../../../apppkg/[misc, simulator]
-import ../../../../corepkg/[misc]
+import ../../../../corepkg/[misc, rule]
 
 type SelectControl* = ref object of LayoutContainer
   ## Select control.

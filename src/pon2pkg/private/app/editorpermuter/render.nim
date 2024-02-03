@@ -8,7 +8,7 @@
 import std/[options, strformat, uri]
 import ../../[misc]
 import ../../../apppkg/[misc, simulator]
-import ../../../corepkg/[cell, field, misc, moveresult, pair, position]
+import ../../../corepkg/[cell, field, misc, moveresult, pair, position, rule]
 import ../../../nazopuyopkg/[mark]
 
 when defined(js):

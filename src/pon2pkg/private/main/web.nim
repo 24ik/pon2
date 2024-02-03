@@ -11,7 +11,7 @@ import ../[misc, webworker]
 import ../app/editorpermuter/web/editor/[webworker]
 import ../nazopuyo/[node]
 import ../../apppkg/[editorpermuter, marathon, simulator]
-import ../../corepkg/[environment, field, misc, pair, position]
+import ../../corepkg/[environment, field, misc, pair, position, rule]
 import ../../nazopuyopkg/[nazopuyo, solve]
 
 # ------------------------------------------------
