@@ -32,7 +32,8 @@ const StrToCell = collect:
 func parseCell*(str: string): Cell {.inline.} =
   ## Converts the string representation to the cell.
   ## If `str` is not a valid representation, `ValueError` is raised.
-  if str notin StrToCell:
+  try:
+    result = StrToCell[str]
+  except KeyError:
+    result = None # HACK: dummy to suppress warning
     raise newException(ValueError, "Invalid cell: " & str)
-
-  result = StrToCell[str]
