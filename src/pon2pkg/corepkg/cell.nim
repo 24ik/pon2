@@ -30,8 +30,8 @@ const StrToCell = collect:
     {$cell: cell}
 
 func parseCell*(str: string): Cell {.inline.} =
-  ## Converts the string representation to the cell.
-  ## If `str` is not a valid representation, `ValueError` is raised.
+  ## Returns the cell converted from the string representation.
+  ## If the string is invalid, `ValueError` is raised.
   try:
     result = StrToCell[str]
   except KeyError:

@@ -93,4 +93,5 @@ task web, "Make Web Pages":
   rmDir "src/htmldocs"
 
   # assets
+  exec "nim c -r assets/pairs/generate.nim"
   cpDir "assets", "www/assets"

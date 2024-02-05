@@ -20,3 +20,6 @@
 
 /benchmark/*
 !/benchmark/*.nim*
+
+/assets/pairs/generate
+/assets/pairs/swap.txt

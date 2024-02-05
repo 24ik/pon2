@@ -5,8 +5,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, strutils, sugar, tables]
-import ./[fieldtype, misc]
+import std/[sugar, tables]
+import ./[fieldtype, host]
 
 type
   Direction* {.pure.} = enum
@@ -18,7 +18,7 @@ type
 
   Position* {.pure.} = enum
     ## The location where a pair is put.
-    None = ".."
+    None = ""
 
     Up0 = "1N"
     Up1 = "2N"
@@ -45,8 +45,6 @@ type
     Left3 = "43"
     Left4 = "54"
     Left5 = "65"
-
-  Positions* = seq[Position]
 
 const
   AllPositions* = {Up0..Left5}
@@ -184,32 +182,13 @@ const StrToPos = collect:
     {$pos: pos}
 
 func parsePosition*(str: string): Position {.inline.} =
-  ## Converts the string representation to the position.
-  ## If `str` is not a valid representation, `ValueError` is raised.
+  ## Returns the position converted from the string representation.
+  ## If the string is invalid, `ValueError` is raised.
   try:
     result = StrToPos[str]
   except KeyError:
     result = Position.low # HACK: dummy to suppress warning
     raise newException(ValueError, "Invalid position: " & str)
-
-# ------------------------------------------------
-# Positions <-> string
-# ------------------------------------------------
-
-const PositionsSep = "\n"
-
-func `$`*(positions: Positions): string {.inline.} =
-  let strs = collect:
-    for pos in positions:
-      $pos
-
-  result = strs.join PositionsSep
-
-func parsePositions*(str: string): Positions {.inline.} =
-  ## Converts the string representation to the positions.
-  ## If `str` is not a valid representation, `ValueError` is raised.
-  if str == "": newSeq[Position](0)
-  else: str.split(PositionsSep).mapIt it.parsePosition
 
 # ------------------------------------------------
 # Position <-> URI
@@ -222,14 +201,14 @@ const
       {$PosToIshikawaUri[pos.ord]: pos}
 
 func toUriQuery*(self; host: SimulatorHost): string {.inline.} =
-  ## Converts the position to the URI query.
+  ## Returns the URI query converted from the position.
   case host
   of Izumiya: $self
   of Ishikawa, Ips: $PosToIshikawaUri[self.ord]
 
 func parsePosition*(query: string, host: SimulatorHost): Position {.inline.} =
-  ## Converts the URI query to the position.
-  ## If `query` is not a vaid URI, `ValueError` is raised.
+  ## Returns the position converted from the URI query.
+  ## If the query is invalid, `ValueError` is raised.
   case host
   of Izumiya:
     result = query.parsePosition
@@ -239,27 +218,3 @@ func parsePosition*(query: string, host: SimulatorHost): Position {.inline.} =
     except KeyError:
       result = Position.low # HACK: dummy to suppress warning
       raise newException(ValueError, "Invalid position: " & query)
-
-# ------------------------------------------------
-# Positions <-> URI
-# ------------------------------------------------
-
-func toUriQuery*(positions: Positions, host: SimulatorHost): string {.inline.} =
-  ## Converts the positions to the URI query.
-  join positions.mapIt it.toUriQuery host
-
-func parsePositions*(query: string, host: SimulatorHost): Positions {.inline.} =
-  ## Converts the URI query to the positions.
-  ## If `query` is not a vaid URI, `ValueError` is raised.
-  case host
-  of Izumiya:
-    if query.len mod 2 != 0:
-      raise newException(ValueError, "Invalid positions: " & query)
-
-    result = collect:
-      for i in countup(0, query.len.pred, 2):
-        query[i..i.succ].parsePosition host
-  of Ishikawa, Ips:
-    result = collect:
-      for c in query:
-        ($c).parsePosition host

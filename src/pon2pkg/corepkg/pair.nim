@@ -5,44 +5,40 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, setutils, strutils, sugar, tables]
-import ./[cell, misc]
-import ../private/[misc]
+import std/[setutils, sugar, tables]
+import ./[cell, host]
 
-type
-  Pair* {.pure.} = enum
-    ## The pair of two color puyos.
-    RedRed = $Red & $Red
-    RedGreen = $Red & $Green
-    RedBlue = $Red & $Blue
-    RedYellow = $Red & $Yellow
-    RedPurple = $Red & $Purple
+type Pair* {.pure.} = enum
+  ## The pair of two color puyos.
+  RedRed = $Red & $Red
+  RedGreen = $Red & $Green
+  RedBlue = $Red & $Blue
+  RedYellow = $Red & $Yellow
+  RedPurple = $Red & $Purple
 
-    GreenRed = $Green & $Red
-    GreenGreen = $Green & $Green
-    GreenBlue = $Green & $Blue
-    GreenYellow = $Green & $Yellow
-    GreenPurple = $Green & $Purple
+  GreenRed = $Green & $Red
+  GreenGreen = $Green & $Green
+  GreenBlue = $Green & $Blue
+  GreenYellow = $Green & $Yellow
+  GreenPurple = $Green & $Purple
 
-    BlueRed = $Blue & $Red
-    BlueGreen = $Blue & $Green
-    BlueBlue = $Blue & $Blue
-    BlueYellow = $Blue & $Yellow
-    BluePurple = $Blue & $Purple
+  BlueRed = $Blue & $Red
+  BlueGreen = $Blue & $Green
+  BlueBlue = $Blue & $Blue
+  BlueYellow = $Blue & $Yellow
+  BluePurple = $Blue & $Purple
 
-    YellowRed = $Yellow & $Red
-    YellowGreen = $Yellow & $Green
-    YellowBlue = $Yellow & $Blue
-    YellowYellow = $Yellow & $Yellow
-    YellowPurple = $Yellow & $Purple
+  YellowRed = $Yellow & $Red
+  YellowGreen = $Yellow & $Green
+  YellowBlue = $Yellow & $Blue
+  YellowYellow = $Yellow & $Yellow
+  YellowPurple = $Yellow & $Purple
 
-    PurpleRed = $Purple & $Red
-    PurpleGreen = $Purple & $Green
-    PurpleBlue = $Purple & $Blue
-    PurpleYellow = $Purple & $Yellow
-    PurplePurple = $Purple & $Purple
-
-  Pairs* = seq[Pair]
+  PurpleRed = $Purple & $Red
+  PurpleGreen = $Purple & $Green
+  PurpleBlue = $Purple & $Blue
+  PurpleYellow = $Purple & $Yellow
+  PurplePurple = $Purple & $Purple
 
 using
   self: Pair
@@ -119,7 +115,7 @@ func swap*(mSelf) {.inline.} = mSelf = mSelf.swapped
   ## Swaps the axis-puyo and child-puyo.
 
 # ------------------------------------------------
-# Count - Puyo
+# Count
 # ------------------------------------------------
 
 func puyoCount*(self; puyo: Puyo): int {.inline.} =
@@ -129,32 +125,11 @@ func puyoCount*(self; puyo: Puyo): int {.inline.} =
 func puyoCount*(self): int {.inline.} = 2
   ## Returns the number of puyos in the pair.
 
-func puyoCount*(pairs: Pairs; puyo: Puyo): int {.inline.} =
-  ## Returns the number of `puyo` in the pairs.
-  sum2 pairs.mapIt it.puyoCount puyo
-
-func puyoCount*(pairs: Pairs): int {.inline.} = pairs.len * 2
-  ## Returns the number of puyos in the pairs.
-
-# ------------------------------------------------
-# Count - Color
-# ------------------------------------------------
-
 func colorCount*(self): int {.inline.} = self.puyoCount
   ## Returns the number of color puyos in the pair.
 
-func colorCount*(pairs: Pairs): int {.inline.} = pairs.puyoCount
-  ## Returns the number of color puyos in the pairs.
-
-# ------------------------------------------------
-# Count - Garbage
-# ------------------------------------------------
-
 func garbageCount*(self): int {.inline.} = 0
   ## Returns the number of garbage puyos in the pair.
-
-func garbageCount*(pairs: Pairs): int {.inline.} = 0
-  ## Returns the number of garbage puyos in the pairs.
 
 # ------------------------------------------------
 # Pair <-> string
@@ -165,32 +140,13 @@ const StrToPair = collect:
     {$pair: pair}
 
 func parsePair*(str: string): Pair {.inline.} =
-  ## Converts the string representation to the pair.
-  ## If `str` is not a valid representation, `ValueError` is raised.
+  ## Returns the pair converted from the string representation.
+  ## If the string is invalid, `ValueError` is raised.
   try:
     result = StrToPair[str]
   except KeyError:
     result = Pair.low # HACK: dummy to suppress warning
     raise newException(ValueError, "Invalid pair: " & str)
-
-# ------------------------------------------------
-# Pairs <-> string
-# ------------------------------------------------
-
-const PairsSep = "\n"
-
-func `$`*(pairs: Pairs): string {.inline.} =
-  let strs = collect:
-    for pair in pairs:
-      $pair
-
-  result = strs.join PairsSep
-
-func parsePairs*(str: string): Pairs {.inline.} =
-  ## Converts the string representation to the pairs.
-  ## If `str` is not a valid representation, `ValueError` is raised.
-  if str == "": newSeq[Pair](0)
-  else: str.split(PairsSep).mapIt it.parsePair
 
 # ------------------------------------------------
 # Pair <-> URI
@@ -203,14 +159,14 @@ const
       {$PairToIshikawaUri[pair.ord]: pair}
 
 func toUriQuery*(self; host: SimulatorHost): string {.inline.} =
-  ## Converts the pair to the URI query.
+  ## Returns the URI query converted from the pair.
   case host
   of Izumiya: $self
   of Ishikawa, Ips: $PairToIshikawaUri[self.ord]
 
 func parsePair*(query: string; host: SimulatorHost): Pair {.inline.} =
-  ## Converts the URI query to the pair.
-  ## If `query` is not a valid URI, `ValueError` is raised.
+  ## Returns the pair converted from the URI query.
+  ## If the query is invalid, `ValueError` is raised.
   case host
   of Izumiya:
     result = query.parsePair
@@ -220,54 +176,3 @@ func parsePair*(query: string; host: SimulatorHost): Pair {.inline.} =
     except KeyError:
       result = Pair.low # HACK: dummy to suppress warning
       raise newException(ValueError, "Invalid pair: " & query)
-
-# ------------------------------------------------
-# Pairs <-> URI
-# ------------------------------------------------
-
-func toUriQuery*(pairs: Pairs; host: SimulatorHost): string {.inline.} =
-  ## Converts the pairs to the URI query.
-  join pairs.mapIt it.toUriQuery host
-
-func parsePairs*(query: string; host: SimulatorHost): Pairs {.inline.} =
-  ## Converts the URI query to the pairs.
-  ## If `query` is not a valid URI, `ValueError` is raised.
-  case host
-  of Izumiya:
-    if query.len mod 2 != 0:
-      raise newException(ValueError, "Invalid pairs: " & query)
-
-    result = collect:
-      for i in countup(0, query.len.pred, 2):
-        query[i..i.succ].parsePair host
-  of Ishikawa, Ips:
-    result = collect:
-      for c in query:
-        ($c).parsePair host
-
-# ------------------------------------------------
-# Pair <-> array
-# ------------------------------------------------
-
-func toArray*(self): array[2, Cell] {.inline.} = [self.axis, self.child]
-  ## Converts the pair to the array.
-
-func parsePair*(arr: array[2, ColorPuyo]): Pair {.inline.} =
-  ## Converts the array to the pair.
-  initPair(arr[0], arr[1])
-
-# ------------------------------------------------
-# Pairs <-> array
-# ------------------------------------------------
-
-func toArray*(pairs: Pairs): seq[array[2, Cell]] {.inline.} =
-  ## Converts the pairs to the array.
-  collect:
-    for pair in pairs:
-      pair.toArray
-
-func parsePairs*(arr: openArray[array[2, ColorPuyo]]): Pairs {.inline.} =
-  ## Converts the array to the pairs.
-  collect:
-    for pairArray in arr:
-      pairArray.parsePair
