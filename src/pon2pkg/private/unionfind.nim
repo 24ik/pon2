@@ -1,4 +1,4 @@
-## This module implements union-find tree.
+## This module implements union-find trees.
 ##
 
 {.experimental: "strictDefs".}
@@ -16,6 +16,7 @@ type
     subtreeSizes: seq[Positive]
 
 using
+  self: UnionFind
   mSelf: var UnionFind
 
 # ------------------------------------------------
