@@ -7,8 +7,6 @@
 ## worker file by `assignToWorker()`.
 ## 1. The handler is executed.
 ##
-## ## Examples
-##
 ## The following example shows the number-increment task.
 ##
 
@@ -25,7 +23,7 @@ runnableExamples:
   # Worker File
   # The name of the output file should be `worker.min.js`.
   # To change this, specify the compile option
-  # `-d:Pon2WorkerFileName=<fileName>`.
+  # `-d:pon2.workerfilename=<fileName>`.
   import std/[strutils]
   import ./pon2pkg/private/[webworker] # change path if needed
 
@@ -67,7 +65,7 @@ type
     webWorker: JsObject
 
 const
-  Pon2WorkerFileName {.strdefine.} = "worker.min.js"
+  WorkerFileName {.define: "pon2.workerfilename".} = "worker.min.js"
 
   DefaultWorkerTask*: WorkerTask =
     (args: seq[string]) => (Success, newSeq[string](0))
@@ -112,7 +110,7 @@ proc run*(mSelf; args: varargs[string]) {.inline.} =
 # Constructor
 # ------------------------------------------------
 
-proc initWebWorker: JsObject {.importjs: &"new Worker('{Pon2WorkerFileName}')".}
+proc initWebWorker: JsObject {.importjs: &"new Worker('{WorkerFileName}')".}
   ## Returns the web worker launched by the caller.
 
 proc `completeHandler=`*(mSelf; handler: WorkerCompleteHandler) {.inline.} =
