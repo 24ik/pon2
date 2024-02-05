@@ -77,8 +77,12 @@ func move*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]): MoveResult
   ## Puts the pair and advance the field until chains end.
   ## This function tracks the followings:
   ## - Number of chains
+  if mSelf.pairPositionIdx >= mSelf.pairsPositions.len:
+    return 0.initMoveResult
+
   let pairPos = mSelf.pairsPositions[mSelf.pairPositionIdx]
   result = mSelf.field.move(pairPos.pair, pairPos.position)
+  mSelf.pairPositionIdx.inc
 
 func move*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F], pos: Position):
     MoveResult {.inline, discardable.} =
@@ -94,8 +98,12 @@ func moveWithRoughTracking*[F: TsuField or WaterField](
   ## This function tracks the followings:
   ## - Number of chains
   ## - Number of puyos that disappeared
+  if mSelf.pairPositionIdx >= mSelf.pairsPositions.len:
+    return 0.initMoveResult
+
   let pairPos = mSelf.pairsPositions[mSelf.pairPositionIdx]
   result = mSelf.field.moveWithRoughTracking(pairPos.pair, pairPos.position)
+  mSelf.pairPositionIdx.inc
 
 func moveWithRoughTracking*[F: TsuField or WaterField](
     mSelf: var PuyoPuyo[F], pos: Position): MoveResult {.inline.} =
@@ -113,8 +121,12 @@ func moveWithDetailTracking*[F: TsuField or WaterField](
   ## - Number of chains
   ## - Number of puyos that disappeared
   ## - Number of puyos that disappeared in each chain
+  if mSelf.pairPositionIdx >= mSelf.pairsPositions.len:
+    return 0.initMoveResult
+
   let pairPos = mSelf.pairsPositions[mSelf.pairPositionIdx]
   result = mSelf.field.moveWithDetailTracking(pairPos.pair, pairPos.position)
+  mSelf.pairPositionIdx.inc
 
 func moveWithDetailTracking*[F: TsuField or WaterField](
     mSelf: var PuyoPuyo[F], pos: Position): MoveResult {.inline.} =
@@ -135,8 +147,12 @@ func moveWithFullTracking*[F: TsuField or WaterField](
   ## - Number of puyos that disappeared in each chain
   ## - Number of color puyos in each connected component that disappeared \
   ## in each chain
+  if mSelf.pairPositionIdx >= mSelf.pairsPositions.len:
+    return 0.initMoveResult
+
   let pairPos = mSelf.pairsPositions[mSelf.pairPositionIdx]
   result = mSelf.field.moveWithFullTracking(pairPos.pair, pairPos.position)
+  mSelf.pairPositionIdx.inc
 
 func moveWithFullTracking*[F: TsuField or WaterField](
     mSelf: var Environment[F]): MoveResult {.inline.} =
@@ -171,6 +187,7 @@ func parsePuyoPuyo*[F: TsuField or WaterField](str: string): PuyoPuyo[F]
 
   result.field = strs[0].parseField[:F]
   result.pairsPositions = strs[1].parsePairsPositions
+  result.pairPositionIdx = 0
 
 # ------------------------------------------------
 # Puyo Puyo Game <-> URI
@@ -194,6 +211,8 @@ func parsePuyoPuyo*[F: TsuField or WaterField](
     query: string, host: SimulatorHost): PuyoPuyo[F] {.inline.} =
   ## Returns the Puyo Puyo game converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
+  result.pairPositionIdx = 0
+
   case host
   of Izumiya:
     var
