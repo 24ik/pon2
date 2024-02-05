@@ -17,6 +17,25 @@ import ../../nazopuyopkg/[generate, nazopuyo, permute, solve]
 # Parse
 # ------------------------------------------------
 
+func parseSomeInt[T: SomeInteger or Natural or Positive](
+    val: Value, allowNone = false): Option[T] {.inline.} =
+  ## Converts the value to the given type `T`.
+  ## If the conversion fails, `ValueError` will be raised.
+  ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is
+  ## returned.
+  {.push warning[ProveInit]: off.}
+  result = none T
+  {.pop.}
+
+  case val.kind
+  of vkNone:
+    if not allowNone:
+      raise newException(ValueError, "`val` should have a value.")
+  of vkStr:
+    result = some parseSomeInt[T] $val
+  else:
+    raise newException(ValueError, "`val` should be `vkNone` or `vkStr`.")
+
 func parseRequirementKind(val: Value, allowNone = false):
     Option[RequirementKind] {.inline.} =
   ## Converts the value to the requirement kind.

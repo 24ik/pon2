@@ -5,11 +5,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[algorithm, options, os, parsecfg, sequtils, streams, strutils,
-            typetraits, uri]
-
-when not defined(js):
-  import docopt
+import std/[algorithm, os, parsecfg, sequtils, streams, strutils, typetraits,
+            uri]
 
 const Version* = staticRead(
   currentSourcePath().parentDir.parentDir.parentDir.parentDir /
@@ -69,26 +66,6 @@ func parseSomeInt*[T: SomeNumber or Natural or Positive](val: string): T
   ## Converts the char or string to the given type `T`.
   ## If the conversion fails, `ValueError` will be raised.
   T parseInt val
-
-when not defined(js):
-  func parseSomeInt*[T: SomeInteger or Natural or Positive](
-      val: Value, allowNone = false): Option[T] {.inline.} =
-    ## Converts the value to the given type `T`.
-    ## If the conversion fails, `ValueError` will be raised.
-    ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is
-    ## returned.
-    {.push warning[ProveInit]: off.}
-    result = none T
-    {.pop.}
-
-    case val.kind
-    of vkNone:
-      if not allowNone:
-        raise newException(ValueError, "`val` should have a value.")
-    of vkStr:
-      result = some parseSomeInt[T] $val
-    else:
-      raise newException(ValueError, "`val` should be `vkNone` or `vkStr`.")
 
 # ------------------------------------------------
 # Others
