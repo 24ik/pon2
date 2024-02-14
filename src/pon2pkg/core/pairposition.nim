@@ -10,11 +10,11 @@ import ./[host, pair, position]
 import ../private/[misc]
 
 type
-  PairPosition = object
+  PairPosition* = object
     pair*: Pair
     position*: Position
 
-  PairsPositions = seq[PairPosition]
+  PairsPositions* = seq[PairPosition]
 
 # ------------------------------------------------
 # Count

@@ -35,7 +35,7 @@ type
 const
   TsuGarbageRate {.define: "pon2.garbagerate.tsu".} = 70
   WaterGarbageRate {.define: "pon2.garbagerate.water".} = 90
-  GarbageRates: array[Rule, Positive] = [TsuGarbageRate.Positive, WaterGarbageRate]
+  GarbageRates*: array[Rule, Positive] = [TsuGarbageRate.Positive, WaterGarbageRate]
 
 using
   self: MoveResult
