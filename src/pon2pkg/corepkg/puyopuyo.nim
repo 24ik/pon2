@@ -251,4 +251,4 @@ func parsePuyoPuyo*[F: TsuField or WaterField](
     else:
       raise newException(ValueError, "Invalid Puyo Puyo game: " & query)
 
-    result.field = queries[0].parseField host
+    result.field = parseField[F](queries[0]) host
