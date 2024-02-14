@@ -14,8 +14,7 @@ when defined(cpu32):
 else:
   import ./bit64/[binary]
 
-type DisappearResult* = object
-  ## Disappearing result.
+type DisappearResult* = object ## Disappearing result.
   red*: BinaryField
   green*: BinaryField
   blue*: BinaryField
@@ -24,35 +23,28 @@ type DisappearResult* = object
   garbage*: BinaryField
   color*: BinaryField
 
-using
-  disRes: DisappearResult
+using disRes: DisappearResult
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-func notDisappeared*(disRes): bool {.inline.} = disRes.color.isZero
+func notDisappeared*(disRes): bool {.inline.} =
   ## Returns `true` if no puyos disappeared.
+  disRes.color.isZero
 
 # ------------------------------------------------
-# Count - Color
+# Count
 # ------------------------------------------------
 
 func colorCount*(disRes): int {.inline.} =
   ## Returns the number of color puyos that disappeared.
-  disRes.red.popcnt + disRes.green.popcnt + disRes.blue.popcnt +
-    disRes.yellow.popcnt + disRes.purple.popcnt
+  disRes.red.popcnt + disRes.green.popcnt + disRes.blue.popcnt + disRes.yellow.popcnt +
+    disRes.purple.popcnt
 
-# ------------------------------------------------
-# Count - Garbage
-# ------------------------------------------------
-
-func garbageCount*(disRes): int {.inline.} = disRes.garbage.popcnt
+func garbageCount*(disRes): int {.inline.} =
   ## Returns the number of garbage puyos that disappeared.
-
-# ------------------------------------------------
-# Count - Puyo
-# ------------------------------------------------
+  disRes.garbage.popcnt
 
 func puyoCount*(disRes; puyo: Puyo): int {.inline.} =
   ## Returns the number of `puyo` that disappeared.
@@ -73,12 +65,11 @@ func puyoCount*(disRes): int {.inline.} =
 # Connection
 # ------------------------------------------------
 
-func initDefaultComponents: array[Height + 2, array[Width + 2, Natural]]
-                            {.inline.} =
+func initDefaultComponents(): array[Height + 2, array[Width + 2, Natural]] {.inline.} =
   ## Constructor of `DefaultComponents`.
   result[0][0] = 0 # dummy to remove warning
-  for i in 0..<Height.succ 2:
-    for j in 0..<Width.succ 2:
+  for i in 0 ..< Height.succ 2:
+    for j in 0 ..< Width.succ 2:
       result[i][j] = 0
 
 const DefaultComponents = initDefaultComponents()
@@ -92,8 +83,8 @@ func connectionCounts(field: BinaryField): seq[int] {.inline.} =
     uf = initUnionFind Height * Width
     nextComponentIdx = Natural 1
 
-  for col in Column.low..Column.high:
-    for row in Row.low..Row.high:
+  for col in Column.low .. Column.high:
+    for row in Row.low .. Row.high:
       if not field[row, col]:
         continue
 
@@ -116,8 +107,8 @@ func connectionCounts(field: BinaryField): seq[int] {.inline.} =
           nextComponentIdx.inc
 
   result = 0.repeat nextComponentIdx
-  for row in Row.low..Row.high:
-    for col in Column.low..Column.high:
+  for row in Row.low .. Row.high:
+    for col in Column.low .. Column.high:
       let idx = components[row.ord.succ][col.ord.succ]
       if idx == 0:
         continue

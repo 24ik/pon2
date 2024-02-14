@@ -11,8 +11,7 @@ import ../[binary]
 import ../../../[unionfind]
 import ../../../../corepkg/[cell, fieldtype]
 
-type DisappearResult* = object
-  ## Disappearing result.
+type DisappearResult* = object ## Disappearing result.
   red*: BinaryField
   greenBlue*: BinaryField
   yellowPurple*: BinaryField
@@ -20,59 +19,62 @@ type DisappearResult* = object
   color*: BinaryField
 
 using
-  disRes: DisappearResult
+  self: DisappearResult
+  mSelf: var DisappearResult
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-func notDisappeared*(disRes): bool {.inline.} = disRes.color.isZero
+func notDisappeared*(self): bool {.inline.} =
   ## Returns `true` if no puyos disappeared.
+  self.color.isZero
 
 # ------------------------------------------------
-# Count - Color
+# Count
 # ------------------------------------------------
 
-func colorCount*(disRes): int {.inline.} =
+func colorCount*(self): int {.inline.} =
   ## Returns the number of color puyos that disappeared.
-  disRes.red.popcnt + disRes.greenBlue.popcnt + disRes.yellowPurple.popcnt
+  self.red.popcnt + self.greenBlue.popcnt + self.yellowPurple.popcnt
 
-# ------------------------------------------------
-# Count - Garbage
-# ------------------------------------------------
-
-func garbageCount*(disRes): int {.inline.} = disRes.garbage.popcnt
+func garbageCount*(self): int {.inline.} =
   ## Returns the number of garbage puyos that disappeared.
+  self.garbage.popcnt
 
-# ------------------------------------------------
-# Count - Puyo
-# ------------------------------------------------
-
-func puyoCount*(disRes; puyo: Puyo): int {.inline.} =
+func puyoCount*(self; puyo: Puyo): int {.inline.} =
   ## Returns the number of `puyo` that disappeared.
   case puyo
-  of Hard: 0
-  of Garbage: disRes.garbage.popcnt
-  of Red: disRes.red.popcnt
-  of Green: disRes.greenBlue.popcnt 0
-  of Blue: disRes.greenBlue.popcnt 1
-  of Yellow: disRes.yellowPurple.popcnt 0
-  of Purple: disRes.yellowPurple.popcnt 1
+  of Hard:
+    0
+  of Garbage:
+    self.garbage.popcnt
+  of Red:
+    self.red.popcnt
+  of Green:
+    self.greenBlue.popcnt 0
+  of Blue:
+    self.greenBlue.popcnt 1
+  of Yellow:
+    self.yellowPurple.popcnt 0
+  of Purple:
+    self.yellowPurple.popcnt 1
 
-func puyoCount*(disRes): int {.inline.} =
+func puyoCount*(self): int {.inline.} =
   ## Returns the number of puyos that disappeared.
-  disRes.colorCount + disRes.garbageCount
+  self.colorCount + self.garbageCount
 
 # ------------------------------------------------
 # Connection
 # ------------------------------------------------
 
-func initDefaultComponents: array[
-    Height + 2, array[Width + 2, tuple[color: 0..2; idx: Natural]]] {.inline.} =
+func initDefaultComponents(): array[
+    Height + 2, array[Width + 2, tuple[color: 0 .. 2, idx: Natural]]
+] {.inline.} =
   ## Constructor of `DefaultComponents`.
   result[0][0] = (0, 0) # dummy to remove warning
-  for i in 0..<Height.succ 2:
-    for j in 0..<Width.succ 2:
+  for i in 0 ..< Height.succ 2:
+    for j in 0 ..< Width.succ 2:
       result[i][j].color = 0
       result[i][j].idx = 0
 
@@ -90,19 +92,19 @@ func connectionCounts(field: BinaryField): array[2, seq[int]] {.inline.} =
     uf = initUnionFind Height * Width
     nextComponentIdx = Natural 1
 
-  for col in Column.low..Column.high:
+  for col in Column.low .. Column.high:
     # NOTE: YMM[e15, ..., e0] == array[e0, ..., e15]
     let
       colIdx = col.ord.succ
       colVal1 = arr[14 - col]
       colVal2 = arr[6 - col]
 
-    for row in Row.low..Row.high:
+    for row in Row.low .. Row.high:
       let
         rowIdx = row.ord.succ
         rowDigit = 13 - row
-        color = bitor(
-          colVal1.testBit(rowDigit).int, colVal2.testBit(rowDigit).int shl 1)
+        color =
+          bitor(colVal1.testBit(rowDigit).int, colVal2.testBit(rowDigit).int shl 1)
       if color == 0:
         continue
 
@@ -126,8 +128,8 @@ func connectionCounts(field: BinaryField): array[2, seq[int]] {.inline.} =
 
   result[0] = 0.repeat nextComponentIdx
   result[1] = 0.repeat nextComponentIdx
-  for row in Row.low..Row.high:
-    for col in Column.low..Column.high:
+  for row in Row.low .. Row.high:
+    for col in Column.low .. Column.high:
       let (color, idx) = components[row.ord.succ][col.ord.succ]
       if color == 0:
         continue
@@ -137,13 +139,13 @@ func connectionCounts(field: BinaryField): array[2, seq[int]] {.inline.} =
   result[0].keepItIf it > 0
   result[1].keepItIf it > 0
 
-func connectionCounts*(disRes): array[ColorPuyo, seq[int]] {.inline.} =
+func connectionCounts*(self): array[ColorPuyo, seq[int]] {.inline.} =
   ## Returns the number of color puyos in each connected component.
   let
-    greenBlue = disRes.greenBlue.connectionCounts
-    yellowPurple = disRes.yellowPurple.connectionCounts
+    greenBlue = self.greenBlue.connectionCounts
+    yellowPurple = self.yellowPurple.connectionCounts
 
-  result[Red] = disRes.red.connectionCounts[1]
+  result[Red] = self.red.connectionCounts[1]
   result[Green] = greenBlue[0]
   result[Blue] = greenBlue[1]
   result[Yellow] = yellowPurple[0]
