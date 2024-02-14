@@ -1,4 +1,4 @@
-## This module implements nazo puyos.
+## This module implements Nazo Puyos.
 ##
 
 {.experimental: "strictDefs".}
