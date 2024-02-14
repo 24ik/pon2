@@ -85,13 +85,13 @@ func `-=`[F: TsuField or WaterField](field1: var F, field2: BinaryField) {.inlin
 # ------------------------------------------------
 
 func toTsuField*(self: WaterField): TsuField {.inline.} =
-  ## Converts the Water field to the Tsu field.
+  ## Returns the Tsu field converted from the Water field.
   result.bit2 = self.bit2
   result.bit1 = self.bit1
   result.bit0 = self.bit0
 
 func toWaterField*(self: TsuField): WaterField {.inline.} =
-  ## Converts the Water field to the Water field.
+  ## Returns the Water field converted from the Tsu field.
   result.bit2 = self.bit2
   result.bit1 = self.bit1
   result.bit0 = self.bit0
@@ -125,14 +125,14 @@ func clearColumn(mSelf: var (TsuField or WaterField), col) {.inline.} =
 # ------------------------------------------------
 
 func toCell(bit2, bit1, bit0: bool): Cell {.inline.} =
-  ## Converts the bits to the cell.
+  ## Returns the cell converted from bits.
   Cell.low.succ bit2.int * 4 + bit1.int * 2 + bit0.int
 
 func `[]`*(self: TsuField or WaterField, row, col): Cell {.inline.} =
   toCell(self.bit2[row, col], self.bit1[row, col], self.bit0[row, col])
 
 func toBits(cell: Cell): tuple[bit2: bool, bit1: bool, bit0: bool] {.inline.} =
-  ## Returns each bit of the cell.
+  ## Returns the bits converted from the cell.
   let c = cell.int
   result.bit2 = c.testBit 2
   result.bit1 = c.testBit 1
@@ -471,7 +471,7 @@ func drop*(mSelf: var WaterField) {.inline.} =
 # ------------------------------------------------
 
 func toArray*(self: TsuField or WaterField): array[Row, array[Column, Cell]] {.inline.} =
-  ## Converts the field to the array.
+  ## Returns the array converted from the field.
   let
     arr2 = self.bit2.toArray
     arr1 = self.bit1.toArray
@@ -485,7 +485,7 @@ func toArray*(self: TsuField or WaterField): array[Row, array[Column, Cell]] {.i
 func parseField*[F: TsuField or WaterField](
     arr: array[Row, array[Column, Cell]]
 ): F {.inline.} =
-  ## Converts the array data to the field.
+  ## Returns the field converted from the array.
   var arr2, arr1, arr0: array[Row, array[Column, bool]]
   # dummy to remove warning
   arr2[Row.low][Column.low] = false

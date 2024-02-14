@@ -416,7 +416,7 @@ func flippedH*(self): BinaryField {.inline.} =
 # ------------------------------------------------
 
 func toDropMask*(existField: BinaryField): DropMask {.inline.} =
-  ## Converts `existField` to the drop mask.
+  ## Returns a drop mask converted from the exist field.
   let existArray = cast[array[16, uint16]](existField + floorBinaryField())
 
   result[0] = when UseBmi2: 0 else: 0'u16.toPextMask # dummy to remove warning
@@ -480,7 +480,7 @@ func waterDrop*(
 # ------------------------------------------------
 
 func toArray*(self): array[Row, array[Column, WhichColor]] {.inline.} =
-  ## Converts the binary field to the array.
+  ## Returns the array converted from the field.
   let arr = cast[array[16, int16]](self)
 
   result[Row.low][Column.low] = WhichColor(color1: 0, color2: 0)
@@ -499,7 +499,7 @@ func toArray*(self): array[Row, array[Column, WhichColor]] {.inline.} =
 func parseBinaryField*(
     arr: array[Row, array[Column, WhichColor]]
 ): BinaryField {.inline.} =
-  ## Converts the array to the binary field.
+  ## Returns the field converted from the array.
   var
     color1Left = 0'i64
     color1Right = 0'i64

@@ -22,7 +22,7 @@ const StrToRule = collect:
 
 func parseRule*(str: string): Rule {.inline.} =
   ## Converts the string representation to the rule.
-  ## If `str` is not a valid representation, `ValueError` is raised.
+  ## If the string is invalid, `ValueError` is raised.
   try:
     result = StrToRule[str]
   except KeyError:

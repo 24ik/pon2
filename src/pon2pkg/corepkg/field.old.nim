@@ -9,7 +9,7 @@
 {.experimental: "views".}
 
 import std/[sequtils, setutils, strutils, sugar, tables]
-import ./[cell, fieldtype, host, moveresult, pair, position, rule]
+import ./[cell, fieldtype, misc, moveresult, pair, position, rule]
 import ../private/[intrinsic]
 import ../private/core/field/[binary]
 
@@ -20,12 +20,17 @@ else:
   import ../private/core/field/primitive/[disappearresult, main]
 
 export
-  main.TsuField, main.WaterField, main.zeroField, main.zeroTsuField,
+  UseAvx2, main.TsuField, main.WaterField, main.zeroField, main.zeroTsuField,
   main.zeroWaterField, main.toTsuField, main.toWaterField, main.`[]`, main.`[]=`,
   main.insert, main.removeSqueeze, main.puyoCount, main.colorCount, main.garbageCount,
   main.connect3, main.connect3V, main.connect3H, main.connect3L, main.shiftedUp,
   main.shiftedDown, main.shiftedRight, main.shiftedLeft, main.flippedV, main.flippedH,
   main.disappear, main.willDisappear, main.put, main.drop, main.toArray, main.parseField
+
+type Fields* = object ## Field type that accepts all rules.
+  rule*: Rule
+  tsu*: TsuField
+  water*: WaterField
 
 # ------------------------------------------------
 # Property
@@ -40,7 +45,21 @@ func isDead*(self: TsuField or WaterField): bool {.inline.} =
   self.exist.isDead self.rule
 
 # ------------------------------------------------
-# Count
+# Flatten
+# ------------------------------------------------
+
+template flattenAnd*(fields: Fields, body: untyped): untyped =
+  ## Runs `body` with `field` exposed.
+  case fields.rule
+  of Tsu:
+    let field {.inject.} = fields.tsu
+    body
+  of Water:
+    let field {.inject.} = fields.water
+    body
+
+# ------------------------------------------------
+# Count - None
 # ------------------------------------------------
 
 func noneCount*(self: TsuField or WaterField): int {.inline.} =
@@ -223,6 +242,16 @@ func moveWithFullTracking*(
 # Field <-> array
 # ------------------------------------------------
 
+func parseTsuField*(arr: array[Row, array[Column, Cell]]): TsuField {.inline.} =
+  ## Converts the array to the Tsu field.
+
+  parseField[TsuField](arr)
+
+func parseWaterField*(arr: array[Row, array[Column, Cell]]): WaterField {.inline.} =
+  ## Converts the array to the Water field.
+
+  parseField[WaterField](arr)
+
 func `$`*(self: TsuField): string {.inline.} =
   # NOTE: using generics for `$` raises error
   let
@@ -244,8 +273,8 @@ func `$`*(self: WaterField): string {.inline.} =
   result = lines.join "\n"
 
 func parseField*[F: TsuField or WaterField](str: string): F {.inline.} =
-  ## Returns the field converted from the string representation.
-  ## If the string is invalid, `ValueError` is raised.
+  ## Converts the string representation to the field.
+  ## If `str` is not a valid representation, `ValueError` is raised.
   let lines = str.split '\n'
   if lines.len != Height or lines.anyIt it.len != Width:
     raise newException(ValueError, "Invalid field: " & str)
@@ -257,6 +286,18 @@ func parseField*[F: TsuField or WaterField](str: string): F {.inline.} =
       arr[row][col] = ($lines[row][col]).parseCell
 
   result = parseField[F](arr)
+
+func parseTsuField*(str: string): TsuField {.inline.} =
+  ## Converts the string representation to the Tsu field.
+  ## If `str` is not a valid representation, `ValueError` is raised.
+
+  parseField[TsuField](str)
+
+func parseWaterField*(str: string): WaterField {.inline.} =
+  ## Converts the string representation to the Water field.
+  ## If `str` is not a valid representation, `ValueError` is raised.
+
+  parseField[WaterField](str)
 
 const
   IzumiyaUriRuleFieldSep = "-"
@@ -276,7 +317,7 @@ const
       {idx: cell}
 
 func toUriQuery*(self: TsuField or WaterField, host: SimulatorHost): string {.inline.} =
-  ## Returns the URI query converted from the field.
+  ## Converts the field to the URI query.
   let arr = self.toArray
 
   case host
@@ -327,8 +368,8 @@ func toUriQuery*(self: TsuField or WaterField, host: SimulatorHost): string {.in
 func parseField*[F: TsuField or WaterField](
     query: string, host: SimulatorHost
 ): F {.inline.} =
-  ## Returns the field converted from the query.
-  ## If the query is invalid, `ValueError` is raised.
+  ## Converts the URI query to the field.
+  ## If `query` is not a valid URI, `ValueError` is raised.
   var arr: array[Row, array[Column, Cell]]
   arr[Row.low][Column.low] = Cell.low # dummy to remove warning
 
@@ -394,3 +435,23 @@ func parseField*[F: TsuField or WaterField](
       arr[row][col.succ] = cell2
 
   result = parseField[F](arr)
+
+func parseTsuField*(query: string, host: SimulatorHost): TsuField {.inline.} =
+  ## Converts the URI query to the Tsu field.
+  ## If `query` is not a valid URI, `ValueError` is raised.
+  parseField[TsuField](query, host)
+
+func parseWaterField*(query: string, host: SimulatorHost): WaterField {.inline.} =
+  ## Converts the URI query to the Water field.
+  ## If `query` is not a valid URI, `ValueError` is raised.
+  parseField[WaterField](query, host)
+
+func parseFields*(query: string, host: SimulatorHost): Fields {.inline.} =
+  ## Converts the URI query to the fields.
+  ## If `query` is not a valid URI, `ValueError` is raised.
+  try:
+    result.tsu = query.parseTsuField host
+    result.rule = Tsu
+  except ValueError:
+    result.water = query.parseWaterField host
+    result.rule = Water

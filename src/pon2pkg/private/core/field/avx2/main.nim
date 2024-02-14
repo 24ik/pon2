@@ -63,14 +63,14 @@ func `+=`[F: TsuField or WaterField](field1: var F, field2: F) {.inline.} =
 # ------------------------------------------------
 
 func toTsuField*(self: WaterField): TsuField {.inline.} =
-  ## Converts the Water field to the Tsu field.
+  ## Returns the Tsu field converted from the Water field.
   result.hardGarbage = self.hardGarbage
   result.noneRed = self.noneRed
   result.greenBlue = self.greenBlue
   result.yellowPurple = self.yellowPurple
 
 func toWaterField*(self: TsuField): WaterField {.inline.} =
-  ## Converts the Water field to the Water field.
+  ## Returns the Water field converted from the Tsu field.
   result.hardGarbage = self.hardGarbage
   result.noneRed = self.noneRed
   result.greenBlue = self.greenBlue
@@ -107,7 +107,7 @@ func clearColumn(mSelf: var (TsuField or WaterField), col) {.inline.} =
 # ------------------------------------------------
 
 func toCell(hardGarbage, noneRed, greenBlue, yellowPurple: WhichColor): Cell {.inline.} =
-  ## Converts the values to the cell.
+  ## Returns the cell converted from which-colors.
   Cell bitor(
     # digit-0
     hardGarbage.color1.int64,
@@ -142,7 +142,7 @@ func toWhichColor(
   greenBlue: WhichColor,
   yellowPurple: WhichColor
 ] {.inline.} =
-  ## Converts the cell to the values.
+  ## Returns the which-colors converted from the cell.
   let
     c = cell.int64
     bit2: range[0'i64 .. 1'i64] = bitand(c, 4) shr 2
@@ -486,7 +486,7 @@ func drop*(mSelf: var WaterField) {.inline.} =
 # ------------------------------------------------
 
 func toArray*(self: TsuField or WaterField): array[Row, array[Column, Cell]] {.inline.} =
-  ## Converts the field to the array.
+  ## Returns the array converted from the field.
   let
     hardGarbage = self.hardGarbage.toArray
     noneRed = self.noneRed.toArray
@@ -506,7 +506,7 @@ func toArray*(self: TsuField or WaterField): array[Row, array[Column, Cell]] {.i
 func parseField*[F: TsuField or WaterField](
     arr: array[Row, array[Column, Cell]]
 ): F {.inline.} =
-  ## Converts the array to the field.
+  ## Returns the field converted from the array.
   var hardGarbageArr, noneRedArr, greenBlueArr, yellowPurpleArr:
     array[Row, array[Column, WhichColor]]
   # dummy to remove warning

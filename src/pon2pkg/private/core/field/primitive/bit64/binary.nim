@@ -383,7 +383,7 @@ func flippedH*(self): BinaryField {.inline.} =
 # ------------------------------------------------
 
 func toColumnArray(self): array[Column, uint64] {.inline.} =
-  ## Converts the field to the integer array corresponding to each column.
+  ## Returns the integer array converted from the field.
   result[0] = self.left.bitsliced 33 ..< 48
   result[1] = self.left.bitsliced 17 ..< 32
   result[2] = self.left.bitsliced 1 ..< 16
@@ -392,7 +392,7 @@ func toColumnArray(self): array[Column, uint64] {.inline.} =
   result[5] = self.right.bitsliced 17 ..< 32
 
 func toDropMask*(existField: BinaryField): DropMask {.inline.} =
-  ## Converts `existField` to the drop mask.
+  ## Returns a drop mask converted from the exist field.
   let arr = (existField + FloorBinaryField).toColumnArray
 
   result[Column.low] = when UseBmi2: 0 else: 0'u64.toPextMask # dummy to remove warning
@@ -448,7 +448,7 @@ func waterDrop*(
 # ------------------------------------------------
 
 func toArray*(self): array[Row, array[Column, bool]] {.inline.} =
-  ## Converts the binary field to the array.
+  ## Returns the array converted from the field.
   result[Row.low][Column.low] = false # dummy to remove warning
   for row in Row.low .. Row.high:
     result[row][0] = self.left.testBit 45 - row
@@ -459,7 +459,7 @@ func toArray*(self): array[Row, array[Column, bool]] {.inline.} =
     result[row][5] = self.right.testBit 29 - row
 
 func parseBinaryField*(arr: array[Row, array[Column, bool]]): BinaryField {.inline.} =
-  ## Converts the array to the binary field.
+  ## Returns the field converted from the array.
   result.left = 0
   result.right = 0
 

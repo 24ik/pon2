@@ -66,7 +66,7 @@ func puyoCount*(disRes): int {.inline.} =
 # ------------------------------------------------
 
 func initDefaultComponents(): array[Height + 2, array[Width + 2, Natural]] {.inline.} =
-  ## Constructor of `DefaultComponents`.
+  ## Returns `DefaultComponents`.
   result[0][0] = 0 # dummy to remove warning
   for i in 0 ..< Height.succ 2:
     for j in 0 ..< Width.succ 2:
