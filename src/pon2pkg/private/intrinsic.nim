@@ -44,12 +44,10 @@ when UseBmi2:
     {.passc: "-mbmi2".}
     {.passl: "-mbmi2".}
 
-  func pext*(a, mask: uint64): uint64
-            {.header: "<immintrin.h>", importc: "_pext_u64".}
+  func pext*(a, mask: uint64): uint64 {.header: "<immintrin.h>", importc: "_pext_u64".}
     ## Parallel bits extract.
 
-  func pext*(a, mask: uint32): uint32
-            {.header: "<immintrin.h>", importc: "_pext_u32".}
+  func pext*(a, mask: uint32): uint32 {.header: "<immintrin.h>", importc: "_pext_u32".}
     ## Parallel bits extract.
 
   func pext*(a, mask: uint16): uint16 {.inline.} =
@@ -63,23 +61,26 @@ else:
     BitNum32 = 5
     BitNum16 = 4
 
-  type PextMask*[T: uint64 or uint32 or uint16] = object
-    ## Mask used in `pext`.
+  type PextMask*[T: uint64 or uint32 or uint16] = object ## Mask used in `pext`.
     mask: T
     bits: array[BitNum64, T] # HACK: cannot use BitNum32/16 due to Nim's bug
 
-  func toPextMask*[T: uint64 or uint32 or uint16](mask: T): PextMask[T]
-                  {.inline.} =
+  func toPextMask*[T: uint64 or uint32 or uint16](mask: T): PextMask[T] {.inline.} =
     ## Converts `mask` to the pext mask.
     const BitNum =
-      when T is uint64: BitNum64 elif T is uint32: BitNum32 else: BitNum16
+      when T is uint64:
+        BitNum64
+      elif T is uint32:
+        BitNum32
+      else:
+        BitNum16
 
     result.mask = mask
 
     var lastMask = mask.bitnot
-    for i in 0..<BitNum.pred:
+    for i in 0 ..< BitNum.pred:
       var bit = lastMask shl 1
-      for j in 0..<BitNum:
+      for j in 0 ..< BitNum:
         bit = bitxor(bit, (bit shl (1 shl j)))
 
       result.bits[i] = bit
@@ -87,19 +88,22 @@ else:
 
     result.bits[BitNum.pred] = (T.high - lastMask + 1) shl 1
 
-  func pext*[T: uint64 or uint32 or uint16](a: T, mask: PextMask[T]): T
-            {.inline.} =
+  func pext*[T: uint64 or uint32 or uint16](a: T, mask: PextMask[T]): T {.inline.} =
     ## Parallel bits extract.
     ## Suitable for multiple `pext` calling with the same `mask`.
     const BitNum =
-      when T is uint64: BitNum64 elif T is uint32: BitNum32 else: BitNum16
+      when T is uint64:
+        BitNum64
+      elif T is uint32:
+        BitNum32
+      else:
+        BitNum16
 
     result = bitand(a, mask.mask)
 
-    for i in 0..<BitNum:
+    for i in 0 ..< BitNum:
       let bit = mask.bits[i]
-      result = bitor(bitand(result, bit.bitnot),
-                     bitand(result, bit) shr (1 shl i))
+      result = bitor(bitand(result, bit.bitnot), bitand(result, bit) shr (1 shl i))
 
   func pext*[T: uint64 or uint32 or uint16](a, mask: T): T {.inline.} =
     ## Parallel bits extract.

@@ -18,8 +18,8 @@ type
     Yellow = "y"
     Purple = "p"
 
-  ColorPuyo* = range[Red..Purple]
-  Puyo* = range[Hard..Purple]
+  ColorPuyo* = range[Red .. Purple]
+  Puyo* = range[Hard .. Purple]
 
 # ------------------------------------------------
 # Cell <-> string

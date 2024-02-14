@@ -10,8 +10,7 @@ import std/[sequtils, sugar]
 type
   UnionFindNode* = Natural ## Union-find node.
 
-  UnionFind* = object
-    ## Union-find tree.
+  UnionFind* = object ## Union-find tree.
     parents: seq[UnionFindNode]
     subtreeSizes: seq[Positive]
 
@@ -26,7 +25,7 @@ using
 func initUnionFind*(size: Natural): UnionFind {.inline.} =
   ## Returns a new union-find tree.
   result.parents = collect:
-    for i in 0..<size:
+    for i in 0 ..< size:
       UnionFindNode i
 
   {.push warning[ProveInit]: off.}
@@ -52,7 +51,7 @@ func getRoot*(mSelf; node: UnionFindNode): UnionFindNode {.inline.} =
 
   result = mSelf.getRoot mSelf.parents[node]
 
-func merge*(mSelf; node1: UnionFindNode; node2: UnionFindNode) {.inline.} =
+func merge*(mSelf; node1: UnionFindNode, node2: UnionFindNode) {.inline.} =
   ## Merges the tree containing `node1` and the one containing `node2`
   ## using a union-by-size strategy.
   let
@@ -63,12 +62,13 @@ func merge*(mSelf; node1: UnionFindNode; node2: UnionFindNode) {.inline.} =
 
   # union-by-size merge
   let (big, small) =
-    if mSelf.subtreeSizes[root1] >= mSelf.subtreeSizes[root2]: (root1, root2)
-    else: (root2, root1)
+    if mSelf.subtreeSizes[root1] >= mSelf.subtreeSizes[root2]:
+      (root1, root2)
+    else:
+      (root2, root1)
   mSelf.subtreeSizes[big].inc mSelf.subtreeSizes[small]
   mSelf.parents[small] = big
 
-func sameGroup*(mSelf; node1: UnionFindNode; node2: UnionFindNode): bool
-               {.inline.} =
+func sameGroup*(mSelf; node1: UnionFindNode, node2: UnionFindNode): bool {.inline.} =
   ## Returns `true` if `node1` and `node2` are contained in the same tree.
   mSelf.getRoot(node1) == mSelf.getRoot(node2)

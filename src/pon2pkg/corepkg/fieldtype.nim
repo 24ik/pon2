@@ -21,7 +21,7 @@ static:
   doAssert AirHeight >= 3
 
 type
-  Row* = range[0..Height.pred]
-  Column* = range[0..Width.pred]
-  WaterRow* = range[AirHeight..Height.pred]
-  AirRow* = range[0..AirHeight.pred]
+  Row* = range[0 .. Height.pred]
+  Column* = range[0 .. Width.pred]
+  WaterRow* = range[AirHeight .. Height.pred]
+  AirRow* = range[0 .. AirHeight.pred]

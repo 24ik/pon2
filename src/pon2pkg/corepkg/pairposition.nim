@@ -71,37 +71,36 @@ func `$`*(pairsPositions: PairsPositions): string {.inline.} =
 func parsePairsPositions*(str: string): PairsPositions {.inline.} =
   ## Returns the pairs&positions converted from the string representation.
   ## If the string is invalid, `ValueError` is raised.
-  if str == "": newSeq[PairPosition](0)
-  else: str.split(PairsPositionsSep).mapIt it.parsePairPosition
+  if str == "":
+    newSeq[PairPosition](0)
+  else:
+    str.split(PairsPositionsSep).mapIt it.parsePairPosition
 
 # ------------------------------------------------
 # PairPosition <-> URI
 # ------------------------------------------------
 
-func toUriQuery*(pairPosition: PairPosition, host: SimulatorHost): string
-                {.inline.} =
+func toUriQuery*(pairPosition: PairPosition, host: SimulatorHost): string {.inline.} =
   ## Returns the URI query converted from the pair&position.
   &"{self.pair.toUriQuery host}{self.position.toUriQuery host}"
 
-func parsePairPosition*(query: string, host: SimulatorHost): PairPosition
-                       {.inline.} =
+func parsePairPosition*(query: string, host: SimulatorHost): PairPosition {.inline.} =
   ## Returns the pair&position converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
   # NOTE: this function is not robust; dependent on the current URI format
   case host
   of Izumiya:
-    result.pair = query[0..<2].parsePair host
-    result.position = query[2..^1].parsePosition host
+    result.pair = query[0 ..< 2].parsePair host
+    result.position = query[2 ..^ 1].parsePosition host
   of Ishikawa, Ips:
-    result.pair = query[0..0].parsePair host
-    result.position = query[1..^1].parsePosition host
+    result.pair = query[0 .. 0].parsePair host
+    result.position = query[1 ..^ 1].parsePosition host
 
 # ------------------------------------------------
 # PairsPositions <-> URI
 # ------------------------------------------------
 
-func toUriQuery*(pairsPositions: PairsPositions, host: SimulatorHost): string
-                {.inline.} =
+func toUriQuery*(pairsPositions: PairsPositions, host: SimulatorHost): string {.inline.} =
   ## Returns the URI query converted from the pairs&positions.
   let strs = collect:
     for pairPos in pairsPositions:
@@ -109,8 +108,7 @@ func toUriQuery*(pairsPositions: PairsPositions, host: SimulatorHost): string
 
   result = strs.join
 
-func parsePairsPositions*(query: string, host: SimulatorHost): PairsPosition
-                         {.inline.} =
+func parsePairsPositions*(query: string, host: SimulatorHost): PairsPosition {.inline.} =
   ## Returns the pairs&positions converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
   # NOTE: this function is not robust; dependent on the current URI format
@@ -134,4 +132,4 @@ func parsePairsPositions*(query: string, host: SimulatorHost): PairsPosition
         idx.inc 2
   of Ishikawa, Ips:
     for i in countup(0, query.len, 2):
-      result.add query[idx..idx.succ].parsePairPosition host
+      result.add query[idx .. idx.succ].parsePairPosition host

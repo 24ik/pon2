@@ -18,11 +18,9 @@
 {.experimental: "views".}
 
 import std/[options, os, random, sequtils, setutils, strutils, sugar, tables, uri]
-import ./[cell, field, fieldtype, misc, moveresult, pair, pairposition,
-          position, rule]
+import ./[cell, field, fieldtype, misc, moveresult, pair, pairposition, position, rule]
 
-type PuyoPuyo*[F: TsuField or WaterField] = object
-  ## Puyo Puyo game.
+type PuyoPuyo*[F: TsuField or WaterField] = object ## Puyo Puyo game.
   field*: F
   pairsPositions*: PairsPositions
 
@@ -42,7 +40,7 @@ func reset*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]) {.inline.} =
 # Constructor
 # ------------------------------------------------
 
-func initPuyoPuyo*[F: TsuField or WaterField]: PuyoPuyo[F] {.inline.} =
+func initPuyoPuyo*[F: TsuField or WaterField](): PuyoPuyo[F] {.inline.} =
   ## Returns a new Puyo Puyo game.
   result.reset
 
@@ -50,8 +48,9 @@ func initPuyoPuyo*[F: TsuField or WaterField]: PuyoPuyo[F] {.inline.} =
 # Count
 # ------------------------------------------------
 
-func puyoCount*[F: TsuField or WaterField](self: PuyoPuyo[F], puyo: Puyo): int
-               {.inline.} =
+func puyoCount*[F: TsuField or WaterField](
+    self: PuyoPuyo[F], puyo: Puyo
+): int {.inline.} =
   ## Returns the number of `puyo` in the Puyo Puyo game.
   self.field.puyoCount(puyo) + self.pairsPositions.puyoCount(puyo)
 
@@ -63,8 +62,7 @@ func colorCount*[F: TsuField or WaterField](self: PuyoPuyo[F]): int {.inline.} =
   ## Returns the number of color puyos in the Puyo Puyo game.
   self.field.colorCount + self.pairsPositions.colorCount
 
-func garbageCount*[F: TsuField or WaterField](self: PuyoPuyo[F]): int
-                  {.inline.} =
+func garbageCount*[F: TsuField or WaterField](self: PuyoPuyo[F]): int {.inline.} =
   ## Returns the number of garbage puyos in the Puyo Puyo game.
   self.field.garbageCount + self.pairsPositions.garbageCount
 
@@ -72,8 +70,9 @@ func garbageCount*[F: TsuField or WaterField](self: PuyoPuyo[F]): int
 # Move
 # ------------------------------------------------
 
-func move*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]): MoveResult
-    {.inline, discardable.} =
+func move*[F: TsuField or WaterField](
+    mSelf: var PuyoPuyo[F]
+): MoveResult {.inline, discardable.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks the followings:
   ## - Number of chains
@@ -84,8 +83,9 @@ func move*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]): MoveResult
   result = mSelf.field.move(pairPos.pair, pairPos.position)
   mSelf.pairPositionIdx.inc
 
-func move*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F], pos: Position):
-    MoveResult {.inline, discardable.} =
+func move*[F: TsuField or WaterField](
+    mSelf: var PuyoPuyo[F], pos: Position
+): MoveResult {.inline, discardable.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks the followings:
   ## - Number of chains
@@ -93,7 +93,8 @@ func move*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F], pos: Position):
   result = mSelf.move
 
 func moveWithRoughTracking*[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F]): MoveResult {.inline.} =
+    mSelf: var PuyoPuyo[F]
+): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks the followings:
   ## - Number of chains
@@ -106,7 +107,8 @@ func moveWithRoughTracking*[F: TsuField or WaterField](
   mSelf.pairPositionIdx.inc
 
 func moveWithRoughTracking*[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F], pos: Position): MoveResult {.inline.} =
+    mSelf: var PuyoPuyo[F], pos: Position
+): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks the followings:
   ## - Number of chains
@@ -115,7 +117,8 @@ func moveWithRoughTracking*[F: TsuField or WaterField](
   result = mSelf.moveWithRoughTracking
 
 func moveWithDetailTracking*[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F]): MoveResult {.inline.} =
+    mSelf: var PuyoPuyo[F]
+): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks the followings:
   ## - Number of chains
@@ -129,7 +132,8 @@ func moveWithDetailTracking*[F: TsuField or WaterField](
   mSelf.pairPositionIdx.inc
 
 func moveWithDetailTracking*[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F], pos: Position): MoveResult {.inline.} =
+    mSelf: var PuyoPuyo[F], pos: Position
+): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks the followings:
   ## - Number of chains
@@ -139,7 +143,8 @@ func moveWithDetailTracking*[F: TsuField or WaterField](
   result = mSelf.moveWithDetailTracking
 
 func moveWithFullTracking*[F: TsuField or WaterField](
-    mSelf: var Environment[F]): MoveResult {.inline.} =
+    mSelf: var Environment[F]
+): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks the followings:
   ## - Number of chains
@@ -155,7 +160,8 @@ func moveWithFullTracking*[F: TsuField or WaterField](
   mSelf.pairPositionIdx.inc
 
 func moveWithFullTracking*[F: TsuField or WaterField](
-    mSelf: var Environment[F]): MoveResult {.inline.} =
+    mSelf: var Environment[F]
+): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks the followings:
   ## - Number of chains
@@ -175,8 +181,7 @@ const FieldPairsPositionsSep = "\n------\n"
 func `$`*[F: TsuField or WaterField](self: PuyoPuyo[F]): string {.inline.} =
   &"{self.field}{FieldPairsPositionsSep}{self.pairsPositions}"
 
-func parsePuyoPuyo*[F: TsuField or WaterField](str: string): PuyoPuyo[F]
-                   {.inline.} =
+func parsePuyoPuyo*[F: TsuField or WaterField](str: string): PuyoPuyo[F] {.inline.} =
   ## Returns the Puyo Puyo game converted from the string representation.
   ## If the string is invalid, `ValueError` is raised.
   let strs = str.split FieldPairsPositionsSep
@@ -185,7 +190,7 @@ func parsePuyoPuyo*[F: TsuField or WaterField](str: string): PuyoPuyo[F]
 
   result.reset
 
-  result.field = strs[0].parseField[:F]
+  result.field = parseField[F](strs[0])
   result.pairsPositions = strs[1].parsePairsPositions
   result.pairPositionIdx = 0
 
@@ -198,17 +203,21 @@ const
   PairsPositionsKey = "pairs"
 
 func toUriQuery*[F: TsuField or WaterField](
-    self: PuyoPuyo[F], host: SimulatorHost): string {.inline.} =
+    self: PuyoPuyo[F], host: SimulatorHost
+): string {.inline.} =
   ## Returns the URI query converted from the Puyo Puyo game.
   case host
   of Izumiya:
-    encodeQuery [(FieldKey, self.field.toUriQuery host),
-                 (PairsPositionsKey, self.pairsPositions.toUriQuery host)]
+    encodeQuery [
+      (FieldKey, self.field.toUriQuery host),
+      (PairsPositionsKey, self.pairsPositions.toUriQuery host)
+    ]
   of Ishikawa, Ips:
     &"{self.field.toUriQuery host}_{self.pairsPositions.toUriQuery host}"
 
 func parsePuyoPuyo*[F: TsuField or WaterField](
-    query: string, host: SimulatorHost): PuyoPuyo[F] {.inline.} =
+    query: string, host: SimulatorHost
+): PuyoPuyo[F] {.inline.} =
   ## Returns the Puyo Puyo game converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
   result.pairPositionIdx = 0
@@ -222,7 +231,7 @@ func parsePuyoPuyo*[F: TsuField or WaterField](
     for (key, val) in query.decodeQuery:
       case key
       of FieldKey:
-        result.field = val.parseField[:F](host)
+        result.field = parseField[F](val, host)
         fieldSet = true
       of PairsPositionsKey:
         result.pairsPositions = val.parsePairsPositions host

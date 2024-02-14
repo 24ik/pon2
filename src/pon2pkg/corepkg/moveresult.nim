@@ -16,8 +16,7 @@ import ./[cell, fieldtype, rule]
 import ../private/[misc]
 
 type
-  MoveResult* = object
-    ## Moving result.
+  MoveResult* = object ## Moving result.
     chainCount*: int
     totalDisappearCounts*: Option[array[Puyo, int]]
     disappearCounts*: Option[seq[array[Puyo, int]]]
@@ -36,8 +35,7 @@ type
 const
   TsuGarbageRate {.define: "pon2.garbagerate.tsu".} = 70
   WaterGarbageRate {.define: "pon2.garbagerate.water".} = 90
-  GarbageRates: array[Rule, Positive] = [
-    TsuGarbageRate.Positive, WaterGarbageRate]
+  GarbageRates: array[Rule, Positive] = [TsuGarbageRate.Positive, WaterGarbageRate]
 
 using
   self: MoveResult
@@ -57,8 +55,8 @@ func initMoveResult*(chainCount: int): MoveResult {.inline.} =
   {.pop.}
 
 func initMoveResult*(
-    chainCount: int, totalDisappearCounts: array[Puyo, int]): MoveResult
-    {.inline.} =
+    chainCount: int, totalDisappearCounts: array[Puyo, int]
+): MoveResult {.inline.} =
   ## Returns a new move result.
   result.chainCount = chainCount
   result.totalDisappearCounts = some totalDisappearCounts
@@ -68,8 +66,10 @@ func initMoveResult*(
   {.pop.}
 
 func initMoveResult*(
-    chainCount: int, totalDisappearCounts: array[Puyo, int],
-    disappearCounts: seq[array[Puyo, int]]): MoveResult {.inline.} =
+    chainCount: int,
+    totalDisappearCounts: array[Puyo, int],
+    disappearCounts: seq[array[Puyo, int]],
+): MoveResult {.inline.} =
   ## Returns a new move result.
   result.chainCount = chainCount
   result.totalDisappearCounts = some totalDisappearCounts
@@ -79,10 +79,11 @@ func initMoveResult*(
   {.pop.}
 
 func initMoveResult*(
-    chainCount: int, totalDisappearCounts: array[Puyo, int],
+    chainCount: int,
+    totalDisappearCounts: array[Puyo, int],
     disappearCounts: seq[array[Puyo, int]],
-    detailDisappearCounts: seq[array[ColorPuyo, seq[int]]]): MoveResult
-    {.inline.} =
+    detailDisappearCounts: seq[array[ColorPuyo, seq[int]]],
+): MoveResult {.inline.} =
   ## Returns a new move result.
   result.chainCount = chainCount
   result.totalDisappearCounts = some totalDisappearCounts
@@ -98,14 +99,15 @@ func puyoCount*(self; puyo: Puyo): int {.inline.} =
   ## `UnpackDefect` will be raised if not supported.
   self.totalDisappearCounts.get[puyo]
 
-func puyoCount*(self): int {.inline.} = self.totalDisappearCounts.get.sum2
+func puyoCount*(self): int {.inline.} =
   ## Returns the number of puyos that disappeared.
   ## `UnpackDefect` will be raised if not supported.
+  self.totalDisappearCounts.get.sum2
 
 func colorCount*(self): int {.inline.} =
   ## Returns the number of color puyos that disappeared.
   ## `UnpackDefect` will be raised if not supported.
-  self.totalDisappearCounts.get[ColorPuyo.low..ColorPuyo.high].sum2
+  self.totalDisappearCounts.get[ColorPuyo.low .. ColorPuyo.high].sum2
 
 func garbageCount*(self): int {.inline.} =
   ## Returns the number of garbage puyos that disappeared.
@@ -129,7 +131,7 @@ func puyoCounts*(self): seq[int] {.inline.} =
 func colorCounts*(self): seq[int] {.inline.} =
   ## Returns the number of color puyos that disappeared in each chain.
   ## `UnpackDefect` will be raised if not supported.
-  self.disappearCounts.get.mapIt it[ColorPuyo.low..ColorPuyo.high].sum2
+  self.disappearCounts.get.mapIt it[ColorPuyo.low .. ColorPuyo.high].sum2
 
 func garbageCounts*(self): seq[int] {.inline.} =
   ## Returns the number of garbage puyos that disappeared in each chain.
@@ -175,7 +177,7 @@ func colorPlaces*(self): seq[int] {.inline.} =
   ## `UnpackDefect` will be raised if not supported.
   collect:
     for countsArr in self.detailDisappearCounts.get:
-      sum2 (ColorPuyo.low..ColorPuyo.high).mapIt countsArr[it].len
+      sum2 (ColorPuyo.low .. ColorPuyo.high).mapIt countsArr[it].len
 
 # ------------------------------------------------
 # Connect
@@ -189,8 +191,7 @@ func colorConnects*(self; color: ColorPuyo): seq[int] {.inline.} =
 func colorConnects*(self): seq[int] {.inline.} =
   ## Returns the number of connections of color puyos that disappeared.
   ## `UnpackDefect` will be raised if not supported.
-  concat self.detailDisappearCounts.get.mapIt it[
-    ColorPuyo.low..ColorPuyo.high].concat
+  concat self.detailDisappearCounts.get.mapIt it[ColorPuyo.low .. ColorPuyo.high].concat
 
 # ------------------------------------------------
 # Score
@@ -201,7 +202,7 @@ const
     for connect in 0 .. Height.pred * Width:
       if connect <= 4:
         0
-      elif connect in 5..10:
+      elif connect in 5 .. 10:
         connect - 3
       else:
         10
@@ -209,12 +210,12 @@ const
     for chain in 0 .. Height * Width div 4:
       if chain <= 1:
         0
-      elif chain in 2..5:
+      elif chain in 2 .. 5:
         8 * 2 ^ (chain - 2)
       else:
         64 + 32 * (chain - 5)
   ColorBonuses = collect:
-    for color in 0..ColorPuyo.fullSet.card:
+    for color in 0 .. ColorPuyo.fullSet.card:
       if color <= 1:
         0
       else:
@@ -235,25 +236,26 @@ func score*(self): int {.inline.} =
   for chainIdx, countsArray in self.detailDisappearCounts.get:
     let
       disappearCounts =
-        self.disappearCounts.get[chainIdx][ColorPuyo.low..ColorPuyo.high]
+        self.disappearCounts.get[chainIdx][ColorPuyo.low .. ColorPuyo.high]
 
       chainBonus = ChainBonuses[chainIdx.succ]
       connectBonus =
-        sum2 countsArray[ColorPuyo.low..ColorPuyo.high].mapIt it.connectBonus
+        sum2 countsArray[ColorPuyo.low .. ColorPuyo.high].mapIt it.connectBonus
       colorBonus = ColorBonuses[disappearCounts.countIt it > 0]
 
-    result.inc 10 * disappearCounts.sum2 *
-      max(chainBonus + connectBonus + colorBonus, 1)
+    result.inc 10 * disappearCounts.sum2 * max(
+      chainBonus + connectBonus + colorBonus, 1
+    )
 
 # ------------------------------------------------
 # Notice Garbage
 # ------------------------------------------------
 
-const NoticeUnits: array[NoticeGarbage, Natural] =
-  [1, 6, 30, 180, 360, 720, 1440]
+const NoticeUnits: array[NoticeGarbage, Natural] = [1, 6, 30, 180, 360, 720, 1440]
 
-func noticeGarbageCounts*(score: Natural, rule: Rule): array[NoticeGarbage, int]
-                         {.inline.} =
+func noticeGarbageCounts*(
+    score: Natural, rule: Rule
+): array[NoticeGarbage, int] {.inline.} =
   ## Returns the number of notice garbages.
   result[Small] = 0 # HACK: dummy to suppress warning
 
@@ -263,8 +265,7 @@ func noticeGarbageCounts*(score: Natural, rule: Rule): array[NoticeGarbage, int]
     result[notice] = score2 div unit
     score2.dec result[notice] * unit
 
-func noticeGarbageCounts*(self; rule: Rule): array[NoticeGarbage, int]
-                         {.inline.} =
+func noticeGarbageCounts*(self; rule: Rule): array[NoticeGarbage, int] {.inline.} =
   ## Returns the number of notice garbages.
   ## Note that this function calls `score()`.
   self.score.noticeGarbageCounts rule

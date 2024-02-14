@@ -27,8 +27,9 @@ runnableExamples:
   import std/[strutils]
   import ./pon2pkg/private/[webworker] # change path if needed
 
-  proc succ2(args: seq[string]): tuple[returnCode: WorkerReturnCode,
-                                       messages: seq[string]] =
+  proc succ2(
+      args: seq[string]
+  ): tuple[returnCode: WorkerReturnCode, messages: seq[string]] =
     if args.len != 1:
       return (Failure, @["Invalid number of arguments are given."])
     try:
@@ -52,23 +53,21 @@ type
     Failure = "failure"
 
   WorkerTask* = (
-      seq[string] -> tuple[returnCode: WorkerReturnCode, messages: seq[string]])
-    ## Task executed in a new thread.
+    seq[string] -> tuple[returnCode: WorkerReturnCode, messages: seq[string]]
+  ) ## Task executed in a new thread.
 
   WorkerCompleteHandler* = (
-      (returnCode: WorkerReturnCode, messages: seq[string]) -> void)
-    ## Handler executed after the `WorkerTask` completed.
+    (returnCode: WorkerReturnCode, messages: seq[string]) -> void
+  ) ## Handler executed after the `WorkerTask` completed.
 
-  Worker* = object
-    ## Web worker.
+  Worker* = object ## Web worker.
     running*: bool
     webWorker: JsObject
 
 const
   WorkerFileName {.define: "pon2.workerfilename".} = "worker.min.js"
 
-  DefaultWorkerTask*: WorkerTask =
-    (args: seq[string]) => (Success, newSeq[string](0))
+  DefaultWorkerTask*: WorkerTask = (args: seq[string]) => (Success, newSeq[string](0))
   DefaultWorkerCompleteHandler*: WorkerCompleteHandler =
     (returnCode: WorkerReturnCode, messages: seq[string]) => (discard)
 
@@ -83,21 +82,22 @@ using
 # Task
 # ------------------------------------------------
 
-proc getSelf: JsObject {.importjs: "(self)".} ## Returns the web worker object.
+proc getSelf(): JsObject {.importjs: "(self)".} ## Returns the web worker object.
 
 func split2(str: string, sep: string): seq[string] {.inline.} =
   ## Splits `str` by `sep`.
   ## If `str == ""`, returns `@[]`
   ## (unlike `strutils.split`; it returns `@[""]`).
-  if str == "": @[] else: str.split sep
+  if str == "":
+    @[]
+  else:
+    str.split sep
 
 proc assignToWorker*(task: WorkerTask) {.inline.} =
   ## Assigns the task to the worker.
   proc runTask(event: JsObject) =
-    let (returnCode, messages) = task(
-      ($event.data.to(cstring)).split2 MessageSep)
-    getSelf().postMessage(
-      cstring &"{returnCode}{HeaderSep}{messages.join MessageSep}")
+    let (returnCode, messages) = task(($event.data.to(cstring)).split2 MessageSep)
+    getSelf().postMessage(cstring &"{returnCode}{HeaderSep}{messages.join MessageSep}")
 
   getSelf().onmessage = runTask
 
@@ -110,7 +110,7 @@ proc run*(mSelf; args: varargs[string]) {.inline.} =
 # Constructor
 # ------------------------------------------------
 
-proc initWebWorker: JsObject {.importjs: &"new Worker('{WorkerFileName}')".}
+proc initWebWorker(): JsObject {.importjs: &"new Worker('{WorkerFileName}')".}
   ## Returns the web worker launched by the caller.
 
 proc `completeHandler=`*(mSelf; handler: WorkerCompleteHandler) {.inline.} =
@@ -132,7 +132,7 @@ proc `completeHandler=`*(mSelf; handler: WorkerCompleteHandler) {.inline.} =
 
   mSelf.webWorker.onmessage = runHandler
 
-proc initWorker*: Worker {.inline.} =
+proc initWorker*(): Worker {.inline.} =
   ## Returns the worker.
   result.running = false
   result.webWorker = initWebWorker()

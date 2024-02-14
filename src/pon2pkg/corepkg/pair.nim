@@ -15,25 +15,21 @@ type Pair* {.pure.} = enum
   RedBlue = $Red & $Blue
   RedYellow = $Red & $Yellow
   RedPurple = $Red & $Purple
-
   GreenRed = $Green & $Red
   GreenGreen = $Green & $Green
   GreenBlue = $Green & $Blue
   GreenYellow = $Green & $Yellow
   GreenPurple = $Green & $Purple
-
   BlueRed = $Blue & $Red
   BlueGreen = $Blue & $Green
   BlueBlue = $Blue & $Blue
   BlueYellow = $Blue & $Yellow
   BluePurple = $Blue & $Purple
-
   YellowRed = $Yellow & $Red
   YellowGreen = $Yellow & $Green
   YellowBlue = $Yellow & $Blue
   YellowYellow = $Yellow & $Yellow
   YellowPurple = $Yellow & $Purple
-
   PurpleRed = $Purple & $Red
   PurpleGreen = $Purple & $Green
   PurpleBlue = $Purple & $Blue
@@ -49,7 +45,8 @@ using
 # ------------------------------------------------
 
 const FirstPairs: array[ColorPuyo, Pair] = [
-  RedRed, GreenRed, BlueRed, YellowRed, PurpleRed]
+  RedRed, GreenRed, BlueRed, YellowRed, PurpleRed
+]
 
 func initPair*(axis, child: ColorPuyo): Pair {.inline.} =
   ## Returns a new Pair.
@@ -59,13 +56,13 @@ func initPair*(axis, child: ColorPuyo): Pair {.inline.} =
 # Property
 # ------------------------------------------------
 
-func initPairToAxis: array[Pair, Cell] {.inline.} =
+func initPairToAxis(): array[Pair, Cell] {.inline.} =
   ## Returns `PairToAxis`.
   result[Pair.low] = Cell.low # HACK: dummy to suppress warning
   for pair in Pair:
     result[pair] = ColorPuyo.low.succ pair.ord div ColorPuyo.fullSet.card
 
-func initPairToChild: array[Pair, Cell] {.inline.} =
+func initPairToChild(): array[Pair, Cell] {.inline.} =
   ## Returns `PairToChild`.
   result[Pair.low] = Cell.low # HACK: dummy to suppress warning
   for pair in Pair:
@@ -75,10 +72,11 @@ const
   PairToAxis = initPairToAxis()
   PairToChild = initPairToChild()
 
-func axis*(self): Cell {.inline.} = PairToAxis[self] ## Returns the axis-puyo.
+func axis*(self): Cell {.inline.} = ## Returns the axis-puyo.
+  PairToAxis[self]
 
-func child*(self): Cell {.inline.} = PairToChild[self]
-  ## Returns the child-puyo.
+func child*(self): Cell {.inline.} = ## Returns the child-puyo.
+  PairToChild[self]
 
 func isDouble*(self): bool {.inline.} =
   ## Returns `true` if the pair is double (monochromatic).
@@ -100,7 +98,7 @@ func `child=`*(mSelf; color: ColorPuyo) {.inline.} =
 # Swap
 # ------------------------------------------------
 
-func initPairToSwapPair: array[Pair, Pair] {.inline.} =
+func initPairToSwapPair(): array[Pair, Pair] {.inline.} =
   ## Returns `PairToSwapPair`.
   result[Pair.low] = Pair.low # HACK: dummy to suppress warning
   for pair in Pair:
@@ -108,11 +106,12 @@ func initPairToSwapPair: array[Pair, Pair] {.inline.} =
 
 const PairToSwapPair = initPairToSwapPair()
 
-func swapped*(self): Pair {.inline.} = PairToSwapPair[self]
+func swapped*(self): Pair {.inline.} =
   ## Returns the pair with axis-puyo and child-puyo swapped.
+  PairToSwapPair[self]
 
-func swap*(mSelf) {.inline.} = mSelf = mSelf.swapped
-  ## Swaps the axis-puyo and child-puyo.
+func swap*(mSelf) {.inline.} = ## Swaps the axis-puyo and child-puyo.
+  mSelf = mSelf.swapped
 
 # ------------------------------------------------
 # Count
@@ -122,14 +121,16 @@ func puyoCount*(self; puyo: Puyo): int {.inline.} =
   ## Returns the number of `puyo` in the pair.
   (self.axis == puyo).int + (self.child == puyo).int
 
-func puyoCount*(self): int {.inline.} = 2
-  ## Returns the number of puyos in the pair.
+func puyoCount*(self): int {.inline.} = ## Returns the number of puyos in the pair.
+  2
 
-func colorCount*(self): int {.inline.} = self.puyoCount
+func colorCount*(self): int {.inline.} =
   ## Returns the number of color puyos in the pair.
+  self.puyoCount
 
-func garbageCount*(self): int {.inline.} = 0
+func garbageCount*(self): int {.inline.} =
   ## Returns the number of garbage puyos in the pair.
+  0
 
 # ------------------------------------------------
 # Pair <-> string
@@ -161,10 +162,12 @@ const
 func toUriQuery*(self; host: SimulatorHost): string {.inline.} =
   ## Returns the URI query converted from the pair.
   case host
-  of Izumiya: $self
-  of Ishikawa, Ips: $PairToIshikawaUri[self.ord]
+  of Izumiya:
+    $self
+  of Ishikawa, Ips:
+    $PairToIshikawaUri[self.ord]
 
-func parsePair*(query: string; host: SimulatorHost): Pair {.inline.} =
+func parsePair*(query: string, host: SimulatorHost): Pair {.inline.} =
   ## Returns the pair converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
   case host
