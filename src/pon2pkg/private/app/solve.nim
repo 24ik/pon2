@@ -6,8 +6,8 @@
 {.experimental: "views".}
 
 import std/[options, sequtils, setutils, strutils, sugar, tables, uri]
-import ./[mark]
 import ../[misc]
+import ../core/[mark]
 import
   ../../core/[
     cell, field, misc, moveresult, nazopuyo, pair, pairposition, position, puyopuyo,
@@ -329,10 +329,10 @@ func solve*[F: TsuField or WaterField](
     reqKind: static RequirementKind,
     reqColor: static RequirementColor,
     earlyStopping: static bool,
-): seq[Positions] {.inline.} =
+): seq[PairsPositions] {.inline.} =
   ## Solves the nazo puyo.
   if node.isAccepted(reqKind, reqColor):
-    return @[node.positions]
+    return @[node.nazoPuyo.puyoPuyo.pairsPositions]
   if node.isLeaf or node.canPrune(reqKind, reqColor):
     return @[]
 
@@ -346,7 +346,7 @@ func solve*[F: TsuField or WaterField](
 
 func solve[F: TsuField or WaterField](
     node: Node[F], reqKind: static RequirementKind, earlyStopping: static bool
-): seq[Positions] {.inline.} =
+): seq[PairsPositions] {.inline.} =
   ## Solves the nazo puyo.
   assert reqKind in {
     RequirementKind.Clear, DisappearCount, DisappearCountMore, ChainClear,
@@ -355,7 +355,7 @@ func solve[F: TsuField or WaterField](
   }
 
   result =
-    case node.requirement.color
+    case node.nazoPuyo.requirement.color
     of RequirementColor.All:
       node.solve(reqKind, RequirementColor.All, earlyStopping)
     of RequirementColor.Red:
@@ -380,7 +380,7 @@ func solve*[F: TsuField or WaterField](
   const DummyColor = RequirementColor.All
 
   result =
-    case node.requirement.kind
+    case node.nazoPuyo.requirement.kind
     of RequirementKind.Clear:
       node.solve(RequirementKind.Clear, earlyStopping)
     of DisappearColor:
