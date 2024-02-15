@@ -7,7 +7,7 @@
 
 import std/[bitops]
 import ../../../../[intrinsic]
-import ../../../../../corepkg/[fieldtype]
+import ../../../../../core/[fieldtype]
 
 type
   BinaryField* = object

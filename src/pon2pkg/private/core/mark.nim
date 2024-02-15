@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 import std/[sequtils, tables]
-import ../../core/[cell, moveresult, nazopuyo]
+import ../../core/[cell, moveresult, requirement]
 
 # ------------------------------------------------
 # Common

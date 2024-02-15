@@ -8,7 +8,7 @@
 import std/[bitops]
 import ./[binary, disappearresult]
 import ../[binary as commonBinary]
-import ../../../../corepkg/[cell, fieldtype, pair, position]
+import ../../../../core/[cell, fieldtype, pair, position]
 
 export binary.`==`
 
@@ -382,6 +382,9 @@ func willDisappear*(self: TsuField or WaterField): bool {.inline.} =
 
 func put*(mSelf: var TsuField, pair: Pair, pos: Position) {.inline.} =
   ## Puts the pair.
+  if pos == Position.None:
+    return
+
   let
     existField = mSelf.exist
     nextPutMask = existField xor (existField + floorBinaryField()).shiftedUp
@@ -401,6 +404,9 @@ func put*(mSelf: var TsuField, pair: Pair, pos: Position) {.inline.} =
 
 func put*(mSelf: var WaterField, pair: Pair, pos: Position) {.inline.} =
   ## Puts the pair.
+  if pos == Position.None:
+    return
+
   let
     axisCol = pos.axisColumn
     childCol = pos.childColumn

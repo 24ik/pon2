@@ -9,7 +9,7 @@ import std/[bitops, sequtils]
 import ./[binary]
 import ../[binary]
 import ../../../[unionfind]
-import ../../../../corepkg/[cell, fieldtype]
+import ../../../../core/[cell, fieldtype]
 
 type DisappearResult* = object ## Disappearing result.
   red*: BinaryField

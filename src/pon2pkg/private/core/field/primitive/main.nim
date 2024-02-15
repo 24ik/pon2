@@ -8,7 +8,7 @@
 import std/[bitops]
 import ./[disappearresult]
 import ../[binary]
-import ../../../../corepkg/[cell, fieldtype, pair, position]
+import ../../../../core/[cell, fieldtype, pair, position]
 
 when defined(cpu32):
   import ./bit32/binary
@@ -391,6 +391,9 @@ const
 
 func put*(mSelf: var TsuField, pair: Pair, pos: Position) {.inline.} =
   ## Puts the pair.
+  if pos == Position.None:
+    return
+
   let
     existField = mSelf.exist
     nextPutMask = existField xor (existField + FloorBinaryField).shiftedUp
@@ -402,6 +405,9 @@ func put*(mSelf: var TsuField, pair: Pair, pos: Position) {.inline.} =
 
 func put*(mSelf: var WaterField, pair: Pair, pos: Position) {.inline.} =
   ## Puts the pair.
+  if pos == Position.None:
+    return
+
   let
     axisCol = pos.axisColumn
     childCol = pos.childColumn

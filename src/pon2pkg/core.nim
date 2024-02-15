@@ -84,8 +84,8 @@ export
   position.rotatedLeft, position.rotateRight, position.rotateLeft,
   position.parsePosition, position.toUriQuery
 export
-  puyopuyo.PuyoPuyo, puyopuyo.reset, puyopuyo.initPuyoPuyo, puyopuyo.puyoCount,
-  puyopuyo.colorCount, puyopuyo.garbageCount, puyopuyo.move,
+  puyopuyo.PuyoPuyo, puyopuyo.reset, puyopuyo.initPuyoPuyo, puyopuyo.movingCompleted,
+  puyopuyo.puyoCount, puyopuyo.colorCount, puyopuyo.garbageCount, puyopuyo.move,
   puyopuyo.moveWithRoughTracking, puyopuyo.moveWithDetailTracking,
   puyopuyo.moveWithFullTracking, puyopuyo.`$`, puyopuyo.parsePuyoPuyo,
   puyopuyo.toUriQuery

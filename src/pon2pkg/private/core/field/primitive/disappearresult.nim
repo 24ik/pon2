@@ -7,7 +7,7 @@
 
 import std/[sequtils]
 import ../../../[unionfind]
-import ../../../../corepkg/[cell, fieldtype]
+import ../../../../core/[cell, fieldtype]
 
 when defined(cpu32):
   import ./bit32/[binary]
