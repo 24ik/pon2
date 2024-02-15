@@ -6,6 +6,7 @@
 ## - [field](./core/field.html)
 ## - [fieldtype](./core/fieldtype.html)
 ## - [host](./core/host.html)
+## - [mark](./core/mark.html)
 ## - [misc](./core/misc.html)
 ## - [moveresult](./core/moveresult.html)
 ## - [nazopuyo](./core/nazopuyo.html)
@@ -32,7 +33,7 @@
 
 import
   ./core/[
-    cell, field, fieldtype, host, misc, moveresult, nazopuyo, pair, pairposition,
+    cell, field, fieldtype, host, mark, misc, moveresult, nazopuyo, pair, pairposition,
     position, puyopuyo, requirement, rule
   ]
 import ./private/[intrinsic]
@@ -57,6 +58,7 @@ export
   fieldtype.Height, fieldtype.Width, fieldtype.WaterHeight, fieldtype.AirHeight,
   fieldtype.Row, fieldtype.Column, fieldtype.WaterRow, fieldtype.AirRow
 export host.SimulatorHost
+export mark.MarkResult, mark.mark
 export misc.SimulatorKind, misc.SimulatorMode
 export
   moveresult.MoveResult, moveresult.NoticeGarbage, moveresult.initMoveResult,
