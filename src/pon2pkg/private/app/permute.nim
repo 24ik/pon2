@@ -64,7 +64,7 @@ func allPairsPositionsSeq*[F: TsuField or WaterField](
     fixMoves: openArray[Positive],
     allowDouble: bool,
     allowLastDouble: bool,
-): seq[Pairs] {.inline.} =
+): seq[PairsPositions] {.inline.} =
   ## Returns all possible pairs (and positions) in ascending order that can be
   ## obtained by permuting puyos contained in the pairs.
   # NOTE: Swapped pair sometimes gives a different solution, but this function

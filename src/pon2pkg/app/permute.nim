@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 import ./[solve]
-import ../core/[field, nazopuyo, pair, position, puyopuyo]
+import ../core/[field, nazopuyo, pair, pairposition, position, puyopuyo]
 import ../private/app/[permute]
 
 when not defined(js):
