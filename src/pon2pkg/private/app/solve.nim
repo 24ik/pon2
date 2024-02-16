@@ -78,23 +78,19 @@ func child[F: TsuField or WaterField](
     reqColor: static RequirementColor,
 ): Node[F] {.inline.} =
   ## Returns the child node with the `pos` edge.
-  let
-    firstPair = node.puyoPuyo.pairsPositions[0].pair
-    moveFn =
-      when reqKind in {
-        Clear, DisappearColor, DisappearColorMore, DisappearCount, DisappearCountMore,
-        Chain, ChainMore, ChainClear, ChainMoreClear
-      }:
-        puyopuyo.moveWithRoughTracking[F]
-      elif reqKind in {
-        DisappearColorSametime, DisappearColorMoreSametime, DisappearCountSametime,
-        DisappearCountMoreSametime
-      }:
-        puyopuyo.moveWithDetailTracking[F]
-      else:
-        puyopuyo.moveWithFullTracking[F]
-
-  discard firstPair # HACK: dummy to remove warning
+  let moveFn =
+    when reqKind in {
+      Clear, DisappearColor, DisappearColorMore, DisappearCount, DisappearCountMore,
+      Chain, ChainMore, ChainClear, ChainMoreClear
+    }:
+      puyopuyo.moveWithRoughTracking[F]
+    elif reqKind in {
+      DisappearColorSametime, DisappearColorMoreSametime, DisappearCountSametime,
+      DisappearCountMoreSametime
+    }:
+      puyopuyo.moveWithDetailTracking[F]
+    else:
+      puyopuyo.moveWithFullTracking[F]
 
   result = node
   result.moveResult = result.nazoPuyo.puyoPuyo.moveFn pos
@@ -375,7 +371,7 @@ func solve[F: TsuField or WaterField](
 
 func solve*[F: TsuField or WaterField](
     node: Node[F], earlyStopping: static bool = false
-): seq[Positions] {.inline.} =
+): seq[PairsPositions] {.inline.} =
   ## Solves the nazo puyo.
   const DummyColor = RequirementColor.All
 
