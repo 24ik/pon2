@@ -1,4 +1,4 @@
-## This module implements solvers.
+## This module implements Nazo Puyo solvers.
 ##
 
 {.experimental: "strictDefs".}
