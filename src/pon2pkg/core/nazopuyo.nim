@@ -29,7 +29,7 @@ func initNazoPuyo*[F: TsuField or WaterField](): NazoPuyo[F] {.inline.} =
 
 func moveCount*[F: TsuField or WaterField](self: NazoPuyo[F]): int {.inline.} =
   ## Returns the number of moves of the nazo puyo.
-  self.environment.pairs.len
+  self.puyoPuyo.pairsPositions.len
 
 # ------------------------------------------------
 # Nazo Puyo <-> string
