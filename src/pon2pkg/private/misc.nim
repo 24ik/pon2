@@ -5,7 +5,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[algorithm, os, parsecfg, sequtils, streams, strutils, typetraits, uri]
+import
+  std/[algorithm, os, parsecfg, random, sequtils, streams, strutils, typetraits, uri]
 
 const Version* =
   staticRead(
@@ -82,3 +83,18 @@ func product2*[T](x: openArray[seq[T]]): seq[seq[T]] {.inline.} =
     x[0].mapIt @[it]
   else:
     x.product
+
+iterator zip*[T, U, V](
+    s1: openArray[T], s2: openArray[U], s3: openArray[V]
+): (T, U, V) {.inline.} =
+  ## Yields a combination of elements.
+  ## Longer array[s] will be truncated.
+  let minLen = [s1.len, s2.len, s3.len].min
+  for i in 0 ..< minLen:
+    yield (s1[i], s2[i], s3[i])
+
+func sample*[T](rng: var Rand, arr: openArray[T], count: Natural): seq[T] {.inline.} =
+  ## Selects and returns `count` elements in the array without duplicates.
+  var arr2 = arr.toSeq
+  rng.shuffle arr2
+  result = arr2[0 ..< count]

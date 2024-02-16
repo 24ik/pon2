@@ -220,7 +220,7 @@ func moveWithFullTracking*(
   result = 0.initMoveResult # HACK: dummy to remove warning
 
 # ------------------------------------------------
-# Field <-> array
+# Field <-> string
 # ------------------------------------------------
 
 func `$`*(self: TsuField): string {.inline.} =
@@ -257,6 +257,10 @@ func parseField*[F: TsuField or WaterField](str: string): F {.inline.} =
       arr[row][col] = ($lines[row][col]).parseCell
 
   result = parseField[F](arr)
+
+# ------------------------------------------------
+# Field <-> URI
+# ------------------------------------------------
 
 const
   IzumiyaUriRuleFieldSep = "-"
