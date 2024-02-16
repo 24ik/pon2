@@ -6,6 +6,7 @@
 {.experimental: "views".}
 
 import std/[algorithm, options, random, sequtils, sugar]
+import ./[nazopuyo]
 import
   ../core/[
     cell, field, fieldtype, nazopuyo, pair, pairposition, position, puyopuyo, rule,
@@ -264,7 +265,7 @@ func generateRequirement(
 {.pop.}
 
 # ------------------------------------------------
-# Generate
+# Generate - Generics
 # ------------------------------------------------
 
 func hasDouble(pairsPositions: PairsPositions): bool {.inline.} =
@@ -352,3 +353,103 @@ func generate*[F: TsuField or WaterField](
   {.pop.}
 
   raise newException(GenerateError, "Reached max trial: `generate`.")
+
+proc generate*[F: TsuField or WaterField](
+    req: GenerateRequirement,
+    moveCount: Positive,
+    colorCount: range[1 .. 5],
+    heights: array[Column, Option[Natural]],
+    puyoCounts: tuple[color: Natural, garbage: Natural],
+    connect3Counts:
+      tuple[
+        total: Option[Natural],
+        vertical: Option[Natural],
+        horizontal: Option[Natural],
+        lShape: Option[Natural]
+      ],
+    allowDouble: bool,
+    allowLastDouble: bool,
+): NazoPuyo[F] {.inline.} =
+  ## Returns a randomly generated nazo puyo that has a unique solution.
+  ## If generation fails, `GenerateError` will be raised.
+  ## `parallelCount` will be ignored on JS backend.
+  generate(
+    initRand().rand(int),
+    req,
+    moveCount,
+    colorCount,
+    heights,
+    puyoCounts,
+    connect3Counts,
+    allowDouble,
+    allowLastDouble,
+  )
+
+# ------------------------------------------------
+# Generate - Wrap
+# ------------------------------------------------
+
+func generate*(
+    seed: SomeSignedInt,
+    rule: Rule,
+    req: GenerateRequirement,
+    moveCount: Positive,
+    colorCount: range[1 .. 5],
+    heights: array[Column, Option[Natural]],
+    puyoCounts: tuple[color: Natural, garbage: Natural],
+    connect3Counts:
+      tuple[
+        total: Option[Natural],
+        vertical: Option[Natural],
+        horizontal: Option[Natural],
+        lShape: Option[Natural]
+      ],
+    allowDouble: bool,
+    allowLastDouble: bool,
+): NazoPuyoWrap {.inline.} =
+  ## Returns a randomly generated nazo puyo that has a unique solution.
+  ## If generation fails, `GenerateError` will be raised.
+  ## `parallelCount` will be ignored on JS backend.
+  case rule
+  of Tsu:
+    generate[TsuField](
+      seed, req, moveCount, colorCount, heights, puyoCounts, connect3Counts,
+      allowDouble, allowLastDouble
+    ).initNazoPuyoWrap
+  of Water:
+    generate[WaterField](
+      seed, req, moveCount, colorCount, heights, puyoCounts, connect3Counts,
+      allowDouble, allowLastDouble
+    ).initNazoPuyoWrap
+
+proc generate*(
+    rule: Rule,
+    req: GenerateRequirement,
+    moveCount: Positive,
+    colorCount: range[1 .. 5],
+    heights: array[Column, Option[Natural]],
+    puyoCounts: tuple[color: Natural, garbage: Natural],
+    connect3Counts:
+      tuple[
+        total: Option[Natural],
+        vertical: Option[Natural],
+        horizontal: Option[Natural],
+        lShape: Option[Natural]
+      ],
+    allowDouble: bool,
+    allowLastDouble: bool,
+): NazoPuyoWrap {.inline.} =
+  ## Returns a randomly generated nazo puyo that has a unique solution.
+  ## If generation fails, `GenerateError` will be raised.
+  ## `parallelCount` will be ignored on JS backend.
+  case rule
+  of Tsu:
+    generate[TsuField](
+      req, moveCount, colorCount, heights, puyoCounts, connect3Counts, allowDouble,
+      allowLastDouble
+    ).initNazoPuyoWrap
+  of Water:
+    generate[WaterField](
+      req, moveCount, colorCount, heights, puyoCounts, connect3Counts, allowDouble,
+      allowLastDouble
+    ).initNazoPuyoWrap
