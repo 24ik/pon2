@@ -18,13 +18,14 @@
 {.experimental: "views".}
 
 import std/[options, os, random, sequtils, setutils, strutils, sugar, tables, uri]
-import ./[cell, field, fieldtype, misc, moveresult, pair, pairposition, position, rule]
+import
+  ./[cell, field, fieldtype, host, misc, moveresult, pair, pairposition, position, rule]
 
 type PuyoPuyo*[F: TsuField or WaterField] = object ## Puyo Puyo game.
   field*: F
   pairsPositions*: PairsPositions
 
-  pairPositionIdx: Natural
+  nextIdx: Natural
 
 # ------------------------------------------------
 # Reset
@@ -34,7 +35,7 @@ func reset*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]) {.inline.} =
   ## Resets the Puyo Puyo game.
   mSelf.field = zeroField[F]()
   mSelf.pairsPositions.setLen 0
-  mSelf.pairPositionIdx = 0
+  mSelf.nextIdx = 0
 
 # ------------------------------------------------
 # Constructor
@@ -50,7 +51,7 @@ func initPuyoPuyo*[F: TsuField or WaterField](): PuyoPuyo[F] {.inline.} =
 
 func movingCompleted*[F: TsuField or WaterField](self: PuyoPuyo[F]): bool {.inline.} =
   ## Returns `true` if all pairs in the Puyo Puyo game are put (or skipped).
-  mSelf.pairPositionIdx >= mSelf.pairsPositions.len:
+  mSelf.nextIdx >= mSelf.pairsPositions.len
 
 # ------------------------------------------------
 # Count
@@ -88,11 +89,11 @@ func move[F: TsuField or WaterField](
     return 0.initMoveResult
 
   when overwritePos:
-    mSelf.pairsPositions[mSelf.pairPositionIdx].position = pos
+    mSelf.pairsPositions[mSelf.nextIdx].position = pos
 
-  let pairPos = mSelf.pairsPositions[mSelf.pairPositionIdx]
+  let pairPos = mSelf.pairsPositions[mSelf.nextIdx]
   result = mSelf.field.move(pairPos.pair, pairPos.position)
-  mSelf.pairPositionIdx.inc
+  mSelf.nextIdx.inc
 
 func move*[F: TsuField or WaterField](
     mSelf: var PuyoPuyo[F]
@@ -125,11 +126,11 @@ func moveWithRoughTracking[F: TsuField or WaterField](
     return initMoveResult(0, [0, 0, 0, 0, 0, 0, 0])
 
   when overwritePos:
-    mSelf.pairsPositions[mSelf.pairPositionIdx].position = pos
+    mSelf.pairsPositions[mSelf.nextIdx].position = pos
 
-  let pairPos = mSelf.pairsPositions[mSelf.pairPositionIdx]
+  let pairPos = mSelf.pairsPositions[mSelf.nextIdx]
   result = mSelf.field.moveWithRoughTracking(pairPos.pair, pairPos.position)
-  mSelf.pairPositionIdx.inc
+  mSelf.nextIdx.inc
 
 func moveWithRoughTracking*[F: TsuField or WaterField](
     mSelf: var PuyoPuyo[F]
@@ -165,11 +166,11 @@ func moveWithDetailTracking[F: TsuField or WaterField](
     return initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[])
 
   when overwritePos:
-    mSelf.pairsPositions[mSelf.pairPositionIdx].position = pos
+    mSelf.pairsPositions[mSelf.nextIdx].position = pos
 
-  let pairPos = mSelf.pairsPositions[mSelf.pairPositionIdx]
+  let pairPos = mSelf.pairsPositions[mSelf.nextIdx]
   result = mSelf.field.moveWithDetailTracking(pairPos.pair, pairPos.position)
-  mSelf.pairPositionIdx.inc
+  mSelf.nextIdx.inc
 
 func moveWithDetailTracking*[F: TsuField or WaterField](
     mSelf: var PuyoPuyo[F]
@@ -209,11 +210,11 @@ func moveWithFullTracking[F: TsuField or WaterField](
     return initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
 
   when overwritePos:
-    mSelf.pairsPositions[mSelf.pairPositionIdx].position = pos
+    mSelf.pairsPositions[mSelf.nextIdx].position = pos
 
-  let pairPos = mSelf.pairsPositions[mSelf.pairPositionIdx]
+  let pairPos = mSelf.pairsPositions[mSelf.nextIdx]
   result = mSelf.field.moveWithFullTracking(pairPos.pair, pairPos.position)
-  mSelf.pairPositionIdx.inc
+  mSelf.nextIdx.inc
 
 func moveWithFullTracking*[F: TsuField or WaterField](
     mSelf: var Environment[F]
@@ -259,7 +260,7 @@ func parsePuyoPuyo*[F: TsuField or WaterField](str: string): PuyoPuyo[F] {.inlin
 
   result.field = parseField[F](strs[0])
   result.pairsPositions = strs[1].parsePairsPositions
-  result.pairPositionIdx = 0
+  result.nextIdx = 0
 
 # ------------------------------------------------
 # Puyo Puyo Game <-> URI
@@ -287,7 +288,7 @@ func parsePuyoPuyo*[F: TsuField or WaterField](
 ): PuyoPuyo[F] {.inline.} =
   ## Returns the Puyo Puyo game converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
-  result.pairPositionIdx = 0
+  result.nextIdx = 0
 
   case host
   of Izumiya:

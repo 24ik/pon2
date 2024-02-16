@@ -10,11 +10,11 @@ import ./[host, pair, position]
 import ../private/[misc]
 
 type
-  PairPosition* = object
+  PairPosition* = object ## Pair and position.
     pair*: Pair
     position*: Position
 
-  PairsPositions* = seq[PairPosition]
+  PairsPositions* = seq[PairPosition] ## Pairs and Positions.
 
 # ------------------------------------------------
 # Count
@@ -123,7 +123,7 @@ func parsePairsPositions*(query: string, host: SimulatorHost): PairsPosition {.i
     while idx < query.len:
       try:
         if idx.succ(4) >= query.len:
-          raise newException(ValueError, "")
+          raise newException(ValueError, "This exception cannot occur.")
 
         result.add query[idx ..< idx.succ 4].parsePairPosition host
         idx.inc 4
