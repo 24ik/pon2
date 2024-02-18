@@ -8,8 +8,8 @@
 import std/[sugar]
 import karax/[karax, karaxdsl, kbase, vdom, vstyles]
 import ../../[misc]
-import ../../../../apppkg/[simulator]
-import ../../../../corepkg/[cell]
+import ../../../../app/[simulator]
+import ../../../../core/[cell]
 
 const
   ButtonClass = kstring"button px-2"
@@ -29,21 +29,17 @@ proc initPaletteNode*(simulator: var Simulator): VNode {.inline.} =
           for cell in [None, Red, Green, Blue]:
             td:
               let cellClass =
-                if cell == simulator.editing.cell: SelectedButtonClass
-                else: ButtonClass
+                if cell == simulator.editing.cell: SelectedButtonClass else: ButtonClass
 
-              button(class = cellClass,
-                     onclick = simulator.initClickHandler(cell)):
+              button(class = cellClass, onclick = simulator.initClickHandler(cell)):
                 figure(class = "image is-24x24"):
                   img(src = cell.cellImageSrc)
         tr:
           for i, cell in [Yellow, Purple, Garbage]:
             td:
               let cellClass =
-                if cell == simulator.editing.cell: SelectedButtonClass
-                else: ButtonClass
+                if cell == simulator.editing.cell: SelectedButtonClass else: ButtonClass
 
-              button(class = cellClass,
-                     onclick = simulator.initClickHandler(cell)):
+              button(class = cellClass, onclick = simulator.initClickHandler(cell)):
                 figure(class = "image is-24x24"):
                   img(src = cell.cellImageSrc)
