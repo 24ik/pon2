@@ -8,9 +8,9 @@
 import std/[strformat, sugar, uri]
 import karax/[karax, karaxdsl, kbase, kdom, vdom, vstyles]
 import ./[field, pairs, requirement]
-import ../[render]
+import ../[common]
 import ../../[misc]
-import ../../../../apppkg/[simulator]
+import ../../../../app/[simulator]
 
 const
   UrlCopyButtonIdPrefix = "pon2-share-url"
@@ -22,7 +22,11 @@ const
   DisplayPairDivIdPrefix = "pon2-share-display-pair"
   DisplayPairPosDivIdPrefix = "pon2-share-display-pair-pos"
 
-proc downloadDisplayImage(id: kstring) {.importjs: &"""
+proc downloadDisplayImage(
+  id: kstring
+) {.
+  importjs:
+    &"""
 const div = document.getElementById('{DisplayDivIdPrefix}' + (#));
 div.style.display = 'block';
 html2canvas(div).then((canvas) => {{
@@ -33,16 +37,18 @@ html2canvas(div).then((canvas) => {{
   element.download = 'puyo.png';
   element.target = '_blank';
   element.click();
-}});""".} ## Downloads the simulator image.
+}});"""
+.} ## Downloads the simulator image.
 
 func initDownloadHandler(id: string, withPositions: bool): () -> void =
   ## Returns the handler for downloading.
   # NOTE: cannot inline due to lazy evaluation
-  proc handler =
-    document.getElementById(kstring &"{DisplayPairDivIdPrefix}{id}").
-      style.display = if withPositions: "none" else: "block"
-    document.getElementById(kstring &"{DisplayPairPosDivIdPrefix}{id}").
-      style.display = if withPositions: "block" else: "none"
+  proc handler() =
+    document.getElementById(kstring &"{DisplayPairDivIdPrefix}{id}").style.display =
+      if withPositions: "none" else: "block"
+
+    document.getElementById(kstring &"{DisplayPairPosDivIdPrefix}{id}").style.display =
+      if withPositions: "block" else: "none"
     downloadDisplayImage id.kstring
 
   result = handler
@@ -62,48 +68,74 @@ proc initShareNode*(simulator: var Simulator, id = ""): VNode {.inline.} =
       span:
         text "でシェア"
       tdiv(class = "buttons"):
-        a(class = "button is-size-7", target = "_blank",
-          rel = "noopener noreferrer", href = kstring $simulator.toXlink false):
+        a(
+          class = "button is-size-7",
+          target = "_blank",
+          rel = "noopener noreferrer",
+          href = kstring $simulator.toXlink(withPositions = false, editor = false),
+        ):
           text "操作無"
-        a(class = "button is-size-7", target = "_blank",
-          rel = "noopener noreferrer", href = kstring $simulator.toXlink true):
+        a(
+          class = "button is-size-7",
+          target = "_blank",
+          rel = "noopener noreferrer",
+          href = kstring $simulator.toXlink(withPositions = true, editor = false),
+        ):
           text "操作有"
     tdiv(class = "block"):
       text "画像ダウンロード"
       tdiv(class = "buttons"):
-        button(class = "button is-size-7",
-               onclick = initDownloadHandler(id, false)):
+        button(class = "button is-size-7", onclick = initDownloadHandler(id, false)):
           text "操作無"
-        button(class = "button is-size-7",
-               onclick = initDownloadHandler(id, true)):
+        button(class = "button is-size-7", onclick = initDownloadHandler(id, true)):
           text "操作有"
     tdiv(class = "block"):
       text "URLコピー"
       tdiv(class = "buttons"):
-        button(id = urlCopyButtonId.kstring, class = "button is-size-7",
-               onclick = initCopyButtonHandler(
-                () => $simulator.toUri(false, false), urlCopyButtonId)):
+        button(
+          id = urlCopyButtonId.kstring,
+          class = "button is-size-7",
+          onclick = initCopyButtonHandler(
+            () => $simulator.toUri(withPositions = false, editor = false),
+            urlCopyButtonId,
+          ),
+        ):
           text "操作無"
-        button(id = posUrlCopyButtonId.kstring, class = "button is-size-7",
-               onclick = initCopyButtonHandler(
-                () => $simulator.toUri(false, true), posUrlCopyButtonId)):
+        button(
+          id = posUrlCopyButtonId.kstring,
+          class = "button is-size-7",
+          onclick = initCopyButtonHandler(
+            () => $simulator.toUri(withPositions = true, editor = false),
+            posUrlCopyButtonId,
+          ),
+        ):
           text "操作有"
     if simulator.editor:
       tdiv(class = "block"):
         text "編集者URLコピー"
         tdiv(class = "buttons"):
-          button(id = editorUrlCopyButtonId.kstring, class = "button is-size-7",
-                 onclick = initCopyButtonHandler(
-                   () => $simulator.toUri(true, false), editorUrlCopyButtonId)):
+          button(
+            id = editorUrlCopyButtonId.kstring,
+            class = "button is-size-7",
+            onclick = initCopyButtonHandler(
+              () => $simulator.toUri(withPositions = false, editor = true),
+              editorUrlCopyButtonId,
+            ),
+          ):
             text "操作無"
-          button(id = editorPosUrlCopyButtonId.kstring,
-                 class = "button is-size-7",
-                 onclick = initCopyButtonHandler(
-                   () => $simulator.toUri(true, true),
-                   editorPosUrlCopyButtonId)):
+          button(
+            id = editorPosUrlCopyButtonId.kstring,
+            class = "button is-size-7",
+            onclick = initCopyButtonHandler(
+              () => $simulator.toUri(withPositions = true, editor = true),
+              editorPosUrlCopyButtonId,
+            ),
+          ):
             text "操作有"
-    tdiv(id = kstring &"{DisplayDivIdPrefix}{id}",
-         style = style(StyleAttr.display, kstring"none")):
+    tdiv(
+      id = kstring &"{DisplayDivIdPrefix}{id}",
+      style = style(StyleAttr.display, kstring"none"),
+    ):
       tdiv(class = "block"):
         simulator.initRequirementNode(true, id)
       tdiv(class = "block"):
@@ -111,11 +143,11 @@ proc initShareNode*(simulator: var Simulator, id = ""): VNode {.inline.} =
           tdiv(class = "column is-narrow"):
             tdiv(class = "block"):
               simulator.initFieldNode(true)
-          tdiv(id = kstring &"{DisplayPairDivIdPrefix}{id}",
-               class = "column is-narrow"):
+          tdiv(id = kstring &"{DisplayPairDivIdPrefix}{id}", class = "column is-narrow"):
             tdiv(class = "block"):
               simulator.initPairsNode(true, false)
-          tdiv(id = kstring &"{DisplayPairPosDivIdPrefix}{id}",
-               class = "column is-narrow"):
+          tdiv(
+            id = kstring &"{DisplayPairPosDivIdPrefix}{id}", class = "column is-narrow"
+          ):
             tdiv(class = "block"):
               simulator.initPairsNode(true, true)
