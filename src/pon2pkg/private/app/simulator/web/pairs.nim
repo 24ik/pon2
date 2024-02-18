@@ -7,39 +7,39 @@
 
 import std/[options, sugar]
 import karax/[karax, karaxdsl, kbase, vdom, vstyles]
-import ../[render]
+import ../[common]
 import ../../[misc]
-import ../../../../apppkg/[misc, simulator]
-import ../../../../corepkg/[cell, misc, pair]
+import ../../../../app/[color, misc, nazopuyo, simulator]
+import ../../../../core/[cell, misc, pair]
 
-func initDeleteClickHandler(simulator: var Simulator, idx: Natural):
-    () -> void =
+func initDeleteClickHandler(simulator: var Simulator, idx: Natural): () -> void =
   ## Returns the click handler for delete buttons.
   # NOTE: cannot inline due to lazy evaluation
   () => simulator.deletePair(idx)
 
-func initCellClickHandler(simulator: var Simulator, idx: Natural,
-                          axis: bool): () -> void =
+func initCellClickHandler(
+    simulator: var Simulator, idx: Natural, axis: bool
+): () -> void =
   ## Returns the click handler for cell buttons.
   # NOTE: cannot inline due to lazy evaluation
   () => simulator.writeCell(idx, axis)
 
-func cellClass(simulator: Simulator, idx: Natural, axis: bool): kstring
-              {.inline.} =
+func cellClass(simulator: Simulator, idx: Natural, axis: bool): kstring {.inline.} =
   ## Returns the cell's class.
   if simulator.pairCellBackgroundColor(idx, axis) == SelectColor:
     kstring"button p-0 is-selected is-primary"
   else:
     kstring"button p-0"
 
-proc initPairsNode*(simulator: var Simulator, displayMode = false,
-                    showPositions = true): VNode {.inline.} =
+proc initPairsNode*(
+    simulator: var Simulator, displayMode = false, showPositions = true
+): VNode {.inline.} =
   ## Returns the pairs node.
   let editMode = simulator.mode == Edit and not displayMode
 
   result = buildHtml(table(class = "table is-narrow")):
     tbody:
-      for idx, pair in simulator.originalPairs:
+      for idx, (pair, pos) in simulator.originalNazoPuyoWrap.pairsPositions:
         let rowClass =
           if simulator.needPairPointer(idx) and not displayMode:
             kstring"is-selected"
@@ -50,8 +50,10 @@ proc initPairsNode*(simulator: var Simulator, displayMode = false,
           # delete button
           if editMode:
             td:
-              button(class = "button is-size-7",
-                     onclick = simulator.initDeleteClickHandler(idx)):
+              button(
+                class = "button is-size-7",
+                onclick = simulator.initDeleteClickHandler(idx),
+              ):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-trash")
 
@@ -67,9 +69,11 @@ proc initPairsNode*(simulator: var Simulator, displayMode = false,
                 let axisSrc = pair.axis.cellImageSrc
 
                 if editMode:
-                  button(class = simulator.cellClass(idx, true),
-                         style = style(StyleAttr.maxHeight, kstring"24px"),
-                         onclick = simulator.initCellClickHandler(idx, true)):
+                  button(
+                    class = simulator.cellClass(idx, true),
+                    style = style(StyleAttr.maxHeight, kstring"24px"),
+                    onclick = simulator.initCellClickHandler(idx, true),
+                  ):
                     figure(class = "image is-24x24"):
                       img(src = axisSrc)
                 else:
@@ -80,9 +84,11 @@ proc initPairsNode*(simulator: var Simulator, displayMode = false,
                 let childSrc = pair.child.cellImageSrc
 
                 if editMode:
-                  button(class = simulator.cellClass(idx, false),
-                         style = style(StyleAttr.maxHeight, kstring"24px"),
-                         onclick = simulator.initCellClickHandler(idx, false)):
+                  button(
+                    class = simulator.cellClass(idx, false),
+                    style = style(StyleAttr.maxHeight, kstring"24px"),
+                    onclick = simulator.initCellClickHandler(idx, false),
+                  ):
                     figure(class = "image is-24x24"):
                       img(src = childSrc)
                 else:
@@ -91,32 +97,44 @@ proc initPairsNode*(simulator: var Simulator, displayMode = false,
 
           # position
           if showPositions:
-            let pos = simulator.positions[idx]
             td:
-              text if pos.isSome: $pos.get else: ""
+              text $pos
+
       # placeholder after the last pair for edit mode
       if editMode:
         tr:
           td:
-            button(class = "button is-static",
-                   style = style(StyleAttr.visibility, kstring"hidden")):
+            button(
+              class = "button is-static",
+              style = style(StyleAttr.visibility, kstring"hidden"),
+            ):
               span(class = "icon"):
                 italic(class = "fa-solid fa-trash")
           td:
-            text $simulator.pairs.len.succ
+            text $simulator.originalNazoPuyoWrap.pairsPositions.len.succ
           td:
             tdiv(class = "columns is-mobile is-gapless"):
               tdiv(class = "column is-narrow"):
-                button(class = simulator.cellClass(simulator.pairs.len, true),
-                       style = style(StyleAttr.maxHeight, kstring"24px"),
-                       onclick = simulator.initCellClickHandler(
-                         simulator.pairs.len, true)):
+                button(
+                  class = simulator.cellClass(
+                    simulator.originalNazoPuyoWrap.pairsPositions.len, true
+                  ),
+                  style = style(StyleAttr.maxHeight, kstring"24px"),
+                  onclick = simulator.initCellClickHandler(
+                    simulator.originalNazoPuyoWrap.pairsPositions.len, true
+                  ),
+                ):
                   figure(class = "image is-24x24"):
-                    img(src = None.cellImageSrc)
+                    img(src = Cell.None.cellImageSrc)
               tdiv(class = "column is-narrow"):
-                button(class = simulator.cellClass(simulator.pairs.len, false),
-                       style = style(StyleAttr.maxHeight, kstring"24px"),
-                       onclick = simulator.initCellClickHandler(
-                         simulator.pairs.len, false)):
+                button(
+                  class = simulator.cellClass(
+                    simulator.originalNazoPuyoWrap.pairsPositions.len, false
+                  ),
+                  style = style(StyleAttr.maxHeight, kstring"24px"),
+                  onclick = simulator.initCellClickHandler(
+                    simulator.originalNazoPuyoWrap.pairsPositions.len, false
+                  ),
+                ):
                   figure(class = "image is-24x24"):
-                    img(src = None.cellImageSrc)
+                    img(src = Cell.None.cellImageSrc)
