@@ -6,10 +6,10 @@
 {.experimental: "views".}
 
 import karax/[karaxdsl, vdom]
-import ../[render]
+import ../[common]
 import ../../[misc]
-import ../../../../apppkg/[simulator]
-import ../../../../corepkg/[misc]
+import ../../../../app/[simulator]
+import ../../../../core/[notice]
 
 proc initMessagesNode*(simulator: var Simulator): VNode {.inline.} =
   ## Returns the messages node.
@@ -23,11 +23,14 @@ proc initMessagesNode*(simulator: var Simulator): VNode {.inline.} =
             for notice in countdown(Comet, Small):
               let imgSrc = notice.noticeGarbageImageSrc
 
-              for _ in 1..noticeGarbages[notice]:
+              for _ in 1 .. noticeGarbages[notice]:
                 td:
                   figure(class = "image is-16x16"):
                     img(src = imgSrc)
             td:
               tdiv(class = "is-size-7"):
-                text if score == 0: "　" else: $score
+                text if score == 0:
+                  "　"
+                else:
+                  $score
     text state
