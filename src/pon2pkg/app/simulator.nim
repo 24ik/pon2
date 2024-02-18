@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[deques, options, sequtils, strformat, uri]
+import std/[deques, options, sequtils, strformat, sugar, tables, uri]
 import ./[key, misc, nazopuyo]
 import
   ../core/[
@@ -75,13 +75,13 @@ const
   InitPos = Up2
   DefaultReq = Requirement(kind: Clear, color: RequirementColor.All, number: 0)
 
-func initSimulator*[F: TsuField or WaterField](
-    nazo: NazoPuyo[F], mode = Play, editor = false
+func initSimulator*(
+    nazoPuyoWrap: NazoPuyoWrap, mode = Play, editor = false
 ): Simulator {.inline.} =
   ## Returns a new simulator.
   ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
-  result.nazoPuyoWrap = initNazoPuyoWrap nazo
-  result.originalNazoPuyoWrap = initNazoPuyoWrap nazo
+  result.nazoPuyoWrap = nazoPuyoWrap
+  result.originalNazoPuyoWrap = nazoPuyoWrap
   result.moveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
 
   result.editor = editor or mode == Edit
@@ -99,6 +99,13 @@ func initSimulator*[F: TsuField or WaterField](
   result.editing.pair = (Natural 0, true)
   result.editing.focusField = true
   result.editing.insert = false
+
+func initSimulator*[F: TsuField or WaterField](
+    nazo: NazoPuyo[F], mode = Play, editor = false
+): Simulator {.inline.} =
+  ## Returns a new simulator.
+  ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
+  initNazoPuyoWrap(nazo).initSimulator(mode, editor)
 
 func initSimulator*[F: TsuField or WaterField](
     puyoPuyo: PuyoPuyo[F], mode = Play, editor = false
@@ -535,8 +542,16 @@ func reset*(mSelf; resetPosition = true) {.inline.} =
 # ------------------------------------------------
 
 const
+  EditorKey = "editor"
   KindKey = "kind"
   ModeKey = "mode"
+
+  StrToKind = collect:
+    for kind in SimulatorKind:
+      {$kind: kind}
+  StrToMode = collect:
+    for mode in SimulatorMode:
+      {$mode: mode}
 
 func toUri*(self; withPositions: bool, editor: bool): Uri {.inline.} =
   ## Returns the URI converted from the simulator.
@@ -554,7 +569,7 @@ func toUri*(self; withPositions: bool, editor: bool): Uri {.inline.} =
     # editor, kind, mode
     var queries = newSeq[(string, string)](0)
     if self.editor:
-      queries.add ("editor", "")
+      queries.add (EditorKey, "")
     queries.add (KindKey, $self.kind)
     queries.add (ModeKey, $self.mode)
 
@@ -571,6 +586,48 @@ func toUri*(self; withPositions: bool, editor: bool): Uri {.inline.} =
 func toUri*(self; withPositions: bool): Uri {.inline.} =
   ## Returns the URI converted from the simulator.
   self.toUri(withPositions, self.editor)
+
+func parseSimulator*(uri: Uri) {.inline.} =
+  ## Returns the simulator converted from the URI.
+  ## If the URI is invalid, `ValueError` is raised.
+  var
+    editor = false
+    kindVal = "<invalid>"
+    modeVal = "<invalid>"
+    simulatorQueries = initTable[string, string]()
+    mainQueries = newSeq[(string, string)](0)
+  for (key, val) in uri.decodeQuery:
+    case key
+    of EditorKey:
+      if val == "":
+        editor = true
+      else:
+        raise newException(ValueError, "Invalid simulator: " & $uri)
+    of KindKey:
+      kindVal = val
+    of ModeKey:
+      modeVal = val
+    else:
+      mainQueries.add (key, val)
+
+  if kindVal notin StrToKind or modeVal notin StrToMode:
+    raise newException(ValueError, "Invalid simulator: " & $uri)
+
+  let
+    kind = StrToKind[kindVal]
+    mode = StrToMode[modeVal]
+
+  case kind
+  of Regular:
+    try:
+      result = parsePuyoPuyo[TsuField](mainQuery, Izumiya).initSimulator(mode, editor)
+    except ValueError:
+      result = parsePuyoPuyo[WaterField](mainQuery, Izumiya).initSimulator(mode, editor)
+  of Nazo:
+    try:
+      result = parseNazoPuyo[TsuField](mainQuery, Izumiya).initSimulator(mode, editor)
+    except ValueError:
+      result = parseNazoPuyo[WaterField](mainQuery, Izumiya).initSimulator(mode, editor)
 
 # ------------------------------------------------
 # Keyboard Operation
