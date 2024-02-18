@@ -1,4 +1,4 @@
-## This module implements helper functions for simulator rendering.
+## This module implements helper functions for the simulator.
 ##
 
 {.experimental: "strictDefs".}
