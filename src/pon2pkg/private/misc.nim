@@ -98,3 +98,17 @@ func sample*[T](rng: var Rand, arr: openArray[T], count: Natural): seq[T] {.inli
   var arr2 = arr.toSeq
   rng.shuffle arr2
   result = arr2[0 ..< count]
+
+func incRot*[T: Ordinal](x: var T) {.inline.} =
+  ## Rotating `inc`.
+  if x == T.high:
+    x = T.low
+  else:
+    x.inc
+
+func decRot*[T: Ordinal](x: var T) {.inline.} =
+  ## Rotating `dec`.
+  if x == T.low:
+    x = T.high
+  else:
+    x.dec

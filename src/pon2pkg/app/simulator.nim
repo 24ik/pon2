@@ -5,11 +5,13 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[deques, options, sequtils, uri]
-import ./[misc]
-import ../corepkg/[cell, environment, field, fieldtype, misc, moveresult, pair,
-                   position, rule]
-import ../nazopuyopkg/[nazopuyo]
+import std/[deques, options, sequtils, strformat, uri]
+import ./[key, misc, nazopuyo]
+import
+  ../core/[
+    cell, field, fieldtype, host, misc, moveresult, nazopuyo, pair, position, puyopuyo,
+    requirement, rule
+  ]
 import ../private/[intrinsic, misc]
 
 when UseAvx2:
@@ -18,6 +20,17 @@ else:
   import ../private/core/field/primitive/[disappearresult]
 
 type
+  SimulatorKind* {.pure.} = enum
+    ## simulator kind.
+    Regular = "r"
+    Nazo = "n"
+
+  SimulatorMode* {.pure.} = enum
+    ## simulator mode.
+    Edit = "e"
+    Play = "p"
+    Replay = "r"
+
   SimulatorState* {.pure.} = enum
     ## Simulator state.
     Stable
@@ -26,129 +39,93 @@ type
 
   Simulator* = object
     ## Puyo Puyo simulator.
-    ## Note that `editor` does not affect the behaviour; it is used only by
-    ## rendering.
-    environments*: Environments
-    originalEnvironments*: Environments
-    positions*: Positions
-    requirement*: Requirement
+    ## Note that `editor` field does not affect the behaviour; it is used only
+    ## by rendering.
+    nazoPuyoWrap*: NazoPuyoWrap
+    originalNazoPuyoWrap*: NazoPuyoWrap
+    moveResult: MoveResult
 
     editor*: bool
     state*: SimulatorState
     kind: SimulatorKind
     mode: SimulatorMode
 
-    undoDeque: Deque[tuple[environments: Environments,
-                           requirement: Requirement]]
-    redoDeque: Deque[tuple[environments: Environments,
-                           requirement: Requirement]]
+    undoDeque: Deque[NazoPuyoWrap]
+    redoDeque: Deque[NazoPuyoWrap]
 
     next*: tuple[index: Natural, position: Position]
-    editing*: tuple[
-      cell: Cell, field: tuple[row: Row, column: Column],
-      pair: tuple[index: Natural, axis: bool], focusField: bool, insert: bool]
-
-    moveResult: MoveResult
+    editing*:
+      tuple[
+        cell: Cell,
+        field: tuple[row: Row, column: Column],
+        pair: tuple[index: Natural, axis: bool],
+        focusField: bool,
+        insert: bool
+      ]
 
 using
   self: Simulator
   mSelf: var Simulator
 
 # ------------------------------------------------
-# Constructor - Simulator
+# Constructor
 # ------------------------------------------------
 
 const
   InitPos = Up2
-  DefaultReq = Requirement(kind: Clear, color: some RequirementColor.All,
-                           number: none RequirementNumber)
+  DefaultReq = Requirement(kind: Clear, color: RequirementColor.All, number: 0)
 
 func initSimulator*[F: TsuField or WaterField](
-    env: Environment[F], positions: Positions, mode = Play,
-    editor = false): Simulator {.inline.} =
-  ## Constructor of `Simulator`.
+    nazo: NazoPuyo[F], mode = Play, editor = false
+): Simulator {.inline.} =
+  ## Returns a new simulator.
   ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
-  when F is TsuField:
-    result.rule = Tsu
-    result.environments.tsu = env
-    result.environments.water = initWaterEnvironment 0
-  else:
-    result.rule = Water
-    result.environments.tsu = initTsuEnvironment 0
-    result.environments.water = env
-  result.originalEnvironments.tsu = result.environments.tsu
-  result.originalEnvironments.water = result.environments.water
-  result.positions = positions
-  result.positions.setLen env.pairs.len
-  result.requirement = DefaultReq
+  result.nazoPuyoWrap = initNazoPuyoWrap nazo
+  result.originalNazoPuyoWrap = initNazoPuyoWrap nazo
+  result.moveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
 
   result.editor = editor or mode == Edit
   result.state = Stable
-  result.kind = Regular
+  result.kind = Nazo
   result.mode = mode
 
-  result.undoDeque = initDeque[
-    tuple[environments: Environments,
-          requirement: Requirement]](env.pairs.len)
-  result.redoDeque = initDeque[
-    tuple[environments: Environments,
-          requirement: Requirement]](env.pairs.len)
+  result.undoDeque = initDeque[NazoPuyoWrap](nazo.moveCount)
+  result.redoDeque = initDeque[NazoPuyoWrap](nazo.moveCount)
 
   result.next.index = Natural 0
   result.next.position = InitPos
-  result.editing.cell = None
+  result.editing.cell = Cell.None
   result.editing.field = (Row.low, Column.low)
   result.editing.pair = (Natural 0, true)
   result.editing.focusField = true
   result.editing.insert = false
 
-  result.moveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
-
 func initSimulator*[F: TsuField or WaterField](
-    env: Environment[F], mode = Play, editor = false): Simulator {.inline.} =
-  ## Constructor of `Simulator`.
+    puyoPuyo: PuyoPuyo[F], mode = Play, editor = false
+): Simulator {.inline.} =
+  ## Returns a new simulator.
   ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
-  env.initSimulator(Position.none.repeat env.pairs.len, mode, editor)
-
-func initSimulator*[F: TsuField or WaterField](
-    nazo: NazoPuyo[F], positions: Positions, mode = Play,
-    editor = false): Simulator {.inline.} =
-  ## Constructor of `Simulator`.
-  ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
-  result = nazo.environment.initSimulator(positions, mode, editor)
-  result.kind = Nazo
-  result.requirement = nazo.requirement
-
-func initSimulator*[F: TsuField or WaterField](
-    nazo: NazoPuyo[F], mode = Play, editor = false): Simulator {.inline.} =
-  ## Constructor of `Simulator`.
-  ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
-  nazo.initSimulator(Position.none.repeat nazo.moveCount, mode, editor)
+  result =
+    NazoPuyo[F](puyoPuyo: puyoPuyo, requirement: DefaultReq).initSimulator(mode, editor)
+  result.kind = Regular
 
 # ------------------------------------------------
 # Property - Rule / Kind / Mode
 # ------------------------------------------------
 
-func rule*(self): Rule {.inline.} = self.environments.rule
-func kind*(self): SimulatorKind {.inline.} = self.kind
-func mode*(self): SimulatorMode {.inline.} = self.mode
+func rule*(self): Rule {.inline.} =
+  self.nazoPuyoWrap.rule
+
+func kind*(self): SimulatorKind {.inline.} =
+  self.kind
+
+func mode*(self): SimulatorMode {.inline.} =
+  self.mode
 
 func `rule=`*(mSelf; rule: Rule) {.inline.} =
-  if rule == mSelf.rule:
-    return
-
-  mSelf.environments.rule = rule
-
-  case rule
-  of Tsu: mSelf.environments.tsu = mSelf.environments.water.toTsuEnvironment
-  of Water: mSelf.environments.water = mSelf.environments.tsu.toWaterEnvironment
-
-  mSelf.originalEnvironments = mSelf.environments
+  mSelf.nazoPuyoWrap.rule = rule
 
 func `kind=`*(mSelf; kind: SimulatorKind) {.inline.} =
-  if kind == mSelf.kind:
-    return
-
   mSelf.kind = kind
 
 func `mode=`*(mSelf; mode: SimulatorMode) {.inline.} =
@@ -159,7 +136,7 @@ func `mode=`*(mSelf; mode: SimulatorMode) {.inline.} =
     mSelf.editor = true
 
   if mode == Edit or mSelf.mode == Edit:
-    mSelf.environments = mSelf.originalEnvironments
+    mSelf.nazoPuyoWrap = mSelf.originalNazoPuyoWrap
     mSelf.state = Stable
     mSelf.undoDeque.clear
     mSelf.redoDeque.clear
@@ -167,169 +144,36 @@ func `mode=`*(mSelf; mode: SimulatorMode) {.inline.} =
   mSelf.mode = mode
 
 # ------------------------------------------------
-# Property - Nazo
-# ------------------------------------------------
-
-func tsuNazoPuyo*(self): NazoPuyo[TsuField] {.inline.} =
-  ## Returns the Tsu nazo puyo.
-  result.environment = self.environments.tsu
-  result.requirement = self.requirement
-
-func waterNazoPuyo*(self): NazoPuyo[WaterField] {.inline.} =
-  ## Returns the Water nazo puyo.
-  result.environment = self.environments.water
-  result.requirement = self.requirement
-
-# ------------------------------------------------
-# Property - Nazo - Original
-# ------------------------------------------------
-
-func originalTsuNazoPuyo*(self): NazoPuyo[TsuField] {.inline.} =
-  ## Returns the original Tsu nazo puyo.
-  result.environment = self.originalEnvironments.tsu
-  result.requirement = self.requirement
-
-func originalWaterNazoPuyo*(self): NazoPuyo[WaterField] {.inline.} =
-  ## Returns the original Water nazo puyo.
-  result.environment = self.originalEnvironments.water
-  result.requirement = self.requirement
-
-# ------------------------------------------------
-# Property - Pairs
-# ------------------------------------------------
-
-func pairs*(self): Pairs {.inline.} =
-  ## Returns the pairs.
-  case self.rule
-  of Tsu: self.environments.tsu.pairs
-  of Water: self.environments.water.pairs
-
-func pairs*(mSelf): var Pairs {.inline.} =
-  ## Returns the pairs.
-  case mSelf.rule
-  of Tsu: result = mSelf.environments.tsu.pairs
-  of Water: result = mSelf.environments.water.pairs
-
-func adjustPositions(mSelf) {.inline.} = mSelf.positions.setLen mSelf.pairs.len
-  ## Adjust the positions' length.
-
-func `pairs=`*(mSelf; pairs: Pairs) {.inline.} =
-  ## Sets the pairs.
-  ## Note that this function calles `adjustPositions()` internally.
-  case mSelf.rule
-  of Tsu: mSelf.environments.tsu.pairs = pairs
-  of Water: mSelf.environments.water.pairs = pairs
-
-  mSelf.adjustPositions
-
-# ------------------------------------------------
-# Property - Pairs - Original
-# ------------------------------------------------
-
-func originalPairs*(self): Pairs {.inline.} =
-  ## Returns the original pairs.
-  case self.rule
-  of Tsu: self.originalEnvironments.tsu.pairs
-  of Water: self.originalEnvironments.water.pairs
-
-func originalPairs*(mSelf): var Pairs {.inline.} =
-  ## Returns the original pairs.
-  case mSelf.rule
-  of Tsu: result = mSelf.originalEnvironments.tsu.pairs
-  of Water: result = mSelf.originalEnvironments.water.pairs
-
-func `originalPairs=`*(mSelf; pairs: Pairs) {.inline.} =
-  ## Sets the original pairs.
-  ## Note that this function does **NOT** call `adjustPositions()` internally.
-  case mSelf.rule
-  of Tsu: mSelf.originalEnvironments.tsu.pairs = pairs
-  of Water: mSelf.originalEnvironments.water.pairs = pairs
-
-# ------------------------------------------------
 # Property - Score
 # ------------------------------------------------
 
-func score*(self): int {.inline.} = self.moveResult.score ## Returns the score.
-
-# ------------------------------------------------
-# With
-# ------------------------------------------------
-
-template withNazoPuyo*(self: Simulator, body: untyped): untyped =
-  ## Runs `body` with `nazoPuyo` exposed.
-  case self.rule
-  of Tsu:
-    let nazoPuyo {.inject.} = self.tsuNazoPuyo
-    body
-  of Water:
-    let nazoPuyo {.inject.} = self.waterNazoPuyo
-    body
-
-template withOriginalNazoPuyo*(self: Simulator, body: untyped): untyped =
-  ## Runs `body` with `originalNazoPuyo` exposed.
-  case self.rule
-  of Tsu:
-    let originalNazoPuyo {.inject.} = self.originalTsuNazoPuyo
-    body
-  of Water:
-    let originalNazoPuyo {.inject.} = self.originalWaterNazoPuyo
-    body
-
-template withEnvironment*(self: Simulator, body: untyped): untyped =
-  ## Runs `body` with `environment` exposed.
-  self.environments.flattenAnd:
-    body
-
-template withOriginalEnvironment*(self: Simulator, body: untyped): untyped =
-  ## Runs `body` with `originalEnvironment` exposed.
-  self.originalEnvironments.flattenAnd:
-    let originalEnvironment {.inject.} = environment
-    body
-
-template withField*(self: Simulator, body: untyped): untyped =
-  ## Runs `body` with `field` exposed.
-  self.environments.flattenAnd:
-    let field {.inject.} = environment.field
-    body
-
-template withOriginalField*(self: Simulator, body: untyped): untyped =
-  ## Runs `body` with `originalField` exposed.
-  self.originalEnvironments.flattenAnd:
-    let originalField {.inject.} = environment.field
-    body
+func score*(self): int {.inline.} = ## Returns the score.
+  self.moveResult.score
 
 # ------------------------------------------------
 # Edit - Other
 # ------------------------------------------------
 
-func toggleInserting*(mSelf) {.inline.} = mSelf.editing.insert.toggle
-  ## Toggles inserting or not.
+func toggleInserting*(mSelf) {.inline.} = ## Toggles inserting or not.
+  mSelf.editing.insert.toggle
 
-func toggleFocus*(mSelf) {.inline.} = mSelf.editing.focusField.toggle
-  ## Toggles focusing field or not.
+func toggleFocus*(mSelf) {.inline.} = ## Toggles focusing field or not.
+  mSelf.editing.focusField.toggle
 
 func save(mSelf) {.inline.} =
   ## Saves the current simulator.
-  mSelf.undoDeque.addLast (mSelf.environments, mSelf.requirement)
+  mSelf.undoDeque.addLast mSelf.nazoPuyoWrap
   mSelf.redoDeque.clear
 
 template change(mSelf; body: untyped) =
-  ## Helper template for operations that changes `originalEnvironment`.
+  ## Helper template for operations that changes `originalNazoPuyoWrap`.
   mSelf.save
   body
-  mSelf.originalEnvironments = mSelf.environments
+  mSelf.originalNazoPuyoWrap = mSelf.nazoPuyoWrap
 
 # ------------------------------------------------
 # Edit - Cursor
 # ------------------------------------------------
-
-func incRot[T: Ordinal](x: var T) {.inline.} =
-  ## Rotating `inc`.
-  if x == T.high: x = T.low else: x.inc
-
-func decRot[T: Ordinal](x: var T) {.inline.} =
-  ## Rotating `dec`.
-  if x == T.low: x = T.high else: x.dec
 
 func moveCursorUp*(mSelf) {.inline.} =
   ## Moves the cursor upward.
@@ -369,49 +213,44 @@ func moveCursorLeft*(mSelf) {.inline.} =
 # Edit - Delete
 # ------------------------------------------------
 
-func delete[T](deque: var Deque[T], idx: Natural) {.inline.} =
-  var s = deque.toSeq
-  s.delete idx
-  deque = s.toDeque
-
-func deletePair*(mSelf; idx: Natural) {.inline.} =
-  ## Deletes the pair.
-  if idx >= mSelf.pairs.len:
+func deletePairPosition*(mSelf; idx: Natural) {.inline.} =
+  ## Deletes the pair&position.
+  if idx >= mSelf.pairsPositions.len:
     return
 
   mSelf.change:
-    mSelf.pairs.delete idx
-    mSelf.positions.delete idx
+    mSelf.pairsPositions.delete idx
 
-func deletePair*(mSelf) {.inline.} =
-  ## Deletes the pair at selecting index.
-  mSelf.deletePair mSelf.editing.pair.index
+func deletePairPosition*(mSelf) {.inline.} =
+  ## Deletes the pair&position at selecting index.
+  mSelf.deletePairPosition mSelf.editing.pair.index
 
 # ------------------------------------------------
 # Edit - Write
 # ------------------------------------------------
 
-func insert[T](deque: var Deque[T], item: T, idx: Natural) {.inline.} =
-  var s = deque.toSeq
-  s.insert item, idx
-  deque = s.toDeque
-
 func writeCell(mSelf; row: Row, col: Column, cell: Cell) {.inline.} =
   ## Writes the cell to the field.
   mSelf.change:
     if mSelf.editing.insert:
-      if cell == None:
+      if cell == Cell.None:
         case mSelf.rule
-        of Tsu: mSelf.environments.tsu.field.removeSqueeze row, col
-        of Water: mSelf.environments.water.field.removeSqueeze row, col
+        of Tsu:
+          mSelf.nazoPuyoWrap.tsu.field.removeSqueeze row, col
+        of Water:
+          mSelf.nazoPuyoWrap.water.field.removeSqueeze row, col
       else:
         case mSelf.rule
-        of Tsu: mSelf.environments.tsu.field.insert row, col, cell
-        of Water: mSelf.environments.water.field.insert row, col, cell
+        of Tsu:
+          mSelf.nazoPuyoWrap.tsu.field.insert row, col, cell
+        of Water:
+          mSelf.nazoPuyoWrap.water.field.insert row, col, cell
     else:
       case mSelf.rule
-      of Tsu: mSelf.environments.tsu.field[row, col] = cell
-      of Water: mSelf.environments.water.field[row, col] = cell
+      of Tsu:
+        mSelf.nazoPuyoWrap.tsu.field[row, col] = cell
+      of Water:
+        mSelf.nazoPuyoWrap.water.field[row, col] = cell
 
 func writeCell*(mSelf; row: Row, col: Column) {.inline.} =
   ## Writes the selecting cell to the field.
@@ -420,25 +259,27 @@ func writeCell*(mSelf; row: Row, col: Column) {.inline.} =
 func writeCell(mSelf; idx: Natural, axis: bool, cell: Cell) {.inline.} =
   ## Writes the cell to the pairs.
   case cell
-  of None:
-    mSelf.deletePair idx
+  of Cell.None:
+    mSelf.deletePairPosition idx
   of Hard, Cell.Garbage:
     discard
-  of Cell.Red..Cell.Purple:
+  of Cell.Red .. Cell.Purple:
     let color = ColorPuyo cell
     mSelf.change:
-      if idx == mSelf.pairs.len:
-        mSelf.pairs.addLast initPair(color, color)
-        mSelf.positions.add none Position
+      if idx == mSelf.nazoPuyoWrap.pairsPositions.len:
+        mSelf.nazoPuyoWrap.pairsPositions.add PairPosition(
+          pair: initPair(color, color), position: Position.None
+        )
       else:
         if mSelf.editing.insert:
-          mSelf.pairs.insert initPair(color, color), idx
-          mSelf.positions.insert Position.none, idx
+          mSelf.nazoPuyoWrap.pairsPositions.insert PairPosition(
+            pair: initPair(color, color), position: Position.None
+          ), idx
         else:
           if axis:
-            mSelf.pairs[idx].axis = color
+            mSelf.nazoPuyoWrap.pairsPositions[idx].pair.axis = color
           else:
-            mSelf.pairs[idx].child = color
+            mSelf.nazoPuyoWrap.pairsPositions[idx].pair.child = color
 
 func writeCell*(mSelf; idx: Natural, axis: bool) {.inline.} =
   ## Writes the selecting cell to the pairs.
@@ -459,29 +300,29 @@ func shiftFieldUp*(mSelf) {.inline.} =
   ## Shifts the field upward.
   mSelf.change:
     case mSelf.rule
-    of Tsu: mSelf.environments.tsu.field.shiftUp
-    of Water: mSelf.environments.water.field.shiftUp
+    of Tsu: mSelf.nazoPuyoWrap.tsu.field.shiftUp
+    of Water: mSelf.nazoPuyoWrap.water.field.shiftUp
 
 func shiftFieldDown*(mSelf) {.inline.} =
   ## Shifts the field downward.
   mSelf.change:
     case mSelf.rule
-    of Tsu: mSelf.environments.tsu.field.shiftDown
-    of Water: mSelf.environments.water.field.shiftDown
+    of Tsu: mSelf.nazoPuyoWrap.tsu.field.shiftDown
+    of Water: mSelf.nazoPuyoWrap.water.field.shiftDown
 
 func shiftFieldRight*(mSelf) {.inline.} =
   ## Shifts the field rightward.
   mSelf.change:
     case mSelf.rule
-    of Tsu: mSelf.environments.tsu.field.shiftRight
-    of Water: mSelf.environments.water.field.shiftRight
+    of Tsu: mSelf.nazoPuyoWrap.tsu.field.shiftRight
+    of Water: mSelf.nazoPuyoWrap.water.field.shiftRight
 
 func shiftFieldLeft*(mSelf) {.inline.} =
   ## Shifts the field leftward.
   mSelf.change:
     case mSelf.rule
-    of Tsu: mSelf.environments.tsu.field.shiftLeft
-    of Water: mSelf.environments.water.field.shiftLeft
+    of Tsu: mSelf.nazoPuyoWrap.tsu.field.shiftLeft
+    of Water: mSelf.nazoPuyoWrap.water.field.shiftLeft
 
 # ------------------------------------------------
 # Edit - Flip
@@ -491,15 +332,15 @@ func flipFieldV*(mSelf) {.inline.} =
   ## Flips the field vertically.
   mSelf.change:
     case mSelf.rule
-    of Tsu: mSelf.environments.tsu.field.flipV
-    of Water: mSelf.environments.water.field.flipV
+    of Tsu: mSelf.nazoPuyoWrap.tsu.field.flipV
+    of Water: mSelf.nazoPuyoWrap.water.field.flipV
 
 func flipFieldH*(mSelf) {.inline.} =
   ## Flips the field horizontally.
   mSelf.change:
     case mSelf.rule
-    of Tsu: mSelf.environments.tsu.field.flipH
-    of Water: mSelf.environments.water.field.flipH
+    of Tsu: mSelf.nazoPuyoWrap.tsu.field.flipH
+    of Water: mSelf.nazoPuyoWrap.water.field.flipH
 
 # ------------------------------------------------
 # Edit - Requirement
@@ -507,29 +348,41 @@ func flipFieldH*(mSelf) {.inline.} =
 
 func `requirementKind=`*(mSelf; kind: RequirementKind) {.inline.} =
   ## Sets the requirement kind.
-  mSelf.change:
-    mSelf.requirement.kind = kind
-
-    if kind in ColorKinds and mSelf.requirement.color.isNone:
-      mSelf.requirement.color = some RequirementColor.low
-    if kind in NumberKinds and mSelf.requirement.number.isNone:
-      mSelf.requirement.number = some RequirementNumber.low
-
-func `requirementColor=`*(mSelf; color: RequirementColor) {.inline.} =
-  ## Sets the requirement color.
-  if mSelf.requirement.kind in NoColorKinds:
+  if kind == mSelf.nazoPuyoWrap.requirement:
     return
 
   mSelf.change:
-    mSelf.requirement.color = some color
+    if kind in ColorKinds:
+      if mSelf.nazoPuyoWrap.requirement.kind in ColorKinds:
+        mSelf.requirement = Requirement(
+          kind: kind, color: mSelf.requirement.color, number: mSelf.requirement.number
+        )
+      else:
+        mSelf.requirement = Requirement(
+          kind: kind, color: RequirementColor.low, number: mSelf.requirement.number
+        )
+    else:
+      mSelf.requirement = Requirement(kind: kind, number: mSelf.requirement.number)
+
+func `requirementColor=`*(mSelf; color: RequirementColor) {.inline.} =
+  ## Sets the requirement color.
+  if mSelf.nazoPuyoWrap.requirement.kind in NoColorKinds:
+    return
+  if color == mSelf.nazoPuyoWrap.requirement.color:
+    return
+
+  mSelf.change:
+    mSelf.nazoPuyoWrap.requirement.color = color
 
 func `requirementNumber=`*(mSelf; num: RequirementNumber) {.inline.} =
   ## Sets the requirement number.
   if mSelf.requirement.kind in NoNumberKinds:
     return
+  if num == mSelf.nazoPuyoWrap.requirement.number:
+    return
 
   mSelf.change:
-    mSelf.requirement.number = some num
+    mSelf.nazoPuyoWrap.requirement.number = num
 
 # ------------------------------------------------
 # Edit - Undo / Redo
@@ -540,92 +393,91 @@ func undo*(mSelf) {.inline.} =
   if mSelf.undoDeque.len == 0:
     return
 
-  mSelf.redoDeque.addLast (mSelf.environments, mSelf.requirement)
-  (mSelf.environments, mSelf.requirement) = mSelf.undoDeque.popLast
+  mSelf.redoDeque.addLast mSelf.nazoPuyoWrap
+  mSelf.nazoPuyoWrap = mSelf.undoDeque.popLast
 
-  mSelf.originalEnvironments = mSelf.environments
-  mSelf.adjustPositions
+  mSelf.originalNazoPuyoWrap = mSelf.nazoPuyoWrap
 
 func redo*(mSelf) {.inline.} =
   ## Performs redo.
   if mSelf.redoDeque.len == 0:
     return
 
-  mSelf.undoDeque.addLast (mSelf.environments, mSelf.requirement)
-  (mSelf.environments, mSelf.requirement) = mSelf.redoDeque.popLast
+  mSelf.undoDeque.addLast mSelf.nazoPuyoWrap
+  mSelf.nazoPuyoWrap = mSelf.redoDeque.popLast
 
-  mSelf.originalEnvironments = mSelf.environments
-  mSelf.adjustPositions
+  mSelf.originalNazoPuyoWrap = mSelf.nazoPuyoWrap
 
 # ------------------------------------------------
 # Play - Position
 # ------------------------------------------------
 
-func moveNextPositionRight*(mSelf) {.inline.} = mSelf.next.position.moveRight
-  ## Moves the next position right.
+func moveNextPositionRight*(mSelf) {.inline.} = ## Moves the next position right.
+  mSelf.next.position.moveRight
 
-func moveNextPositionLeft*(mSelf) {.inline.} = mSelf.next.position.moveLeft
-  ## Moves the next position left.
+func moveNextPositionLeft*(mSelf) {.inline.} = ## Moves the next position left.
+  mSelf.next.position.moveLeft
 
 func rotateNextPositionRight*(mSelf) {.inline.} =
   ## Rotates the next position right.
   mSelf.next.position.rotateRight
 
-func rotateNextPositionLeft*(mSelf) {.inline.} = mSelf.next.position.rotateLeft
-  ## Rotates the next position left.
+func rotateNextPositionLeft*(mSelf) {.inline.} = ## Rotates the next position left.
+  mSelf.next.position.rotateLeft
 
 # ------------------------------------------------
 # Forward / Backward
 # ------------------------------------------------
 
-func forward*(mSelf; useNextPosition = true, skip = false) {.inline.} =
+func forward*(mSelf; replay = false, skip = false) {.inline.} =
   ## Forwards the simulator.
-  ## If `skip` is `true`, `useNextPositions` will be ignored.
+  ## `replay` is prioritized over `skip`.
   case mSelf.state
   of Stable:
-    if mSelf.pairs.len == 0:
+    if mSelf.nazoPuyoWrap.pairsPositions.len == 0:
       return
 
     mSelf.moveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
     mSelf.save
 
-    if useNextPosition:
-      mSelf.positions[mSelf.next.index] = some mSelf.next.position
-    if skip:
-      mSelf.positions[mSelf.next.index] = none Position
+    if not replay:
+      mSelf.nazoPuyoWrap.pairsPositions[mSelf.next.index].position =
+        if skip: Position.None else: mSelf.next.position
 
     # put
     block:
       let
-        pair = mSelf.pairs.popFirst
-        pos = mSelf.positions[mSelf.next.index]
+        pairPos = mSelf.nazoPuyoWrap.pairsPositions[mSelf.next.index]
+        pair = pairPos.pair
+        pos = pairPos.position
 
-      if pos.isSome:
-        case mSelf.rule
-        of Tsu:
-          mSelf.environments.tsu.field.put pair, pos.get
-        of Water:
-          mSelf.environments.water.field.put pair, pos.get
+      case mSelf.nazoPuyoWrap.rule
+      of Tsu:
+        mSelf.nazoPuyoWrap.tsu.field.put pair, pos
+      of Water:
+        mSelf.nazoPuyoWrap.water.field.put pair, pos
 
     # disappear
     block:
-      let disappear = case mSelf.rule
-      of Tsu: mSelf.environments.tsu.field.willDisappear
-      of Water: mSelf.environments.water.field.willDisappear
+      let willDisappear2 =
+        case mSelf.rule
+        of Tsu: mSelf.nazoPuyoWrap.tsu.field.willDisappear
+        of Water: mSelf.nazoPuyoWrap.water.field.willDisappear
 
-      if disappear:
+      if willDisappear2:
         mSelf.state = WillDisappear
       else:
         mSelf.state = Stable
         mSelf.next.index.inc
         mSelf.next.position = InitPos
   of WillDisappear:
-    let disappearRes = case mSelf.rule
-    of Tsu: mSelf.environments.tsu.field.disappear
-    of Water: mSelf.environments.water.field.disappear
+    let disappearRes =
+      case mSelf.rule
+      of Tsu: mSelf.nazoPuyoWrap.tsu.field.disappear
+      of Water: mSelf.nazoPuyoWrap.water.field.disappear
 
     var counts: array[Puyo, int] = [0, 0, 0, 0, 0, 0, 0]
-    for puyo in Puyo.low..Puyo.high:
+    for puyo in Puyo.low .. Puyo.high:
       let count = disappearRes.puyoCount puyo
       counts[puyo] = count
       mSelf.moveResult.totalDisappearCounts.get[puyo].inc count
@@ -634,15 +486,16 @@ func forward*(mSelf; useNextPosition = true, skip = false) {.inline.} =
 
     mSelf.state = Disappearing
   of Disappearing:
-    let disappear = case mSelf.rule
-    of Tsu:
-      mSelf.environments.tsu.field.drop
-      mSelf.environments.tsu.field.willDisappear
-    of Water:
-      mSelf.environments.water.field.drop
-      mSelf.environments.water.field.willDisappear
+    let willDisappear2 =
+      case mSelf.rule
+      of Tsu:
+        mSelf.nazoPuyoWrap.tsu.field.drop
+        mSelf.nazoPuyoWrap.tsu.field.willDisappear
+      of Water:
+        mSelf.nazoPuyoWrap.water.field.drop
+        mSelf.nazoPuyoWrap.water.field.willDisappear
 
-    if disappear:
+    if willDisappear2:
       mSelf.state = WillDisappear
     else:
       mSelf.state = Stable
@@ -659,14 +512,14 @@ func backward*(mSelf) {.inline.} =
   if mSelf.state == Stable:
     mSelf.next.index.dec
 
-  (mSelf.environments, mSelf.requirement) = mSelf.undoDeque.popLast
+  mSelf.nazoPuyoWrap = mSelf.undoDeque.popLast
   mSelf.state = Stable
   mSelf.next.position = InitPos
 
 func reset*(mSelf; resetPosition = true) {.inline.} =
   ## Resets the simulator.
   mSelf.state = Stable
-  mSelf.environments = mSelf.originalEnvironments
+  mSelf.nazoPuyoWrap = mSelf.originalNazoPuyoWrap
   mSelf.undoDeque.clear
   mSelf.redoDeque.clear
   mSelf.next.index = 0
@@ -674,43 +527,57 @@ func reset*(mSelf; resetPosition = true) {.inline.} =
   mSelf.moveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
 
   if resetPosition:
-    mSelf.positions = Position.none.repeat mSelf.pairs.len
+    for pairPos in mSelf.nazoPuyoWrap.pairsPositions.mitems:
+      pairPos.position = Position.None
 
 # ------------------------------------------------
-# Simulator -> URI
+# Simulator <-> URI
 # ------------------------------------------------
 
-func toUri*(self; editor: bool, withPositions: bool): Uri {.inline.} =
-  ## Converts the simulator to the URI.
+const
+  KindKey = "kind"
+  ModeKey = "mode"
+
+func toUri*(self; withPositions: bool, editor: bool): Uri {.inline.} =
+  ## Returns the URI converted from the simulator.
   ## `self.editor` will be overridden with `editor`.
-  case self.kind
-  of Regular:
-    self.withOriginalEnvironment:
-      result =
-        if withPositions:
-          originalEnvironment.toUri(self.positions, kind = self.kind,
-                                    mode = self.mode, editor = editor)
-        else:
-          originalEnvironment.toUri(kind = self.kind, mode = self.mode,
-                                    editor = editor)
-  of Nazo:
-    self.withOriginalNazoPuyo:
-      result =
-        if withPositions: originalNazoPuyo.toUri(
-          self.positions, mode = self.mode, editor = editor)
-        else:
-          originalNazoPuyo.toUri(mode = self.mode, editor = editor)
+  result = initUri()
+  result.hostname = $Izumiya
+  result.path = "/pon2/app/index.html"
+
+  self.originalNazoPuyoWrap.flattenAnd:
+    var nazo = nazoPuyo
+    if not withPositions:
+      for pairPos in nazo.puyoPuyo.pairsPositions.mitems:
+        pairPos.position = Position.None
+
+    # editor, kind, mode
+    var queries = newSeq[(string, string)](0)
+    if self.editor:
+      queries.add ("editor", "")
+    queries.add (KindKey, $self.kind)
+    queries.add (ModeKey, $self.mode)
+
+    # nazopuyo / puyopuyo
+    let mainQuery =
+      case self.kind
+      of Regular:
+        nazo.puyoPuyo.toUriQuery Izumiya
+      of Nazo:
+        nazo.toUriQuery Izumiya
+
+    result.query = &"{queries.encodeQuery}&{mainQuery}"
 
 func toUri*(self; withPositions: bool): Uri {.inline.} =
-  ## Converts the simulator to the URI.
-  self.toUri(self.editor, withPositions)
+  ## Returns the URI converted from the simulator.
+  self.toUri(withPositions, self.editor)
 
 # ------------------------------------------------
 # Keyboard Operation
 # ------------------------------------------------
 
 func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
-  ## Handler for keyboard input.
+  ## Does operation specified by the keyboard input.
   ## Returns `true` if any action is executed.
   result = true
 
@@ -744,7 +611,7 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
     elif event == initKeyEvent("KeyO"):
       mSelf.writeCell Cell.Garbage
     elif event == initKeyEvent("Space"):
-      mSelf.writeCell None
+      mSelf.writeCell Cell.None
     # shift field
     elif event == initKeyEvent("KeyA", shift = true):
       mSelf.shiftFieldLeft
@@ -781,11 +648,11 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
     elif event == initKeyEvent("KeyW"):
       mSelf.backward
     elif event == initKeyEvent("Digit0"):
-      mSelf.reset(resetPosition = false)
+      mSelf.reset false
     elif event == initKeyEvent("Space"):
       mSelf.forward(skip = true)
     elif event == initKeyEvent("KeyN"):
-      mSelf.forward(useNextPosition = false)
+      mSelf.forward(replay = true)
     else:
       result = false
   of Replay:
@@ -793,9 +660,9 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
     if event == initKeyEvent("KeyW"):
       mSelf.backward
     elif event == initKeyEvent("KeyS"):
-      mSelf.forward(useNextPosition = false)
+      mSelf.forward(replay = true)
     elif event == initKeyEvent("Digit0"):
-      mSelf.reset(resetPosition = false)
+      mSelf.reset false
     else:
       result = false
 
@@ -806,9 +673,19 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
 when defined(js):
   import std/[dom, sugar]
   import karax/[karax, karaxdsl, vdom]
-  import ../private/app/editorpermuter/web/[
-    controller, field, immediatepairs, messages, nextpair, pairs as pairsModule,
-    palette, requirement, select, share]
+  import
+    ../private/app/editorpermuter/web/[
+      controller,
+      field,
+      immediatepairs,
+      messages,
+      nextpair,
+      pairs as pairsModule,
+      palette,
+      requirement,
+      select,
+      share
+    ]
 
   # ------------------------------------------------
   # JS - Keyboard Handler
@@ -869,8 +746,9 @@ when defined(js):
             tdiv(class = "block"):
               mSelf.initPairsNode
 
-  proc initSimulatorNode*(mSelf; setKeyHandler = true, wrapSection = true,
-                          id = ""): VNode {.inline.} =
+  proc initSimulatorNode*(
+      mSelf; setKeyHandler = true, wrapSection = true, id = ""
+  ): VNode {.inline.} =
     ## Returns the simulator node.
     ## `id` is shared with other node-creating procedures and need to be unique.
     if setKeyHandler:
@@ -883,43 +761,62 @@ when defined(js):
       result = mSelf.initSimulatorNode id
 
   proc initSimulatorNode*[F: TsuField or WaterField](
-      nazoEnv: NazoPuyo[F] or Environment[F], mode = Play, editor = false,
-      setKeyHandler = true, wrapSection = true, id = ""): VNode {.inline.} =
+      nazoEnv: NazoPuyo[F] or Environment[F],
+      mode = Play,
+      editor = false,
+      setKeyHandler = true,
+      wrapSection = true,
+      id = "",
+  ): VNode {.inline.} =
     ## Returns the simulator node.
     ## `id` is shared with other node-creating procedures and need to be unique.
     var simulator = nazoEnv.initSimulator(mode, editor)
     result = simulator.initSimulatorNode(setKeyHandler, wrapSection, id)
 
   proc initSimulatorNode*[F: TsuField or WaterField](
-      nazoEnv: NazoPuyo[F] or Environment[F], positions: Positions, mode = Play,
-      editor = false, setKeyHandler = true, wrapSection = true, id = ""): VNode
-      {.inline.} =
+      nazoEnv: NazoPuyo[F] or Environment[F],
+      positions: Positions,
+      mode = Play,
+      editor = false,
+      setKeyHandler = true,
+      wrapSection = true,
+      id = "",
+  ): VNode {.inline.} =
     ## Returns the simulator node.
     ## `id` is shared with other node-creating procedures and need to be unique.
     var simulator = nazoEnv.initSimulator(positions, mode, editor)
     result = simulator.initSimulatorNode(setKeyHandler, wrapSection, id)
+
 else:
   import std/[sugar]
   import nigui
-  import ../private/app/editorpermuter/native/[
-    assets, field, immediatepairs, messages, nextpair, pairs as pairsModule,
-    requirement, select, share]
+  import
+    ../private/app/editorpermuter/native/[
+      assets,
+      field,
+      immediatepairs,
+      messages,
+      nextpair,
+      pairs as pairsModule,
+      requirement,
+      select,
+      share
+    ]
 
   type
-    SimulatorControl* = ref object of LayoutContainer
-      ## Root control of the simulator.
+    SimulatorControl* = ref object of LayoutContainer ## Root control of the simulator.
       simulator*: ref Simulator
 
-    SimulatorWindow* = ref object of WindowImpl
-      ## Application window for the simulator.
+    SimulatorWindow* = ref object of WindowImpl ## Application window for the simulator.
       simulator*: ref Simulator
 
   # ------------------------------------------------
   # Native - Keyboard Handler
   # ------------------------------------------------
 
-  proc runKeyboardEventHandler*(window: SimulatorWindow, event: KeyboardEvent,
-                                keys = downKeys()) {.inline.} =
+  proc runKeyboardEventHandler*(
+      window: SimulatorWindow, event: KeyboardEvent, keys = downKeys()
+  ) {.inline.} =
     ## Keyboard event handler.
     let needRedraw = window.simulator[].operate event.toKeyEvent keys
     if needRedraw:
@@ -932,7 +829,7 @@ else:
 
     cast[SimulatorWindow](rawWindow).runKeyboardEventHandler event
 
-  func initKeyboardEventHandler*: (event: KeyboardEvent) -> void {.inline.} =
+  func initKeyboardEventHandler*(): (event: KeyboardEvent) -> void {.inline.} =
     ## Returns the keyboard event handler.
     keyboardEventHandler
 
@@ -940,8 +837,7 @@ else:
   # Native - Control
   # ------------------------------------------------
 
-  proc initSimulatorControl*(simulator: ref Simulator): SimulatorControl
-                            {.inline.} =
+  proc initSimulatorControl*(simulator: ref Simulator): SimulatorControl {.inline.} =
     ## Returns the simulator control.
     result = new SimulatorControl
     result.init
@@ -983,8 +879,11 @@ else:
     reqControl.setWidth secondRow.naturalWidth
     messages.setWidth field.naturalWidth
 
-  proc initSimulatorWindow*(simulator: ref Simulator, title = "ぷよぷよシミュレータ",
-                            setKeyHandler = true): SimulatorWindow {.inline.} =
+  proc initSimulatorWindow*(
+      simulator: ref Simulator,
+      title = "ぷよぷよシミュレータ",
+      setKeyHandler = true,
+  ): SimulatorWindow {.inline.} =
     ## Returns the simulator window.
     result = new SimulatorWindow
     result.init

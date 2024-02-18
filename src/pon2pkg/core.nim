@@ -33,8 +33,8 @@
 
 import
   ./core/[
-    cell, field, fieldtype, host, mark, misc, moveresult, nazopuyo, pair, pairposition,
-    position, puyopuyo, requirement, rule
+    cell, field, fieldtype, host, mark, misc, moveresult, nazopuyo, notice, pair,
+    pairposition, position, puyopuyo, requirement, rule
   ]
 import ./private/[intrinsic]
 
@@ -61,14 +61,15 @@ export host.SimulatorHost
 export mark.MarkResult, mark.mark
 export misc.SimulatorKind, misc.SimulatorMode
 export
-  moveresult.MoveResult, moveresult.NoticeGarbage, moveresult.initMoveResult,
-  moveresult.puyoCount, moveresult.colorCount, moveresult.garbageCount,
-  moveresult.puyoCounts, moveresult.colorCounts, moveresult.garbageCounts,
-  moveresult.colors, moveresult.colorsSeq, moveresult.colorPlaces,
-  moveresult.colorConnects, moveresult.score, moveresult.noticeGarbageCounts
+  moveresult.MoveResult, moveresult.initMoveResult, moveresult.puyoCount,
+  moveresult.colorCount, moveresult.garbageCount, moveresult.puyoCounts,
+  moveresult.colorCounts, moveresult.garbageCounts, moveresult.colors,
+  moveresult.colorsSeq, moveresult.colorPlaces, moveresult.colorConnects,
+  moveresult.score, moveresult.noticeGarbageCounts
 export
   nazopuyo.NazoPuyo, nazopuyo.initNazoPuyo, nazopuyo.moveCount, nazopuyo.`$`,
   nazopuyo.parseNazoPuyo, nazopuyo.toUriQuery
+export notice.NoticeGarbage, notice.GarbageRates, notice.noticeGarbageCounts
 export
   pair.Pair, pair.initPair, pair.axis, pair.child, pair.isDouble, pair.`axis=`,
   pair.`child=`, pair.swapped, pair.swap, pair.puyoCount, pair.colorCount,

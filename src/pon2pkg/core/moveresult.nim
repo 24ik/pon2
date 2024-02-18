@@ -1,41 +1,19 @@
 ## This module implements moving results.
 ##
-## Compile Options:
-## | Option                            | Description                 | Default  |
-## | --------------------------------- | --------------------------- | -------- |
-## | `-d:pon2.garbagerate.tsu=<int>`   | Garbage rate in Tsu rule.   | `70`     |
-## | `-d:pon2.garbagerate.water=<int>` | Garbage rate in Water rule. | `90`     |
-##
 
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[math, options, sequtils, setutils, sugar]
-import ./[cell, fieldtype, rule]
+import ./[cell, fieldtype, notice, rule]
 import ../private/[misc]
 
-type
-  MoveResult* = object ## Moving result.
-    chainCount*: int
-    totalDisappearCounts*: Option[array[Puyo, int]]
-    disappearCounts*: Option[seq[array[Puyo, int]]]
-    detailDisappearCounts*: Option[seq[array[ColorPuyo, seq[int]]]]
-
-  NoticeGarbage* {.pure.} = enum
-    ## Notice garbage puyo.
-    Small
-    Big
-    Rock
-    Star
-    Moon
-    Crown
-    Comet
-
-const
-  TsuGarbageRate {.define: "pon2.garbagerate.tsu".} = 70
-  WaterGarbageRate {.define: "pon2.garbagerate.water".} = 90
-  GarbageRates*: array[Rule, Positive] = [TsuGarbageRate.Positive, WaterGarbageRate]
+type MoveResult* = object ## Moving result.
+  chainCount*: int
+  totalDisappearCounts*: Option[array[Puyo, int]]
+  disappearCounts*: Option[seq[array[Puyo, int]]]
+  detailDisappearCounts*: Option[seq[array[ColorPuyo, seq[int]]]]
 
 using
   self: MoveResult
@@ -250,20 +228,6 @@ func score*(self): int {.inline.} =
 # ------------------------------------------------
 # Notice Garbage
 # ------------------------------------------------
-
-const NoticeUnits: array[NoticeGarbage, Natural] = [1, 6, 30, 180, 360, 720, 1440]
-
-func noticeGarbageCounts*(
-    score: Natural, rule: Rule
-): array[NoticeGarbage, int] {.inline.} =
-  ## Returns the number of notice garbages.
-  result[Small] = 0 # HACK: dummy to suppress warning
-
-  var score2 = score div GarbageRates[rule]
-  for notice in countdown(NoticeGarbage.high, NoticeGarbage.low):
-    let unit = NoticeUnits[notice]
-    result[notice] = score2 div unit
-    score2.dec result[notice] * unit
 
 func noticeGarbageCounts*(self; rule: Rule): array[NoticeGarbage, int] {.inline.} =
   ## Returns the number of notice garbages.
