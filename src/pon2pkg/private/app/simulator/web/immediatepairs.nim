@@ -6,21 +6,21 @@
 {.experimental: "views".}
 
 import karax/[karaxdsl, vdom]
-import ../[render]
+import ../[common]
 import ../../[misc]
-import ../../../../apppkg/[simulator]
-import ../../../../corepkg/[cell]
+import ../../../../app/[simulator]
+import ../../../../core/[cell]
 
 proc initImmediatePairsNode*(simulator: var Simulator): VNode {.inline.} =
   ## Returns the immediate pairs node.
   buildHtml(table):
     tbody:
       # indent
-      for _ in 1..4:
+      for _ in 1 .. 4:
         tr:
           td:
             figure(class = "image is-24x24"):
-              img(src = cellImageSrc(None))
+              img(src = Cell.None.cellImageSrc)
 
       # next-puyo
       tr:
@@ -36,7 +36,7 @@ proc initImmediatePairsNode*(simulator: var Simulator): VNode {.inline.} =
       tr:
         td:
           figure(class = "image is-24x24"):
-            img(src = None.cellImageSrc)
+            img(src = Cell.None.cellImageSrc)
 
       # double-next-puyo
       tr:
