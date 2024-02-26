@@ -8,36 +8,37 @@
 import std/[sugar]
 import nigui
 import ./[assets]
-import ../[render]
-import ../../../../apppkg/[misc, simulator]
-import ../../../../corepkg/[field, fieldtype]
+import ../[common]
+import ../../../../app/[color, nazopuyo, simulator]
+import ../../../../core/[field, fieldtype]
 
-type FieldControl* = ref object of LayoutContainer
-  ## Field control.
+type FieldControl* = ref object of LayoutContainer ## Field control.
   simulator: ref Simulator
   assets: ref Assets
 
-proc cellDrawHandler(control: FieldControl, event: DrawEvent, row: Row,
-                     col: Column) {.inline.} =
+proc cellDrawHandler(
+    control: FieldControl, event: DrawEvent, row: Row, col: Column
+) {.inline.} =
   ## Draws the cell.
   let canvas = event.control.canvas
 
-  canvas.areaColor =
-    control.simulator[].fieldCellBackgroundColor(row, col).toNiguiColor
+  canvas.areaColor = control.simulator[].fieldCellBackgroundColor(row, col).toNiguiColor
   canvas.fill
 
-  let cell = control.simulator[].withField:
+  let cell = control.simulator[].nazoPuyoWrap.flattenAnd:
     field[row, col]
   canvas.drawImage control.assets[].cellImages[cell]
 
-func initCellDrawHandler(control: FieldControl, row: Row, col: Column):
-    (event: DrawEvent) -> void =
+func initCellDrawHandler(
+    control: FieldControl, row: Row, col: Column
+): (event: DrawEvent) -> void =
   ## Returns the handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: DrawEvent) => control.cellDrawHandler(event, row, col)
 
-proc initFieldControl*(simulator: ref Simulator, assets: ref Assets):
-    FieldControl {.inline.} =
+proc initFieldControl*(
+    simulator: ref Simulator, assets: ref Assets
+): FieldControl {.inline.} =
   ## Returns a field control.
   result = new FieldControl
   result.init
@@ -46,14 +47,14 @@ proc initFieldControl*(simulator: ref Simulator, assets: ref Assets):
   result.simulator = simulator
   result.assets = assets
 
-  for row in Row.low..Row.high:
+  for row in Row.low .. Row.high:
     let line = newLayoutContainer Layout_Horizontal
     result.add line
 
     line.spacing = 0
     line.padding = 0
 
-    for col in Column.low..Column.high:
+    for col in Column.low .. Column.high:
       let cell = newControl()
       line.add cell
 
