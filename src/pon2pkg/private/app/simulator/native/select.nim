@@ -8,15 +8,19 @@
 import std/[sugar]
 import nigui
 import ./[requirement]
-import ../../../../apppkg/[misc, simulator]
-import ../../../../corepkg/[misc, rule]
+import ../[misc]
+import ../../../../app/[color, simulator]
+import ../../../../core/[rule]
 
-type SelectControl* = ref object of LayoutContainer
-  ## Select control.
+type SelectControl* = ref object of LayoutContainer ## Select control.
   simulator: ref Simulator
 
-proc modeHandler(control: SelectControl, event: ClickEvent, mode: SimulatorMode,
-                 reqControl: RequirementControl) {.inline.} =
+proc modeHandler(
+    control: SelectControl,
+    event: ClickEvent,
+    mode: SimulatorMode,
+    reqControl: RequirementControl,
+) {.inline.} =
   ## Changes the simulator mode.
   const ModeToIndex: array[SimulatorMode, Natural] = [0, 1, 2]
 
@@ -29,8 +33,7 @@ proc modeHandler(control: SelectControl, event: ClickEvent, mode: SimulatorMode,
   reqControl.updateRequirementControl event
   event.control.parentWindow.control.forceRedraw
 
-proc ruleHandler(control: SelectControl, event: ClickEvent, rule: Rule)
-                {.inline.} =
+proc ruleHandler(control: SelectControl, event: ClickEvent, rule: Rule) {.inline.} =
   ## Changes the rule.
   const RuleToIndex: array[Rule, Natural] = [0, 1]
 
@@ -42,8 +45,12 @@ proc ruleHandler(control: SelectControl, event: ClickEvent, rule: Rule)
 
   event.control.parentWindow.control.forceRedraw
 
-proc kindHandler(control: SelectControl, event: ClickEvent, kind: SimulatorKind,
-                 reqControl: RequirementControl) {.inline.} =
+proc kindHandler(
+    control: SelectControl,
+    event: ClickEvent,
+    kind: SimulatorKind,
+    reqControl: RequirementControl,
+) {.inline.} =
   ## Changes the simulator kind.
   const KindToIndex: array[SimulatorKind, Natural] = [0, 1]
 
@@ -56,29 +63,28 @@ proc kindHandler(control: SelectControl, event: ClickEvent, kind: SimulatorKind,
   reqControl.updateRequirementControl event
   event.control.parentWindow.control.forceRedraw
 
-func initModeHandler(control: SelectControl, mode: SimulatorMode,
-                     reqControl: RequirementControl):
-                    (event: ClickEvent) -> void =
+func initModeHandler(
+    control: SelectControl, mode: SimulatorMode, reqControl: RequirementControl
+): (event: ClickEvent) -> void =
   ## Returns the mode handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: ClickEvent) => control.modeHandler(event, mode, reqControl)
 
-func initRuleHandler(control: SelectControl, rule: Rule):
-    (event: ClickEvent) -> void =
+func initRuleHandler(control: SelectControl, rule: Rule): (event: ClickEvent) -> void =
   ## Returns the rule handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: ClickEvent) => control.ruleHandler(event, rule)
 
-func initKindHandler(control: SelectControl, kind: SimulatorKind,
-                     reqControl: RequirementControl):
-                    (event: ClickEvent) -> void =
+func initKindHandler(
+    control: SelectControl, kind: SimulatorKind, reqControl: RequirementControl
+): (event: ClickEvent) -> void =
   ## Returns the kind handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: ClickEvent) => control.kindHandler(event, kind, reqControl)
 
-proc initSelectControl*(simulator: ref Simulator,
-                        reqControl: RequirementControl): SelectControl
-                       {.inline.} =
+proc initSelectControl*(
+    simulator: ref Simulator, reqControl: RequirementControl
+): SelectControl {.inline.} =
   ## Returns a select control.
   result = new SelectControl
   result.init
