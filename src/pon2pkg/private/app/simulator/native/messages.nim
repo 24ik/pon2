@@ -8,20 +8,18 @@
 import std/[sugar]
 import nigui
 import ./[assets]
-import ../[render]
-import ../../../../apppkg/[misc, simulator]
-import ../../../../corepkg/[misc]
+import ../[common]
+import ../../../../app/[color, simulator]
+import ../../../../core/[misc]
 
-type MessagesControl* = ref object of ControlImpl
-  ## Messages control.
+type MessagesControl* = ref object of ControlImpl ## Messages control.
   simulator: ref Simulator
 
 # ------------------------------------------------
 # Control
 # ------------------------------------------------
 
-proc messagesDrawHandler(control: MessagesControl, event: DrawEvent)
-                        {.inline.} =
+proc messagesDrawHandler(control: MessagesControl, event: DrawEvent) {.inline.} =
   ## Draws the message.
   let canvas = event.control.canvas
 
@@ -31,14 +29,14 @@ proc messagesDrawHandler(control: MessagesControl, event: DrawEvent)
   if control.simulator[].mode != Edit:
     canvas.drawText control.simulator[].getMessages.state
 
-func initMessageDrawHandler(control: MessagesControl):
-    (event: DrawEvent) -> void =
+func initMessageDrawHandler(control: MessagesControl): (event: DrawEvent) -> void =
   ## Returns the handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: DrawEvent) => control.messagesDrawHandler event
 
-proc initMessagesControl*(simulator: ref Simulator, assets: ref Assets):
-    MessagesControl {.inline.} =
+proc initMessagesControl*(
+    simulator: ref Simulator, assets: ref Assets
+): MessagesControl {.inline.} =
   ## Returns a messages control.
   result = new MessagesControl
   result.init
