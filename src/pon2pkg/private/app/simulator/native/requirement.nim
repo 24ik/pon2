@@ -7,12 +7,10 @@
 
 import std/[options, sequtils, sugar]
 import nigui
-import ../../../../apppkg/[simulator]
-import ../../../../corepkg/[misc]
-import ../../../../nazopuyopkg/[nazopuyo]
+import ../../../../app/[nazopuyo, simulator]
+import ../../../../core/[misc, nazopuyo, requirement]
 
-type RequirementControl* = ref object of LayoutContainer
-  ## Requirement control.
+type RequirementControl* = ref object of LayoutContainer ## Requirement control.
   simulator: ref Simulator
 
 # ------------------------------------------------
@@ -49,7 +47,7 @@ proc numberComboBox(control: RequirementControl): ComboBox {.inline.} =
 
 proc updateDescription(control: RequirementControl) =
   ## Changes the requirement description.
-  control.descriptionLabel.text = $control.simulator[].requirement
+  control.descriptionLabel.text = $control.simulator[].nazoPuyoWrap.requirement
 
 proc kindHandler(control: RequirementControl, event: ComboBoxChangeEvent) =
   ## Changes the requirement kind.
@@ -66,38 +64,34 @@ proc kindHandler(control: RequirementControl, event: ComboBoxChangeEvent) =
 
 proc colorHandler(control: RequirementControl, event: ComboBoxChangeEvent) =
   ## Changes the requirement color.
-  control.simulator[].requirementColor =
-    control.colorComboBox.index.RequirementColor
+  control.simulator[].requirementColor = control.colorComboBox.index.RequirementColor
 
   control.updateDescription
 
 proc numberHandler(control: RequirementControl, event: ComboBoxChangeEvent) =
   ## Changes the requirement number.
-  control.simulator[].requirementNumber =
-    control.numberComboBox.index.RequirementNumber
+  control.simulator[].requirementNumber = control.numberComboBox.index.RequirementNumber
 
   control.updateDescription
 
-func initKindHandler(control: RequirementControl):
-    (event: ComboBoxChangeEvent) -> void =
+func initKindHandler(control: RequirementControl): (event: ComboBoxChangeEvent) -> void =
   ## Returns the kind handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: ComboBoxChangeEvent) => control.kindHandler event
 
-func initColorHandler(control: RequirementControl):
-    (event: ComboBoxChangeEvent) -> void =
+func initColorHandler(control: RequirementControl): (event: ComboBoxChangeEvent) -> void =
   ## Returns the color handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: ComboBoxChangeEvent) => control.colorHandler event
 
-func initNumberHandler(control: RequirementControl):
-    (event: ComboBoxChangeEvent) -> void =
+func initNumberHandler(
+    control: RequirementControl
+): (event: ComboBoxChangeEvent) -> void =
   ## Returns the number handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: ComboBoxChangeEvent) => control.numberHandler event
 
-proc initRequirementControl*(simulator: ref Simulator): RequirementControl
-                            {.inline.} =
+proc initRequirementControl*(simulator: ref Simulator): RequirementControl {.inline.} =
   ## Returns a requirement control.
   result = new RequirementControl
   result.init
@@ -109,11 +103,11 @@ proc initRequirementControl*(simulator: ref Simulator): RequirementControl
   result.padding = 10.scaleToDpi
 
   # row=0
-  let desc = newLabel $simulator[].requirement
+  let desc = newLabel $simulator[].nazoPuyoWrap.requirement
   result.add desc
 
   # row=1
-  let kind = newComboBox((RequirementKind.low..RequirementKind.high).toSeq.mapIt $it)
+  let kind = newComboBox((RequirementKind.low .. RequirementKind.high).toSeq.mapIt $it)
   result.add kind
 
   kind.onChange = result.initKindHandler
@@ -127,8 +121,9 @@ proc initRequirementControl*(simulator: ref Simulator): RequirementControl
 
   let
     color = newComboBox(
-      @["全"] & (RequirementColor.low.succ..RequirementColor.high).mapIt $it)
-    num = newComboBox((RequirementNumber.low..RequirementNumber.high).mapIt $it)
+      @["全"] & (RequirementColor.low.succ .. RequirementColor.high).mapIt $it
+    )
+    num = newComboBox((RequirementNumber.low .. RequirementNumber.high).mapIt $it)
   thirdRow.add color
   thirdRow.add num
 
@@ -137,15 +132,15 @@ proc initRequirementControl*(simulator: ref Simulator): RequirementControl
 
   # set index
   if simulator[].mode == Edit:
-    let req = simulator[].requirement
+    let req = simulator[].nazoPuyoWrap.requirement
 
     kind.index = req.kind.ord
     if req.kind in ColorKinds:
-      color.index = req.color.get.ord
+      color.index = req.color.ord
     else:
       color.enabled = false
     if req.kind in NumberKinds:
-      num.index = req.number.get.ord
+      num.index = req.number.ord
     else:
       num.enabled = false
   else:
@@ -163,8 +158,9 @@ proc setWidth*(control: RequirementControl, width: Natural) {.inline.} =
   control.colorComboBox.width = width div 2 - 5.scaleToDpi
   control.numberComboBox.width = width - width div 2 - 5.scaleToDpi
 
-proc updateRequirementControl*(control: RequirementControl, event: ClickEvent)
-                              {.inline.} =
+proc updateRequirementControl*(
+    control: RequirementControl, event: ClickEvent
+) {.inline.} =
   ## Updates the requirement control.
   let
     descLabel = control.descriptionLabel
@@ -178,12 +174,12 @@ proc updateRequirementControl*(control: RequirementControl, event: ClickEvent)
     colorBox.enabled = false
     numberBox.enabled = false
   else:
-    descLabel.text = $control.simulator[].requirement
+    descLabel.text = $control.simulator[].nazoPuyoWrap.requirement
     if control.simulator[].mode == Edit:
       kindBox.enabled = true
-      colorBox.enabled = control.simulator[].requirement.kind in ColorKinds
+      colorBox.enabled = control.simulator[].nazoPuyoWrap.requirement.kind in ColorKinds
       numberBox.enabled =
-        control.simulator[].requirement.kind in NumberKinds
+        control.simulator[].nazoPuyoWrap.requirement.kind in NumberKinds
     else:
       kindBox.enabled = false
       colorBox.enabled = false
