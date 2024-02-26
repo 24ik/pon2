@@ -7,11 +7,10 @@
 
 import std/[browsers, sugar, uri]
 import nigui
-import ../[render]
-import ../../../../apppkg/[simulator]
+import ../[common]
+import ../../../../app/[simulator]
 
-type ShareControl* = ref object of LayoutContainer
-  ## Share control.
+type ShareControl* = ref object of LayoutContainer ## Share control.
   simulator: ref Simulator
 
 proc initShareControl*(simulator: ref Simulator): ShareControl {.inline.} =
@@ -28,19 +27,21 @@ proc initShareControl*(simulator: ref Simulator): ShareControl {.inline.} =
   # share
   let shareLabel = newLabel()
   result.add shareLabel
-  shareLabel.text = "URLをシェア"
+  shareLabel.text = "𝕏でシェア"
 
   let shareButtonWithoutUrl = newButton()
   result.add shareButtonWithoutUrl
-  shareButtonWithoutUrl.text = "𝕏 操作無URL"
+  shareButtonWithoutUrl.text = "操作無"
   shareButtonWithoutUrl.onClick =
-    (event: ClickEvent) => ($simulator[].toXLink false).openDefaultBrowser
+    (event: ClickEvent) =>
+    ($simulator[].toXLink(withPositions = false, editor = false)).openDefaultBrowser
 
   let shareButtonWithUrl = newButton()
   result.add shareButtonWithUrl
-  shareButtonWithUrl.text = "𝕏 操作有URL"
+  shareButtonWithUrl.text = "操作有"
   shareButtonWithUrl.onClick =
-    (event: ClickEvent) => ($simulator[].toXLink true).openDefaultBrowser
+    (event: ClickEvent) =>
+    ($simulator[].toXLink(withPositions = true, editor = false)).openDefaultBrowser
 
   # copy URL
   let copyLabel = newLabel()
@@ -54,10 +55,34 @@ proc initShareControl*(simulator: ref Simulator): ShareControl {.inline.} =
   copyButtons.add copyButtonWithoutUrl
   copyButtonWithoutUrl.text = "操作無"
   copyButtonWithoutUrl.onClick =
-    (event: ClickEvent) => (app.clipboardText = $simulator[].toUri false)
+    (event: ClickEvent) =>
+    (app.clipboardText = $simulator[].toUri(withPositions = false, editor = false))
 
   let copyButtonWithUrl = newButton()
   copyButtons.add copyButtonWithUrl
   copyButtonWithUrl.text = "操作有"
   copyButtonWithUrl.onClick =
-    (event: ClickEvent) => (app.clipboardText = $simulator[].toUri true)
+    (event: ClickEvent) =>
+    (app.clipboardText = $simulator[].toUri(withPositions = true, editor = false))
+
+  # copy URL (editor)
+  let copyLabel = newLabel()
+  result.add copyLabel
+  copyLabel.text = "編集者URLコピー"
+
+  let editorCopyButtons = newLayoutContainer Layout_Horizontal
+  result.add editorCopyButtons
+
+  let editorCopyButtonWithoutUrl = newButton()
+  editorCopyButtons.add editorCopyButtonWithoutUrl
+  editorCopyButtonWithoutUrl.text = "操作無"
+  editorCopyButtonWithoutUrl.onClick =
+    (event: ClickEvent) =>
+    (app.clipboardText = $simulator[].toUri(withPositions = false, editor = true))
+
+  let editorCopyButtonWithUrl = newButton()
+  editorCopyButtons.add editorCopyButtonWithUrl
+  editorCopyButtonWithUrl.text = "操作有"
+  editorCopyButtonWithUrl.onClick =
+    (event: ClickEvent) =>
+    (app.clipboardText = $simulator[].toUri(withPositions = true, editor = true))
