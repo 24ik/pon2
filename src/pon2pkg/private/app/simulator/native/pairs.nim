@@ -8,12 +8,11 @@
 import std/[sugar]
 import nigui
 import ./[assets]
-import ../[render]
-import ../../../../apppkg/[misc, simulator]
-import ../../../../corepkg/[cell, pair, position]
+import ../[common]
+import ../../../../app/[color, nazopuyo, simulator]
+import ../../../../core/[cell, pair, pairposition, position]
 
-type PairsControl* = ref object of LayoutContainer
-  ## Pairs control.
+type PairsControl* = ref object of LayoutContainer ## Pairs control.
   simulator: ref Simulator
   assets: ref Assets
 
@@ -21,29 +20,31 @@ type PairsControl* = ref object of LayoutContainer
 # Pair
 # ------------------------------------------------
 
-proc cellDrawHandler(control: PairsControl, event: DrawEvent, idx: Natural,
-                     axis: bool) {.inline.} =
+proc cellDrawHandler(
+    control: PairsControl, event: DrawEvent, idx: Natural, axis: bool
+) {.inline.} =
   ## Draws the cell.
   let canvas = event.control.canvas
 
-  canvas.areaColor =
-    control.simulator[].pairCellBackgroundColor(idx, axis).toNiguiColor
+  canvas.areaColor = control.simulator[].pairCellBackgroundColor(idx, axis).toNiguiColor
   canvas.fill
 
-  var cell = None
-  if idx < control.simulator[].originalPairs.len:
-    let pair = control.simulator[].originalPairs[idx]
+  var cell = Cell.None
+  if idx < control.simulator[].originalNazoPuyoWrap.pairsPositions.len:
+    let pair = control.simulator[].originalNazoPuyoWrap.pairsPositions[idx].pair
     cell = if axis: pair.axis else: pair.child
   canvas.drawImage control.assets[].cellImages[cell]
 
-func initCellDrawHandler(control: PairsControl, idx: Natural, isAxis: bool):
-    (event: DrawEvent) -> void =
+func initCellDrawHandler(
+    control: PairsControl, idx: Natural, isAxis: bool
+): (event: DrawEvent) -> void =
   ## Returns the pair's draw handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: DrawEvent) => control.cellDrawHandler(event, idx, isAxis)
 
-proc initPairControl(control: PairsControl, idx: Natural, assets: ref Assets):
-    LayoutContainer {.inline.} =
+proc initPairControl(
+    control: PairsControl, idx: Natural, assets: ref Assets
+): LayoutContainer {.inline.} =
   ## Returns a pair control.
   result = newLayoutContainer Layout_Horizontal
 
@@ -68,8 +69,7 @@ proc initPairControl(control: PairsControl, idx: Natural, assets: ref Assets):
 # Index
 # ------------------------------------------------
 
-proc indexDrawHandler(control: PairsControl, event: DrawEvent, idx: Natural)
-                     {.inline.} =
+proc indexDrawHandler(control: PairsControl, event: DrawEvent, idx: Natural) {.inline.} =
   ## Draws the index.
   let canvas = event.control.canvas
 
@@ -79,8 +79,9 @@ proc indexDrawHandler(control: PairsControl, event: DrawEvent, idx: Natural)
   let nextArrow = if control.simulator[].needPairPointer(idx): "> " else: "  "
   canvas.drawText nextArrow & $idx.succ
 
-func initIndexDrawHandler(control: PairsControl, idx: Natural):
-    (event: DrawEvent) -> void =
+func initIndexDrawHandler(
+    control: PairsControl, idx: Natural
+): (event: DrawEvent) -> void =
   ## Returns the index's draw handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: DrawEvent) => control.indexDrawHandler(event, idx)
@@ -94,25 +95,28 @@ proc initIndexControl(control: PairsControl, idx: Natural): Control {.inline.} =
 # Position
 # ------------------------------------------------
 
-proc positionDrawHandler(control: PairsControl, event: DrawEvent, idx: Natural)
-                        {.inline.} =
+proc positionDrawHandler(
+    control: PairsControl, event: DrawEvent, idx: Natural
+) {.inline.} =
   ## Draws the position.
   let canvas = event.control.canvas
 
   canvas.areaColor = DefaultColor.toNiguiColor
   canvas.fill
 
-  canvas.drawText if idx < control.simulator[].positions.len:
-    $control.simulator[].positions[idx] else: "  "
+  canvas.drawText if idx < control.simulator[].nazoPuyoWrap.pairsPositions.len:
+    $control.simulator[].nazoPuyoWrap.pairsPositions[idx].position
+  else:
+    $Position.None
 
-func initPositionDrawHandler(control: PairsControl, idx: Natural):
-    (event: DrawEvent) -> void =
+func initPositionDrawHandler(
+    control: PairsControl, idx: Natural
+): (event: DrawEvent) -> void =
   ## Returns the position's draw handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: DrawEvent) => control.positionDrawHandler(event, idx)
 
-proc initPositionControl(control: PairsControl, idx: Natural): Control
-                        {.inline.} =
+proc initPositionControl(control: PairsControl, idx: Natural): Control {.inline.} =
   ## Returns a position control.
   result = newControl()
   result.onDraw = control.initPositionDrawHandler idx
@@ -121,8 +125,9 @@ proc initPositionControl(control: PairsControl, idx: Natural): Control
 # Pairs
 # ------------------------------------------------
 
-proc initFullPairControl(control: PairsControl, idx: Natural,
-                         assets: ref Assets): LayoutContainer {.inline.} =
+proc initFullPairControl(
+    control: PairsControl, idx: Natural, assets: ref Assets
+): LayoutContainer {.inline.} =
   ## Returns a full pair control.
   result = newLayoutContainer Layout_Horizontal
 
@@ -142,8 +147,9 @@ proc initFullPairControl(control: PairsControl, idx: Natural,
   positionControl.width = positionControl.getTextWidth $Position.low
   positionControl.height = pairControl.naturalHeight
 
-proc initPairsControl*(simulator: ref Simulator, assets: ref Assets):
-    PairsControl {.inline.} =
+proc initPairsControl*(
+    simulator: ref Simulator, assets: ref Assets
+): PairsControl {.inline.} =
   ## Returns a pairs control.
   result = new PairsControl
   result.init
@@ -152,5 +158,5 @@ proc initPairsControl*(simulator: ref Simulator, assets: ref Assets):
   result.simulator = simulator
   result.assets = assets
 
-  for idx in 0..simulator[].pairs.len:
+  for idx in 0 .. simulator[].nazoPuyoWrap.pairsPositions.len:
     result.add result.initFullPairControl(idx, assets)
