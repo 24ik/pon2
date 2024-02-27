@@ -1,4 +1,4 @@
-## This module implements editor-permuters.
+## This module implements the GUI application.
 ##
 
 {.experimental: "strictDefs".}
@@ -6,30 +6,29 @@
 {.experimental: "views".}
 
 import std/[options, sequtils]
-import ./[misc, simulator]
-import ../corepkg/[environment, field, misc, pair, position]
-import ../nazopuyopkg/[nazopuyo]
+import ./[color, key, nazopuyo, simulator]
+import
+  ../core/[field, misc, nazopuyo, pair, pairposition, position, puyopuyo, requirement]
 import ../private/[misc]
 
 when defined(js):
   import std/[sugar, uri]
   import karax/[karax, karaxdsl, kdom, vdom]
   import ../private/[webworker]
-  import ../private/nazopuyo/[permute]
-  import ../private/app/editorpermuter/web/editor/[webworker]
+  import ../private/app/[permute]
+  import ../private/app/gui/web/[webworker]
 else:
   {.push warning[Deprecated]: off.}
   import std/[cpuinfo, sugar, threadpool]
   import nigui
-  import ../nazopuyopkg/[permute, solve]
+  import ./[permute, solve]
   {.pop.}
 
-type EditorPermuter* = object
-  ## Editor and Permuter.
+type GuiApplication* = object ## GUI application.
   simulator*: ref Simulator
   replaySimulator*: ref Simulator
 
-  replayData*: Option[seq[tuple[pairs: Pairs, positions: Positions]]]
+  replayPairsPositions*: Option[PairsPositions]
   replayIdx*: Natural
 
   editor: bool
@@ -48,22 +47,24 @@ using
 # Constructor
 # ------------------------------------------------
 
-proc initEditorPermuter*[F: TsuField or WaterField](
-    env: Environment[F], positions: Positions, mode = Play,
-    editor = false): EditorPermuter {.inline.} =
-  ## Returns a new `EditorManager`.
+const DefaultReq = Requirement(kind: Clear, color: RequirementColor.All, number: 0)
+
+func initGuiApplication*(
+    nazoPuyoWrap: NazoPuyoWrap, mode = Play, editor = false
+): GuiApplication {.inline.} =
+  ## Returns a new GUI application.
   ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
   result.simulator = new Simulator
-  result.simulator[] = env.initSimulator(positions, mode, editor)
+  result.simulator[] = nazoPuyoWrap.initSimulator(mode, editor)
   result.replaySimulator = new Simulator
-  result.replaySimulator[] = 0.initEnvironment[:F].initSimulator(Replay, editor)
+  result.replaySimulator[] = nazoPuyoWrap.initSimulator(Replay, true)
 
   {.push warning[ProveInit]: off.}
-  result.replayData = default type result.replayData
-  result.replayIdx = 0
+  result.replayPairsPositions = none PairsPositions
   {.pop.}
+  result.replayIdx = 0
 
-  result.editor = editor
+  result.editor = editor or mode == Edit
   result.focusEditor = false
   result.solving = false
   result.permuting = false
@@ -72,49 +73,28 @@ proc initEditorPermuter*[F: TsuField or WaterField](
     result.progressBarData.now = 0
     result.progressBarData.total = 0
 
-proc initEditorPermuter*[F: TsuField or WaterField](
-    env: Environment[F], mode = Play, editor = false): EditorPermuter
-    {.inline.} =
-  ## Returns a new `EditorManager`.
+func initGuiApplication*[F: TsuField or WaterField](
+    nazo: NazoPuyo[F], mode = Play, editor = false
+): GuiApplication {.inline.} =
+  ## Returns a new GUI application.
   ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
-  env.initEditorPermuter(Position.none.repeat env.pairs.len, mode, editor)
+  initNazoPuyoWrap(nazo).initGuiApplication(mode, editor)
 
-proc initEditorPermuter*[F: TsuField or WaterField](
-    nazo: NazoPuyo[F], positions: Positions, mode = Play,
-    editor = false): EditorPermuter {.inline.} =
-  ## Returns a new `EditorManager`.
+func initGuiApplication*[F: TsuField or WaterField](
+    puyoPuyo: PuyoPuyo[F], mode = Play, editor = false
+): GuiApplication {.inline.} =
+  ## Returns a new GUI application.
   ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
-  result.simulator = new Simulator
-  result.simulator[] = nazo.initSimulator(positions, mode, editor)
-  result.replaySimulator = new Simulator
-  result.replaySimulator[] = initNazoPuyo[F]().initSimulator(Replay, editor)
-
-  {.push warning[ProveInit]: off.}
-  result.replayData = default type result.replayData
-  result.replayIdx = 0
-  {.pop.}
-
-  result.editor = editor
-  result.focusEditor = false
-  result.solving = false
-  result.permuting = false
-
-  when defined(js):
-    result.progressBarData.now = 0
-    result.progressBarData.total = 0
-
-proc initEditorPermuter*[F: TsuField or WaterField](
-    nazo: NazoPuyo[F], mode = Play, editor = false): EditorPermuter {.inline.} =
-  ## Returns a new `EditorManager`.
-  ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
-  nazo.initEditorPermuter(Position.none.repeat nazo.moveCount, mode, editor)
+  NazoPuyo[F](puyoPuyo: puyoPuyo, requirement: DefaultReq).initGuiApplication(
+    mode, editor
+  )
 
 # ------------------------------------------------
 # Edit - Other
 # ------------------------------------------------
 
-func toggleFocus*(mSelf) {.inline.} = mSelf.focusEditor.toggle
-  ## Toggles focusing to editor tab or not.
+func toggleFocus*(mSelf) {.inline.} = ## Toggles focusing to editor tab or not.
+  mSelf.focusEditor.toggle
 
 # ------------------------------------------------
 # Solve
@@ -123,66 +103,71 @@ func toggleFocus*(mSelf) {.inline.} = mSelf.focusEditor.toggle
 when defined(js):
   const ResultMonitorIntervalMs = 100
 
-proc updateReplaySimulator[F: TsuField or WaterField](mSelf; nazo: NazoPuyo[F])
-                 {.inline.} =
+func updateReplaySimulator[F: TsuField or WaterField](
+    mSelf; nazo: NazoPuyo[F]
+) {.inline.} =
   ## Updates the replay simulator.
-  ## This function is assumed to be called after `mSelf.replayData` is set.
-  assert mSelf.replayData.isSome
+  ## This function is assumed to be called after `mSelf.replayPairsPositions` is set.
+  assert mSelf.replayPairsPositions.isSome
 
-  if mSelf.replayData.get.len > 0:
+  if mSelf.replayPairsPositions.get.len > 0:
     mSelf.focusEditor = true
     mSelf.replayIdx = 0
 
     var nazo2 = nazo
-    nazo2.environment.pairs = mSelf.replayData.get[0].pairs
-    mSelf.replaySimulator[] = nazo2.initSimulator(
-      mSelf.replayData.get[0].positions, mSelf.replaySimulator[].mode,
-      mSelf.replaySimulator[].editor)
+    nazo2.puyoPuyo.pairsPositions = mSelf.replayPairsPositions.get[0]
+    mSelf.replaySimulator[] =
+      nazo2.initSimulator(mSelf.replaySimulator[].mode, mSelf.replaySimulator[].editor)
   else:
     mSelf.focusEditor = false
 
-proc solve*(mSelf; parallelCount: Positive =
-    when defined(js): 6 else: max(1, countProcessors())) {.inline.} =
+proc solve*(
+    mSelf;
+    parallelCount: Positive =
+      when defined(js):
+        6
+      else:
+        max(1, countProcessors())
+    ,
+) {.inline.} =
   ## Solves the nazo puyo.
   if mSelf.solving or mSelf.permuting or mSelf.simulator[].kind != Nazo:
     return
 
   mSelf.solving = true
 
-  mSelf.simulator[].withNazoPuyo:
+  mSelf.simulator[].nazoPuyoWrap.flattenAnd:
     when defined(js):
       {.push warning[ProveInit]: off.}
-      var results = @[none seq[Positions]]
+      var results = @[none seq[PairsPositions]]
       {.pop.}
       nazoPuyo.asyncSolve(results, parallelCount = parallelCount)
 
       mSelf.progressBarData.total =
-        if nazoPuyo.environment.pairs.peekFirst.isDouble:
-          nazoPuyo.environment.field.validDoublePositions.len
+        if mSelf.simulator[].nazoPuyoWrap.pairsPositions[0].pair.isDouble:
+          field.validDoublePositions.len
         else:
-          nazoPuyo.environment.field.validPositions.len
+          field.validPositions.len
       mSelf.progressBarData.now = 0
 
       var interval: Interval
-      proc showReplay =
+      proc showReplay() =
         mSelf.progressBarData.now = results.len.pred
         if results.allIt it.isSome:
           mSelf.progressBarData.total = 0
-          mSelf.replayData = some results.mapIt(it.get).concat.mapIt (
-            nazoPuyo.environment.pairs, it)
+          mSelf.replayData = some results.mapIt(it.get).concat
           mSelf.updateReplaySimulator nazoPuyo
           mSelf.solving = false
           interval.clearInterval
 
         if not kxi.surpressRedraws:
           kxi.redraw
+
       interval = showReplay.setInterval ResultMonitorIntervalMs
     else:
       # FIXME: make asynchronous
       # FIXME: redraw
-      mSelf.replayData =
-        some nazoPuyo.solve(parallelCount = parallelCount).mapIt (
-          nazoPuyo.environment.pairs, it)
+      mSelf.replayData = some nazoPuyo.solve(parallelCount = parallelCount)
       mSelf.updateReplaySimulator nazoPuyo
       mSelf.solving = false
 
@@ -190,51 +175,55 @@ proc solve*(mSelf; parallelCount: Positive =
 # Permute
 # ------------------------------------------------
 
-proc permute*(mSelf; fixMoves: seq[Positive], allowDouble: bool,
-              allowLastDouble: bool,
-              parallelCount =
-                when defined(js): 6 else: max(1, countProcessors()))
-             {.inline.} =
+proc permute*(
+    mSelf;
+    fixMoves: seq[Positive],
+    allowDouble: bool,
+    allowLastDouble: bool,
+    parallelCount =
+      when defined(js):
+        6
+      else:
+        max(1, countProcessors())
+    ,
+) {.inline.} =
   ## Permutes the nazo puyo.
   if mSelf.solving or mSelf.permuting or mSelf.simulator[].kind != Nazo:
     return
 
   mSelf.permuting = true
 
-  mSelf.simulator[].withNazoPuyo:
+  mSelf.simulator[].nazoPuyoWrap.flattenAnd:
     when defined(js):
       {.push warning[ProveInit]: off.}
-      var results = @[none tuple[pairs: Pairs, answer: Positions]]
+      var results = @[none PairsPositions]
       {.pop.}
-      nazoPuyo.asyncPermute(results, fixMoves, allowDouble, allowLastDouble,
-                            parallelCount)
+      nazoPuyo.asyncPermute(
+        results, fixMoves, allowDouble, allowLastDouble, parallelCount
+      )
 
       mSelf.progressBarData.total =
-        nazoPuyo.allPairsSeq(fixMoves, allowDouble, allowLastDouble).len
+        nazoPuyo.allPairsPositionsSeq(fixMoves, allowDouble, allowLastDouble).len
       mSelf.progressBarData.now = 0
 
       var interval: Interval
-      proc showReplay =
+      proc showReplay() =
         mSelf.progressBarData.now = results.len.pred
         if results.allIt it.isSome:
           mSelf.progressBarData.total = 0
-          mSelf.replayData = some results.mapIt(it.get).mapIt (
-            it.pairs, it.answer)
+          mSelf.replayPairsPositions = some results.mapIt(it.get)
           mSelf.updateReplaySimulator nazoPuyo
           mSelf.permuting = false
           interval.clearInterval
 
         if not kxi.surpressRedraws:
           kxi.redraw
+
       interval = showReplay.setInterval ResultMonitorIntervalMs
     else:
       # FIXME: make asynchronous
       # FIXME: redraw
-      let permuteRes = collect:
-        for (pairs, answer) in nazoPuyo.permute(
-            fixMoves, allowDouble, allowLastDouble):
-          (pairs, answer)
-      mSelf.replayData = some permuteRes
+      mSelf.replayData = some nazoPuyo.permute(fixMoves, allowDouble, allowLastDouble)
       mSelf.updateReplaySimulator nazoPuyo
       mSelf.permuting = false
 
@@ -244,38 +233,34 @@ proc permute*(mSelf; fixMoves: seq[Positive], allowDouble: bool,
 
 proc nextReplay*(mSelf) {.inline.} =
   ## Shows the next replay.
-  if mSelf.replayData.isNone or mSelf.replayData.get.len == 0:
+  if mSelf.replayPairsPositions.isNone or mSelf.replayPairsPositions.get.len == 0:
     return
 
-  if mSelf.replayIdx == mSelf.replayData.get.len.pred:
+  if mSelf.replayIdx == mSelf.replayPairsPositions.get.len.pred:
     mSelf.replayIdx = 0
   else:
     mSelf.replayIdx.inc
 
-  mSelf.replaySimulator[].pairs = mSelf.replayData.get[mSelf.replayIdx].pairs
-  mSelf.replaySimulator[].originalPairs =
-    mSelf.replayData.get[mSelf.replayIdx].pairs
-  mSelf.replaySimulator[].positions =
-    mSelf.replayData.get[mSelf.replayIdx].positions
-
+  mSelf.replaySimulator[].nazoPuyoWrap.pairsPositions =
+    mSelf.replayPairsPositions.get[mSelf.replayIdx]
+  mSelf.replaySimulator[].originalNazoPuyoWrap.pairsPositions =
+    mSelf.replayPairsPositions.get[mSelf.replayIdx]
   mSelf.replaySimulator[].reset false
 
 proc prevReplay*(mSelf) {.inline.} =
   ## Shows the previous replay.
-  if mSelf.replayData.isNone or mSelf.replayData.get.len == 0:
+  if mSelf.replayPairsPositions.isNone or mSelf.replayPairsPositions.get.len == 0:
     return
 
   if mSelf.replayIdx == 0:
-    mSelf.replayIdx = mSelf.replayData.get.len.pred
+    mSelf.replayIdx = mSelf.replayPairsPositions.get.len.pred
   else:
     mSelf.replayIdx.dec
 
-  mSelf.replaySimulator[].pairs = mSelf.replayData.get[mSelf.replayIdx].pairs
-  mSelf.replaySimulator[].originalPairs =
-    mSelf.replayData.get[mSelf.replayIdx].pairs
-  mSelf.replaySimulator[].positions =
-    mSelf.replayData.get[mSelf.replayIdx].positions
-
+  mSelf.replaySimulator[].nazoPuyoWrap.pairsPositions =
+    mSelf.replayPairsPositions.get[mSelf.replayIdx]
+  mSelf.replaySimulator[].originalNazoPuyoWrap.pairsPositions =
+    mSelf.replayPairsPositions.get[mSelf.replayIdx]
   mSelf.replaySimulator[].reset false
 
 # ------------------------------------------------
@@ -283,7 +268,7 @@ proc prevReplay*(mSelf) {.inline.} =
 # ------------------------------------------------
 
 proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
-  ## Handler for keyboard input.
+  ## Does operation specified by the keyboard input.
   ## Returns `true` if any action is executed.
   if event == initKeyEvent("KeyQ", shift = true):
     mSelf.toggleFocus
@@ -314,8 +299,9 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
 
 when defined(js):
   import std/[dom]
-  import ../private/app/editorpermuter/web/editor/[
-    controller, pagination, settings, progress, simulator]
+  import
+    ../private/app/editorpermuter/web/editor/
+      [controller, pagination, settings, progress, simulator]
 
   # ------------------------------------------------
   # JS - Keyboard Handler
@@ -344,8 +330,8 @@ when defined(js):
   proc initEditorPermuterNode(mSelf; id: string): VNode {.inline.} =
     ## Returns the editor&permuter node without the external section.
     ## `id` is shared with other node-creating procedures and need to be unique.
-    let simulatorNode = mSelf.simulator[].initSimulatorNode(
-      setKeyHandler = false, id = id)
+    let simulatorNode =
+      mSelf.simulator[].initSimulatorNode(setKeyHandler = false, id = id)
 
     result = buildHtml(tdiv(class = "columns is-mobile is-variable is-1")):
       tdiv(class = "column is-narrow"):
@@ -366,8 +352,9 @@ when defined(js):
                 tdiv(class = "block"):
                   mSelf.initEditorSimulatorNode
 
-  proc initEditorPermuterNode*(mSelf; setKeyHandler = true, wrapSection = true,
-                               id = ""): VNode {.inline.} =
+  proc initEditorPermuterNode*(
+      mSelf; setKeyHandler = true, wrapSection = true, id = ""
+  ): VNode {.inline.} =
     ## Returns the editor&permuter node.
     ## `id` is shared with other node-creating procedures and need to be unique.
     if setKeyHandler:
@@ -380,26 +367,34 @@ when defined(js):
       result = mSelf.initEditorPermuterNode id
 
   proc initEditorPermuterNode*[F: TsuField or WaterField](
-      nazoEnv: NazoPuyo[F] or Environment[F], positions: Positions, mode = Play,
-      editor = false, setKeyHandker = true, wrapSection = true, id = ""): VNode
-      {.inline.} =
+      nazoEnv: NazoPuyo[F] or Environment[F],
+      positions: Positions,
+      mode = Play,
+      editor = false,
+      setKeyHandker = true,
+      wrapSection = true,
+      id = "",
+  ): VNode {.inline.} =
     ## Returns the editor&permuter node.
     ## `id` is shared with other node-creating procedures and need to be unique.
     var editorPermuter = nazoEnv.initEditorPermuter(positions, mode, editor)
-    result = editorPermuter.initEditorPermuterNode(setKeyHandker, wrapSection,
-                                                   id)
+    result = editorPermuter.initEditorPermuterNode(setKeyHandker, wrapSection, id)
 
   proc initEditorPermuterNode*[F: TsuField or WaterField](
-      nazoEnv: NazoPuyo[F] or Environment[F], mode = Play, editor = false,
-      setKeyHandker = true, wrapSection = true, id = ""): VNode {.inline.} =
+      nazoEnv: NazoPuyo[F] or Environment[F],
+      mode = Play,
+      editor = false,
+      setKeyHandker = true,
+      wrapSection = true,
+      id = "",
+  ): VNode {.inline.} =
     ## Returns the editor&permuter node.
     ## `id` is shared with other node-creating procedures and need to be unique.
     var editorPermuter = nazoEnv.initEditorPermuter(mode, editor)
-    result = editorPermuter.initEditorPermuterNode(setKeyHandker, wrapSection,
-                                                   id)
+    result = editorPermuter.initEditorPermuterNode(setKeyHandker, wrapSection, id)
+
 else:
-  import ../private/app/editorpermuter/native/editor/[
-    controller, pagination, simulator]
+  import ../private/app/editorpermuter/native/editor/[controller, pagination, simulator]
 
   type
     EditorPermuterControl* = ref object of LayoutContainer
@@ -415,8 +410,8 @@ else:
   # ------------------------------------------------
 
   proc runKeyboardEventHandler*(
-      window: EditorPermuterWindow, event: KeyboardEvent,
-      keys = downKeys()) {.inline.} =
+      window: EditorPermuterWindow, event: KeyboardEvent, keys = downKeys()
+  ) {.inline.} =
     ## Keyboard event handler.
     let needRedraw = window.editorPermuter[].operate event.toKeyEvent keys
     if needRedraw:
@@ -429,7 +424,7 @@ else:
 
     cast[EditorPermuterWindow](rawWindow).runKeyboardEventHandler event
 
-  func initKeyboardEventHandler*: (event: KeyboardEvent) -> void {.inline.} =
+  func initKeyboardEventHandler*(): (event: KeyboardEvent) -> void {.inline.} =
     ## Returns the keyboard event handler.
     keyboardEventHandler
 
@@ -437,8 +432,9 @@ else:
   # Native - Control
   # ------------------------------------------------
 
-  proc initEditorPermuterControl*(editorPermuter: ref EditorPermuter):
-      EditorPermuterControl {.inline.} =
+  proc initEditorPermuterControl*(
+      editorPermuter: ref EditorPermuter
+  ): EditorPermuterControl {.inline.} =
     ## Returns the editor&permuter control.
     result = new EditorPermuterControl
     result.init
@@ -462,8 +458,8 @@ else:
     secondCol.add editorPermuter.initEditorSimulatorControl
 
   proc initEditorPermuterWindow*(
-      editorPermuter: ref EditorPermuter, title = "Pon!通",
-      setKeyHandler = true): EditorPermuterWindow {.inline.} =
+      editorPermuter: ref EditorPermuter, title = "Pon!通", setKeyHandler = true
+  ): EditorPermuterWindow {.inline.} =
     ## Returns the editor&permuter window.
     result = new EditorPermuterWindow
     result.init
