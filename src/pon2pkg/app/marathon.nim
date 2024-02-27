@@ -9,13 +9,13 @@
 {.experimental: "views".}
 
 import std/[algorithm, critbits, math, os, sequtils, strutils, sugar, random]
-import ./[misc, simulator]
-import ../corepkg/[cell, environment, misc, pair]
-import ../nazopuyopkg/[nazopuyo] # HACK: somehow this is necessary
+import ./[key, simulator]
+import ../app/[nazopuyo, simulator]
+import ../core/[cell, environment, misc, pair, pairposition, position, puyopuyo]
 import ../private/[misc]
+import ../private/app/marathon/[common]
 
-type Marathon* = object
-  ## Marathon manager.
+type Marathon* = object ## Marathon manager.
   simulator*: ref Simulator
 
   matchPairsStrsSeq*: seq[string]
@@ -30,9 +30,8 @@ type Marathon* = object
   rng: Rand
 
 const
-  RawPairsTxt =
-    staticRead currentSourcePath().parentDir.parentDir.parentDir.parentDir /
-      "assets/all-pairs.txt"
+  RawPairsTxt = staticRead currentSourcePath().parentDir.parentDir.parentDir.parentDir /
+    "assets/all-pairs.txt"
   MatchResultPairsCountPerPage* = 10
   AllPairsCount* = 65536
 
@@ -44,11 +43,10 @@ using
 # Constructor
 # ------------------------------------------------
 
-proc initMarathon*: Marathon {.inline.} =
+proc initMarathon*(): Marathon {.inline.} =
   ## Returns a new marathon manager.
   result.simulator = new Simulator
-  result.simulator[] =
-    0.initTsuEnvironment(setPairs = false).initSimulator(Play, true)
+  result.simulator[] = initPuyoPuyo[TsuField]().initSimulator(Play, true)
 
   result.matchPairsStrsSeq = @[]
   result.matchResultPageCount = 0
@@ -63,21 +61,11 @@ proc initMarathon*: Marathon {.inline.} =
   result.rng = initRand()
 
 # ------------------------------------------------
-# Pairs
-# ------------------------------------------------
-
-func toPairs*(str: string): Pairs {.inline.} =
-  ## Converts the flattened string to the pairs.
-  result = initDeque[Pair](str.len div 2)
-  for i in countup(0, str.len.pred, 2):
-    result.addLast str[i..i.succ].parsePair
-
-# ------------------------------------------------
 # Edit - Other
 # ------------------------------------------------
 
-func toggleFocus*(mSelf) {.inline.} = mSelf.focusSimulator.toggle
-  ## Toggles focusing to the simulator or not.
+func toggleFocus*(mSelf) {.inline.} = ## Toggles focusing to the simulator or not.
+  mSelf.focusSimulator.toggle
 
 # ------------------------------------------------
 # Table Page
@@ -121,7 +109,7 @@ func swappedPrefixes(prefix: string): seq[string] {.inline.} =
     pairIdx = [0, 0, 0, 0, 0, 0] # AB, AC, AD, BC, BD, CD
     pairCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # AB, ..., CD, AA, BB, CC, DD
   for i in countup(0, prefix.len.pred, 2):
-    case prefix[i..i.succ]
+    case prefix[i .. i.succ]
     of "AA":
       pairCounts[6].inc
     of "BB":
@@ -150,21 +138,28 @@ func swappedPrefixes(prefix: string): seq[string] {.inline.} =
       pairIdx[5] = i
 
   let
-    notDoublePairCount = pairCounts[0..<6].sum2
+    notDoublePairCount = pairCounts[0 ..< 6].sum2
     fixIdx =
       if pairCounts[0] > 0 and notDoublePairCount == pairCounts[0] and
-        pairCounts[6] + pairCounts[7] == 0: pairIdx[0]
+          pairCounts[6] + pairCounts[7] == 0:
+        pairIdx[0]
       elif pairCounts[1] > 0 and notDoublePairCount == pairCounts[1] and
-        pairCounts[6] + pairCounts[8] == 0: pairIdx[1]
+        pairCounts[6] + pairCounts[8] == 0:
+        pairIdx[1]
       elif pairCounts[2] > 0 and notDoublePairCount == pairCounts[2] and
-        pairCounts[6] + pairCounts[9] == 0: pairIdx[2]
+        pairCounts[6] + pairCounts[9] == 0:
+        pairIdx[2]
       elif pairCounts[3] > 0 and notDoublePairCount == pairCounts[3] and
-        pairCounts[7] + pairCounts[8] == 0: pairIdx[3]
+        pairCounts[7] + pairCounts[8] == 0:
+        pairIdx[3]
       elif pairCounts[4] > 0 and notDoublePairCount == pairCounts[4] and
-        pairCounts[7] + pairCounts[9] == 0: pairIdx[4]
+        pairCounts[7] + pairCounts[9] == 0:
+        pairIdx[4]
       elif pairCounts[5] > 0 and notDoublePairCount == pairCounts[5] and
-        pairCounts[8] + pairCounts[9] == 0: pairIdx[5]
-      else: -1
+        pairCounts[8] + pairCounts[9] == 0:
+        pairIdx[5]
+      else:
+        -1
 
     pairsSeq = collect:
       for i in countup(0, prefix.len.pred, 2):
@@ -172,47 +167,51 @@ func swappedPrefixes(prefix: string): seq[string] {.inline.} =
           c1 = prefix[i]
           c2 = prefix[i.succ]
 
-        if c1 == c2 or i == fixIdx: @[c1 & c2] else: @[c1 & c2, c2 & c1]
+        if c1 == c2 or i == fixIdx:
+          @[c1 & c2]
+        else:
+          @[c1 & c2, c2 & c1]
 
   result = pairsSeq.product2.mapIt it.join
 
 func initReplaceData(keys: string): seq[seq[(string, string)]] {.inline.} =
   ## Returns arguments for prefix replacing.
-  result = @[] # HACK: dummy to remove warning
+  result = @[] # HACK: dummy to suppress warning
 
   case keys.len
   of 1:
     result = collect:
-      for p0 in ColorPuyo.low..ColorPuyo.high:
+      for p0 in ColorPuyo.low .. ColorPuyo.high:
         @[($keys[0], $p0)]
   of 2:
     result = collect:
-      for p0 in ColorPuyo.low..ColorPuyo.high:
-        for p1 in ColorPuyo.low..ColorPuyo.high:
+      for p0 in ColorPuyo.low .. ColorPuyo.high:
+        for p1 in ColorPuyo.low .. ColorPuyo.high:
           if p0 != p1:
             @[($keys[0], $p0), ($keys[1], $p1)]
   of 3:
     result = collect:
-      for p0 in ColorPuyo.low..ColorPuyo.high:
-        for p1 in ColorPuyo.low..ColorPuyo.high:
-          for p2 in ColorPuyo.low..ColorPuyo.high:
+      for p0 in ColorPuyo.low .. ColorPuyo.high:
+        for p1 in ColorPuyo.low .. ColorPuyo.high:
+          for p2 in ColorPuyo.low .. ColorPuyo.high:
             if {p0, p1, p2}.card == 3:
               @[($keys[0], $p0), ($keys[1], $p1), ($keys[2], $p2)]
   of 4:
     result = collect:
-      for p0 in ColorPuyo.low..ColorPuyo.high:
-        for p1 in ColorPuyo.low..ColorPuyo.high:
-          for p2 in ColorPuyo.low..ColorPuyo.high:
-            for p3 in ColorPuyo.low..ColorPuyo.high:
+      for p0 in ColorPuyo.low .. ColorPuyo.high:
+        for p1 in ColorPuyo.low .. ColorPuyo.high:
+          for p2 in ColorPuyo.low .. ColorPuyo.high:
+            for p3 in ColorPuyo.low .. ColorPuyo.high:
               if {p0, p1, p2, p3}.card == 4:
-                @[($keys[0], $p0), ($keys[1], $p1), ($keys[2], $p2),
-                  ($keys[3], $p3)]
+                @[($keys[0], $p0), ($keys[1], $p1), ($keys[2], $p2), ($keys[3], $p3)]
   else:
     assert false
 
 const
-  ReplaceDataSeq = ["A".initReplaceData, "AB".initReplaceData,
-                    "ABC".initReplaceData, "ABCD".initReplaceData]
+  ReplaceDataSeq = [
+    "A".initReplaceData, "AB".initReplaceData, "ABC".initReplaceData,
+    "ABCD".initReplaceData
+  ]
   NeedReplaceKeysSeq = ["a".toSet2, "ab".toSet2, "abc".toSet2, "abcd".toSet2]
 
 {.push warning[Uninit]: off.}
@@ -231,13 +230,12 @@ func match*(mSelf; prefix: string) {.inline.} =
       for replaceData in ReplaceDataSeq[keys.card.pred]:
         for prefix3 in prefix2.swappedPrefixes:
           {.push warning[ProveInit]: off.}
-          mSelf.matchPairsStrsSeq &= mSelf.allPairsStrsTree.itemsWithPrefix(
-            prefix3.multiReplace replaceData).toSeq
+          mSelf.matchPairsStrsSeq &=
+            mSelf.allPairsStrsTree.itemsWithPrefix(prefix3.multiReplace replaceData).toSeq
           {.pop.}
     else:
       {.push warning[ProveInit]: off.}
-      mSelf.matchPairsStrsSeq =
-        mSelf.allPairsStrsTree.itemsWithPrefix(prefix).toSeq
+      mSelf.matchPairsStrsSeq = mSelf.allPairsStrsTree.itemsWithPrefix(prefix).toSeq
       {.pop.}
 
   mSelf.matchResultPageCount =
@@ -254,11 +252,11 @@ func match*(mSelf; prefix: string) {.inline.} =
 
 proc play(mSelf; pairsStr: string) {.inline.} =
   ## Plays a marathon mode with the given pairs.
-  let pairs = pairsStr.toPairs
+  let pairsPositions = pairsStr.toPairsPositions
 
   mSelf.simulator[].reset true
-  mSelf.simulator[].pairs = pairs
-  mSelf.simulator[].originalPairs = pairs
+  mSelf.simulator[].nazopuyoWrap.pairsPositions = pairsPositions
+  mSelf.simulator[].originalNazoPuyoWrap.pairsPositions = pairsPositions
 
   mSelf.focusSimulator = true
 
@@ -284,7 +282,7 @@ proc play*(mSelf; onlyMatched = true) {.inline.} =
 # ------------------------------------------------
 
 proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
-  ## Handler for keyboard input.
+  ## Does operation specified by the keyboard input.
   ## Returns `true` if any action is executed.
   if event == initKeyEvent("KeyQ", shift = true):
     mSelf.toggleFocus
@@ -302,23 +300,23 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
 when defined(js):
   import std/[dom]
   import karax/[karax, karaxdsl, vdom]
-  import ../private/app/marathon/web/[controller, pagination, searchbar,
-                                      searchresult, simulator]
+  import
+    ../private/app/marathon/web/
+      [controller, pagination, searchbar, searchresult, simulator]
 
   # ------------------------------------------------
   # JS - Keyboard Handler
   # ------------------------------------------------
 
   proc runKeyboardEventHandler*(mSelf; event: KeyEvent) {.inline.} =
-    ## Keyboard event handler.
+    ## Runs the keyboard event handler.
     let needRedraw = mSelf.operate event
     if needRedraw and not kxi.surpressRedraws:
       kxi.redraw
 
   proc runKeyboardEventHandler*(mSelf; event: dom.Event) {.inline.} =
-    ## Keybaord event handler.
-    # HACK: somehow this assertion fails
-    # assert event of KeyboardEvent
+    ## Runs the Keybaord event handler.
+    # assert event of KeyboardEvent # HACK: somehow this assertion fails
     mSelf.runKeyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
 
   proc initKeyboardEventHandler*(mSelf): (event: dom.Event) -> void {.inline.} =
@@ -329,7 +327,7 @@ when defined(js):
   # JS - Node
   # ------------------------------------------------
 
-  proc initMarathonNode*(mSelf; id: string): VNode {.inline.} =
+  proc initMarathonNode(mSelf; id: string): VNode {.inline.} =
     ## Returns the node of marathon manager.
     ## `id` is shared with other node-creating procedures and need to be unique.
     buildHtml(tdiv(class = "columns is-mobile")):
@@ -349,8 +347,9 @@ when defined(js):
           tdiv(class = "block"):
             mSelf.initMarathonSearchResultNode
 
-  proc initMarathonNode*(mSelf; setKeyHandler = true; wrapSection = true;
-                         id = ""): VNode {.inline.} =
+  proc initMarathonNode*(
+      mSelf; setKeyHandler = true, wrapSection = true, id = ""
+  ): VNode {.inline.} =
     ## Returns the node of marathon manager.
     ## `id` is shared with other node-creating procedures and need to be unique.
     if setKeyHandler:
