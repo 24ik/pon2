@@ -40,8 +40,8 @@ type GuiApplication* = object ## GUI application.
     progressBarData*: tuple[now: Natural, total: Natural]
 
 using
-  self: EditorPermuter
-  mSelf: var EditorPermuter
+  self: GuiApplication
+  mSelf: var GuiApplication
 
 # ------------------------------------------------
 # Constructor
@@ -298,7 +298,7 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
 # ------------------------------------------------
 
 when defined(js):
-  import std/[dom]
+  import karax/[kdom]
   import
     ../private/app/editorpermuter/web/editor/
       [controller, pagination, settings, progress, simulator]
@@ -308,18 +308,17 @@ when defined(js):
   # ------------------------------------------------
 
   proc runKeyboardEventHandler*(mSelf; event: KeyEvent) {.inline.} =
-    ## Keyboard event handler.
+    ## Runs the keyboard event handler.
     let needRedraw = mSelf.operate event
     if needRedraw and not kxi.surpressRedraws:
       kxi.redraw
 
-  proc runKeyboardEventHandler*(mSelf; event: dom.Event) {.inline.} =
+  proc runKeyboardEventHandler*(mSelf; event: Event) {.inline.} =
     ## Keybaord event handler.
-    # HACK: somehow this assertion fails
-    # assert event of KeyboardEvent
+    # assert event of KeyboardEvent # HACK: somehow this assertion fails
     mSelf.runKeyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
 
-  proc initKeyboardEventHandler*(mSelf): (event: dom.Event) -> void {.inline.} =
+  proc initKeyboardEventHandler*(mSelf): (event: Event) -> void {.inline.} =
     ## Returns the keyboard event handler.
     (event: dom.Event) => mSelf.runKeyboardEventHandler event
 
@@ -327,8 +326,8 @@ when defined(js):
   # JS - Node
   # ------------------------------------------------
 
-  proc initEditorPermuterNode(mSelf; id: string): VNode {.inline.} =
-    ## Returns the editor&permuter node without the external section.
+  proc initGuiApplicationNode(mSelf; id: string): VNode {.inline.} =
+    ## Returns the GUI application without the external section.
     ## `id` is shared with other node-creating procedures and need to be unique.
     let simulatorNode =
       mSelf.simulator[].initSimulatorNode(setKeyHandler = false, id = id)
@@ -345,17 +344,17 @@ when defined(js):
               mSelf.initEditorSettingsNode id
             if mSelf.progressBarData.total > 0:
               mSelf.initEditorProgressBarNode
-            if mSelf.replayData.isSome:
+            if mSelf.replayPairsPositions.isSome:
               tdiv(class = "block"):
                 mSelf.initEditorPaginationNode
-              if mSelf.replayData.get.len > 0:
+              if mSelf.replayPairsPositions.get.len > 0:
                 tdiv(class = "block"):
                   mSelf.initEditorSimulatorNode
 
-  proc initEditorPermuterNode*(
+  proc initGuiApplicationNode*(
       mSelf; setKeyHandler = true, wrapSection = true, id = ""
   ): VNode {.inline.} =
-    ## Returns the editor&permuter node.
+    ## Returns the GUI application node.
     ## `id` is shared with other node-creating procedures and need to be unique.
     if setKeyHandler:
       document.onkeydown = mSelf.initKeyboardEventHandler
@@ -366,84 +365,56 @@ when defined(js):
     else:
       result = mSelf.initEditorPermuterNode id
 
-  proc initEditorPermuterNode*[F: TsuField or WaterField](
-      nazoEnv: NazoPuyo[F] or Environment[F],
-      positions: Positions,
-      mode = Play,
-      editor = false,
-      setKeyHandker = true,
-      wrapSection = true,
-      id = "",
-  ): VNode {.inline.} =
-    ## Returns the editor&permuter node.
-    ## `id` is shared with other node-creating procedures and need to be unique.
-    var editorPermuter = nazoEnv.initEditorPermuter(positions, mode, editor)
-    result = editorPermuter.initEditorPermuterNode(setKeyHandker, wrapSection, id)
-
-  proc initEditorPermuterNode*[F: TsuField or WaterField](
-      nazoEnv: NazoPuyo[F] or Environment[F],
-      mode = Play,
-      editor = false,
-      setKeyHandker = true,
-      wrapSection = true,
-      id = "",
-  ): VNode {.inline.} =
-    ## Returns the editor&permuter node.
-    ## `id` is shared with other node-creating procedures and need to be unique.
-    var editorPermuter = nazoEnv.initEditorPermuter(mode, editor)
-    result = editorPermuter.initEditorPermuterNode(setKeyHandker, wrapSection, id)
-
 else:
-  import ../private/app/editorpermuter/native/editor/[controller, pagination, simulator]
+  import ../private/app/gui/native/[controller, pagination, simulator]
 
   type
-    EditorPermuterControl* = ref object of LayoutContainer
-      ## Root control of the editor&permuter.
-      editorPermuter*: ref EditorPermuter
+    GuiApplicationControl* = ref object of LayoutContainer
+      ## Root control of the GUI application.
+      guiApplication*: ref GuiApplication
 
-    EditorPermuterWindow* = ref object of WindowImpl
-      ## Application window for the editor&permuter.
-      editorPermuter*: ref EditorPermuter
+    GuiApplicationWindow* = ref object of WindowImpl ## Application window.
+      guiApplication*: ref GuiApplication
 
   # ------------------------------------------------
   # Native - Keyboard Handler
   # ------------------------------------------------
 
   proc runKeyboardEventHandler*(
-      window: EditorPermuterWindow, event: KeyboardEvent, keys = downKeys()
+      window: GuiApplicationWindow, event: KeyboardEvent, keys = downKeys()
   ) {.inline.} =
-    ## Keyboard event handler.
-    let needRedraw = window.editorPermuter[].operate event.toKeyEvent keys
+    ## Runs the keyboard event handler.
+    let needRedraw = window.guiApplication[].operate event.toKeyEvent keys
     if needRedraw:
       event.window.control.forceRedraw
 
-  proc keyboardEventHandler(event: KeyboardEvent) =
+  proc runKeyboardEventHandler(event: KeyboardEvent) =
     ## Keyboard event handler.
     let rawWindow = event.window
-    assert rawWindow of EditorPermuterWindow
+    assert rawWindow of GuiApplicationWindow
 
-    cast[EditorPermuterWindow](rawWindow).runKeyboardEventHandler event
+    cast[GuiApplicationWindow](rawWindow).runKeyboardEventHandler event
 
   func initKeyboardEventHandler*(): (event: KeyboardEvent) -> void {.inline.} =
     ## Returns the keyboard event handler.
-    keyboardEventHandler
+    runKeyboardEventHandler
 
   # ------------------------------------------------
   # Native - Control
   # ------------------------------------------------
 
-  proc initEditorPermuterControl*(
-      editorPermuter: ref EditorPermuter
-  ): EditorPermuterControl {.inline.} =
-    ## Returns the editor&permuter control.
-    result = new EditorPermuterControl
+  proc initGuiApplicationControl*(
+      guiApplication: ref GuiApplication
+  ): GuiApplicationControl {.inline.} =
+    ## Returns the GUI application control.
+    result = new GuiApplicationControl
     result.init
     result.layout = Layout_Horizontal
 
-    result.editorPermuter = editorPermuter
+    result.guiApplication = guiApplication
 
     # col=0
-    let simulatorControl = editorPermuter[].simulator.initSimulatorControl
+    let simulatorControl = guiApplication[].simulator.initSimulatorControl
     result.add simulatorControl
 
     # col=1
@@ -453,25 +424,25 @@ else:
     secondCol.padding = 10.scaleToDpi
     secondCol.spacing = 10.scaleToDpi
 
-    secondCol.add editorPermuter.initEditorControllerControl
-    secondCol.add editorPermuter.initEditorPaginationControl
-    secondCol.add editorPermuter.initEditorSimulatorControl
+    secondCol.add guiApplication.initEditorControllerControl
+    secondCol.add guiApplication.initEditorPaginationControl
+    secondCol.add guiApplication.initEditorSimulatorControl
 
-  proc initEditorPermuterWindow*(
-      editorPermuter: ref EditorPermuter, title = "Pon!通", setKeyHandler = true
+  proc initGuiApplicationWindow*(
+      guiApplication: ref GuiApplication, title = "Pon!通", setKeyHandler = true
   ): EditorPermuterWindow {.inline.} =
-    ## Returns the editor&permuter window.
-    result = new EditorPermuterWindow
+    ## Returns the GUI application window.
+    result = new GuiApplicationWindow
     result.init
 
-    result.editorPermuter = editorPermuter
+    result.guiApplication = guiApplication
 
     result.title = title
     result.resizable = false
     if setKeyHandler:
       result.onKeyDown = keyboardEventHandler
 
-    let rootControl = editorPermuter.initEditorPermuterControl
+    let rootControl = editorPermuter.initGuiApplicationControl
     result.add rootControl
 
     when defined(windows):
