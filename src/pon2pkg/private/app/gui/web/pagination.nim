@@ -7,24 +7,25 @@
 
 import std/[options, strformat, sugar]
 import karax/[karax, karaxdsl, vdom]
-import ../../../../../apppkg/[editorpermuter]
+import ../../../../app/[gui]
+import ../../../../core/[pairposition]
 
-proc initEditorPaginationNode*(editorPermuter: var EditorPermuter): VNode
-                              {.inline.} =
+proc initEditorPaginationNode*(guiApplication: var GuiApplication): VNode {.inline.} =
   ## Returns the editor pagination node.
   let showIdx =
-    if editorPermuter.replayData.get.len == 0: 0
-    else: editorPermuter.replayIdx.succ
+    if guiApplication.replayPairsPositions.get.len == 0:
+      0
+    else:
+      guiApplication.replayIdx.succ
 
-  result = buildHtml(nav(class = "pagination", role = "navigation",
-                         aria-label = "pagination")):
-    button(class = "button pagination-link",
-           onclick = () => editorPermuter.prevReplay):
+  result = buildHtml(
+    nav(class = "pagination", role = "navigation", aria - label = "pagination")
+  ):
+    button(class = "button pagination-link", onclick = () => guiApplication.prevReplay):
       span(class = "icon"):
         italic(class = "fa-solid fa-backward-step")
     button(class = "button pagination-link is-static"):
-      text &"{showIdx} / {editorPermuter.replayData.get.len}"
-    button(class = "button pagination-link",
-           onclick = () => editorPermuter.nextReplay):
+      text &"{showIdx} / {guiApplication.replayPairsPositions.get.len}"
+    button(class = "button pagination-link", onclick = () => guiApplication.nextReplay):
       span(class = "icon"):
         italic(class = "fa-solid fa-forward-step")
