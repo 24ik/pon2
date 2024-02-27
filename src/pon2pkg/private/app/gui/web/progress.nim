@@ -7,15 +7,15 @@
 
 import std/[strformat]
 import karax/[karaxdsl, kbase, vdom]
-import ../../../../../apppkg/[editorpermuter]
+import ../../../../app/[gui]
 
-proc initEditorProgressBarNode*(editorPermuter: var EditorPermuter): VNode
-                               {.inline.} =
+proc initEditorProgressBarNode*(guiApplication: var GuiApplication): VNode {.inline.} =
   ## Returns the editor progress bar node.
   let
-    now = editorPermuter.progressBarData.now
-    total = editorPermuter.progressBarData.total
+    now = guiApplication.progressBarData.now
+    total = guiApplication.progressBarData.total
 
-  result = buildHtml(progress(class = "progress is-primary",
-                              value = kstring $now, max = kstring $total)):
+  result = buildHtml(
+    progress(class = "progress is-primary", value = kstring $now, max = kstring $total)
+  ):
     text &"{now} / {total}"
