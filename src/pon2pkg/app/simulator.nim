@@ -728,10 +728,10 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
 # ------------------------------------------------
 
 when defined(js):
-  import std/[dom, sugar]
-  import karax/[karax, karaxdsl, vdom]
+  import std/[sugar]
+  import karax/[karax, karaxdsl, kdom, vdom]
   import
-    ../private/app/editorpermuter/web/[
+    ../private/app/simulator/web/[
       controller,
       field,
       immediatepairs,
@@ -749,15 +749,14 @@ when defined(js):
   # ------------------------------------------------
 
   proc runKeyboardEventHandler*(mSelf; event: KeyEvent) {.inline.} =
-    ## Keybaord event handler.
+    ## Runs the keybaord event handler.
     let needRedraw = mSelf.operate event
     if needRedraw and not kxi.surpressRedraws:
       kxi.redraw
 
   proc runKeyboardEventHandler*(mSelf; event: dom.Event) {.inline.} =
-    ## Keybaord event handler.
-    # HACK: somehow this assertion fails
-    # assert event of KeyboardEvent
+    ## Runs the keybaord event handler.
+    # assert event of KeyboardEvent # HACK: somehow this assertion fails
     mSelf.runKeyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
 
   func initKeyboardEventHandler*(mSelf): (event: dom.Event) -> void {.inline.} =
@@ -817,38 +816,11 @@ when defined(js):
     else:
       result = mSelf.initSimulatorNode id
 
-  proc initSimulatorNode*[F: TsuField or WaterField](
-      nazoEnv: NazoPuyo[F] or Environment[F],
-      mode = Play,
-      editor = false,
-      setKeyHandler = true,
-      wrapSection = true,
-      id = "",
-  ): VNode {.inline.} =
-    ## Returns the simulator node.
-    ## `id` is shared with other node-creating procedures and need to be unique.
-    var simulator = nazoEnv.initSimulator(mode, editor)
-    result = simulator.initSimulatorNode(setKeyHandler, wrapSection, id)
-
-  proc initSimulatorNode*[F: TsuField or WaterField](
-      nazoEnv: NazoPuyo[F] or Environment[F],
-      positions: Positions,
-      mode = Play,
-      editor = false,
-      setKeyHandler = true,
-      wrapSection = true,
-      id = "",
-  ): VNode {.inline.} =
-    ## Returns the simulator node.
-    ## `id` is shared with other node-creating procedures and need to be unique.
-    var simulator = nazoEnv.initSimulator(positions, mode, editor)
-    result = simulator.initSimulatorNode(setKeyHandler, wrapSection, id)
-
 else:
   import std/[sugar]
   import nigui
   import
-    ../private/app/editorpermuter/native/[
+    ../private/app/simulator/native/[
       assets,
       field,
       immediatepairs,
@@ -874,13 +846,13 @@ else:
   proc runKeyboardEventHandler*(
       window: SimulatorWindow, event: KeyboardEvent, keys = downKeys()
   ) {.inline.} =
-    ## Keyboard event handler.
+    ## Runs the keyboard event handler.
     let needRedraw = window.simulator[].operate event.toKeyEvent keys
     if needRedraw:
       event.window.control.forceRedraw
 
-  proc keyboardEventHandler(event: KeyboardEvent) =
-    ## Keyboard event handler.
+  proc runKeyboardEventHandler(event: KeyboardEvent) =
+    ## Runs the keyboard event handler.
     let rawWindow = event.window
     assert rawWindow of SimulatorWindow
 
@@ -888,7 +860,7 @@ else:
 
   func initKeyboardEventHandler*(): (event: KeyboardEvent) -> void {.inline.} =
     ## Returns the keyboard event handler.
-    keyboardEventHandler
+    runKeyboardEventHandler
 
   # ------------------------------------------------
   # Native - Control
@@ -938,7 +910,7 @@ else:
 
   proc initSimulatorWindow*(
       simulator: ref Simulator,
-      title = "ぷよぷよシミュレータ",
+      title = "Pon!通シミュレーター",
       setKeyHandler = true,
   ): SimulatorWindow {.inline.} =
     ## Returns the simulator window.
