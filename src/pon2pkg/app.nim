@@ -1,67 +1,78 @@
 ## This module implements the application for [Puyo Puyo](https://puyo.sega.jp/)
 ## and [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
-## With `import pon2pkg/app`, you can use all features provided by this module.
-## Also, you can write such as `import pon2pkg/apppkg/simulator` to import
-## submodules individually.
 ##
 ## Submodule Documentations:
-## - [editorpermuter](./apppkg/editorpermuter.html)
+## - [color](./apppkg/color.html)
+## - [generate](./apppkg/generate.html)
+## - [gui](./apppkg/gui.html)
+## - [key](./apppkg/key.html)
 ## - [marathon](./apppkg/marathon.html)
-## - [misc](./apppkg/misc.html)
+## - [nazopuyo](./apppkg/nazopuyo.html)
+## - [permute](./apppkg/permute.html)
 ## - [simulator](./apppkg/simulator.html)
+## - [solve](./apppkg/solve.html)
 ##
 
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./apppkg/[editorpermuter, marathon, misc, simulator]
+import ./app/[color, generate, gui, key, marathon, nazopuyo, permute, simulator, solve]
 
-export editorpermuter.EditorPermuter, editorpermuter.initEditorPermuter,
-  editorpermuter.toggleFocus, editorpermuter.solve, editorpermuter.nextReplay,
-  editorpermuter.prevReplay, editorpermuter.operate
-export marathon.Marathon, marathon.initMarathon, marathon.toggleFocus,
-  marathon.nextResultPage, marathon.prevResultPage, marathon.match,
-  marathon.play, marathon.operate
-export misc.KeyEvent, misc.Color, misc.SelectColor, misc.GhostColor,
-  misc.WaterColor, misc.DefaultColor, misc.initKeyEvent
-export simulator.SimulatorState, simulator.Simulator, simulator.initSimulator,
-  simulator.`rule`, simulator.`kind`, simulator.`mode`, simulator.`rule=`,
-  simulator.`kind=`, simulator.`mode=`, simulator.tsuNazoPuyo,
-  simulator.waterNazoPuyo, simulator.originalTsuNazoPuyo,
-  simulator.originalWaterNazoPuyo, simulator.pairs, simulator.`pairs=`,
-  simulator.originalPairs, simulator.`originalPairs=`, simulator.score,
-  simulator.withNazoPuyo, simulator.withOriginalNazoPuyo,
-  simulator.withEnvironment, simulator.withOriginalEnvironment,
-  simulator.withField, simulator.withOriginalField, simulator.toggleInserting,
-  simulator.toggleFocus, simulator.moveCursorUp, simulator.moveCursorDown,
-  simulator.moveCursorRight, simulator.moveCursorLeft, simulator.deletePair,
-  simulator.writeCell, simulator.shiftFieldUp, simulator.shiftFieldDown,
-  simulator.shiftFieldRight, simulator.shiftFieldLeft, simulator.flipFieldV,
-  simulator.flipFieldH, simulator.`requirementKind=`,
-  simulator.`requirementColor=`, simulator.`requirementNumber=`, simulator.undo,
-  simulator.redo, simulator.moveNextPositionRight,
-  simulator.moveNextPositionLeft, simulator.rotateNextPositionRight,
-  simulator.rotateNextPositionLeft, simulator.forward, simulator.backward,
-  simulator.reset, simulator.toUri, simulator.operate
+export
+  color.Color, color.SelectColor, color.GhostColor, color.WaterColor, color.DefaultColor
+export
+  generate.GenerateError, generate.GenerateRequirementColor,
+  generate.GenerateRequirement, generate.generate
+export
+  gui.GuiApplication, gui.initGuiApplication, gui.toggleFocus, gui.solve, gui.permute,
+  gui.nextReplay, gui.prevReplay, gui.operate
+export key.KeyEvent, key.initKeyEvent
+export
+  marathon.Marathon, marathon.initMarathon, marathon.toggleFocus,
+  marathon.nextResultPage, marathon.prevResultPage, marathon.match, marathon.play,
+  marathon.operate
+export
+  nazopuyo.NazoPuyoWrap, nazopuyo.initNazoPuyoWrap, nazopuyo.flattenAnd,
+  nazopuyo.pairsPositions, nazopuyo.requirement, nazopuyo.rule, nazopuyo.`rule=`
+export permute.permute
+export
+  simulator.SimulatorKind, simulator.SimulatorMode, simulator.SimulatorState,
+  simulator.Simulator, simulator.initSimulator, simulator.rule, simulator.kind,
+  simulator.mode, simulator.`rule=`, simulator.`kind=`, simulator.`mode=`,
+  simulator.score, simulator.toggleInserting, simulator.toggleFocus,
+  simulator.moveCursorUp, simulator.moveCursorDown, simulator.moveCursorRight,
+  simulator.moveCursorLeft, simulator.deletePairPosition, simulator.writeCell,
+  simulator.shiftFieldUp, simulator.shiftFieldDown, simulator.shiftFieldRight,
+  simulator.shiftFieldLeft, simulator.flipFieldV, simulator.flipFieldH,
+  simulator.`requirementKind=`, simulator.`requirementColor=`,
+  simulator.`requirementNumber=`, simulator.undo, simulator.redo,
+  simulator.moveNextPositionRight, simulator.moveNextPositionLeft,
+  simulator.rotateNextPositionRight, simulator.rotateNextPositionLeft,
+  simulator.forward, simulator.backward, simulator.reset, simulator.toUri,
+  simulator.parseSimulator, simulator.operate
+export solve.solve
 
 when defined(js):
-  export editorpermuter.runKeyboardEventHandler,
-    editorpermuter.initKeyboardEventHandler,
-    editorpermuter.initEditorPermuterNode
-  export marathon.runKeyboardEventHandler, marathon.initKeyboardEventHandler,
+  export color.toColorCode
+  export
+    gui.runKeyboardEventHandler, gui.initKeyboardEventHandler,
+    gui.initGuiApplicationNode
+  export key.toKeyEvent
+  export
+    marathon.runKeyboardEventHandler, marathon.initKeyboardEventHandler,
     marathon.initMarathonNode
-  export misc.toColorCode, misc.toKeyEvent
-  export simulator.runKeyboardEventHandler, simulator.initKeyboardEventHandler,
+  export
+    simulator.runKeyboardEventHandler, simulator.initKeyboardEventHandler,
     simulator.initSimulatorNode
 else:
-  export editorpermuter.EditorPermuterControl,
-    editorpermuter.EditorPermuterWindow, editorpermuter.runKeyboardEventHandler,
-    editorpermuter.initKeyboardEventHandler,
-    editorpermuter.initEditorPermuterControl,
-    editorpermuter.initEditorPermuterWindow
-  export misc.ColorButton, misc.initColorButton, misc.handleDrawEvent,
-    misc.toNiguiColor, misc.toKeyEvent
-  export simulator.SimulatorControl, simulator.SimulatorWindow,
+  export color.toNiguiColor
+  export
+    gui.GuiApplicationControl, gui.GuiApplicationWindow, gui.runKeyboardEventHandler,
+    gui.initKeyboardEventHandler, gui.initGuiApplicationControl,
+    gui.initGuiApplicationWindow
+  export key.toKeyEvent
+  export
+    simulator.SimulatorControl, simulator.SimulatorWindow,
     simulator.runKeyboardEventHandler, simulator.initKeyboardEventHandler,
     simulator.initSimulatorControl, simulator.initSimulatorWindow
