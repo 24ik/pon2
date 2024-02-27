@@ -221,7 +221,8 @@ proc asyncPermute*[F: TsuField or WaterField](
 
       var nazo2 = nazo
       nazo2.puyoPuyo.pairsPositions = pairsPositionsSeq[pairsPositionsIdx]
-      worker.run $Permute, $pairsPositionsIdx, $nazo2.toUriQuery Izumiya
+      worker.run $Permute,
+        $pairsPositionsIdx, $nazo2.toUriQuery Izumiya, $nazo2.puyoPuyo.field.rule
       pairsPositionsIdx.inc
 
   interval = runWorkers.setInterval WaitLoopIntervalMs

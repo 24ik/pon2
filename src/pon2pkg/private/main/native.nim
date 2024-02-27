@@ -1,4 +1,4 @@
-## This module implements auxiliary functions for the native main file.
+## This module implements helper functions for the native main file.
 ##
 
 {.experimental: "strictDefs".}
