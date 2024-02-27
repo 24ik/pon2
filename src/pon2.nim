@@ -1,18 +1,21 @@
 ## The `pon2` module provides applications and APIs for
 ## [Puyo Puyo](https://puyo.sega.jp/) and
 ## [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
+## 
+## Instead of importing `pon2`, the following submodules can be imported individually.
+## - [`core`](./pon2pkg/core.html)
+## - [`app`](./pon2pkg/app.html)
 ##
-## API Documentations:
-## - [Puyo Puyo](./pon2pkg/core.html)
-## - [Nazo Puyo](./pon2pkg/nazopuyo.html)
-## - [GUI Application](./pon2pkg/app.html)
-##
-## Generate Static Web Pages on JS Backend:
-## | Compile Option    | Generated File                  |
-## | ----------------- | ------------------------------- |
-## | No Option         | Main file.                      |
-## | `-d:Pon2Worker`   | Web worker file.                |
-## | `-d:Pon2Marathon` | Main file for marathon manager. |
+## Compile Options:
+## | Option                            | Description                 | Default |
+## | --------------------------------- | --------------------------- | ------- |
+## | `-d:pon2.waterheight=<int>`       | Height of the water.        | `8`     |
+## | `-d:pon2.garbagerate.tsu=<int>`   | Garbage rate in Tsu rule.   | `70`    |
+## | `-d:pon2.garbagerate.water=<int>` | Garbage rate in Water rule. | `90`    |
+## | `-d:pon2.avx2=<bool>`             | Use AVX2 instructions.      | `true`  |
+## | `-d:pon2.bmi2=<bool>`             | Use BMI2 instructions.      | `true`  |
+## | `-d:pon2.worker                   | Generate web worker file.   |         |
+## | `-d:pon2.marathon                 | Generate marathon JS file.  |         |
 ##
 
 {.experimental: "strictDefs".}
@@ -21,15 +24,15 @@
 
 when isMainModule:
   when defined(js):
-    when defined(Pon2Worker):
+    when defined(pon2.worker):
       import ./pon2pkg/private/[webworker]
       import ./pon2pkg/private/main/[web]
 
       assignToWorker workerTask
-    elif defined(Pon2Marathon):
+    elif defined(pon2.marathon):
       import std/[sugar]
       import karax/[karax]
-      import ./pon2pkg/apppkg/[marathon as marathonModule]
+      import ./pon2pkg/app/[marathon as marathonModule]
       import ./pon2pkg/private/main/[web]
 
       var marathon = initMarathon()
@@ -37,16 +40,16 @@ when isMainModule:
       setRenderer () => marathon.initMainMarathonNode
     else:
       import std/[sugar]
-      import ./pon2pkg/apppkg/[editorpermuter as editorPermuterModule]
+      import ./pon2pkg/app/[gui]
       import ./pon2pkg/private/main/[web]
       import karax/[karax]
 
       var
         pageInitialized = false
-        editorPermuter: EditorPermuter
+        guiApplication: GuiApplication
 
       setRenderer (routerData: RouterData) =>
-        routerData.initMainEditorPermuterNode(pageInitialized, editorPermuter)
+        routerData.initGuiApplicationNode(pageInitialized, guiApplication)
   else:
     import std/[tables]
     import ./pon2pkg/private/main/[native]
@@ -62,10 +65,5 @@ when isMainModule:
       args.runGuiApplication
 
 when defined(nimdoc):
-  # HACK: need to access something to generate documentation
-  import ./pon2pkg/app as appDoc
-  import ./pon2pkg/core as coreDoc
-  import ./pon2pkg/nazopuyo as nazoDoc
-  discard coreDoc.Cell.None
-  discard nazoDoc.MarkResult.Accept
-  discard appDoc.SimulatorState.Stable
+  import ./pon2pkg/app
+  import ./pon2pkg/core

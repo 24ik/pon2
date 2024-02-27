@@ -1,4 +1,4 @@
-## This module implements the core of [Puyo Puyo](https://puyo.sega.jp/) and
+## This module implements [Puyo Puyo](https://puyo.sega.jp/) and
 ## [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 ##
 ## Submodule Documentations:
@@ -7,9 +7,9 @@
 ## - [fieldtype](./core/fieldtype.html)
 ## - [host](./core/host.html)
 ## - [mark](./core/mark.html)
-## - [misc](./core/misc.html)
 ## - [moveresult](./core/moveresult.html)
 ## - [nazopuyo](./core/nazopuyo.html)
+## - [notice](./core/notice.html)
 ## - [pair](./core/pair.html)
 ## - [pairposition](./core/pairposition.html)
 ## - [position](./core/position.html)
@@ -33,7 +33,7 @@
 
 import
   ./core/[
-    cell, field, fieldtype, host, mark, misc, moveresult, nazopuyo, notice, pair,
+    cell, field, fieldtype, host, mark, moveresult, nazopuyo, notice, pair,
     pairposition, position, puyopuyo, requirement, rule
   ]
 import ./private/[intrinsic]
@@ -50,8 +50,7 @@ export
   field.noneCount, field.invalidPositions, field.validPositions,
   field.validDoublePositions, field.shiftUp, field.shiftDown, field.shiftRight,
   field.shiftLeft, field.flipV, field.flipH, field.move, field.moveWithRoughTracking,
-  field.moveWithDetailTracking, field.moveWithFullTracking, field.parseTsuField,
-  field.parseWaterField, field.`$`, field.toUriQuery
+  field.moveWithDetailTracking, field.moveWithFullTracking, field.`$`, field.toUriQuery
 when UseAvx2:
   export field.`==`
 export
@@ -59,7 +58,6 @@ export
   fieldtype.Row, fieldtype.Column, fieldtype.WaterRow, fieldtype.AirRow
 export host.SimulatorHost
 export mark.MarkResult, mark.mark
-export misc.SimulatorKind, misc.SimulatorMode
 export
   moveresult.MoveResult, moveresult.initMoveResult, moveresult.puyoCount,
   moveresult.colorCount, moveresult.garbageCount, moveresult.puyoCounts,
