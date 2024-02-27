@@ -6,10 +6,13 @@
 {.experimental: "views".}
 
 import karax/[vdom]
-import ../../../../../apppkg/[editorpermuter, simulator]
+import ../../../../app/[gui, simulator]
 
-proc initEditorSimulatorNode*(editorPermuter: var EditorPermuter, id = ""):
-    VNode {.inline.} =
+proc initEditorSimulatorNode*(
+    guiApplication: var GuiApplication, id = ""
+): VNode {.inline.} =
   ## Returns the editor simulator node.
   ## `id` is shared with other node-creating procedures and need to be unique.
-  editorPermuter.replaySimulator[].initSimulatorNode(false, false, id)
+  guiApplication.replaySimulator[].initSimulatorNode(
+    setKeyHandler = false, wrapSection = false, id = id
+  )
