@@ -1,4 +1,4 @@
-## This module implements auxiliary things for the native main file.
+## This module implements auxiliary functions for the native main file.
 ##
 
 {.experimental: "strictDefs".}
@@ -9,20 +9,19 @@ import std/[browsers, options, random, sequtils, strformat, strutils, uri]
 import docopt
 import nigui
 import ../[misc]
-import ../../apppkg/[editorpermuter]
-import ../../corepkg/[environment, field, fieldtype, misc, rule]
-import ../../nazopuyopkg/[generate, nazopuyo, permute, solve]
+import ../../app/[generate, gui, nazopuyo, permute, simulator, solve]
+import ../../core/[field, fieldtype, misc, nazopuyo, puyopuyo, requirement, rule]
 
 # ------------------------------------------------
 # Parse
 # ------------------------------------------------
 
 func parseSomeInt[T: SomeInteger or Natural or Positive](
-    val: Value, allowNone = false): Option[T] {.inline.} =
+    val: Value, allowNone = false
+): Option[T] {.inline.} =
   ## Converts the value to the given type `T`.
   ## If the conversion fails, `ValueError` will be raised.
-  ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is
-  ## returned.
+  ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is returned.
   {.push warning[ProveInit]: off.}
   result = none T
   {.pop.}
@@ -36,55 +35,53 @@ func parseSomeInt[T: SomeInteger or Natural or Positive](
   else:
     raise newException(ValueError, "`val` should be `vkNone` or `vkStr`.")
 
-func parseRequirementKind(val: Value, allowNone = false):
-    Option[RequirementKind] {.inline.} =
+func parseRequirementKind(
+    val: Value, allowNone = false
+): Option[RequirementKind] {.inline.} =
   ## Converts the value to the requirement kind.
   ## If the conversion fails, `ValueError` will be raised.
-  ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is
-  ## returned.
-  let idx = val.parseSomeInt[:int](allowNone)
+  ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is returned.
+  let idx = parseSomeInt[int](val, allowNone)
   {.push warning[ProveInit]: off.}
   if idx.isNone:
     return none RequirementKind
   {.pop.}
 
-  if idx.get notin RequirementKind.low.ord..RequirementKind.high.ord:
+  if idx.get notin RequirementKind.low.ord .. RequirementKind.high.ord:
     raise newException(ValueError, "Invalid requirement kind.")
 
   result = some RequirementKind idx.get
 
 func parseGenerateRequirementColor(
-    val: Value, allowNone = false): Option[GenerateRequirementColor]
-    {.inline.} =
+    val: Value, allowNone = false
+): Option[GenerateRequirementColor] {.inline.} =
   ## Converts the value to the generate requirement color.
   ## If the conversion fails, `ValueError` will be raised.
-  ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is
-  ## returned.
-  let idx = val.parseSomeInt[:int](allowNone)
+  ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is returned.
+  let idx = parseSomeInt[int](val, allowNone)
   {.push warning[ProveInit]: off.}
   if idx.isNone:
     return none GenerateRequirementColor
   {.pop.}
 
-  if idx.get notin GenerateRequirementColor.low.ord ..
-      GenerateRequirementColor.high.ord:
+  if idx.get notin GenerateRequirementColor.low.ord .. GenerateRequirementColor.high.ord:
     raise newException(ValueError, "Invalid requirement color.")
 
   result = some GenerateRequirementColor idx.get
 
-func parseRequirementNumber(val: Value, allowNone = false):
-    Option[RequirementNumber] {.inline.} =
+func parseRequirementNumber(
+    val: Value, allowNone = false
+): Option[RequirementNumber] {.inline.} =
   ## Converts the value to the requirement number.
   ## If the conversion fails, `ValueError` will be raised.
-  ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is
-  ## returned.
-  let idx = val.parseSomeInt[:int](allowNone)
+  ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is returned.
+  let idx = parseSomeInt[int](val, allowNone)
   {.push warning[ProveInit]: off.}
   if idx.isNone:
     return none RequirementNumber
   {.pop.}
 
-  if idx.get notin RequirementNumber.low.ord..RequirementNumber.high.ord:
+  if idx.get notin RequirementNumber.low.ord .. RequirementNumber.high.ord:
     raise newException(ValueError, "Invalid requirement number.")
 
   result = some RequirementNumber idx.get
@@ -92,15 +89,14 @@ func parseRequirementNumber(val: Value, allowNone = false):
 func parseRule(val: Value, allowNone = false): Option[Rule] {.inline.} =
   ## Converts the value to the rule.
   ## If the conversion fails, `ValueError` will be raised.
-  ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is
-  ## returned.
-  let idx = val.parseSomeInt[:int](allowNone)
+  ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is returned.
+  let idx = parseSomeInt[int](val, allowNone)
   {.push warning[ProveInit]: off.}
   if idx.isNone:
     return none Rule
   {.pop.}
 
-  if idx.get notin Rule.low.ord..Rule.high.ord:
+  if idx.get notin Rule.low.ord .. Rule.high.ord:
     raise newException(ValueError, "Invalid rule.")
 
   result = some Rule idx.get
@@ -115,9 +111,15 @@ proc runSolver*(args: Table[string, Value]) {.inline.} =
   if args["-B"].to_bool:
     questionUriStr.openDefaultBrowser
 
-  questionUriStr.parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
+  let simulator = questionUriStr.parseUri.parseSimulator
+  if simulator.kind != Nazo:
+    raise newException(ValueError, "The question should be a Nazo Puyo.")
+
+  var simulator2 = simulator
+  simulator.nazoPuyoWrap.flattenAnd:
     for answerIdx, answer in nazoPuyo.solve(showProgress = true):
-      let answerUri = nazoPuyo.toUri(answer, mode = Replay, editor = true)
+      simulator2.nazoPuyoWrap.pairsPositions = answer
+      let answerUri = simulator2.toUri(withPositions = true)
       echo &"({answerIdx.succ}) {answerUri}"
 
       if args["-b"].to_bool:
@@ -131,19 +133,25 @@ proc runGenerator*(args: Table[string, Value]) {.inline.} =
   ## Runs the CUI generator.
   # RNG
   var rng =
-    if args["-s"].kind == vkNone: initRand()
-    else: args["-s"].parseSomeInt[:Natural].get.initRand
+    if args["-s"].kind == vkNone:
+      initRand()
+    else:
+      parseSomeInt[Natural](args["-s"]).get.initRand
 
   # requirement
   {.push warning[ProveInit]: off.}
   let
     kind = args["--rk"].parseRequirementKind.get
     color =
-      if kind in ColorKinds: args["--rc"].parseGenerateRequirementColor
-      else: none GenerateRequirementColor
+      if kind in ColorKinds:
+        args["--rc"].parseGenerateRequirementColor
+      else:
+        none GenerateRequirementColor
     number =
-      if kind in NumberKinds: args["--rn"].parseRequirementNumber
-      else: none RequirementNumber
+      if kind in NumberKinds:
+        args["--rn"].parseRequirementNumber
+      else:
+        none RequirementNumber
     req = GenerateRequirement(kind: kind, color: color, number: number)
   {.pop.}
 
@@ -155,35 +163,68 @@ proc runGenerator*(args: Table[string, Value]) {.inline.} =
   heights[Column.low] = none Natural # HACK: dummy to remove warning
   for i, c in ($args["-H"]):
     heights[Column i] =
-      if c == '+': none Natural
-      else: some c.parseSomeInt[:Natural]
+      if c == '+':
+        none Natural
+      else:
+        some parseSomeInt[Natural](c)
   {.pop.}
 
   # generate
-  for nazoIdx in 0..<args["-n"].parseSomeInt[:Natural].get:
-    let (question, answer) = generates(
-      (rng.rand int.low..int.high),
-      args["-r"].parseRule.get,
-      req,
-      args["-m"].parseSomeInt[:Natural].get,
-      args["-c"].parseSomeInt[:Natural].get,
-      heights,
-      (color: args["--nc"].parseSomeInt[:Natural].get,
-        garbage: args["--ng"].parseSomeInt[:Natural].get),
-      (
-        total: args["--tt"].parseSomeInt[:Natural](true),
-        vertical: args["--tv"].parseSomeInt[:Natural](true),
-        horizontal: args["--th"].parseSomeInt[:Natural](true),
-        lShape: args["--tl"].parseSomeInt[:Natural](true)),
-      not args["-D"].to_bool,
-      args["-d"].to_bool)
-
+  for nazoIdx in 0 ..< parseSomeInt[Natural](args["-n"]).get:
     let
       questionUri: Uri
       answerUri: Uri
-    question.flattenAnd:
-      questionUri = nazoPuyo.toUri
-      answerUri = nazoPuyo.toUri answer
+
+    case args["-r"].parseRule.get
+    of Tsu:
+      let simulator = generate[TsuField](
+        (rng.rand int.low .. int.high),
+        args["-r"].parseRule.get,
+        req,
+        parseSomeInt[Natural](args["-m"]).get,
+        parseSomeInt[Natural](args["-c"]).get,
+        heights,
+        (
+          color: parseSomeInt[Natural](args["--nc"]).get,
+          garbage: parseSomeInt[Natural](args["--ng"]).get,
+        ),
+        (
+          total: parseSomeInt[Natural](args["--tt"], true),
+          vertical: parseSomeInt[Natural](args["--tv"], true),
+          horizontal: parseSomeInt[Natural](args["--th"], true),
+          lShape: parseSomeInt[Natural](args["--tl"], true),
+        ),
+        not args["-D"].to_bool,
+        args["-d"].to_bool,
+      ).initSimulator
+
+      questionUri = simulator.toUri false
+      answerUri = simulator.toUri true
+    of Water:
+      let simulator = generate[WaterField](
+        (rng.rand int.low .. int.high),
+        args["-r"].parseRule.get,
+        req,
+        parseSomeInt[Natural](args["-m"]).get,
+        parseSomeInt[Natural](args["-c"]).get,
+        heights,
+        (
+          color: parseSomeInt[Natural](args["--nc"]).get,
+          garbage: parseSomeInt[Natural](args["--ng"]).get,
+        ),
+        (
+          total: parseSomeInt[Natural](args["--tt"], true),
+          vertical: parseSomeInt[Natural](args["--tv"], true),
+          horizontal: parseSomeInt[Natural](args["--th"], true),
+          lShape: parseSomeInt[Natural](args["--tl"], true),
+        ),
+        not args["-D"].to_bool,
+        args["-d"].to_bool,
+      ).initSimulator
+
+      questionUri = simulator.toUri false
+      answerUri = simulator.toUri true
+
     echo &"(Q{nazoIdx.succ}) {questionUri}"
     echo &"(A{nazoIdx.succ}) {answerUri}"
     echo ""
@@ -199,19 +240,27 @@ proc runGenerator*(args: Table[string, Value]) {.inline.} =
 
 proc runPermuter*(args: Table[string, Value]) {.inline.} =
   ## Runs the CUI permuter.
+  let
+    questionUriStr = $args["<question>"]
+    simulator = questionUriStr.parseUri.parseSimulator
+
   var idx = 0
   {.push warning[UnsafeDefault]: off.}
   {.push warning[UnsafeSetLen]: off.}
-  ($args["<question>"]).parseUri.parseNazoPuyos.nazoPuyos.flattenAnd:
-    for (pairs, answer) in nazoPuyo.permute(
-        args["-f"].mapIt(it.parseSomeInt[:Positive]),
-        not args["-D"].to_bool, args["-d"].to_bool, showProgress = true):
+  simulator.nazoPuyoWrap.flattenAnd:
+    for pairsPositions in nazoPuyo.permute(
+      args["-f"].mapIt(parseSomeInt[Positive](it)),
+      not args["-D"].to_bool,
+      args["-d"].to_bool,
+      showProgress = true,
+    ):
       var nazo = nazoPuyo
-      nazo.environment.pairs = pairs
+      nazo.puyoPuyo.pairsPositions = pairsPositions
 
       let
-        questionUri = nazo.toUri
-        answerUri = nazo.toUri answer
+        simulator2 = nazo.initSimulator
+        questionUri = simulator2.toUri false
+        answerUri = simulator2.toUri true
       echo &"(Q{idx.succ}) {questionUri}"
       echo &"(A{idx.succ}) {answerUri}"
       echo ""
@@ -231,42 +280,27 @@ proc runPermuter*(args: Table[string, Value]) {.inline.} =
 
 proc runGuiApplication*(args: Table[string, Value]) {.inline.} =
   ## Runs the GUI application.
-  let editorPermuter = new EditorPermuter
+  let guiApplication = new GuiApplication
   case args["<uri>"].kind
   of vkNone:
-    editorPermuter[] = initTsuEnvironment().initEditorPermuter
+    guiApplication[] = initPuyoPuyo[TsuField]().initGuiApplication(editor = true)
   of vkStr:
-    let inputUri = ($args["<uri>"]).parseUri
-    try:
-      let parseRes = inputUri.parseNazoPuyos
-      parseRes.nazoPuyos.flattenAnd:
-        if parseRes.positions.isSome:
-          editorPermuter[] = nazoPuyo.initEditorPermuter(
-            parseRes.positions.get, parseRes.mode, parseRes.editor)
-        else:
-          editorPermuter[] = nazoPuyo.initEditorPermuter(
-            parseRes.mode, parseRes.editor)
-    except ValueError:
-      let parseRes = inputUri.parseEnvironments
-      parseRes.environments.flattenAnd:
-        if parseRes.positions.isSome:
-          editorPermuter[] = environment.initEditorPermuter(
-            parseRes.positions.get, parseRes.mode, parseRes.editor)
-        else:
-          editorPermuter[] = environment.initEditorPermuter(
-            parseRes.mode, parseRes.editor)
+    guiApplication[] = ($args["<uri>"]).parseUri.parseSimulator.nazoPuyoWrap.initGuiApplication(
+      editor = true
+    )
   else:
     assert false
 
   app.init
-  editorPermuter.initEditorPermuterWindow.show
+  guiApplication.initGuiApplicationWindow.show
   app.run
 
 # ------------------------------------------------
 # Command-line Arguments
 # ------------------------------------------------
 
-const Document = """
+const Document =
+  """
 ぷよぷよ・なぞぷよ用アプリケーション．
 機能一覧（使用方法はUsageの節を参照）：
 * なぞぷよ解探索
@@ -344,5 +378,6 @@ Options:
     「+」も指定でき，これを指定した列は高さが1以上のランダムとなる．
     なお，「+」を指定する場合は，6文字全て「+」か「0」のいずれかである必要がある．"""
 
-proc getCommandLineArguments*: Table[string, Value] {.inline.} = Document.docopt
+proc getCommandLineArguments*(): Table[string, Value] {.inline.} =
   ## Returns the command line arguments.
+  Document.docopt

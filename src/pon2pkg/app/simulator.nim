@@ -596,6 +596,9 @@ func parseSimulator*(uri: Uri) {.inline.} =
     modeVal = "<invalid>"
     simulatorQueries = initTable[string, string]()
     mainQueries = newSeq[(string, string)](0)
+  assert kindVal notin StrToKind
+  assert modeVal notin StrToMode
+
   for (key, val) in uri.decodeQuery:
     case key
     of EditorKey:
