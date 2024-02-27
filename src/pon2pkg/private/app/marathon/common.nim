@@ -8,6 +8,10 @@
 import std/[sugar]
 import ../../../core/[pair, pairposition, position]
 
+const
+  MatchResultPairsCountPerPage* = 10
+  AllPairsCount* = 65536
+
 func toPairsPositions*(str: string): PairsPositions {.inline.} =
   ## Returns the pairs&positions converted from the flattened string.
   collect:

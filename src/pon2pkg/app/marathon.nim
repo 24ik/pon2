@@ -1,7 +1,7 @@
 ## This module implements marathon mode.
 ##
 # NOTE (Implementation approach): To prevent slow page loading and rendering,
-# data is basically handled as `string` and conversion to `Pairs` is performed
+# data is basically handled as `string` and conversion to `Pair` is performed
 # when necessary.
 
 {.experimental: "strictDefs".}
@@ -29,11 +29,8 @@ type Marathon* = object ## Marathon manager.
 
   rng: Rand
 
-const
-  RawPairsTxt = staticRead currentSourcePath().parentDir.parentDir.parentDir.parentDir /
-    "assets/all-pairs.txt"
-  MatchResultPairsCountPerPage* = 10
-  AllPairsCount* = 65536
+const RawPairsTxt = staticRead currentSourcePath().parentDir.parentDir.parentDir.parentDir /
+  "assets/all-pairs.txt"
 
 using
   self: Marathon
