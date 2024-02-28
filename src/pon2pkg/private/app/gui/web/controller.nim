@@ -9,7 +9,7 @@ import std/[sugar]
 import karax/[karax, karaxdsl, kbase, vdom]
 import ./[settings]
 import ../../../../app/[gui, nazopuyo, simulator]
-import ../../../../core/[nazopuyo, pairposition]
+import ../../../../core/[nazopuyo]
 
 proc initEditorControllerNode*(
     guiApplication: var GuiApplication, id = ""

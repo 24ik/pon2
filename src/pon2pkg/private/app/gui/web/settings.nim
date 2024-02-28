@@ -8,7 +8,7 @@
 import std/[sequtils, strformat]
 import karax/[karaxdsl, kbase, kdom, vdom]
 import ../../../../app/[gui, nazopuyo, simulator]
-import ../../../../core/[pair, pairposition, position]
+import ../../../../core/[position]
 
 const
   ParallelCountSelectIdPrefix = "pon2-settings-parallel"

@@ -734,7 +734,6 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
 # ------------------------------------------------
 
 when defined(js):
-  import std/[sugar]
   import karax/[karax, karaxdsl, kdom, vdom]
   import
     ../private/app/simulator/web/[
@@ -823,7 +822,6 @@ when defined(js):
       result = mSelf.initSimulatorNode id
 
 else:
-  import std/[sugar]
   import nigui
   import
     ../private/app/simulator/native/[

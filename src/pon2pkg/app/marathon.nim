@@ -9,9 +9,8 @@
 {.experimental: "views".}
 
 import std/[algorithm, critbits, math, os, sequtils, strutils, sugar, random]
-import ./[key, simulator]
-import ../app/[nazopuyo, simulator]
-import ../core/[cell, environment, misc, pair, pairposition, position, puyopuyo]
+import ./[key, nazopuyo, simulator]
+import ../core/[cell, field, puyopuyo]
 import ../private/[misc]
 import ../private/app/marathon/[common]
 
@@ -30,7 +29,7 @@ type Marathon* = object ## Marathon manager.
   rng: Rand
 
 const RawPairsTxt = staticRead currentSourcePath().parentDir.parentDir.parentDir.parentDir /
-  "assets/all-pairs.txt"
+  "assets" / "pairs" / "swap.txt"
 
 using
   self: Marathon

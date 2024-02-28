@@ -22,7 +22,7 @@ const
 # ------------------------------------------------
 
 when defined(js):
-  import std/[dom, strutils]
+  import std/[strutils]
   import karax/[kbase]
 
   func toColorCode*(color: Color): kstring {.inline.} =

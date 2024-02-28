@@ -5,10 +5,10 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, strformat, sugar]
+import std/[strformat, sugar]
 import karax/[karax, karaxdsl, kbase, vdom]
 import ../../../../app/[nazopuyo, simulator]
-import ../../../../core/[misc, requirement]
+import ../../../../core/[requirement]
 
 const
   KindSelectIdPrefix = "pon2-req-kind"
@@ -59,7 +59,7 @@ proc initRequirementNode*(
 
   if displayMode or simulator.mode != Edit:
     return buildHtml(bold):
-      text $simulator.requirement
+      text $simulator.nazoPuyoWrap.requirement
 
   result = buildHtml(tdiv):
     tdiv(class = "block mb-1"):

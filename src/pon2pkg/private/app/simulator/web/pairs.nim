@@ -5,17 +5,17 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, sugar]
+import std/[sugar]
 import karax/[karax, karaxdsl, kbase, vdom, vstyles]
 import ../[common]
 import ../../[misc]
-import ../../../../app/[color, misc, nazopuyo, simulator]
-import ../../../../core/[cell, misc, pair]
+import ../../../../app/[color, nazopuyo, simulator]
+import ../../../../core/[cell, pair]
 
 func initDeleteClickHandler(simulator: var Simulator, idx: Natural): () -> void =
   ## Returns the click handler for delete buttons.
   # NOTE: cannot inline due to lazy evaluation
-  () => simulator.deletePair(idx)
+  () => simulator.deletePairPosition(idx)
 
 func initCellClickHandler(
     simulator: var Simulator, idx: Natural, axis: bool
@@ -39,12 +39,15 @@ proc initPairsNode*(
 
   result = buildHtml(table(class = "table is-narrow")):
     tbody:
-      for idx, (pair, pos) in simulator.originalNazoPuyoWrap.pairsPositions:
-        let rowClass =
-          if simulator.needPairPointer(idx) and not displayMode:
-            kstring"is-selected"
-          else:
-            kstring""
+      for idx, pairPos in simulator.originalNazoPuyoWrap.pairsPositions:
+        let
+          pair = pairPos.pair
+          pos = pairPos.position
+          rowClass =
+            if simulator.needPairPointer(idx) and not displayMode:
+              kstring"is-selected"
+            else:
+              kstring""
 
         tr(class = rowClass):
           # delete button

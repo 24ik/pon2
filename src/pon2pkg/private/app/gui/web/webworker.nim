@@ -10,7 +10,7 @@ import ../../[permute, solve]
 import ../../../[webworker]
 import
   ../../../../core/
-    [field, nazopuyo, pair, pairposition, position, puyopuyo, requirement]
+    [field, host, nazopuyo, pair, pairposition, position, puyopuyo, requirement]
 
 type TaskKind* = enum
   ## Worker task kind.
@@ -94,7 +94,7 @@ proc asyncSolve[F: TsuField or WaterField](
     DisappearPlaceMore, DisappearConnect, DisappearConnectMore
   }
 
-  case nazo.requirement.color.get
+  case nazo.requirement.color
   of RequirementColor.All:
     nazo.asyncSolve results, reqKind, RequirementColor.All, earlyStopping, parallelCount
   of RequirementColor.Red:
@@ -195,7 +195,7 @@ proc asyncPermute*[F: TsuField or WaterField](
       if messages[0].parseBool:
         results.add some messages[1].parsePairsPositions Izumiya
       else:
-        results.add none tuple[pairs: Pairs, answer: Positions]
+        results.add none PairsPositions
 
       if results.len == pairsPositionsSeq.len.succ:
         results.keepItIf it.isSome

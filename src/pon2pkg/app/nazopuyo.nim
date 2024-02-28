@@ -39,6 +39,7 @@ func initNazoPuyoWrap*[F: TsuField or WaterField](
 
 template flattenAnd*(self; body: untyped): untyped =
   ## Runs `body` with `nazoPuyo` exposed.
+  {.push hint[XDeclaredButNotUsed]: off.}
   case self.rule
   of Tsu:
     let
@@ -54,6 +55,7 @@ template flattenAnd*(self; body: untyped): untyped =
       field {.inject.} = self.water.puyoPuyo.field
 
     body
+  {.pop.}
 
 # ------------------------------------------------
 # Property - Pairs&Positions

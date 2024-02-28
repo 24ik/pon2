@@ -16,4 +16,5 @@ func toPairsPositions*(str: string): PairsPositions {.inline.} =
   ## Returns the pairs&positions converted from the flattened string.
   collect:
     for i in countup(0, str.len.pred, 2):
-      PairPosition(pair: str[i .. i.succ].parsePair, position: None)
+      let s = str[i .. i.succ]
+      PairPosition(pair: s.parsePair, position: None)

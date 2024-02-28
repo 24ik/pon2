@@ -5,15 +5,13 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, sequtils, strformat, strutils, uri]
+import std/[sequtils, strformat, strutils, uri]
 import karax/[karax, karaxdsl, vdom]
 import ../[misc, webworker]
 import ../app/[solve]
 import ../app/gui/web/[webworker]
-import ../../app/[gui, marathon, nazopuyo, simulator]
-import
-  ../../core/
-    [field, misc, nazopuyo, pair, pairposition, position, puyopuyo, solve, rule]
+import ../../app/[gui, marathon, nazopuyo, simulator, solve]
+import ../../core/[field, host, nazopuyo, pairposition, puyopuyo, rule]
 
 # ------------------------------------------------
 # Web Worker
@@ -103,13 +101,13 @@ proc initGuiApplicationNode*(
   uri.query = query
 
   try:
-    guiApplication = uri.parseSimulator.nazoPuyoWrap.initGuiApplicationNode
+    guiApplication = uri.parseSimulator.nazoPuyoWrap.initGuiApplication
   except ValueError:
     return buildHtml(tdiv):
       text "URL形式エラー"
 
   result = buildHtml(tdiv):
-    guiApplication.simulator[].nazoPuyoWrap.initGuiApplicationNode
+    guiApplication.initGuiApplicationNode
     initFooterNode()
 
 proc initMainMarathonNode*(marathon: var Marathon): VNode {.inline.} =

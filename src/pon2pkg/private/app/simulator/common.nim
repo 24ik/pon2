@@ -144,17 +144,16 @@ func getMessages*(
 .} =
   ## Returns the messages.
   ## Note that `noticeGarbages` in the result should be used only in rendering.
-  result.state =
-    case simulator.kind
-    of Regular:
-      if simulator.state != Stable:
-        ""
-      else:
-        simulator.nazoPuyoWrap.flattenAnd:
-          if field.isDead: DeadMessage else: ""
-    of Nazo:
-      simulator.originalNazoPuyoWrap.flattenAnd:
-        NazoMessages[nazoPuyo.mark]
+  case simulator.kind
+  of Regular:
+    if simulator.state != Stable:
+      result.state = ""
+    else:
+      simulator.nazoPuyoWrap.flattenAnd:
+        result.state = if field.isDead: DeadMessage else: ""
+  of Nazo:
+    simulator.originalNazoPuyoWrap.flattenAnd:
+      result.state = NazoMessages[nazoPuyo.mark]
 
   result.score = simulator.score
 

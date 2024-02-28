@@ -9,8 +9,8 @@ import std/[sugar]
 import karax/[karax, karaxdsl, kbase, vdom, vstyles]
 import ../[common]
 import ../../[misc]
-import ../../../../app/[nazopuyo, simulator]
-import ../../../../core/[field, fieldtype, misc]
+import ../../../../app/[color, nazopuyo, simulator]
+import ../../../../core/[cell, field, fieldtype]
 
 func initClickHandler(simulator: var Simulator, row: Row, col: Column): () -> void =
   ## Returns the click handler.
@@ -19,8 +19,9 @@ func initClickHandler(simulator: var Simulator, row: Row, col: Column): () -> vo
 
 proc initFieldNode*(simulator: var Simulator, displayMode = false): VNode {.inline.} =
   ## Returns the field node.
-  let arr = simulator.nazoPuyoWrap.flattenAnd:
-    field.toArray
+  let arr: array[Height, array[Width, Cell]]
+  simulator.nazoPuyoWrap.flattenAnd:
+    arr = field.toArray
 
   result = buildHtml(table(style = style(StyleAttr.border, kstring"1px black solid"))):
     tbody:

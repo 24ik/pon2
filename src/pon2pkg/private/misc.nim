@@ -84,7 +84,7 @@ iterator zip*[T, U, V](
     s1: openArray[T], s2: openArray[U], s3: openArray[V]
 ): (T, U, V) {.inline.} =
   ## Yields a combination of elements.
-  ## Longer array[s] will be truncated.
+  ## Longer array\[s\] will be truncated.
   let minLen = [s1.len, s2.len, s3.len].min
   for i in 0 ..< minLen:
     yield (s1[i], s2[i], s3[i])

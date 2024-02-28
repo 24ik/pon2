@@ -9,7 +9,6 @@ srcDir = "src"
 installExt = @["nim"]
 bin = @["pon2"]
 
-
 # Dependencies
 
 requires "nim ^= 2.0.2"
@@ -29,8 +28,7 @@ task test, "Run Tests":
     Pon2Avx2 {.intdefine.} = 2
     Pon2Bmi2 {.intdefine.} = 2
 
-  exec &"nim c -r -d:Pon2Avx2={Pon2Avx2} -d:Pon2Bmi2={Pon2Bmi2} " &
-    "tests/makeTest.nim"
+  exec &"nim c -r -d:Pon2Avx2={Pon2Avx2} -d:Pon2Bmi2={Pon2Bmi2} " & "tests/makeTest.nim"
   exec "testament all"
 
 task benchmark, "Benchmarking":
@@ -38,8 +36,7 @@ task benchmark, "Benchmarking":
     Pon2Avx2 {.booldefine.} = true
     Pon2Bmi2 {.booldefine.} = true
 
-  exec &"nim c -r -d:Pon2Avx2={Pon2Avx2} -d:Pon2Bmi2={Pon2Bmi2} " &
-    "benchmark/main.nim"
+  exec &"nim c -r -d:Pon2Avx2={Pon2Avx2} -d:Pon2Bmi2={Pon2Bmi2} " & "benchmark/main.nim"
 
 task documentation, "Make Documentation":
   exec &"nim doc --project -d:Pon2Avx2=true src/pon2.nim"
@@ -80,12 +77,12 @@ task web, "Make Web Pages":
     else:
       cpFile rawJs, dst
 
-  # playground
-  "src/pon2.nim".compile "www/playground/index.min.js"
-  "src/pon2.nim".compile "www/playground/worker.min.js", "-d:Pon2Worker"
+  # GUI application
+  "src/pon2.nim".compile "www/gui/index.min.js"
+  "src/pon2.nim".compile "www/gui/worker.min.js", "-d:pon2.worker"
 
   # marathon
-  "src/pon2.nim".compile "www/marathon/index.min.js", "-d:Pon2Marathon"
+  "src/pon2.nim".compile "www/marathon/index.min.js", "-d:pon2.marathon"
 
   # documentation
   exec "nimble -y documentation"

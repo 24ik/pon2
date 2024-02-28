@@ -14,8 +14,8 @@
 ## | `-d:pon2.garbagerate.water=<int>` | Garbage rate in Water rule. | `90`    |
 ## | `-d:pon2.avx2=<bool>`             | Use AVX2 instructions.      | `true`  |
 ## | `-d:pon2.bmi2=<bool>`             | Use BMI2 instructions.      | `true`  |
-## | `-d:pon2.worker                   | Generate web worker file.   |         |
-## | `-d:pon2.marathon                 | Generate marathon JS file.  |         |
+## | `-d:pon2.worker`                  | Generate web worker file.   |         |
+## | `-d:pon2.marathon`                | Generate marathon JS file.  |         |
 ##
 
 {.experimental: "strictDefs".}
@@ -67,3 +67,7 @@ when isMainModule:
 when defined(nimdoc):
   import ./pon2pkg/app
   import ./pon2pkg/core
+
+  # HACK: dummy to suppress warning
+  discard SelectColor
+  discard Cell.None

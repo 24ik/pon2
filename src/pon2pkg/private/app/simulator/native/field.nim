@@ -10,7 +10,7 @@ import nigui
 import ./[assets]
 import ../[common]
 import ../../../../app/[color, nazopuyo, simulator]
-import ../../../../core/[field, fieldtype]
+import ../../../../core/[cell, field, fieldtype]
 
 type FieldControl* = ref object of LayoutContainer ## Field control.
   simulator: ref Simulator
@@ -25,8 +25,9 @@ proc cellDrawHandler(
   canvas.areaColor = control.simulator[].fieldCellBackgroundColor(row, col).toNiguiColor
   canvas.fill
 
-  let cell = control.simulator[].nazoPuyoWrap.flattenAnd:
-    field[row, col]
+  let cell: Cell
+  control.simulator[].nazoPuyoWrap.flattenAnd:
+    cell = field[row, col]
   canvas.drawImage control.assets[].cellImages[cell]
 
 func initCellDrawHandler(

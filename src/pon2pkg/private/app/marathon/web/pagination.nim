@@ -7,7 +7,8 @@
 
 import std/[strformat, sugar]
 import karax/[karax, karaxdsl, vdom]
-import ../../../../apppkg/[marathon]
+import ../[common]
+import ../../../../app/[marathon]
 
 proc initMarathonPaginationNode*(marathon: var Marathon): VNode {.inline.} =
   ## Returns the marathon pagination node.
@@ -15,7 +16,8 @@ proc initMarathonPaginationNode*(marathon: var Marathon): VNode {.inline.} =
     firstIdx = marathon.matchResultPageIdx * MatchResultPairsCountPerPage + 1
     lastIdx = min(
       marathon.matchResultPageIdx.succ * MatchResultPairsCountPerPage,
-      marathon.matchPairsStrsSeq.len)
+      marathon.matchPairsStrsSeq.len,
+    )
     ratio = marathon.matchPairsStrsSeq.len / AllPairsCount
     pageTxt =
       if marathon.matchPairsStrsSeq.len > 0:
@@ -24,15 +26,14 @@ proc initMarathonPaginationNode*(marathon: var Marathon): VNode {.inline.} =
       else:
         "0 / 0 (0.0%)"
 
-  result = buildHtml(nav(class = "pagination", role = "navigation",
-                aria-label = "pagination")):
-    button(class = "button pagination-link",
-           onclick = () => marathon.prevResultPage):
+  result = buildHtml(
+    nav(class = "pagination", role = "navigation", aria - label = "pagination")
+  ):
+    button(class = "button pagination-link", onclick = () => marathon.prevResultPage):
       span(class = "icon"):
         italic(class = "fa-solid fa-backward-step")
     button(class = "button pagination-link is-static"):
       text pageTxt
-    button(class = "button pagination-link",
-           onclick = () => marathon.nextResultPage):
+    button(class = "button pagination-link", onclick = () => marathon.nextResultPage):
       span(class = "icon"):
         italic(class = "fa-solid fa-forward-step")

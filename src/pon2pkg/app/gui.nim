@@ -6,13 +6,14 @@
 {.experimental: "views".}
 
 import std/[options, sequtils]
-import ./[key, nazopuyo, permute, simulator]
+import ./[key, nazopuyo, simulator]
 import ../core/[field, nazopuyo, pairposition, puyopuyo, requirement]
 import ../private/[misc]
 
 when defined(js):
-  import std/[sugar, uri]
+  import std/[sugar]
   import karax/[karax, karaxdsl, kdom, vdom]
+  import ../core/[pair]
   import ../private/[webworker]
   import ../private/app/[permute]
   import ../private/app/gui/web/[webworker]
@@ -49,7 +50,7 @@ using
 const DefaultReq = Requirement(kind: Clear, color: RequirementColor.All, number: 0)
 
 proc initGuiApplication*(
-    nazoPuyoWrap: NazoPuyoWrap, mode = Play, editor = false
+    nazoPuyoWrap: NazoPuyoWrap, mode = SimulatorMode.Play, editor = false
 ): GuiApplication {.inline.} =
   ## Returns a new GUI application.
   ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
@@ -301,10 +302,7 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
 # ------------------------------------------------
 
 when defined(js):
-  import karax/[kdom]
-  import
-    ../private/app/editorpermuter/web/editor/
-      [controller, pagination, settings, progress, simulator]
+  import ../private/app/gui/web/[controller, pagination, settings, progress, simulator]
 
   # ------------------------------------------------
   # JS - Keyboard Handler
@@ -364,9 +362,9 @@ when defined(js):
 
     if wrapSection:
       result = buildHtml(section(class = "section")):
-        mSelf.initEditorPermuterNode id
+        mSelf.initGuiApplicationNode id
     else:
-      result = mSelf.initEditorPermuterNode id
+      result = mSelf.initGuiApplicationNode id
 
 else:
   import ../private/app/gui/native/[controller, pagination, simulator]

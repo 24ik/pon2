@@ -8,12 +8,11 @@
 import std/[options, strformat, sugar]
 import karax/[karax, karaxdsl, vdom]
 import ../../../../app/[gui]
-import ../../../../core/[pairposition]
 
 proc initEditorPaginationNode*(guiApplication: var GuiApplication): VNode {.inline.} =
   ## Returns the editor pagination node.
   let showIdx =
-    if guiApplication.replayPairsPositions.get.len == 0:
+    if guiApplication.replayPairsPositionsSeq.get.len == 0:
       0
     else:
       guiApplication.replayIdx.succ
@@ -25,7 +24,7 @@ proc initEditorPaginationNode*(guiApplication: var GuiApplication): VNode {.inli
       span(class = "icon"):
         italic(class = "fa-solid fa-backward-step")
     button(class = "button pagination-link is-static"):
-      text &"{showIdx} / {guiApplication.replayPairsPositions.get.len}"
+      text &"{showIdx} / {guiApplication.replayPairsPositionsSeq.get.len}"
     button(class = "button pagination-link", onclick = () => guiApplication.nextReplay):
       span(class = "icon"):
         italic(class = "fa-solid fa-forward-step")
