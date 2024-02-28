@@ -1,10 +1,9 @@
 ## The `pon2` module provides applications and APIs for
 ## [Puyo Puyo](https://puyo.sega.jp/) and
 ## [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
-## 
-## Instead of importing `pon2`, the following submodules can be imported individually.
-## - [`core`](./pon2pkg/core.html)
-## - [`app`](./pon2pkg/app.html)
+## To access APIs, import the following submodules:
+## - [`pon2pkg/core`](./pon2pkg/core.html)
+## - [`pon2pkg/app`](./pon2pkg/app.html)
 ##
 ## Compile Options:
 ## | Option                            | Description                 | Default |

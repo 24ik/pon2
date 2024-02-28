@@ -70,14 +70,24 @@ func parseNazoPuyo*[F: TsuField or WaterField](
 ): NazoPuyo[F] {.inline.} =
   ## Returns the Nazo Puyo converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
-  var
-    puyoPuyoKeyVals = newSeq[(string, string)](0)
-    reqKeyVals = newSeq[(string, string)](0)
-  for (key, val) in query.decodeQuery:
-    if key in RequirementQueryKeys:
-      reqKeyVals.add (key, val)
-    else:
-      puyoPuyoKeyVals.add (key, val)
+  case host
+  of Izumiya:
+    var
+      puyoPuyoKeyVals = newSeq[(string, string)](0)
+      reqKeyVals = newSeq[(string, string)](0)
+    for (key, val) in query.decodeQuery:
+      if key in RequirementQueryKeys:
+        reqKeyVals.add (key, val)
+      else:
+        puyoPuyoKeyVals.add (key, val)
 
-  result.puyoPuyo = parsePuyoPuyo[F](puyoPuyoKeyVals.encodeQuery, host)
-  result.requirement = reqKeyVals.encodeQuery.parseRequirement host
+    result.puyoPuyo = parsePuyoPuyo[F](puyoPuyoKeyVals.encodeQuery, host)
+    result.requirement = reqKeyVals.encodeQuery.parseRequirement host
+  of Ishikawa, Ips:
+    let queries = query.split "__"
+    case queries.len
+    of 2:
+      result.puyoPuyo = parsePuyoPuyo[F](queries[0], host)
+      result.requirement = queries[1].parseRequirement host
+    else:
+      raise newException(ValueError, "Invalid Nazo Puyo: " & query)

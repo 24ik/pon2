@@ -1,14 +1,14 @@
 {.experimental: "strictDefs".}
 
-import std/[math, options, monotimes, times, uri]
-import ../src/pon2pkg/corepkg/[cell, field, environment, pair, position]
-import ../src/pon2pkg/nazopuyopkg/[nazopuyo, solve]
+import std/[math, monotimes, times, uri]
+import ../src/pon2pkg/[app, core]
 
-template benchmark(desc: string, loop: Positive, prepare: untyped,
-                   measure: untyped): untyped =
+template benchmark(
+    desc: string, loop: Positive, prepare: untyped, measure: untyped
+): untyped =
   var totalDuration = DurationZero
 
-  for _ in 1..loop:
+  for _ in 1 .. loop:
     prepare
 
     let t1 = getMonoTime()
@@ -20,7 +20,8 @@ template benchmark(desc: string, loop: Positive, prepare: untyped,
   echo desc, ": ", totalDuration div loop
 
 when isMainModule:
-  let env19 = parseTsuEnvironment("""
+  let puyoPuyo19 = parsePuyoPuyo[TsuField](
+    """
 by.yrr
 gb.gry
 rbgyyr
@@ -35,19 +36,20 @@ rgybgy
 rgybgy
 rgybgy
 ------
-bg""").environment
+bg|3N"""
+  )
 
   block:
     var field = zeroTsuField()
     benchmark "Setter", 10 ^ 4:
-      field = env19.field
+      field = puyoPuyo19.field
     do:
       field[2, 3] = Cell.Red
 
   block:
     var field = zeroTsuField()
     benchmark "Put", 10 ^ 4:
-      field = env19.field
+      field = puyoPuyo19.field
     do:
       field.put GreenYellow, Up2
 
@@ -76,50 +78,52 @@ bg""").environment
       field.drop
 
   block:
-    var env = initTsuEnvironment 0
+    var puyoPuyo = initPuyoPuyo[TsuField]()
     benchmark "move (Vanilla)", 10 ^ 4:
-      env = env19
+      puyoPuyo = puyoPuyo19
     do:
-      env.move Up3, false
+      puyoPuyo.move
 
   block:
-    var env = initTsuEnvironment 0
+    var puyoPuyo = initPuyoPuyo[TsuField]()
     benchmark "move (Rough)", 10 ^ 4:
-      env = env19
+      puyoPuyo = puyoPuyo19
     do:
-      discard env.moveWithRoughTracking(Up3, false)
+      discard puyoPuyo.moveWithRoughTracking
 
   block:
-    var env = initTsuEnvironment 0
+    var puyoPuyo = initPuyoPuyo[TsuField]()
     benchmark "move (Detail)", 10 ^ 4:
-      env = env19
+      puyoPuyo = puyoPuyo19
     do:
-      discard env.moveWithDetailTracking(Up3, false)
+      discard puyoPuyo.moveWithDetailTracking
   block:
-    var env = initTsuEnvironment 0
+    var puyoPuyo = initPuyoPuyo[TsuField]()
     benchmark "move (Full)", 10 ^ 4:
-      env = env19
+      puyoPuyo = puyoPuyo19
     do:
-      discard env.moveWithFullTracking(Up3, false)
+      discard puyoPuyo.moveWithFullTracking
 
   block:
-    let nazo = (
+    let nazoWrap = (
       "https://ishikawapuyo.net/simu/pn.html?" &
       "c01cw2jo9jAbckAq9zqhacs9jAiSr_c1g1E1E1c1A1__200"
-    ).parseUri.parseTsuNazoPuyo.nazoPuyo
+    ).parseUri.parseSimulator.nazoPuyoWrap
 
     benchmark "Solve (Rashomon)", 1:
       discard
     do:
-      discard nazo.solve
+      nazoWrap.flattenAnd:
+        discard nazoPuyo.solve
 
   block:
-    let nazo = (
+    let nazoWrap = (
       "https://ishikawapuyo.net/simu/pn.html?" &
       "P00P00PrAOqcOi9OriQpaQxAQzsNziN9aN_g1c1A1E1u16121q1__v0c"
-    ).parseUri.parseTsuNazoPuyo.nazoPuyo
+    ).parseUri.parseSimulator.nazoPuyoWrap
 
     benchmark "Solve (Galaxy)", 1:
       discard
     do:
-      discard nazo.solve
+      nazoWrap.flattenAnd:
+        discard nazoPuyo.solve

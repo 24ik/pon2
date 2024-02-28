@@ -123,7 +123,7 @@ func parsePairsPositions*(query: string, host: SimulatorHost): PairsPositions {.
     while idx < query.len:
       try:
         if idx.succ(4) >= query.len:
-          raise newException(ValueError, "This exception cannot occur.")
+          raise newException(ValueError, "This exception should be caught.")
 
         result.add query[idx ..< idx.succ 4].parsePairPosition host
         idx.inc 4
@@ -131,5 +131,5 @@ func parsePairsPositions*(query: string, host: SimulatorHost): PairsPositions {.
         result.add query[idx ..< idx.succ 2].parsePairPosition host
         idx.inc 2
   of Ishikawa, Ips:
-    for i in countup(0, query.len, 2):
+    for i in countup(0, query.len.pred, 2):
       result.add query[i .. i.succ].parsePairPosition host

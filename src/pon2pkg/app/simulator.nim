@@ -556,35 +556,55 @@ const
     for mode in SimulatorMode:
       {$mode: mode}
 
-func toUri*(self; withPositions: bool, editor: bool): Uri {.inline.} =
+func toUri*(self; withPositions: bool, editor: bool, host = Izumiya): Uri {.inline.} =
   ## Returns the URI converted from the simulator.
   ## `self.editor` will be overridden with `editor`.
   result = initUri()
-  result.hostname = $Izumiya
-  result.path = "/pon2/app/index.html"
+  result.hostname = $host
 
+  # path
+  case host
+  of Izumiya:
+    result.path = "/pon2/gui/index.html"
+  of Ishikawa, Ips:
+    let modeChar =
+      case self.kind
+      of Regular:
+        case self.mode
+        of Edit: 'e'
+        of Play: 's'
+        of Replay: 'v'
+      of Nazo:
+        'n'
+    result.path = &"/simu/p{modeChar}.html"
+
+  # query
   self.originalNazoPuyoWrap.flattenAnd:
     var nazo = nazoPuyo
     if not withPositions:
       for pairPos in nazo.puyoPuyo.pairsPositions.mitems:
         pairPos.position = Position.None
 
-    # editor, kind, mode
-    var queries = newSeq[(string, string)](0)
-    if self.editor:
-      queries.add (EditorKey, "")
-    queries.add (KindKey, $self.kind)
-    queries.add (ModeKey, $self.mode)
-
     # nazopuyo / puyopuyo
     let mainQuery =
       case self.kind
       of Regular:
-        nazo.puyoPuyo.toUriQuery Izumiya
+        nazo.puyoPuyo.toUriQuery host
       of Nazo:
-        nazo.toUriQuery Izumiya
+        nazo.toUriQuery host
 
-    result.query = &"{queries.encodeQuery}&{mainQuery}"
+    case host
+    of Izumiya:
+      # editor, kind, mode
+      var queries = newSeq[(string, string)](0)
+      if self.editor:
+        queries.add (EditorKey, "")
+      queries.add (KindKey, $self.kind)
+      queries.add (ModeKey, $self.mode)
+
+      result.query = &"{queries.encodeQuery}&{mainQuery}"
+    of Ishikawa, Ips:
+      result.query = mainQuery
 
 func toUri*(self; withPositions: bool): Uri {.inline.} =
   ## Returns the URI converted from the simulator.
@@ -593,47 +613,83 @@ func toUri*(self; withPositions: bool): Uri {.inline.} =
 func parseSimulator*(uri: Uri): Simulator {.inline.} =
   ## Returns the simulator converted from the URI.
   ## If the URI is invalid, `ValueError` is raised.
-  var
-    editor = false
-    kindVal = "<invalid>"
-    modeVal = "<invalid>"
-    mainQueries = newSeq[(string, string)](0)
-  assert kindVal notin StrToKind
-  assert modeVal notin StrToMode
+  case uri.hostname
+  of $Izumiya:
+    if uri.path != "/pon2/gui/index.html":
+      raise newException(ValueError, "Invalid simulator: " & $uri)
 
-  for (key, val) in uri.query.decodeQuery:
-    case key
-    of EditorKey:
-      if val == "":
-        editor = true
+    var
+      editor = false
+      kindVal = "<invalid>"
+      modeVal = "<invalid>"
+      mainQueries = newSeq[(string, string)](0)
+    assert kindVal notin StrToKind
+    assert modeVal notin StrToMode
+
+    for (key, val) in uri.query.decodeQuery:
+      case key
+      of EditorKey:
+        if val == "":
+          editor = true
+        else:
+          raise newException(ValueError, "Invalid simulator: " & $uri)
+      of KindKey:
+        kindVal = val
+      of ModeKey:
+        modeVal = val
       else:
-        raise newException(ValueError, "Invalid simulator: " & $uri)
-    of KindKey:
-      kindVal = val
-    of ModeKey:
-      modeVal = val
+        mainQueries.add (key, val)
+
+    if kindVal notin StrToKind or modeVal notin StrToMode:
+      raise newException(ValueError, "Invalid simulator: " & $uri)
+
+    let
+      kind = StrToKind[kindVal]
+      mode = StrToMode[modeVal]
+      mainQuery = mainQueries.encodeQuery
+
+    case kind
+    of Regular:
+      try:
+        result = parsePuyoPuyo[TsuField](mainQuery, Izumiya).initSimulator(mode, editor)
+      except ValueError:
+        result =
+          parsePuyoPuyo[WaterField](mainQuery, Izumiya).initSimulator(mode, editor)
+    of Nazo:
+      try:
+        result = parseNazoPuyo[TsuField](mainQuery, Izumiya).initSimulator(mode, editor)
+      except ValueError:
+        result =
+          parseNazoPuyo[WaterField](mainQuery, Izumiya).initSimulator(mode, editor)
+  of $Ishikawa, $Ips:
+    var
+      kind = SimulatorKind.low
+      mode = SimulatorMode.low
+    case uri.path
+    of "/simu/pe.html":
+      kind = Regular
+      mode = Edit
+    of "/simu/ps.html":
+      kind = Regular
+      mode = Play
+    of "/simu/pv.html":
+      kind = Regular
+      mode = Replay
+    of "/simu/pn.html":
+      kind = Nazo
+      mode = Play
     else:
-      mainQueries.add (key, val)
+      raise newException(ValueError, "Invalid simulator: " & $uri)
 
-  if kindVal notin StrToKind or modeVal notin StrToMode:
+    let host = if uri.hostname == $Ishikawa: Ishikawa else: Ips
+
+    case kind
+    of Regular:
+      result = parsePuyoPuyo[TsuField](uri.query, host).initSimulator mode
+    of Nazo:
+      result = parseNazoPuyo[TsuField](uri.query, host).initSimulator mode
+  else:
     raise newException(ValueError, "Invalid simulator: " & $uri)
-
-  let
-    kind = StrToKind[kindVal]
-    mode = StrToMode[modeVal]
-    mainQuery = mainQueries.encodeQuery
-
-  case kind
-  of Regular:
-    try:
-      result = parsePuyoPuyo[TsuField](mainQuery, Izumiya).initSimulator(mode, editor)
-    except ValueError:
-      result = parsePuyoPuyo[WaterField](mainQuery, Izumiya).initSimulator(mode, editor)
-  of Nazo:
-    try:
-      result = parseNazoPuyo[TsuField](mainQuery, Izumiya).initSimulator(mode, editor)
-    except ValueError:
-      result = parseNazoPuyo[WaterField](mainQuery, Izumiya).initSimulator(mode, editor)
 
 # ------------------------------------------------
 # Keyboard Operation
