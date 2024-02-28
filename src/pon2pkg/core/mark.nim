@@ -49,6 +49,7 @@ func mark*[F: TsuField or WaterField](nazo: NazoPuyo[F]): MarkResult {.inline.} 
     # skip
     if pos == Position.None:
       skipped = true
+      continue
     if skipped:
       return SkipMove
 
