@@ -6,9 +6,8 @@
 {.experimental: "views".}
 
 import std/[options, sequtils]
-import ./[color, key, nazopuyo, simulator]
-import
-  ../core/[field, misc, nazopuyo, pair, pairposition, position, puyopuyo, requirement]
+import ./[key, nazopuyo, permute, simulator]
+import ../core/[field, nazopuyo, pairposition, puyopuyo, requirement]
 import ../private/[misc]
 
 when defined(js):
@@ -28,7 +27,7 @@ type GuiApplication* = object ## GUI application.
   simulator*: ref Simulator
   replaySimulator*: ref Simulator
 
-  replayPairsPositions*: Option[PairsPositions]
+  replayPairsPositionsSeq*: Option[seq[PairsPositions]]
   replayIdx*: Natural
 
   editor: bool
@@ -49,7 +48,7 @@ using
 
 const DefaultReq = Requirement(kind: Clear, color: RequirementColor.All, number: 0)
 
-func initGuiApplication*(
+proc initGuiApplication*(
     nazoPuyoWrap: NazoPuyoWrap, mode = Play, editor = false
 ): GuiApplication {.inline.} =
   ## Returns a new GUI application.
@@ -60,7 +59,7 @@ func initGuiApplication*(
   result.replaySimulator[] = nazoPuyoWrap.initSimulator(Replay, true)
 
   {.push warning[ProveInit]: off.}
-  result.replayPairsPositions = none PairsPositions
+  result.replayPairsPositionsSeq = none seq[PairsPositions]
   {.pop.}
   result.replayIdx = 0
 
@@ -73,14 +72,14 @@ func initGuiApplication*(
     result.progressBarData.now = 0
     result.progressBarData.total = 0
 
-func initGuiApplication*[F: TsuField or WaterField](
+proc initGuiApplication*[F: TsuField or WaterField](
     nazo: NazoPuyo[F], mode = Play, editor = false
 ): GuiApplication {.inline.} =
   ## Returns a new GUI application.
   ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
   initNazoPuyoWrap(nazo).initGuiApplication(mode, editor)
 
-func initGuiApplication*[F: TsuField or WaterField](
+proc initGuiApplication*[F: TsuField or WaterField](
     puyoPuyo: PuyoPuyo[F], mode = Play, editor = false
 ): GuiApplication {.inline.} =
   ## Returns a new GUI application.
@@ -103,19 +102,19 @@ func toggleFocus*(mSelf) {.inline.} = ## Toggles focusing to editor tab or not.
 when defined(js):
   const ResultMonitorIntervalMs = 100
 
-func updateReplaySimulator[F: TsuField or WaterField](
+proc updateReplaySimulator[F: TsuField or WaterField](
     mSelf; nazo: NazoPuyo[F]
 ) {.inline.} =
   ## Updates the replay simulator.
-  ## This function is assumed to be called after `mSelf.replayPairsPositions` is set.
-  assert mSelf.replayPairsPositions.isSome
+  ## This function is assumed to be called after `mSelf.replayPairsPositionsSeq` is set.
+  assert mSelf.replayPairsPositionsSeq.isSome
 
-  if mSelf.replayPairsPositions.get.len > 0:
+  if mSelf.replayPairsPositionsSeq.get.len > 0:
     mSelf.focusEditor = true
     mSelf.replayIdx = 0
 
     var nazo2 = nazo
-    nazo2.puyoPuyo.pairsPositions = mSelf.replayPairsPositions.get[0]
+    nazo2.puyoPuyo.pairsPositions = mSelf.replayPairsPositionsSeq.get[0]
     mSelf.replaySimulator[] =
       nazo2.initSimulator(mSelf.replaySimulator[].mode, mSelf.replaySimulator[].editor)
   else:
@@ -155,7 +154,7 @@ proc solve*(
         mSelf.progressBarData.now = results.len.pred
         if results.allIt it.isSome:
           mSelf.progressBarData.total = 0
-          mSelf.replayData = some results.mapIt(it.get).concat
+          mSelf.replayPairsPositionsSeq = some results.mapIt(it.get).concat
           mSelf.updateReplaySimulator nazoPuyo
           mSelf.solving = false
           interval.clearInterval
@@ -167,7 +166,7 @@ proc solve*(
     else:
       # FIXME: make asynchronous
       # FIXME: redraw
-      mSelf.replayData = some nazoPuyo.solve(parallelCount = parallelCount)
+      mSelf.replayPairsPositionsSeq = some nazoPuyo.solve(parallelCount = parallelCount)
       mSelf.updateReplaySimulator nazoPuyo
       mSelf.solving = false
 
@@ -175,6 +174,7 @@ proc solve*(
 # Permute
 # ------------------------------------------------
 
+{.push warning[Uninit]: off.}
 proc permute*(
     mSelf;
     fixMoves: seq[Positive],
@@ -211,7 +211,7 @@ proc permute*(
         mSelf.progressBarData.now = results.len.pred
         if results.allIt it.isSome:
           mSelf.progressBarData.total = 0
-          mSelf.replayPairsPositions = some results.mapIt(it.get)
+          mSelf.replayPairsPositionsSeq = some results.mapIt(it.get)
           mSelf.updateReplaySimulator nazoPuyo
           mSelf.permuting = false
           interval.clearInterval
@@ -223,9 +223,12 @@ proc permute*(
     else:
       # FIXME: make asynchronous
       # FIXME: redraw
-      mSelf.replayData = some nazoPuyo.permute(fixMoves, allowDouble, allowLastDouble)
+      mSelf.replayPairsPositionsSeq =
+        some nazoPuyo.permute(fixMoves, allowDouble, allowLastDouble).toSeq
       mSelf.updateReplaySimulator nazoPuyo
       mSelf.permuting = false
+
+{.pop.}
 
 # ------------------------------------------------
 # Replay
@@ -233,34 +236,34 @@ proc permute*(
 
 proc nextReplay*(mSelf) {.inline.} =
   ## Shows the next replay.
-  if mSelf.replayPairsPositions.isNone or mSelf.replayPairsPositions.get.len == 0:
+  if mSelf.replayPairsPositionsSeq.isNone or mSelf.replayPairsPositionsSeq.get.len == 0:
     return
 
-  if mSelf.replayIdx == mSelf.replayPairsPositions.get.len.pred:
+  if mSelf.replayIdx == mSelf.replayPairsPositionsSeq.get.len.pred:
     mSelf.replayIdx = 0
   else:
     mSelf.replayIdx.inc
 
   mSelf.replaySimulator[].nazoPuyoWrap.pairsPositions =
-    mSelf.replayPairsPositions.get[mSelf.replayIdx]
+    mSelf.replayPairsPositionsSeq.get[mSelf.replayIdx]
   mSelf.replaySimulator[].originalNazoPuyoWrap.pairsPositions =
-    mSelf.replayPairsPositions.get[mSelf.replayIdx]
+    mSelf.replayPairsPositionsSeq.get[mSelf.replayIdx]
   mSelf.replaySimulator[].reset false
 
 proc prevReplay*(mSelf) {.inline.} =
   ## Shows the previous replay.
-  if mSelf.replayPairsPositions.isNone or mSelf.replayPairsPositions.get.len == 0:
+  if mSelf.replayPairsPositionsSeq.isNone or mSelf.replayPairsPositionsSeq.get.len == 0:
     return
 
   if mSelf.replayIdx == 0:
-    mSelf.replayIdx = mSelf.replayPairsPositions.get.len.pred
+    mSelf.replayIdx = mSelf.replayPairsPositionsSeq.get.len.pred
   else:
     mSelf.replayIdx.dec
 
   mSelf.replaySimulator[].nazoPuyoWrap.pairsPositions =
-    mSelf.replayPairsPositions.get[mSelf.replayIdx]
+    mSelf.replayPairsPositionsSeq.get[mSelf.replayIdx]
   mSelf.replaySimulator[].originalNazoPuyoWrap.pairsPositions =
-    mSelf.replayPairsPositions.get[mSelf.replayIdx]
+    mSelf.replayPairsPositionsSeq.get[mSelf.replayIdx]
   mSelf.replaySimulator[].reset false
 
 # ------------------------------------------------
@@ -344,10 +347,10 @@ when defined(js):
               mSelf.initEditorSettingsNode id
             if mSelf.progressBarData.total > 0:
               mSelf.initEditorProgressBarNode
-            if mSelf.replayPairsPositions.isSome:
+            if mSelf.replayPairsPositionsSeq.isSome:
               tdiv(class = "block"):
                 mSelf.initEditorPaginationNode
-              if mSelf.replayPairsPositions.get.len > 0:
+              if mSelf.replayPairsPositionsSeq.get.len > 0:
                 tdiv(class = "block"):
                   mSelf.initEditorSimulatorNode
 
@@ -430,7 +433,7 @@ else:
 
   proc initGuiApplicationWindow*(
       guiApplication: ref GuiApplication, title = "Pon!通", setKeyHandler = true
-  ): EditorPermuterWindow {.inline.} =
+  ): GuiApplicationWindow {.inline.} =
     ## Returns the GUI application window.
     result = new GuiApplicationWindow
     result.init
@@ -440,9 +443,9 @@ else:
     result.title = title
     result.resizable = false
     if setKeyHandler:
-      result.onKeyDown = keyboardEventHandler
+      result.onKeyDown = runKeyboardEventHandler
 
-    let rootControl = editorPermuter.initGuiApplicationControl
+    let rootControl = guiApplication.initGuiApplicationControl
     result.add rootControl
 
     when defined(windows):

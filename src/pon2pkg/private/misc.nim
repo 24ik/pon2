@@ -55,16 +55,12 @@ func initXLink*(text = "", hashTag = "", uri = initUri()): Uri {.inline.} =
 # Parse
 # ------------------------------------------------
 
-func parseSomeInt*[T: SomeNumber or Natural or Positive](val: char): T {.inline.} =
+func parseSomeInt*[T: SomeNumber or Natural or Positive, U: char or string](
+    val: U
+): T {.inline.} =
   ## Converts the char or string to the given type `T`.
   ## If the conversion fails, `ValueError` will be raised.
-  # NOTE: somehow generics for `val` does not work
   T parseInt $val
-
-func parseSomeInt*[T: SomeNumber or Natural or Positive](val: string): T {.inline.} =
-  ## Converts the char or string to the given type `T`.
-  ## If the conversion fails, `ValueError` will be raised.
-  T parseInt val
 
 # ------------------------------------------------
 # Others
@@ -97,7 +93,9 @@ func sample*[T](rng: var Rand, arr: openArray[T], count: Natural): seq[T] {.inli
   ## Selects and returns `count` elements in the array without duplicates.
   var arr2 = arr.toSeq
   rng.shuffle arr2
+  {.push warning[ProveInit]: off.}
   result = arr2[0 ..< count]
+  {.pop.}
 
 func incRot*[T: Ordinal](x: var T) {.inline.} =
   ## Rotating `inc`.

@@ -6,11 +6,11 @@
 {.experimental: "views".}
 
 import std/[deques, options, sequtils, strformat, sugar, tables, uri]
-import ./[key, misc, nazopuyo]
+import ./[key, nazopuyo]
 import
   ../core/[
-    cell, field, fieldtype, host, misc, moveresult, nazopuyo, pair, position, puyopuyo,
-    requirement, rule
+    cell, field, fieldtype, host, moveresult, nazopuyo, pair, pairposition, position,
+    puyopuyo, requirement, rule
   ]
 import ../private/[intrinsic, misc]
 
@@ -89,8 +89,9 @@ func initSimulator*(
   result.kind = Nazo
   result.mode = mode
 
-  result.undoDeque = initDeque[NazoPuyoWrap](nazo.moveCount)
-  result.redoDeque = initDeque[NazoPuyoWrap](nazo.moveCount)
+  nazoPuyoWrap.flattenAnd:
+    result.undoDeque = initDeque[NazoPuyoWrap](nazoPuyo.moveCount)
+    result.redoDeque = initDeque[NazoPuyoWrap](nazoPuyo.moveCount)
 
   result.next.index = Natural 0
   result.next.position = InitPos
@@ -188,7 +189,7 @@ func moveCursorUp*(mSelf) {.inline.} =
     mSelf.editing.field.row.decRot
   else:
     if mSelf.editing.pair.index == 0:
-      mSelf.editing.pair.index = mSelf.pairs.len
+      mSelf.editing.pair.index = mSelf.nazoPuyoWrap.pairsPositions.len
     else:
       mSelf.editing.pair.index.dec
 
@@ -197,7 +198,7 @@ func moveCursorDown*(mSelf) {.inline.} =
   if mSelf.editing.focusField:
     mSelf.editing.field.row.incRot
   else:
-    if mSelf.editing.pair.index == mSelf.pairs.len:
+    if mSelf.editing.pair.index == mSelf.nazoPuyoWrap.pairsPositions.len:
       mSelf.editing.pair.index = Natural 0
     else:
       mSelf.editing.pair.index.inc
@@ -222,11 +223,11 @@ func moveCursorLeft*(mSelf) {.inline.} =
 
 func deletePairPosition*(mSelf; idx: Natural) {.inline.} =
   ## Deletes the pair&position.
-  if idx >= mSelf.pairsPositions.len:
+  if idx >= mSelf.nazoPuyoWrap.pairsPositions.len:
     return
 
   mSelf.change:
-    mSelf.pairsPositions.delete idx
+    mSelf.nazoPuyoWrap.pairsPositions.delete idx
 
 func deletePairPosition*(mSelf) {.inline.} =
   ## Deletes the pair&position at selecting index.
@@ -243,21 +244,21 @@ func writeCell(mSelf; row: Row, col: Column, cell: Cell) {.inline.} =
       if cell == Cell.None:
         case mSelf.rule
         of Tsu:
-          mSelf.nazoPuyoWrap.tsu.field.removeSqueeze row, col
+          mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.removeSqueeze row, col
         of Water:
-          mSelf.nazoPuyoWrap.water.field.removeSqueeze row, col
+          mSelf.nazoPuyoWrap.water.puyoPuyo.field.removeSqueeze row, col
       else:
         case mSelf.rule
         of Tsu:
-          mSelf.nazoPuyoWrap.tsu.field.insert row, col, cell
+          mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.insert row, col, cell
         of Water:
-          mSelf.nazoPuyoWrap.water.field.insert row, col, cell
+          mSelf.nazoPuyoWrap.water.puyoPuyo.field.insert row, col, cell
     else:
       case mSelf.rule
       of Tsu:
-        mSelf.nazoPuyoWrap.tsu.field[row, col] = cell
+        mSelf.nazoPuyoWrap.tsu.puyoPuyo.field[row, col] = cell
       of Water:
-        mSelf.nazoPuyoWrap.water.field[row, col] = cell
+        mSelf.nazoPuyoWrap.water.puyoPuyo.field[row, col] = cell
 
 func writeCell*(mSelf; row: Row, col: Column) {.inline.} =
   ## Writes the selecting cell to the field.
@@ -307,29 +308,29 @@ func shiftFieldUp*(mSelf) {.inline.} =
   ## Shifts the field upward.
   mSelf.change:
     case mSelf.rule
-    of Tsu: mSelf.nazoPuyoWrap.tsu.field.shiftUp
-    of Water: mSelf.nazoPuyoWrap.water.field.shiftUp
+    of Tsu: mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.shiftUp
+    of Water: mSelf.nazoPuyoWrap.water.puyoPuyo.field.shiftUp
 
 func shiftFieldDown*(mSelf) {.inline.} =
   ## Shifts the field downward.
   mSelf.change:
     case mSelf.rule
-    of Tsu: mSelf.nazoPuyoWrap.tsu.field.shiftDown
-    of Water: mSelf.nazoPuyoWrap.water.field.shiftDown
+    of Tsu: mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.shiftDown
+    of Water: mSelf.nazoPuyoWrap.water.puyoPuyo.field.shiftDown
 
 func shiftFieldRight*(mSelf) {.inline.} =
   ## Shifts the field rightward.
   mSelf.change:
     case mSelf.rule
-    of Tsu: mSelf.nazoPuyoWrap.tsu.field.shiftRight
-    of Water: mSelf.nazoPuyoWrap.water.field.shiftRight
+    of Tsu: mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.shiftRight
+    of Water: mSelf.nazoPuyoWrap.water.puyoPuyo.field.shiftRight
 
 func shiftFieldLeft*(mSelf) {.inline.} =
   ## Shifts the field leftward.
   mSelf.change:
     case mSelf.rule
-    of Tsu: mSelf.nazoPuyoWrap.tsu.field.shiftLeft
-    of Water: mSelf.nazoPuyoWrap.water.field.shiftLeft
+    of Tsu: mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.shiftLeft
+    of Water: mSelf.nazoPuyoWrap.water.puyoPuyo.field.shiftLeft
 
 # ------------------------------------------------
 # Edit - Flip
@@ -339,15 +340,15 @@ func flipFieldV*(mSelf) {.inline.} =
   ## Flips the field vertically.
   mSelf.change:
     case mSelf.rule
-    of Tsu: mSelf.nazoPuyoWrap.tsu.field.flipV
-    of Water: mSelf.nazoPuyoWrap.water.field.flipV
+    of Tsu: mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.flipV
+    of Water: mSelf.nazoPuyoWrap.water.puyoPuyo.field.flipV
 
 func flipFieldH*(mSelf) {.inline.} =
   ## Flips the field horizontally.
   mSelf.change:
     case mSelf.rule
-    of Tsu: mSelf.nazoPuyoWrap.tsu.field.flipH
-    of Water: mSelf.nazoPuyoWrap.water.field.flipH
+    of Tsu: mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.flipH
+    of Water: mSelf.nazoPuyoWrap.water.puyoPuyo.field.flipH
 
 # ------------------------------------------------
 # Edit - Requirement
@@ -355,21 +356,23 @@ func flipFieldH*(mSelf) {.inline.} =
 
 func `requirementKind=`*(mSelf; kind: RequirementKind) {.inline.} =
   ## Sets the requirement kind.
-  if kind == mSelf.nazoPuyoWrap.requirement:
+  if kind == mSelf.nazoPuyoWrap.requirement.kind:
     return
 
-  mSelf.change:
-    if kind in ColorKinds:
-      if mSelf.nazoPuyoWrap.requirement.kind in ColorKinds:
-        mSelf.requirement = Requirement(
-          kind: kind, color: mSelf.requirement.color, number: mSelf.requirement.number
-        )
+  {.cast(uncheckedAssign).}:
+    mSelf.change:
+      if kind in ColorKinds:
+        if mSelf.nazoPuyoWrap.requirement.kind in ColorKinds:
+          mSelf.nazoPuyoWrap.requirement.kind = kind
+        else:
+          mSelf.nazoPuyoWrap.requirement = Requirement(
+            kind: kind,
+            color: RequirementColor.low,
+            number: mSelf.nazoPuyoWrap.requirement.number,
+          )
       else:
-        mSelf.requirement = Requirement(
-          kind: kind, color: RequirementColor.low, number: mSelf.requirement.number
-        )
-    else:
-      mSelf.requirement = Requirement(kind: kind, number: mSelf.requirement.number)
+        mSelf.nazoPuyoWrap.requirement =
+          Requirement(kind: kind, number: mSelf.nazoPuyoWrap.requirement.number)
 
 func `requirementColor=`*(mSelf; color: RequirementColor) {.inline.} =
   ## Sets the requirement color.
@@ -383,7 +386,7 @@ func `requirementColor=`*(mSelf; color: RequirementColor) {.inline.} =
 
 func `requirementNumber=`*(mSelf; num: RequirementNumber) {.inline.} =
   ## Sets the requirement number.
-  if mSelf.requirement.kind in NoNumberKinds:
+  if mSelf.nazoPuyoWrap.requirement.kind in NoNumberKinds:
     return
   if num == mSelf.nazoPuyoWrap.requirement.number:
     return
@@ -460,16 +463,16 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
 
       case mSelf.nazoPuyoWrap.rule
       of Tsu:
-        mSelf.nazoPuyoWrap.tsu.field.put pair, pos
+        mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.put pair, pos
       of Water:
-        mSelf.nazoPuyoWrap.water.field.put pair, pos
+        mSelf.nazoPuyoWrap.water.puyoPuyo.field.put pair, pos
 
     # disappear
     block:
       let willDisappear2 =
         case mSelf.rule
-        of Tsu: mSelf.nazoPuyoWrap.tsu.field.willDisappear
-        of Water: mSelf.nazoPuyoWrap.water.field.willDisappear
+        of Tsu: mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.willDisappear
+        of Water: mSelf.nazoPuyoWrap.water.puyoPuyo.field.willDisappear
 
       if willDisappear2:
         mSelf.state = WillDisappear
@@ -480,8 +483,8 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
   of WillDisappear:
     let disappearRes =
       case mSelf.rule
-      of Tsu: mSelf.nazoPuyoWrap.tsu.field.disappear
-      of Water: mSelf.nazoPuyoWrap.water.field.disappear
+      of Tsu: mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.disappear
+      of Water: mSelf.nazoPuyoWrap.water.puyoPuyo.field.disappear
 
     var counts: array[Puyo, int] = [0, 0, 0, 0, 0, 0, 0]
     for puyo in Puyo.low .. Puyo.high:
@@ -496,11 +499,11 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
     let willDisappear2 =
       case mSelf.rule
       of Tsu:
-        mSelf.nazoPuyoWrap.tsu.field.drop
-        mSelf.nazoPuyoWrap.tsu.field.willDisappear
+        mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.drop
+        mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.willDisappear
       of Water:
-        mSelf.nazoPuyoWrap.water.field.drop
-        mSelf.nazoPuyoWrap.water.field.willDisappear
+        mSelf.nazoPuyoWrap.water.puyoPuyo.field.drop
+        mSelf.nazoPuyoWrap.water.puyoPuyo.field.willDisappear
 
     if willDisappear2:
       mSelf.state = WillDisappear
@@ -587,19 +590,18 @@ func toUri*(self; withPositions: bool): Uri {.inline.} =
   ## Returns the URI converted from the simulator.
   self.toUri(withPositions, self.editor)
 
-func parseSimulator*(uri: Uri) {.inline.} =
+func parseSimulator*(uri: Uri): Simulator {.inline.} =
   ## Returns the simulator converted from the URI.
   ## If the URI is invalid, `ValueError` is raised.
   var
     editor = false
     kindVal = "<invalid>"
     modeVal = "<invalid>"
-    simulatorQueries = initTable[string, string]()
     mainQueries = newSeq[(string, string)](0)
   assert kindVal notin StrToKind
   assert modeVal notin StrToMode
 
-  for (key, val) in uri.decodeQuery:
+  for (key, val) in uri.query.decodeQuery:
     case key
     of EditorKey:
       if val == "":
@@ -619,6 +621,7 @@ func parseSimulator*(uri: Uri) {.inline.} =
   let
     kind = StrToKind[kindVal]
     mode = StrToMode[modeVal]
+    mainQuery = mainQueries.encodeQuery
 
   case kind
   of Regular:
@@ -925,7 +928,7 @@ else:
     result.title = title
     result.resizable = false
     if setKeyHandler:
-      result.onKeyDown = keyboardEventHandler
+      result.onKeyDown = runKeyboardEventHandler
 
     let rootControl = simulator.initSimulatorControl
     result.add rootControl

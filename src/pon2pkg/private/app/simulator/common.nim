@@ -5,13 +5,13 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, strformat, uri]
+import std/[strformat, uri]
 import ../../[misc]
 import ../../../app/[color, nazopuyo, simulator]
 import
   ../../../core/[
-    cell, field, fieldtype, mark, misc, moveresult, nazopuyo, notice, pair,
-    pairposition, position, puyopuyo, rule
+    cell, field, fieldtype, mark, moveresult, nazopuyo, notice, pair, pairposition,
+    position, puyopuyo, rule
   ]
 
 when defined(js):
@@ -84,7 +84,7 @@ func nextPairCell*(
     elif simulator.nazoPuyoWrap.pairsPositions.len == 0:
       Cell.None
     elif idx == 0 and col == pos.axisColumn:
-      simulator.nazoPuyoWrap.pairsPositions[0].axis
+      simulator.nazoPuyoWrap.pairsPositions[0].pair.axis
     elif (
       # Up, Down
       (
@@ -101,7 +101,7 @@ func nextPairCell*(
         )
       )
     ):
-      simulator.nazoPuyoWrap.pairsPositions[0].child
+      simulator.nazoPuyoWrap.pairsPositions[0].pair.child
     else:
       Cell.None
 

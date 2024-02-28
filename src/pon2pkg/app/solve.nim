@@ -7,7 +7,7 @@
 
 import std/[options, sequtils, setutils, tables]
 import ./[nazopuyo]
-import ../core/[field, nazopuyo, pair, pairposition, position, requirement]
+import ../core/[field, nazopuyo, pairposition, requirement]
 import ../private/app/[solve]
 
 when defined(js):
@@ -72,8 +72,8 @@ proc solve[F: TsuField or WaterField](
     {.push warning[Effect]: off.}
     var
       threadsRunning = false.repeat parallelCount
-      futures = newSeq[FlowVar[seq[Positions]]](parallelCount)
-      results = newSeqOfCap[seq[Positions]](childNodes.len)
+      futures = newSeq[FlowVar[seq[PairsPositions]]](parallelCount)
+      results = newSeqOfCap[seq[PairsPositions]](childNodes.len)
     {.pop.}
     for child in childNodes:
       var spawned = false
@@ -144,7 +144,7 @@ proc solve[F: TsuField or WaterField](
   }
 
   result =
-    case nazo.requirement.color.get
+    case nazo.requirement.color
     of RequirementColor.All:
       nazo.solve(
         reqKind, RequirementColor.All, showProgress, earlyStopping, parallelCount

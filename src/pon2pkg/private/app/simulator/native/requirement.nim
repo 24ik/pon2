@@ -5,10 +5,10 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, sequtils, sugar]
+import std/[sequtils, sugar]
 import nigui
 import ../../../../app/[nazopuyo, simulator]
-import ../../../../core/[misc, nazopuyo, requirement]
+import ../../../../core/[requirement]
 
 type RequirementControl* = ref object of LayoutContainer ## Requirement control.
   simulator: ref Simulator

@@ -9,6 +9,7 @@ import std/[sugar]
 import nigui
 import ./[assets]
 import ../[common]
+import ../../[misc]
 import ../../../../app/[color, nazopuyo, simulator]
 import ../../../../core/[cell, pair, pairposition, position]
 

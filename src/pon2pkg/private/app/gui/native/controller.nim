@@ -7,7 +7,8 @@
 
 import std/[sugar]
 import nigui
-import ../../../../app/[color, gui, misc]
+import ../../[misc]
+import ../../../../app/[color, gui]
 
 type EditorControllerControl* = ref object of LayoutContainer
   ## Editor controller control.

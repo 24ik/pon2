@@ -8,7 +8,6 @@
 import std/[options, strformat, sugar]
 import nigui
 import ../../../../app/[color, gui]
-import ../../../../core/[pairposition]
 
 type EditorPaginationControl* = ref object of LayoutContainer
   ## Editor pagination control.
@@ -38,17 +37,17 @@ proc drawHandler(control: EditorPaginationControl): (event: DrawEvent) -> void =
 
     let
       showIdx =
-        if control.guiApplication[].replayPairsPositions.isNone:
+        if control.guiApplication[].replayPairsPositionsSeq.isNone:
           0
-        elif control.guiApplication[].replayPairsPositions.get.len == 0:
+        elif control.guiApplication[].replayPairsPositionsSeq.get.len == 0:
           0
         else:
           control.guiApplication[].replayIdx
       showLen =
-        if control.guiApplication[].replayPairsPositions.isNone:
+        if control.guiApplication[].replayPairsPositionsSeq.isNone:
           0
         else:
-          control.guiApplication[].replayPairsPositions.get.len
+          control.guiApplication[].replayPairsPositionsSeq.get.len
 
     canvas.drawText &"{showIdx} / {showLen}"
 

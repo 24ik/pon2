@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 import std/[sequtils, sugar]
-import ../../core/[cell, field, nazopuyo, pair, pairposition]
+import ../../core/[cell, field, nazopuyo, pair, pairposition, position]
 
 func allPairsPositionsSeq(
     originalPairsPositions: PairsPositions,
@@ -57,7 +57,7 @@ func allPairsPositionsSeq(
       result &=
         originalPairsPositions.allPairsPositionsSeq(
           fixMoves, allowDouble, allowLastDouble, newColorCounts, idx.succ, moveCount
-        ).mapIt it.dup insert(nowPair, 0)
+        ).mapIt it.dup insert(PairPosition(pair: nowPair, position: Position.None), 0)
 
 func allPairsPositionsSeq*[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
@@ -71,7 +71,7 @@ func allPairsPositionsSeq*[F: TsuField or WaterField](
   # does not consider it.
   var colorCounts: array[ColorPuyo, Natural] = [0, 0, 0, 0, 0]
   for color in ColorPuyo:
-    colorCounts[color] = nazo.puyoPuyo.pairs.puyoCount color
+    colorCounts[color] = nazo.puyoPuyo.pairsPositions.puyoCount color
 
   result = nazo.puyoPuyo.pairsPositions.allPairsPositionsSeq(
     fixMoves.deduplicate, allowDouble, allowLastDouble, colorCounts, 0, nazo.moveCount

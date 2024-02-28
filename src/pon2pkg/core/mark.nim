@@ -6,7 +6,8 @@
 {.experimental: "views".}
 
 import std/[options, tables]
-import ./[cell, field, moveresult, nazopuyo, position, puyopuyo, requirement]
+import
+  ./[cell, field, moveresult, nazopuyo, pairposition, position, puyopuyo, requirement]
 import ../private/core/[mark]
 
 type MarkResult* = enum
@@ -42,20 +43,9 @@ func mark*[F: TsuField or WaterField](nazo: NazoPuyo[F]): MarkResult {.inline.} 
     disappearColors = set[ColorPuyo]({}) # used for DisappearColor
     disappearCount = 0 # used for DisappearCount
 
-  let moveFn =
-    case nazo.requirement.kind
-    of Clear, Chain, ChainMore:
-      puyopuyo.move[F]
-    of DisappearColor, DisappearColorMore, DisappearCount, DisappearCountMore,
-        ChainClear, ChainMoreClear:
-      puyopuyo.moveWithRoughTracking[F]
-    of DisappearColorSametime, DisappearColorMoreSametime, DisappearCountSametime,
-        DisappearCountMoreSametime:
-      puyopuyo.moveWithDetailTracking[F]
-    of DisappearPlace, DisappearPlaceMore, DisappearConnect, DisappearConnectMore:
-      puyopuyo.moveWithFullTracking[F]
+  for pairPos in nazo.puyoPuyo.pairsPositions:
+    let pos = pairPos.position
 
-  for (_, pos) in nazo.puyoPuyo.pairsPositions:
     # skip
     if pos == Position.None:
       skipped = true
@@ -66,8 +56,21 @@ func mark*[F: TsuField or WaterField](nazo: NazoPuyo[F]): MarkResult {.inline.} 
     if pos in nazo2.puyoPuyo.field.invalidPositions:
       return ImpossibleMove
 
-    # move and update intermediate result
-    let moveRes = nazo2.puyoPuyo.moveFn pos
+    # move
+    let moveRes: MoveResult
+    case nazo.requirement.kind
+    of Clear, Chain, ChainMore:
+      moveRes = nazo2.puyoPuyo.move pos
+    of DisappearColor, DisappearColorMore, DisappearCount, DisappearCountMore,
+        ChainClear, ChainMoreClear:
+      moveRes = nazo2.puyoPuyo.moveWithRoughTracking pos
+    of DisappearColorSametime, DisappearColorMoreSametime, DisappearCountSametime,
+        DisappearCountMoreSametime:
+      moveRes = nazo2.puyoPuyo.moveWithDetailTracking pos
+    of DisappearPlace, DisappearPlaceMore, DisappearConnect, DisappearConnectMore:
+      moveRes = nazo2.puyoPuyo.moveWithFullTracking pos
+
+    # update intermediate result
     case nazo.requirement.kind
     of DisappearColor, DisappearColorMore:
       disappearColors.incl moveRes.colors

@@ -5,9 +5,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, os, random, sequtils, setutils, strutils, sugar, tables, uri]
-import
-  ./[cell, field, fieldtype, host, misc, moveresult, pair, pairposition, position, rule]
+import std/[strutils, tables, uri]
+import ./[cell, field, host, moveresult, pair, pairposition, position]
 
 type PuyoPuyo*[F: TsuField or WaterField] = object ## Puyo Puyo game.
   field*: F
@@ -31,6 +30,7 @@ func reset*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]) {.inline.} =
 
 func initPuyoPuyo*[F: TsuField or WaterField](): PuyoPuyo[F] {.inline.} =
   ## Returns a new Puyo Puyo game.
+  result = default PuyoPuyo[F] # HACK: dummy to suppress warning
   result.reset
 
 # ------------------------------------------------
@@ -39,7 +39,7 @@ func initPuyoPuyo*[F: TsuField or WaterField](): PuyoPuyo[F] {.inline.} =
 
 func movingCompleted*[F: TsuField or WaterField](self: PuyoPuyo[F]): bool {.inline.} =
   ## Returns `true` if all pairs in the Puyo Puyo game are put (or skipped).
-  mSelf.nextIdx >= mSelf.pairsPositions.len
+  self.nextIdx >= self.pairsPositions.len
 
 # ------------------------------------------------
 # Count
@@ -185,7 +185,7 @@ func moveWithDetailTracking*[F: TsuField or WaterField](
 # ------------------------------------------------
 
 func moveWithFullTracking[F: TsuField or WaterField](
-    mSelf: var Environment[F], pos: Position, overwritePos: static bool
+    mSelf: var PuyoPuyo[F], pos: Position, overwritePos: static bool
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks the followings:
@@ -205,7 +205,7 @@ func moveWithFullTracking[F: TsuField or WaterField](
   mSelf.nextIdx.inc
 
 func moveWithFullTracking*[F: TsuField or WaterField](
-    mSelf: var Environment[F]
+    mSelf: var PuyoPuyo[F]
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks the followings:
@@ -217,7 +217,7 @@ func moveWithFullTracking*[F: TsuField or WaterField](
   mSelf.moveWithFullTracking(Position.low, false)
 
 func moveWithFullTracking*[F: TsuField or WaterField](
-    mSelf: var Environment[F], pos: Position
+    mSelf: var PuyoPuyo[F], pos: Position
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks the followings:
@@ -307,4 +307,4 @@ func parsePuyoPuyo*[F: TsuField or WaterField](
     else:
       raise newException(ValueError, "Invalid Puyo Puyo game: " & query)
 
-    result.field = parseField[F](queries[0]) host
+    result.field = parseField[F](queries[0], host)

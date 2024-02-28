@@ -66,9 +66,9 @@ proc initShareControl*(simulator: ref Simulator): ShareControl {.inline.} =
     (app.clipboardText = $simulator[].toUri(withPositions = true, editor = false))
 
   # copy URL (editor)
-  let copyLabel = newLabel()
-  result.add copyLabel
-  copyLabel.text = "編集者URLコピー"
+  let editorCopyLabel = newLabel()
+  result.add editorCopyLabel
+  editorCopyLabel.text = "編集者URLコピー"
 
   let editorCopyButtons = newLayoutContainer Layout_Horizontal
   result.add editorCopyButtons

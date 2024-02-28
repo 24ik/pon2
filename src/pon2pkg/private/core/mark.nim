@@ -190,7 +190,7 @@ func disappearConnectSatisfied*(
 ): bool {.inline.} =
   ## Returns `true` if the requirement satisfied.
   let connects =
-    case req.color.get
+    case req.color
     of RequirementColor.All, RequirementColor.Color:
       moveRes.colorConnects
     else:

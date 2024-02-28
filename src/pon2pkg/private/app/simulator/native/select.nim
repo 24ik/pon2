@@ -8,7 +8,7 @@
 import std/[sugar]
 import nigui
 import ./[requirement]
-import ../[misc]
+import ../../[misc]
 import ../../../../app/[color, simulator]
 import ../../../../core/[rule]
 

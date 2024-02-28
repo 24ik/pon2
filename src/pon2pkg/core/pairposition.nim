@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 import std/[sequtils, strformat, strutils, sugar]
-import ./[host, pair, position]
+import ./[cell, host, pair, position]
 import ../private/[misc]
 
 type
@@ -43,7 +43,7 @@ func garbageCount*(pairsPositions: PairsPositions): int {.inline.} =
 const PairPosSep = '|'
 
 func `$`*(pairPosition: PairPosition): string {.inline.} =
-  &"{self.pair}{PairPosSep}{self.position}"
+  &"{pairPosition.pair}{PairPosSep}{pairPosition.position}"
 
 func parsePairPosition*(str: string): PairPosition {.inline.} =
   ## Returns the pair&position converted from the string representation.
@@ -82,7 +82,7 @@ func parsePairsPositions*(str: string): PairsPositions {.inline.} =
 
 func toUriQuery*(pairPosition: PairPosition, host: SimulatorHost): string {.inline.} =
   ## Returns the URI query converted from the pair&position.
-  &"{self.pair.toUriQuery host}{self.position.toUriQuery host}"
+  &"{pairPosition.pair.toUriQuery host}{pairPosition.position.toUriQuery host}"
 
 func parsePairPosition*(query: string, host: SimulatorHost): PairPosition {.inline.} =
   ## Returns the pair&position converted from the URI query.
@@ -108,12 +108,12 @@ func toUriQuery*(pairsPositions: PairsPositions, host: SimulatorHost): string {.
 
   result = strs.join
 
-func parsePairsPositions*(query: string, host: SimulatorHost): PairsPosition {.inline.} =
+func parsePairsPositions*(query: string, host: SimulatorHost): PairsPositions {.inline.} =
   ## Returns the pairs&positions converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
   # NOTE: this function is not robust; dependent on the current URI format
   if query.len mod 2 != 0:
-    raise newException(ValueError, "Invalid pairs&positions: ", query)
+    raise newException(ValueError, "Invalid pairs&positions: " & query)
 
   result = newSeqOfCap[PairPosition](query.len div 2)
 
@@ -132,4 +132,4 @@ func parsePairsPositions*(query: string, host: SimulatorHost): PairsPosition {.i
         idx.inc 2
   of Ishikawa, Ips:
     for i in countup(0, query.len, 2):
-      result.add query[idx .. idx.succ].parsePairPosition host
+      result.add query[i .. i.succ].parsePairPosition host

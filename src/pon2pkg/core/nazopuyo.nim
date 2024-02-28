@@ -5,8 +5,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, sequtils, setutils, strformat, strutils, sugar, tables, uri]
-import ./[field, misc, pair, position, puyopuyo, requirement, rule]
+import std/[strformat, strutils, tables, uri]
+import ./[field, host, puyopuyo, requirement]
 
 type NazoPuyo*[F: TsuField or WaterField] = object ## Nazo Puyo.
   puyoPuyo*: PuyoPuyo[F]
@@ -63,7 +63,7 @@ func toUriQuery*[F: TsuField or WaterField](
     of Izumiya: '&'
     of Ishikawa, Ips: '_'
 
-  result = &"{self.puyoPuyo.toUriQuery host}{sep}{self.pairsPositions.toUriQuery host}"
+  result = &"{self.puyoPuyo.toUriQuery host}{sep}{self.requirement.toUriQuery host}"
 
 func parseNazoPuyo*[F: TsuField or WaterField](
     query: string, host: SimulatorHost

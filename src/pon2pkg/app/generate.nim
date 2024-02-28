@@ -6,11 +6,11 @@
 {.experimental: "views".}
 
 import std/[algorithm, options, random, sequtils, sugar]
-import ./[nazopuyo]
+import ./[nazopuyo, solve]
 import
   ../core/[
-    cell, field, fieldtype, nazopuyo, pair, pairposition, position, puyopuyo, rule,
-    solve
+    cell, field, fieldtype, nazopuyo, pair, pairposition, position, puyopuyo,
+    requirement, rule
   ]
 import ../private/[misc]
 
@@ -185,22 +185,28 @@ func generatePuyoPuyo[F: TsuField or WaterField](
     extras = rng.split(extraCount, useColors.len, true)
 
   # shuffle for pairs&positions
+  {.push warning[ProveInit]: off.}
   var puyos = newSeqOfCap[Puyo](puyoCounts.color + puyoCounts.garbage)
   for color, chain, surplus in zip(useColors, chains, extras):
     puyos &= color.Puyo.repeat chain * 4 + surplus
   rng.shuffle puyos
+  {.pop.}
 
   # make pairs&positions
+  {.push warning[ProveInit]: off.}
   let pairsPositions = collect:
     for i in 0 ..< moveCount:
       PairPosition(
         pair: initPair(puyos[2 * i], puyos[2 * i + 1]), position: Position.None
       )
+  {.pop.}
 
   # shuffle for field
+  {.push warning[ProveInit]: off.}
   var fieldPuyos =
     puyos[2 * moveCount .. ^1] & Cell.Garbage.Puyo.repeat puyoCounts.garbage
   rng.shuffle fieldPuyos
+  {.pop.}
 
   # calc heights
   let colCounts = rng.split(fieldCount, heights)
@@ -242,25 +248,35 @@ func generateRequirement(
 ): Requirement {.inline.} =
   ## Returns a random requirement.
   ## If generation fails, `GenerateError` will be raised.
-  result.kind = req.kind
+  var
+    kind = RequirementKind.low
+    color = RequirementColor.low
+    number = RequirementNumber.low
+
+  kind = req.kind
 
   # color
-  if req.kind in ColorKinds:
-    result.color =
+  if kind in ColorKinds:
+    color =
       case req.color
       of GenerateRequirementColor.All:
-        some RequirementColor.All
+        RequirementColor.All
       of GenerateRequirementColor.SingleColor:
-        some ColorToReqColor[rng.sample useColors]
+        ColorToReqColor[rng.sample useColors]
       of GenerateRequirementColor.Garbage:
-        some RequirementColor.Garbage
+        RequirementColor.Garbage
       of GenerateRequirementColor.Color:
-        some RequirementColor.Color
+        RequirementColor.Color
 
   # number
-  result.number = 0
-  if req.kind in NumberKinds:
-    result.number = req.number
+  if kind in NumberKinds:
+    number = req.number
+
+  {.cast(uncheckedAssign).}:
+    if kind in ColorKinds:
+      result = Requirement(kind: kind, color: color, number: number)
+    else:
+      result = Requirement(kind: kind, number: number)
 {.pop.}
 {.pop.}
 
@@ -273,7 +289,7 @@ func hasDouble(pairsPositions: PairsPositions): bool {.inline.} =
   # HACK: Cutting this function out is needed due to Nim's bug
   pairsPositions.anyIt it.pair.isDouble
 
-func generate*[F: TsuField or WaterField](
+proc generate*[F: TsuField or WaterField](
     seed: SomeSignedInt,
     req: GenerateRequirement,
     moveCount: Positive,
@@ -303,7 +319,7 @@ func generate*[F: TsuField or WaterField](
   if puyoCounts.color div 4 < colorCount:
     raise newException(GenerateError, "The number of colors is too big.")
 
-  var rng = seed.get.int64.initRand
+  var rng = seed.int64.initRand
 
   # requirement
   {.push warning[UnsafeSetLen]: off.}
@@ -328,9 +344,9 @@ func generate*[F: TsuField or WaterField](
       continue
     if result.puyoPuyo.field.willDisappear:
       continue
-    if not allowDouble and result.puyoPuyo.pairs.hasDouble:
+    if not allowDouble and result.puyoPuyo.pairsPositions.hasDouble:
       continue
-    if not allowLastDouble and result.puyoPuyo.pairsPositions[^1].isDouble:
+    if not allowLastDouble and result.puyoPuyo.pairsPositions[^1].pair.isDouble:
       continue
     if connect3Counts.total.isSome and
         result.puyoPuyo.field.connect3.colorCount != connect3Counts.total.get * 3:
@@ -346,8 +362,8 @@ func generate*[F: TsuField or WaterField](
       continue
 
     let answers = result.solve(earlyStopping = true)
-    if answers.len == 1 and answers[0].positions[^1] != Position.None:
-      result.pairsPositions = answers[0]
+    if answers.len == 1 and answers[0][^1].position != Position.None:
+      result.puyoPuyo.pairsPositions = answers[0]
       return
   {.pop.}
   {.pop.}
@@ -373,8 +389,9 @@ proc generate*[F: TsuField or WaterField](
   ## Returns a randomly generated nazo puyo that has a unique solution.
   ## If generation fails, `GenerateError` will be raised.
   ## `parallelCount` will be ignored on JS backend.
-  generate(
-    initRand().rand(int),
+  var rng = initRand()
+  generate[F](
+    rng.rand(int),
     req,
     moveCount,
     colorCount,
@@ -389,7 +406,7 @@ proc generate*[F: TsuField or WaterField](
 # Generate - Wrap
 # ------------------------------------------------
 
-func generate*(
+proc generate*(
     seed: SomeSignedInt,
     rule: Rule,
     req: GenerateRequirement,

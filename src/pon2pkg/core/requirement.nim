@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 import std/[setutils, strutils, sugar, tables, uri]
-import ../corepkg/[host]
+import ../core/[host]
 
 type
   RequirementKind* {.pure.} = enum
@@ -172,58 +172,63 @@ func toUriQuery*(req: Requirement, host: SimulatorHost): string {.inline.} =
 func parseRequirement*(query: string, host: SimulatorHost): Requirement {.inline.} =
   ## Returns the requirement converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
+  var
+    kind = RequirementKind.low
+    color = RequirementColor.low
+    number = RequirementNumber.low
+
   case host
   of Izumiya:
-    result.kind = RequirementKind.low # HACK: dummy to suppress warning
-    result.number = 0
     var
       kindSet = false
       colorSet = false
       numberSet = false
-      color = RequirementColor.low
 
     for (key, val) in query.decodeQuery:
       case key
       of KindKey:
         let kindInt = val.parseInt
-        if kindInt < RequirementKind.low.ord or RequirementKind.high.ord < kindInt:
+        if kindInt notin RequirementKind.low.ord .. RequirementKind.high.ord:
           raise newException(ValueError, "Invalid requirement: " & query)
 
-        result.kind = kindInt.RequirementKind
+        kind = kindInt.RequirementKind
         kindSet = true
       of ColorKey:
         var colorInt = val.parseInt
-        if colorInt < RequirementColor.low.ord or RequirementColor.high.ord < colorInt:
+        if colorInt notin RequirementColor.low.ord .. RequirementColor.high.ord:
           raise newException(ValueError, "Invalid requirement: " & query)
 
         color = colorInt.RequirementColor
         colorSet = true
       of NumberKey:
         let numberInt = val.parseInt
-        if numberInt < RequirementNumber.low.ord or
-            RequirementNumber.high.ord < numberInt:
+        if numberInt notin RequirementNumber.low.ord .. RequirementNumber.high.ord:
           raise newException(ValueError, "Invalid requirement: " & query)
 
-        result.number = numberInt.RequirementNumber
+        number = numberInt.RequirementNumber
         numberSet = true
       else:
         raise newException(ValueError, "Invalid requirement: " & query)
 
-    if not kindSet or (result.kind in ColorKinds != colorSet) or
-        (result.kind in NumberKinds != numberSet):
+    if not kindSet or (kind in ColorKinds != colorSet) or
+        (kind in NumberKinds != numberSet):
       raise newException(ValueError, "Invalid requirement: " & query)
-
-    result.color = color
   of Ishikawa, Ips:
     if query.len != 3 or query[0] notin IshikawaUriToKind or
         query[1] notin IshikawaUriToColor or query[2] notin IshikawaUriToNumber:
       raise newException(ValueError, "Invalid requirement: " & query)
 
-    result.kind = IshikawaUriToKind[query[0]]
-    if result.kind in ColorKinds:
-      result.color = IshikawaUriToColor[query[1]]
-    if result.kind in NumberKinds:
-      result.number = IshikawaUriToNumber[query[2]]
+    kind = IshikawaUriToKind[query[0]]
+    if kind in ColorKinds:
+      color = IshikawaUriToColor[query[1]]
+    if kind in NumberKinds:
+      number = IshikawaUriToNumber[query[2]]
 
-  if result.kind == Clear:
-    result.number = 0
+    if kind == Clear:
+      number = RequirementNumber.low
+
+  {.cast(uncheckedAssign).}:
+    if kind in ColorKinds:
+      result = Requirement(kind: kind, color: color, number: number)
+    else:
+      result = Requirement(kind: kind, number: number)

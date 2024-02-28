@@ -34,7 +34,8 @@ export
   marathon.operate
 export
   nazopuyo.NazoPuyoWrap, nazopuyo.initNazoPuyoWrap, nazopuyo.flattenAnd,
-  nazopuyo.pairsPositions, nazopuyo.requirement, nazopuyo.rule, nazopuyo.`rule=`
+  nazopuyo.pairsPositions, nazopuyo.`pairsPositions=`, nazopuyo.requirement,
+  nazopuyo.`requirement=`, nazopuyo.rule, nazopuyo.`rule=`
 export permute.permute
 export
   simulator.SimulatorKind, simulator.SimulatorMode, simulator.SimulatorState,
