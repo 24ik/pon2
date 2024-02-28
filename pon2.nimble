@@ -3,7 +3,7 @@
 version = "0.11.5"
 author = "Keisuke Izumiya"
 description = "Puyo Puyo Library"
-license = "Apache-2.0 OR MPL-2.0"
+license = "Apache-2.0"
 
 srcDir = "src"
 installExt = @["nim"]
@@ -16,7 +16,7 @@ requires "nim ^= 2.0.2"
 requires "docopt ^= 0.7.1"
 requires "karax ^= 1.3.3"
 requires "nigui ^= 0.2.7"
-requires "nimsimd ^= 1.2.6"
+requires "nimsimd ^= 1.2.9"
 requires "suru#f6f1e607c585b2bc2f71309996643f0555ff6349"
 
 # Tasks
