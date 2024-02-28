@@ -65,6 +65,7 @@ const
 
 func invalidPositions*(self): set[Position] {.inline.} =
   ## Returns the invalid positions.
+  ## `Position.None` is not included.
   result = {}
   var usableColumns = AllColumns
 
@@ -92,10 +93,12 @@ func invalidPositions*(self): set[Position] {.inline.} =
 
 func validPositions*(self): set[Position] {.inline.} =
   ## Returns the valid positions.
-  self.invalidPositions.complement
+  ## `Position.None` is not included.
+  AllPositions - self.invalidPositions
 
 func validDoublePositions*(self): set[Position] {.inline.} =
   ## Returns the valid positions for a double pair.
+  ## `Position.None` is not included.
   AllDoublePositions - self.invalidPositions
 
 # ------------------------------------------------

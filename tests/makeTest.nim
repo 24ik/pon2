@@ -10,8 +10,10 @@ type TestMode = enum
   Both
 
 const
-  Pon2Avx2 {.intdefine.} = Both
-  Pon2Bmi2 {.intdefine.} = Both
+  Avx2Ord {.define: "pon2.avx2".} = Both.ord
+  Bmi2Ord {.define: "pon2.bmi2".} = Both.ord
+  Avx2 = Avx2Ord.TestMode
+  Bmi2 = Bmi2Ord.TestMode
 
 when isMainModule:
   const
@@ -19,7 +21,8 @@ when isMainModule:
     TripleQuote = '"'.repeat 3
     Matrix = "<MATRIX>"
     Targets = "<TARGETS>"
-    FileContentTemplate = &"""
+    FileContentTemplate =
+      &"""
 discard {TripleQuote}
   action: "run"
   targets: "{Targets}"
@@ -33,18 +36,19 @@ main()
 
     # boolean flags
     BoolValues = [Off: @[false], On: @[true], Both: @[true, false]]
-    Avx2Seq = BoolValues[Pon2Avx2]
-    Bmi2Seq = BoolValues[Pon2Bmi2]
+    Avx2Seq = BoolValues[Avx2]
+    Bmi2Seq = BoolValues[Bmi2]
 
   let
     matrixSeq = collect:
       for values in product([Avx2Seq, Bmi2Seq]):
-        &"-d:Pon2Avx2={values[0]} -d:Pon2Bmi2={values[1]}"
+        &"-d:pon2.avx2={values[0]} -d:pon2.bmi2={values[1]}"
 
     # NOTE: On Windows and non-c backend, the test fails due to Nim's bug
-    fileContent = FileContentTemplate.replace(
-      Matrix, matrixSeq.join "; ").replace(
-        Targets, when defined(windows): "c" else: "c cpp js")
+    fileContent =
+      FileContentTemplate.replace(Matrix, matrixSeq.join "; ").replace(
+        Targets, when defined(windows): "c" else: "c cpp js"
+      )
 
   for kind, path in currentSourcePath().Path.parentDir.walkDir:
     case kind

@@ -3,9 +3,9 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2pkg/corepkg/[cell {.all.}]
+import ../../src/pon2pkg/core/[cell {.all.}]
 
-proc main* =
+proc main*() =
   # ------------------------------------------------
   # Cell <-> string
   # ------------------------------------------------

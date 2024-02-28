@@ -53,14 +53,17 @@ func noneCount*(self: TsuField or WaterField): int {.inline.} =
 
 func invalidPositions*(self: TsuField or WaterField): set[Position] {.inline.} =
   ## Returns the invalid positions.
+  ## `Position.None` is not included.
   self.exist.invalidPositions
 
 func validPositions*(self: TsuField or WaterField): set[Position] {.inline.} =
   ## Returns the valid positions.
+  ## `Position.None` is not included.
   self.exist.validPositions
 
 func validDoublePositions*(self: TsuField or WaterField): set[Position] {.inline.} =
   ## Returns the valid positions for a double pair.
+  ## `Position.None` is not included.
   self.exist.validDoublePositions
 
 # ------------------------------------------------
