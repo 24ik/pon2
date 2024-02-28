@@ -94,6 +94,6 @@ export
   requirement.RequirementKind, requirement.RequirementColor,
   requirement.RequirementNumber, requirement.Requirement, requirement.NoColorKinds,
   requirement.NoNumberKinds, requirement.ColorKinds, requirement.NumberKinds,
-  requirement.isSupported, requirement.`$`, requirement.parseRequirement,
-  requirement.toUriQuery
+  requirement.`==`, requirement.isSupported, requirement.`$`,
+  requirement.parseRequirement, requirement.toUriQuery
 export rule.Rule, rule.parseRule

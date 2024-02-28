@@ -64,9 +64,10 @@ proc solve[F: TsuField or WaterField](
 
     when earlyStopping:
       proc shutDownProgressBar() =
-        progressBar.inc progressBar[0].total - progressBar[0].progress
-        progressBar.update
-        progressBar.finish
+        if showProgress:
+          progressBar.inc progressBar[0].total - progressBar[0].progress
+          progressBar.update
+          progressBar.finish
 
     # spawn tasks
     {.push warning[Effect]: off.}

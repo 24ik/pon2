@@ -69,6 +69,14 @@ using
   mSelf: var Requirement
 
 # ------------------------------------------------
+# Operator
+# ------------------------------------------------
+
+func `==`*(self; req: Requirement): bool {.inline.} =
+  self.kind == req.kind and self.number == req.number and
+    (req.kind notin ColorKinds or self.color == req.color)
+
+# ------------------------------------------------
 # Property
 # ------------------------------------------------
 
