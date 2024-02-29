@@ -133,7 +133,7 @@ func children*[F: TsuField or WaterField](
 ): seq[Node[F]] {.inline.} =
   ## Returns the children of the node.
   let positions =
-    if node.nazoPuyo.puyoPuyo.pairsPositions[0].pair.isDouble:
+    if node.nazoPuyo.puyoPuyo.nextPairPosition.get.pair.isDouble:
       node.nazoPuyo.puyoPuyo.field.validDoublePositions
     else:
       node.nazoPuyo.puyoPuyo.field.validPositions

@@ -83,10 +83,11 @@ export
   position.parsePosition, position.toUriQuery
 export
   puyopuyo.PuyoPuyo, puyopuyo.reset, puyopuyo.initPuyoPuyo, puyopuyo.`==`,
-  puyopuyo.movingCompleted, puyopuyo.puyoCount, puyopuyo.colorCount,
-  puyopuyo.garbageCount, puyopuyo.move, puyopuyo.moveWithRoughTracking,
-  puyopuyo.moveWithDetailTracking, puyopuyo.moveWithFullTracking, puyopuyo.`$`,
-  puyopuyo.parsePuyoPuyo, puyopuyo.toUriQuery
+  puyopuyo.movingCompleted, puyopuyo.nextPairPosition, puyopuyo.puyoCount,
+  puyopuyo.colorCount, puyopuyo.garbageCount, puyopuyo.move,
+  puyopuyo.moveWithRoughTracking, puyopuyo.moveWithDetailTracking,
+  puyopuyo.moveWithFullTracking, puyopuyo.`$`, puyopuyo.parsePuyoPuyo,
+  puyopuyo.toUriQuery
 export
   requirement.RequirementKind, requirement.RequirementColor,
   requirement.RequirementNumber, requirement.Requirement, requirement.NoColorKinds,

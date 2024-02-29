@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, strutils, tables, uri]
+import std/[options, strformat, strutils, tables, uri]
 import ./[cell, field, host, moveresult, pair, pairposition, position]
 
 type PuyoPuyo*[F: TsuField or WaterField] = object ## Puyo Puyo game.
@@ -50,6 +50,16 @@ func `==`*(self: PuyoPuyo[WaterField], field: PuyoPuyo[TsuField]): bool {.inline
 func movingCompleted*[F: TsuField or WaterField](self: PuyoPuyo[F]): bool {.inline.} =
   ## Returns `true` if all pairs in the Puyo Puyo game are put (or skipped).
   self.nextIdx >= self.pairsPositions.len
+
+func nextPairPosition*[F: TsuField or WaterField](
+    self: PuyoPuyo[F]
+): Option[PairPosition] {.inline.} =
+  ## Returns the next pair&position.
+  ## If no pairs left, returns `none`.
+  if self.movingCompleted:
+    none PairPosition
+  else:
+    some self.pairsPositions[self.nextIdx]
 
 # ------------------------------------------------
 # Count

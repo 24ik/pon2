@@ -2,15 +2,13 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, unittest, uri]
-import ../../src/pon2pkg/app/[nazopuyo, simulator]
+import std/[options, unittest]
 import
   ../../src/pon2pkg/core/
     [field, host, nazopuyo {.all.}, pairposition, puyopuyo, requirement]
 
 proc moveCount(uriStr: string): int =
-  uriStr.parseUri.parseSimulator.nazoPuyoWrap.flattenAnd:
-    result = nazoPuyo.moveCount
+  parseNazoPuyo[TsuField](uriStr, Ishikawa).moveCount
 
 proc main*() =
   # ------------------------------------------------
@@ -45,9 +43,9 @@ proc main*() =
   # moveCount
   block:
     check initNazoPuyo[TsuField]().moveCount == 0
-    check "https://ishikawapuyo.net/simu/pn.html?109e9_01__200".moveCount == 1
-    check "https://ishikawapuyo.net/simu/pn.html?5004ABA_S1S1__u03".moveCount == 2
-    check "https://ishikawapuyo.net/simu/pn.html?3ww3so4zM_s1G1u1__u04".moveCount == 3
+    check "109e9_01__200".moveCount == 1
+    check "5004ABA_S1S1__u03".moveCount == 2
+    check "3ww3so4zM_s1G1u1__u04".moveCount == 3
 
   # ------------------------------------------------
   # NazoPuyo <-> string / URI
