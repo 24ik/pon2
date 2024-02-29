@@ -53,7 +53,7 @@ proc main*() =
   # NazoPuyo <-> string / URI
   # ------------------------------------------------
 
-  # $, parseNazoPuyo, toUri
+  # $, parseNazoPuyo, toUriQuery
   block:
     let
       str =
