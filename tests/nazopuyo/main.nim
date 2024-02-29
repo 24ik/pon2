@@ -87,6 +87,7 @@ yb|"""
     check nazo.toUriQuery(Izumiya) == izumiyaQuery
     check nazo.toUriQuery(Ishikawa) == ishikawaQuery
     check nazo.toUriQuery(Ips) == ipsQuery
+
     check parseNazoPuyo[TsuField](izumiyaQuery, Izumiya) == nazo
     check parseNazoPuyo[TsuField](ishikawaQuery, Ishikawa) == nazo
     check parseNazoPuyo[TsuField](ipsQuery, Ips) == nazo

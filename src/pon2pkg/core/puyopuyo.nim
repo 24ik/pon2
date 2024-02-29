@@ -56,10 +56,13 @@ func nextPairPosition*[F: TsuField or WaterField](
 ): Option[PairPosition] {.inline.} =
   ## Returns the next pair&position.
   ## If no pairs left, returns `none`.
-  if self.movingCompleted:
-    none PairPosition
-  else:
-    some self.pairsPositions[self.nextIdx]
+  {.push warning[ProveInit]: off.}
+  result =
+    if self.movingCompleted:
+      none PairPosition
+    else:
+      some self.pairsPositions[self.nextIdx]
+  {.pop.}
 
 # ------------------------------------------------
 # Count
@@ -249,7 +252,7 @@ func moveWithFullTracking*[F: TsuField or WaterField](
   mSelf.moveWithFullTracking(pos, true)
 
 # ------------------------------------------------
-# Puyo Puyo Game <-> string
+# Puyo Puyo <-> string
 # ------------------------------------------------
 
 const FieldPairsPositionsSep = "\n------\n"
@@ -259,11 +262,11 @@ func `$`*[F: TsuField or WaterField](self: PuyoPuyo[F]): string {.inline.} =
   $self.field & FieldPairsPositionsSep & $self.pairsPositions
 
 func parsePuyoPuyo*[F: TsuField or WaterField](str: string): PuyoPuyo[F] {.inline.} =
-  ## Returns the Puyo Puyo game converted from the string representation.
+  ## Returns the Puyo Puyo converted from the string representation.
   ## If the string is invalid, `ValueError` is raised.
   let strs = str.split FieldPairsPositionsSep
   if strs.len != 2:
-    raise newException(ValueError, "Invalid Puyo Puyo game: " & str)
+    raise newException(ValueError, "Invalid Puyo Puyo: " & str)
 
   result.reset
 
@@ -282,7 +285,7 @@ const
 func toUriQuery*[F: TsuField or WaterField](
     self: PuyoPuyo[F], host: SimulatorHost
 ): string {.inline.} =
-  ## Returns the URI query converted from the Puyo Puyo game.
+  ## Returns the URI query converted from the Puyo Puyo.
   case host
   of Izumiya:
     encodeQuery [
@@ -295,7 +298,7 @@ func toUriQuery*[F: TsuField or WaterField](
 func parsePuyoPuyo*[F: TsuField or WaterField](
     query: string, host: SimulatorHost
 ): PuyoPuyo[F] {.inline.} =
-  ## Returns the Puyo Puyo game converted from the URI query.
+  ## Returns the Puyo Puyo converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
   result.nextIdx = 0
 
@@ -314,10 +317,10 @@ func parsePuyoPuyo*[F: TsuField or WaterField](
         result.pairsPositions = val.parsePairsPositions host
         pairsPositionsSet = true
       else:
-        raise newException(ValueError, "Invalid Puyo Puyo game: " & query)
+        raise newException(ValueError, "Invalid Puyo Puyo: " & query)
 
     if not fieldSet or not pairsPositionsSet:
-      raise newException(ValueError, "Invalid Puyo Puyo game: " & query)
+      raise newException(ValueError, "Invalid Puyo Puyo: " & query)
   of Ishikawa, Ips:
     let queries = query.split '_'
     case queries.len
@@ -326,6 +329,6 @@ func parsePuyoPuyo*[F: TsuField or WaterField](
     of 2:
       result.pairsPositions = queries[1].parsePairsPositions host
     else:
-      raise newException(ValueError, "Invalid Puyo Puyo game: " & query)
+      raise newException(ValueError, "Invalid Puyo Puyo: " & query)
 
     result.field = parseField[F](queries[0], host)
