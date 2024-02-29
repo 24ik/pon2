@@ -2,11 +2,12 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, sequtils, unittest, uri]
-import ../../src/pon2pkg/nazopuyopkg/[nazopuyo, permute]
-import ../../src/pon2pkg/corepkg/[pair, position]
+import std/[sequtils, unittest, uri]
+import ../../src/pon2pkg/app/[permute {.all.}]
+import ../../src/pon2pkg/core/[field, host, nazopuyo, pairposition]
 
-proc main* =
+{.push warning[Uninit]: off.}
+proc main*() =
   # ------------------------------------------------
   # Permute
   # ------------------------------------------------
@@ -14,28 +15,31 @@ proc main* =
   # permute
   block:
     let
-      nazo = "https://ishikawapuyo.net/simu/pn.html?S00r0Mm6iOi_g1g1__u03".
-        parseUri.parseTsuNazoPuyo.nazoPuyo
+      nazo = parseNazoPuyo[TsuField]("S00r0Mm6iOi_g1g1__u03", Ishikawa)
 
-      result1gbgb = ("gb\ngb".parsePairs, "12\n12".parsePositions)
-      result1gbbg = ("gb\nbg".parsePairs, "12\n21".parsePositions)
-      result1bgbg = ("bg\nbg".parsePairs, "21\n21".parsePositions)
-      result2 = ("gg\nbb".parsePairs, "1N\n2N".parsePositions)
+      result1gbgb = "gb12gb12".parsePairsPositions Izumiya
+      result1gbbg = "gb12bg21".parsePairsPositions Izumiya
+      result1bgbg = "bg21bg21".parsePairsPositions Izumiya
+      result2 = "gg1Nbb2N".parsePairsPositions Izumiya
 
     # allow double
     # w/o fixMoves
-    check nazo.permute(newSeq[Positive](0), true, true).toSeq == @[
-      result2, result1gbgb]
+    check nazo.permute(newSeq[Positive](0), allowDouble = true, allowLastDouble = true).toSeq ==
+      @[result2, result1gbgb]
     # w/ fixMoves
-    check nazo.permute(@[2.Positive], true, true).toSeq == @[
-      result1gbbg]
-    check nazo.permute(@[1.Positive, 2.Positive], true, true).toSeq == @[
-      result1bgbg]
+    check nazo.permute(@[2.Positive], allowDouble = true, allowLastDouble = true).toSeq ==
+      @[result1gbbg]
+    check nazo.permute(
+      @[1.Positive, 2.Positive], allowDouble = true, allowLastDouble = true
+    ).toSeq == @[result1bgbg]
 
     # not allow last double
-    check nazo.permute(newSeq[Positive](0), true, false).toSeq == @[
-      result1gbgb]
+    check nazo.permute(newSeq[Positive](0), allowDouble = true, allowLastDouble = false).toSeq ==
+      @[result1gbgb]
 
     # not allow double
-    check nazo.permute(newSeq[Positive](0), false, false).toSeq == @[
-      result1gbgb]
+    check nazo.permute(
+      newSeq[Positive](0), allowDouble = false, allowLastDouble = false
+    ).toSeq == @[result1gbgb]
+
+{.pop.}

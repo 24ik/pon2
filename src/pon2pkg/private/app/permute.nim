@@ -22,7 +22,7 @@ func allPairsPositionsSeq(
   # NOTE: Swapped pair sometimes gives a different solution, but this function
   # does not consider it.
   if idx == moveCount:
-    return @[]
+    return @[@[]]
 
   result = @[]
   let nowLast = idx == moveCount.pred
