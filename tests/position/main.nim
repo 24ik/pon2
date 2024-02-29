@@ -3,9 +3,9 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2pkg/corepkg/[position {.all.}]
+import ../../src/pon2pkg/core/[host, position {.all.}]
 
-proc main* =
+proc main*() =
   # ------------------------------------------------
   # Constructor
   # ------------------------------------------------
@@ -63,3 +63,20 @@ proc main* =
       var pos2 = pos
       pos2.rotateLeft
       check pos2 == answer
+
+  # ------------------------------------------------
+  # Position <-> string / URI
+  # ------------------------------------------------
+
+  # parsePosition, toUriQuery
+  block:
+    check $Right2 == "34"
+    check "34".parsePosition == Right2
+
+    check Right2.toUriQuery(Izumiya) == "34"
+    check Right2.toUriQuery(Ishikawa) == "g"
+    check Right2.toUriQuery(Ips) == "g"
+
+    check "34".parsePosition(Izumiya) == Right2
+    check "g".parsePosition(Ishikawa) == Right2
+    check "g".parsePosition(Ips) == Right2
