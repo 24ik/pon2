@@ -90,6 +90,12 @@ func isSupported*(self): bool {.inline.} =
 # Requirement <-> string
 # ------------------------------------------------
 
+func `$`*(req: Requirement): string {.inline.} =
+  result = ($req.kind).replace("n", $req.number)
+  if req.kind in ColorKinds:
+    result = result.replace("c", $req.color)
+
+# NOTE: this should be put after `$`
 {.cast(uncheckedAssign).}:
   const
     AllRequirementsClear = collect:
@@ -100,20 +106,14 @@ func isSupported*(self): bool {.inline.} =
         for color in RequirementColor:
           for num in RequirementNumber.low .. RequirementNumber.high:
             Requirement(kind: kind, color: color, number: num)
-const
-  AllRequirementsWithoutColor = collect:
-    for kind in NoColorKinds:
-      for num in RequirementNumber.low .. RequirementNumber.high:
-        Requirement(kind: kind, number: num)
-  StrToRequirement = collect:
-    for req in AllRequirementsClear & AllRequirementsWithColor &
-        AllRequirementsWithoutColor:
-      {$req: req}
-
-func `$`*(req: Requirement): string {.inline.} =
-  result = ($req.kind).replace("n", $req.number)
-  if req.kind in ColorKinds:
-    result = result.replace("c", $req.color)
+    AllRequirementsWithoutColor = collect:
+      for kind in NoColorKinds:
+        for num in RequirementNumber.low .. RequirementNumber.high:
+          Requirement(kind: kind, number: num)
+const StrToRequirement = collect:
+  for req in AllRequirementsClear & AllRequirementsWithColor &
+      AllRequirementsWithoutColor:
+    {$req: req}
 
 func parseRequirement*(str: string): Requirement {.inline.} =
   ## Returns the requirement converted from the string representation.

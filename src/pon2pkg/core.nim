@@ -36,7 +36,6 @@ import
     cell, field, fieldtype, host, mark, moveresult, nazopuyo, notice, pair,
     pairposition, position, puyopuyo, requirement, rule
   ]
-import ./private/[intrinsic]
 
 export cell.Cell, cell.ColorPuyo, cell.Puyo, cell.parseCell
 export
@@ -46,13 +45,11 @@ export
   field.garbageCount, field.connect3, field.connect3V, field.connect3H, field.connect3L,
   field.shiftedUp, field.shiftedDown, field.shiftedRight, field.shiftedLeft,
   field.flippedV, field.flippedH, field.disappear, field.willDisappear, field.put,
-  field.drop, field.toArray, field.parseField, field.rule, field.isDead,
+  field.drop, field.toArray, field.parseField, field.`==`, field.rule, field.isDead,
   field.noneCount, field.invalidPositions, field.validPositions,
   field.validDoublePositions, field.shiftUp, field.shiftDown, field.shiftRight,
   field.shiftLeft, field.flipV, field.flipH, field.move, field.moveWithRoughTracking,
   field.moveWithDetailTracking, field.moveWithFullTracking, field.`$`, field.toUriQuery
-when UseAvx2:
-  export field.`==`
 export
   fieldtype.Height, fieldtype.Width, fieldtype.WaterHeight, fieldtype.AirHeight,
   fieldtype.Row, fieldtype.Column, fieldtype.WaterRow, fieldtype.AirRow
@@ -65,8 +62,8 @@ export
   moveresult.colorsSeq, moveresult.colorPlaces, moveresult.colorConnects,
   moveresult.score, moveresult.noticeGarbageCounts
 export
-  nazopuyo.NazoPuyo, nazopuyo.initNazoPuyo, nazopuyo.moveCount, nazopuyo.`$`,
-  nazopuyo.parseNazoPuyo, nazopuyo.toUriQuery
+  nazopuyo.NazoPuyo, nazopuyo.initNazoPuyo, nazopuyo.`==`, nazopuyo.moveCount,
+  nazopuyo.`$`, nazopuyo.parseNazoPuyo, nazopuyo.toUriQuery
 export notice.NoticeGarbage, notice.GarbageRates, notice.noticeGarbageCounts
 export
   pair.Pair, pair.initPair, pair.axis, pair.child, pair.isDouble, pair.`axis=`,
@@ -85,11 +82,11 @@ export
   position.rotatedLeft, position.rotateRight, position.rotateLeft,
   position.parsePosition, position.toUriQuery
 export
-  puyopuyo.PuyoPuyo, puyopuyo.reset, puyopuyo.initPuyoPuyo, puyopuyo.movingCompleted,
-  puyopuyo.puyoCount, puyopuyo.colorCount, puyopuyo.garbageCount, puyopuyo.move,
-  puyopuyo.moveWithRoughTracking, puyopuyo.moveWithDetailTracking,
-  puyopuyo.moveWithFullTracking, puyopuyo.`$`, puyopuyo.parsePuyoPuyo,
-  puyopuyo.toUriQuery
+  puyopuyo.PuyoPuyo, puyopuyo.reset, puyopuyo.initPuyoPuyo, puyopuyo.`==`,
+  puyopuyo.movingCompleted, puyopuyo.puyoCount, puyopuyo.colorCount,
+  puyopuyo.garbageCount, puyopuyo.move, puyopuyo.moveWithRoughTracking,
+  puyopuyo.moveWithDetailTracking, puyopuyo.moveWithFullTracking, puyopuyo.`$`,
+  puyopuyo.parsePuyoPuyo, puyopuyo.toUriQuery
 export
   requirement.RequirementKind, requirement.RequirementColor,
   requirement.RequirementNumber, requirement.Requirement, requirement.NoColorKinds,

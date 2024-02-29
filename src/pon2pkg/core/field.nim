@@ -28,6 +28,16 @@ export
   main.disappear, main.willDisappear, main.put, main.drop, main.toArray, main.parseField
 
 # ------------------------------------------------
+# Operator
+# ------------------------------------------------
+
+func `==`*(self: TsuField, field: WaterField): bool {.inline.} =
+  false
+
+func `==`*(self: WaterField, field: TsuField): bool {.inline.} =
+  false
+
+# ------------------------------------------------
 # Property
 # ------------------------------------------------
 

@@ -522,12 +522,16 @@ func backward*(mSelf) {.inline.} =
   if mSelf.state == Stable:
     mSelf.next.index.dec
 
+  let savePos = mSelf.nazoPuyoWrap.pairsPositions[mSelf.next.index].position
   mSelf.nazoPuyoWrap = mSelf.undoDeque.popLast
   mSelf.state = Stable
   mSelf.next.position = InitPos
 
+  mSelf.nazoPuyoWrap.pairsPositions[mSelf.next.index].position = savePos
+
 func reset*(mSelf; resetPosition = true) {.inline.} =
   ## Resets the simulator.
+  let savePairsPositions = mSelf.nazoPuyoWrap.pairsPositions
   mSelf.state = Stable
   mSelf.nazoPuyoWrap = mSelf.originalNazoPuyoWrap
   mSelf.undoDeque.clear
@@ -536,9 +540,12 @@ func reset*(mSelf; resetPosition = true) {.inline.} =
   mSelf.next.position = InitPos
   mSelf.moveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
 
-  if resetPosition:
-    for pairPos in mSelf.nazoPuyoWrap.pairsPositions.mitems:
-      pairPos.position = Position.None
+  for i in 0 ..< mSelf.nazoPuyoWrap.pairsPositions.len:
+    mSelf.nazoPuyoWrap.pairsPositions[i].position =
+      if resetPosition:
+        Position.None
+      else:
+        savePairsPositions[i].position
 
 # ------------------------------------------------
 # Simulator <-> URI
@@ -560,6 +567,10 @@ func toUri*(self; withPositions: bool, editor: bool, host = Izumiya): Uri {.inli
   ## Returns the URI converted from the simulator.
   ## `self.editor` will be overridden with `editor`.
   result = initUri()
+  result.scheme =
+    case host
+    of Izumiya, Ishikawa: "https"
+    of Ips: "http"
   result.hostname = $host
 
   # path
@@ -597,7 +608,7 @@ func toUri*(self; withPositions: bool, editor: bool, host = Izumiya): Uri {.inli
     of Izumiya:
       # editor, kind, mode
       var queries = newSeq[(string, string)](0)
-      if self.editor:
+      if editor:
         queries.add (EditorKey, "")
       queries.add (KindKey, $self.kind)
       queries.add (ModeKey, $self.mode)
@@ -606,13 +617,15 @@ func toUri*(self; withPositions: bool, editor: bool, host = Izumiya): Uri {.inli
     of Ishikawa, Ips:
       result.query = mainQuery
 
-func toUri*(self; withPositions: bool): Uri {.inline.} =
+func toUri*(self; withPositions: bool, host = Izumiya): Uri {.inline.} =
   ## Returns the URI converted from the simulator.
-  self.toUri(withPositions, self.editor)
+  self.toUri(withPositions, self.editor, host)
 
 func parseSimulator*(uri: Uri): Simulator {.inline.} =
   ## Returns the simulator converted from the URI.
   ## If the URI is invalid, `ValueError` is raised.
+  result = initPuyoPuyo[TsuField]().initSimulator # HACK: dummy to suppress warning
+
   case uri.hostname
   of $Izumiya:
     if uri.path != "/pon2/gui/index.html":
@@ -653,14 +666,20 @@ func parseSimulator*(uri: Uri): Simulator {.inline.} =
       try:
         result = parsePuyoPuyo[TsuField](mainQuery, Izumiya).initSimulator(mode, editor)
       except ValueError:
-        result =
-          parsePuyoPuyo[WaterField](mainQuery, Izumiya).initSimulator(mode, editor)
+        try:
+          result =
+            parsePuyoPuyo[WaterField](mainQuery, Izumiya).initSimulator(mode, editor)
+        except ValueError:
+          raise newException(ValueError, "Invalid simulator: " & $uri)
     of Nazo:
       try:
         result = parseNazoPuyo[TsuField](mainQuery, Izumiya).initSimulator(mode, editor)
       except ValueError:
-        result =
-          parseNazoPuyo[WaterField](mainQuery, Izumiya).initSimulator(mode, editor)
+        try:
+          result =
+            parseNazoPuyo[WaterField](mainQuery, Izumiya).initSimulator(mode, editor)
+        except ValueError:
+          raise newException(ValueError, "Invalid simulator: " & $uri)
   of $Ishikawa, $Ips:
     var
       kind = SimulatorKind.low

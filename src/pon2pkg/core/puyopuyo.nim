@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strutils, tables, uri]
+import std/[strformat, strutils, tables, uri]
 import ./[cell, field, host, moveresult, pair, pairposition, position]
 
 type PuyoPuyo*[F: TsuField or WaterField] = object ## Puyo Puyo game.
@@ -32,6 +32,16 @@ func initPuyoPuyo*[F: TsuField or WaterField](): PuyoPuyo[F] {.inline.} =
   ## Returns a new Puyo Puyo game.
   result = default PuyoPuyo[F] # HACK: dummy to suppress warning
   result.reset
+
+# ------------------------------------------------
+# Operator
+# ------------------------------------------------
+
+func `==`*(self: PuyoPuyo[TsuField], puyoPuyo: PuyoPuyo[WaterField]): bool {.inline.} =
+  false
+
+func `==`*(self: PuyoPuyo[WaterField], field: PuyoPuyo[TsuField]): bool {.inline.} =
+  false
 
 # ------------------------------------------------
 # Property
@@ -235,7 +245,8 @@ func moveWithFullTracking*[F: TsuField or WaterField](
 const FieldPairsPositionsSep = "\n------\n"
 
 func `$`*[F: TsuField or WaterField](self: PuyoPuyo[F]): string {.inline.} =
-  &"{self.field}{FieldPairsPositionsSep}{self.pairsPositions}"
+  # HACK: cannot `strformat` here due to inlining error
+  $self.field & FieldPairsPositionsSep & $self.pairsPositions
 
 func parsePuyoPuyo*[F: TsuField or WaterField](str: string): PuyoPuyo[F] {.inline.} =
   ## Returns the Puyo Puyo game converted from the string representation.

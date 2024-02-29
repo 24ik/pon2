@@ -24,6 +24,16 @@ func initNazoPuyo*[F: TsuField or WaterField](): NazoPuyo[F] {.inline.} =
   result.requirement = DefaultRequirement
 
 # ------------------------------------------------
+# Operator
+# ------------------------------------------------
+
+func `==`*(self: NazoPuyo[TsuField], puyoPuyo: NazoPuyo[WaterField]): bool {.inline.} =
+  false
+
+func `==`*(self: NazoPuyo[WaterField], field: NazoPuyo[TsuField]): bool {.inline.} =
+  false
+
+# ------------------------------------------------
 # Property
 # ------------------------------------------------
 
@@ -38,7 +48,8 @@ func moveCount*[F: TsuField or WaterField](self: NazoPuyo[F]): int {.inline.} =
 const ReqPuyoPuyoSep = "\n======\n"
 
 func `$`*[F: TsuField or WaterField](self: NazoPuyo[F]): string {.inline.} =
-  &"{self.requirement}{ReqPuyoPuyoSep}{self.puyoPuyo}"
+  # HACK: cannot `strformat` here due to inlining error
+  $self.requirement & ReqPuyoPuyoSep & $self.puyoPuyo
 
 func parseNazoPuyo*[F: TsuField or WaterField](str: string): NazoPuyo[F] {.inline.} =
   ## Returns the Nazo Puyo converted from the string representation.
@@ -60,8 +71,8 @@ func toUriQuery*[F: TsuField or WaterField](
   ## Returns the URI query converted from the Nazo Puyo.
   let sep =
     case host
-    of Izumiya: '&'
-    of Ishikawa, Ips: '_'
+    of Izumiya: "&"
+    of Ishikawa, Ips: "__"
 
   result = &"{self.puyoPuyo.toUriQuery host}{sep}{self.requirement.toUriQuery host}"
 

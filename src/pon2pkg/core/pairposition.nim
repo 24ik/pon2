@@ -122,7 +122,7 @@ func parsePairsPositions*(query: string, host: SimulatorHost): PairsPositions {.
     var idx = 0
     while idx < query.len:
       try:
-        if idx.succ(4) >= query.len:
+        if idx.succ(4) > query.len:
           raise newException(ValueError, "This exception should be caught.")
 
         result.add query[idx ..< idx.succ 4].parsePairPosition host

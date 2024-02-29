@@ -38,7 +38,7 @@ func initNazoPuyoWrap*[F: TsuField or WaterField](
 # ------------------------------------------------
 
 template flattenAnd*(self; body: untyped): untyped =
-  ## Runs `body` with `nazoPuyo` exposed.
+  ## Runs `body` with `nazoPuyo`, `puyoPuyo` and `field` exposed.
   {.push hint[XDeclaredButNotUsed]: off.}
   case self.rule
   of Tsu:
@@ -118,3 +118,16 @@ func `rule=`*(mSelf; rule: Rule) {.inline.} =
     mSelf.tsu.puyoPuyo.field = mSelf.water.puyoPuyo.field.toTsuField
   of Water:
     mSelf.water.puyoPuyo.field = mSelf.tsu.puyoPuyo.field.toWaterField
+
+# ------------------------------------------------
+# Operator
+# ------------------------------------------------
+
+func `==`*(self; nazoPuyoWrap: NazoPuyoWrap): bool {.inline.} =
+  case self.rule
+  of Tsu:
+    nazoPuyoWrap.flattenAnd:
+      result = nazoPuyo == self.tsu
+  of Water:
+    nazoPuyoWrap.flattenAnd:
+      result = nazoPuyo == self.water
