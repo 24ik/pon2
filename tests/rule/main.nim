@@ -3,19 +3,19 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2pkg/core/[cell {.all.}]
+import ../../src/pon2pkg/core/[rule {.all.}]
 
 proc main*() =
   # ------------------------------------------------
-  # Cell <-> string
+  # Rule <-> string
   # ------------------------------------------------
 
-  # parseCell
+  # parseRule
   block:
-    for cell in Cell:
-      check ($cell).parseCell == cell
+    for rule in Rule:
+      check ($rule).parseRule == rule
 
     expect ValueError:
-      discard "".parseCell
+      discard "".parseRule
     expect ValueError:
-      discard "H".parseCell
+      discard "T".parseRule

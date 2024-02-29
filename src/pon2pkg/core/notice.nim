@@ -35,13 +35,14 @@ const
 const NoticeUnits: array[NoticeGarbage, Natural] = [1, 6, 30, 180, 360, 720, 1440]
 
 func noticeGarbageCounts*(
-    score: Natural, rule: Rule
+    score: Natural, rule: Rule, useComet = false
 ): array[NoticeGarbage, int] {.inline.} =
   ## Returns the number of notice garbages.
   result[Small] = 0 # HACK: dummy to suppress warning
 
+  let highestNotice = if useComet: Comet else: Crown
   var score2 = score div GarbageRates[rule]
-  for notice in countdown(NoticeGarbage.high, NoticeGarbage.low):
+  for notice in countdown(highestNotice, NoticeGarbage.low):
     let unit = NoticeUnits[notice]
     result[notice] = score2 div unit
     score2.dec result[notice] * unit
