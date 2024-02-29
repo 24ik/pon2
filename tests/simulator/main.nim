@@ -260,38 +260,38 @@ rg|"""
   # undo, redo
   block:
     var simulator = initPuyoPuyo[TsuField]().initSimulator
-    let simulator1 = simulator
+    let nazo1 = simulator.nazoPuyoWrap
 
     simulator.undo
-    check simulator.nazoPuyoWrap == simulator1.nazoPuyoWrap
+    check simulator.nazoPuyoWrap == nazo1
 
     simulator.writeCell Cell.Red
-    let simulator2 = simulator
+    let nazo2 = simulator.nazoPuyoWrap
 
     simulator.flipFieldH
-    let simulator3 = simulator
+    let nazo3 = simulator.nazoPuyoWrap
 
     simulator.undo
-    check simulator.nazoPuyoWrap == simulator2.nazoPuyoWrap
+    check simulator.nazoPuyoWrap == nazo2
 
     simulator.undo
-    check simulator.nazoPuyoWrap == simulator1.nazoPuyoWrap
+    check simulator.nazoPuyoWrap == nazo1
 
     simulator.redo
-    check simulator.nazoPuyoWrap == simulator2.nazoPuyoWrap
+    check simulator.nazoPuyoWrap == nazo2
 
     simulator.redo
-    check simulator.nazoPuyoWrap == simulator3.nazoPuyoWrap
+    check simulator.nazoPuyoWrap == nazo3
 
     simulator.undo
     simulator.flipFieldV
-    let simulator4 = simulator
+    let nazo4 = simulator.nazoPuyoWrap
 
     simulator.redo
-    check simulator.nazoPuyoWrap == simulator4.nazoPuyoWrap
+    check simulator.nazoPuyoWrap == nazo4
 
     simulator.undo
-    check simulator.nazoPuyoWrap == simulator2.nazoPuyoWrap
+    check simulator.nazoPuyoWrap == nazo2
 
   # ------------------------------------------------
   # Play - Position
