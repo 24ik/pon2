@@ -165,8 +165,7 @@ proc solve*(
 
       interval = showReplay.setInterval ResultMonitorIntervalMs
     else:
-      # FIXME: make asynchronous
-      # FIXME: redraw
+      # FIXME: make asynchronous, redraw
       mSelf.replayPairsPositionsSeq = some nazoPuyo.solve(parallelCount = parallelCount)
       mSelf.updateReplaySimulator nazoPuyo
       mSelf.solving = false
@@ -222,8 +221,7 @@ proc permute*(
 
       interval = showReplay.setInterval ResultMonitorIntervalMs
     else:
-      # FIXME: make asynchronous
-      # FIXME: redraw
+      # FIXME: make asynchronous, redraw
       mSelf.replayPairsPositionsSeq =
         some nazoPuyo.permute(fixMoves, allowDouble, allowLastDouble).toSeq
       mSelf.updateReplaySimulator nazoPuyo
@@ -447,8 +445,7 @@ else:
     result.add rootControl
 
     when defined(windows):
-      # HACK: somehow this adjustment is needed on Windows
-      # TODO: better implementation
+      # FIXME: ad hoc adjustment needed on Windows and need improvement
       result.width = (rootControl.naturalWidth.float * 1.1).int
       result.height = (rootControl.naturalHeight.float * 1.1).int
     else:

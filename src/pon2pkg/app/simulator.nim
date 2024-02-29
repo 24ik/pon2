@@ -1007,8 +1007,7 @@ else:
     result.add rootControl
 
     when defined(windows):
-      # HACK: somehow this adjustment is needed on Windows
-      # TODO: better implementation
+      # FIXME: ad hoc adjustment needed on Windows and need improvement
       result.width = (rootControl.naturalWidth.float * 1.1).int
       result.height = (rootControl.naturalHeight.float * 1.1).int
     else:
