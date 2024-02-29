@@ -31,7 +31,7 @@ func initKeyEvent*(
 # ------------------------------------------------
 
 when defined(js):
-  import std/[dom]
+  import karax/[kdom]
 
   func toKeyEvent*(event: KeyboardEvent): KeyEvent {.inline.} =
     ## Returns a new `KeyEvent` converted from the keyboard event.
