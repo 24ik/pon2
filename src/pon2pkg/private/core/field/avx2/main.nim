@@ -8,20 +8,18 @@
 import std/[bitops]
 import ./[binary, disappearresult]
 import ../[binary as commonBinary]
-import ../../../../corepkg/[cell, misc, pair, position]
+import ../../../../core/[cell, fieldtype, pair, position]
 
 export binary.`==`
 
 type
-  TsuField* = object
-    ## Puyo Puyo field with Tsu rule.
+  TsuField* = object ## Puyo Puyo field with Tsu rule.
     hardGarbage: BinaryField
     noneRed: BinaryField
     greenBlue: BinaryField
     yellowPurple: BinaryField
 
-  WaterField* = object
-    ## Puyo Puyo field with Water rule.
+  WaterField* = object ## Puyo Puyo field with Water rule.
     hardGarbage: BinaryField
     noneRed: BinaryField
     greenBlue: BinaryField
@@ -35,18 +33,20 @@ using
 # Constructor
 # ------------------------------------------------
 
-func zeroField*[F: TsuField or WaterField]: F {.inline.} =
+func zeroField*[F: TsuField or WaterField](): F {.inline.} =
   ## Returns the field with all elements zero.
   result.hardGarbage = zeroBinaryField()
   result.noneRed = zeroBinaryField()
   result.greenBlue = zeroBinaryField()
   result.yellowPurple = zeroBinaryField()
 
-func zeroTsuField*: TsuField {.inline.} = zeroField[TsuField]()
+func zeroTsuField*(): TsuField {.inline.} =
   ## Returns the Tsu field with all elements zero.
+  zeroField[TsuField]()
 
-func zeroWaterField*: WaterField {.inline.} = zeroField[WaterField]()
+func zeroWaterField*(): WaterField {.inline.} =
   ## Returns the Water field with all elements zero.
+  zeroField[WaterField]()
 
 # ------------------------------------------------
 # Operator
@@ -63,14 +63,14 @@ func `+=`[F: TsuField or WaterField](field1: var F, field2: F) {.inline.} =
 # ------------------------------------------------
 
 func toTsuField*(self: WaterField): TsuField {.inline.} =
-  ## Converts the Water field to the Tsu field.
+  ## Returns the Tsu field converted from the Water field.
   result.hardGarbage = self.hardGarbage
   result.noneRed = self.noneRed
   result.greenBlue = self.greenBlue
   result.yellowPurple = self.yellowPurple
 
 func toWaterField*(self: TsuField): WaterField {.inline.} =
-  ## Converts the Water field to the Water field.
+  ## Returns the Water field converted from the Tsu field.
   result.hardGarbage = self.hardGarbage
   result.noneRed = self.noneRed
   result.greenBlue = self.greenBlue
@@ -88,14 +88,14 @@ func exist*(self: TsuField or WaterField): BinaryField {.inline.} =
 # Row, Column
 # ------------------------------------------------
 
-func column[F: TsuField or WaterField](self: F; col): F {.inline.} =
+func column[F: TsuField or WaterField](self: F, col): F {.inline.} =
   ## Returns the field with only the given column.
   result.hardGarbage = self.hardGarbage.column col
   result.noneRed = self.noneRed.column col
   result.greenBlue = self.greenBlue.column col
   result.yellowPurple = self.yellowPurple.column col
 
-func clearColumn(mSelf: var (TsuField or WaterField); col) {.inline.} =
+func clearColumn(mSelf: var (TsuField or WaterField), col) {.inline.} =
   ## Clears the given column.
   mSelf.hardGarbage.clearColumn col
   mSelf.noneRed.clearColumn col
@@ -106,36 +106,51 @@ func clearColumn(mSelf: var (TsuField or WaterField); col) {.inline.} =
 # Indexer
 # ------------------------------------------------
 
-func toCell(hardGarbage, noneRed, greenBlue, yellowPurple: WhichColor): Cell
-           {.inline.} =
-  ## Converts the values to the cell.
+func toCell(hardGarbage, noneRed, greenBlue, yellowPurple: WhichColor): Cell {.inline.} =
+  ## Returns the cell converted from which-colors.
   Cell bitor(
     # digit-0
-    hardGarbage.color1.int64, noneRed.color2.int64, greenBlue.color2.int64,
+    hardGarbage.color1.int64,
+    noneRed.color2.int64,
+    greenBlue.color2.int64,
     yellowPurple.color2.int64,
     # digit-1
-    bitor(hardGarbage.color2.int64, noneRed.color2.int64,
-          yellowPurple.color1.int64, yellowPurple.color2.int64) shl 1,
+    bitor(
+      hardGarbage.color2.int64, noneRed.color2.int64, yellowPurple.color1.int64,
+      yellowPurple.color2.int64
+    ) shl 1,
     # digit-2
-    bitor(greenBlue.color1.int64, greenBlue.color2.int64,
-          yellowPurple.color1.int64, yellowPurple.color2.int64) shl 2)
+    bitor(
+      greenBlue.color1.int64, greenBlue.color2.int64, yellowPurple.color1.int64,
+      yellowPurple.color2.int64
+    ) shl 2,
+  )
 
-func `[]`*(self: TsuField or WaterField; row, col): Cell {.inline.} =
-  toCell(self.hardGarbage[row, col], self.noneRed[row, col],
-         self.greenBlue[row, col], self.yellowPurple[row, col])
+func `[]`*(self: TsuField or WaterField, row, col): Cell {.inline.} =
+  toCell(
+    self.hardGarbage[row, col],
+    self.noneRed[row, col],
+    self.greenBlue[row, col],
+    self.yellowPurple[row, col],
+  )
 
-func toWhichColor(cell: Cell): tuple[
-    hardGarbage: WhichColor, noneRed: WhichColor, greenBlue: WhichColor,
-    yellowPurple: WhichColor] {.inline.} =
-  ## Converts the cell to the values.
+func toWhichColor(
+    cell: Cell
+): tuple[
+  hardGarbage: WhichColor,
+  noneRed: WhichColor,
+  greenBlue: WhichColor,
+  yellowPurple: WhichColor
+] {.inline.} =
+  ## Returns the which-colors converted from the cell.
   let
     c = cell.int64
-    bit2: range[0'i64..1'i64] = bitand(c, 4) shr 2
-    bit1: range[0'i64..1'i64] = bitand(c, 2) shr 1
-    bit0: range[0'i64..1'i64] = bitand(c, 1)
-    notBit2: range[0'i64..1'i64] = 1 - bit2
-    notBit1: range[0'i64..1'i64] = 1 - bit1
-    notBit0: range[0'i64..1'i64] = 1 - bit0
+    bit2: range[0'i64 .. 1'i64] = bitand(c, 4) shr 2
+    bit1: range[0'i64 .. 1'i64] = bitand(c, 2) shr 1
+    bit0: range[0'i64 .. 1'i64] = bitand(c, 1)
+    notBit2: range[0'i64 .. 1'i64] = 1 - bit2
+    notBit1: range[0'i64 .. 1'i64] = 1 - bit1
+    notBit0: range[0'i64 .. 1'i64] = 1 - bit0
 
   result.hardGarbage.color1 = bitand(notBit2, notBit1, bit0)
   result.hardGarbage.color2 = bitand(notBit2, bit1, notBit0)
@@ -146,8 +161,7 @@ func toWhichColor(cell: Cell): tuple[
   result.yellowPurple.color1 = bitand(bit2, bit1, notBit0)
   result.yellowPurple.color2 = bitand(bit2, bit1, bit0)
 
-func `[]=`*(mSelf: var (TsuField or WaterField); row, col; cell: Cell)
-           {.inline.} =
+func `[]=`*(mSelf: var (TsuField or WaterField), row, col; cell: Cell) {.inline.} =
   let (hardGarbage, noneRed, greenBlue, yellowPurple) = cell.toWhichColor
   mSelf.hardGarbage[row, col] = hardGarbage
   mSelf.noneRed[row, col] = noneRed
@@ -158,8 +172,9 @@ func `[]=`*(mSelf: var (TsuField or WaterField); row, col; cell: Cell)
 # Insert / RemoveSqueeze
 # ------------------------------------------------
 
-func insert(mSelf: var (TsuField or WaterField); row, col; cell: Cell,
-            insertFn: type(tsuInsert)) {.inline.} =
+func insert(
+    mSelf: var (TsuField or WaterField), row, col; cell: Cell, insertFn: type(tsuInsert)
+) {.inline.} =
   ## Inserts the cell and shifts the field.
   let (hardGarbage, noneRed, greenBlue, yellowPurple) = cell.toWhichColor
 
@@ -168,12 +183,12 @@ func insert(mSelf: var (TsuField or WaterField); row, col; cell: Cell,
   mSelf.greenBlue.insertFn row, col, greenBlue
   mSelf.yellowPurple.insertFn row, col, yellowPurple
 
-func insert*(mSelf: var TsuField; row, col; cell: Cell) {.inline.} =
+func insert*(mSelf: var TsuField, row, col; cell: Cell) {.inline.} =
   ## Inserts `which` and shifts the field upward above the location
   ## where `which` is inserted.
   mSelf.insert row, col, cell, tsuInsert
 
-func insert*(mSelf: var WaterField; row, col; cell: Cell) {.inline.} =
+func insert*(mSelf: var WaterField, row, col; cell: Cell) {.inline.} =
   ## Inserts `which` and shifts the field and shifts the field.
   ## If `(row, col)` is in the air, shifts the field upward above
   ## the location where inserted.
@@ -181,20 +196,23 @@ func insert*(mSelf: var WaterField; row, col; cell: Cell) {.inline.} =
   ## where inserted.
   mSelf.insert row, col, cell, waterInsert
 
-func removeSqueeze(mSelf: var (TsuField or WaterField); row, col;
-                   removeSqueezeFn: type(tsuRemoveSqueeze)) {.inline.} =
+func removeSqueeze(
+    mSelf: var (TsuField or WaterField),
+    row, col;
+    removeSqueezeFn: type(tsuRemoveSqueeze),
+) {.inline.} =
   ## Removes the cell at `(row, col)` and shifts the field.
   mSelf.hardGarbage.removeSqueezeFn row, col
   mSelf.noneRed.removeSqueezeFn row, col
   mSelf.greenBlue.removeSqueezeFn row, col
   mSelf.yellowPurple.removeSqueezeFn row, col
 
-func removeSqueeze*(mSelf: var TsuField; row, col) {.inline.} =
+func removeSqueeze*(mSelf: var TsuField, row, col) {.inline.} =
   ## Removes the value at `(row, col)` and shifts the field downward
   ## above the location where the cell is removed.
   mSelf.removeSqueeze row, col, tsuRemoveSqueeze
 
-func removeSqueeze*(mSelf: var WaterField; row, col) {.inline.} =
+func removeSqueeze*(mSelf: var WaterField, row, col) {.inline.} =
   ## Removes the value at `(row, col)` and shifts the field.
   ## If `(row, col)` is in the air, shifts the field downward above
   ## the location where removed.
@@ -203,35 +221,34 @@ func removeSqueeze*(mSelf: var WaterField; row, col) {.inline.} =
   mSelf.removeSqueeze row, col, waterRemoveSqueeze
 
 # ------------------------------------------------
-# Count - Puyo
+# Count
 # ------------------------------------------------
 
 func puyoCount*(self: TsuField or WaterField, puyo: Puyo): int {.inline.} =
   ## Returns the number of `puyo` in the field.
   case puyo
-  of Hard: self.hardGarbage.popcnt 0
-  of Garbage: self.hardGarbage.popcnt 1
-  of Red: self.noneRed.popcnt 1
-  of Green: self.greenBlue.popcnt 0
-  of Blue: self.greenBlue.popcnt 1
-  of Yellow: self.yellowPurple.popcnt 0
-  of Purple: self.yellowPurple.popcnt 1
+  of Hard:
+    self.hardGarbage.popcnt 0
+  of Garbage:
+    self.hardGarbage.popcnt 1
+  of Red:
+    self.noneRed.popcnt 1
+  of Green:
+    self.greenBlue.popcnt 0
+  of Blue:
+    self.greenBlue.popcnt 1
+  of Yellow:
+    self.yellowPurple.popcnt 0
+  of Purple:
+    self.yellowPurple.popcnt 1
 
 func puyoCount*(self: TsuField or WaterField): int {.inline.} =
   ## Returns the number of puyos in the field.
   self.exist.popcnt div 2
 
-# ------------------------------------------------
-# Count - Color
-# ------------------------------------------------
-
 func colorCount*(self: TsuField or WaterField): int {.inline.} =
   ## Returns the number of color puyos in the field.
   sum(self.noneRed, self.greenBlue, self.yellowPurple).popcnt
-
-# ------------------------------------------------
-# Count - Garbage
-# ------------------------------------------------
 
 func garbageCount*(self: TsuField or WaterField): int {.inline.} =
   ## Returns the number of garbage puyos in the field.
@@ -338,8 +355,9 @@ func flippedH*[F: TsuField or WaterField](self: F): F {.inline.} =
 # Disappear
 # ------------------------------------------------
 
-func disappear*(mSelf: var (TsuField or WaterField)): DisappearResult
-               {.inline, discardable.} =
+func disappear*(
+    mSelf: var (TsuField or WaterField)
+): DisappearResult {.inline, discardable.} =
   ## Removes puyos that should disappear.
   result.red = mSelf.noneRed.disappeared
   result.greenBlue = mSelf.greenBlue.disappeared
@@ -355,9 +373,8 @@ func disappear*(mSelf: var (TsuField or WaterField)): DisappearResult
 
 func willDisappear*(self: TsuField or WaterField): bool {.inline.} =
   ## Returns `true` if any puyos will disappear.
-  self.greenBlue.willDisappear or
-  self.yellowPurple.willDisappear or
-  self.noneRed.willDisappear
+  self.greenBlue.willDisappear or self.yellowPurple.willDisappear or
+    self.noneRed.willDisappear
 
 # ------------------------------------------------
 # Operation
@@ -365,45 +382,51 @@ func willDisappear*(self: TsuField or WaterField): bool {.inline.} =
 
 func put*(mSelf: var TsuField, pair: Pair, pos: Position) {.inline.} =
   ## Puts the pair.
+  if pos == Position.None:
+    return
+
   let
     existField = mSelf.exist
     nextPutMask = existField xor (existField + floorBinaryField()).shiftedUp
     nextPutMasks = [nextPutMask, nextPutMask.shiftedUp]
-    axisMask = nextPutMasks[int pos in Down0..Down5].column pos.axisColumn
-    childMask = nextPutMasks[int pos in Up0..Up5].column pos.childColumn
+    axisMask = nextPutMasks[int pos in Down0 .. Down5].column pos.axisColumn
+    childMask = nextPutMasks[int pos in Up0 .. Up5].column pos.childColumn
 
     axisWhich = pair.axis.toWhichColor
     childWhich = pair.child.toWhichColor
 
-  mSelf.noneRed += axisMask * axisWhich.noneRed.filled +
-    childMask * childWhich.noneRed.filled
-  mSelf.greenBlue += axisMask * axisWhich.greenBlue.filled +
-    childMask * childWhich.greenBlue.filled
-  mSelf.yellowPurple += axisMask * axisWhich.yellowPurple.filled +
-    childMask * childWhich.yellowPurple.filled
+  mSelf.noneRed +=
+    axisMask * axisWhich.noneRed.filled + childMask * childWhich.noneRed.filled
+  mSelf.greenBlue +=
+    axisMask * axisWhich.greenBlue.filled + childMask * childWhich.greenBlue.filled
+  mSelf.yellowPurple +=
+    axisMask * axisWhich.yellowPurple.filled + childMask * childWhich.yellowPurple.filled
 
 func put*(mSelf: var WaterField, pair: Pair, pos: Position) {.inline.} =
   ## Puts the pair.
+  if pos == Position.None:
+    return
+
   let
     axisCol = pos.axisColumn
     childCol = pos.childColumn
 
     existField = mSelf.exist
-    nextPutMask = (existField xor
-      (existField + waterHighField()).shiftedUpWithoutTrim).airTrimmed
+    nextPutMask =
+      (existField xor (existField + waterHighField()).shiftedUpWithoutTrim).airTrimmed
     nextPutMasks = [nextPutMask, nextPutMask.shiftedUp]
-    axisMask = nextPutMasks[int pos in Down0..Down5].column axisCol
-    childMask = nextPutMasks[int pos in Up0..Up5].column childCol
+    axisMask = nextPutMasks[int pos in Down0 .. Down5].column axisCol
+    childMask = nextPutMasks[int pos in Up0 .. Up5].column childCol
 
     axisWhich = pair.axis.toWhichColor
     childWhich = pair.child.toWhichColor
 
-  mSelf.noneRed += axisMask * axisWhich.noneRed.filled +
-    childMask * childWhich.noneRed.filled
-  mSelf.greenBlue += axisMask * axisWhich.greenBlue.filled +
-    childMask * childWhich.greenBlue.filled
-  mSelf.yellowPurple += axisMask * axisWhich.yellowPurple.filled +
-    childMask * childWhich.yellowPurple.filled
+  mSelf.noneRed +=
+    axisMask * axisWhich.noneRed.filled + childMask * childWhich.noneRed.filled
+  mSelf.greenBlue +=
+    axisMask * axisWhich.greenBlue.filled + childMask * childWhich.greenBlue.filled
+  mSelf.yellowPurple +=
+    axisMask * axisWhich.yellowPurple.filled + childMask * childWhich.yellowPurple.filled
 
   let shiftFields1 = [mSelf.shiftedDownWithoutTrim, mSelf]
   mSelf.clearColumn axisCol
@@ -457,22 +480,19 @@ func drop*(mSelf: var WaterField) {.inline.} =
     mSelf.yellowPurple.shiftDownWithoutTrim Height - WaterHeight
 
   let waterDropExistField = mSelf.exist
-  mSelf.hardGarbage = waterDrop(
-    waterDropExistField, dropField.hardGarbage, mSelf.hardGarbage)
-  mSelf.noneRed = waterDrop(
-    waterDropExistField, dropField.noneRed, mSelf.noneRed)
-  mSelf.greenBlue = waterDrop(
-    waterDropExistField, dropField.greenBlue, mSelf.greenBlue)
-  mSelf.yellowPurple = waterDrop(
-    waterDropExistField, dropField.yellowPurple, mSelf.yellowPurple)
+  mSelf.hardGarbage =
+    waterDrop(waterDropExistField, dropField.hardGarbage, mSelf.hardGarbage)
+  mSelf.noneRed = waterDrop(waterDropExistField, dropField.noneRed, mSelf.noneRed)
+  mSelf.greenBlue = waterDrop(waterDropExistField, dropField.greenBlue, mSelf.greenBlue)
+  mSelf.yellowPurple =
+    waterDrop(waterDropExistField, dropField.yellowPurple, mSelf.yellowPurple)
 
 # ------------------------------------------------
 # Field <-> array
 # ------------------------------------------------
 
-func toArray*(self: TsuField or WaterField): array[Row, array[Column, Cell]]
-             {.inline.} =
-  ## Converts the field to the array.
+func toArray*(self: TsuField or WaterField): array[Row, array[Column, Cell]] {.inline.} =
+  ## Returns the array converted from the field.
   let
     hardGarbage = self.hardGarbage.toArray
     noneRed = self.noneRed.toArray
@@ -480,14 +500,19 @@ func toArray*(self: TsuField or WaterField): array[Row, array[Column, Cell]]
     yellowPurple = self.yellowPurple.toArray
 
   result[Row.low][Column.low] = None # dummy to remove warning
-  for row in Row.low..Row.high:
-    for col in Column.low..Column.high:
-      result[row][col] = toCell(hardGarbage[row][col], noneRed[row][col],
-                                greenBlue[row][col], yellowPurple[row][col])
+  for row in Row.low .. Row.high:
+    for col in Column.low .. Column.high:
+      result[row][col] = toCell(
+        hardGarbage[row][col],
+        noneRed[row][col],
+        greenBlue[row][col],
+        yellowPurple[row][col],
+      )
 
 func parseField*[F: TsuField or WaterField](
-    arr: array[Row, array[Column, Cell]]): F {.inline.} =
-  ## Converts the array to the field.
+    arr: array[Row, array[Column, Cell]]
+): F {.inline.} =
+  ## Returns the field converted from the array.
   var hardGarbageArr, noneRedArr, greenBlueArr, yellowPurpleArr:
     array[Row, array[Column, WhichColor]]
   # dummy to remove warning
@@ -496,10 +521,9 @@ func parseField*[F: TsuField or WaterField](
   greenBlueArr[Row.low][Column.low] = WhichColor(color1: 0, color2: 0)
   yellowPurpleArr[Row.low][Column.low] = WhichColor(color1: 0, color2: 0)
 
-  for row in Row.low..Row.high:
-    for col in Column.low..Column.high:
-      let (hardGarbage, noneRed, greenBlue, yellowPurple) =
-        arr[row][col].toWhichColor
+  for row in Row.low .. Row.high:
+    for col in Column.low .. Column.high:
+      let (hardGarbage, noneRed, greenBlue, yellowPurple) = arr[row][col].toWhichColor
       hardGarbageArr[row][col] = hardGarbage
       noneRedArr[row][col] = noneRed
       greenBlueArr[row][col] = greenBlue

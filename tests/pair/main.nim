@@ -3,9 +3,9 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2pkg/corepkg/[cell, pair {.all.}]
+import ../../src/pon2pkg/core/[cell, host, pair {.all.}]
 
-proc main* =
+proc main*() =
   # ------------------------------------------------
   # Constructor
   # ------------------------------------------------
@@ -14,11 +14,6 @@ proc main* =
   block:
     check initPair(Yellow, Green) == YellowGreen
     check initPair(Purple, Purple) == PurplePurple
-
-  # initPairs
-  block:
-    check initPairs([BlueRed, YellowPurple]) == [BlueRed, YellowPurple].toDeque
-    check initPairs(BlueRed, YellowPurple) == [BlueRed, YellowPurple].toDeque
 
   # ------------------------------------------------
   # Property
@@ -46,16 +41,6 @@ proc main* =
     pair.child = Green
     check pair == BlueGreen
 
-  # ==
-  block:
-    let
-      pairsSeq = [RedRed, PurpleGreen]
-      pairs1 = initPairs(pairsSeq)
-    var pairs2 = initPairs()
-    pairs2.addLast pairsSeq[0]
-    pairs2.addLast pairsSeq[1]
-    check pairs1 == pairs2
-
   # ------------------------------------------------
   # Swap
   # ------------------------------------------------
@@ -68,3 +53,33 @@ proc main* =
     var pair = GreenPurple
     pair.swap
     check pair == PurpleGreen
+
+  # ------------------------------------------------
+  # Count
+  # ------------------------------------------------
+
+  # puyoCount, colorCount, garbageCount
+  block:
+    check YellowGreen.puyoCount(Yellow) == 1
+    check YellowGreen.puyoCount(Green) == 1
+    check YellowGreen.puyoCount(Purple) == 0
+    check YellowGreen.puyoCount == 2
+    check YellowGreen.colorCount == 2
+    check YellowGreen.garbageCount == 0
+
+  # ------------------------------------------------
+  # Pair <-> string / URI
+  # ------------------------------------------------
+
+  # parsePair, toUriQuery
+  block:
+    check $RedGreen == "rg"
+    check "rg".parsePair == RedGreen
+
+    check RedGreen.toUriQuery(Izumiya) == "rg"
+    check RedGreen.toUriQuery(Ishikawa) == "c"
+    check RedGreen.toUriQuery(Ips) == "c"
+
+    check "rg".parsePair(Izumiya) == RedGreen
+    check "c".parsePair(Ishikawa) == RedGreen
+    check "c".parsePair(Ips) == RedGreen

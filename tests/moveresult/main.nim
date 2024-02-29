@@ -3,10 +3,9 @@
 {.experimental: "views".}
 
 import std/[options, unittest]
-import ../../src/pon2pkg/corepkg/[cell, environment, moveresult {.all.},
-                                  position]
+import ../../src/pon2pkg/core/[cell, field, moveresult {.all.}, position, puyopuyo]
 
-proc main* =
+proc main*() =
   # ------------------------------------------------
   # Count, Score
   # ------------------------------------------------
@@ -14,7 +13,8 @@ proc main* =
   # chainCount, puyoCount[s], colorCount[s], garbageCount[s], colors[Seq],
   # colorPlaces, colorConnects, score
   block:
-    let env = parseTsuEnvironment("""
+    let puyoPuyo = parsePuyoPuyo[TsuField](
+      """
 ....g.
 ....g.
 ....pg
@@ -29,24 +29,23 @@ proc main* =
 ...orb
 ...gbb
 ------
-rb
-rg""").environment
+rb|4F
+rg|"""
+    )
 
-    let
-      moveRes, roughRes, detailRes, fullRes: MoveResult
-      pos = Down3
+    let moveRes, roughRes, detailRes, fullRes: MoveResult
     block:
-      var env2 = env
-      moveRes = env2.move(pos, false)
+      var puyoPuyo2 = puyoPuyo
+      moveRes = puyoPuyo2.move
     block:
-      var env2 = env
-      roughRes = env2.moveWithRoughTracking(pos, false)
+      var puyoPuyo2 = puyoPuyo
+      roughRes = puyoPuyo2.moveWithRoughTracking
     block:
-      var env2 = env
-      detailRes = env2.moveWithDetailTracking(pos, false)
+      var puyoPuyo2 = puyoPuyo
+      detailRes = puyoPuyo2.moveWithDetailTracking
     block:
-      var env2 = env
-      fullRes = env2.moveWithFullTracking(pos, false)
+      var puyoPuyo2 = puyoPuyo
+      fullRes = puyoPuyo2.moveWithFullTracking
 
     # chainCount
     block:

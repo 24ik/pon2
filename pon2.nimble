@@ -1,14 +1,13 @@
 # Package
 
-version = "0.11.5"
+version = "0.12.0"
 author = "Keisuke Izumiya"
 description = "Puyo Puyo Library"
-license = "Apache-2.0 OR MPL-2.0"
+license = "Apache-2.0"
 
 srcDir = "src"
 installExt = @["nim"]
 bin = @["pon2"]
-
 
 # Dependencies
 
@@ -17,7 +16,7 @@ requires "nim ^= 2.0.2"
 requires "docopt ^= 0.7.1"
 requires "karax ^= 1.3.3"
 requires "nigui ^= 0.2.7"
-requires "nimsimd ^= 1.2.6"
+requires "nimsimd ^= 1.2.9"
 requires "suru#f6f1e607c585b2bc2f71309996643f0555ff6349"
 
 # Tasks
@@ -26,26 +25,24 @@ import std/[os, sequtils, strformat, strutils]
 
 task test, "Run Tests":
   const
-    Pon2Avx2 {.intdefine.} = 2
-    Pon2Bmi2 {.intdefine.} = 2
+    Avx2 {.define: "pon2.avx2".} = 2
+    Bmi2 {.define: "pon2.bmi2".} = 2
 
-  exec &"nim c -r -d:Pon2Avx2={Pon2Avx2} -d:Pon2Bmi2={Pon2Bmi2} " &
-    "tests/makeTest.nim"
+  exec &"nim c -r -d:pon2.avx2={Avx2} -d:pon2.bmi2={Bmi2} " & "tests/makeTest.nim"
   exec "testament all"
 
 task benchmark, "Benchmarking":
   const
-    Pon2Avx2 {.booldefine.} = true
-    Pon2Bmi2 {.booldefine.} = true
+    Avx2 {.define: "pon2.avx2".} = true
+    Bmi2 {.define: "pon2.bmi2".} = true
 
-  exec &"nim c -r -d:Pon2Avx2={Pon2Avx2} -d:Pon2Bmi2={Pon2Bmi2} " &
-    "benchmark/main.nim"
+  exec &"nim c -r -d:pon2.avx2={Avx2} -d:pon2.bmi2={Bmi2} " & "benchmark/main.nim"
 
 task documentation, "Make Documentation":
-  exec &"nim doc --project -d:Pon2Avx2=true src/pon2.nim"
+  exec &"nim doc --project -d:pon2.avx2=true src/pon2.nim"
   mvDir "src/htmldocs", "src/htmldocs2"
 
-  exec &"nim doc --project -d:Pon2Avx2=false src/pon2.nim"
+  exec &"nim doc --project -d:pon2.avx2=false src/pon2.nim"
   cpDir "src/htmldocs2", "src/htmldocs"
   rmDir "src/htmldocs2"
 
@@ -80,12 +77,12 @@ task web, "Make Web Pages":
     else:
       cpFile rawJs, dst
 
-  # playground
-  "src/pon2.nim".compile "www/playground/index.min.js"
-  "src/pon2.nim".compile "www/playground/worker.min.js", "-d:Pon2Worker"
+  # GUI application
+  "src/pon2.nim".compile "www/gui/index.min.js"
+  "src/pon2.nim".compile "www/gui/worker.min.js", "-d:pon2.worker"
 
   # marathon
-  "src/pon2.nim".compile "www/marathon/index.min.js", "-d:Pon2Marathon"
+  "src/pon2.nim".compile "www/marathon/index.min.js", "-d:pon2.marathon"
 
   # documentation
   exec "nimble -y documentation"
@@ -93,4 +90,5 @@ task web, "Make Web Pages":
   rmDir "src/htmldocs"
 
   # assets
+  exec "nim c -r assets/pairs/generate.nim"
   cpDir "assets", "www/assets"

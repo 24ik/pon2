@@ -7,9 +7,10 @@
 
 import std/[sugar]
 import karax/[karax, karaxdsl, vdom]
+import ../[common]
 import ../../[misc]
-import ../../../../apppkg/[marathon]
-import ../../../../corepkg/[pair]
+import ../../../../app/[marathon]
+import ../../../../core/[pair, pairposition]
 
 const ShowPairCount = 8
 
@@ -23,24 +24,26 @@ proc initMarathonSearchResultNode*(marathon: var Marathon): VNode {.inline.} =
   result = buildHtml(table(class = "table")):
     tbody:
       let
-        beginPairIdx =
-          marathon.matchResultPageIdx * MatchResultPairsCountPerPage
+        beginPairIdx = marathon.matchResultPageIdx * MatchResultPairsCountPerPage
         endPairIdx = min(
           marathon.matchResultPageIdx.succ * MatchResultPairsCountPerPage,
-          marathon.matchPairsStrsSeq.len)
+          marathon.matchPairsStrsSeq.len,
+        )
 
-      for pairsIdx in beginPairIdx..<endPairIdx:
+      for pairsIdx in beginPairIdx ..< endPairIdx:
         tr:
           td:
-            button(class = "button is-size-7",
-                   onclick = marathon.initPlayHandler pairsIdx):
+            button(
+              class = "button is-size-7", onclick = marathon.initPlayHandler pairsIdx
+            ):
               span(class = "icon"):
                 italic(class = "fa-solid fa-gamepad")
 
-          let pairs = marathon.matchPairsStrsSeq[pairsIdx][
-            0 ..< ShowPairCount * 2].toPairs
-          for pairIdx in 0..<ShowPairCount:
-            let pair = pairs[pairIdx]
+          let pairsPositions = marathon.matchPairsStrsSeq[pairsIdx][
+            0 ..< ShowPairCount * 2
+          ].toPairsPositions
+          for idx in 0 ..< ShowPairCount:
+            let pair = pairsPositions[idx].pair
 
             td:
               figure(class = "image is-16x16"):

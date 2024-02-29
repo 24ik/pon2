@@ -7,7 +7,7 @@
 
 import std/[bitops]
 import ../../../../[intrinsic]
-import ../../../../../corepkg/[misc]
+import ../../../../../core/[fieldtype]
 
 type
   BinaryField* = object
@@ -15,19 +15,26 @@ type
     center: uint32
     right: uint32
 
-  DropMask* = array[Column, when UseBmi2: uint32 else: PextMask[uint32]]
+  DropMask* = array[
+    Column,
+    when UseBmi2:
+      uint32
+    else:
+      PextMask[uint32]
+    ,
+  ]
 
 const
   ZeroBinaryField* = BinaryField(left: 0'u32, center: 0'u32, right: 0'u32)
     ## Binary field with all elements zero.
-  OneBinaryField* = BinaryField(
-    left: 0xFFFF_FFFF'u32, center: 0xFFFF_FFFF'u32, right: 0xFFFF_FFFF'u32)
+  OneBinaryField* =
+    BinaryField(left: 0xFFFF_FFFF'u32, center: 0xFFFF_FFFF'u32, right: 0xFFFF_FFFF'u32)
     ## Binary field with all elements one.
-  FloorBinaryField* = BinaryField(
-    left: 0x0001_0001'u32, center: 0x0001_0001'u32, right: 0x0001_0001'u32)
+  FloorBinaryField* =
+    BinaryField(left: 0x0001_0001'u32, center: 0x0001_0001'u32, right: 0x0001_0001'u32)
     ## Binary field with floor bits one.
-  WaterHighField* = BinaryField(
-    left: 0x0100_0100'u32, center: 0x0100_0100'u32, right: 0x0100_0100'u32)
+  WaterHighField* =
+    BinaryField(left: 0x0100_0100'u32, center: 0x0100_0100'u32, right: 0x0100_0100'u32)
     ## Binary field with `row==WaterRow.low` bits one.
 
 using
@@ -91,34 +98,44 @@ func sum*(field1, field2, field3: BinaryField): BinaryField {.inline.} =
   result.center = bitor(field1.center, field2.center, field3.center)
   result.right = bitor(field1.right, field2.right, field3.right)
 
-func sum*(field1, field2, field3, field4, field5: BinaryField): BinaryField
-         {.inline.} =
-  result.left = bitor(field1.left, field2.left, field3.left, field4.left,
-                      field5.left)
-  result.center = bitor(field1.center, field2.center, field3.center,
-                        field4.center, field5.center)
-  result.right = bitor(field1.right, field2.right, field3.right, field4.right,
-                       field5.right)
+func sum*(field1, field2, field3, field4, field5: BinaryField): BinaryField {.inline.} =
+  result.left = bitor(field1.left, field2.left, field3.left, field4.left, field5.left)
+  result.center =
+    bitor(field1.center, field2.center, field3.center, field4.center, field5.center)
+  result.right =
+    bitor(field1.right, field2.right, field3.right, field4.right, field5.right)
 
-func sum*(field1, field2, field3, field4, field5, field6, field7: BinaryField):
-    BinaryField {.inline.} =
-  result.left = bitor(field1.left, field2.left, field3.left, field4.left,
-                      field5.left, field6.left, field7.left)
-  result.center = bitor(field1.center, field2.center, field3.center,
-                        field4.center, field5.center, field6.center,
-                        field7.center)
-  result.right = bitor(field1.right, field2.right, field3.right, field4.right,
-                       field5.right, field6.right, field7.right)
+func sum*(
+    field1, field2, field3, field4, field5, field6, field7: BinaryField
+): BinaryField {.inline.} =
+  result.left = bitor(
+    field1.left, field2.left, field3.left, field4.left, field5.left, field6.left,
+    field7.left
+  )
+  result.center = bitor(
+    field1.center, field2.center, field3.center, field4.center, field5.center,
+    field6.center, field7.center
+  )
+  result.right = bitor(
+    field1.right, field2.right, field3.right, field4.right, field5.right, field6.right,
+    field7.right
+  )
 
-func sum*(field1, field2, field3, field4, field5, field6, field7,
-          field8: BinaryField): BinaryField {.inline.} =
-  result.left = bitor(field1.left, field2.left, field3.left, field4.left,
-                      field5.left, field6.left, field7.left, field8.left)
-  result.center = bitor(field1.center, field2.center, field3.center,
-                        field4.center, field5.center, field6.center,
-                        field7.center, field8.center)
-  result.right = bitor(field1.right, field2.right, field3.right, field4.right,
-                       field5.right, field6.right, field7.right, field8.right)
+func sum*(
+    field1, field2, field3, field4, field5, field6, field7, field8: BinaryField
+): BinaryField {.inline.} =
+  result.left = bitor(
+    field1.left, field2.left, field3.left, field4.left, field5.left, field6.left,
+    field7.left, field8.left
+  )
+  result.center = bitor(
+    field1.center, field2.center, field3.center, field4.center, field5.center,
+    field6.center, field7.center, field8.center
+  )
+  result.right = bitor(
+    field1.right, field2.right, field3.right, field4.right, field5.right, field6.right,
+    field7.right, field8.right
+  )
 
 func prod*(field1, field2, field3: BinaryField): BinaryField {.inline.} =
   result.left = bitand(field1.left, field2.left, field3.left)
@@ -165,24 +182,27 @@ const ColMasks: array[Column, BinaryField] = [
   BinaryField(left: 0'u32, center: 0xFFFF_0000'u32, right: 0'u32),
   BinaryField(left: 0'u32, center: 0x0000_FFFF'u32, right: 0'u32),
   BinaryField(left: 0'u32, center: 0'u32, right: 0xFFFF_0000'u32),
-  BinaryField(left: 0'u32, center: 0'u32, right: 0x0000_FFFF'u32)]
+  BinaryField(left: 0'u32, center: 0'u32, right: 0x0000_FFFF'u32)
+]
 
 func row*(self, row): BinaryField {.inline.} =
   ## Returns the binary field with only the given row.
   return self * (0x2000_2000'u32 shr row)
 
-func column*(self, col): BinaryField {.inline.} = self * ColMasks[col]
+func column*(self, col): BinaryField {.inline.} =
   ## Returns the binary field with only the given column.
+  self * ColMasks[col]
 
-func clearColumn*(mSelf, col) {.inline.} = mSelf -= mSelf.column col
-  ## Clears the given column.
+func clearColumn*(mSelf, col) {.inline.} =
+  mSelf -= mSelf.column col ## Clears the given column.
 
 # ------------------------------------------------
 # Indexer
 # ------------------------------------------------
 
-func leftCenterRightMasks(col):
-    tuple[left: uint32; center: uint32; right: uint32] {.inline.} =
+func leftCenterRightMasks(
+    col
+): tuple[left: uint32, center: uint32, right: uint32] {.inline.} =
   ## Returns `(l, c, r)`; among `l`, `c`, and `r`,
   ## those corresponding to `col` is `uint32.high`, and the rest are `0`.
   let
@@ -193,8 +213,7 @@ func leftCenterRightMasks(col):
   result.center = uint32.high - left - right
   result.right = right
 
-func cellMasks(row, col):
-    tuple[left: uint32; center: uint32; right: uint32] {.inline.} =
+func cellMasks(row, col): tuple[left: uint32, center: uint32, right: uint32] {.inline.} =
   ## Returns three masks with only the bit at position `(row, col)` set to `1`.
   const Mask = 0x2000_0000'u32
 
@@ -206,11 +225,14 @@ func cellMasks(row, col):
 func `[]`*(self, row, col): bool {.inline.} =
   let (leftMask, centerMask, rightMask) = cellMasks(row, col)
   result = bool bitor(
-    bitand(self.left, leftMask), bitand(self.center, centerMask),
-    bitand(self.right, rightMask))
+    bitand(self.left, leftMask),
+    bitand(self.center, centerMask),
+    bitand(self.right, rightMask),
+  )
 
-func exist*(self, row, col): int {.inline.} = int self[row, col]
+func exist*(self, row, col): int {.inline.} =
   ## Returns `1` if the bit `(row, col)` is set; otherwise, returns `0`.
+  int self[row, col]
 
 func `[]=`*(mSelf; row; col; val: bool) {.inline.} =
   let
@@ -223,35 +245,34 @@ func `[]=`*(mSelf; row; col; val: bool) {.inline.} =
 # Insert / RemoveSqueeze
 # ------------------------------------------------
 
-func aboveMasks(row, col): tuple[left: uint32; center: uint32; right: uint32]
-               {.inline.} =
+func aboveMasks(row, col): tuple[left: uint32, center: uint32, right: uint32] {.inline.} =
   ## Returns three masks with only the bits above `(row, col)` set to `1`.
   ## Including `(row, col)`.
   let (leftMask, centerMask, rightMask) = col.leftCenterRightMasks
   result.left = bitand(
-    uint32.high.masked 16 * (1 - col) + Row.high - row + 1 ..< 16 * (2 - col),
-    leftMask)
+    uint32.high.masked 16 * (1 - col) + Row.high - row + 1 ..< 16 * (2 - col), leftMask
+  )
   result.center = bitand(
     uint32.high.masked 16 * (3 - col) + Row.high - row + 1 ..< 16 * (4 - col),
-    centerMask)
+    centerMask,
+  )
   result.right = bitand(
-    uint32.high.masked 16 * (5 - col) + Row.high - row + 1 ..< 16 * (6 - col),
-    rightMask)
+    uint32.high.masked 16 * (5 - col) + Row.high - row + 1 ..< 16 * (6 - col), rightMask
+  )
 
-func belowMasks(row, col): tuple[left: uint32; center: uint32; right: uint32]
-               {.inline.} =
+func belowMasks(row, col): tuple[left: uint32, center: uint32, right: uint32] {.inline.} =
   ## Returns three masks with only the bits below `(row, col)` set to `1`.
   ## Including `(row, col)`.
   let (leftMask, centerMask, rightMask) = col.leftCenterRightMasks
   result.left = bitand(
-    uint32.high.masked 16 * (1 - col) .. 16 * (1 - col) + Row.high - row + 1,
-    leftMask)
+    uint32.high.masked 16 * (1 - col) .. 16 * (1 - col) + Row.high - row + 1, leftMask
+  )
   result.center = bitand(
-    uint32.high.masked 16 * (3 - col) .. 16 * (3 - col) + Row.high - row + 1,
-    centerMask)
+    uint32.high.masked 16 * (3 - col) .. 16 * (3 - col) + Row.high - row + 1, centerMask
+  )
   result.right = bitand(
-    uint32.high.masked 16 * (5 - col) .. 16 * (5 - col) + Row.high - row + 1,
-    rightMask)
+    uint32.high.masked 16 * (5 - col) .. 16 * (5 - col) + Row.high - row + 1, rightMask
+  )
 
 func tsuInsert*(mSelf; row; col; val: bool) {.inline.} =
   ## Inserts `val` and shifts the binary field upward
@@ -259,13 +280,17 @@ func tsuInsert*(mSelf; row; col; val: bool) {.inline.} =
   let
     (leftMask, centerMask, rightMask) = aboveMasks(row, col)
     moveMask = BinaryField(left: leftMask, center: centerMask, right: rightMask)
-    moveField = BinaryField(left: bitand(mSelf.left, leftMask),
-                            center: bitand(mSelf.center, centerMask),
-                            right: bitand(mSelf.right, rightMask))
+    moveField = BinaryField(
+      left: bitand(mSelf.left, leftMask),
+      center: bitand(mSelf.center, centerMask),
+      right: bitand(mSelf.right, rightMask),
+    )
 
   mSelf = sum(
-    mSelf - moveField, moveField shl 1,
-    (moveMask xor (moveMask shl 1)) * cast[uint32](-val.int32)).trimmed
+    mSelf - moveField,
+    moveField shl 1,
+    (moveMask xor (moveMask shl 1)) * cast[uint32](-val.int32),
+  ).trimmed
 
 func waterInsert*(mSelf; row; col; val: bool) {.inline.} =
   ## Inserts `val` and shifts the field and shifts the field.
@@ -276,25 +301,31 @@ func waterInsert*(mSelf; row; col; val: bool) {.inline.} =
   let
     # air: above, upward
     (leftMaskAir, centerMaskAir, rightMaskAir) = aboveMasks(row, col)
-    moveMaskAir = BinaryField(left: leftMaskAir, center: centerMaskAir,
-                              right: rightMaskAir)
-    moveFieldAir = BinaryField(left: bitand(mSelf.left, leftMaskAir),
-                               center: bitand(mSelf.center, centerMaskAir),
-                               right: bitand(mSelf.right, rightMaskAir))
-    addFieldAir = moveFieldAir shl 1 +
+    moveMaskAir =
+      BinaryField(left: leftMaskAir, center: centerMaskAir, right: rightMaskAir)
+    moveFieldAir = BinaryField(
+      left: bitand(mSelf.left, leftMaskAir),
+      center: bitand(mSelf.center, centerMaskAir),
+      right: bitand(mSelf.right, rightMaskAir),
+    )
+    addFieldAir =
+      moveFieldAir shl 1 +
       (moveMaskAir xor (moveMaskAir shl 1)) * cast[uint32](-val.int32)
 
     # water: below, downward
     (leftMaskWater, centerMaskWater, rightMaskWater) = belowMasks(row, col)
-    moveMaskWater = BinaryField(left: leftMaskWater, center: centerMaskWater,
-                                right: rightMaskWater)
-    moveFieldWater = BinaryField(left: bitand(mSelf.left, leftMaskWater),
-                                 center: bitand(mSelf.center, centerMaskWater),
-                                 right: bitand(mSelf.right, rightMaskWater))
-    addFieldWater = moveFieldWater shr 1 +
+    moveMaskWater =
+      BinaryField(left: leftMaskWater, center: centerMaskWater, right: rightMaskWater)
+    moveFieldWater = BinaryField(
+      left: bitand(mSelf.left, leftMaskWater),
+      center: bitand(mSelf.center, centerMaskWater),
+      right: bitand(mSelf.right, rightMaskWater),
+    )
+    addFieldWater =
+      moveFieldWater shr 1 +
       (moveMaskWater xor (moveMaskWater shr 1)) * cast[uint32](-val.int32)
 
-    insertIntoAir = int row in AirRow.low..AirRow.high
+    insertIntoAir = int row in AirRow.low .. AirRow.high
     removeField = [moveFieldWater, moveFieldAir][insertIntoAir]
     addField = [addFieldWater, addFieldAir][insertIntoAir]
 
@@ -306,12 +337,13 @@ func tsuRemoveSqueeze*(mSelf, row, col) {.inline.} =
   let
     (leftMask, centerMask, rightMask) = aboveMasks(row, col)
     moveMask = BinaryField(left: leftMask, center: centerMask, right: rightMask)
-    moveField = BinaryField(left: bitand(mSelf.left, leftMask),
-                            center: bitand(mSelf.center, centerMask),
-                            right: bitand(mSelf.right, rightMask))
+    moveField = BinaryField(
+      left: bitand(mSelf.left, leftMask),
+      center: bitand(mSelf.center, centerMask),
+      right: bitand(mSelf.right, rightMask),
+    )
 
-  mSelf =
-    mSelf - moveField + (moveField - (moveMask xor (moveMask shl 1))) shr 1
+  mSelf = mSelf - moveField + (moveField - (moveMask xor (moveMask shl 1))) shr 1
 
 func waterRemoveSqueeze*(mSelf, row, col) {.inline.} =
   ## Removes the value at `(row, col)` and shifts the field.
@@ -322,25 +354,27 @@ func waterRemoveSqueeze*(mSelf, row, col) {.inline.} =
   let
     # air: above, downward
     (leftMaskAir, centerMaskAir, rightMaskAir) = aboveMasks(row, col)
-    moveMaskAir = BinaryField(left: leftMaskAir, center: centerMaskAir,
-                              right: rightMaskAir)
-    moveFieldAir = BinaryField(left: bitand(mSelf.left, leftMaskAir),
-                               center: bitand(mSelf.center, centerMaskAir),
-                               right: bitand(mSelf.right, rightMaskAir))
-    addFieldAir =
-      (moveFieldAir - (moveMaskAir xor (moveMaskAir shl 1))) shr 1
+    moveMaskAir =
+      BinaryField(left: leftMaskAir, center: centerMaskAir, right: rightMaskAir)
+    moveFieldAir = BinaryField(
+      left: bitand(mSelf.left, leftMaskAir),
+      center: bitand(mSelf.center, centerMaskAir),
+      right: bitand(mSelf.right, rightMaskAir),
+    )
+    addFieldAir = (moveFieldAir - (moveMaskAir xor (moveMaskAir shl 1))) shr 1
 
     # water: below, upward
     (leftMaskWater, centerMaskWater, rightMaskWater) = belowMasks(row, col)
-    moveMaskWater = BinaryField(left: leftMaskWater, center: centerMaskWater,
-                                right: rightMaskWater)
-    moveFieldWater = BinaryField(left: bitand(mSelf.left, leftMaskWater),
-                                 center: bitand(mSelf.center, centerMaskWater),
-                                 right: bitand(mSelf.right, rightMaskWater))
-    addFieldWater =
-      (moveFieldWater - (moveMaskWater xor (moveMaskWater shr 1))) shl 1
+    moveMaskWater =
+      BinaryField(left: leftMaskWater, center: centerMaskWater, right: rightMaskWater)
+    moveFieldWater = BinaryField(
+      left: bitand(mSelf.left, leftMaskWater),
+      center: bitand(mSelf.center, centerMaskWater),
+      right: bitand(mSelf.right, rightMaskWater),
+    )
+    addFieldWater = (moveFieldWater - (moveMaskWater xor (moveMaskWater shr 1))) shl 1
 
-    insertIntoAir = int row in AirRow.low..AirRow.high
+    insertIntoAir = int row in AirRow.low .. AirRow.high
     removeField = [moveFieldWater, moveFieldAir][insertIntoAir]
     addField = [addFieldWater, addFieldAir][insertIntoAir]
 
@@ -350,8 +384,8 @@ func waterRemoveSqueeze*(mSelf, row, col) {.inline.} =
 # Property
 # ------------------------------------------------
 
-func isZero*(self): bool {.inline.} = self == ZeroBinaryField
-  ## Returns `true` if all elements are zero.
+func isZero*(self): bool {.inline.} = ## Returns `true` if all elements are zero.
+  self == ZeroBinaryField
 
 # ------------------------------------------------
 # Shift
@@ -382,7 +416,7 @@ func shiftedLeftWithoutTrim*(self): BinaryField {.inline.} =
 # ------------------------------------------------
 
 func flipCol(val: uint32): uint32 {.inline.} =
-  ## Flips two columns.
+  ## Returns the value by flipping two columns.
   bitor(val.bitsliced 16 ..< 32, val shl 16)
 
 func flippedV*(self): BinaryField {.inline.} =
@@ -402,7 +436,7 @@ func flippedH*(self): BinaryField {.inline.} =
 # ------------------------------------------------
 
 func toColumnArray(self): array[Column, uint32] {.inline.} =
-  ## Converts the field to the integer array corresponding to each column.
+  ## Returns the integer array converted from the field.
   result[0] = self.left.bitsliced 17 ..< 32
   result[1] = self.left.bitsliced 1 ..< 16
   result[2] = self.center.bitsliced 17 ..< 32
@@ -411,13 +445,16 @@ func toColumnArray(self): array[Column, uint32] {.inline.} =
   result[5] = self.right.bitsliced 1 ..< 16
 
 func toDropMask*(existField: BinaryField): DropMask {.inline.} =
-  ## Converts `existField` to the drop mask.
+  ## Returns a drop mask converted from the exist field.
   let existFloor = (existField + FloorBinaryField).toColumnArray
 
-  result[Column.low] =
-    when UseBmi2: 0 else: 0'u32.toPextMask # dummy to remove warning
-  for col in Column.low..Column.high:
-    result[col] = when UseBmi2: existFloor[col] else: existFloor[col].toPextMask
+  result[Column.low] = when UseBmi2: 0 else: 0'u32.toPextMask # dummy to remove warning
+  for col in Column.low .. Column.high:
+    result[col] =
+      when UseBmi2:
+        existFloor[col]
+      else:
+        existFloor[col].toPextMask
 
 func drop*(mSelf; mask: DropMask) {.inline.} =
   ## Drops floating cells.
@@ -427,47 +464,42 @@ func drop*(mSelf; mask: DropMask) {.inline.} =
   mSelf.center = bitor(arr[2].pext(mask[2]) shl 17, arr[3].pext(mask[3]) shl 1)
   mSelf.right = bitor(arr[4].pext(mask[4]) shl 17, arr[5].pext(mask[5]) shl 1)
 
-func waterDrop*(waterDropExistField, dropField,
-                waterDropField: BinaryField): BinaryField {.inline.} =
+func waterDrop*(
+    waterDropExistField, dropField, waterDropField: BinaryField
+): BinaryField {.inline.} =
   ## Drops floating cells in Water rule.
   let
     left = bitor(
-      bitand(
-        0xFFFF'u32,
-        cast[uint32](-waterDropExistField.exist(Row.high, 0).int32)) shl 16,
-      bitand(
-        0xFFFF'u32,
-        cast[uint32](-waterDropExistField.exist(Row.high, 1).int32)))
+      bitand(0xFFFF'u32, cast[uint32](-waterDropExistField.exist(Row.high, 0).int32)) shl
+        16,
+      bitand(0xFFFF'u32, cast[uint32](-waterDropExistField.exist(Row.high, 1).int32)),
+    )
     center = bitor(
-      bitand(
-        0xFFFF'u32,
-        cast[uint32](-waterDropExistField.exist(Row.high, 2).int32)) shl 16,
-      bitand(
-        0xFFFF'u32,
-        cast[uint32](-waterDropExistField.exist(Row.high, 3).int32)))
+      bitand(0xFFFF'u32, cast[uint32](-waterDropExistField.exist(Row.high, 2).int32)) shl
+        16,
+      bitand(0xFFFF'u32, cast[uint32](-waterDropExistField.exist(Row.high, 3).int32)),
+    )
     right = bitor(
-      bitand(
-        0xFFFF'u32,
-        cast[uint32](-waterDropExistField.exist(Row.high, 4).int32)) shl 16,
-      bitand(
-        0xFFFF'u32,
-        cast[uint32](-waterDropExistField.exist(Row.high, 5).int32)))
+      bitand(0xFFFF'u32, cast[uint32](-waterDropExistField.exist(Row.high, 4).int32)) shl
+        16,
+      bitand(0xFFFF'u32, cast[uint32](-waterDropExistField.exist(Row.high, 5).int32)),
+    )
     notLeft = left.bitnot
     notCenter = center.bitnot
     notRight = right.bitnot
 
-  return dropField * BinaryField(left: left, center: center, right: right) +
-    waterDropField * BinaryField(left: notLeft, center: notCenter,
-                                 right: notRight)
+  return
+    dropField * BinaryField(left: left, center: center, right: right) +
+    waterDropField * BinaryField(left: notLeft, center: notCenter, right: notRight)
 
 # ------------------------------------------------
 # BinaryField <-> array
 # ------------------------------------------------
 
 func toArray*(self): array[Row, array[Column, bool]] {.inline.} =
-  ## Converts the binary field to the array.
+  ## Returns the array converted from the field.
   result[Row.low][Column.low] = false # dummy to remove warning
-  for row in Row.low..Row.high:
+  for row in Row.low .. Row.high:
     result[row][0] = self.left.testBit 29 - row
     result[row][1] = self.left.testBit 13 - row
     result[row][2] = self.center.testBit 29 - row
@@ -475,17 +507,16 @@ func toArray*(self): array[Row, array[Column, bool]] {.inline.} =
     result[row][4] = self.right.testBit 29 - row
     result[row][5] = self.right.testBit 13 - row
 
-func parseBinaryField*(arr: array[Row, array[Column, bool]]): BinaryField
-                      {.inline.} =
-  ## Converts the array to the binary field.
+func parseBinaryField*(arr: array[Row, array[Column, bool]]): BinaryField {.inline.} =
+  ## Returns the field converted from the array.
   result.left = 0
   result.center = 0
   result.right = 0
 
   for row, line in arr:
-    for col in 0..<2:
+    for col in 0 ..< 2:
       result.left.setMask line[col].uint32 shl (29 - col * 16 - row)
-    for col in 2..<4:
+    for col in 2 ..< 4:
       result.center.setMask line[col].uint32 shl (61 - col * 16 - row)
-    for col in 4..<6:
+    for col in 4 ..< 6:
       result.right.setMask line[col].uint32 shl (93 - col * 16 - row)

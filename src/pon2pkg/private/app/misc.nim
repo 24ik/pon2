@@ -8,26 +8,30 @@
 when defined(js):
   import std/[jsffi, sugar]
   import karax/[kbase, kdom]
-  import ../../corepkg/[cell, misc]
+  import ../../core/[cell, notice]
 
   # ------------------------------------------------
-  # Clipboard
+  # JS - Clipboard
   # ------------------------------------------------
 
-  proc getNavigator: JsObject {.importjs: "(navigator)".} ## Returns navigator.
+  proc getNavigator(): JsObject {.importjs: "(navigator)".} ## Returns the navigator.
 
-  proc copyToClipboard(text: kstring) = getNavigator().clipboard.writeText text
+  proc copyToClipboard(text: kstring) =
+    ## Writes the text to the clipboard.
+    getNavigator().clipboard.writeText text
 
-  proc showFlashMessage(element: Element, messageHtml: string,
-                        timeMs = Natural 500) {.inline.} =
+  proc showFlashMessage(
+      element: Element, messageHtml: string, timeMs = Natural 500
+  ) {.inline.} =
     ## Sets the flash message on the element for `timeMs` ms.
     let oldHtml = element.innerHTML
     element.innerHTML = messageHtml
     discard setTimeout(() => (element.innerHTML = oldHtml), timeMs)
 
-  func initCopyButtonHandler*(copyStr: () -> string, id: string,
-                              disableMs = Natural 500): () -> void {.inline.} =
-    proc handler =
+  func initCopyButtonHandler*(
+      copyStr: () -> string, id: string, disableMs = Natural 500
+  ): () -> void {.inline.} =
+    proc handler() =
       let btn = document.getElementById id.kstring
 
       btn.disabled = true
@@ -35,13 +39,15 @@ when defined(js):
 
       btn.showFlashMessage(
         "<span class='icon'><i class='fa-solid fa-check'></i></span>" &
-        "<span>コピー</span>", disableMs)
+          "<span>コピー</span>",
+        disableMs,
+      )
       discard setTimeout(() => (btn.disabled = false), disableMs)
 
     result = handler
 
   # ------------------------------------------------
-  # Images
+  # JS - Images
   # ------------------------------------------------
 
   func cellImageSrc*(cell: Cell): kstring {.inline.} =
@@ -68,9 +74,51 @@ when defined(js):
     of Comet: "../assets/noticegarbage/comet.png"
 
   # ------------------------------------------------
-  # Others
+  # JS - Others
   # ------------------------------------------------
 
-  proc isMobile*: bool
-    {.importjs: "navigator.userAgent.match(/iPhone|Android.+Mobile/)".}
-    ## Returns `true` if the mobile is detected.
+  proc isMobile*(): bool {.
+    importjs: "navigator.userAgent.match(/iPhone|Android.+Mobile/)"
+  .} ## Returns `true` if the mobile is detected.
+
+else:
+  import std/[math]
+  import nigui
+
+  # ------------------------------------------------
+  # Native - Button
+  # ------------------------------------------------
+
+  type ColorButton* = ref object of Button
+    ## [Button with color](https://github.com/simonkrauter/NiGui/issues/9).
+
+  proc initColorButton*(text = ""): ColorButton {.inline.} =
+    ## Returns a new color button.
+    result = new ColorButton
+    result.init
+    result.text = text
+
+  method handleDrawEvent*(control: ColorButton, event: DrawEvent) =
+    let canvas = event.control.canvas
+    canvas.areaColor = control.backgroundColor
+    canvas.textColor = control.textColor
+    canvas.lineColor = control.textColor
+    canvas.drawRectArea(0, 0, control.width, control.height)
+    canvas.drawTextCentered(control.text)
+    canvas.drawRectOutline(0, 0, control.width, control.height)
+
+  # ------------------------------------------------
+  # Native - Others
+  # ------------------------------------------------
+
+  # FIXME: these are very ad hoc implementations and need improvement
+
+  const Dpi = when defined(windows): 144 else: 120
+
+  func pt*(px: int): float {.inline.} =
+    ## Returns `pt` converted from `px`.
+    px / Dpi * 72
+
+  func px*(pt: float): int {.inline.} =
+    ## Returns `px` converted from `pt`.
+    (pt / 72 * Dpi).round.int

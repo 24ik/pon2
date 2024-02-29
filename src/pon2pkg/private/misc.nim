@@ -5,15 +5,14 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[algorithm, options, os, parsecfg, sequtils, streams, strutils,
-            typetraits, uri]
+import
+  std/[algorithm, os, parsecfg, random, sequtils, streams, strutils, typetraits, uri]
 
-when not defined(js):
-  import docopt
-
-const Version* = staticRead(
-  currentSourcePath().parentDir.parentDir.parentDir.parentDir /
-    "pon2.nimble").newStringStream.loadConfig.getSectionValue("", "version")
+const Version* =
+  staticRead(
+    currentSourcePath().parentDir.parentDir.parentDir.parentDir / "pon2.nimble"
+  ).newStringStream.loadConfig
+  .getSectionValue("", "version")
 
 # ------------------------------------------------
 # Warning-suppress Version
@@ -44,9 +43,8 @@ func initXLink*(text = "", hashTag = "", uri = initUri()): Uri {.inline.} =
   result.hostname = "twitter.com"
   result.path = "/intent/tweet"
 
-  var queries = @[
-    ("ref_src", "twsrc^tfw|twcamp^buttonembed|twterm^share|twgr^"),
-    ("text", text)]
+  var queries =
+    @[("ref_src", "twsrc^tfw|twcamp^buttonembed|twterm^share|twgr^"), ("text", text)]
   if hashTag != "":
     queries.add ("hashtags", hashTag)
   if uri != initUri():
@@ -57,49 +55,58 @@ func initXLink*(text = "", hashTag = "", uri = initUri()): Uri {.inline.} =
 # Parse
 # ------------------------------------------------
 
-func parseSomeInt*[T: SomeNumber or Natural or Positive](val: char): T
-                  {.inline.} =
+func parseSomeInt*[T: SomeNumber or Natural or Positive, U: char or string](
+    val: U
+): T {.inline.} =
   ## Converts the char or string to the given type `T`.
   ## If the conversion fails, `ValueError` will be raised.
-  # NOTE: somehow generics for `val` does not work
   T parseInt $val
-
-func parseSomeInt*[T: SomeNumber or Natural or Positive](val: string): T
-                  {.inline.} =
-  ## Converts the char or string to the given type `T`.
-  ## If the conversion fails, `ValueError` will be raised.
-  T parseInt val
-
-when not defined(js):
-  func parseSomeInt*[T: SomeInteger or Natural or Positive](
-      val: Value, allowNone = false): Option[T] {.inline.} =
-    ## Converts the value to the given type `T`.
-    ## If the conversion fails, `ValueError` will be raised.
-    ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is
-    ## returned.
-    {.push warning[ProveInit]: off.}
-    result = none T
-    {.pop.}
-
-    case val.kind
-    of vkNone:
-      if not allowNone:
-        raise newException(ValueError, "`val` should have a value.")
-    of vkStr:
-      result = some parseSomeInt[T] $val
-    else:
-      raise newException(ValueError, "`val` should be `vkNone` or `vkStr`.")
 
 # ------------------------------------------------
 # Others
 # ------------------------------------------------
 
-func toggle*(b: var bool) {.inline.} = b = not b ## Toggles the value.
+func toggle*(b: var bool) {.inline.} = ## Toggles the value.
+  b = not b
 
 func product2*[T](x: openArray[seq[T]]): seq[seq[T]] {.inline.} =
   ## Returns a cartesian product.
   ## This version works on any length.
   case x.len
-  of 0: @[newSeq[T](0)]
-  of 1: x[0].mapIt @[it]
-  else: x.product
+  of 0:
+    @[newSeq[T](0)]
+  of 1:
+    x[0].mapIt @[it]
+  else:
+    x.product
+
+iterator zip*[T, U, V](
+    s1: openArray[T], s2: openArray[U], s3: openArray[V]
+): (T, U, V) {.inline.} =
+  ## Yields a combination of elements.
+  ## Longer array\[s\] will be truncated.
+  let minLen = [s1.len, s2.len, s3.len].min
+  for i in 0 ..< minLen:
+    yield (s1[i], s2[i], s3[i])
+
+func sample*[T](rng: var Rand, arr: openArray[T], count: Natural): seq[T] {.inline.} =
+  ## Selects and returns `count` elements in the array without duplicates.
+  var arr2 = arr.toSeq
+  rng.shuffle arr2
+  {.push warning[ProveInit]: off.}
+  result = arr2[0 ..< count]
+  {.pop.}
+
+func incRot*[T: Ordinal](x: var T) {.inline.} =
+  ## Rotating `inc`.
+  if x == T.high:
+    x = T.low
+  else:
+    x.inc
+
+func decRot*[T: Ordinal](x: var T) {.inline.} =
+  ## Rotating `dec`.
+  if x == T.low:
+    x = T.high
+  else:
+    x.dec

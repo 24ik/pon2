@@ -8,7 +8,7 @@
 import std/[bitops]
 import ./[disappearresult]
 import ../[binary]
-import ../../../../corepkg/[cell, misc, pair, position]
+import ../../../../core/[cell, fieldtype, pair, position]
 
 when defined(cpu32):
   import ./bit32/binary
@@ -16,14 +16,12 @@ else:
   import ./bit64/binary
 
 type
-  TsuField* = object
-    ## Puyo Puyo field with Tsu rule.
+  TsuField* = object ## Puyo Puyo field with Tsu rule.
     bit2: BinaryField
     bit1: BinaryField
     bit0: BinaryField
 
-  WaterField* = object
-    ## Puyo Puyo field with Water rule.
+  WaterField* = object ## Puyo Puyo field with Water rule.
     bit2: BinaryField
     bit1: BinaryField
     bit0: BinaryField
@@ -36,8 +34,8 @@ using
 # Constructor
 # ------------------------------------------------
 
-func initZeroField[F: TsuField or WaterField]: F {.inline.} =
-  ## Constructor of `Zero***Field`.
+func initZeroField[F: TsuField or WaterField](): F {.inline.} =
+  ## Returns `Zero***Field`.
   result.bit2 = ZeroBinaryField
   result.bit1 = ZeroBinaryField
   result.bit0 = ZeroBinaryField
@@ -46,15 +44,17 @@ const
   ZeroTsuField = initZeroField[TsuField]()
   ZeroWaterField = initZeroField[WaterField]()
 
-func zeroField*[F: TsuField or WaterField]: F {.inline.} =
+func zeroField*[F: TsuField or WaterField](): F {.inline.} =
   ## Returns the field with all elements zero.
   when F is TsuField: ZeroTsuField else: ZeroWaterField
 
-func zeroTsuField*: TsuField {.inline.} = zeroField[TsuField]()
+func zeroTsuField*(): TsuField {.inline.} =
   ## Returns the Tsu field with all elements zero.
+  zeroField[TsuField]()
 
-func zeroWaterField*: WaterField {.inline.} = zeroField[WaterField]()
+func zeroWaterField*(): WaterField {.inline.} =
   ## Returns the Water field with all elements zero.
+  zeroField[WaterField]()
 
 # ------------------------------------------------
 # Operator
@@ -65,8 +65,7 @@ func `+`[F: TsuField or WaterField](field1, field2: F): F {.inline.} =
   result.bit1 = field1.bit1 + field2.bit1
   result.bit0 = field1.bit0 + field2.bit0
 
-func `*`[F: TsuField or WaterField](field1: F, field2: BinaryField): F
-        {.inline.} =
+func `*`[F: TsuField or WaterField](field1: F, field2: BinaryField): F {.inline.} =
   result.bit2 = field1.bit2 * field2
   result.bit1 = field1.bit1 * field2
   result.bit0 = field1.bit0 * field2
@@ -76,8 +75,7 @@ func `+=`[F: TsuField or WaterField](field1: var F, field2: F) {.inline.} =
   field1.bit1 += field2.bit1
   field1.bit0 += field2.bit0
 
-func `-=`[F: TsuField or WaterField](field1: var F, field2: BinaryField)
-         {.inline.} =
+func `-=`[F: TsuField or WaterField](field1: var F, field2: BinaryField) {.inline.} =
   field1.bit2 -= field2
   field1.bit1 -= field2
   field1.bit0 -= field2
@@ -87,13 +85,13 @@ func `-=`[F: TsuField or WaterField](field1: var F, field2: BinaryField)
 # ------------------------------------------------
 
 func toTsuField*(self: WaterField): TsuField {.inline.} =
-  ## Converts the Water field to the Tsu field.
+  ## Returns the Tsu field converted from the Water field.
   result.bit2 = self.bit2
   result.bit1 = self.bit1
   result.bit0 = self.bit0
 
 func toWaterField*(self: TsuField): WaterField {.inline.} =
-  ## Converts the Water field to the Water field.
+  ## Returns the Water field converted from the Tsu field.
   result.bit2 = self.bit2
   result.bit1 = self.bit1
   result.bit0 = self.bit0
@@ -110,7 +108,7 @@ func exist*(self: TsuField or WaterField): BinaryField {.inline.} =
 # Row, Column
 # ------------------------------------------------
 
-func column[F: TsuField or WaterField](self: F; col): F {.inline.} =
+func column[F: TsuField or WaterField](self: F, col): F {.inline.} =
   ## Returns the field with only the given column.
   result.bit2 = self.bit2.column col
   result.bit1 = self.bit1.column col
@@ -127,21 +125,20 @@ func clearColumn(mSelf: var (TsuField or WaterField), col) {.inline.} =
 # ------------------------------------------------
 
 func toCell(bit2, bit1, bit0: bool): Cell {.inline.} =
-  ## Converts the bits to the cell.
+  ## Returns the cell converted from bits.
   Cell.low.succ bit2.int * 4 + bit1.int * 2 + bit0.int
 
-func `[]`*(self: TsuField or WaterField; row, col): Cell {.inline.} =
+func `[]`*(self: TsuField or WaterField, row, col): Cell {.inline.} =
   toCell(self.bit2[row, col], self.bit1[row, col], self.bit0[row, col])
 
 func toBits(cell: Cell): tuple[bit2: bool, bit1: bool, bit0: bool] {.inline.} =
-  ## Returns each bit of the cell.
+  ## Returns the bits converted from the cell.
   let c = cell.int
   result.bit2 = c.testBit 2
   result.bit1 = c.testBit 1
   result.bit0 = c.testBit 0
 
-func `[]=`*(mSelf: var (TsuField or WaterField); row, col; cell: Cell)
-           {.inline.} =
+func `[]=`*(mSelf: var (TsuField or WaterField), row, col; cell: Cell) {.inline.} =
   let bits = cell.toBits
   mSelf.bit2[row, col] = bits.bit2
   mSelf.bit1[row, col] = bits.bit1
@@ -151,8 +148,9 @@ func `[]=`*(mSelf: var (TsuField or WaterField); row, col; cell: Cell)
 # Insert / RemoveSqueeze
 # ------------------------------------------------
 
-func insert(mSelf: var (TsuField or WaterField); row, col; cell: Cell,
-            insertFn: type(tsuInsert)) {.inline.} =
+func insert(
+    mSelf: var (TsuField or WaterField), row, col; cell: Cell, insertFn: type(tsuInsert)
+) {.inline.} =
   ## Inserts the cell and shifts the field.
   let bits = cell.toBits
 
@@ -160,12 +158,12 @@ func insert(mSelf: var (TsuField or WaterField); row, col; cell: Cell,
   mSelf.bit1.insertFn row, col, bits.bit1
   mSelf.bit0.insertFn row, col, bits.bit0
 
-func insert*(mSelf: var TsuField; row, col; cell: Cell) {.inline.} =
+func insert*(mSelf: var TsuField, row, col; cell: Cell) {.inline.} =
   ## Inserts `which` and shifts the field upward above the location
   ## where `which` is inserted.
   mSelf.insert row, col, cell, tsuInsert
 
-func insert*(mSelf: var WaterField; row, col; cell: Cell) {.inline.} =
+func insert*(mSelf: var WaterField, row, col; cell: Cell) {.inline.} =
   ## Inserts `which` and shifts the field and shifts the field.
   ## If `(row, col)` is in the air, shifts the field upward above
   ## the location where inserted.
@@ -174,19 +172,21 @@ func insert*(mSelf: var WaterField; row, col; cell: Cell) {.inline.} =
   mSelf.insert row, col, cell, waterInsert
 
 func removeSqueeze(
-    mSelf: var (TsuField or WaterField); row, col;
-    removeSqueezeFn: type(tsuRemoveSqueeze)) {.inline.} =
+    mSelf: var (TsuField or WaterField),
+    row, col;
+    removeSqueezeFn: type(tsuRemoveSqueeze),
+) {.inline.} =
   ## Removes the cell at `(row, col)` and shifts the field.
   mSelf.bit2.removeSqueezeFn row, col
   mSelf.bit1.removeSqueezeFn row, col
   mSelf.bit0.removeSqueezeFn row, col
 
-func removeSqueeze*(mSelf: var TsuField; row, col) {.inline.} =
+func removeSqueeze*(mSelf: var TsuField, row, col) {.inline.} =
   ## Removes the value at `(row, col)` and shifts the field downward
   ## above the location where the cell is removed.
   mSelf.removeSqueeze row, col, tsuRemoveSqueeze
 
-func removeSqueeze*(mSelf: var WaterField; row, col) {.inline.} =
+func removeSqueeze*(mSelf: var WaterField, row, col) {.inline.} =
   ## Removes the value at `(row, col)` and shifts the field.
   ## If `(row, col)` is in the air, shifts the field downward above
   ## the location where removed.
@@ -227,7 +227,7 @@ func purple(self: TsuField or WaterField): BinaryField {.inline.} =
   prod(self.bit2, self.bit1, self.bit0)
 
 # ------------------------------------------------
-# Count - Puyo
+# Count
 # ------------------------------------------------
 
 func puyoCount*(self: TsuField or WaterField, puyo: Puyo): int {.inline.} =
@@ -245,17 +245,9 @@ func puyoCount*(self: TsuField or WaterField): int {.inline.} =
   ## Returns the number of puyos in the field.
   self.exist.popcnt
 
-# ------------------------------------------------
-# Count - Color
-# ------------------------------------------------
-
 func colorCount*(self: TsuField or WaterField): int {.inline.} =
   ## Returns the number of color puyos in the field.
   (self.bit2 + self.red).popcnt
-
-# ------------------------------------------------
-# Count - Garbage
-# ------------------------------------------------
 
 func garbageCount*(self: TsuField or WaterField): int {.inline.} =
   ## Returns the number of garbage puyos in the field.
@@ -269,29 +261,41 @@ func connect3*[F: TsuField or WaterField](field: F): F {.inline.} =
   ## Returns the field with only the locations where exactly three color puyos
   ## are connected.
   ## This function ignores ghost puyos.
-  field * sum(field.red.connect3, field.green.connect3, field.blue.connect3,
-              field.yellow.connect3, field.purple.connect3)
+  field *
+    sum(
+      field.red.connect3, field.green.connect3, field.blue.connect3,
+      field.yellow.connect3, field.purple.connect3
+    )
 
 func connect3V*[F: TsuField or WaterField](field: F): F {.inline.} =
   ## Returns the field with only the locations where exactly three color puyos
   ## are connected vertically.
   ## This function ignores ghost puyos.
-  field * sum(field.red.connect3V, field.green.connect3V, field.blue.connect3V,
-              field.yellow.connect3V, field.purple.connect3V)
+  field *
+    sum(
+      field.red.connect3V, field.green.connect3V, field.blue.connect3V,
+      field.yellow.connect3V, field.purple.connect3V
+    )
 
 func connect3H*[F: TsuField or WaterField](field: F): F {.inline.} =
   ## Returns the field with only the locations where exactly three color puyos
   ## are connected horizontally.
   ## This function ignores ghost puyos.
-  field * sum(field.red.connect3H, field.green.connect3H, field.blue.connect3H,
-              field.yellow.connect3H, field.purple.connect3H)
+  field *
+    sum(
+      field.red.connect3H, field.green.connect3H, field.blue.connect3H,
+      field.yellow.connect3H, field.purple.connect3H
+    )
 
 func connect3L*[F: TsuField or WaterField](field: F): F {.inline.} =
   ## Returns the field with only the locations where exactly three color puyos
   ## are connected by L-shape.
   ## This function ignores ghost puyos.
-  field * sum(field.red.connect3L, field.green.connect3L, field.blue.connect3L,
-              field.yellow.connect3L, field.purple.connect3L)
+  field *
+    sum(
+      field.red.connect3L, field.green.connect3L, field.blue.connect3L,
+      field.yellow.connect3L, field.purple.connect3L
+    )
 
 # ------------------------------------------------
 # Shift
@@ -347,8 +351,9 @@ func flippedH*[F: TsuField or WaterField](field: F): F {.inline.} =
 # Disappear
 # ------------------------------------------------
 
-func disappear*(mSelf: var (TsuField or WaterField)): DisappearResult
-               {.inline, discardable.} =
+func disappear*(
+    mSelf: var (TsuField or WaterField)
+): DisappearResult {.inline, discardable.} =
   ## Removes puyos that should disappear.
   result.red = mSelf.red.disappeared
   result.green = mSelf.green.disappeared
@@ -356,35 +361,29 @@ func disappear*(mSelf: var (TsuField or WaterField)): DisappearResult
   result.yellow = mSelf.yellow.disappeared
   result.purple = mSelf.purple.disappeared
 
-  result.color = sum(result.red, result.green, result.blue, result.yellow,
-                     result.purple)
+  result.color =
+    sum(result.red, result.green, result.blue, result.yellow, result.purple)
   result.garbage = result.color.expanded * mSelf.garbage
 
   mSelf -= result.color + result.garbage
 
 func willDisappear*(self: TsuField or WaterField): bool {.inline.} =
   ## Returns `true` if any puyos will disappear.
-  self.red.willDisappear or
-  self.green.willDisappear or
-  self.blue.willDisappear or
-  self.yellow.willDisappear or
-  self.purple.willDisappear
+  self.red.willDisappear or self.green.willDisappear or self.blue.willDisappear or
+    self.yellow.willDisappear or self.purple.willDisappear
 
 # ------------------------------------------------
 # Operation
 # ------------------------------------------------
 
-func initFillFields[F: TsuField or WaterField]: array[ColorPuyo, F] {.inline.} =
+func initFillFields[F: TsuField or WaterField](): array[ColorPuyo, F] {.inline.} =
   ## Constructor of `Fill***Fields`.
   result[ColorPuyo.low].bit2 = ZeroBinaryField # dummy to remove warning
 
   for color in ColorPuyo:
-    result[color].bit2 =
-      if color.ord.testBit 2: OneBinaryField else: ZeroBinaryField
-    result[color].bit1 =
-      if color.ord.testBit 1: OneBinaryField else: ZeroBinaryField
-    result[color].bit0 =
-      if color.ord.testBit 0: OneBinaryField else: ZeroBinaryField
+    result[color].bit2 = if color.ord.testBit 2: OneBinaryField else: ZeroBinaryField
+    result[color].bit1 = if color.ord.testBit 1: OneBinaryField else: ZeroBinaryField
+    result[color].bit0 = if color.ord.testBit 0: OneBinaryField else: ZeroBinaryField
 
 const
   FillTsuFields = initFillFields[TsuField]()
@@ -392,31 +391,36 @@ const
 
 func put*(mSelf: var TsuField, pair: Pair, pos: Position) {.inline.} =
   ## Puts the pair.
+  if pos == Position.None:
+    return
+
   let
     existField = mSelf.exist
     nextPutMask = existField xor (existField + FloorBinaryField).shiftedUp
     nextPutMasks = [nextPutMask, nextPutMask.shiftedUp]
-    axisMask = nextPutMasks[int pos in Down0..Down5].column pos.axisColumn
-    childMask = nextPutMasks[int pos in Up0..Up5].column pos.childColumn
+    axisMask = nextPutMasks[int pos in Down0 .. Down5].column pos.axisColumn
+    childMask = nextPutMasks[int pos in Up0 .. Up5].column pos.childColumn
 
-  mSelf += FillTsuFields[pair.axis] * axisMask +
-    FillTsuFields[pair.child] * childMask
+  mSelf += FillTsuFields[pair.axis] * axisMask + FillTsuFields[pair.child] * childMask
 
 func put*(mSelf: var WaterField, pair: Pair, pos: Position) {.inline.} =
   ## Puts the pair.
+  if pos == Position.None:
+    return
+
   let
     axisCol = pos.axisColumn
     childCol = pos.childColumn
 
     existField = mSelf.exist
-    nextPutMask = (existField xor
-      (existField + WaterHighField).shiftedUpWithoutTrim).airTrimmed
+    nextPutMask =
+      (existField xor (existField + WaterHighField).shiftedUpWithoutTrim).airTrimmed
     nextPutMasks = [nextPutMask, nextPutMask.shiftedUp]
-    axisMask = nextPutMasks[int pos in Down0..Down5].column axisCol
-    childMask = nextPutMasks[int pos in Up0..Up5].column childCol
+    axisMask = nextPutMasks[int pos in Down0 .. Down5].column axisCol
+    childMask = nextPutMasks[int pos in Up0 .. Up5].column childCol
 
-  mSelf += FillWaterFields[pair.axis] * axisMask +
-    FillWaterFields[pair.child] * childMask
+  mSelf +=
+    FillWaterFields[pair.axis] * axisMask + FillWaterFields[pair.child] * childMask
 
   let shiftFields1 = [mSelf.shiftedDownWithoutTrim, mSelf]
   mSelf.clearColumn axisCol
@@ -472,31 +476,30 @@ func drop*(mSelf: var WaterField) {.inline.} =
 # Field <-> array
 # ------------------------------------------------
 
-func toArray*(self: TsuField or WaterField): array[Row, array[Column, Cell]]
-             {.inline.} =
-  ## Converts the field to the array.
+func toArray*(self: TsuField or WaterField): array[Row, array[Column, Cell]] {.inline.} =
+  ## Returns the array converted from the field.
   let
     arr2 = self.bit2.toArray
     arr1 = self.bit1.toArray
     arr0 = self.bit0.toArray
 
   result[Row.low][Column.low] = None # dummy to remove warning
-  for row in Row.low..Row.high:
-    for col in Column.low..Column.high:
-      result[row][col] =
-        toCell(arr2[row][col], arr1[row][col], arr0[row][col])
+  for row in Row.low .. Row.high:
+    for col in Column.low .. Column.high:
+      result[row][col] = toCell(arr2[row][col], arr1[row][col], arr0[row][col])
 
 func parseField*[F: TsuField or WaterField](
-    arr: array[Row, array[Column, Cell]]): F {.inline.} =
-  ## Converts the array data to the field.
+    arr: array[Row, array[Column, Cell]]
+): F {.inline.} =
+  ## Returns the field converted from the array.
   var arr2, arr1, arr0: array[Row, array[Column, bool]]
   # dummy to remove warning
   arr2[Row.low][Column.low] = false
   arr1[Row.low][Column.low] = false
   arr0[Row.low][Column.low] = false
 
-  for row in Row.low..Row.high:
-    for col in Column.low..Column.high:
+  for row in Row.low .. Row.high:
+    for col in Column.low .. Column.high:
       let (bit2, bit1, bit0) = arr[row][col].toBits
       arr2[row][col] = bit2
       arr1[row][col] = bit1

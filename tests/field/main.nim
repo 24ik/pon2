@@ -3,9 +3,10 @@
 {.experimental: "views".}
 
 import std/[setutils, strutils, unittest]
-import ../../src/pon2pkg/corepkg/[cell, field {.all.}, misc, pair, position]
+import
+  ../../src/pon2pkg/core/[cell, field {.all.}, fieldtype, host, pair, position, rule]
 
-proc main* =
+proc main*() =
   # ------------------------------------------------
   # Convert
   # ------------------------------------------------
@@ -14,8 +15,8 @@ proc main* =
   block:
     let
       str = "......\n".repeat(12) & "rgbypo"
-      tsuField = str.parseTsuField
-      waterField = str.parseWaterField
+      tsuField = parseField[TsuField](str)
+      waterField = parseField[WaterField](str)
 
     check tsuField.toWaterField == waterField
     check waterField.toTsuField == tsuField
@@ -26,8 +27,8 @@ proc main* =
 
   # [], []=
   block:
-    var field = parseTsuField "......\n".repeat(12) & "g.r..."
-    check field[12, 1] == None
+    var field = parseField[TsuField]("......\n".repeat(12) & "g.r...")
+    check field[12, 1] == Cell.None
     check field[12, 2] == Red
 
     field[12, 2] = Yellow
@@ -42,9 +43,9 @@ proc main* =
     # tsu
     block:
       let
-        field1 = parseTsuField "......\n".repeat(12) & "o....."
-        field2 = parseTsuField "......\n".repeat(11) & "r.....\no....."
-        field3 = parseTsuField "......\n".repeat(10) & "r.....\ng.....\no....."
+        field1 = parseField[TsuField]("......\n".repeat(12) & "o.....")
+        field2 = parseField[TsuField]("......\n".repeat(11) & "r.....\no.....")
+        field3 = parseField[TsuField]("......\n".repeat(10) & "r.....\ng.....\no.....")
 
       var field = field1
       field.insert 11, 0, Red
@@ -62,18 +63,25 @@ proc main* =
     # water
     block:
       let
-        field1 = parseWaterField "......\n".repeat(4) & "r.....\ng.....\n" &
-          "......\n".repeat(7)[0..^2]
-        field2 = parseWaterField "......\n".repeat(3) &
-          "b.....\nr.....\ng.....\n" & "......\n".repeat(7)[0..^2]
-        field3 = parseWaterField "......\n".repeat(2) &
-          "b.....\ny.....\nr.....\ng.....\n" & "......\n".repeat(7)[0..^2]
-        field4 = parseWaterField "......\n".repeat(2) &
-          "b.....\ny.....\nr.....\ng.....\np.....\n" &
-          "......\n".repeat(6)[0..^2]
-        field5 = parseWaterField "......\n".repeat(2) &
-          "b.....\ny.....\nr.....\ng.....\no.....\np.....\n" &
-          "......\n".repeat(5)[0..^2]
+        field1 = parseField[WaterField](
+          "......\n".repeat(4) & "r.....\ng.....\n" & "......\n".repeat(7)[0 ..^ 2]
+        )
+        field2 = parseField[WaterField](
+          "......\n".repeat(3) & "b.....\nr.....\ng.....\n" &
+            "......\n".repeat(7)[0 ..^ 2]
+        )
+        field3 = parseField[WaterField](
+          "......\n".repeat(2) & "b.....\ny.....\nr.....\ng.....\n" &
+            "......\n".repeat(7)[0 ..^ 2]
+        )
+        field4 = parseField[WaterField](
+          "......\n".repeat(2) & "b.....\ny.....\nr.....\ng.....\np.....\n" &
+            "......\n".repeat(6)[0 ..^ 2]
+        )
+        field5 = parseField[WaterField](
+          "......\n".repeat(2) & "b.....\ny.....\nr.....\ng.....\no.....\np.....\n" &
+            "......\n".repeat(5)[0 ..^ 2]
+        )
 
       var field = field1
       field.insert 3, 0, Blue
@@ -108,42 +116,47 @@ proc main* =
   block:
     let
       fieldTop = "......\n".repeat 8
-      fieldBottom = """
+      fieldBottom =
+        """
 bbbbrr
 rggyyr
 rgbbbr
 ryyygb
 ybybbb"""
-      three = """
+      three =
+        """
 ......
 rgg...
 rgbbb.
 r.....
 ......"""
-      threeV = """
+      threeV =
+        """
 ......
 r.....
 r.....
 r.....
 ......"""
-      threeH = """
+      threeH =
+        """
 ......
 ......
 ..bbb.
 ......
 ......"""
-      threeL = """
+      threeL =
+        """
 ......
 .gg...
 .g....
 ......
 ......"""
 
-    let field = parseTsuField fieldTop & fieldBottom
-    check field.connect3 == parseTsuField fieldTop & three
-    check field.connect3V == parseTsuField fieldTop & threeV
-    check field.connect3H == parseTsuField fieldTop & threeH
-    check field.connect3L == parseTsuField fieldTop & threeL
+    let field = parseField[TsuField](fieldTop & fieldBottom)
+    check field.connect3 == parseField[TsuField](fieldTop & three)
+    check field.connect3V == parseField[TsuField](fieldTop & threeV)
+    check field.connect3H == parseField[TsuField](fieldTop & threeH)
+    check field.connect3L == parseField[TsuField](fieldTop & threeL)
 
   # ------------------------------------------------
   # Shift
@@ -151,9 +164,9 @@ r.....
 
   # shift
   block:
-    var field1 = parseTsuField "......\n".repeat(12) & "..o..."
-    let field2 = parseTsuField "......\n".repeat(12) & "...o.."
-    let field3 = parseTsuField "......\n".repeat(11) & "...o..\n......"
+    var field1 = parseField[TsuField]("......\n".repeat(12) & "..o...")
+    let field2 = parseField[TsuField]("......\n".repeat(12) & "...o..")
+    let field3 = parseField[TsuField]("......\n".repeat(11) & "...o..\n......")
 
     check field2.shiftedLeft == field1
     check field1.shiftedRight == field2
@@ -173,9 +186,9 @@ r.....
   # flip
   block:
     let
-      field1 = parseTsuField "......\n".repeat(11) & "....rg\n.by..."
-      field2 = parseTsuField ".by...\n....rg\n" & "......\n".repeat(11)[0 .. ^2]
-      field3 = parseTsuField "......\n".repeat(11) & "gr....\n...yb."
+      field1 = parseField[TsuField]("......\n".repeat(11) & "....rg\n.by...")
+      field2 = parseField[TsuField](".by...\n....rg\n" & "......\n".repeat(11)[0 .. ^2])
+      field3 = parseField[TsuField]("......\n".repeat(11) & "gr....\n...yb.")
 
     check field1.flippedV == field2
     check field1.flippedH == field3
@@ -215,16 +228,17 @@ r.....
     block:
       var field = zeroTsuField()
       field.put RedGreen, Right1
-      check field == parseTsuField "......\n".repeat(12) & ".rg..."
+      check field == parseField[TsuField]("......\n".repeat(12) & ".rg...")
       field.put BlueYellow, Left3
-      check field == parseTsuField "......\n".repeat(11) & "..y...\n.rgb.."
+      check field == parseField[TsuField]("......\n".repeat(11) & "..y...\n.rgb..")
       field.put RedPurple, Up3
-      check field == parseTsuField "......\n".repeat(10) &
-        "...p..\n..yr..\n.rgb.."
+      check field ==
+        parseField[TsuField]("......\n".repeat(10) & "...p..\n..yr..\n.rgb..")
 
     # ghost, row-14
     block:
-      var field = parseTsuField """
+      var field = parseField[TsuField](
+        """
 ......
 o.....
 o.....
@@ -238,8 +252,11 @@ o.....
 o.....
 o.....
 o....."""
+      )
       field.put RedGreen, Up0
-      check field == parseTsuField """
+      check field ==
+        parseField[TsuField](
+          """
 r.....
 o.....
 o.....
@@ -253,10 +270,12 @@ o.....
 o.....
 o.....
 o....."""
+        )
 
     # Water
     block:
-      var field = parseWaterField """
+      var field = parseField[WaterField](
+        """
 ......
 ......
 ......
@@ -270,8 +289,11 @@ o....."""
 ....o.
 ......
 ......"""
+      )
       field.put RedGreen, Left4
-      check field == parseWaterField """
+      check field ==
+        parseField[WaterField](
+          """
 ......
 ......
 ......
@@ -285,8 +307,11 @@ o....."""
 ....o.
 ....o.
 ......"""
+        )
       field.put BlueYellow, Down4
-      check field == parseWaterField """
+      check field ==
+        parseField[WaterField](
+          """
 ......
 ......
 ......
@@ -300,12 +325,14 @@ o....."""
 ....o.
 ....o.
 ....o."""
+        )
 
   # drop
   block:
     # Tsu
     block:
-      var field = parseTsuField """
+      var field = parseField[TsuField](
+        """
 oo....
 oo....
 oo....
@@ -319,8 +346,11 @@ oooo..
 ooo...
 ooo...
 o.oo.."""
+      )
       field.drop
-      check field == parseTsuField """
+      check field ==
+        parseField[TsuField](
+          """
 o.....
 o.....
 o.....
@@ -334,10 +364,12 @@ ooo...
 ooo...
 oooo..
 oooo.."""
+        )
 
     # Water
     block:
-      var field = parseWaterField """
+      var field = parseField[WaterField](
+        """
 ....o.
 ....o.
 ...oo.
@@ -351,8 +383,11 @@ oo.oo.
 .o..o.
 ......
 ....o."""
+      )
       field.drop
-      check field == parseWaterField """
+      check field ==
+        parseField[WaterField](
+          """
 ......
 ......
 ......
@@ -366,6 +401,7 @@ oo.oo.
 ....o.
 ....o.
 ....o."""
+        )
 
   # ------------------------------------------------
   # Property
@@ -384,10 +420,10 @@ oo.oo.
       field[1, 2] = Blue
       check field.isDead
 
-      for row in Row.low..Row.high:
-        for col in Column.low..Column.high:
+      for row in Row.low .. Row.high:
+        for col in Column.low .. Column.high:
           field[row, col] = Blue
-      field[1, 2] = None
+      field[1, 2] = Cell.None
       check not field.isDead
 
     # Water
@@ -397,30 +433,11 @@ oo.oo.
       check field.isDead
 
       field = zeroWaterField()
-      for row in Row.low..Row.high:
+      for row in Row.low .. Row.high:
         if row != WaterRow.low.pred:
-          for col in Column.low..Column.high:
+          for col in Column.low .. Column.high:
             field[row, col] = Blue
       check not field.isDead
-
-  # ------------------------------------------------
-  # Flatten
-  # ------------------------------------------------
-
-  # flattenAnd
-  block:
-    let
-      str = "......\n".repeat(12) & "r....."
-      tsuField = str.parseTsuField
-      waterField = str.parseWaterField
-    var fields = Fields(rule: Tsu, tsu: tsuField, water: waterField)
-
-    fields.flattenAnd:
-      check field.type is TsuField
-
-    fields.rule = Water
-    fields.flattenAnd:
-      check field.type is WaterField
 
   # ------------------------------------------------
   # Count - None
@@ -445,28 +462,28 @@ oo.oo.
     var field = zeroTsuField()
     field[12, 1] = Red
     check field.invalidPositions.card == 0
-    check field.validPositions == Position.fullSet
-    check field.validDoublePositions == DoublePositions
+    check field.validPositions == AllPositions
+    check field.validDoublePositions == AllDoublePositions
 
     field[1, 1] = Red
-    check field.invalidPositions == {Up0, Right0, Down0, Up1, Right1, Down1,
-                                     Left1, Left2}
+    check field.invalidPositions ==
+      {Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2}
 
     field[2, 5] = Red
     check field.invalidPositions == {Down1}
 
-    field[2, 5] = None
+    field[2, 5] = Cell.None
     field[1, 3] = Red
     check field.invalidPositions == {Down1, Down3}
 
     field[0, 1] = Red
-    check field.invalidPositions == {Up0, Right0, Down0, Up1, Right1, Down1,
-                                     Left1, Left2, Down3}
+    check field.invalidPositions ==
+      {Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2, Down3}
 
-    field = zeroField[TsuField]()
+    field = zeroTsuField()
     field[1, 1] = Red
     field[2, 2] = Red
     field[1, 3] = Red
     field[0, 4] = Red
-    check field.invalidPositions == {Down1, Right3, Down3, Up4, Right4, Down4,
-                                     Left4, Up5, Down5, Left5}
+    check field.invalidPositions ==
+      {Down1, Right3, Down3, Up4, Right4, Down4, Left4, Up5, Down5, Left5}
