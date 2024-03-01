@@ -704,9 +704,9 @@ func parseSimulator*(uri: Uri): Simulator {.inline.} =
 
     case kind
     of Regular:
-      result = parsePuyoPuyo[TsuField](uri.query, host).initSimulator mode
+      result = parsePuyoPuyo[TsuField](uri.query, host).initSimulator(mode, true)
     of Nazo:
-      result = parseNazoPuyo[TsuField](uri.query, host).initSimulator mode
+      result = parseNazoPuyo[TsuField](uri.query, host).initSimulator(mode, true)
   else:
     raise newException(ValueError, "Invalid simulator: " & $uri)
 
