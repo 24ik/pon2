@@ -101,7 +101,7 @@ proc initGuiApplicationNode*(
   uri.query = query
 
   try:
-    guiApplication = uri.parseSimulator.nazoPuyoWrap.initGuiApplication
+    guiApplication = uri.parseSimulator.initGuiApplication
   except ValueError:
     return buildHtml(tdiv):
       text "URL形式エラー"

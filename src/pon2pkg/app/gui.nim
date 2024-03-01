@@ -47,24 +47,19 @@ using
 # Constructor
 # ------------------------------------------------
 
-const DefaultReq = Requirement(kind: Clear, color: RequirementColor.All, number: 0)
-
-proc initGuiApplication*(
-    nazoPuyoWrap: NazoPuyoWrap, mode = SimulatorMode.Play, editor = false
-): GuiApplication {.inline.} =
+proc initGuiApplication*(simulator: Simulator): GuiApplication {.inline.} =
   ## Returns a new GUI application.
-  ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
   result.simulator = new Simulator
-  result.simulator[] = nazoPuyoWrap.initSimulator(mode, editor)
+  result.simulator[] = simulator
   result.replaySimulator = new Simulator
-  result.replaySimulator[] = nazoPuyoWrap.initSimulator(Replay, true)
+  result.replaySimulator[] = simulator
 
   {.push warning[ProveInit]: off.}
   result.replayPairsPositionsSeq = none seq[PairsPositions]
   {.pop.}
   result.replayIdx = 0
 
-  result.editor = editor or mode == Edit
+  result.editor = simulator.editor
   result.focusEditor = false
   result.solving = false
   result.permuting = false
@@ -72,22 +67,6 @@ proc initGuiApplication*(
   when defined(js):
     result.progressBarData.now = 0
     result.progressBarData.total = 0
-
-proc initGuiApplication*[F: TsuField or WaterField](
-    nazo: NazoPuyo[F], mode = Play, editor = false
-): GuiApplication {.inline.} =
-  ## Returns a new GUI application.
-  ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
-  initNazoPuyoWrap(nazo).initGuiApplication(mode, editor)
-
-proc initGuiApplication*[F: TsuField or WaterField](
-    puyoPuyo: PuyoPuyo[F], mode = Play, editor = false
-): GuiApplication {.inline.} =
-  ## Returns a new GUI application.
-  ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
-  NazoPuyo[F](puyoPuyo: puyoPuyo, requirement: DefaultReq).initGuiApplication(
-    mode, editor
-  )
 
 # ------------------------------------------------
 # Edit - Other

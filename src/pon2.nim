@@ -3,8 +3,8 @@
 ## [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 ##
 ## To access APIs, import the following submodules:
-## - [`pon2pkg/core`](./pon2pkg/core.html)
-## - [`pon2pkg/app`](./pon2pkg/app.html)
+## - [pon2pkg/core](./pon2pkg/core.html)
+## - [pon2pkg/app](./pon2pkg/app.html)
 ##
 ## Compile Options:
 ## | Option                            | Description                 | Default |
