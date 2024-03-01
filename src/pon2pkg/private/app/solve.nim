@@ -531,7 +531,7 @@ func parseNode*[F: TsuField or WaterField](str: string): Node[F] {.inline.} =
   ## If the conversion fails, `ValueError` will be raised.
   let strs = str.split NodeStrSep
 
-  result.nazoPuyo = parseNazoPuyo[F](strs[0])
+  result.nazoPuyo = parseNazoPuyo[F](strs[0], Izumiya)
   result.moveResult = strs[1].parseMoveResult
 
   result.disappearedColors = strs[2].parseColors
@@ -544,4 +544,4 @@ func parseNode*[F: TsuField or WaterField](str: string): Node[F] {.inline.} =
   for color in ColorPuyo.low .. ColorPuyo.high:
     result.pairsCounts[color] = strs[idx].parseInt
     idx.inc
-  result.garbageCount = strs[16].parseInt
+  result.garbageCount = strs[14].parseInt
