@@ -1,8 +1,8 @@
 # Package
 
-version = "0.12.1"
+version = "0.12.2"
 author = "Keisuke Izumiya"
-description = "Puyo Puyo Library"
+description = "Puyo Puyo and Nazo Puyo Application"
 license = "Apache-2.0"
 
 srcDir = "src"
