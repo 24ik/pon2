@@ -11,7 +11,7 @@ import ../core/[mark]
 import
   ../../core/[
     cell, field, host, moveresult, nazopuyo, pair, pairposition, position, puyopuyo,
-    requirement
+    requirement,
   ]
 
 type Node*[F: TsuField or WaterField] = object ## Node of solution search tree.
@@ -68,7 +68,7 @@ const ReqColorToPuyo = {
   RequirementColor.Green: Cell.Green.Puyo,
   RequirementColor.Blue: Cell.Blue.Puyo,
   RequirementColor.Yellow: Cell.Yellow.Puyo,
-  RequirementColor.Purple: Cell.Purple.Puyo
+  RequirementColor.Purple: Cell.Purple.Puyo,
 }.toTable
 
 func child[F: TsuField or WaterField](
@@ -78,16 +78,19 @@ func child[F: TsuField or WaterField](
     reqColor: static RequirementColor,
 ): Node[F] {.inline.} =
   ## Returns the child node with the `pos` edge.
+  when reqKind notin {DisappearColor, DisappearColorMore}:
+    let putPair = node.nazoPuyo.puyoPuyo.nextPairPosition.get.pair
+
   result = node
   result.moveResult =
     when reqKind in {
       Clear, DisappearColor, DisappearColorMore, DisappearCount, DisappearCountMore,
-      Chain, ChainMore, ChainClear, ChainMoreClear
+      Chain, ChainMore, ChainClear, ChainMoreClear,
     }:
       result.nazoPuyo.puyoPuyo.moveWithRoughTracking pos
     elif reqKind in {
       DisappearColorSametime, DisappearColorMoreSametime, DisappearCountSametime,
-      DisappearCountMoreSametime
+      DisappearCountMoreSametime,
     }:
       result.nazoPuyo.puyoPuyo.moveWithDetailTracking pos
     else:
@@ -108,7 +111,8 @@ func child[F: TsuField or WaterField](
 
   # update fieldCounts, pairsCounts
   when reqKind notin {DisappearColor, DisappearColorMore}:
-    when reqColor in
+    when reqKind notin ColorKinds or
+        reqColor in
         {RequirementColor.All, RequirementColor.Color, RequirementColor.Garbage}:
       for color in ColorPuyo:
         result.fieldCounts[color] = result.nazoPuyo.puyoPuyo.field.puyoCount color
@@ -116,14 +120,13 @@ func child[F: TsuField or WaterField](
       let puyo = ReqColorToPuyo[reqColor]
       result.fieldCounts[puyo] = result.nazoPuyo.puyoPuyo.field.puyoCount puyo
 
-    let putPair = node.nazoPuyo.puyoPuyo.pairsPositions[0].pair
     result.pairsCounts[putPair.axis].dec
     result.pairsCounts[putPair.child].dec
 
   # update garbageCount
   when reqKind in {
     Clear, DisappearCount, DisappearCountMore, ChainClear, ChainMoreClear,
-    DisappearCountSametime, DisappearCountMoreSametime
+    DisappearCountSametime, DisappearCountMoreSametime,
   }:
     when reqColor in {RequirementColor.All, RequirementColor.Garbage}:
       result.garbageCount.dec result.moveResult.garbageCount
@@ -256,7 +259,7 @@ func canPrune*[F: TsuField or WaterField](
       result = false
   elif reqKind in {
     DisappearCount, DisappearCountMore, DisappearCountSametime,
-    DisappearCountMoreSametime, DisappearConnect, DisappearConnectMore
+    DisappearCountMoreSametime, DisappearConnect, DisappearConnectMore,
   }:
     let nowPossibleCount: int
     when reqColor in
@@ -283,7 +286,7 @@ func canPrune*[F: TsuField or WaterField](
         node.disappearedCount + nowPossibleCount
       elif reqKind in {
         DisappearCountSametime, DisappearCountMoreSametime, DisappearConnect,
-        DisappearConnectMore
+        DisappearConnectMore,
       }:
         nowPossibleCount
       else:
@@ -345,7 +348,7 @@ func solve[F: TsuField or WaterField](
   assert reqKind in {
     RequirementKind.Clear, DisappearCount, DisappearCountMore, ChainClear,
     ChainMoreClear, DisappearCountSametime, DisappearCountMoreSametime, DisappearPlace,
-    DisappearPlaceMore, DisappearConnect, DisappearConnectMore
+    DisappearPlaceMore, DisappearConnect, DisappearConnectMore,
   }
 
   result =
