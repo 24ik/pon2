@@ -5,13 +5,13 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, uri]
+import std/[options, strformat, uri]
 import ../../[misc]
 import ../../../app/[color, nazopuyo, simulator]
 import
   ../../../core/[
     cell, field, fieldtype, mark, moveresult, nazopuyo, notice, pair, pairposition,
-    position, puyopuyo, rule
+    position, puyopuyo, rule,
   ]
 
 when defined(js):
@@ -76,15 +76,19 @@ func nextPairCell*(
     simulator: Simulator, idx: range[-1 .. 1], col: Column
 ): Cell {.inline.} =
   ## Returns the cell in the next pairs.
-  let pos = simulator.next.position
+  let
+    pos = simulator.next.position
+    nextPairPos: Option[PairPosition]
+  simulator.nazoPuyoWrap.flattenAnd:
+    nextPairPos = puyoPuyo.nextPairPosition
 
   result =
     if simulator.state != Stable:
       Cell.None
-    elif simulator.nazoPuyoWrap.pairsPositions.len == 0:
+    elif nextPairPos.isNone:
       Cell.None
     elif idx == 0 and col == pos.axisColumn:
-      simulator.nazoPuyoWrap.pairsPositions[0].pair.axis
+      nextPairPos.get.pair.axis
     elif (
       # Up, Down
       (
@@ -101,7 +105,7 @@ func nextPairCell*(
         )
       )
     ):
-      simulator.nazoPuyoWrap.pairsPositions[0].pair.child
+      nextPairPos.get.pair.child
     else:
       Cell.None
 
@@ -111,18 +115,18 @@ func nextPairCell*(
 
 func immediateNextPairCell*(simulator: Simulator, axis: bool): Cell {.inline.} =
   ## Returns the next-pair's cell in the immediate pairs.
-  if simulator.nazoPuyoWrap.pairsPositions.len <= 1:
+  if simulator.nazoPuyoWrap.nextIdx >= simulator.nazoPuyoWrap.pairsPositions.len:
     return Cell.None
 
-  let pair = simulator.nazoPuyoWrap.pairsPositions[1].pair
+  let pair = simulator.nazoPuyoWrap.pairsPositions[^1].pair
   result = if axis: pair.axis else: pair.child
 
 func immediateDoubleNextPairCell*(simulator: Simulator, axis: bool): Cell {.inline.} =
   ## Returns the double-next-pair's cell in the immediate pairs.
-  if simulator.nazoPuyoWrap.pairsPositions.len <= 2:
+  if simulator.nazoPuyoWrap.nextIdx.succ >= simulator.nazoPuyoWrap.pairsPositions.len:
     return Cell.None
 
-  let pair = simulator.nazoPuyoWrap.pairsPositions[2].pair
+  let pair = simulator.nazoPuyoWrap.pairsPositions[^2].pair
   result = if axis: pair.axis else: pair.child
 
 # ------------------------------------------------
@@ -133,7 +137,7 @@ const
   DeadMessage = "ばたんきゅ〜"
   NazoMessages: array[MarkResult, string] = [
     "クリア！", "　", DeadMessage, "不可能な設置", "設置スキップ",
-    "未対応"
+    "未対応",
   ]
   ShownNoticeGarbgeCount = 6
 
@@ -144,16 +148,24 @@ func getMessages*(
 .} =
   ## Returns the messages.
   ## Note that `noticeGarbages` in the result should be used only in rendering.
-  case simulator.kind
-  of Regular:
-    if simulator.state != Stable:
-      result.state = ""
-    else:
+  if simulator.state == Stable:
+    case simulator.kind
+    of Regular:
       simulator.nazoPuyoWrap.flattenAnd:
         result.state = if field.isDead: DeadMessage else: ""
-  of Nazo:
-    simulator.originalNazoPuyoWrap.flattenAnd:
-      result.state = NazoMessages[nazoPuyo.mark]
+    of Nazo:
+      let
+        pairsPositions = simulator.nazoPuyoWrap.pairsPositions
+        endIdx: Natural
+      simulator.nazoPuyoWrap.flattenAnd:
+        endIdx = nazoPuyo.puyoPuyo.nextIdx
+
+      simulator.originalNazoPuyoWrap.flattenAnd:
+        var nazo = nazoPuyo
+        nazo.puyoPuyo.pairsPositions = pairsPositions
+        result.state = NazoMessages[nazo.mark endIdx]
+  else:
+    result.state = "　"
 
   result.score = simulator.score
 

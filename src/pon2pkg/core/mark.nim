@@ -29,11 +29,14 @@ const ReqColorToPuyo = {
   RequirementColor.Green: Cell.Green.Puyo,
   RequirementColor.Blue: Cell.Blue.Puyo,
   RequirementColor.Yellow: Cell.Yellow.Puyo,
-  RequirementColor.Purple: Cell.Purple.Puyo
+  RequirementColor.Purple: Cell.Purple.Puyo,
 }.toTable
 
-func mark*[F: TsuField or WaterField](nazo: NazoPuyo[F]): MarkResult {.inline.} =
+func mark*[F: TsuField or WaterField](
+    nazo: NazoPuyo[F], endIdx: Natural
+): MarkResult {.inline.} =
   ## Marks the positions.
+  ## Uses `nazo.puyoPuyo.pairsPositions[0 ..< endIdx]` to mark.
   if not nazo.requirement.isSupported:
     return NotSupport
 
@@ -43,8 +46,8 @@ func mark*[F: TsuField or WaterField](nazo: NazoPuyo[F]): MarkResult {.inline.} 
     disappearColors = set[ColorPuyo]({}) # used for DisappearColor
     disappearCount = 0 # used for DisappearCount
 
-  for pairPos in nazo.puyoPuyo.pairsPositions:
-    let pos = pairPos.position
+  for pairPosIdx in 0 ..< endIdx:
+    let pos = nazo.puyoPuyo.pairsPositions[pairPosIdx].position
 
     # skip
     if pos == Position.None:
@@ -161,3 +164,7 @@ func mark*[F: TsuField or WaterField](nazo: NazoPuyo[F]): MarkResult {.inline.} 
       return Dead
 
   result = WrongAnswer
+
+func mark*[F: TsuField or WaterField](nazo: NazoPuyo[F]): MarkResult {.inline.} =
+  ## Marks the positions.
+  nazo.mark nazo.moveCount

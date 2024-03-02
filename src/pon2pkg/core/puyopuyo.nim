@@ -12,7 +12,7 @@ type PuyoPuyo*[F: TsuField or WaterField] = object ## Puyo Puyo game.
   field*: F
   pairsPositions*: PairsPositions
 
-  nextIdx: Natural
+  nextIdx*: Natural
 
 # ------------------------------------------------
 # Reset
@@ -290,7 +290,7 @@ func toUriQuery*[F: TsuField or WaterField](
   of Izumiya:
     encodeQuery [
       (FieldKey, self.field.toUriQuery host),
-      (PairsPositionsKey, self.pairsPositions.toUriQuery host)
+      (PairsPositionsKey, self.pairsPositions.toUriQuery host),
     ]
   of Ishikawa, Ips:
     &"{self.field.toUriQuery host}_{self.pairsPositions.toUriQuery host}"
