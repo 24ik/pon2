@@ -39,7 +39,7 @@ proc initPairsNode*(
 
   result = buildHtml(table(class = "table is-narrow")):
     tbody:
-      for idx, pairPos in simulator.originalNazoPuyoWrap.pairsPositions:
+      for idx, pairPos in simulator.nazoPuyoWrap.pairsPositions:
         let
           pair = pairPos.pair
           pos = pairPos.position

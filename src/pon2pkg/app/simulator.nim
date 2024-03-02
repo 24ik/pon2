@@ -444,8 +444,9 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
   ## `replay` is prioritized over `skip`.
   case mSelf.state
   of Stable:
-    if mSelf.nazoPuyoWrap.pairsPositions.len == 0:
-      return
+    mSelf.nazoPuyoWrap.flattenAnd:
+      if nazoPuyo.puyoPuyo.nextPairPosition.isNone:
+        return
 
     mSelf.moveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
     mSelf.save
@@ -480,6 +481,7 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
         mSelf.state = Stable
         mSelf.next.index.inc
         mSelf.next.position = InitPos
+        mSelf.nazoPuyoWrap.nextIdx.inc
   of WillDisappear:
     let disappearRes =
       case mSelf.rule
@@ -511,6 +513,7 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
       mSelf.state = Stable
       mSelf.next.index.inc
       mSelf.next.position = InitPos
+      mSelf.nazoPuyoWrap.nextIdx.inc
 
 func backward*(mSelf) {.inline.} =
   ## Backwards the simulator.

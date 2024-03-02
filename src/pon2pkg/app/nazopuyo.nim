@@ -80,6 +80,28 @@ func `pairsPositions=`*(mSelf; pairsPositions: PairsPositions) {.inline.} =
     mSelf.water.puyoPuyo.pairsPositions = pairsPositions
 
 # ------------------------------------------------
+# Property - nextIdx
+# ------------------------------------------------
+
+func nextIdx*(self): Natural {.inline.} =
+  self.flattenAnd:
+    result = puyoPuyo.nextIdx
+
+func nextIdx*(mSelf): var Natural {.inline.} =
+  case mSelf.rule
+  of Tsu:
+    result = mSelf.tsu.puyoPuyo.nextIdx
+  of Water:
+    result = mSelf.water.puyoPuyo.nextIdx
+
+func `nextIdx=`*(mSelf; idx: Natural) {.inline.} =
+  case mSelf.rule
+  of Tsu:
+    mSelf.tsu.puyoPuyo.nextIdx = idx
+  of Water:
+    mSelf.water.puyoPuyo.nextIdx = idx
+
+# ------------------------------------------------
 # Property - Requirement
 # ------------------------------------------------
 

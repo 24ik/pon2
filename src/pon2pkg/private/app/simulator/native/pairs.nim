@@ -31,8 +31,8 @@ proc cellDrawHandler(
   canvas.fill
 
   var cell = Cell.None
-  if idx < control.simulator[].originalNazoPuyoWrap.pairsPositions.len:
-    let pair = control.simulator[].originalNazoPuyoWrap.pairsPositions[idx].pair
+  if idx < control.simulator[].nazoPuyoWrap.pairsPositions.len:
+    let pair = control.simulator[].nazoPuyoWrap.pairsPositions[idx].pair
     cell = if axis: pair.axis else: pair.child
   canvas.drawImage control.assets[].cellImages[cell]
 
@@ -70,7 +70,9 @@ proc initPairControl(
 # Index
 # ------------------------------------------------
 
-proc indexDrawHandler(control: PairsControl, event: DrawEvent, idx: Natural) {.inline.} =
+proc indexDrawHandler(
+    control: PairsControl, event: DrawEvent, idx: Natural
+) {.inline.} =
   ## Draws the index.
   let canvas = event.control.canvas
 
