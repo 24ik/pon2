@@ -41,7 +41,7 @@ jobs:
 
       - run: nimble -y install -p:-d:danger -p:-d:pon2.avx2=false -p:-d:pon2.bmi2=false
         if: runner.os == 'macOS'
-      - run: nimble -y install -p:-d:danger
+      - run: nimble -y install -p:"-d:danger"
         if: runner.os != 'macOS'
 
       - uses: actions/upload-artifact@v3
