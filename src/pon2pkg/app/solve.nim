@@ -141,7 +141,7 @@ proc solve[F: TsuField or WaterField](
   assert reqKind in {
     Clear, DisappearCount, DisappearCountMore, ChainClear, ChainMoreClear,
     DisappearCountSametime, DisappearCountMoreSametime, DisappearPlace,
-    DisappearPlaceMore, DisappearConnect, DisappearConnectMore
+    DisappearPlaceMore, DisappearConnect, DisappearConnectMore,
   }
 
   result =
@@ -225,7 +225,7 @@ proc solve*[F: TsuField or WaterField](
     of DisappearColorMoreSametime:
       nazo.solve(
         DisappearColorMoreSametime, DummyColor, showProgress, earlyStopping,
-        parallelCount
+        parallelCount,
       )
     of DisappearCountSametime:
       nazo.solve(DisappearCountSametime, showProgress, earlyStopping, parallelCount)

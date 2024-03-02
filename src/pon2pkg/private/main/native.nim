@@ -85,11 +85,12 @@ proc runSolver*(args: Table[string, Value]) {.inline.} =
   if simulator.kind != Nazo:
     raise newException(ValueError, "The question should be a Nazo Puyo.")
 
-  var simulator2 = simulator
   simulator.nazoPuyoWrap.flattenAnd:
     for answerIdx, answer in nazoPuyo.solve(showProgress = true):
-      simulator2.nazoPuyoWrap.pairsPositions = answer
-      let answerUri = simulator2.toUri(withPositions = true)
+      var nazo = nazoPuyo
+      nazo.puyoPuyo.pairsPositions = answer
+
+      let answerUri = nazo.initSimulator(mode = Replay).toUri(withPositions = true)
       echo &"({answerIdx.succ}) {answerUri}"
 
       if args["-b"].to_bool:
@@ -201,10 +202,10 @@ proc runPermuter*(args: Table[string, Value]) {.inline.} =
       var nazo = nazoPuyo
       nazo.puyoPuyo.pairsPositions = pairsPositions
 
-      let
-        simulator2 = nazo.initSimulator
-        questionUri = simulator2.toUri false
-        answerUri = simulator2.toUri true
+      var simulator2 = nazo.initSimulator(mode = Replay)
+      let answerUri = simulator2.toUri(withPositions = true)
+      simulator2.mode = Play
+      let questionUri = simulator2.toUri(withPositions = false)
       echo &"(Q{idx.succ}) {questionUri}"
       echo &"(A{idx.succ}) {answerUri}"
       echo ""

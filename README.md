@@ -25,14 +25,19 @@ native-GUI application is beta version.
 
 You can get the binary at the
 [latest release](https://github.com/izumiya-keisuke/pon2/releases/latest).
-
-**NOTE:** Built binary may not work on macOS due to the limitation of
+Note that the built binary may not work on macOS due to the limitation of
 [NiGui](https://github.com/simonkrauter/NiGui).
 
 ### Manual Installation
 
 ```shell
-nimble install https://github.com/izumiya-keisuke/pon2 -p:-d:danger -p:-d:Pon2Avx2=<bool> -p:-d:Pon2Bmi2=<bool>
+nimble install pon2 -p:-d:danger
+```
+
+If you want to specify the instruction set, use the following command:
+
+```shell
+nimble install pon2 -p:-d:danger -p:-d:pon2.avx2=<bool> -p:-d:pon2.bmi2=<bool>
 ```
 
 ## Usage

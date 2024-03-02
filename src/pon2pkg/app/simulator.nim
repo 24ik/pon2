@@ -10,7 +10,7 @@ import ./[key, nazopuyo]
 import
   ../core/[
     cell, field, fieldtype, host, moveresult, nazopuyo, pair, pairposition, position,
-    puyopuyo, requirement, rule
+    puyopuyo, requirement, rule,
   ]
 import ../private/[intrinsic, misc]
 
@@ -60,7 +60,7 @@ type
         field: tuple[row: Row, column: Column],
         pair: tuple[index: Natural, axis: bool],
         focusField: bool,
-        insert: bool
+        insert: bool,
       ]
 
 using
@@ -821,7 +821,7 @@ when defined(js):
       palette,
       requirement,
       select,
-      share
+      share,
     ]
 
   # ------------------------------------------------
@@ -908,7 +908,7 @@ else:
       pairs as pairsModule,
       requirement,
       select,
-      share
+      share,
     ]
 
   type
