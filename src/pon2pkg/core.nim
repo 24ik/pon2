@@ -39,7 +39,7 @@ import
 
 export cell.Cell, cell.ColorPuyo, cell.Puyo, cell.parseCell
 export
-  field.TsuField, field.WaterField, field.zeroField, field.toTsuField,
+  field.TsuField, field.WaterField, field.initField, field.toTsuField,
   field.toWaterField, field.`[]`, field.`[]=`, field.insert, field.removeSqueeze,
   field.puyoCount, field.colorCount, field.garbageCount, field.connect3,
   field.connect3V, field.connect3H, field.connect3L, field.shiftedUp, field.shiftedDown,

@@ -44,8 +44,8 @@ const
   ZeroTsuField = initZeroField[TsuField]()
   ZeroWaterField = initZeroField[WaterField]()
 
-func zeroField*[F: TsuField or WaterField](): F {.inline.} =
-  ## Returns the field with all elements zero.
+func initField*[F: TsuField or WaterField](): F {.inline.} =
+  ## Returns the field with all cells None.
   when F is TsuField: ZeroTsuField else: ZeroWaterField
 
 # ------------------------------------------------

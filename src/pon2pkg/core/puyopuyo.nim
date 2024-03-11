@@ -20,7 +20,7 @@ type PuyoPuyo*[F: TsuField or WaterField] = object ## Puyo Puyo game.
 
 func reset*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]) {.inline.} =
   ## Resets the Puyo Puyo game.
-  mSelf.field = zeroField[F]()
+  mSelf.field = initField[F]()
   mSelf.pairsPositions.setLen 0
   mSelf.nextIdx = 0
 

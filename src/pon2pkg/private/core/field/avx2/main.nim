@@ -33,8 +33,8 @@ using
 # Constructor
 # ------------------------------------------------
 
-func zeroField*[F: TsuField or WaterField](): F {.inline.} =
-  ## Returns the field with all elements zero.
+func initField*[F: TsuField or WaterField](): F {.inline.} =
+  ## Returns the field with all cells None.
   result.hardGarbage = zeroBinaryField()
   result.noneRed = zeroBinaryField()
   result.greenBlue = zeroBinaryField()
