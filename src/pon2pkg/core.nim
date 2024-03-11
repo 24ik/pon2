@@ -34,22 +34,22 @@
 import
   ./core/[
     cell, field, fieldtype, host, mark, moveresult, nazopuyo, notice, pair,
-    pairposition, position, puyopuyo, requirement, rule
+    pairposition, position, puyopuyo, requirement, rule,
   ]
 
 export cell.Cell, cell.ColorPuyo, cell.Puyo, cell.parseCell
 export
-  field.TsuField, field.WaterField, field.zeroField, field.zeroTsuField,
-  field.zeroWaterField, field.toTsuField, field.toWaterField, field.`[]`, field.`[]=`,
-  field.insert, field.removeSqueeze, field.puyoCount, field.colorCount,
-  field.garbageCount, field.connect3, field.connect3V, field.connect3H, field.connect3L,
-  field.shiftedUp, field.shiftedDown, field.shiftedRight, field.shiftedLeft,
-  field.flippedV, field.flippedH, field.disappear, field.willDisappear, field.put,
-  field.drop, field.toArray, field.parseField, field.`==`, field.rule, field.isDead,
-  field.noneCount, field.invalidPositions, field.validPositions,
-  field.validDoublePositions, field.shiftUp, field.shiftDown, field.shiftRight,
-  field.shiftLeft, field.flipV, field.flipH, field.move, field.moveWithRoughTracking,
-  field.moveWithDetailTracking, field.moveWithFullTracking, field.`$`, field.toUriQuery
+  field.TsuField, field.WaterField, field.zeroField, field.toTsuField,
+  field.toWaterField, field.`[]`, field.`[]=`, field.insert, field.removeSqueeze,
+  field.puyoCount, field.colorCount, field.garbageCount, field.connect3,
+  field.connect3V, field.connect3H, field.connect3L, field.shiftedUp, field.shiftedDown,
+  field.shiftedRight, field.shiftedLeft, field.flippedV, field.flippedH,
+  field.disappear, field.willDisappear, field.put, field.drop, field.toArray,
+  field.parseField, field.`==`, field.rule, field.isDead, field.noneCount,
+  field.invalidPositions, field.validPositions, field.validDoublePositions,
+  field.shiftUp, field.shiftDown, field.shiftRight, field.shiftLeft, field.flipV,
+  field.flipH, field.move, field.moveWithRoughTracking, field.moveWithDetailTracking,
+  field.moveWithFullTracking, field.`$`, field.toUriQuery
 export
   fieldtype.Height, fieldtype.Width, fieldtype.WaterHeight, fieldtype.AirHeight,
   fieldtype.Row, fieldtype.Column, fieldtype.WaterRow, fieldtype.AirRow
