@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ../core/[field, nazopuyo, pairposition, requirement, rule]
+import ../core/[field, nazopuyo, pairposition, puyopuyo, requirement, rule]
 
 type NazoPuyoWrap* = object ## Nazo puyo type that accepts all rules.
   tsu*: NazoPuyo[TsuField]
