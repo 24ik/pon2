@@ -5,14 +5,14 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, strformat, strutils, tables, uri]
+import std/[strformat, strutils, tables, uri]
 import ./[cell, field, host, moveresult, pair, pairposition, position]
 
 type PuyoPuyo*[F: TsuField or WaterField] = object ## Puyo Puyo game.
   field*: F
   pairsPositions*: PairsPositions
 
-  nextIdx*: Natural
+  nextIdx: Natural
 
 # ------------------------------------------------
 # Reset
@@ -47,22 +47,36 @@ func `==`*(self: PuyoPuyo[WaterField], field: PuyoPuyo[TsuField]): bool {.inline
 # Property
 # ------------------------------------------------
 
+func nextIndex*[F: TsuField or WaterField](self: PuyoPuyo[F]): int {.inline.} =
+  ## Returns the next pair's index to be operated.
+  self.nextIdx
+
+func incrementNextIndex*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]) {.inline.} =
+  ## Increments the next pair's index to be operated.
+  ## The result is clipped.
+  if mSelf.nextIdx >= mSelf.pairsPositions.len:
+    return
+
+  mSelf.nextIdx.inc
+
+func decrementNextIndex*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]) {.inline.} =
+  ## Increments the next pair's index to be operated.
+  ## The result is clipped.
+  if mSelf.nextIdx <= 0:
+    return
+
+  mSelf.nextIdx.dec
+
 func movingCompleted*[F: TsuField or WaterField](self: PuyoPuyo[F]): bool {.inline.} =
   ## Returns `true` if all pairs in the Puyo Puyo game are put (or skipped).
   self.nextIdx >= self.pairsPositions.len
 
 func nextPairPosition*[F: TsuField or WaterField](
     self: PuyoPuyo[F]
-): Option[PairPosition] {.inline.} =
-  ## Returns the next pair&position.
-  ## If no pairs left, returns `none`.
-  {.push warning[ProveInit]: off.}
-  result =
-    if self.movingCompleted:
-      none PairPosition
-    else:
-      some self.pairsPositions[self.nextIdx]
-  {.pop.}
+): PairPosition {.inline.} =
+  ## Returns the next pair&position to be operated.
+  ## If no pairs left, `IndexDefect` is raised.
+  self.pairsPositions[self.nextIdx]
 
 # ------------------------------------------------
 # Count
@@ -102,7 +116,7 @@ func move[F: TsuField or WaterField](
   when overwritePos:
     mSelf.pairsPositions[mSelf.nextIdx].position = pos
 
-  let pairPos = mSelf.pairsPositions[mSelf.nextIdx]
+  let pairPos = mSelf.nextPairPosition
   result = mSelf.field.move(pairPos.pair, pairPos.position)
   mSelf.nextIdx.inc
 
@@ -139,7 +153,7 @@ func moveWithRoughTracking[F: TsuField or WaterField](
   when overwritePos:
     mSelf.pairsPositions[mSelf.nextIdx].position = pos
 
-  let pairPos = mSelf.pairsPositions[mSelf.nextIdx]
+  let pairPos = mSelf.nextPairPosition
   result = mSelf.field.moveWithRoughTracking(pairPos.pair, pairPos.position)
   mSelf.nextIdx.inc
 
@@ -179,7 +193,7 @@ func moveWithDetailTracking[F: TsuField or WaterField](
   when overwritePos:
     mSelf.pairsPositions[mSelf.nextIdx].position = pos
 
-  let pairPos = mSelf.pairsPositions[mSelf.nextIdx]
+  let pairPos = mSelf.nextPairPosition
   result = mSelf.field.moveWithDetailTracking(pairPos.pair, pairPos.position)
   mSelf.nextIdx.inc
 
@@ -223,7 +237,7 @@ func moveWithFullTracking[F: TsuField or WaterField](
   when overwritePos:
     mSelf.pairsPositions[mSelf.nextIdx].position = pos
 
-  let pairPos = mSelf.pairsPositions[mSelf.nextIdx]
+  let pairPos = mSelf.nextPairPosition
   result = mSelf.field.moveWithFullTracking(pairPos.pair, pairPos.position)
   mSelf.nextIdx.inc
 

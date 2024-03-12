@@ -2,7 +2,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, sequtils, strformat, strutils, unittest, uri]
+import std/[sequtils, strformat, strutils, unittest, uri]
 import
   ../../src/pon2pkg/core/
     [cell, field, host, moveresult, pair, pairposition, position, puyopuyo {.all.}]
@@ -25,6 +25,25 @@ proc main*() =
   # Property
   # ------------------------------------------------
 
+  # nextIndex, incrementNextIndex, decrementNextIndex
+  block:
+    var puyoPuyo = initPuyoPuyo[TsuField]()
+    puyoPuyo.pairsPositions.add PairPosition(pair: RedGreen, position: Up1)
+    check puyoPuyo.nextIndex == 0
+
+    puyoPuyo.decrementNextIndex
+    check puyoPuyo.nextIndex == 0
+
+    puyoPuyo.incrementNextIndex
+    check puyoPuyo.nextIndex == 1
+    puyoPuyo.incrementNextIndex
+    check puyoPuyo.nextIndex == 2
+    puyoPuyo.incrementNextIndex
+    check puyoPuyo.nextIndex == 2
+
+    puyoPuyo.decrementNextIndex
+    check puyoPuyo.nextIndex == 1
+
   # movingCompleted, nextPairPosition
   block:
     var puyoPuyo = initPuyoPuyo[TsuField]()
@@ -32,17 +51,16 @@ proc main*() =
     puyoPuyo.pairsPositions.add PairPosition(pair: BlueYellow, position: Up2)
 
     check not puyoPuyo.movingCompleted
-    check puyoPuyo.nextPairPosition == some PairPosition(pair: RedGreen, position: Up1)
+    check puyoPuyo.nextPairPosition == PairPosition(pair: RedGreen, position: Up1)
 
     puyoPuyo.move
     check not puyoPuyo.movingCompleted
-    check puyoPuyo.nextPairPosition == some PairPosition(
-      pair: BlueYellow, position: Up2
-    )
+    check puyoPuyo.nextPairPosition == PairPosition(pair: BlueYellow, position: Up2)
 
     puyoPuyo.move
     check puyoPuyo.movingCompleted
-    check puyoPuyo.nextPairPosition.isNOne
+    expect IndexDefect:
+      discard puyoPuyo.nextPairPosition
 
   # ------------------------------------------------
   # Count
