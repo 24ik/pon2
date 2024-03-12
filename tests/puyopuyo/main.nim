@@ -5,7 +5,17 @@
 import std/[sequtils, strformat, strutils, unittest, uri]
 import
   ../../src/pon2pkg/core/
-    [cell, field, host, moveresult, pair, pairposition, position, puyopuyo {.all.}]
+    [
+      cell,
+      field,
+      host,
+      moveresult,
+      pair,
+      pairposition,
+      position,
+      puyopuyo {.all.},
+      rule,
+    ]
 
 proc main*() =
   # ------------------------------------------------
@@ -24,6 +34,11 @@ proc main*() =
   # ------------------------------------------------
   # Property
   # ------------------------------------------------
+
+  # rule
+  block:
+    check initPuyoPuyo[TsuField]().rule == Tsu
+    check initPuyoPuyo[WaterField]().rule == Water
 
   # nextIndex, incrementNextIndex, decrementNextIndex
   block:

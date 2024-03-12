@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 import std/[strformat, strutils, tables, uri]
-import ./[cell, field, host, moveresult, pair, pairposition, position]
+import ./[cell, field, host, moveresult, pair, pairposition, position, rule]
 
 type PuyoPuyo*[F: TsuField or WaterField] = object ## Puyo Puyo game.
   field*: F
@@ -46,6 +46,10 @@ func `==`*(self: PuyoPuyo[WaterField], field: PuyoPuyo[TsuField]): bool {.inline
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
+
+func rule*[F: TsuField or WaterField](self: PuyoPuyo[F]): Rule {.inline.} =
+  ## Returns the rule.
+  self.field.rule
 
 func nextIndex*[F: TsuField or WaterField](self: PuyoPuyo[F]): int {.inline.} =
   ## Returns the next pair's index to be operated.
