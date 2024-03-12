@@ -79,7 +79,7 @@ func child[F: TsuField or WaterField](
 ): Node[F] {.inline.} =
   ## Returns the child node with the `pos` edge.
   when reqKind notin {DisappearColor, DisappearColorMore}:
-    let putPair = node.nazoPuyo.puyoPuyo.nextPairPosition.get.pair
+    let putPair = node.nazoPuyo.puyoPuyo.nextPairPosition.pair
 
   result = node
   result.moveResult =
@@ -136,7 +136,7 @@ func children*[F: TsuField or WaterField](
 ): seq[Node[F]] {.inline.} =
   ## Returns the children of the node.
   let positions =
-    if node.nazoPuyo.puyoPuyo.nextPairPosition.get.pair.isDouble:
+    if node.nazoPuyo.puyoPuyo.nextPairPosition.pair.isDouble:
       node.nazoPuyo.puyoPuyo.field.validDoublePositions
     else:
       node.nazoPuyo.puyoPuyo.field.validPositions
