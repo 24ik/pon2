@@ -40,21 +40,21 @@ bg|3N"""
   )
 
   block:
-    var field = zeroTsuField()
+    var field = initField[TsuField]()
     benchmark "Setter", 10 ^ 4:
       field = puyoPuyo19.field
     do:
       field[2, 3] = Cell.Red
 
   block:
-    var field = zeroTsuField()
+    var field = initField[TsuField]()
     benchmark "Put", 10 ^ 4:
       field = puyoPuyo19.field
     do:
       field.put GreenYellow, Up2
 
   block:
-    var field = zeroTsuField()
+    var field = initField[TsuField]()
     benchmark "Disppear", 10 ^ 4:
       field[5, 4] = Cell.Red
       field[5, 5] = Cell.Red
@@ -64,14 +64,14 @@ bg|3N"""
       discard field.disappear
 
   block:
-    var field = zeroTsuField()
+    var field = initField[TsuField]()
     benchmark "Drop (Tsu)", 10 ^ 4:
       field[2, 3] = Cell.Red
     do:
       field.drop
 
   block:
-    var field = zeroWaterField()
+    var field = initField[WaterField]()
     benchmark "Drop (Water)", 10 ^ 3:
       field[2, 3] = Cell.Red
     do:
@@ -111,18 +111,6 @@ bg|3N"""
     ).parseUri.parseSimulator.nazoPuyoWrap
 
     benchmark "Solve (Rashomon)", 1:
-      discard
-    do:
-      nazoWrap.flattenAnd:
-        discard nazoPuyo.solve
-
-  block:
-    let nazoWrap = (
-      "https://ishikawapuyo.net/simu/pn.html?" &
-      "P00P00PrAOqcOi9OriQpaQxAQzsNziN9aN_g1c1A1E1u16121q1__v0c"
-    ).parseUri.parseSimulator.nazoPuyoWrap
-
-    benchmark "Solve (Galaxy)", 1:
       discard
     do:
       nazoWrap.flattenAnd:

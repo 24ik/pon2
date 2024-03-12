@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, strformat, uri]
+import std/[strformat, uri]
 import ../../[misc]
 import ../../../app/[color, nazopuyo, simulator]
 import
@@ -78,17 +78,19 @@ func nextPairCell*(
   ## Returns the cell in the next pairs.
   let
     pos = simulator.next.position
-    nextPairPos: Option[PairPosition]
+    noPosLeft: bool
+    nextPair: Pair
   simulator.nazoPuyoWrap.flattenAnd:
-    nextPairPos = puyoPuyo.nextPairPosition
+    noPosLeft = puyoPuyo.movingCompleted
+    nextPair = if noPosLeft: Pair.low else: puyoPuyo.nextPairPosition.pair
 
   result =
     if simulator.state != Stable:
       Cell.None
-    elif nextPairPos.isNone:
+    elif noPosLeft:
       Cell.None
     elif idx == 0 and col == pos.axisColumn:
-      nextPairPos.get.pair.axis
+      nextPair.axis
     elif (
       # Up, Down
       (
@@ -105,7 +107,7 @@ func nextPairCell*(
         )
       )
     ):
-      nextPairPos.get.pair.child
+      nextPair.child
     else:
       Cell.None
 
@@ -115,7 +117,7 @@ func nextPairCell*(
 
 func immediateNextPairCell*(simulator: Simulator, axis: bool): Cell {.inline.} =
   ## Returns the next-pair's cell in the immediate pairs.
-  if simulator.nazoPuyoWrap.nextIdx >= simulator.nazoPuyoWrap.pairsPositions.len:
+  if simulator.nazoPuyoWrap.nextIndex >= simulator.nazoPuyoWrap.pairsPositions.len:
     return Cell.None
 
   let pair = simulator.nazoPuyoWrap.pairsPositions[^1].pair
@@ -123,7 +125,7 @@ func immediateNextPairCell*(simulator: Simulator, axis: bool): Cell {.inline.} =
 
 func immediateDoubleNextPairCell*(simulator: Simulator, axis: bool): Cell {.inline.} =
   ## Returns the double-next-pair's cell in the immediate pairs.
-  if simulator.nazoPuyoWrap.nextIdx.succ >= simulator.nazoPuyoWrap.pairsPositions.len:
+  if simulator.nazoPuyoWrap.nextIndex.succ >= simulator.nazoPuyoWrap.pairsPositions.len:
     return Cell.None
 
   let pair = simulator.nazoPuyoWrap.pairsPositions[^2].pair
@@ -158,7 +160,7 @@ func getMessages*(
         pairsPositions = simulator.nazoPuyoWrap.pairsPositions
         endIdx: Natural
       simulator.nazoPuyoWrap.flattenAnd:
-        endIdx = nazoPuyo.puyoPuyo.nextIdx
+        endIdx = nazoPuyo.puyoPuyo.nextIndex
 
       simulator.originalNazoPuyoWrap.flattenAnd:
         var nazo = nazoPuyo
