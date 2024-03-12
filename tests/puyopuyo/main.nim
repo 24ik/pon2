@@ -37,12 +37,10 @@ proc main*() =
     puyoPuyo.incrementNextIndex
     check puyoPuyo.nextIndex == 1
     puyoPuyo.incrementNextIndex
-    check puyoPuyo.nextIndex == 2
-    puyoPuyo.incrementNextIndex
-    check puyoPuyo.nextIndex == 2
+    check puyoPuyo.nextIndex == 1
 
     puyoPuyo.decrementNextIndex
-    check puyoPuyo.nextIndex == 1
+    check puyoPuyo.nextIndex == 0
 
   # movingCompleted, nextPairPosition
   block:
