@@ -24,15 +24,15 @@ proc main*() =
         kind: Clear, color: RequirementColor.All, number: RequirementNumber.low
       )
 
-    check tsu.puyoPuyo.field == zeroTsuField()
+    check tsu.puyoPuyo.field == initField[TsuField]()
     check tsu.puyoPuyo.pairsPositions.len == 0
     check tsu.requirement == req
 
-    check tsu.puyoPuyo.field == zeroTsuField()
+    check tsu.puyoPuyo.field == initField[TsuField]()
     check tsu.puyoPuyo.pairsPositions.len == 0
     check tsu.requirement == req
 
-    check water.puyoPuyo.field == zeroWaterField()
+    check water.puyoPuyo.field == initField[WaterField]()
     check water.puyoPuyo.pairsPositions.len == 0
     check water.requirement == req
 
