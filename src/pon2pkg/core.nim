@@ -48,22 +48,22 @@ export
   field.parseField, field.`==`, field.rule, field.isDead, field.noneCount,
   field.invalidPositions, field.validPositions, field.validDoublePositions,
   field.shiftUp, field.shiftDown, field.shiftRight, field.shiftLeft, field.flipV,
-  field.flipH, field.move, field.moveWithRoughTracking, field.moveWithDetailTracking,
-  field.moveWithFullTracking, field.`$`, field.toUriQuery
+  field.flipH, field.move, field.move0, field.move1, field.move2, field.`$`,
+  field.toUriQuery
 export
   fieldtype.Height, fieldtype.Width, fieldtype.WaterHeight, fieldtype.AirHeight,
   fieldtype.Row, fieldtype.Column, fieldtype.WaterRow, fieldtype.AirRow
 export host.SimulatorHost
 export mark.MarkResult, mark.mark
 export
-  moveresult.MoveResult, moveresult.initMoveResult, moveresult.puyoCount,
-  moveresult.colorCount, moveresult.garbageCount, moveresult.puyoCounts,
-  moveresult.colorCounts, moveresult.garbageCounts, moveresult.colors,
-  moveresult.colorsSeq, moveresult.colorPlaces, moveresult.colorConnects,
-  moveresult.score, moveresult.noticeGarbageCounts
+  moveresult.MoveTrackingLevel, moveresult.MoveResult, moveresult.initMoveResult,
+  moveresult.puyoCount, moveresult.colorCount, moveresult.garbageCount,
+  moveresult.puyoCounts, moveresult.colorCounts, moveresult.garbageCounts,
+  moveresult.colors, moveresult.colorsSeq, moveresult.colorPlaces,
+  moveresult.colorConnects, moveresult.score, moveresult.noticeGarbageCounts
 export
-  nazopuyo.NazoPuyo, nazopuyo.initNazoPuyo, nazopuyo.`==`, nazopuyo.moveCount,
-  nazopuyo.`$`, nazopuyo.parseNazoPuyo, nazopuyo.toUriQuery
+  nazopuyo.NazoPuyo, nazopuyo.initNazoPuyo, nazopuyo.`==`, nazopuyo.rule,
+  nazopuyo.moveCount, nazopuyo.`$`, nazopuyo.parseNazoPuyo, nazopuyo.toUriQuery
 export notice.NoticeGarbage, notice.GarbageRates, notice.noticeGarbageCounts
 export
   pair.Pair, pair.initPair, pair.axis, pair.child, pair.isDouble, pair.`axis=`,
@@ -85,8 +85,7 @@ export
   puyopuyo.PuyoPuyo, puyopuyo.reset, puyopuyo.initPuyoPuyo, puyopuyo.`==`,
   puyopuyo.rule, puyopuyo.movingCompleted, puyopuyo.nextPairPosition,
   puyopuyo.puyoCount, puyopuyo.colorCount, puyopuyo.garbageCount, puyopuyo.move,
-  puyopuyo.moveWithRoughTracking, puyopuyo.moveWithDetailTracking,
-  puyopuyo.moveWithFullTracking, puyopuyo.`$`, puyopuyo.parsePuyoPuyo,
+  puyopuyo.move0, puyopuyo.move1, puyopuyo.move2, puyopuyo.`$`, puyopuyo.parsePuyoPuyo,
   puyopuyo.toUriQuery
 export
   requirement.RequirementKind, requirement.RequirementColor,

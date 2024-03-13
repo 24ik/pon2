@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[deques, options, sequtils, strformat, sugar, tables, uri]
+import std/[deques, sequtils, strformat, sugar, tables, uri]
 import ./[key, nazopuyo]
 import
   ../core/[
@@ -74,6 +74,8 @@ using
 const
   InitPos = Up2
   DefaultReq = Requirement(kind: Clear, color: RequirementColor.All, number: 0)
+  DefaultMoveResult =
+    initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], newSeq[array[ColorPuyo, seq[int]]](0))
 
 func initSimulator*(
     nazoPuyoWrap: NazoPuyoWrap, mode = Play, editor = false
@@ -82,7 +84,7 @@ func initSimulator*(
   ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
   result.nazoPuyoWrap = nazoPuyoWrap
   result.originalNazoPuyoWrap = nazoPuyoWrap
-  result.moveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
+  result.moveResult = DefaultMoveResult
 
   result.editor = editor or mode == Edit
   result.state = Stable
@@ -448,7 +450,7 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
       if nazoPuyo.puyoPuyo.movingCompleted:
         return
 
-    mSelf.moveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
+    mSelf.moveResult = DefaultMoveResult
     mSelf.save
 
     if not replay:
@@ -488,13 +490,9 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
       of Tsu: mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.disappear
       of Water: mSelf.nazoPuyoWrap.water.puyoPuyo.field.disappear
 
-    var counts: array[Puyo, int] = [0, 0, 0, 0, 0, 0, 0]
     for puyo in Puyo.low .. Puyo.high:
-      let count = disappearRes.puyoCount puyo
-      counts[puyo] = count
-      mSelf.moveResult.totalDisappearCounts.get[puyo].inc count
-    mSelf.moveResult.disappearCounts.get.add counts
-    mSelf.moveResult.detailDisappearCounts.get.add disappearRes.connectionCounts
+      mSelf.moveResult.disappearCounts[puyo].inc disappearRes.puyoCount puyo
+    mSelf.moveResult.fullDisappearCounts.add disappearRes.connectionCounts
 
     mSelf.state = Disappearing
   of Disappearing:
@@ -520,7 +518,7 @@ func backward*(mSelf) {.inline.} =
   if mSelf.undoDeque.len == 0:
     return
 
-  mSelf.moveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
+  mSelf.moveResult = DefaultMoveResult
 
   if mSelf.state == Stable:
     mSelf.next.index.dec
@@ -541,7 +539,7 @@ func reset*(mSelf; resetPosition = true) {.inline.} =
   mSelf.redoDeque.clear
   mSelf.next.index = 0
   mSelf.next.position = InitPos
-  mSelf.moveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
+  mSelf.moveResult = DefaultMoveResult
 
   for i in 0 ..< mSelf.nazoPuyoWrap.pairsPositions.len:
     mSelf.nazoPuyoWrap.pairsPositions[i].position =

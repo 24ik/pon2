@@ -5,7 +5,7 @@
 import std/[options, unittest]
 import
   ../../src/pon2pkg/core/
-    [field, host, nazopuyo {.all.}, pairposition, puyopuyo, requirement]
+    [field, host, nazopuyo {.all.}, pairposition, puyopuyo, requirement, rule]
 
 proc moveCount(uriStr: string): int =
   parseNazoPuyo[TsuField](uriStr, Ishikawa).moveCount
@@ -39,6 +39,11 @@ proc main*() =
   # ------------------------------------------------
   # Property
   # ------------------------------------------------
+
+  # rule
+  block:
+    check initNazoPuyo[TsuField]().rule == Tsu
+    check initNazoPuyo[WaterField]().rule == Water
 
   # moveCount
   block:

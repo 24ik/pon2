@@ -96,7 +96,7 @@ proc main*() =
   # Move
   # ------------------------------------------------
 
-  # move, moveWithRoughTracking, moveWithDetailTracking, moveWithFullTracking
+  # move, move0, move1, move2
   block:
     # Tsu
     block:
@@ -126,25 +126,25 @@ rg|"""
 
       block:
         var puyoPuyo = puyoPuyoBefore
-        discard puyoPuyo.move
+        puyoPuyo.move
         check puyoPuyo.field == puyoPuyoAfter.field
         check puyoPuyo.pairsPositions == puyoPuyoAfter.pairsPositions
 
       block:
         var puyoPuyo = puyoPuyoBefore
-        discard puyoPuyo.moveWithRoughTracking
+        discard puyoPuyo.move0
         check puyoPuyo.field == puyoPuyoAfter.field
         check puyoPuyo.pairsPositions == puyoPuyoAfter.pairsPositions
 
       block:
         var puyoPuyo = puyoPuyoBefore
-        discard puyoPuyo.moveWithDetailTracking
+        discard puyoPuyo.move1
         check puyoPuyo.field == puyoPuyoAfter.field
         check puyoPuyo.pairsPositions == puyoPuyoAfter.pairsPositions
 
       block:
         var puyoPuyo = puyoPuyoBefore
-        discard puyoPuyo.moveWithFullTracking
+        discard puyoPuyo.move2
         check puyoPuyo.field == puyoPuyoAfter.field
         check puyoPuyo.pairsPositions == puyoPuyoAfter.pairsPositions
 
@@ -191,7 +191,7 @@ rg|"""
         )
 
       var puyoPuyo = puyoPuyoBefore
-      discard puyoPuyo.moveWithFullTracking
+      discard puyoPuyo.move2
       check puyoPuyo.field == puyoPuyoAfter.field
       check puyoPuyo.pairsPositions == puyoPuyoAfter.pairsPositions
 

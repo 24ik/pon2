@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, sequtils, setutils, strutils, sugar, tables, uri]
+import std/[sequtils, setutils, strutils, sugar, tables, uri]
 import ../[misc]
 import ../core/[mark]
 import
@@ -34,7 +34,7 @@ type Node*[F: TsuField or WaterField] = object ## Node of solution search tree.
 func initNode*[F: TsuField or WaterField](nazo: NazoPuyo[F]): Node[F] {.inline.} =
   ## Returns the root node of the nazo puyo.
   result.nazoPuyo = nazo
-  result.moveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
+  result.moveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0])
 
   result.disappearedColors = {}
   result.disappearedCount = 0
@@ -62,14 +62,10 @@ func isLeaf[F: TsuField or WaterField](node: Node[F]): bool {.inline.} =
 # Child
 # ------------------------------------------------
 
-const ReqColorToPuyo = {
-  RequirementColor.Garbage: Cell.Garbage.Puyo,
-  RequirementColor.Red: Cell.Red.Puyo,
-  RequirementColor.Green: Cell.Green.Puyo,
-  RequirementColor.Blue: Cell.Blue.Puyo,
-  RequirementColor.Yellow: Cell.Yellow.Puyo,
-  RequirementColor.Purple: Cell.Purple.Puyo,
-}.toTable
+const ReqColorToPuyo: array[RequirementColor, Puyo] = [
+  Puyo.low, Cell.Red, Cell.Green, Cell.Blue, Cell.Yellow, Cell.Purple, Cell.Garbage,
+  Puyo.low,
+]
 
 func child[F: TsuField or WaterField](
     node: Node[F],
@@ -87,14 +83,14 @@ func child[F: TsuField or WaterField](
       Clear, DisappearColor, DisappearColorMore, DisappearCount, DisappearCountMore,
       Chain, ChainMore, ChainClear, ChainMoreClear,
     }:
-      result.nazoPuyo.puyoPuyo.moveWithRoughTracking pos
+      result.nazoPuyo.puyoPuyo.move0 pos
     elif reqKind in {
       DisappearColorSametime, DisappearColorMoreSametime, DisappearCountSametime,
       DisappearCountMoreSametime,
     }:
-      result.nazoPuyo.puyoPuyo.moveWithDetailTracking pos
+      result.nazoPuyo.puyoPuyo.move1 pos
     else:
-      result.nazoPuyo.puyoPuyo.moveWithFullTracking pos
+      result.nazoPuyo.puyoPuyo.move2 pos
 
   # update cumulative data
   when reqKind in {DisappearColor, DisappearColorMore}:
@@ -434,21 +430,19 @@ func toStr(moveResult: MoveResult): string {.inline.} =
   var strs = newSeq[string](0)
 
   strs.add $moveResult.chainCount
+  strs &= moveResult.disappearCounts.mapIt $it
+  strs.add $moveResult.trackingLevel.ord
 
-  strs.add $moveResult.totalDisappearCounts.isSome
-  if moveResult.totalDisappearCounts.isSome:
-    strs &= moveResult.totalDisappearCounts.get.mapIt $it
-
-  strs.add $moveResult.disappearCounts.isSome
-  if moveResult.disappearCounts.isSome:
-    strs.add $moveResult.disappearCounts.get.len
-    for counts in moveResult.disappearCounts.get:
+  case moveResult.trackingLevel
+  of Level0:
+    discard
+  of Level1:
+    strs.add $moveResult.detailDisappearCounts.len
+    for counts in moveResult.detailDisappearCounts:
       strs &= counts.mapIt $it
-
-  strs.add $moveResult.detailDisappearCounts.isSome
-  if moveResult.detailDisappearCounts.isSome:
-    strs.add $moveResult.detailDisappearCounts.get.len
-    for detailCounts in moveResult.detailDisappearCounts.get:
+  of Level2:
+    strs.add $moveResult.fullDisappearCounts.len
+    for detailCounts in moveResult.fullDisappearCounts:
       for color in ColorPuyo.low .. ColorPuyo.high:
         strs.add $detailCounts[color].len
         strs &= detailCounts[color].mapIt $it
@@ -484,41 +478,38 @@ func parseMoveResult(str: string): MoveResult {.inline.} =
   ## Converts the string to the move result.
   ## If the conversion fails, `ValueError` will be raised.
   let strs = str.split NodeStrAuxSep
-  var idx = 0
 
-  result.chainCount = strs[idx].parseInt
-  idx.inc
-
-  if strs[idx].parseBool:
-    idx.inc
-    result.totalDisappearCounts = some [0, 0, 0, 0, 0, 0, 0]
-    for puyo in Puyo.low .. Puyo.high:
-      result.totalDisappearCounts.get[puyo] = strs[idx].parseInt
-      idx.inc
+  const Zeros: array[Puyo, int] = [0, 0, 0, 0, 0, 0, 0]
+  case strs[8].parseInt
+  of 0:
+    result = initMoveResult(0, Zeros)
+  of 1:
+    result = initMoveResult(0, Zeros, newSeq[array[Puyo, int]](0))
+  of 2:
+    result = initMoveResult(0, Zeros, newSeq[array[ColorPuyo, seq[int]]](0))
   else:
-    result.totalDisappearCounts = none array[Puyo, int]
-    idx.inc
+    raise newException(ValueError, "Invalid move result: " & str)
 
-  if strs[idx].parseBool:
-    idx.inc
-    result.disappearCounts = some newSeq[array[Puyo, int]](strs[idx].parseInt)
-    idx.inc
+  result.chainCount = strs[0].parseInt
+  for i in 0 ..< 7:
+    result.disappearCounts[Puyo.low.succ i] = strs[1 + i].parseInt
 
-    for counts in result.disappearCounts.get.mitems:
+  case result.trackingLevel
+  of Level0:
+    discard
+  of Level1:
+    result.detailDisappearCounts = newSeq[array[Puyo, int]](strs[10].parseInt)
+
+    var idx = 11
+    for counts in result.detailDisappearCounts.mitems:
       for puyo in Puyo.low .. Puyo.high:
         counts[puyo] = strs[idx].parseInt
         idx.inc
-  else:
-    result.disappearCounts = none seq[array[Puyo, int]]
-    idx.inc
+  of Level2:
+    result.fullDisappearCounts = newSeq[array[ColorPuyo, seq[int]]](strs[10].parseInt)
 
-  if strs[idx].parseBool:
-    idx.inc
-    result.detailDisappearCounts =
-      some newSeq[array[ColorPuyo, seq[int]]](strs[idx].parseInt)
-    idx.inc
-
-    for detailCounts in result.detailDisappearCounts.get.mitems:
+    var idx = 11
+    for detailCounts in result.fullDisappearCounts.mitems:
       for color in ColorPuyo.low .. ColorPuyo.high:
         detailCounts[color] = newSeq[int](strs[idx].parseInt)
         idx.inc
@@ -526,8 +517,6 @@ func parseMoveResult(str: string): MoveResult {.inline.} =
         for count in detailCounts[color].mitems:
           count = strs[idx].parseInt
           idx.inc
-  else:
-    result.detailDisappearCounts = none seq[array[ColorPuyo, seq[int]]]
 
 func parseNode*[F: TsuField or WaterField](str: string): Node[F] {.inline.} =
   ## Converts the string to the node.
