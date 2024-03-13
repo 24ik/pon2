@@ -21,6 +21,9 @@ proc main*() =
     check tsuField.toWaterField == waterField
     check waterField.toTsuField == tsuField
 
+    check tsuField.toTsuField == tsuField
+    check waterField.toWaterField == waterField
+
   # ------------------------------------------------
   # Indexer
   # ------------------------------------------------

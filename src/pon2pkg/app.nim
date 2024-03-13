@@ -33,10 +33,8 @@ export
   marathon.nextResultPage, marathon.prevResultPage, marathon.match, marathon.play,
   marathon.operate
 export
-  nazopuyo.NazoPuyoWrap, nazopuyo.initNazoPuyoWrap, nazopuyo.flattenAnd,
-  nazopuyo.pairsPositions, nazopuyo.`pairsPositions=`, nazopuyo.nextIndex,
-  nazopuyo.incrementNextIndex, nazopuyo.decrementNextIndex, nazopuyo.requirement,
-  nazopuyo.`requirement=`, nazopuyo.rule, nazopuyo.`rule=`, nazopuyo.`==`
+  nazopuyo.NazoPuyoWrap, nazopuyo.initNazoPuyoWrap, nazopuyo.get, nazopuyo.rule,
+  nazopuyo.`rule=`, nazopuyo.`==`
 export permute.permute
 export
   simulator.SimulatorKind, simulator.SimulatorMode, simulator.SimulatorState,

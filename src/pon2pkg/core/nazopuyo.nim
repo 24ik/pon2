@@ -34,6 +34,24 @@ func `==`*(self: NazoPuyo[WaterField], field: NazoPuyo[TsuField]): bool {.inline
   false
 
 # ------------------------------------------------
+# Convert
+# ------------------------------------------------
+
+func toTsuNazoPuyo*[F: TsuField or WaterField](
+    self: NazoPuyo[F]
+): NazoPuyo[TsuField] {.inline.} =
+  ## Returns the Tsu Nazo Puyo converted from the given Nazo Puyo.
+  result.puyoPuyo = self.puyoPuyo.toTsuPuyoPuyo
+  result.requirement = self.requirement
+
+func toWaterNazoPuyo*[F: TsuField or WaterField](
+    self: NazoPuyo[F]
+): NazoPuyo[WaterField] {.inline.} =
+  ## Returns the Water Nazo Puyo converted from the given Nazo Puyo.
+  result.puyoPuyo = self.puyoPuyo.toWaterPuyoPuyo
+  result.requirement = self.requirement
+
+# ------------------------------------------------
 # Property
 # ------------------------------------------------
 

@@ -20,8 +20,8 @@ func initClickHandler(simulator: var Simulator, row: Row, col: Column): () -> vo
 proc initFieldNode*(simulator: var Simulator, displayMode = false): VNode {.inline.} =
   ## Returns the field node.
   let arr: array[Height, array[Width, Cell]]
-  simulator.nazoPuyoWrap.flattenAnd:
-    arr = field.toArray
+  simulator.nazoPuyoWrap.get:
+    arr = wrappedNazoPuyo.puyoPuyo.field.toArray
 
   result = buildHtml(table(style = style(StyleAttr.border, kstring"1px black solid"))):
     tbody:

@@ -37,6 +37,15 @@ proc main*() =
     check water.requirement == req
 
   # ------------------------------------------------
+  # Convert
+  # ------------------------------------------------
+
+  # toTsuNazoPuyo, toWaterNazoPuyo
+  block:
+    let nazo = initNazoPuyo[TsuField]()
+    check nazo.toWaterNazoPuyo.toWaterNazoPuyo.toTsuNazoPuyo.toTsuNazoPuyo == nazo
+
+  # ------------------------------------------------
   # Property
   # ------------------------------------------------
 

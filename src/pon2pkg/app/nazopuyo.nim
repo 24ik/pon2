@@ -8,9 +8,9 @@
 import ../core/[field, nazopuyo, pairposition, puyopuyo, requirement, rule]
 
 type NazoPuyoWrap* = object ## Nazo puyo type that accepts all rules.
-  tsu*: NazoPuyo[TsuField]
-  water*: NazoPuyo[WaterField]
-  rule: Rule
+  case rule: Rule
+  of Tsu: tsu: NazoPuyo[TsuField]
+  of Water: water: NazoPuyo[WaterField]
 
 using
   self: NazoPuyoWrap
@@ -25,103 +25,27 @@ func initNazoPuyoWrap*[F: TsuField or WaterField](
 ): NazoPuyoWrap {.inline.} =
   ## Returns a new nazo puyo wrap.
   when F is TsuField:
-    result.tsu = nazo
-    result.water = initNazoPuyo[WaterField]()
-    result.rule = Tsu
+    NazoPuyoWrap(rule: Tsu, tsu: nazo)
   else:
-    result.tsu = initNazoPuyo[TsuField]()
-    result.water = nazo
-    result.rule = Water
+    NazoPuyoWrap(rule: Water, water: nazo)
 
 # ------------------------------------------------
-# Property - Nazo Puyo / Puyo Puyo / Field
+# Property
 # ------------------------------------------------
 
-template flattenAnd*(self; body: untyped): untyped =
-  ## Runs `body` with `nazoPuyo`, `puyoPuyo` and `field` exposed.
-  {.push hint[XDeclaredButNotUsed]: off.}
+template get*(self; body: untyped): untyped =
+  ## Runs `body` with `wrappedNazoPuyo` exposed.
   case self.rule
   of Tsu:
-    let
-      nazoPuyo {.inject.} = self.tsu
-      puyoPuyo {.inject.} = self.tsu.puyoPuyo
-      field {.inject.} = self.tsu.puyoPuyo.field
+    template wrappedNazoPuyo(): auto {.redefine.} =
+      self.tsu
 
     body
   of Water:
-    let
-      nazoPuyo {.inject.} = self.water
-      puyoPuyo {.inject.} = self.water.puyoPuyo
-      field {.inject.} = self.water.puyoPuyo.field
+    template wrappedNazoPuyo(): auto {.redefine.} =
+      self.water
 
     body
-  {.pop.}
-
-# ------------------------------------------------
-# Property - Pairs&Positions
-# ------------------------------------------------
-
-func pairsPositions*(self): PairsPositions {.inline.} =
-  self.flattenAnd:
-    result = puyoPuyo.pairsPositions
-
-func pairsPositions*(mSelf): var PairsPositions {.inline.} =
-  case mSelf.rule
-  of Tsu:
-    result = mSelf.tsu.puyoPuyo.pairsPositions
-  of Water:
-    result = mSelf.water.puyoPuyo.pairsPositions
-
-func `pairsPositions=`*(mSelf; pairsPositions: PairsPositions) {.inline.} =
-  case mSelf.rule
-  of Tsu:
-    mSelf.tsu.puyoPuyo.pairsPositions = pairsPositions
-  of Water:
-    mSelf.water.puyoPuyo.pairsPositions = pairsPositions
-
-# ------------------------------------------------
-# Property - Next Index
-# ------------------------------------------------
-
-func nextIndex*(self): int {.inline.} =
-  self.flattenAnd:
-    result = puyoPuyo.nextIndex
-
-func incrementNextIndex*(mSelf) {.inline.} =
-  case mSelf.rule
-  of Tsu: mSelf.tsu.puyoPuyo.incrementNextIndex
-  of Water: mSelf.water.puyoPuyo.incrementNextIndex
-
-func decrementNextIndex*(mSelf) {.inline.} =
-  case mSelf.rule
-  of Tsu: mSelf.tsu.puyoPuyo.decrementNextIndex
-  of Water: mSelf.water.puyoPuyo.decrementNextIndex
-
-# ------------------------------------------------
-# Property - Requirement
-# ------------------------------------------------
-
-func requirement*(self): Requirement {.inline.} =
-  self.flattenAnd:
-    result = nazoPuyo.requirement
-
-func requirement*(mSelf): var Requirement {.inline.} =
-  case mSelf.rule
-  of Tsu:
-    result = mSelf.tsu.requirement
-  of Water:
-    result = mSelf.water.requirement
-
-func `requirement=`*(mSelf; req: Requirement) {.inline.} =
-  case mSelf.rule
-  of Tsu:
-    mSelf.tsu.requirement = req
-  of Water:
-    mSelf.water.requirement = req
-
-# ------------------------------------------------
-# Property - Rule
-# ------------------------------------------------
 
 func rule*(self): Rule {.inline.} =
   self.rule
@@ -130,12 +54,12 @@ func `rule=`*(mSelf; rule: Rule) {.inline.} =
   if rule == mSelf.rule:
     return
 
-  mSelf.rule = rule
-  case rule
-  of Tsu:
-    mSelf.tsu.puyoPuyo.field = mSelf.water.puyoPuyo.field.toTsuField
-  of Water:
-    mSelf.water.puyoPuyo.field = mSelf.tsu.puyoPuyo.field.toWaterField
+  mSelf.get:
+    case rule
+    of Tsu:
+      mSelf = wrappedNazoPuyo.toTsuNazoPuyo.initNazoPuyoWrap
+    of Water:
+      mSelf = wrappedNazoPuyo.toWaterNazoPuyo.initNazoPuyoWrap
 
 # ------------------------------------------------
 # Operator
@@ -144,8 +68,8 @@ func `rule=`*(mSelf; rule: Rule) {.inline.} =
 func `==`*(self; nazoPuyoWrap: NazoPuyoWrap): bool {.inline.} =
   case self.rule
   of Tsu:
-    nazoPuyoWrap.flattenAnd:
-      result = nazoPuyo == self.tsu
+    result = nazoPuyoWrap.get:
+      self.tsu == wrappedNazoPuyo
   of Water:
-    nazoPuyoWrap.flattenAnd:
-      result = nazoPuyo == self.water
+    result = nazoPuyoWrap.get:
+      self.water == wrappedNazoPuyo

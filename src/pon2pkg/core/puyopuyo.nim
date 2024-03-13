@@ -44,6 +44,26 @@ func `==`*(self: PuyoPuyo[WaterField], field: PuyoPuyo[TsuField]): bool {.inline
   false
 
 # ------------------------------------------------
+# Convert
+# ------------------------------------------------
+
+func toTsuPuyoPuyo*[F: TsuField or WaterField](
+    self: PuyoPuyo[F]
+): PuyoPuyo[TsuField] {.inline.} =
+  ## Returns the Tsu Puyo Puyo converted from the given Puyo Puyo.
+  result.field = self.field.toTsuField
+  result.pairsPositions = self.pairsPositions
+  result.nextIdx = self.nextIdx
+
+func toWaterPuyoPuyo*[F: TsuField or WaterField](
+    self: PuyoPuyo[F]
+): PuyoPuyo[WaterField] {.inline.} =
+  ## Returns the Water Puyo Puyo converted from the given Puyo Puyo.
+  result.field = self.field.toWaterField
+  result.pairsPositions = self.pairsPositions
+  result.nextIdx = self.nextIdx
+
+# ------------------------------------------------
 # Property
 # ------------------------------------------------
 

@@ -32,6 +32,19 @@ proc main*() =
     check puyoPuyo == initPuyoPuyo[TsuField]()
 
   # ------------------------------------------------
+  # Convert
+  # ------------------------------------------------
+
+  # toTsuPuyoPuyo, toWaterPuyoPuyo
+  block:
+    var puyoPuyo = initPuyoPuyo[TsuField]()
+    puyoPuyo.field[0, 0] = Red
+    puyoPuyo.pairsPositions.add PairPosition(pair: RedGreen, position: Up1)
+
+    check puyoPuyo.toWaterPuyoPuyo.toWaterPuyoPuyo.toTsuPuyoPuyo.toTsuPuyoPuyo ==
+      puyoPuyo
+
+  # ------------------------------------------------
   # Property
   # ------------------------------------------------
 

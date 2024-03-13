@@ -62,8 +62,9 @@ export
   moveresult.colors, moveresult.colorsSeq, moveresult.colorPlaces,
   moveresult.colorConnects, moveresult.score, moveresult.noticeGarbageCounts
 export
-  nazopuyo.NazoPuyo, nazopuyo.initNazoPuyo, nazopuyo.`==`, nazopuyo.rule,
-  nazopuyo.moveCount, nazopuyo.`$`, nazopuyo.parseNazoPuyo, nazopuyo.toUriQuery
+  nazopuyo.NazoPuyo, nazopuyo.initNazoPuyo, nazopuyo.`==`, nazopuyo.toTsuNazoPuyo,
+  nazopuyo.toWaterNazoPuyo, nazopuyo.rule, nazopuyo.moveCount, nazopuyo.`$`,
+  nazopuyo.parseNazoPuyo, nazopuyo.toUriQuery
 export notice.NoticeGarbage, notice.GarbageRates, notice.noticeGarbageCounts
 export
   pair.Pair, pair.initPair, pair.axis, pair.child, pair.isDouble, pair.`axis=`,
@@ -83,9 +84,10 @@ export
   position.parsePosition, position.toUriQuery
 export
   puyopuyo.PuyoPuyo, puyopuyo.reset, puyopuyo.initPuyoPuyo, puyopuyo.`==`,
-  puyopuyo.rule, puyopuyo.movingCompleted, puyopuyo.nextPairPosition,
-  puyopuyo.puyoCount, puyopuyo.colorCount, puyopuyo.garbageCount, puyopuyo.move,
-  puyopuyo.move0, puyopuyo.move1, puyopuyo.move2, puyopuyo.`$`, puyopuyo.parsePuyoPuyo,
+  puyopuyo.toTsuPuyoPuyo, puyopuyo.toWaterPuyoPuyo, puyopuyo.rule,
+  puyopuyo.movingCompleted, puyopuyo.nextPairPosition, puyopuyo.puyoCount,
+  puyopuyo.colorCount, puyopuyo.garbageCount, puyopuyo.move, puyopuyo.move0,
+  puyopuyo.move1, puyopuyo.move2, puyopuyo.`$`, puyopuyo.parsePuyoPuyo,
   puyopuyo.toUriQuery
 export
   requirement.RequirementKind, requirement.RequirementColor,

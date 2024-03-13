@@ -76,14 +76,17 @@ proc main*() =
   # play
   block:
     var marathon = initMarathon()
-    doAssert marathon.simulator[].nazoPuyoWrap.pairsPositions.len == 0
-    marathon.play(onlyMatched = false)
-    check marathon.simulator[].nazoPuyoWrap.pairsPositions.len > 0
 
-    marathon.match("rg")
-    marathon.play
-    check marathon.simulator[].nazoPuyoWrap.pairsPositions[0].pair == RedGreen
+    marathon.simulator[].nazoPuyoWrap.get:
+      doAssert wrappedNazoPuyo.puyoPuyo.pairsPositions.len == 0
 
-    marathon.play 0
-    check marathon.simulator[].nazoPuyoWrap.pairsPositions[0].pair == RedGreen
-    check marathon.matchPairsStrsSeq[0].startsWith "rg"
+      marathon.play(onlyMatched = false)
+      check wrappedNazoPuyo.puyoPuyo.pairsPositions.len > 0
+
+      marathon.match("rg")
+      marathon.play
+      check wrappedNazoPuyo.puyoPuyo.pairsPositions[0].pair == RedGreen
+
+      marathon.play 0
+      check wrappedNazoPuyo.puyoPuyo.pairsPositions[0].pair == RedGreen
+      check marathon.matchPairsStrsSeq[0].startsWith "rg"

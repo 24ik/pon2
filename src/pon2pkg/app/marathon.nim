@@ -206,7 +206,7 @@ func initReplaceData(keys: string): seq[seq[(string, string)]] {.inline.} =
 const
   ReplaceDataSeq = [
     "A".initReplaceData, "AB".initReplaceData, "ABC".initReplaceData,
-    "ABCD".initReplaceData
+    "ABCD".initReplaceData,
   ]
   NeedReplaceKeysSeq = ["a".toSet2, "ab".toSet2, "abc".toSet2, "abcd".toSet2]
 
@@ -251,8 +251,10 @@ proc play(mSelf; pairsStr: string) {.inline.} =
   let pairsPositions = pairsStr.toPairsPositions
 
   mSelf.simulator[].reset true
-  mSelf.simulator[].nazopuyoWrap.pairsPositions = pairsPositions
-  mSelf.simulator[].originalNazoPuyoWrap.pairsPositions = pairsPositions
+  mSelf.simulator[].nazopuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
+  mSelf.simulator[].originalNazopuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
 
   mSelf.focusSimulator = true
 

@@ -91,9 +91,9 @@ func initSimulator*(
   result.kind = Nazo
   result.mode = mode
 
-  nazoPuyoWrap.flattenAnd:
-    result.undoDeque = initDeque[NazoPuyoWrap](nazoPuyo.moveCount)
-    result.redoDeque = initDeque[NazoPuyoWrap](nazoPuyo.moveCount)
+  nazoPuyoWrap.get:
+    result.undoDeque = initDeque[NazoPuyoWrap](wrappedNazoPuyo.moveCount)
+    result.redoDeque = initDeque[NazoPuyoWrap](wrappedNazoPuyo.moveCount)
 
   result.next.index = Natural 0
   result.next.position = InitPos
@@ -191,7 +191,8 @@ func moveCursorUp*(mSelf) {.inline.} =
     mSelf.editing.field.row.decRot
   else:
     if mSelf.editing.pair.index == 0:
-      mSelf.editing.pair.index = mSelf.nazoPuyoWrap.pairsPositions.len
+      mSelf.editing.pair.index = mSelf.nazoPuyoWrap.get:
+        wrappedNazoPuyo.puyoPuyo.pairsPositions.len
     else:
       mSelf.editing.pair.index.dec
 
@@ -200,7 +201,9 @@ func moveCursorDown*(mSelf) {.inline.} =
   if mSelf.editing.focusField:
     mSelf.editing.field.row.incRot
   else:
-    if mSelf.editing.pair.index == mSelf.nazoPuyoWrap.pairsPositions.len:
+    let lastIdx = mSelf.nazoPuyoWrap.get:
+      wrappedNazoPuyo.puyoPuyo.pairsPositions.len
+    if mSelf.editing.pair.index == lastIdx:
       mSelf.editing.pair.index = Natural 0
     else:
       mSelf.editing.pair.index.inc
@@ -225,11 +228,12 @@ func moveCursorLeft*(mSelf) {.inline.} =
 
 func deletePairPosition*(mSelf; idx: Natural) {.inline.} =
   ## Deletes the pair&position.
-  if idx >= mSelf.nazoPuyoWrap.pairsPositions.len:
-    return
+  mSelf.nazoPuyoWrap.get:
+    if idx >= wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
+      return
 
-  mSelf.change:
-    mSelf.nazoPuyoWrap.pairsPositions.delete idx
+    mSelf.change:
+      wrappedNazoPuyo.puyoPuyo.pairsPositions.delete idx
 
 func deletePairPosition*(mSelf) {.inline.} =
   ## Deletes the pair&position at selecting index.
@@ -242,25 +246,14 @@ func deletePairPosition*(mSelf) {.inline.} =
 func writeCell(mSelf; row: Row, col: Column, cell: Cell) {.inline.} =
   ## Writes the cell to the field.
   mSelf.change:
-    if mSelf.editing.insert:
-      if cell == Cell.None:
-        case mSelf.rule
-        of Tsu:
-          mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.removeSqueeze row, col
-        of Water:
-          mSelf.nazoPuyoWrap.water.puyoPuyo.field.removeSqueeze row, col
+    mSelf.nazoPuyoWrap.get:
+      if mSelf.editing.insert:
+        if cell == Cell.None:
+          wrappedNazoPuyo.puyoPuyo.field.removeSqueeze row, col
+        else:
+          wrappedNazoPuyo.puyoPuyo.field.insert row, col, cell
       else:
-        case mSelf.rule
-        of Tsu:
-          mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.insert row, col, cell
-        of Water:
-          mSelf.nazoPuyoWrap.water.puyoPuyo.field.insert row, col, cell
-    else:
-      case mSelf.rule
-      of Tsu:
-        mSelf.nazoPuyoWrap.tsu.puyoPuyo.field[row, col] = cell
-      of Water:
-        mSelf.nazoPuyoWrap.water.puyoPuyo.field[row, col] = cell
+        wrappedNazoPuyo.puyoPuyo.field[row, col] = cell
 
 func writeCell*(mSelf; row: Row, col: Column) {.inline.} =
   ## Writes the selecting cell to the field.
@@ -276,20 +269,21 @@ func writeCell(mSelf; idx: Natural, axis: bool, cell: Cell) {.inline.} =
   of Cell.Red .. Cell.Purple:
     let color = ColorPuyo cell
     mSelf.change:
-      if idx == mSelf.nazoPuyoWrap.pairsPositions.len:
-        mSelf.nazoPuyoWrap.pairsPositions.add PairPosition(
-          pair: initPair(color, color), position: Position.None
-        )
-      else:
-        if mSelf.editing.insert:
-          mSelf.nazoPuyoWrap.pairsPositions.insert PairPosition(
+      mSelf.nazoPuyoWrap.get:
+        if idx == wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
+          wrappedNazoPuyo.puyoPuyo.pairsPositions.add PairPosition(
             pair: initPair(color, color), position: Position.None
-          ), idx
+          )
         else:
-          if axis:
-            mSelf.nazoPuyoWrap.pairsPositions[idx].pair.axis = color
+          if mSelf.editing.insert:
+            wrappedNazoPuyo.puyoPuyo.pairsPositions.insert PairPosition(
+              pair: initPair(color, color), position: Position.None
+            ), idx
           else:
-            mSelf.nazoPuyoWrap.pairsPositions[idx].pair.child = color
+            if axis:
+              wrappedNazoPuyo.puyoPuyo.pairsPositions[idx].pair.axis = color
+            else:
+              wrappedNazoPuyo.puyoPuyo.pairsPositions[idx].pair.child = color
 
 func writeCell*(mSelf; idx: Natural, axis: bool) {.inline.} =
   ## Writes the selecting cell to the pairs.
@@ -309,30 +303,26 @@ func writeCell*(mSelf; cell: Cell) {.inline.} =
 func shiftFieldUp*(mSelf) {.inline.} =
   ## Shifts the field upward.
   mSelf.change:
-    case mSelf.rule
-    of Tsu: mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.shiftUp
-    of Water: mSelf.nazoPuyoWrap.water.puyoPuyo.field.shiftUp
+    mSelf.nazoPuyoWrap.get:
+      wrappedNazoPuyo.puyoPuyo.field.shiftUp
 
 func shiftFieldDown*(mSelf) {.inline.} =
   ## Shifts the field downward.
   mSelf.change:
-    case mSelf.rule
-    of Tsu: mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.shiftDown
-    of Water: mSelf.nazoPuyoWrap.water.puyoPuyo.field.shiftDown
+    mSelf.nazoPuyoWrap.get:
+      wrappedNazoPuyo.puyoPuyo.field.shiftDown
 
 func shiftFieldRight*(mSelf) {.inline.} =
   ## Shifts the field rightward.
   mSelf.change:
-    case mSelf.rule
-    of Tsu: mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.shiftRight
-    of Water: mSelf.nazoPuyoWrap.water.puyoPuyo.field.shiftRight
+    mSelf.nazoPuyoWrap.get:
+      wrappedNazoPuyo.puyoPuyo.field.shiftRight
 
 func shiftFieldLeft*(mSelf) {.inline.} =
   ## Shifts the field leftward.
   mSelf.change:
-    case mSelf.rule
-    of Tsu: mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.shiftLeft
-    of Water: mSelf.nazoPuyoWrap.water.puyoPuyo.field.shiftLeft
+    mSelf.nazoPuyoWrap.get:
+      wrappedNazoPuyo.puyoPuyo.field.shiftLeft
 
 # ------------------------------------------------
 # Edit - Flip
@@ -341,16 +331,14 @@ func shiftFieldLeft*(mSelf) {.inline.} =
 func flipFieldV*(mSelf) {.inline.} =
   ## Flips the field vertically.
   mSelf.change:
-    case mSelf.rule
-    of Tsu: mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.flipV
-    of Water: mSelf.nazoPuyoWrap.water.puyoPuyo.field.flipV
+    mSelf.nazoPuyoWrap.get:
+      wrappedNazoPuyo.puyoPuyo.field.flipV
 
 func flipFieldH*(mSelf) {.inline.} =
   ## Flips the field horizontally.
   mSelf.change:
-    case mSelf.rule
-    of Tsu: mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.flipH
-    of Water: mSelf.nazoPuyoWrap.water.puyoPuyo.field.flipH
+    mSelf.nazoPuyoWrap.get:
+      wrappedNazoPuyo.puyoPuyo.field.flipH
 
 # ------------------------------------------------
 # Edit - Requirement
@@ -358,43 +346,46 @@ func flipFieldH*(mSelf) {.inline.} =
 
 func `requirementKind=`*(mSelf; kind: RequirementKind) {.inline.} =
   ## Sets the requirement kind.
-  if kind == mSelf.nazoPuyoWrap.requirement.kind:
-    return
+  mSelf.nazoPuyoWrap.get:
+    if kind == wrappedNazoPuyo.requirement.kind:
+      return
 
-  {.cast(uncheckedAssign).}:
-    mSelf.change:
-      if kind in ColorKinds:
-        if mSelf.nazoPuyoWrap.requirement.kind in ColorKinds:
-          mSelf.nazoPuyoWrap.requirement.kind = kind
+    {.cast(uncheckedAssign).}:
+      mSelf.change:
+        if kind in ColorKinds:
+          if wrappedNazoPuyo.requirement.kind in ColorKinds:
+            wrappedNazoPuyo.requirement.kind = kind
+          else:
+            wrappedNazoPuyo.requirement = Requirement(
+              kind: kind,
+              color: RequirementColor.low,
+              number: wrappedNazoPuyo.requirement.number,
+            )
         else:
-          mSelf.nazoPuyoWrap.requirement = Requirement(
-            kind: kind,
-            color: RequirementColor.low,
-            number: mSelf.nazoPuyoWrap.requirement.number,
-          )
-      else:
-        mSelf.nazoPuyoWrap.requirement =
-          Requirement(kind: kind, number: mSelf.nazoPuyoWrap.requirement.number)
+          wrappedNazoPuyo.requirement =
+            Requirement(kind: kind, number: wrappedNazoPuyo.requirement.number)
 
 func `requirementColor=`*(mSelf; color: RequirementColor) {.inline.} =
   ## Sets the requirement color.
-  if mSelf.nazoPuyoWrap.requirement.kind in NoColorKinds:
-    return
-  if color == mSelf.nazoPuyoWrap.requirement.color:
-    return
+  mSelf.nazoPuyoWrap.get:
+    if wrappedNazoPuyo.requirement.kind in NoColorKinds:
+      return
+    if color == wrappedNazoPuyo.requirement.color:
+      return
 
-  mSelf.change:
-    mSelf.nazoPuyoWrap.requirement.color = color
+    mSelf.change:
+      wrappedNazoPuyo.requirement.color = color
 
 func `requirementNumber=`*(mSelf; num: RequirementNumber) {.inline.} =
   ## Sets the requirement number.
-  if mSelf.nazoPuyoWrap.requirement.kind in NoNumberKinds:
-    return
-  if num == mSelf.nazoPuyoWrap.requirement.number:
-    return
+  mSelf.nazoPuyoWrap.get:
+    if wrappedNazoPuyo.requirement.kind in NoNumberKinds:
+      return
+    if num == wrappedNazoPuyo.requirement.number:
+      return
 
-  mSelf.change:
-    mSelf.nazoPuyoWrap.requirement.number = num
+    mSelf.change:
+      wrappedNazoPuyo.requirement.number = num
 
 # ------------------------------------------------
 # Edit - Undo / Redo
@@ -444,74 +435,50 @@ func rotateNextPositionLeft*(mSelf) {.inline.} = ## Rotates the next position le
 func forward*(mSelf; replay = false, skip = false) {.inline.} =
   ## Forwards the simulator.
   ## `replay` is prioritized over `skip`.
-  case mSelf.state
-  of Stable:
-    mSelf.nazoPuyoWrap.flattenAnd:
-      if nazoPuyo.puyoPuyo.movingCompleted:
+  mSelf.nazoPuyoWrap.get:
+    case mSelf.state
+    of Stable:
+      if wrappedNazoPuyo.puyoPuyo.movingCompleted:
         return
 
-    mSelf.moveResult = DefaultMoveResult
-    mSelf.save
+      mSelf.moveResult = DefaultMoveResult
+      mSelf.save
 
-    if not replay:
-      mSelf.nazoPuyoWrap.pairsPositions[mSelf.next.index].position =
-        if skip: Position.None else: mSelf.next.position
+      if not replay:
+        wrappedNazoPuyo.puyoPuyo.pairsPositions[mSelf.next.index].position =
+          if skip: Position.None else: mSelf.next.position
 
-    # put
-    block:
-      let
-        pairPos = mSelf.nazoPuyoWrap.pairsPositions[mSelf.next.index]
-        pair = pairPos.pair
-        pos = pairPos.position
+      # put
+      block:
+        let pairPos = wrappedNazoPuyo.puyoPuyo.pairsPositions[mSelf.next.index]
+        wrappedNazoPuyo.puyoPuyo.field.put pairPos.pair, pairPos.position
 
-      case mSelf.nazoPuyoWrap.rule
-      of Tsu:
-        mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.put pair, pos
-      of Water:
-        mSelf.nazoPuyoWrap.water.puyoPuyo.field.put pair, pos
+      # disappear
+      block:
+        if wrappedNazoPuyo.puyoPuyo.field.willDisappear:
+          mSelf.state = WillDisappear
+        else:
+          mSelf.state = Stable
+          mSelf.next.index.inc
+          mSelf.next.position = InitPos
+          wrappedNazoPuyo.puyoPuyo.incrementNextIndex
+    of WillDisappear:
+      let disappearRes = wrappedNazoPuyo.puyoPuyo.field.disappear
 
-    # disappear
-    block:
-      let willDisappear2 =
-        case mSelf.rule
-        of Tsu: mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.willDisappear
-        of Water: mSelf.nazoPuyoWrap.water.puyoPuyo.field.willDisappear
+      for puyo in Puyo.low .. Puyo.high:
+        mSelf.moveResult.disappearCounts[puyo].inc disappearRes.puyoCount puyo
+      mSelf.moveResult.fullDisappearCounts.add disappearRes.connectionCounts
 
-      if willDisappear2:
+      mSelf.state = Disappearing
+    of Disappearing:
+      wrappedNazoPuyo.puyoPuyo.field.drop
+      if wrappedNazoPuyo.puyoPuyo.field.willDisappear:
         mSelf.state = WillDisappear
       else:
         mSelf.state = Stable
         mSelf.next.index.inc
         mSelf.next.position = InitPos
-        mSelf.nazoPuyoWrap.incrementNextIndex
-  of WillDisappear:
-    let disappearRes =
-      case mSelf.rule
-      of Tsu: mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.disappear
-      of Water: mSelf.nazoPuyoWrap.water.puyoPuyo.field.disappear
-
-    for puyo in Puyo.low .. Puyo.high:
-      mSelf.moveResult.disappearCounts[puyo].inc disappearRes.puyoCount puyo
-    mSelf.moveResult.fullDisappearCounts.add disappearRes.connectionCounts
-
-    mSelf.state = Disappearing
-  of Disappearing:
-    let willDisappear2 =
-      case mSelf.rule
-      of Tsu:
-        mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.drop
-        mSelf.nazoPuyoWrap.tsu.puyoPuyo.field.willDisappear
-      of Water:
-        mSelf.nazoPuyoWrap.water.puyoPuyo.field.drop
-        mSelf.nazoPuyoWrap.water.puyoPuyo.field.willDisappear
-
-    if willDisappear2:
-      mSelf.state = WillDisappear
-    else:
-      mSelf.state = Stable
-      mSelf.next.index.inc
-      mSelf.next.position = InitPos
-      mSelf.nazoPuyoWrap.incrementNextIndex
+        wrappedNazoPuyo.puyoPuyo.incrementNextIndex
 
 func backward*(mSelf) {.inline.} =
   ## Backwards the simulator.
@@ -523,30 +490,32 @@ func backward*(mSelf) {.inline.} =
   if mSelf.state == Stable:
     mSelf.next.index.dec
 
-  let savePos = mSelf.nazoPuyoWrap.pairsPositions[mSelf.next.index].position
-  mSelf.nazoPuyoWrap = mSelf.undoDeque.popLast
-  mSelf.state = Stable
-  mSelf.next.position = InitPos
+  mSelf.nazoPuyoWrap.get:
+    let savePos = wrappedNazoPuyo.puyoPuyo.pairsPositions[mSelf.next.index].position
+    mSelf.nazoPuyoWrap = mSelf.undoDeque.popLast
+    mSelf.state = Stable
+    mSelf.next.position = InitPos
 
-  mSelf.nazoPuyoWrap.pairsPositions[mSelf.next.index].position = savePos
+    wrappedNazoPuyo.puyoPuyo.pairsPositions[mSelf.next.index].position = savePos
 
 func reset*(mSelf; resetPosition = true) {.inline.} =
   ## Resets the simulator.
-  let savePairsPositions = mSelf.nazoPuyoWrap.pairsPositions
-  mSelf.state = Stable
-  mSelf.nazoPuyoWrap = mSelf.originalNazoPuyoWrap
-  mSelf.undoDeque.clear
-  mSelf.redoDeque.clear
-  mSelf.next.index = 0
-  mSelf.next.position = InitPos
-  mSelf.moveResult = DefaultMoveResult
+  mSelf.nazoPuyoWrap.get:
+    let savePairsPositions = wrappedNazoPuyo.puyoPuyo.pairsPositions
+    mSelf.state = Stable
+    mSelf.nazoPuyoWrap = mSelf.originalNazoPuyoWrap
+    mSelf.undoDeque.clear
+    mSelf.redoDeque.clear
+    mSelf.next.index = 0
+    mSelf.next.position = InitPos
+    mSelf.moveResult = DefaultMoveResult
 
-  for i in 0 ..< mSelf.nazoPuyoWrap.pairsPositions.len:
-    mSelf.nazoPuyoWrap.pairsPositions[i].position =
-      if resetPosition:
-        Position.None
-      else:
-        savePairsPositions[i].position
+    for i in 0 ..< wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
+      wrappedNazoPuyo.puyoPuyo.pairsPositions[i].position =
+        if resetPosition:
+          Position.None
+        else:
+          savePairsPositions[i].position
 
 # ------------------------------------------------
 # Simulator <-> URI
@@ -590,33 +559,34 @@ func toUri*(self; withPositions: bool, editor: bool, host = Izumiya): Uri {.inli
         'n'
     result.path = &"/simu/p{modeChar}.html"
 
-  # query
-  self.originalNazoPuyoWrap.flattenAnd:
-    var nazo = nazoPuyo
+  let mainQuery: string
+  self.originalNazoPuyoWrap.get:
+    # position
+    var nazo = wrappedNazoPuyo
     if not withPositions:
       for pairPos in nazo.puyoPuyo.pairsPositions.mitems:
         pairPos.position = Position.None
 
     # nazopuyo / puyopuyo
-    let mainQuery =
+    mainQuery =
       case self.kind
       of Regular:
         nazo.puyoPuyo.toUriQuery host
       of Nazo:
         nazo.toUriQuery host
 
-    case host
-    of Izumiya:
-      # editor, kind, mode
-      var queries = newSeq[(string, string)](0)
-      if editor:
-        queries.add (EditorKey, "")
-      queries.add (KindKey, $self.kind)
-      queries.add (ModeKey, $self.mode)
+  case host
+  of Izumiya:
+    # editor, kind, mode
+    var queries = newSeq[(string, string)](0)
+    if editor:
+      queries.add (EditorKey, "")
+    queries.add (KindKey, $self.kind)
+    queries.add (ModeKey, $self.mode)
 
-      result.query = &"{queries.encodeQuery}&{mainQuery}"
-    of Ishikawa, Ips:
-      result.query = mainQuery
+    result.query = &"{queries.encodeQuery}&{mainQuery}"
+  of Ishikawa, Ips:
+    result.query = mainQuery
 
 func toUri*(self; withPositions: bool, host = Izumiya): Uri {.inline.} =
   ## Returns the URI converted from the simulator.

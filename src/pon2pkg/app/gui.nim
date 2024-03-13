@@ -115,12 +115,12 @@ proc solve*(
 
   mSelf.solving = true
 
-  mSelf.simulator[].nazoPuyoWrap.flattenAnd:
+  mSelf.simulator[].nazoPuyoWrap.get:
     when defined(js):
       {.push warning[ProveInit]: off.}
       var results = @[none seq[PairsPositions]]
       {.pop.}
-      nazoPuyo.asyncSolve(results, parallelCount = parallelCount)
+      wrappedNazoPuyo.asyncSolve(results, parallelCount = parallelCount)
 
       mSelf.progressBarData.total =
         if mSelf.simulator[].nazoPuyoWrap.pairsPositions[0].pair.isDouble:
@@ -135,7 +135,7 @@ proc solve*(
         if results.allIt it.isSome:
           mSelf.progressBarData.total = 0
           mSelf.replayPairsPositionsSeq = some results.mapIt(it.get).concat
-          mSelf.updateReplaySimulator nazoPuyo
+          mSelf.updateReplaySimulator wrappedNazoPuyo
           mSelf.solving = false
           interval.clearInterval
 
@@ -145,8 +145,9 @@ proc solve*(
       interval = showReplay.setInterval ResultMonitorIntervalMs
     else:
       # FIXME: make asynchronous, redraw
-      mSelf.replayPairsPositionsSeq = some nazoPuyo.solve(parallelCount = parallelCount)
-      mSelf.updateReplaySimulator nazoPuyo
+      mSelf.replayPairsPositionsSeq =
+        some wrappedNazoPuyo.solve(parallelCount = parallelCount)
+      mSelf.updateReplaySimulator wrappedNazoPuyo
       mSelf.solving = false
 
 # ------------------------------------------------
@@ -172,17 +173,17 @@ proc permute*(
 
   mSelf.permuting = true
 
-  mSelf.simulator[].nazoPuyoWrap.flattenAnd:
+  mSelf.simulator[].nazoPuyoWrap.get:
     when defined(js):
       {.push warning[ProveInit]: off.}
       var results = @[none PairsPositions]
       {.pop.}
-      nazoPuyo.asyncPermute(
+      wrappedNazoPuyo.asyncPermute(
         results, fixMoves, allowDouble, allowLastDouble, parallelCount
       )
 
       mSelf.progressBarData.total =
-        nazoPuyo.allPairsPositionsSeq(fixMoves, allowDouble, allowLastDouble).len
+        wrappedNazoPuyo.allPairsPositionsSeq(fixMoves, allowDouble, allowLastDouble).len
       mSelf.progressBarData.now = 0
 
       var interval: Interval
@@ -191,7 +192,7 @@ proc permute*(
         if results.allIt it.isSome:
           mSelf.progressBarData.total = 0
           mSelf.replayPairsPositionsSeq = some results.mapIt(it.get)
-          mSelf.updateReplaySimulator nazoPuyo
+          mSelf.updateReplaySimulator wrappedNazoPuyo
           mSelf.permuting = false
           interval.clearInterval
 
@@ -202,8 +203,8 @@ proc permute*(
     else:
       # FIXME: make asynchronous, redraw
       mSelf.replayPairsPositionsSeq =
-        some nazoPuyo.permute(fixMoves, allowDouble, allowLastDouble).toSeq
-      mSelf.updateReplaySimulator nazoPuyo
+        some wrappedNazoPuyo.permute(fixMoves, allowDouble, allowLastDouble).toSeq
+      mSelf.updateReplaySimulator wrappedNazoPuyo
       mSelf.permuting = false
 
 {.pop.}
@@ -222,10 +223,12 @@ proc nextReplay*(mSelf) {.inline.} =
   else:
     mSelf.replayIdx.inc
 
-  mSelf.replaySimulator[].nazoPuyoWrap.pairsPositions =
-    mSelf.replayPairsPositionsSeq.get[mSelf.replayIdx]
-  mSelf.replaySimulator[].originalNazoPuyoWrap.pairsPositions =
-    mSelf.replayPairsPositionsSeq.get[mSelf.replayIdx]
+  mSelf.replaySimulator[].nazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.pairsPositions =
+      mSelf.replayPairsPositionsSeq.get[mSelf.replayIdx]
+  mSelf.replaySimulator[].originalNazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.pairsPositions =
+      mSelf.replayPairsPositionsSeq.get[mSelf.replayIdx]
   mSelf.replaySimulator[].reset false
 
 proc prevReplay*(mSelf) {.inline.} =
@@ -238,10 +241,12 @@ proc prevReplay*(mSelf) {.inline.} =
   else:
     mSelf.replayIdx.dec
 
-  mSelf.replaySimulator[].nazoPuyoWrap.pairsPositions =
-    mSelf.replayPairsPositionsSeq.get[mSelf.replayIdx]
-  mSelf.replaySimulator[].originalNazoPuyoWrap.pairsPositions =
-    mSelf.replayPairsPositionsSeq.get[mSelf.replayIdx]
+  mSelf.replaySimulator[].nazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.pairsPositions =
+      mSelf.replayPairsPositionsSeq.get[mSelf.replayIdx]
+  mSelf.replaySimulator[].originalNazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.pairsPositions =
+      mSelf.replayPairsPositionsSeq.get[mSelf.replayIdx]
   mSelf.replaySimulator[].reset false
 
 # ------------------------------------------------

@@ -38,6 +38,18 @@ func `==`*(self: WaterField, field: TsuField): bool {.inline.} =
   false
 
 # ------------------------------------------------
+# Convert
+# ------------------------------------------------
+
+func toTsuField*(self: TsuField): TsuField {.inline.} =
+  ## Returns the Tsu field converted from the given field.
+  result = self
+
+func toWaterField*(self: WaterField): WaterField {.inline.} =
+  ## Returns the Water field converted from the given field.
+  result = self
+
+# ------------------------------------------------
 # Property
 # ------------------------------------------------
 
