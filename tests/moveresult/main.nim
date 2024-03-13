@@ -91,12 +91,14 @@ rg|"""
       expect FieldDefect:
         discard res0.puyoCounts(Red)
       check res1.puyoCounts(Red) == red
-      check res2.puyoCounts(Red) == red
+      expect FieldDefect:
+        discard res2.puyoCounts(Red)
 
       expect FieldDefect:
         discard res0.puyoCounts
       check res1.puyoCounts == puyo
-      check res2.puyoCounts == puyo
+      expect FieldDefect:
+        discard res2.puyoCounts
 
     # colorCounts
     block:
@@ -105,7 +107,8 @@ rg|"""
       expect FieldDefect:
         discard res0.colorCounts
       check res1.colorCounts == color
-      check res2.colorCounts == color
+      expect FieldDefect:
+        discard res2.colorCounts
 
     # garbageCounts
     block:
@@ -114,7 +117,8 @@ rg|"""
       expect FieldDefect:
         discard res0.garbageCounts
       check res1.garbageCounts == garbage
-      check res2.garbageCounts == garbage
+      expect FieldDefect:
+        discard res2.garbageCounts
 
     # colors
     block:
@@ -131,7 +135,8 @@ rg|"""
       expect FieldDefect:
         discard res0.colorsSeq
       check res1.colorsSeq == colorsSeq
-      check res2.colorsSeq == colorsSeq
+      expect FieldDefect:
+        discard res2.colorsSeq
 
     # colorPlaces
     block:
