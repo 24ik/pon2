@@ -158,4 +158,4 @@ func mark*[F: TsuField or WaterField](
 
 func mark*[F: TsuField or WaterField](nazo: NazoPuyo[F]): MarkResult {.inline.} =
   ## Marks the positions.
-  nazo.mark nazo.puyoPuyo.pairsPosition
+  nazo.mark nazo.puyoPuyo.pairsPositions
