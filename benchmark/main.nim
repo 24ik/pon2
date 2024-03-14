@@ -1,6 +1,6 @@
 {.experimental: "strictDefs".}
 
-import std/[math, monotimes, times, uri]
+import std/[math, monotimes, times]
 import ../src/pon2pkg/[app, core]
 
 template benchmark(
@@ -79,39 +79,30 @@ bg|3N"""
 
   block:
     var puyoPuyo = initPuyoPuyo[TsuField]()
-    benchmark "move (Vanilla)", 10 ^ 4:
+    benchmark "move (Level0)", 10 ^ 4:
       puyoPuyo = puyoPuyo19
     do:
-      puyoPuyo.move
+      discard puyoPuyo.move0
 
   block:
     var puyoPuyo = initPuyoPuyo[TsuField]()
-    benchmark "move (Rough)", 10 ^ 4:
+    benchmark "move (Level1)", 10 ^ 4:
       puyoPuyo = puyoPuyo19
     do:
-      discard puyoPuyo.moveWithRoughTracking
+      discard puyoPuyo.move1
 
   block:
     var puyoPuyo = initPuyoPuyo[TsuField]()
-    benchmark "move (Detail)", 10 ^ 4:
+    benchmark "move (Level2)", 10 ^ 4:
       puyoPuyo = puyoPuyo19
     do:
-      discard puyoPuyo.moveWithDetailTracking
-  block:
-    var puyoPuyo = initPuyoPuyo[TsuField]()
-    benchmark "move (Full)", 10 ^ 4:
-      puyoPuyo = puyoPuyo19
-    do:
-      discard puyoPuyo.moveWithFullTracking
+      discard puyoPuyo.move2
 
   block:
-    let nazoWrap = (
-      "https://ishikawapuyo.net/simu/pn.html?" &
-      "c01cw2jo9jAbckAq9zqhacs9jAiSr_c1g1E1E1c1A1__200"
-    ).parseUri.parseSimulator.nazoPuyoWrap
-
+    let nazo = parseNazoPuyo[TsuField](
+      "c01cw2jo9jAbckAq9zqhacs9jAiSr_c1g1E1E1c1A1__200", Ishikawa
+    )
     benchmark "Solve (Rashomon)", 1:
       discard
     do:
-      nazoWrap.flattenAnd:
-        discard nazoPuyo.solve
+      discard nazo.solve

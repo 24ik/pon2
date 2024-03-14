@@ -123,10 +123,10 @@ proc solve*(
       wrappedNazoPuyo.asyncSolve(results, parallelCount = parallelCount)
 
       mSelf.progressBarData.total =
-        if mSelf.simulator[].nazoPuyoWrap.pairsPositions[0].pair.isDouble:
-          field.validDoublePositions.len
+        if wrappedNazoPuyo.puyoPuyo.pairsPositions[0].pair.isDouble:
+          wrappedNazoPuyo.puyoPuyo.field.validDoublePositions.card
         else:
-          field.validPositions.len
+          wrappedNazoPuyo.puyoPuyo.field.validPositions.card
       mSelf.progressBarData.now = 0
 
       var interval: Interval
@@ -226,9 +226,6 @@ proc nextReplay*(mSelf) {.inline.} =
   mSelf.replaySimulator[].nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.pairsPositions =
       mSelf.replayPairsPositionsSeq.get[mSelf.replayIdx]
-  mSelf.replaySimulator[].originalNazoPuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions =
-      mSelf.replayPairsPositionsSeq.get[mSelf.replayIdx]
   mSelf.replaySimulator[].reset false
 
 proc prevReplay*(mSelf) {.inline.} =
@@ -242,9 +239,6 @@ proc prevReplay*(mSelf) {.inline.} =
     mSelf.replayIdx.dec
 
   mSelf.replaySimulator[].nazoPuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions =
-      mSelf.replayPairsPositionsSeq.get[mSelf.replayIdx]
-  mSelf.replaySimulator[].originalNazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.pairsPositions =
       mSelf.replayPairsPositionsSeq.get[mSelf.replayIdx]
   mSelf.replaySimulator[].reset false

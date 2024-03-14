@@ -39,8 +39,6 @@ proc initPairsNode*(
     editMode = simulator.mode == Edit and not displayMode
     pairsPositions = simulator.nazoPuyoWrap.get:
       wrappedNazoPuyo.puyoPuyo.pairsPositions
-    originalPairsPositions = simulator.originalNazoPuyoWrap.get:
-      wrappedNazoPuyo.puyoPuyo.pairsPositions
 
   result = buildHtml(table(class = "table is-narrow")):
     tbody:
@@ -119,24 +117,22 @@ proc initPairsNode*(
               span(class = "icon"):
                 italic(class = "fa-solid fa-trash")
           td:
-            text $originalPairsPositions.len.succ
+            text $pairsPositions.len.succ
           td:
             tdiv(class = "columns is-mobile is-gapless"):
               tdiv(class = "column is-narrow"):
                 button(
-                  class = simulator.cellClass(originalPairsPositions.len, true),
+                  class = simulator.cellClass(pairsPositions.len, true),
                   style = style(StyleAttr.maxHeight, kstring"24px"),
-                  onclick =
-                    simulator.initCellClickHandler(originalPairsPositions.len, true),
+                  onclick = simulator.initCellClickHandler(pairsPositions.len, true),
                 ):
                   figure(class = "image is-24x24"):
                     img(src = Cell.None.cellImageSrc)
               tdiv(class = "column is-narrow"):
                 button(
-                  class = simulator.cellClass(originalPairsPositions.len, false),
+                  class = simulator.cellClass(pairsPositions.len, false),
                   style = style(StyleAttr.maxHeight, kstring"24px"),
-                  onclick =
-                    simulator.initCellClickHandler(originalPairsPositions.len, false),
+                  onclick = simulator.initCellClickHandler(pairsPositions.len, false),
                 ):
                   figure(class = "image is-24x24"):
                     img(src = Cell.None.cellImageSrc)

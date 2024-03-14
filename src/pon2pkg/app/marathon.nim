@@ -253,8 +253,6 @@ proc play(mSelf; pairsStr: string) {.inline.} =
   mSelf.simulator[].reset true
   mSelf.simulator[].nazopuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
-  mSelf.simulator[].originalNazopuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
 
   mSelf.focusSimulator = true
 

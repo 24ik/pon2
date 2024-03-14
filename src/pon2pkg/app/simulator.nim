@@ -42,7 +42,6 @@ type
     ## Note that `editor` field does not affect the behaviour; it is used only
     ## by rendering.
     nazoPuyoWrap*: NazoPuyoWrap
-    originalNazoPuyoWrap*: NazoPuyoWrap
     moveResult: MoveResult
 
     editor*: bool
@@ -83,7 +82,6 @@ func initSimulator*(
   ## Returns a new simulator.
   ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
   result.nazoPuyoWrap = nazoPuyoWrap
-  result.originalNazoPuyoWrap = nazoPuyoWrap
   result.moveResult = DefaultMoveResult
 
   result.editor = editor or mode == Edit
@@ -146,7 +144,8 @@ func `mode=`*(mSelf; mode: SimulatorMode) {.inline.} =
     mSelf.editor = true
 
   if mode == Edit or mSelf.mode == Edit:
-    mSelf.nazoPuyoWrap = mSelf.originalNazoPuyoWrap
+    if mSelf.undoDeque.len > 0:
+      mSelf.nazoPuyoWrap = mSelf.undoDeque.popFirst
     mSelf.state = Stable
     mSelf.undoDeque.clear
     mSelf.redoDeque.clear
@@ -159,6 +158,14 @@ func `mode=`*(mSelf; mode: SimulatorMode) {.inline.} =
 
 func score*(self): int {.inline.} = ## Returns the score.
   self.moveResult.score
+
+# ------------------------------------------------
+# Property - Original
+# ------------------------------------------------
+
+func originalNazoPuyoWrap*(self): NazoPuyoWrap {.inline.} =
+  ## Returns the wrapped Nazo Puyo before any moves.
+  if self.undoDeque.len > 0: self.undoDeque.peekFirst else: self.nazoPuyoWrap
 
 # ------------------------------------------------
 # Edit - Other
@@ -179,7 +186,6 @@ template change(mSelf; body: untyped) =
   ## Helper template for operations that changes `originalNazoPuyoWrap`.
   mSelf.save
   body
-  mSelf.originalNazoPuyoWrap = mSelf.nazoPuyoWrap
 
 # ------------------------------------------------
 # Edit - Cursor
@@ -399,8 +405,6 @@ func undo*(mSelf) {.inline.} =
   mSelf.redoDeque.addLast mSelf.nazoPuyoWrap
   mSelf.nazoPuyoWrap = mSelf.undoDeque.popLast
 
-  mSelf.originalNazoPuyoWrap = mSelf.nazoPuyoWrap
-
 func redo*(mSelf) {.inline.} =
   ## Performs redo.
   if mSelf.redoDeque.len == 0:
@@ -408,8 +412,6 @@ func redo*(mSelf) {.inline.} =
 
   mSelf.undoDeque.addLast mSelf.nazoPuyoWrap
   mSelf.nazoPuyoWrap = mSelf.redoDeque.popLast
-
-  mSelf.originalNazoPuyoWrap = mSelf.nazoPuyoWrap
 
 # ------------------------------------------------
 # Play - Position
@@ -503,7 +505,8 @@ func reset*(mSelf; resetPosition = true) {.inline.} =
   mSelf.nazoPuyoWrap.get:
     let savePairsPositions = wrappedNazoPuyo.puyoPuyo.pairsPositions
     mSelf.state = Stable
-    mSelf.nazoPuyoWrap = mSelf.originalNazoPuyoWrap
+    if mSelf.undoDeque.len > 0:
+      mSelf.nazoPuyoWrap = mSelf.undoDeque.popFirst
     mSelf.undoDeque.clear
     mSelf.redoDeque.clear
     mSelf.next.index = 0
@@ -560,7 +563,7 @@ func toUri*(self; withPositions: bool, editor: bool, host = Izumiya): Uri {.inli
     result.path = &"/simu/p{modeChar}.html"
 
   let mainQuery: string
-  self.originalNazoPuyoWrap.get:
+  self.nazoPuyoWrap.get:
     # position
     var nazo = wrappedNazoPuyo
     if not withPositions:

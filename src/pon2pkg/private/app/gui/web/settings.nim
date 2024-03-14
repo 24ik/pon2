@@ -55,7 +55,9 @@ proc initEditorSettingsNode*(
               id = kstring &"{AllowLastDoubleCheckboxIdPrefix}{id}", `type` = "checkbox"
             )
           text "　N手目を固定:"
-          for pairIdx in 0 ..< guiApplication.simulator[].nazoPuyoWrap.pairsPositions.len:
+          let pairsPositions = guiApplication.simulator[].nazoPuyoWrap.get:
+            wrappedNazoPuyo.puyoPuyo.pairsPositions
+          for pairIdx in 0 ..< pairsPositions.len:
             label(class = "checkbox"):
               text kstring &"　{pairIdx.succ}"
               input(
