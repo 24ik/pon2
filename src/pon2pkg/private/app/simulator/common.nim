@@ -119,20 +119,21 @@ func nextPairCell*(
 func immediateNextPairCell*(simulator: Simulator, axis: bool): Cell {.inline.} =
   ## Returns the next-pair's cell in the immediate pairs.
   simulator.nazoPuyoWrap.get:
-    if wrappedNazoPuyo.puyoPuyo.nextIndex >= wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
+    let nextIdx = wrappedNazoPuyo.puyoPuyo.nextIndex
+    if nextIdx >= wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
       return Cell.None
 
-    let pair = wrappedNazoPuyo.puyoPuyo.pairsPositions[^1].pair
+    let pair = wrappedNazoPuyo.puyoPuyo.pairsPositions[nextIdx].pair
     result = if axis: pair.axis else: pair.child
 
 func immediateDoubleNextPairCell*(simulator: Simulator, axis: bool): Cell {.inline.} =
   ## Returns the double-next-pair's cell in the immediate pairs.
   simulator.nazoPuyoWrap.get:
-    if wrappedNazoPuyo.puyoPuyo.nextIndex.succ >=
-        wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
+    let doubleNextIdx = wrappedNazoPuyo.puyoPuyo.nextIndex.succ
+    if doubleNextIdx >= wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
       return Cell.None
 
-    let pair = wrappedNazoPuyo.puyoPuyo.pairsPositions[^2].pair
+    let pair = wrappedNazoPuyo.puyoPuyo.pairsPositions[doubleNextIdx].pair
     result = if axis: pair.axis else: pair.child
 
 # ------------------------------------------------
