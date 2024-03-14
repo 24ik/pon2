@@ -5,38 +5,33 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, tables]
+import std/[options]
 import
   ./[cell, field, moveresult, nazopuyo, pairposition, position, puyopuyo, requirement]
 import ../private/core/[mark]
 
 type MarkResult* = enum
   ## Marking result.
-  Accept
-  WrongAnswer
-  Dead
-  ImpossibleMove
-  SkipMove
-  NotSupport
+  Accept = "クリア！"
+  WrongAnswer = "　"
+  Dead = "ばたんきゅ〜"
+  ImpossibleMove = "不可能な設置"
+  SkipMove = "設置スキップ"
+  NotSupport = "未対応の条件"
 
 # ------------------------------------------------
 # Mark
 # ------------------------------------------------
 
-const ReqColorToPuyo = {
-  RequirementColor.Garbage: Cell.Garbage.Puyo,
-  RequirementColor.Red: Cell.Red.Puyo,
-  RequirementColor.Green: Cell.Green.Puyo,
-  RequirementColor.Blue: Cell.Blue.Puyo,
-  RequirementColor.Yellow: Cell.Yellow.Puyo,
-  RequirementColor.Purple: Cell.Purple.Puyo,
-}.toTable
+const ReqColorToPuyo: array[RequirementColor, Puyo] = [
+  Puyo.low, Cell.Red, Cell.Green, Cell.Blue, Cell.Yellow, Cell.Purple, Cell.Garbage,
+  Puyo.low,
+]
 
 func mark*[F: TsuField or WaterField](
-    nazo: NazoPuyo[F], endIdx: Natural
+    nazo: NazoPuyo[F], pairsPositions: PairsPositions
 ): MarkResult {.inline.} =
   ## Marks the positions.
-  ## Uses `nazo.puyoPuyo.pairsPositions[0 ..< endIdx]` to mark.
   if not nazo.requirement.isSupported:
     return NotSupport
 
@@ -46,18 +41,16 @@ func mark*[F: TsuField or WaterField](
     disappearColors = set[ColorPuyo]({}) # used for DisappearColor
     disappearCount = 0 # used for DisappearCount
 
-  for pairPosIdx in 0 ..< endIdx:
-    let pos = nazo.puyoPuyo.pairsPositions[pairPosIdx].position
-
+  for pairPos in pairsPositions:
     # skip
-    if pos == Position.None:
+    if pairPos.position == Position.None:
       skipped = true
       continue
     if skipped:
       return SkipMove
 
     # impossible move
-    if pos in nazo2.puyoPuyo.field.invalidPositions:
+    if pairPos.position in nazo2.puyoPuyo.field.invalidPositions:
       return ImpossibleMove
 
     # move
@@ -65,12 +58,12 @@ func mark*[F: TsuField or WaterField](
       case nazo.requirement.kind
       of Clear, Chain, ChainMore, DisappearColor, DisappearColorMore, DisappearCount,
           DisappearCountMore, ChainClear, ChainMoreClear:
-        nazo2.puyoPuyo.move0 pos
+        nazo2.puyoPuyo.move0 pairPos.position
       of DisappearColorSametime, DisappearColorMoreSametime, DisappearCountSametime,
           DisappearCountMoreSametime:
-        nazo2.puyoPuyo.move1 pos
+        nazo2.puyoPuyo.move1 pairPos.position
       of DisappearPlace, DisappearPlaceMore, DisappearConnect, DisappearConnectMore:
-        nazo2.puyoPuyo.move2 pos
+        nazo2.puyoPuyo.move2 pairPos.position
 
     # update intermediate result
     case nazo.requirement.kind
@@ -165,4 +158,4 @@ func mark*[F: TsuField or WaterField](
 
 func mark*[F: TsuField or WaterField](nazo: NazoPuyo[F]): MarkResult {.inline.} =
   ## Marks the positions.
-  nazo.mark nazo.moveCount
+  nazo.mark nazo.puyoPuyo.pairsPosition

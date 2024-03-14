@@ -140,13 +140,7 @@ func immediateDoubleNextPairCell*(simulator: Simulator, axis: bool): Cell {.inli
 # Message
 # ------------------------------------------------
 
-const
-  DeadMessage = "ばたんきゅ〜"
-  NazoMessages: array[MarkResult, string] = [
-    "クリア！", "　", DeadMessage, "不可能な設置", "設置スキップ",
-    "未対応",
-  ]
-  ShownNoticeGarbgeCount = 6
+const ShownNoticeGarbgeCount = 6
 
 func getMessages*(
     simulator: Simulator
@@ -159,19 +153,19 @@ func getMessages*(
     case simulator.kind
     of Regular:
       simulator.nazoPuyoWrap.get:
-        result.state = if wrappedNazoPuyo.puyoPuyo.field.isDead: DeadMessage else: ""
+        result.state =
+          if wrappedNazoPuyo.puyoPuyo.field.isDead:
+            $Dead
+          else:
+            "　"
     of Nazo:
-      let
-        pairsPositions: PairsPositions
-        endIdx: Natural
-      simulator.nazoPuyoWrap.get:
-        pairsPositions = wrappedNazoPuyo.puyoPuyo.pairsPositions
-        endIdx = wrappedNazoPuyo.puyoPuyo.nextIndex
+      let pairsPositions: PairsPositions = simulator.nazoPuyoWrap.get:
+        wrappedNazoPuyo.puyoPuyo.pairsPositions[
+          0 ..< wrappedNazoPuyo.puyoPuyo.nextIndex
+        ]
 
       simulator.originalNazoPuyoWrap.get:
-        var nazo = wrappedNazoPuyo
-        nazo.puyoPuyo.pairsPositions = pairsPositions
-        result.state = NazoMessages[nazo.mark endIdx]
+        result.state = $wrappedNazoPuyo.mark pairsPositions
   else:
     result.state = "　"
 
