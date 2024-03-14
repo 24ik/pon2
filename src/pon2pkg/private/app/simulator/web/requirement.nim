@@ -57,9 +57,12 @@ proc initRequirementNode*(
   if simulator.kind == Regular:
     return buildHtml(text "　")
 
+  let req = simulator.nazoPuyoWrap.get:
+    wrappedNazoPuyo.requirement
+
   if displayMode or simulator.mode != Edit:
     return buildHtml(bold):
-      text $simulator.nazoPuyoWrap.requirement
+      text $req
 
   result = buildHtml(tdiv):
     tdiv(class = "block mb-1"):
@@ -69,10 +72,10 @@ proc initRequirementNode*(
           onclick = simulator.initKindHandler(id),
         ):
           for kind in RequirementKind:
-            option(selected = kind == simulator.nazoPuyoWrap.requirement.kind):
+            option(selected = kind == req.kind):
               text $kind
     tdiv(class = "block"):
-      if simulator.nazoPuyoWrap.requirement.kind in ColorKinds:
+      if req.kind in ColorKinds:
         button(class = "button is-static px-2"):
           text "c ="
         tdiv(class = "select"):
@@ -80,15 +83,12 @@ proc initRequirementNode*(
             id = kstring &"{ColorSelectIdPrefix}{id}",
             onclick = simulator.initColorHandler(id),
           ):
-            option(
-              selected =
-                simulator.nazoPuyoWrap.requirement.color == RequirementColor.All
-            ):
+            option(selected = req.color == RequirementColor.All):
               text "全"
             for color in RequirementColor.All.succ .. RequirementColor.high:
-              option(selected = color == simulator.nazoPuyoWrap.requirement.color):
+              option(selected = color == req.color):
                 text $color
-      if simulator.nazoPuyoWrap.requirement.kind in NumberKinds:
+      if req.kind in NumberKinds:
         button(class = "button is-static px-2"):
           text "n ="
         tdiv(class = "select"):
@@ -97,5 +97,5 @@ proc initRequirementNode*(
             onclick = simulator.initNumberHandler(id),
           ):
             for num in RequirementNumber.low .. RequirementNumber.high:
-              option(selected = num == simulator.nazoPuyoWrap.requirement.number):
+              option(selected = num == req.number):
                 text $num

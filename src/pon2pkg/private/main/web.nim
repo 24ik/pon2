@@ -53,8 +53,8 @@ proc workerTask*(
       of Water:
         nazoPuyoWrap = parseNazoPuyo[WaterField](args2[1], Izumiya).initNazoPuyoWrap
 
-      nazoPuyoWrap.flattenAnd:
-        let answers = nazoPuyo.solve(earlyStopping = true)
+      nazoPuyoWrap.get:
+        let answers = wrappedNazoPuyo.solve(earlyStopping = true)
         if answers.len == 1:
           result.messages = @[$true, args2[0], answers[0].toUriQuery Izumiya]
         else:

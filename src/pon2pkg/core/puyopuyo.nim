@@ -5,14 +5,14 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, strformat, strutils, tables, uri]
-import ./[cell, field, host, moveresult, pair, pairposition, position]
+import std/[strformat, strutils, tables, uri]
+import ./[cell, field, host, moveresult, pair, pairposition, position, rule]
 
 type PuyoPuyo*[F: TsuField or WaterField] = object ## Puyo Puyo game.
   field*: F
   pairsPositions*: PairsPositions
 
-  nextIdx*: Natural
+  nextIdx: Natural
 
 # ------------------------------------------------
 # Reset
@@ -20,7 +20,7 @@ type PuyoPuyo*[F: TsuField or WaterField] = object ## Puyo Puyo game.
 
 func reset*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]) {.inline.} =
   ## Resets the Puyo Puyo game.
-  mSelf.field = zeroField[F]()
+  mSelf.field = initField[F]()
   mSelf.pairsPositions.setLen 0
   mSelf.nextIdx = 0
 
@@ -44,8 +44,52 @@ func `==`*(self: PuyoPuyo[WaterField], field: PuyoPuyo[TsuField]): bool {.inline
   false
 
 # ------------------------------------------------
+# Convert
+# ------------------------------------------------
+
+func toTsuPuyoPuyo*[F: TsuField or WaterField](
+    self: PuyoPuyo[F]
+): PuyoPuyo[TsuField] {.inline.} =
+  ## Returns the Tsu Puyo Puyo converted from the given Puyo Puyo.
+  result.field = self.field.toTsuField
+  result.pairsPositions = self.pairsPositions
+  result.nextIdx = self.nextIdx
+
+func toWaterPuyoPuyo*[F: TsuField or WaterField](
+    self: PuyoPuyo[F]
+): PuyoPuyo[WaterField] {.inline.} =
+  ## Returns the Water Puyo Puyo converted from the given Puyo Puyo.
+  result.field = self.field.toWaterField
+  result.pairsPositions = self.pairsPositions
+  result.nextIdx = self.nextIdx
+
+# ------------------------------------------------
 # Property
 # ------------------------------------------------
+
+func rule*[F: TsuField or WaterField](self: PuyoPuyo[F]): Rule {.inline.} =
+  ## Returns the rule.
+  self.field.rule
+
+func nextIndex*[F: TsuField or WaterField](self: PuyoPuyo[F]): int {.inline.} =
+  ## Returns the next pair's index to be operated.
+  self.nextIdx
+
+func incrementNextIndex*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]) {.inline.} =
+  ## Increments the next pair's index to be operated.
+  ## The result is clipped.
+  if mSelf.nextIdx >= mSelf.pairsPositions.len:
+    return
+
+  mSelf.nextIdx.inc
+
+func decrementNextIndex*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]) {.inline.} =
+  ## Increments the next pair's index to be operated.
+  ## The result is clipped.
+  if mSelf.nextIdx <= 0:
+    return
+
+  mSelf.nextIdx.dec
 
 func movingCompleted*[F: TsuField or WaterField](self: PuyoPuyo[F]): bool {.inline.} =
   ## Returns `true` if all pairs in the Puyo Puyo game are put (or skipped).
@@ -53,16 +97,10 @@ func movingCompleted*[F: TsuField or WaterField](self: PuyoPuyo[F]): bool {.inli
 
 func nextPairPosition*[F: TsuField or WaterField](
     self: PuyoPuyo[F]
-): Option[PairPosition] {.inline.} =
-  ## Returns the next pair&position.
-  ## If no pairs left, returns `none`.
-  {.push warning[ProveInit]: off.}
-  result =
-    if self.movingCompleted:
-      none PairPosition
-    else:
-      some self.pairsPositions[self.nextIdx]
-  {.pop.}
+): PairPosition {.inline.} =
+  ## Returns the next pair&position to be operated.
+  ## If no pairs left, `IndexDefect` is raised.
+  self.pairsPositions[self.nextIdx]
 
 # ------------------------------------------------
 # Count
@@ -87,50 +125,14 @@ func garbageCount*[F: TsuField or WaterField](self: PuyoPuyo[F]): int {.inline.}
   self.field.garbageCount + self.pairsPositions.garbageCount
 
 # ------------------------------------------------
-# Move - Vanilla
+# Move - Level0
 # ------------------------------------------------
 
 func move[F: TsuField or WaterField](
     mSelf: var PuyoPuyo[F], pos: Position, overwritePos: static bool
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
-  ## This function tracks the followings:
-  ## - Number of chains
-  if mSelf.movingCompleted:
-    return 0.initMoveResult
-
-  when overwritePos:
-    mSelf.pairsPositions[mSelf.nextIdx].position = pos
-
-  let pairPos = mSelf.pairsPositions[mSelf.nextIdx]
-  result = mSelf.field.move(pairPos.pair, pairPos.position)
-  mSelf.nextIdx.inc
-
-func move*[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F]
-): MoveResult {.inline, discardable.} =
-  ## Puts the pair and advance the field until chains end.
-  ## This function tracks the followings:
-  ## - Number of chains
-  mSelf.move(Position.low, false)
-
-func move*[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F], pos: Position
-): MoveResult {.inline, discardable.} =
-  ## Puts the pair and advance the field until chains end.
-  ## This function tracks the followings:
-  ## - Number of chains
-  mSelf.move(pos, true)
-
-# ------------------------------------------------
-# Move - Rough
-# ------------------------------------------------
-
-func moveWithRoughTracking[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F], pos: Position, overwritePos: static bool
-): MoveResult {.inline.} =
-  ## Puts the pair and advance the field until chains end.
-  ## This function tracks the followings:
+  ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
   if mSelf.movingCompleted:
@@ -139,117 +141,124 @@ func moveWithRoughTracking[F: TsuField or WaterField](
   when overwritePos:
     mSelf.pairsPositions[mSelf.nextIdx].position = pos
 
-  let pairPos = mSelf.pairsPositions[mSelf.nextIdx]
-  result = mSelf.field.moveWithRoughTracking(pairPos.pair, pairPos.position)
+  result = mSelf.field.move mSelf.nextPairPosition
   mSelf.nextIdx.inc
 
-func moveWithRoughTracking*[F: TsuField or WaterField](
+func move*[F: TsuField or WaterField](
     mSelf: var PuyoPuyo[F]
-): MoveResult {.inline.} =
+): MoveResult {.inline, discardable.} =
   ## Puts the pair and advance the field until chains end.
-  ## This function tracks the followings:
+  ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
-  mSelf.moveWithRoughTracking(Position.low, false)
+  mSelf.move(Position.low, false)
 
-func moveWithRoughTracking*[F: TsuField or WaterField](
+func move*[F: TsuField or WaterField](
+    mSelf: var PuyoPuyo[F], pos: Position
+): MoveResult {.inline, discardable.} =
+  ## Puts the pair and advance the field until chains end.
+  ## This function tracks:
+  ## - Number of chains
+  ## - Number of puyos that disappeared
+  mSelf.move(pos, true)
+
+func move0*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]): MoveResult {.inline.} =
+  ## Puts the pair and advance the field until chains end.
+  ## This function tracks:
+  ## - Number of chains
+  ## - Number of puyos that disappeared
+  result = mSelf.move
+
+func move0*[F: TsuField or WaterField](
     mSelf: var PuyoPuyo[F], pos: Position
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
-  ## This function tracks the followings:
+  ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
-  mSelf.moveWithRoughTracking(pos, true)
+  result = mSelf.move pos
 
 # ------------------------------------------------
-# Move - Detail
+# Move - Level1
 # ------------------------------------------------
 
-func moveWithDetailTracking[F: TsuField or WaterField](
+func move1[F: TsuField or WaterField](
     mSelf: var PuyoPuyo[F], pos: Position, overwritePos: static bool
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
-  ## This function tracks the followings:
+  ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
   ## - Number of puyos that disappeared in each chain
   if mSelf.movingCompleted:
-    return initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[])
+    return initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], newSeq[array[Puyo, int]](0))
 
   when overwritePos:
     mSelf.pairsPositions[mSelf.nextIdx].position = pos
 
-  let pairPos = mSelf.pairsPositions[mSelf.nextIdx]
-  result = mSelf.field.moveWithDetailTracking(pairPos.pair, pairPos.position)
+  result = mSelf.field.move1 mSelf.nextPairPosition
   mSelf.nextIdx.inc
 
-func moveWithDetailTracking*[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F]
-): MoveResult {.inline.} =
+func move1*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
-  ## This function tracks the followings:
+  ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
   ## - Number of puyos that disappeared in each chain
-  mSelf.moveWithDetailTracking(Position.low, false)
+  mSelf.move1(Position.low, false)
 
-func moveWithDetailTracking*[F: TsuField or WaterField](
+func move1*[F: TsuField or WaterField](
     mSelf: var PuyoPuyo[F], pos: Position
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
-  ## This function tracks the followings:
+  ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
   ## - Number of puyos that disappeared in each chain
-  mSelf.moveWithDetailTracking(pos, true)
+  mSelf.move1(pos, true)
 
 # ------------------------------------------------
-# Move - Full
+# Move - Level2
 # ------------------------------------------------
 
-func moveWithFullTracking[F: TsuField or WaterField](
+func move2[F: TsuField or WaterField](
     mSelf: var PuyoPuyo[F], pos: Position, overwritePos: static bool
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
-  ## This function tracks the followings:
+  ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
   ## - Number of puyos that disappeared in each chain
-  ## - Number of color puyos in each connected component that disappeared \
-  ## in each chain
+  ## - Number of color puyos in each connected component that disappeared in each chain
   if mSelf.movingCompleted:
-    return initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
+    return
+      initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], newSeq[array[ColorPuyo, seq[int]]](0))
 
   when overwritePos:
     mSelf.pairsPositions[mSelf.nextIdx].position = pos
 
-  let pairPos = mSelf.pairsPositions[mSelf.nextIdx]
-  result = mSelf.field.moveWithFullTracking(pairPos.pair, pairPos.position)
+  result = mSelf.field.move2 mSelf.nextPairPosition
   mSelf.nextIdx.inc
 
-func moveWithFullTracking*[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F]
-): MoveResult {.inline.} =
+func move2*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
-  ## This function tracks the followings:
+  ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
   ## - Number of puyos that disappeared in each chain
-  ## - Number of color puyos in each connected component that disappeared \
-  ## in each chain
-  mSelf.moveWithFullTracking(Position.low, false)
+  ## - Number of color puyos in each connected component that disappeared in each chain
+  mSelf.move2(Position.low, false)
 
-func moveWithFullTracking*[F: TsuField or WaterField](
+func move2*[F: TsuField or WaterField](
     mSelf: var PuyoPuyo[F], pos: Position
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
-  ## This function tracks the followings:
+  ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
   ## - Number of puyos that disappeared in each chain
-  ## - Number of color puyos in each connected component that disappeared \
-  ## in each chain
-  mSelf.moveWithFullTracking(pos, true)
+  ## - Number of color puyos in each connected component that disappeared in each chain
+  mSelf.move2(pos, true)
 
 # ------------------------------------------------
 # Puyo Puyo <-> string

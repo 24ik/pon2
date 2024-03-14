@@ -5,7 +5,7 @@
 import std/[options, unittest]
 import
   ../../src/pon2pkg/core/
-    [field, host, nazopuyo {.all.}, pairposition, puyopuyo, requirement]
+    [field, host, nazopuyo {.all.}, pairposition, puyopuyo, requirement, rule]
 
 proc moveCount(uriStr: string): int =
   parseNazoPuyo[TsuField](uriStr, Ishikawa).moveCount
@@ -24,21 +24,35 @@ proc main*() =
         kind: Clear, color: RequirementColor.All, number: RequirementNumber.low
       )
 
-    check tsu.puyoPuyo.field == zeroTsuField()
+    check tsu.puyoPuyo.field == initField[TsuField]()
     check tsu.puyoPuyo.pairsPositions.len == 0
     check tsu.requirement == req
 
-    check tsu.puyoPuyo.field == zeroTsuField()
+    check tsu.puyoPuyo.field == initField[TsuField]()
     check tsu.puyoPuyo.pairsPositions.len == 0
     check tsu.requirement == req
 
-    check water.puyoPuyo.field == zeroWaterField()
+    check water.puyoPuyo.field == initField[WaterField]()
     check water.puyoPuyo.pairsPositions.len == 0
     check water.requirement == req
 
   # ------------------------------------------------
+  # Convert
+  # ------------------------------------------------
+
+  # toTsuNazoPuyo, toWaterNazoPuyo
+  block:
+    let nazo = initNazoPuyo[TsuField]()
+    check nazo.toWaterNazoPuyo.toWaterNazoPuyo.toTsuNazoPuyo.toTsuNazoPuyo == nazo
+
+  # ------------------------------------------------
   # Property
   # ------------------------------------------------
+
+  # rule
+  block:
+    check initNazoPuyo[TsuField]().rule == Tsu
+    check initNazoPuyo[WaterField]().rule == Water
 
   # moveCount
   block:

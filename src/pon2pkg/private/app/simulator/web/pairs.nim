@@ -35,11 +35,14 @@ proc initPairsNode*(
     simulator: var Simulator, displayMode = false, showPositions = true
 ): VNode {.inline.} =
   ## Returns the pairs node.
-  let editMode = simulator.mode == Edit and not displayMode
+  let
+    editMode = simulator.mode == Edit and not displayMode
+    pairsPositions = simulator.nazoPuyoWrap.get:
+      wrappedNazoPuyo.puyoPuyo.pairsPositions
 
   result = buildHtml(table(class = "table is-narrow")):
     tbody:
-      for idx, pairPos in simulator.nazoPuyoWrap.pairsPositions:
+      for idx, pairPos in pairsPositions:
         let
           pair = pairPos.pair
           pos = pairPos.position
@@ -114,30 +117,22 @@ proc initPairsNode*(
               span(class = "icon"):
                 italic(class = "fa-solid fa-trash")
           td:
-            text $simulator.originalNazoPuyoWrap.pairsPositions.len.succ
+            text $pairsPositions.len.succ
           td:
             tdiv(class = "columns is-mobile is-gapless"):
               tdiv(class = "column is-narrow"):
                 button(
-                  class = simulator.cellClass(
-                    simulator.originalNazoPuyoWrap.pairsPositions.len, true
-                  ),
+                  class = simulator.cellClass(pairsPositions.len, true),
                   style = style(StyleAttr.maxHeight, kstring"24px"),
-                  onclick = simulator.initCellClickHandler(
-                    simulator.originalNazoPuyoWrap.pairsPositions.len, true
-                  ),
+                  onclick = simulator.initCellClickHandler(pairsPositions.len, true),
                 ):
                   figure(class = "image is-24x24"):
                     img(src = Cell.None.cellImageSrc)
               tdiv(class = "column is-narrow"):
                 button(
-                  class = simulator.cellClass(
-                    simulator.originalNazoPuyoWrap.pairsPositions.len, false
-                  ),
+                  class = simulator.cellClass(pairsPositions.len, false),
                   style = style(StyleAttr.maxHeight, kstring"24px"),
-                  onclick = simulator.initCellClickHandler(
-                    simulator.originalNazoPuyoWrap.pairsPositions.len, false
-                  ),
+                  onclick = simulator.initCellClickHandler(pairsPositions.len, false),
                 ):
                   figure(class = "image is-24x24"):
                     img(src = Cell.None.cellImageSrc)

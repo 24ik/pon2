@@ -2,10 +2,20 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, sequtils, strformat, strutils, unittest, uri]
+import std/[sequtils, strformat, strutils, unittest, uri]
 import
   ../../src/pon2pkg/core/
-    [cell, field, host, moveresult, pair, pairposition, position, puyopuyo {.all.}]
+    [
+      cell,
+      field,
+      host,
+      moveresult,
+      pair,
+      pairposition,
+      position,
+      puyopuyo {.all.},
+      rule,
+    ]
 
 proc main*() =
   # ------------------------------------------------
@@ -22,8 +32,43 @@ proc main*() =
     check puyoPuyo == initPuyoPuyo[TsuField]()
 
   # ------------------------------------------------
+  # Convert
+  # ------------------------------------------------
+
+  # toTsuPuyoPuyo, toWaterPuyoPuyo
+  block:
+    var puyoPuyo = initPuyoPuyo[TsuField]()
+    puyoPuyo.field[0, 0] = Red
+    puyoPuyo.pairsPositions.add PairPosition(pair: RedGreen, position: Up1)
+
+    check puyoPuyo.toWaterPuyoPuyo.toWaterPuyoPuyo.toTsuPuyoPuyo.toTsuPuyoPuyo ==
+      puyoPuyo
+
+  # ------------------------------------------------
   # Property
   # ------------------------------------------------
+
+  # rule
+  block:
+    check initPuyoPuyo[TsuField]().rule == Tsu
+    check initPuyoPuyo[WaterField]().rule == Water
+
+  # nextIndex, incrementNextIndex, decrementNextIndex
+  block:
+    var puyoPuyo = initPuyoPuyo[TsuField]()
+    puyoPuyo.pairsPositions.add PairPosition(pair: RedGreen, position: Up1)
+    check puyoPuyo.nextIndex == 0
+
+    puyoPuyo.decrementNextIndex
+    check puyoPuyo.nextIndex == 0
+
+    puyoPuyo.incrementNextIndex
+    check puyoPuyo.nextIndex == 1
+    puyoPuyo.incrementNextIndex
+    check puyoPuyo.nextIndex == 1
+
+    puyoPuyo.decrementNextIndex
+    check puyoPuyo.nextIndex == 0
 
   # movingCompleted, nextPairPosition
   block:
@@ -32,17 +77,16 @@ proc main*() =
     puyoPuyo.pairsPositions.add PairPosition(pair: BlueYellow, position: Up2)
 
     check not puyoPuyo.movingCompleted
-    check puyoPuyo.nextPairPosition == some PairPosition(pair: RedGreen, position: Up1)
+    check puyoPuyo.nextPairPosition == PairPosition(pair: RedGreen, position: Up1)
 
     puyoPuyo.move
     check not puyoPuyo.movingCompleted
-    check puyoPuyo.nextPairPosition == some PairPosition(
-      pair: BlueYellow, position: Up2
-    )
+    check puyoPuyo.nextPairPosition == PairPosition(pair: BlueYellow, position: Up2)
 
     puyoPuyo.move
     check puyoPuyo.movingCompleted
-    check puyoPuyo.nextPairPosition.isNOne
+    expect IndexDefect:
+      discard puyoPuyo.nextPairPosition
 
   # ------------------------------------------------
   # Count
@@ -65,7 +109,7 @@ proc main*() =
   # Move
   # ------------------------------------------------
 
-  # move, moveWithRoughTracking, moveWithDetailTracking, moveWithFullTracking
+  # move, move0, move1, move2
   block:
     # Tsu
     block:
@@ -95,25 +139,25 @@ rg|"""
 
       block:
         var puyoPuyo = puyoPuyoBefore
-        discard puyoPuyo.move
+        puyoPuyo.move
         check puyoPuyo.field == puyoPuyoAfter.field
         check puyoPuyo.pairsPositions == puyoPuyoAfter.pairsPositions
 
       block:
         var puyoPuyo = puyoPuyoBefore
-        discard puyoPuyo.moveWithRoughTracking
+        discard puyoPuyo.move0
         check puyoPuyo.field == puyoPuyoAfter.field
         check puyoPuyo.pairsPositions == puyoPuyoAfter.pairsPositions
 
       block:
         var puyoPuyo = puyoPuyoBefore
-        discard puyoPuyo.moveWithDetailTracking
+        discard puyoPuyo.move1
         check puyoPuyo.field == puyoPuyoAfter.field
         check puyoPuyo.pairsPositions == puyoPuyoAfter.pairsPositions
 
       block:
         var puyoPuyo = puyoPuyoBefore
-        discard puyoPuyo.moveWithFullTracking
+        discard puyoPuyo.move2
         check puyoPuyo.field == puyoPuyoAfter.field
         check puyoPuyo.pairsPositions == puyoPuyoAfter.pairsPositions
 
@@ -160,7 +204,7 @@ rg|"""
         )
 
       var puyoPuyo = puyoPuyoBefore
-      discard puyoPuyo.moveWithFullTracking
+      discard puyoPuyo.move2
       check puyoPuyo.field == puyoPuyoAfter.field
       check puyoPuyo.pairsPositions == puyoPuyoAfter.pairsPositions
 

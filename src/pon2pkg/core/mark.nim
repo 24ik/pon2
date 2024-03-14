@@ -61,18 +61,16 @@ func mark*[F: TsuField or WaterField](
       return ImpossibleMove
 
     # move
-    let moveRes: MoveResult
-    case nazo.requirement.kind
-    of Clear, Chain, ChainMore:
-      moveRes = nazo2.puyoPuyo.move pos
-    of DisappearColor, DisappearColorMore, DisappearCount, DisappearCountMore,
-        ChainClear, ChainMoreClear:
-      moveRes = nazo2.puyoPuyo.moveWithRoughTracking pos
-    of DisappearColorSametime, DisappearColorMoreSametime, DisappearCountSametime,
-        DisappearCountMoreSametime:
-      moveRes = nazo2.puyoPuyo.moveWithDetailTracking pos
-    of DisappearPlace, DisappearPlaceMore, DisappearConnect, DisappearConnectMore:
-      moveRes = nazo2.puyoPuyo.moveWithFullTracking pos
+    let moveRes =
+      case nazo.requirement.kind
+      of Clear, Chain, ChainMore, DisappearColor, DisappearColorMore, DisappearCount,
+          DisappearCountMore, ChainClear, ChainMoreClear:
+        nazo2.puyoPuyo.move0 pos
+      of DisappearColorSametime, DisappearColorMoreSametime, DisappearCountSametime,
+          DisappearCountMoreSametime:
+        nazo2.puyoPuyo.move1 pos
+      of DisappearPlace, DisappearPlaceMore, DisappearConnect, DisappearConnectMore:
+        nazo2.puyoPuyo.move2 pos
 
     # update intermediate result
     case nazo.requirement.kind

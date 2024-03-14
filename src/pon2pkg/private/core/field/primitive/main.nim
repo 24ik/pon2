@@ -44,17 +44,9 @@ const
   ZeroTsuField = initZeroField[TsuField]()
   ZeroWaterField = initZeroField[WaterField]()
 
-func zeroField*[F: TsuField or WaterField](): F {.inline.} =
-  ## Returns the field with all elements zero.
+func initField*[F: TsuField or WaterField](): F {.inline.} =
+  ## Returns the field with all cells None.
   when F is TsuField: ZeroTsuField else: ZeroWaterField
-
-func zeroTsuField*(): TsuField {.inline.} =
-  ## Returns the Tsu field with all elements zero.
-  zeroField[TsuField]()
-
-func zeroWaterField*(): WaterField {.inline.} =
-  ## Returns the Water field with all elements zero.
-  zeroField[WaterField]()
 
 # ------------------------------------------------
 # Operator
@@ -264,7 +256,7 @@ func connect3*[F: TsuField or WaterField](field: F): F {.inline.} =
   field *
     sum(
       field.red.connect3, field.green.connect3, field.blue.connect3,
-      field.yellow.connect3, field.purple.connect3
+      field.yellow.connect3, field.purple.connect3,
     )
 
 func connect3V*[F: TsuField or WaterField](field: F): F {.inline.} =
@@ -274,7 +266,7 @@ func connect3V*[F: TsuField or WaterField](field: F): F {.inline.} =
   field *
     sum(
       field.red.connect3V, field.green.connect3V, field.blue.connect3V,
-      field.yellow.connect3V, field.purple.connect3V
+      field.yellow.connect3V, field.purple.connect3V,
     )
 
 func connect3H*[F: TsuField or WaterField](field: F): F {.inline.} =
@@ -284,7 +276,7 @@ func connect3H*[F: TsuField or WaterField](field: F): F {.inline.} =
   field *
     sum(
       field.red.connect3H, field.green.connect3H, field.blue.connect3H,
-      field.yellow.connect3H, field.purple.connect3H
+      field.yellow.connect3H, field.purple.connect3H,
     )
 
 func connect3L*[F: TsuField or WaterField](field: F): F {.inline.} =
@@ -294,7 +286,7 @@ func connect3L*[F: TsuField or WaterField](field: F): F {.inline.} =
   field *
     sum(
       field.red.connect3L, field.green.connect3L, field.blue.connect3L,
-      field.yellow.connect3L, field.purple.connect3L
+      field.yellow.connect3L, field.purple.connect3L,
     )
 
 # ------------------------------------------------
@@ -476,7 +468,9 @@ func drop*(mSelf: var WaterField) {.inline.} =
 # Field <-> array
 # ------------------------------------------------
 
-func toArray*(self: TsuField or WaterField): array[Row, array[Column, Cell]] {.inline.} =
+func toArray*(
+    self: TsuField or WaterField
+): array[Row, array[Column, Cell]] {.inline.} =
   ## Returns the array converted from the field.
   let
     arr2 = self.bit2.toArray

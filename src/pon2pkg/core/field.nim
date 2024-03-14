@@ -9,7 +9,7 @@
 {.experimental: "views".}
 
 import std/[sequtils, setutils, strutils, sugar, tables]
-import ./[cell, fieldtype, host, moveresult, pair, position, rule]
+import ./[cell, fieldtype, host, moveresult, pair, pairposition, position, rule]
 import ../private/[intrinsic]
 import ../private/core/field/[binary]
 
@@ -20,12 +20,12 @@ else:
   import ../private/core/field/primitive/[disappearresult, main]
 
 export
-  main.TsuField, main.WaterField, main.zeroField, main.zeroTsuField,
-  main.zeroWaterField, main.toTsuField, main.toWaterField, main.`[]`, main.`[]=`,
-  main.insert, main.removeSqueeze, main.puyoCount, main.colorCount, main.garbageCount,
-  main.connect3, main.connect3V, main.connect3H, main.connect3L, main.shiftedUp,
-  main.shiftedDown, main.shiftedRight, main.shiftedLeft, main.flippedV, main.flippedH,
-  main.disappear, main.willDisappear, main.put, main.drop, main.toArray, main.parseField
+  main.TsuField, main.WaterField, main.initField, main.toTsuField, main.toWaterField,
+  main.`[]`, main.`[]=`, main.insert, main.removeSqueeze, main.puyoCount,
+  main.colorCount, main.garbageCount, main.connect3, main.connect3V, main.connect3H,
+  main.connect3L, main.shiftedUp, main.shiftedDown, main.shiftedRight, main.shiftedLeft,
+  main.flippedV, main.flippedH, main.disappear, main.willDisappear, main.put, main.drop,
+  main.toArray, main.parseField
 
 # ------------------------------------------------
 # Operator
@@ -36,6 +36,18 @@ func `==`*(self: TsuField, field: WaterField): bool {.inline.} =
 
 func `==`*(self: WaterField, field: TsuField): bool {.inline.} =
   false
+
+# ------------------------------------------------
+# Convert
+# ------------------------------------------------
+
+func toTsuField*(self: TsuField): TsuField {.inline.} =
+  ## Returns the Tsu field converted from the given field.
+  result = self
+
+func toWaterField*(self: WaterField): WaterField {.inline.} =
+  ## Returns the Water field converted from the given field.
+  result = self
 
 # ------------------------------------------------
 # Property
@@ -109,7 +121,7 @@ func flipH*(mSelf: var (TsuField or WaterField)) {.inline.} =
   mSelf = mSelf.flippedH
 
 # ------------------------------------------------
-# Move
+# Move - Level0
 # ------------------------------------------------
 
 func move*(
@@ -118,47 +130,58 @@ func move*(
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
-  var chainCount = 0
-
-  mSelf.put pair, pos
-
-  while true:
-    if mSelf.disappear.notDisappeared:
-      return initMoveResult(chainCount)
-
-    mSelf.drop
-
-    chainCount.inc
-
-  result = 0.initMoveResult # HACK: dummy to remove warning
-
-func moveWithRoughTracking*(
-    mSelf: var (TsuField or WaterField), pair: Pair, pos: Position
-): MoveResult {.inline.} =
-  ## Puts the pair and advance the field until chains end.
-  ## This function tracks:
-  ## - Number of chains
   ## - Number of puyos that disappeared
   var
     chainCount = 0
-    totalDisappearCounts: array[Puyo, int] = [0, 0, 0, 0, 0, 0, 0]
+    disappearCounts: array[Puyo, int] = [0, 0, 0, 0, 0, 0, 0]
 
   mSelf.put pair, pos
 
   while true:
     let disappearResult = mSelf.disappear
     if disappearResult.notDisappeared:
-      return initMoveResult(chainCount, totalDisappearCounts)
+      return initMoveResult(chainCount, disappearCounts)
 
     mSelf.drop
 
     chainCount.inc
     for puyo in Puyo:
-      totalDisappearCounts[puyo].inc disappearResult.puyoCount puyo
+      disappearCounts[puyo].inc disappearResult.puyoCount puyo
 
-  result = 0.initMoveResult # HACK: dummy to remove warning
+  result = initMoveResult(chainCount, disappearCounts) # HACK: dummy to suppress warning
 
-func moveWithDetailTracking*(
+func move*(
+    mSelf: var (TsuField or WaterField), pairPos: PairPosition
+): MoveResult {.inline, discardable.} =
+  ## Puts the pair and advance the field until chains end.
+  ## This function tracks:
+  ## - Number of chains
+  ## - Number of puyos that disappeared
+  result = mSelf.move(pairPos.pair, pairPos.position)
+
+func move0*(
+    mSelf: var (TsuField or WaterField), pair: Pair, pos: Position
+): MoveResult {.inline.} =
+  ## Puts the pair and advance the field until chains end.
+  ## This function tracks:
+  ## - Number of chains
+  ## - Number of puyos that disappeared
+  result = mSelf.move(pair, pos)
+
+func move0*(
+    mSelf: var (TsuField or WaterField), pairPos: PairPosition
+): MoveResult {.inline.} =
+  ## Puts the pair and advance the field until chains end.
+  ## This function tracks:
+  ## - Number of chains
+  ## - Number of puyos that disappeared
+  result = mSelf.move pairPos
+
+# ------------------------------------------------
+# Move - Level1
+# ------------------------------------------------
+
+func move1*(
     mSelf: var (TsuField or WaterField), pair: Pair, pos: Position
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
@@ -168,31 +191,46 @@ func moveWithDetailTracking*(
   ## - Number of puyos that disappeared in each chain
   var
     chainCount = 0
-    totalDisappearCounts: array[Puyo, int] = [0, 0, 0, 0, 0, 0, 0]
-    disappearCounts: seq[array[Puyo, int]] = @[]
+    disappearCounts: array[Puyo, int] = [0, 0, 0, 0, 0, 0, 0]
+    detailDisappearCounts: seq[array[Puyo, int]] = @[]
 
   mSelf.put pair, pos
 
   while true:
     let disappearResult = mSelf.disappear
     if disappearResult.notDisappeared:
-      return initMoveResult(chainCount, totalDisappearCounts, disappearCounts)
+      return initMoveResult(chainCount, disappearCounts, detailDisappearCounts)
 
     mSelf.drop
 
     chainCount.inc
 
     var counts: array[Puyo, int]
-    counts[Puyo.low] = Natural.low # dummy to remove warning
+    counts[Puyo.low] = Natural.low # HACK: dummy to suppress warning
     for puyo in Puyo.low .. Puyo.high:
       let count = disappearResult.puyoCount puyo
       counts[puyo] = count
-      totalDisappearCounts[puyo].inc count
-    disappearCounts.add counts
+      disappearCounts[puyo].inc count
+    detailDisappearCounts.add counts
 
-  result = 0.initMoveResult # HACK: dummy to remove warning
+  # HACK: dummy to suppress warning
+  result = initMoveResult(chainCount, disappearCounts, detailDisappearCounts)
 
-func moveWithFullTracking*(
+func move1*(
+    mSelf: var (TsuField or WaterField), pairPos: PairPosition
+): MoveResult {.inline.} =
+  ## Puts the pair and advance the field until chains end.
+  ## This function tracks:
+  ## - Number of chains
+  ## - Number of puyos that disappeared
+  ## - Number of puyos that disappeared in each chain
+  result = mSelf.move1(pairPos.pair, pairPos.position)
+
+# ------------------------------------------------
+# Move - Level2
+# ------------------------------------------------
+
+func move2*(
     mSelf: var (TsuField or WaterField), pair: Pair, pos: Position
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
@@ -200,37 +238,41 @@ func moveWithFullTracking*(
   ## - Number of chains
   ## - Number of puyos that disappeared
   ## - Number of puyos that disappeared in each chain
-  ## - Number of color puyos in each connected component that disappeared \
-  ## in each chain
+  ## - Number of color puyos in each connected component that disappeared in each chain
   var
     chainCount = 0
-    totalDisappearCounts: array[Puyo, int] = [0, 0, 0, 0, 0, 0, 0]
-    disappearCounts: seq[array[Puyo, int]] = @[]
-    detailDisappearCounts: seq[array[ColorPuyo, seq[int]]] = @[]
+    disappearCounts: array[Puyo, int] = [0, 0, 0, 0, 0, 0, 0]
+    fullDisappearCounts: seq[array[ColorPuyo, seq[int]]] = @[]
 
   mSelf.put pair, pos
 
   while true:
     let disappearResult = mSelf.disappear
     if disappearResult.notDisappeared:
-      return initMoveResult(
-        chainCount, totalDisappearCounts, disappearCounts, detailDisappearCounts
-      )
+      return initMoveResult(chainCount, disappearCounts, fullDisappearCounts)
 
     mSelf.drop
 
     chainCount.inc
 
-    var counts: array[Puyo, int]
-    counts[Puyo.low] = Natural.low # dummy to remove warning
     for puyo in Puyo.low .. Puyo.high:
       let count = disappearResult.puyoCount puyo
-      counts[puyo] = count
-      totalDisappearCounts[puyo].inc count
-    disappearCounts.add counts
-    detailDisappearCounts.add disappearResult.connectionCounts
+      disappearCounts[puyo].inc count
+    fullDisappearCounts.add disappearResult.connectionCounts
 
-  result = 0.initMoveResult # HACK: dummy to remove warning
+  # HACK: dummy to suppress warning
+  result = initMoveResult(chainCount, disappearCounts, fullDisappearCounts)
+
+func move2*(
+    mSelf: var (TsuField or WaterField), pairPos: PairPosition
+): MoveResult {.inline.} =
+  ## Puts the pair and advance the field until chains end.
+  ## This function tracks:
+  ## - Number of chains
+  ## - Number of puyos that disappeared
+  ## - Number of puyos that disappeared in each chain
+  ## - Number of color puyos in each connected component that disappeared in each chain
+  result = mSelf.move2(pairPos.pair, pairPos.position)
 
 # ------------------------------------------------
 # Field <-> string

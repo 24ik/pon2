@@ -26,8 +26,8 @@ proc cellDrawHandler(
   canvas.fill
 
   let cell: Cell
-  control.simulator[].nazoPuyoWrap.flattenAnd:
-    cell = field[row, col]
+  control.simulator[].nazoPuyoWrap.get:
+    cell = wrappedNazoPuyo.puyoPuyo.field[row, col]
   canvas.drawImage control.assets[].cellImages[cell]
 
 func initCellDrawHandler(

@@ -18,8 +18,9 @@ proc initEditorControllerNode*(
   ## `id` is shared with other node-creating procedures and need to be unique.
   let
     workerRunning = guiApplication.solving or guiApplication.permuting
-    workerDisable =
-      workerRunning or guiApplication.simulator[].nazoPuyoWrap.pairsPositions.len == 0
+    noPair = guiApplication.simulator[].nazoPuyoWrap.get:
+      wrappedNazoPuyo.puyoPuyo.pairsPositions.len == 0
+    workerDisable = workerRunning or noPair
 
     focusButtonClass =
       if guiApplication.focusEditor:
@@ -38,10 +39,9 @@ proc initEditorControllerNode*(
         kstring"button"
 
   proc permuteHandler() =
-    guiApplication.simulator[].nazoPuyoWrap.flattenAnd:
-      let (_, fixMoves, allowDouble, allowLastDouble) =
-        getSettings(id, nazoPuyo.moveCount)
-      guiApplication.permute fixMoves, allowDouble, allowLastDouble
+    let (_, fixMoves, allowDouble, allowLastDouble) = guiApplication.simulator[].nazoPuyoWrap.get:
+      getSettings(id, wrappedNazoPuyo.moveCount)
+    guiApplication.permute fixMoves, allowDouble, allowLastDouble
 
   result = buildHtml(tdiv(class = "buttons")):
     button(

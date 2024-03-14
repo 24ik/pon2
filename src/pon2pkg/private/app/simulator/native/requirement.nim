@@ -47,7 +47,9 @@ proc numberComboBox(control: RequirementControl): ComboBox {.inline.} =
 
 proc updateDescription(control: RequirementControl) =
   ## Changes the requirement description.
-  control.descriptionLabel.text = $control.simulator[].nazoPuyoWrap.requirement
+  let req = control.simulator[].nazoPuyoWrap.get:
+    wrappedNazoPuyo.requirement
+  control.descriptionLabel.text = $req
 
 proc kindHandler(control: RequirementControl, event: ComboBoxChangeEvent) =
   ## Changes the requirement kind.
@@ -74,12 +76,16 @@ proc numberHandler(control: RequirementControl, event: ComboBoxChangeEvent) =
 
   control.updateDescription
 
-func initKindHandler(control: RequirementControl): (event: ComboBoxChangeEvent) -> void =
+func initKindHandler(
+    control: RequirementControl
+): (event: ComboBoxChangeEvent) -> void =
   ## Returns the kind handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: ComboBoxChangeEvent) => control.kindHandler event
 
-func initColorHandler(control: RequirementControl): (event: ComboBoxChangeEvent) -> void =
+func initColorHandler(
+    control: RequirementControl
+): (event: ComboBoxChangeEvent) -> void =
   ## Returns the color handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: ComboBoxChangeEvent) => control.colorHandler event
@@ -103,7 +109,10 @@ proc initRequirementControl*(simulator: ref Simulator): RequirementControl {.inl
   result.padding = 10.scaleToDpi
 
   # row=0
-  let desc = newLabel $simulator[].nazoPuyoWrap.requirement
+  let
+    req = simulator[].nazoPuyoWrap.get:
+      wrappedNazoPuyo.requirement
+    desc = newLabel $req
   result.add desc
 
   # row=1
@@ -132,7 +141,8 @@ proc initRequirementControl*(simulator: ref Simulator): RequirementControl {.inl
 
   # set index
   if simulator[].mode == Edit:
-    let req = simulator[].nazoPuyoWrap.requirement
+    let req = simulator[].nazoPuyoWrap.get:
+      wrappedNazoPuyo.requirement
 
     kind.index = req.kind.ord
     if req.kind in ColorKinds:
@@ -174,12 +184,14 @@ proc updateRequirementControl*(
     colorBox.enabled = false
     numberBox.enabled = false
   else:
-    descLabel.text = $control.simulator[].nazoPuyoWrap.requirement
+    let req = control.simulator[].nazoPuyoWrap.get:
+      wrappedNazoPuyo.requirement
+    descLabel.text = $req
+
     if control.simulator[].mode == Edit:
       kindBox.enabled = true
-      colorBox.enabled = control.simulator[].nazoPuyoWrap.requirement.kind in ColorKinds
-      numberBox.enabled =
-        control.simulator[].nazoPuyoWrap.requirement.kind in NumberKinds
+      colorBox.enabled = req.kind in ColorKinds
+      numberBox.enabled = req.kind in NumberKinds
     else:
       kindBox.enabled = false
       colorBox.enabled = false

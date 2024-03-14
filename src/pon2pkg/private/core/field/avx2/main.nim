@@ -33,20 +33,12 @@ using
 # Constructor
 # ------------------------------------------------
 
-func zeroField*[F: TsuField or WaterField](): F {.inline.} =
-  ## Returns the field with all elements zero.
+func initField*[F: TsuField or WaterField](): F {.inline.} =
+  ## Returns the field with all cells None.
   result.hardGarbage = zeroBinaryField()
   result.noneRed = zeroBinaryField()
   result.greenBlue = zeroBinaryField()
   result.yellowPurple = zeroBinaryField()
-
-func zeroTsuField*(): TsuField {.inline.} =
-  ## Returns the Tsu field with all elements zero.
-  zeroField[TsuField]()
-
-func zeroWaterField*(): WaterField {.inline.} =
-  ## Returns the Water field with all elements zero.
-  zeroField[WaterField]()
 
 # ------------------------------------------------
 # Operator
@@ -106,7 +98,9 @@ func clearColumn(mSelf: var (TsuField or WaterField), col) {.inline.} =
 # Indexer
 # ------------------------------------------------
 
-func toCell(hardGarbage, noneRed, greenBlue, yellowPurple: WhichColor): Cell {.inline.} =
+func toCell(
+    hardGarbage, noneRed, greenBlue, yellowPurple: WhichColor
+): Cell {.inline.} =
   ## Returns the cell converted from which-colors.
   Cell bitor(
     # digit-0
@@ -117,12 +111,12 @@ func toCell(hardGarbage, noneRed, greenBlue, yellowPurple: WhichColor): Cell {.i
     # digit-1
     bitor(
       hardGarbage.color2.int64, noneRed.color2.int64, yellowPurple.color1.int64,
-      yellowPurple.color2.int64
+      yellowPurple.color2.int64,
     ) shl 1,
     # digit-2
     bitor(
       greenBlue.color1.int64, greenBlue.color2.int64, yellowPurple.color1.int64,
-      yellowPurple.color2.int64
+      yellowPurple.color2.int64,
     ) shl 2,
   )
 
@@ -140,7 +134,7 @@ func toWhichColor(
   hardGarbage: WhichColor,
   noneRed: WhichColor,
   greenBlue: WhichColor,
-  yellowPurple: WhichColor
+  yellowPurple: WhichColor,
 ] {.inline.} =
   ## Returns the which-colors converted from the cell.
   let
@@ -491,7 +485,9 @@ func drop*(mSelf: var WaterField) {.inline.} =
 # Field <-> array
 # ------------------------------------------------
 
-func toArray*(self: TsuField or WaterField): array[Row, array[Column, Cell]] {.inline.} =
+func toArray*(
+    self: TsuField or WaterField
+): array[Row, array[Column, Cell]] {.inline.} =
   ## Returns the array converted from the field.
   let
     hardGarbage = self.hardGarbage.toArray

@@ -31,8 +31,11 @@ proc cellDrawHandler(
   canvas.fill
 
   var cell = Cell.None
-  if idx < control.simulator[].nazoPuyoWrap.pairsPositions.len:
-    let pair = control.simulator[].nazoPuyoWrap.pairsPositions[idx].pair
+  let pairsPositions: PairsPositions
+  control.simulator[].nazoPuyoWrap.get:
+    pairsPositions = wrappedNazoPuyo.puyoPuyo.pairsPositions
+  if idx < pairsPositions.len:
+    let pair = pairsPositions[idx].pair
     cell = if axis: pair.axis else: pair.child
   canvas.drawImage control.assets[].cellImages[cell]
 
@@ -107,10 +110,13 @@ proc positionDrawHandler(
   canvas.areaColor = DefaultColor.toNiguiColor
   canvas.fill
 
-  canvas.drawText if idx < control.simulator[].nazoPuyoWrap.pairsPositions.len:
-    $control.simulator[].nazoPuyoWrap.pairsPositions[idx].position
-  else:
-    $Position.None
+  control.simulator[].nazoPuyoWrap.get:
+    let pos =
+      if idx < wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
+        wrappedNazoPuyo.puyoPuyo.pairsPositions[idx].position
+      else:
+        Position.None
+    canvas.drawText $pos
 
 func initPositionDrawHandler(
     control: PairsControl, idx: Natural
@@ -161,5 +167,6 @@ proc initPairsControl*(
   result.simulator = simulator
   result.assets = assets
 
-  for idx in 0 .. simulator[].nazoPuyoWrap.pairsPositions.len:
-    result.add result.initFullPairControl(idx, assets)
+  simulator[].nazoPuyoWrap.get:
+    for idx in 0 .. wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
+      result.add result.initFullPairControl(idx, assets)

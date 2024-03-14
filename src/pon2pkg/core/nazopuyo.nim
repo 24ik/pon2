@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 import std/[strformat, strutils, tables, uri]
-import ./[field, host, puyopuyo, requirement]
+import ./[field, host, pairposition, puyopuyo, requirement, rule]
 
 type NazoPuyo*[F: TsuField or WaterField] = object ## Nazo Puyo.
   puyoPuyo*: PuyoPuyo[F]
@@ -34,8 +34,30 @@ func `==`*(self: NazoPuyo[WaterField], field: NazoPuyo[TsuField]): bool {.inline
   false
 
 # ------------------------------------------------
+# Convert
+# ------------------------------------------------
+
+func toTsuNazoPuyo*[F: TsuField or WaterField](
+    self: NazoPuyo[F]
+): NazoPuyo[TsuField] {.inline.} =
+  ## Returns the Tsu Nazo Puyo converted from the given Nazo Puyo.
+  result.puyoPuyo = self.puyoPuyo.toTsuPuyoPuyo
+  result.requirement = self.requirement
+
+func toWaterNazoPuyo*[F: TsuField or WaterField](
+    self: NazoPuyo[F]
+): NazoPuyo[WaterField] {.inline.} =
+  ## Returns the Water Nazo Puyo converted from the given Nazo Puyo.
+  result.puyoPuyo = self.puyoPuyo.toWaterPuyoPuyo
+  result.requirement = self.requirement
+
+# ------------------------------------------------
 # Property
 # ------------------------------------------------
+
+func rule*[F: TsuField or WaterField](self: NazoPuyo[F]): Rule {.inline.} =
+  ## Returns the rule.
+  self.puyoPuyo.rule
 
 func moveCount*[F: TsuField or WaterField](self: NazoPuyo[F]): int {.inline.} =
   ## Returns the number of moves of the nazo puyo.

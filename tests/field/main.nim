@@ -21,6 +21,9 @@ proc main*() =
     check tsuField.toWaterField == waterField
     check waterField.toTsuField == tsuField
 
+    check tsuField.toTsuField == tsuField
+    check waterField.toWaterField == waterField
+
   # ------------------------------------------------
   # Indexer
   # ------------------------------------------------
@@ -208,7 +211,7 @@ r.....
 
   # willDisappear
   block:
-    var field = zeroTsuField()
+    var field = initField[TsuField]()
     field[0, 0] = Blue
     field[1, 0] = Blue
     field[2, 0] = Blue
@@ -226,7 +229,7 @@ r.....
   block:
     # Tsu
     block:
-      var field = zeroTsuField()
+      var field = initField[TsuField]()
       field.put RedGreen, Right1
       check field == parseField[TsuField]("......\n".repeat(12) & ".rg...")
       field.put BlueYellow, Left3
@@ -409,14 +412,14 @@ oo.oo.
 
   # rule
   block:
-    check zeroTsuField().rule == Tsu
-    check zeroWaterField().rule == Water
+    check initField[TsuField]().rule == Tsu
+    check initField[WaterField]().rule == Water
 
   # isDead
   block:
     # Tsu
     block:
-      var field = zeroTsuField()
+      var field = initField[TsuField]()
       field[1, 2] = Blue
       check field.isDead
 
@@ -428,11 +431,11 @@ oo.oo.
 
     # Water
     block:
-      var field = zeroWaterField()
+      var field = initField[WaterField]()
       field[WaterRow.low.pred, 3] = Blue
       check field.isDead
 
-      field = zeroWaterField()
+      field = initField[WaterField]()
       for row in Row.low .. Row.high:
         if row != WaterRow.low.pred:
           for col in Column.low .. Column.high:
@@ -445,7 +448,7 @@ oo.oo.
 
   # noneCount
   block:
-    var field = zeroTsuField()
+    var field = initField[TsuField]()
     check field.noneCount == Height * Width
 
     field[1, 3] = Blue
@@ -459,7 +462,7 @@ oo.oo.
 
   # invalidPositions, validPositions, validDoublePositions
   block:
-    var field = zeroTsuField()
+    var field = initField[TsuField]()
     field[12, 1] = Red
     check field.invalidPositions.card == 0
     check field.validPositions == AllPositions
@@ -480,7 +483,7 @@ oo.oo.
     check field.invalidPositions ==
       {Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2, Down3}
 
-    field = zeroTsuField()
+    field = initField[TsuField]()
     field[1, 1] = Red
     field[2, 2] = Red
     field[1, 3] = Red

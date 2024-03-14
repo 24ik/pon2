@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, strformat, uri]
+import std/[strformat, uri]
 import ../../[misc]
 import ../../../app/[color, nazopuyo, simulator]
 import
@@ -78,17 +78,20 @@ func nextPairCell*(
   ## Returns the cell in the next pairs.
   let
     pos = simulator.next.position
-    nextPairPos: Option[PairPosition]
-  simulator.nazoPuyoWrap.flattenAnd:
-    nextPairPos = puyoPuyo.nextPairPosition
+    noPosLeft: bool
+    nextPair: Pair
+  simulator.nazoPuyoWrap.get:
+    noPosLeft = wrappedNazoPuyo.puyoPuyo.movingCompleted
+    nextPair =
+      if noPosLeft: Pair.low else: wrappedNazoPuyo.puyoPuyo.nextPairPosition.pair
 
   result =
     if simulator.state != Stable:
       Cell.None
-    elif nextPairPos.isNone:
+    elif noPosLeft:
       Cell.None
     elif idx == 0 and col == pos.axisColumn:
-      nextPairPos.get.pair.axis
+      nextPair.axis
     elif (
       # Up, Down
       (
@@ -105,7 +108,7 @@ func nextPairCell*(
         )
       )
     ):
-      nextPairPos.get.pair.child
+      nextPair.child
     else:
       Cell.None
 
@@ -115,19 +118,22 @@ func nextPairCell*(
 
 func immediateNextPairCell*(simulator: Simulator, axis: bool): Cell {.inline.} =
   ## Returns the next-pair's cell in the immediate pairs.
-  if simulator.nazoPuyoWrap.nextIdx >= simulator.nazoPuyoWrap.pairsPositions.len:
-    return Cell.None
+  simulator.nazoPuyoWrap.get:
+    if wrappedNazoPuyo.puyoPuyo.nextIndex >= wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
+      return Cell.None
 
-  let pair = simulator.nazoPuyoWrap.pairsPositions[^1].pair
-  result = if axis: pair.axis else: pair.child
+    let pair = wrappedNazoPuyo.puyoPuyo.pairsPositions[^1].pair
+    result = if axis: pair.axis else: pair.child
 
 func immediateDoubleNextPairCell*(simulator: Simulator, axis: bool): Cell {.inline.} =
   ## Returns the double-next-pair's cell in the immediate pairs.
-  if simulator.nazoPuyoWrap.nextIdx.succ >= simulator.nazoPuyoWrap.pairsPositions.len:
-    return Cell.None
+  simulator.nazoPuyoWrap.get:
+    if wrappedNazoPuyo.puyoPuyo.nextIndex.succ >=
+        wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
+      return Cell.None
 
-  let pair = simulator.nazoPuyoWrap.pairsPositions[^2].pair
-  result = if axis: pair.axis else: pair.child
+    let pair = wrappedNazoPuyo.puyoPuyo.pairsPositions[^2].pair
+    result = if axis: pair.axis else: pair.child
 
 # ------------------------------------------------
 # Message
@@ -151,17 +157,18 @@ func getMessages*(
   if simulator.state == Stable:
     case simulator.kind
     of Regular:
-      simulator.nazoPuyoWrap.flattenAnd:
-        result.state = if field.isDead: DeadMessage else: ""
+      simulator.nazoPuyoWrap.get:
+        result.state = if wrappedNazoPuyo.puyoPuyo.field.isDead: DeadMessage else: ""
     of Nazo:
       let
-        pairsPositions = simulator.nazoPuyoWrap.pairsPositions
+        pairsPositions: PairsPositions
         endIdx: Natural
-      simulator.nazoPuyoWrap.flattenAnd:
-        endIdx = nazoPuyo.puyoPuyo.nextIdx
+      simulator.nazoPuyoWrap.get:
+        pairsPositions = wrappedNazoPuyo.puyoPuyo.pairsPositions
+        endIdx = wrappedNazoPuyo.puyoPuyo.nextIndex
 
-      simulator.originalNazoPuyoWrap.flattenAnd:
-        var nazo = nazoPuyo
+      simulator.originalNazoPuyoWrap.get:
+        var nazo = wrappedNazoPuyo
         nazo.puyoPuyo.pairsPositions = pairsPositions
         result.state = NazoMessages[nazo.mark endIdx]
   else:
@@ -191,13 +198,14 @@ func toXLink*(simulator: Simulator, withPositions: bool, editor: bool): Uri {.in
   let simulatorUri = simulator.toUri(withPositions, editor)
 
   if simulator.kind == Nazo:
-    let
-      ruleStr = RuleDescriptions[simulator.rule]
-      moveCountStr = $simulator.nazoPuyoWrap.pairsPositions.len
-      reqStr = $simulator.nazoPuyoWrap.requirement
+    simulator.nazoPuyoWrap.get:
+      let
+        ruleStr = RuleDescriptions[simulator.rule]
+        moveCount = wrappedNazoPuyo.moveCount
+        reqStr = $wrappedNazoPuyo.requirement
 
-    result = initXLink(
-      &"{ruleStr}・{moveCountStr}手・{reqStr}", "なぞぷよ", simulatorUri
-    )
+      result = initXLink(
+        &"{ruleStr}・{moveCount}手・{reqStr}", "なぞぷよ", simulatorUri
+      )
   else:
     result = initXLink(uri = simulatorUri)

@@ -33,21 +33,19 @@ export
   marathon.nextResultPage, marathon.prevResultPage, marathon.match, marathon.play,
   marathon.operate
 export
-  nazopuyo.NazoPuyoWrap, nazopuyo.initNazoPuyoWrap, nazopuyo.flattenAnd,
-  nazopuyo.pairsPositions, nazopuyo.`pairsPositions=`, nazopuyo.nextIdx,
-  nazopuyo.`nextIdx=`, nazopuyo.requirement, nazopuyo.`requirement=`, nazopuyo.rule,
+  nazopuyo.NazoPuyoWrap, nazopuyo.initNazoPuyoWrap, nazopuyo.get, nazopuyo.rule,
   nazopuyo.`rule=`, nazopuyo.`==`
 export permute.permute
 export
   simulator.SimulatorKind, simulator.SimulatorMode, simulator.SimulatorState,
   simulator.Simulator, simulator.initSimulator, simulator.rule, simulator.kind,
   simulator.mode, simulator.`rule=`, simulator.`kind=`, simulator.`mode=`,
-  simulator.score, simulator.toggleInserting, simulator.toggleFocus,
-  simulator.moveCursorUp, simulator.moveCursorDown, simulator.moveCursorRight,
-  simulator.moveCursorLeft, simulator.deletePairPosition, simulator.writeCell,
-  simulator.shiftFieldUp, simulator.shiftFieldDown, simulator.shiftFieldRight,
-  simulator.shiftFieldLeft, simulator.flipFieldV, simulator.flipFieldH,
-  simulator.`requirementKind=`, simulator.`requirementColor=`,
+  simulator.score, simulator.originalNazoPuyoWrap, simulator.toggleInserting,
+  simulator.toggleFocus, simulator.moveCursorUp, simulator.moveCursorDown,
+  simulator.moveCursorRight, simulator.moveCursorLeft, simulator.deletePairPosition,
+  simulator.writeCell, simulator.shiftFieldUp, simulator.shiftFieldDown,
+  simulator.shiftFieldRight, simulator.shiftFieldLeft, simulator.flipFieldV,
+  simulator.flipFieldH, simulator.`requirementKind=`, simulator.`requirementColor=`,
   simulator.`requirementNumber=`, simulator.undo, simulator.redo,
   simulator.moveNextPositionRight, simulator.moveNextPositionLeft,
   simulator.rotateNextPositionRight, simulator.rotateNextPositionLeft,
