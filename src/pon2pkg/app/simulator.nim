@@ -52,7 +52,7 @@ type
     undoDeque: Deque[NazoPuyoWrap]
     redoDeque: Deque[NazoPuyoWrap]
 
-    operating*: tuple[index: Natural, position: Position]
+    operating: tuple[index: Natural, position: Position]
     editing*:
       tuple[
         cell: Cell,
@@ -182,6 +182,10 @@ func state*(self): SimulatorState {.inline.} =
 
 func score*(self): int {.inline.} = ## Returns the score.
   self.moveResult.score
+
+func operating*(self): tuple[index: Natural, position: Position] {.inline.} =
+  ## Returns the operating information.
+  self.operating
 
 # ------------------------------------------------
 # Edit - Other
@@ -810,7 +814,7 @@ when defined(js):
       field,
       immediatepairs,
       messages,
-      operating,
+      operating as operatingModule,
       pairs as pairsModule,
       palette,
       requirement,
@@ -898,7 +902,7 @@ else:
       field,
       immediatepairs,
       messages,
-      operating,
+      operating as operatingModule,
       pairs as pairsModule,
       requirement,
       select,
