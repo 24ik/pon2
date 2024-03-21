@@ -42,9 +42,9 @@ type
     ## Note that `editor` field does not affect the behaviour; it is used only
     ## by rendering.
     nazoPuyoWrap*: NazoPuyoWrap
-    moveResult: MoveResult
 
-    editor*: bool
+    moveResult: MoveResult
+    editor: bool
     state: SimulatorState
     kind: SimulatorKind
     mode: SimulatorMode
@@ -82,8 +82,8 @@ func initSimulator*(
   ## Returns a new simulator.
   ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
   result.nazoPuyoWrap = nazoPuyoWrap
-  result.moveResult = DefaultMoveResult
 
+  result.moveResult = DefaultMoveResult
   result.editor = editor or mode == Edit
   result.state = Stable
   result.kind = Nazo
@@ -155,6 +155,10 @@ func `mode=`*(mSelf; mode: SimulatorMode) {.inline.} =
 # ------------------------------------------------
 # Property - Other
 # ------------------------------------------------
+
+func editor*(self): bool {.inline.} =
+  ## Returns `true` if the simulator is in the editor mode.
+  self.editor
 
 func state*(self): SimulatorState {.inline.} =
   ## Returns the simulator state.
