@@ -41,9 +41,9 @@ type
     ## Puyo Puyo simulator.
     ## Note that `editor` field does not affect the behaviour; it is used only
     ## by rendering.
-    nazoPuyoWrap*: NazoPuyoWrap
-
+    nazoPuyoWrap: NazoPuyoWrap
     moveResult: MoveResult
+
     editor: bool
     state: SimulatorState
     kind: SimulatorKind
@@ -82,8 +82,8 @@ func initSimulator*(
   ## Returns a new simulator.
   ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
   result.nazoPuyoWrap = nazoPuyoWrap
-
   result.moveResult = DefaultMoveResult
+
   result.editor = editor or mode == Edit
   result.state = Stable
   result.kind = Nazo
@@ -153,6 +153,22 @@ func `mode=`*(mSelf; mode: SimulatorMode) {.inline.} =
   mSelf.mode = mode
 
 # ------------------------------------------------
+# Property - Nazo Puyo
+# ------------------------------------------------
+
+func nazoPuyoWrap*(self): NazoPuyoWrap {.inline.} =
+  ## Returns the wrapped Nazo Puyo.
+  self.nazoPuyoWrap
+
+func nazoPuyoWrap*(mSelf): var NazoPuyoWrap {.inline.} =
+  ## Returns the wrapped Nazo Puyo.
+  result = mSelf.nazoPuyoWrap
+
+func originalNazoPuyoWrap*(self): NazoPuyoWrap {.inline.} =
+  ## Returns the wrapped Nazo Puyo before any moves.
+  if self.undoDeque.len > 0: self.undoDeque.peekFirst else: self.nazoPuyoWrap
+
+# ------------------------------------------------
 # Property - Other
 # ------------------------------------------------
 
@@ -166,10 +182,6 @@ func state*(self): SimulatorState {.inline.} =
 
 func score*(self): int {.inline.} = ## Returns the score.
   self.moveResult.score
-
-func originalNazoPuyoWrap*(self): NazoPuyoWrap {.inline.} =
-  ## Returns the wrapped Nazo Puyo before any moves.
-  if self.undoDeque.len > 0: self.undoDeque.peekFirst else: self.nazoPuyoWrap
 
 # ------------------------------------------------
 # Edit - Other
