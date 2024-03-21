@@ -2,15 +2,15 @@
 ## and [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 ##
 ## Submodule Documentations:
-## - [color](./apppkg/color.html)
-## - [generate](./apppkg/generate.html)
-## - [gui](./apppkg/gui.html)
-## - [key](./apppkg/key.html)
-## - [marathon](./apppkg/marathon.html)
-## - [nazopuyo](./apppkg/nazopuyo.html)
-## - [permute](./apppkg/permute.html)
-## - [simulator](./apppkg/simulator.html)
-## - [solve](./apppkg/solve.html)
+## - [color](./app/color.html)
+## - [generate](./app/generate.html)
+## - [gui](./app/gui.html)
+## - [key](./app/key.html)
+## - [marathon](./app/marathon.html)
+## - [nazopuyo](./app/nazopuyo.html)
+## - [permute](./app/permute.html)
+## - [simulator](./app/simulator.html)
+## - [solve](./app/solve.html)
 ##
 
 {.experimental: "strictDefs".}
