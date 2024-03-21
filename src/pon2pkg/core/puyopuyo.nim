@@ -12,7 +12,7 @@ type PuyoPuyo*[F: TsuField or WaterField] = object ## Puyo Puyo game.
   field*: F
   pairsPositions*: PairsPositions
 
-  nowIdx: Natural
+  operatingIdx: Natural
 
 # ------------------------------------------------
 # Reset
@@ -22,7 +22,7 @@ func reset*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]) {.inline.} =
   ## Resets the Puyo Puyo game.
   mSelf.field = initField[F]()
   mSelf.pairsPositions.setLen 0
-  mSelf.nowIdx = 0
+  mSelf.operatingIdx = 0
 
 # ------------------------------------------------
 # Constructor
@@ -53,7 +53,7 @@ func toTsuPuyoPuyo*[F: TsuField or WaterField](
   ## Returns the Tsu Puyo Puyo converted from the given Puyo Puyo.
   result.field = self.field.toTsuField
   result.pairsPositions = self.pairsPositions
-  result.nowIdx = self.nowIdx
+  result.operatingIdx = self.operatingIdx
 
 func toWaterPuyoPuyo*[F: TsuField or WaterField](
     self: PuyoPuyo[F]
@@ -61,7 +61,7 @@ func toWaterPuyoPuyo*[F: TsuField or WaterField](
   ## Returns the Water Puyo Puyo converted from the given Puyo Puyo.
   result.field = self.field.toWaterField
   result.pairsPositions = self.pairsPositions
-  result.nowIdx = self.nowIdx
+  result.operatingIdx = self.operatingIdx
 
 # ------------------------------------------------
 # Property
@@ -71,36 +71,40 @@ func rule*[F: TsuField or WaterField](self: PuyoPuyo[F]): Rule {.inline.} =
   ## Returns the rule.
   self.field.rule
 
-func nowIndex*[F: TsuField or WaterField](self: PuyoPuyo[F]): int {.inline.} =
+func operatingIndex*[F: TsuField or WaterField](self: PuyoPuyo[F]): int {.inline.} =
   ## Returns the index of pair being operated.
-  self.nowIdx
+  self.operatingIdx
 
-func incrementNowIndex*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]) {.inline.} =
+func incrementOperatingIndex*[F: TsuField or WaterField](
+    mSelf: var PuyoPuyo[F]
+) {.inline.} =
   ## Increments the index of pair being operated.
   ## The result is clipped.
-  if mSelf.nowIdx >= mSelf.pairsPositions.len:
+  if mSelf.operatingIdx >= mSelf.pairsPositions.len:
     return
 
-  mSelf.nowIdx.inc
+  mSelf.operatingIdx.inc
 
-func decrementNowIndex*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]) {.inline.} =
+func decrementOperatingIndex*[F: TsuField or WaterField](
+    mSelf: var PuyoPuyo[F]
+) {.inline.} =
   ## Decrements the index of pair being operated.
   ## The result is clipped.
-  if mSelf.nowIdx <= 0:
+  if mSelf.operatingIdx <= 0:
     return
 
-  mSelf.nowIdx.dec
+  mSelf.operatingIdx.dec
 
 func movingCompleted*[F: TsuField or WaterField](self: PuyoPuyo[F]): bool {.inline.} =
   ## Returns `true` if all pairs in the Puyo Puyo game are put (or skipped).
-  self.nowIdx >= self.pairsPositions.len
+  self.operatingIdx >= self.pairsPositions.len
 
-func nowPairPosition*[F: TsuField or WaterField](
+func operatingPairPosition*[F: TsuField or WaterField](
     self: PuyoPuyo[F]
 ): PairPosition {.inline.} =
   ## Returns the pair&position being operated.
   ## If no pairs left, `IndexDefect` is raised.
-  self.pairsPositions[self.nowIdx]
+  self.pairsPositions[self.operatingIdx]
 
 # ------------------------------------------------
 # Count
@@ -139,10 +143,10 @@ func move[F: TsuField or WaterField](
     return initMoveResult(0, [0, 0, 0, 0, 0, 0, 0])
 
   when overwritePos:
-    mSelf.pairsPositions[mSelf.nowIdx].position = pos
+    mSelf.pairsPositions[mSelf.operatingIdx].position = pos
 
-  result = mSelf.field.move mSelf.nowPairPosition
-  mSelf.nowIdx.inc
+  result = mSelf.field.move mSelf.operatingPairPosition
+  mSelf.operatingIdx.inc
 
 func move*[F: TsuField or WaterField](
     mSelf: var PuyoPuyo[F]
@@ -194,10 +198,10 @@ func move1[F: TsuField or WaterField](
     return initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], newSeq[array[Puyo, int]](0))
 
   when overwritePos:
-    mSelf.pairsPositions[mSelf.nowIdx].position = pos
+    mSelf.pairsPositions[mSelf.operatingIdx].position = pos
 
-  result = mSelf.field.move1 mSelf.nowPairPosition
-  mSelf.nowIdx.inc
+  result = mSelf.field.move1 mSelf.operatingPairPosition
+  mSelf.operatingIdx.inc
 
 func move1*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
@@ -235,10 +239,10 @@ func move2[F: TsuField or WaterField](
       initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], newSeq[array[ColorPuyo, seq[int]]](0))
 
   when overwritePos:
-    mSelf.pairsPositions[mSelf.nowIdx].position = pos
+    mSelf.pairsPositions[mSelf.operatingIdx].position = pos
 
-  result = mSelf.field.move2 mSelf.nowPairPosition
-  mSelf.nowIdx.inc
+  result = mSelf.field.move2 mSelf.operatingPairPosition
+  mSelf.operatingIdx.inc
 
 func move2*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
@@ -281,7 +285,7 @@ func parsePuyoPuyo*[F: TsuField or WaterField](str: string): PuyoPuyo[F] {.inlin
 
   result.field = parseField[F](strs[0])
   result.pairsPositions = strs[1].parsePairsPositions
-  result.nowIdx = 0
+  result.operatingIdx = 0
 
 # ------------------------------------------------
 # Puyo Puyo Game <-> URI
@@ -309,7 +313,7 @@ func parsePuyoPuyo*[F: TsuField or WaterField](
 ): PuyoPuyo[F] {.inline.} =
   ## Returns the Puyo Puyo converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
-  result.nowIdx = 0
+  result.operatingIdx = 0
 
   case host
   of Izumiya:

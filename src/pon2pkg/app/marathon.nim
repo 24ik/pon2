@@ -19,7 +19,7 @@ type Marathon* = object ## Marathon manager.
 
   matchPairsStrsSeq*: seq[string]
   matchResultPageCount*: Natural
-  matchResultPageIdx*: Natural
+  matchResultPageIndex*: Natural
 
   allPairsStrsSeq: seq[string]
   allPairsStrsTree: CritBitTree[void]
@@ -46,7 +46,7 @@ proc initMarathon*(): Marathon {.inline.} =
 
   result.matchPairsStrsSeq = @[]
   result.matchResultPageCount = 0
-  result.matchResultPageIdx = 0
+  result.matchResultPageIndex = 0
 
   result.allPairsStrsSeq = RawPairsTxt.splitLines
   result.allPairsStrsTree = result.allPairsStrsSeq.toCritBitTree
@@ -72,20 +72,20 @@ proc nextResultPage*(mSelf) {.inline.} =
   if mSelf.matchResultPageCount == 0:
     return
 
-  if mSelf.matchResultPageIdx == mSelf.matchResultPageCount.pred:
-    mSelf.matchResultPageIdx = 0
+  if mSelf.matchResultPageIndex == mSelf.matchResultPageCount.pred:
+    mSelf.matchResultPageIndex = 0
   else:
-    mSelf.matchResultPageIdx.inc
+    mSelf.matchResultPageIndex.inc
 
 proc prevResultPage*(mSelf) {.inline.} =
   ## Shows the previous result page.
   if mSelf.matchResultPageCount == 0:
     return
 
-  if mSelf.matchResultPageIdx == 0:
-    mSelf.matchResultPageIdx = mSelf.matchResultPageCount.pred
+  if mSelf.matchResultPageIndex == 0:
+    mSelf.matchResultPageIndex = mSelf.matchResultPageCount.pred
   else:
-    mSelf.matchResultPageIdx.dec
+    mSelf.matchResultPageIndex.dec
 
 # ------------------------------------------------
 # Match
@@ -172,8 +172,6 @@ func swappedPrefixes(prefix: string): seq[string] {.inline.} =
 
 func initReplaceData(keys: string): seq[seq[(string, string)]] {.inline.} =
   ## Returns arguments for prefix replacing.
-  result = @[] # HACK: dummy to suppress warning
-
   case keys.len
   of 1:
     result = collect:
@@ -201,6 +199,7 @@ func initReplaceData(keys: string): seq[seq[(string, string)]] {.inline.} =
               if {p0, p1, p2, p3}.card == 4:
                 @[($keys[0], $p0), ($keys[1], $p1), ($keys[2], $p2), ($keys[3], $p3)]
   else:
+    result = @[] # HACK: dummy to suppress warning
     assert false
 
 const
@@ -236,7 +235,7 @@ func match*(mSelf; prefix: string) {.inline.} =
 
   mSelf.matchResultPageCount =
     ceil(mSelf.matchPairsStrsSeq.len / MatchResultPairsCountPerPage).Natural
-  mSelf.matchResultPageIdx = 0
+  mSelf.matchResultPageIndex = 0
 
   if mSelf.matchPairsStrsSeq.len > 0:
     mSelf.focusSimulator = false

@@ -15,7 +15,7 @@ proc initEditorPaginationNode*(guiApplication: var GuiApplication): VNode {.inli
     if guiApplication.replayPairsPositionsSeq.get.len == 0:
       0
     else:
-      guiApplication.replayIdx.succ
+      guiApplication.replayIndex.succ
 
   result = buildHtml(
     nav(class = "pagination", role = "navigation", aria - label = "pagination")

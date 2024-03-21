@@ -42,7 +42,7 @@ proc drawHandler(control: EditorPaginationControl): (event: DrawEvent) -> void =
         elif control.guiApplication[].replayPairsPositionsSeq.get.len == 0:
           0
         else:
-          control.guiApplication[].replayIdx
+          control.guiApplication[].replayIndex
       showLen =
         if control.guiApplication[].replayPairsPositionsSeq.isNone:
           0

@@ -63,7 +63,8 @@ proc initControllerNode*(simulator: var Simulator): VNode {.inline.} =
             italic(class = "fa-solid fa-angles-right")
       tdiv(class = "buttons is-centered mb-0"):
         button(
-          class = "button is-info", onclick = () => simulator.rotateNextPositionLeft
+          class = "button is-info",
+          onclick = () => simulator.rotateOperatingPositionLeft,
         ):
           span(class = "icon"):
             italic(class = "fa-solid fa-arrow-rotate-left")
@@ -71,19 +72,22 @@ proc initControllerNode*(simulator: var Simulator): VNode {.inline.} =
           span(class = "icon"):
             italic(class = "fa-solid fa-backward-step")
         button(
-          class = "button is-info", onclick = () => simulator.rotateNextPositionRight
+          class = "button is-info",
+          onclick = () => simulator.rotateOperatingPositionRight,
         ):
           span(class = "icon"):
             italic(class = "fa-solid fa-arrow-rotate-right")
       tdiv(class = "buttons is-centered mb-0"):
-        button(class = "button is-info", onclick = () => simulator.moveNextPositionLeft):
+        button(
+          class = "button is-info", onclick = () => simulator.moveOperatingPositionLeft
+        ):
           span(class = "icon"):
             italic(class = "fa-solid fa-arrow-left")
         button(class = "button is-info", onclick = () => simulator.forward):
           span(class = "icon"):
             italic(class = "fa-solid fa-arrow-down")
         button(
-          class = "button is-info", onclick = () => simulator.moveNextPositionRight
+          class = "button is-info", onclick = () => simulator.moveOperatingPositionRight
         ):
           span(class = "icon"):
             italic(class = "fa-solid fa-arrow-right")

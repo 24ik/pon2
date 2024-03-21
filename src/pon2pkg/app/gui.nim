@@ -29,7 +29,7 @@ type GuiApplication* = object ## GUI application.
   replaySimulator*: ref Simulator
 
   replayPairsPositionsSeq*: Option[seq[PairsPositions]]
-  replayIdx*: Natural
+  replayIndex*: Natural
 
   editor: bool
   focusEditor*: bool
@@ -57,7 +57,7 @@ proc initGuiApplication*(simulator: Simulator): GuiApplication {.inline.} =
   {.push warning[ProveInit]: off.}
   result.replayPairsPositionsSeq = none seq[PairsPositions]
   {.pop.}
-  result.replayIdx = 0
+  result.replayIndex = 0
 
   result.editor = simulator.editor
   result.focusEditor = false
@@ -91,7 +91,7 @@ proc updateReplaySimulator[F: TsuField or WaterField](
 
   if mSelf.replayPairsPositionsSeq.get.len > 0:
     mSelf.focusEditor = true
-    mSelf.replayIdx = 0
+    mSelf.replayIndex = 0
 
     var nazo2 = nazo
     nazo2.puyoPuyo.pairsPositions = mSelf.replayPairsPositionsSeq.get[0]
@@ -218,14 +218,14 @@ proc nextReplay*(mSelf) {.inline.} =
   if mSelf.replayPairsPositionsSeq.isNone or mSelf.replayPairsPositionsSeq.get.len == 0:
     return
 
-  if mSelf.replayIdx == mSelf.replayPairsPositionsSeq.get.len.pred:
-    mSelf.replayIdx = 0
+  if mSelf.replayIndex == mSelf.replayPairsPositionsSeq.get.len.pred:
+    mSelf.replayIndex = 0
   else:
-    mSelf.replayIdx.inc
+    mSelf.replayIndex.inc
 
   mSelf.replaySimulator[].nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.pairsPositions =
-      mSelf.replayPairsPositionsSeq.get[mSelf.replayIdx]
+      mSelf.replayPairsPositionsSeq.get[mSelf.replayIndex]
   mSelf.replaySimulator[].reset false
 
 proc prevReplay*(mSelf) {.inline.} =
@@ -233,14 +233,14 @@ proc prevReplay*(mSelf) {.inline.} =
   if mSelf.replayPairsPositionsSeq.isNone or mSelf.replayPairsPositionsSeq.get.len == 0:
     return
 
-  if mSelf.replayIdx == 0:
-    mSelf.replayIdx = mSelf.replayPairsPositionsSeq.get.len.pred
+  if mSelf.replayIndex == 0:
+    mSelf.replayIndex = mSelf.replayPairsPositionsSeq.get.len.pred
   else:
-    mSelf.replayIdx.dec
+    mSelf.replayIndex.dec
 
   mSelf.replaySimulator[].nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.pairsPositions =
-      mSelf.replayPairsPositionsSeq.get[mSelf.replayIdx]
+      mSelf.replayPairsPositionsSeq.get[mSelf.replayIndex]
   mSelf.replaySimulator[].reset false
 
 # ------------------------------------------------

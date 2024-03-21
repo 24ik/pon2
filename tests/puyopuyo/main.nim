@@ -53,40 +53,42 @@ proc main*() =
     check initPuyoPuyo[TsuField]().rule == Tsu
     check initPuyoPuyo[WaterField]().rule == Water
 
-  # nextIndex, incrementNextIndex, decrementNextIndex
+  # operatingIndex, incrementOperatingIndex, decrementOperatingIndex
   block:
     var puyoPuyo = initPuyoPuyo[TsuField]()
     puyoPuyo.pairsPositions.add PairPosition(pair: RedGreen, position: Up1)
-    check puyoPuyo.nextIndex == 0
+    check puyoPuyo.operatingIndex == 0
 
-    puyoPuyo.decrementNextIndex
-    check puyoPuyo.nextIndex == 0
+    puyoPuyo.decrementOperatingIndex
+    check puyoPuyo.operatingIndex == 0
 
-    puyoPuyo.incrementNextIndex
-    check puyoPuyo.nextIndex == 1
-    puyoPuyo.incrementNextIndex
-    check puyoPuyo.nextIndex == 1
+    puyoPuyo.incrementOperatingIndex
+    check puyoPuyo.operatingIndex == 1
+    puyoPuyo.incrementOperatingIndex
+    check puyoPuyo.operatingIndex == 1
 
-    puyoPuyo.decrementNextIndex
-    check puyoPuyo.nextIndex == 0
+    puyoPuyo.decrementOperatingIndex
+    check puyoPuyo.operatingIndex == 0
 
-  # movingCompleted, nextPairPosition
+  # movingCompleted, operatingPairPosition
   block:
     var puyoPuyo = initPuyoPuyo[TsuField]()
     puyoPuyo.pairsPositions.add PairPosition(pair: RedGreen, position: Up1)
     puyoPuyo.pairsPositions.add PairPosition(pair: BlueYellow, position: Up2)
 
     check not puyoPuyo.movingCompleted
-    check puyoPuyo.nextPairPosition == PairPosition(pair: RedGreen, position: Up1)
+    check puyoPuyo.operatingPairPosition == PairPosition(pair: RedGreen, position: Up1)
 
     puyoPuyo.move
     check not puyoPuyo.movingCompleted
-    check puyoPuyo.nextPairPosition == PairPosition(pair: BlueYellow, position: Up2)
+    check puyoPuyo.operatingPairPosition == PairPosition(
+      pair: BlueYellow, position: Up2
+    )
 
     puyoPuyo.move
     check puyoPuyo.movingCompleted
     expect IndexDefect:
-      discard puyoPuyo.nextPairPosition
+      discard puyoPuyo.operatingPairPosition
 
   # ------------------------------------------------
   # Count

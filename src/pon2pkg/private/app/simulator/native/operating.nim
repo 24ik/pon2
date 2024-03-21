@@ -1,4 +1,4 @@
-## This module implements the next pair control.
+## This module implements the operating control.
 ##
 
 {.experimental: "strictDefs".}
@@ -12,12 +12,12 @@ import ../[common]
 import ../../../../app/[color, simulator]
 import ../../../../core/[cell, fieldtype]
 
-type NextPairControl* = ref object of LayoutContainer ## Next pair control.
+type OperatingPairControl* = ref object of LayoutContainer ## Operating control.
   simulator: ref Simulator
   assets: ref Assets
 
 proc cellDrawHandler(
-    control: NextPairControl, event: DrawEvent, idx: range[-1 .. 1], col: Column
+    control: OperatingPairControl, event: DrawEvent, idx: range[-1 .. 1], col: Column
 ) {.inline.} =
   ## Draws cell.
   let canvas = event.control.canvas
@@ -29,21 +29,21 @@ proc cellDrawHandler(
     if control.simulator[].mode == Edit:
       None
     else:
-      control.simulator[].nextPairCell(idx, col)
+      control.simulator[].operatingPairCell(idx, col)
   ]
 
 func initCellDrawHandler(
-    control: NextPairControl, idx: range[-1 .. 1], col: Column
+    control: OperatingPairControl, idx: range[-1 .. 1], col: Column
 ): (event: DrawEvent) -> void =
   ## Returns the handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: DrawEvent) => control.cellDrawHandler(event, idx, col)
 
-proc initNextPairControl*(
+proc initOperatingControl*(
     simulator: ref Simulator, assets: ref Assets
-): NextPairControl {.inline.} =
-  ## Returns a next pair control.
-  result = new NextPairControl
+): OperatingPairControl {.inline.} =
+  ## Returns an operating control.
+  result = new OperatingPairControl
   result.init
   result.layout = Layout_Vertical
 

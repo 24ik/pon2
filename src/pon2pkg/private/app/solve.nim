@@ -74,9 +74,6 @@ func child[F: TsuField or WaterField](
     reqColor: static RequirementColor,
 ): Node[F] {.inline.} =
   ## Returns the child node with the `pos` edge.
-  when reqKind notin {DisappearColor, DisappearColorMore}:
-    let putPair = node.nazoPuyo.puyoPuyo.nextPairPosition.pair
-
   result = node
   result.moveResult =
     when reqKind in {
@@ -116,6 +113,7 @@ func child[F: TsuField or WaterField](
       let puyo = ReqColorToPuyo[reqColor]
       result.fieldCounts[puyo] = result.nazoPuyo.puyoPuyo.field.puyoCount puyo
 
+    let putPair = node.nazoPuyo.puyoPuyo.operatingPairPosition.pair
     result.pairsCounts[putPair.axis].dec
     result.pairsCounts[putPair.child].dec
 
@@ -132,7 +130,7 @@ func children*[F: TsuField or WaterField](
 ): seq[Node[F]] {.inline.} =
   ## Returns the children of the node.
   let positions =
-    if node.nazoPuyo.puyoPuyo.nextPairPosition.pair.isDouble:
+    if node.nazoPuyo.puyoPuyo.operatingPairPosition.pair.isDouble:
       node.nazoPuyo.puyoPuyo.field.validDoublePositions
     else:
       node.nazoPuyo.puyoPuyo.field.validPositions

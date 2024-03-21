@@ -1,4 +1,4 @@
-## This module implements the next pair node.
+## This module implements the operating node.
 ##
 
 {.experimental: "strictDefs".}
@@ -11,8 +11,8 @@ import ../../[misc]
 import ../../../../app/[simulator]
 import ../../../../core/[fieldtype]
 
-proc initNextPairNode*(simulator: var Simulator): VNode {.inline.} =
-  ## Returns the next pair node.
+proc initOperatingNode*(simulator: var Simulator): VNode {.inline.} =
+  ## Returns the operating node.
   buildHtml(table):
     tbody:
       for idx in -1 .. 1:
@@ -20,4 +20,4 @@ proc initNextPairNode*(simulator: var Simulator): VNode {.inline.} =
           for col in Column.low .. Column.high:
             td:
               figure(class = "image is-24x24"):
-                img(src = simulator.nextPairCell(idx, col).cellImageSrc)
+                img(src = simulator.operatingPairCell(idx, col).cellImageSrc)

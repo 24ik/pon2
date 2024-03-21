@@ -52,7 +52,7 @@ type
     undoDeque: Deque[NazoPuyoWrap]
     redoDeque: Deque[NazoPuyoWrap]
 
-    next*: tuple[index: Natural, position: Position]
+    operating*: tuple[index: Natural, position: Position]
     editing*:
       tuple[
         cell: Cell,
@@ -93,8 +93,8 @@ func initSimulator*(
     result.undoDeque = initDeque[NazoPuyoWrap](wrappedNazoPuyo.moveCount)
     result.redoDeque = initDeque[NazoPuyoWrap](wrappedNazoPuyo.moveCount)
 
-  result.next.index = Natural 0
-  result.next.position = InitPos
+  result.operating.index = 0
+  result.operating.position = InitPos
   result.editing.cell = Cell.None
   result.editing.field = (Row.low, Column.low)
   result.editing.pair = (Natural 0, true)
@@ -417,18 +417,21 @@ func redo*(mSelf) {.inline.} =
 # Play - Position
 # ------------------------------------------------
 
-func moveNextPositionRight*(mSelf) {.inline.} = ## Moves the next position right.
-  mSelf.next.position.moveRight
+func moveOperatingPositionRight*(mSelf) {.inline.} =
+  ## Moves the operating position right.
+  mSelf.operating.position.moveRight
 
-func moveNextPositionLeft*(mSelf) {.inline.} = ## Moves the next position left.
-  mSelf.next.position.moveLeft
+func moveOperatingPositionLeft*(mSelf) {.inline.} =
+  ## Moves the operating position left.
+  mSelf.operating.position.moveLeft
 
-func rotateNextPositionRight*(mSelf) {.inline.} =
-  ## Rotates the next position right.
-  mSelf.next.position.rotateRight
+func rotateOperatingPositionRight*(mSelf) {.inline.} =
+  ## Rotates the operating position right.
+  mSelf.operating.position.rotateRight
 
-func rotateNextPositionLeft*(mSelf) {.inline.} = ## Rotates the next position left.
-  mSelf.next.position.rotateLeft
+func rotateOperatingPositionLeft*(mSelf) {.inline.} =
+  ## Rotates the operating position left.
+  mSelf.operating.position.rotateLeft
 
 # ------------------------------------------------
 # Forward / Backward
@@ -447,12 +450,12 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
       mSelf.save
 
       if not replay:
-        wrappedNazoPuyo.puyoPuyo.pairsPositions[mSelf.next.index].position =
-          if skip: Position.None else: mSelf.next.position
+        wrappedNazoPuyo.puyoPuyo.pairsPositions[mSelf.operating.index].position =
+          if skip: Position.None else: mSelf.operating.position
 
       # put
       block:
-        let pairPos = wrappedNazoPuyo.puyoPuyo.pairsPositions[mSelf.next.index]
+        let pairPos = wrappedNazoPuyo.puyoPuyo.pairsPositions[mSelf.operating.index]
         wrappedNazoPuyo.puyoPuyo.field.put pairPos.pair, pairPos.position
 
       # disappear
@@ -461,9 +464,9 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
           mSelf.state = WillDisappear
         else:
           mSelf.state = Stable
-          mSelf.next.index.inc
-          mSelf.next.position = InitPos
-          wrappedNazoPuyo.puyoPuyo.incrementNowIndex
+          mSelf.operating.index.inc
+          mSelf.operating.position = InitPos
+          wrappedNazoPuyo.puyoPuyo.incrementOperatingIndex
     of WillDisappear:
       let disappearRes = wrappedNazoPuyo.puyoPuyo.field.disappear
 
@@ -478,9 +481,9 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
         mSelf.state = WillDisappear
       else:
         mSelf.state = Stable
-        mSelf.next.index.inc
-        mSelf.next.position = InitPos
-        wrappedNazoPuyo.puyoPuyo.incrementNowIndex
+        mSelf.operating.index.inc
+        mSelf.operating.position = InitPos
+        wrappedNazoPuyo.puyoPuyo.incrementOperatingIndex
 
 func backward*(mSelf) {.inline.} =
   ## Backwards the simulator.
@@ -490,15 +493,16 @@ func backward*(mSelf) {.inline.} =
   mSelf.moveResult = DefaultMoveResult
 
   if mSelf.state == Stable:
-    mSelf.next.index.dec
+    mSelf.operating.index.dec
 
   mSelf.nazoPuyoWrap.get:
-    let savePos = wrappedNazoPuyo.puyoPuyo.pairsPositions[mSelf.next.index].position
+    let savePos =
+      wrappedNazoPuyo.puyoPuyo.pairsPositions[mSelf.operating.index].position
     mSelf.nazoPuyoWrap = mSelf.undoDeque.popLast
     mSelf.state = Stable
-    mSelf.next.position = InitPos
+    mSelf.operating.position = InitPos
 
-    wrappedNazoPuyo.puyoPuyo.pairsPositions[mSelf.next.index].position = savePos
+    wrappedNazoPuyo.puyoPuyo.pairsPositions[mSelf.operating.index].position = savePos
 
 func reset*(mSelf; resetPosition = true) {.inline.} =
   ## Resets the simulator.
@@ -509,8 +513,8 @@ func reset*(mSelf; resetPosition = true) {.inline.} =
       mSelf.nazoPuyoWrap = mSelf.undoDeque.popFirst
     mSelf.undoDeque.clear
     mSelf.redoDeque.clear
-    mSelf.next.index = 0
-    mSelf.next.position = InitPos
+    mSelf.operating.index = 0
+    mSelf.operating.position = InitPos
     mSelf.moveResult = DefaultMoveResult
 
     for i in 0 ..< wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
@@ -746,14 +750,14 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
   of Play:
     # rotate position
     if event == initKeyEvent("KeyJ"):
-      mSelf.rotateNextPositionLeft
+      mSelf.rotateOperatingPositionLeft
     elif event == initKeyEvent("KeyK"):
-      mSelf.rotateNextPositionRight
+      mSelf.rotateOperatingPositionRight
     # move position
     elif event == initKeyEvent("KeyA"):
-      mSelf.moveNextPositionLeft
+      mSelf.moveOperatingPositionLeft
     elif event == initKeyEvent("KeyD"):
-      mSelf.moveNextPositionRight
+      mSelf.moveOperatingPositionRight
     # forward / backward / reset
     elif event == initKeyEvent("KeyS"):
       mSelf.forward
@@ -790,7 +794,7 @@ when defined(js):
       field,
       immediatepairs,
       messages,
-      nextpair,
+      operating,
       pairs as pairsModule,
       palette,
       requirement,
@@ -832,7 +836,7 @@ when defined(js):
           tdiv(class = "column is-narrow"):
             if mSelf.mode != Edit:
               tdiv(class = "block"):
-                mSelf.initNextPairNode
+                mSelf.initOperatingNode
             tdiv(class = "block"):
               mSelf.initFieldNode
             if mSelf.mode != Edit:
@@ -878,7 +882,7 @@ else:
       field,
       immediatepairs,
       messages,
-      nextpair,
+      operating,
       pairs as pairsModule,
       requirement,
       select,
@@ -945,7 +949,7 @@ else:
     let
       field = simulator.initFieldControl assetsRef
       messages = simulator.initMessagesControl assetsRef
-    left.add simulator.initNextPairControl assetsRef
+    left.add simulator.initOperatingControl assetsRef
     left.add field
     left.add messages
     left.add simulator.initSelectControl reqControl

@@ -47,8 +47,8 @@ export
   simulator.shiftFieldRight, simulator.shiftFieldLeft, simulator.flipFieldV,
   simulator.flipFieldH, simulator.`requirementKind=`, simulator.`requirementColor=`,
   simulator.`requirementNumber=`, simulator.undo, simulator.redo,
-  simulator.moveNextPositionRight, simulator.moveNextPositionLeft,
-  simulator.rotateNextPositionRight, simulator.rotateNextPositionLeft,
+  simulator.moveOperatingPositionRight, simulator.moveOperatingPositionLeft,
+  simulator.rotateOperatingPositionRight, simulator.rotateOperatingPositionLeft,
   simulator.forward, simulator.backward, simulator.reset, simulator.toUri,
   simulator.parseSimulator, simulator.operate
 export solve.solve

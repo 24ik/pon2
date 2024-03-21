@@ -29,19 +29,19 @@ proc main*() =
     var marathon = initMarathon()
     marathon.match("rrgy")
     doAssert marathon.matchPairsStrsSeq.len > 1
-    check marathon.matchResultPageIdx == 0
+    check marathon.matchResultPageIndex == 0
 
     marathon.nextResultPage
-    check marathon.matchResultPageIdx == 1
+    check marathon.matchResultPageIndex == 1
 
     marathon.prevResultPage
-    check marathon.matchResultPageIdx == 0
+    check marathon.matchResultPageIndex == 0
 
     marathon.prevResultPage
-    check marathon.matchResultPageIdx == marathon.matchResultPageCount.pred
+    check marathon.matchResultPageIndex == marathon.matchResultPageCount.pred
 
     marathon.nextResultPage
-    check marathon.matchResultPageIdx == 0
+    check marathon.matchResultPageIndex == 0
 
   # ------------------------------------------------
   # Match
@@ -85,8 +85,8 @@ proc main*() =
 
       marathon.match("rg")
       marathon.play
-      check wrappedNazoPuyo.puyoPuyo.pairsPositions[0].pair == RedGreen
+      check wrappedNazoPuyo.puyoPuyo.pairsPositions[0].pair == GreenRed
 
       marathon.play 0
-      check wrappedNazoPuyo.puyoPuyo.pairsPositions[0].pair == RedGreen
+      check wrappedNazoPuyo.puyoPuyo.pairsPositions[0].pair == GreenRed
       check marathon.matchPairsStrsSeq[0].startsWith "rg"

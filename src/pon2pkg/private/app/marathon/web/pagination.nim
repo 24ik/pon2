@@ -13,9 +13,9 @@ import ../../../../app/[marathon]
 proc initMarathonPaginationNode*(marathon: var Marathon): VNode {.inline.} =
   ## Returns the marathon pagination node.
   let
-    firstIdx = marathon.matchResultPageIdx * MatchResultPairsCountPerPage + 1
+    firstIdx = marathon.matchResultPageIndex * MatchResultPairsCountPerPage + 1
     lastIdx = min(
-      marathon.matchResultPageIdx.succ * MatchResultPairsCountPerPage,
+      marathon.matchResultPageIndex.succ * MatchResultPairsCountPerPage,
       marathon.matchPairsStrsSeq.len,
     )
     ratio = marathon.matchPairsStrsSeq.len / AllPairsCount

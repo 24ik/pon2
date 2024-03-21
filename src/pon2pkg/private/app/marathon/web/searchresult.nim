@@ -24,9 +24,9 @@ proc initMarathonSearchResultNode*(marathon: var Marathon): VNode {.inline.} =
   result = buildHtml(table(class = "table")):
     tbody:
       let
-        beginPairIdx = marathon.matchResultPageIdx * MatchResultPairsCountPerPage
+        beginPairIdx = marathon.matchResultPageIndex * MatchResultPairsCountPerPage
         endPairIdx = min(
-          marathon.matchResultPageIdx.succ * MatchResultPairsCountPerPage,
+          marathon.matchResultPageIndex.succ * MatchResultPairsCountPerPage,
           marathon.matchPairsStrsSeq.len,
         )
 
@@ -39,9 +39,8 @@ proc initMarathonSearchResultNode*(marathon: var Marathon): VNode {.inline.} =
               span(class = "icon"):
                 italic(class = "fa-solid fa-gamepad")
 
-          let pairsPositions = marathon.matchPairsStrsSeq[pairsIdx][
-            0 ..< ShowPairCount * 2
-          ].toPairsPositions
+          let pairsPositions =
+            marathon.matchPairsStrsSeq[pairsIdx][0 ..< ShowPairCount * 2].toPairsPositions
           for idx in 0 ..< ShowPairCount:
             let pair = pairsPositions[idx].pair
 
