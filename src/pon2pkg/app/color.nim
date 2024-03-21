@@ -32,7 +32,7 @@ when defined(js):
       color.red.toHex(2),
       color.green.toHex(2),
       color.blue.toHex(2),
-      color.alpha.toHex(2)
+      color.alpha.toHex(2),
     ]
 else:
   import nigui
