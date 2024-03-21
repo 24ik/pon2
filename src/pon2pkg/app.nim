@@ -40,17 +40,17 @@ export
   simulator.SimulatorKind, simulator.SimulatorMode, simulator.SimulatorState,
   simulator.Simulator, simulator.initSimulator, simulator.rule, simulator.kind,
   simulator.mode, simulator.`rule=`, simulator.`kind=`, simulator.`mode=`,
-  simulator.score, simulator.originalNazoPuyoWrap, simulator.toggleInserting,
-  simulator.toggleFocus, simulator.moveCursorUp, simulator.moveCursorDown,
-  simulator.moveCursorRight, simulator.moveCursorLeft, simulator.deletePairPosition,
-  simulator.writeCell, simulator.shiftFieldUp, simulator.shiftFieldDown,
-  simulator.shiftFieldRight, simulator.shiftFieldLeft, simulator.flipFieldV,
-  simulator.flipFieldH, simulator.`requirementKind=`, simulator.`requirementColor=`,
-  simulator.`requirementNumber=`, simulator.undo, simulator.redo,
-  simulator.moveOperatingPositionRight, simulator.moveOperatingPositionLeft,
-  simulator.rotateOperatingPositionRight, simulator.rotateOperatingPositionLeft,
-  simulator.forward, simulator.backward, simulator.reset, simulator.toUri,
-  simulator.parseSimulator, simulator.operate
+  simulator.state, simulator.score, simulator.originalNazoPuyoWrap,
+  simulator.toggleInserting, simulator.toggleFocus, simulator.moveCursorUp,
+  simulator.moveCursorDown, simulator.moveCursorRight, simulator.moveCursorLeft,
+  simulator.deletePairPosition, simulator.writeCell, simulator.shiftFieldUp,
+  simulator.shiftFieldDown, simulator.shiftFieldRight, simulator.shiftFieldLeft,
+  simulator.flipFieldV, simulator.flipFieldH, simulator.`requirementKind=`,
+  simulator.`requirementColor=`, simulator.`requirementNumber=`, simulator.undo,
+  simulator.redo, simulator.moveOperatingPositionRight,
+  simulator.moveOperatingPositionLeft, simulator.rotateOperatingPositionRight,
+  simulator.rotateOperatingPositionLeft, simulator.forward, simulator.backward,
+  simulator.reset, simulator.toUri, simulator.parseSimulator, simulator.operate
 export solve.solve
 
 when defined(js):

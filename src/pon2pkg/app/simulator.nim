@@ -45,7 +45,7 @@ type
     moveResult: MoveResult
 
     editor*: bool
-    state*: SimulatorState
+    state: SimulatorState
     kind: SimulatorKind
     mode: SimulatorMode
 
@@ -153,15 +153,15 @@ func `mode=`*(mSelf; mode: SimulatorMode) {.inline.} =
   mSelf.mode = mode
 
 # ------------------------------------------------
-# Property - Score
+# Property - Other
 # ------------------------------------------------
+
+func state*(self): SimulatorState {.inline.} =
+  ## Returns the simulator state.
+  self.state
 
 func score*(self): int {.inline.} = ## Returns the score.
   self.moveResult.score
-
-# ------------------------------------------------
-# Property - Original
-# ------------------------------------------------
 
 func originalNazoPuyoWrap*(self): NazoPuyoWrap {.inline.} =
   ## Returns the wrapped Nazo Puyo before any moves.
