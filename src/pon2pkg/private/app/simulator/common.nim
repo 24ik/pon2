@@ -83,7 +83,7 @@ func nextPairCell*(
   simulator.nazoPuyoWrap.get:
     noPosLeft = wrappedNazoPuyo.puyoPuyo.movingCompleted
     nextPair =
-      if noPosLeft: Pair.low else: wrappedNazoPuyo.puyoPuyo.nextPairPosition.pair
+      if noPosLeft: Pair.low else: wrappedNazoPuyo.puyoPuyo.nowPairPosition.pair
 
   result =
     if simulator.state != Stable:
@@ -119,7 +119,7 @@ func nextPairCell*(
 func immediateNextPairCell*(simulator: Simulator, axis: bool): Cell {.inline.} =
   ## Returns the next-pair's cell in the immediate pairs.
   simulator.nazoPuyoWrap.get:
-    let nextIdx = wrappedNazoPuyo.puyoPuyo.nextIndex.succ
+    let nextIdx = wrappedNazoPuyo.puyoPuyo.nowIndex.succ
     if nextIdx >= wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
       return Cell.None
 
@@ -129,7 +129,7 @@ func immediateNextPairCell*(simulator: Simulator, axis: bool): Cell {.inline.} =
 func immediateDoubleNextPairCell*(simulator: Simulator, axis: bool): Cell {.inline.} =
   ## Returns the double-next-pair's cell in the immediate pairs.
   simulator.nazoPuyoWrap.get:
-    let doubleNextIdx = wrappedNazoPuyo.puyoPuyo.nextIndex.succ 2
+    let doubleNextIdx = wrappedNazoPuyo.puyoPuyo.nowIndex.succ 2
     if doubleNextIdx >= wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
       return Cell.None
 
@@ -160,9 +160,7 @@ func getMessages*(
             "　"
     of Nazo:
       let pairsPositions: PairsPositions = simulator.nazoPuyoWrap.get:
-        wrappedNazoPuyo.puyoPuyo.pairsPositions[
-          0 ..< wrappedNazoPuyo.puyoPuyo.nextIndex
-        ]
+        wrappedNazoPuyo.puyoPuyo.pairsPositions[0 ..< wrappedNazoPuyo.puyoPuyo.nowIndex]
 
       simulator.originalNazoPuyoWrap.get:
         result.state = $wrappedNazoPuyo.mark pairsPositions

@@ -463,7 +463,7 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
           mSelf.state = Stable
           mSelf.next.index.inc
           mSelf.next.position = InitPos
-          wrappedNazoPuyo.puyoPuyo.incrementNextIndex
+          wrappedNazoPuyo.puyoPuyo.incrementNowIndex
     of WillDisappear:
       let disappearRes = wrappedNazoPuyo.puyoPuyo.field.disappear
 
@@ -480,7 +480,7 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
         mSelf.state = Stable
         mSelf.next.index.inc
         mSelf.next.position = InitPos
-        wrappedNazoPuyo.puyoPuyo.incrementNextIndex
+        wrappedNazoPuyo.puyoPuyo.incrementNowIndex
 
 func backward*(mSelf) {.inline.} =
   ## Backwards the simulator.
