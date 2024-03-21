@@ -15,9 +15,9 @@ requires "nim ^= 2.0.2"
 
 requires "docopt ^= 0.7.1"
 requires "karax ^= 1.3.3"
-requires "nigui ^= 0.2.7"
+requires "nigui ^= 0.2.8"
 requires "nimsimd ^= 1.2.9"
-requires "suru#f6f1e607c585b2bc2f71309996643f0555ff6349"
+requires "suru ^= 0.3.2"
 
 # Tasks
 
