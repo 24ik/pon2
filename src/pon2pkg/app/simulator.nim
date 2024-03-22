@@ -168,6 +168,17 @@ func `pairsPositions=`*(mSelf; pairsPositions: PairsPositions) {.inline.} =
     wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
 
 # ------------------------------------------------
+# Property - Editing
+# ------------------------------------------------
+
+func editing*(self): SimulatorEditing {.inline.} =
+  ## Returns the editing information.
+  self.editing
+
+func `editingCell=`*(mSelf; cell: Cell) {.inline.} =
+  mSelf.editing.cell = cell
+
+# ------------------------------------------------
 # Property - Other
 # ------------------------------------------------
 
@@ -186,14 +197,6 @@ func operatingPosition*(self): Position {.inline.} =
   ## Returns the operating position.
   self.operatingPosition
 
-func editing*(self): SimulatorEditing {.inline.} =
-  ## Returns the editing information.
-  self.editing
-
-func editing*(mSelf): var SimulatorEditing {.inline.} =
-  ## Returns the editing information.
-  result = mSelf.editing
-
 # ------------------------------------------------
 # Edit - Other
 # ------------------------------------------------
@@ -208,11 +211,6 @@ func save(mSelf) {.inline.} =
   ## Saves the current simulator.
   mSelf.undoDeque.addLast mSelf.nazoPuyoWrap
   mSelf.redoDeque.clear
-
-template change(mSelf; body: untyped) =
-  ## Helper template for operations that changes `originalNazoPuyoWrap`.
-  mSelf.save
-  body
 
 # ------------------------------------------------
 # Edit - Cursor
@@ -265,8 +263,8 @@ func deletePairPosition*(mSelf; idx: Natural) {.inline.} =
     if idx >= wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
       return
 
-    mSelf.change:
-      wrappedNazoPuyo.puyoPuyo.pairsPositions.delete idx
+    mSelf.save
+    wrappedNazoPuyo.puyoPuyo.pairsPositions.delete idx
 
 func deletePairPosition*(mSelf) {.inline.} =
   ## Deletes the pair&position at selecting index.
@@ -278,15 +276,16 @@ func deletePairPosition*(mSelf) {.inline.} =
 
 func writeCell(mSelf; row: Row, col: Column, cell: Cell) {.inline.} =
   ## Writes the cell to the field.
-  mSelf.change:
-    mSelf.nazoPuyoWrap.get:
-      if mSelf.editing.insert:
-        if cell == Cell.None:
-          wrappedNazoPuyo.puyoPuyo.field.removeSqueeze row, col
-        else:
-          wrappedNazoPuyo.puyoPuyo.field.insert row, col, cell
+  mSelf.save
+
+  mSelf.nazoPuyoWrap.get:
+    if mSelf.editing.insert:
+      if cell == Cell.None:
+        wrappedNazoPuyo.puyoPuyo.field.removeSqueeze row, col
       else:
-        wrappedNazoPuyo.puyoPuyo.field[row, col] = cell
+        wrappedNazoPuyo.puyoPuyo.field.insert row, col, cell
+    else:
+      wrappedNazoPuyo.puyoPuyo.field[row, col] = cell
 
 func writeCell*(mSelf; row: Row, col: Column) {.inline.} =
   ## Writes the selecting cell to the field.
@@ -296,27 +295,29 @@ func writeCell(mSelf; idx: Natural, axis: bool, cell: Cell) {.inline.} =
   ## Writes the cell to the pairs.
   case cell
   of Cell.None:
+    mSelf.save
     mSelf.deletePairPosition idx
   of Hard, Cell.Garbage:
     discard
   of Cell.Red .. Cell.Purple:
+    mSelf.save
+
     let color = ColorPuyo cell
-    mSelf.change:
-      mSelf.nazoPuyoWrap.get:
-        if idx == wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
-          wrappedNazoPuyo.puyoPuyo.pairsPositions.add PairPosition(
+    mSelf.nazoPuyoWrap.get:
+      if idx == wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
+        wrappedNazoPuyo.puyoPuyo.pairsPositions.add PairPosition(
+          pair: initPair(color, color), position: Position.None
+        )
+      else:
+        if mSelf.editing.insert:
+          wrappedNazoPuyo.puyoPuyo.pairsPositions.insert PairPosition(
             pair: initPair(color, color), position: Position.None
-          )
+          ), idx
         else:
-          if mSelf.editing.insert:
-            wrappedNazoPuyo.puyoPuyo.pairsPositions.insert PairPosition(
-              pair: initPair(color, color), position: Position.None
-            ), idx
+          if axis:
+            wrappedNazoPuyo.puyoPuyo.pairsPositions[idx].pair.axis = color
           else:
-            if axis:
-              wrappedNazoPuyo.puyoPuyo.pairsPositions[idx].pair.axis = color
-            else:
-              wrappedNazoPuyo.puyoPuyo.pairsPositions[idx].pair.child = color
+            wrappedNazoPuyo.puyoPuyo.pairsPositions[idx].pair.child = color
 
 func writeCell*(mSelf; idx: Natural, axis: bool) {.inline.} =
   ## Writes the selecting cell to the pairs.
@@ -335,27 +336,27 @@ func writeCell*(mSelf; cell: Cell) {.inline.} =
 
 func shiftFieldUp*(mSelf) {.inline.} =
   ## Shifts the field upward.
-  mSelf.change:
-    mSelf.nazoPuyoWrap.get:
-      wrappedNazoPuyo.puyoPuyo.field.shiftUp
+  mSelf.save
+  mSelf.nazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.field.shiftUp
 
 func shiftFieldDown*(mSelf) {.inline.} =
   ## Shifts the field downward.
-  mSelf.change:
-    mSelf.nazoPuyoWrap.get:
-      wrappedNazoPuyo.puyoPuyo.field.shiftDown
+  mSelf.save
+  mSelf.nazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.field.shiftDown
 
 func shiftFieldRight*(mSelf) {.inline.} =
   ## Shifts the field rightward.
-  mSelf.change:
-    mSelf.nazoPuyoWrap.get:
-      wrappedNazoPuyo.puyoPuyo.field.shiftRight
+  mSelf.save
+  mSelf.nazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.field.shiftRight
 
 func shiftFieldLeft*(mSelf) {.inline.} =
   ## Shifts the field leftward.
-  mSelf.change:
-    mSelf.nazoPuyoWrap.get:
-      wrappedNazoPuyo.puyoPuyo.field.shiftLeft
+  mSelf.save
+  mSelf.nazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.field.shiftLeft
 
 # ------------------------------------------------
 # Edit - Flip
@@ -363,15 +364,15 @@ func shiftFieldLeft*(mSelf) {.inline.} =
 
 func flipFieldV*(mSelf) {.inline.} =
   ## Flips the field vertically.
-  mSelf.change:
-    mSelf.nazoPuyoWrap.get:
-      wrappedNazoPuyo.puyoPuyo.field.flipV
+  mSelf.save
+  mSelf.nazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.field.flipV
 
 func flipFieldH*(mSelf) {.inline.} =
   ## Flips the field horizontally.
-  mSelf.change:
-    mSelf.nazoPuyoWrap.get:
-      wrappedNazoPuyo.puyoPuyo.field.flipH
+  mSelf.save
+  mSelf.nazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.field.flipH
 
 # ------------------------------------------------
 # Edit - Requirement
@@ -383,20 +384,21 @@ func `requirementKind=`*(mSelf; kind: RequirementKind) {.inline.} =
     if kind == wrappedNazoPuyo.requirement.kind:
       return
 
+    mSelf.save
+
     {.cast(uncheckedAssign).}:
-      mSelf.change:
-        if kind in ColorKinds:
-          if wrappedNazoPuyo.requirement.kind in ColorKinds:
-            wrappedNazoPuyo.requirement.kind = kind
-          else:
-            wrappedNazoPuyo.requirement = Requirement(
-              kind: kind,
-              color: RequirementColor.low,
-              number: wrappedNazoPuyo.requirement.number,
-            )
+      if kind in ColorKinds:
+        if wrappedNazoPuyo.requirement.kind in ColorKinds:
+          wrappedNazoPuyo.requirement.kind = kind
         else:
-          wrappedNazoPuyo.requirement =
-            Requirement(kind: kind, number: wrappedNazoPuyo.requirement.number)
+          wrappedNazoPuyo.requirement = Requirement(
+            kind: kind,
+            color: RequirementColor.low,
+            number: wrappedNazoPuyo.requirement.number,
+          )
+      else:
+        wrappedNazoPuyo.requirement =
+          Requirement(kind: kind, number: wrappedNazoPuyo.requirement.number)
 
 func `requirementColor=`*(mSelf; color: RequirementColor) {.inline.} =
   ## Sets the requirement color.
@@ -406,8 +408,8 @@ func `requirementColor=`*(mSelf; color: RequirementColor) {.inline.} =
     if color == wrappedNazoPuyo.requirement.color:
       return
 
-    mSelf.change:
-      wrappedNazoPuyo.requirement.color = color
+    mSelf.save
+    wrappedNazoPuyo.requirement.color = color
 
 func `requirementNumber=`*(mSelf; num: RequirementNumber) {.inline.} =
   ## Sets the requirement number.
@@ -417,8 +419,8 @@ func `requirementNumber=`*(mSelf; num: RequirementNumber) {.inline.} =
     if num == wrappedNazoPuyo.requirement.number:
       return
 
-    mSelf.change:
-      wrappedNazoPuyo.requirement.number = num
+    mSelf.save
+    wrappedNazoPuyo.requirement.number = num
 
 # ------------------------------------------------
 # Edit - Undo / Redo

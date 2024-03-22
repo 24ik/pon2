@@ -18,7 +18,7 @@ const
 func initClickHandler(simulator: var Simulator, cell: Cell): () -> void =
   ## Returns the click handler.
   # NOTE: cannot inline due to lazy evaluation
-  () => (simulator.editing.cell = cell)
+  () => (simulator.editingCell = cell)
 
 proc initPaletteNode*(simulator: var Simulator): VNode {.inline.} =
   ## Returns the palette node.
