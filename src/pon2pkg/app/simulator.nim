@@ -37,6 +37,17 @@ type
     WillDisappear
     Disappearing
 
+  SimulatorOperating* = object ## Operating information.
+    index*: Natural
+    position*: Position
+
+  SimulatorEditing* = object ## Editing information.
+    cell*: Cell
+    field*: tuple[row: Row, column: Column]
+    pair*: tuple[index: Natural, axis: bool]
+    focusField*: bool
+    insert*: bool
+
   Simulator* = object
     ## Puyo Puyo simulator.
     ## Note that `editor` field does not affect the behaviour; it is used only
@@ -52,15 +63,8 @@ type
     undoDeque: Deque[NazoPuyoWrap]
     redoDeque: Deque[NazoPuyoWrap]
 
-    operating: tuple[index: Natural, position: Position]
-    editing*:
-      tuple[
-        cell: Cell,
-        field: tuple[row: Row, column: Column],
-        pair: tuple[index: Natural, axis: bool],
-        focusField: bool,
-        insert: bool,
-      ]
+    operating: SimulatorOperating
+    editing: SimulatorEditing
 
 using
   self: Simulator
@@ -183,9 +187,21 @@ func state*(self): SimulatorState {.inline.} =
 func score*(self): int {.inline.} = ## Returns the score.
   self.moveResult.score
 
-func operating*(self): tuple[index: Natural, position: Position] {.inline.} =
+func operating*(self): SimulatorOperating {.inline.} =
   ## Returns the operating information.
   self.operating
+
+func operating*(mSelf): var SimulatorOperating {.inline.} =
+  ## Returns the operating information.
+  result = mSelf.operating
+
+func editing*(self): SimulatorEditing {.inline.} =
+  ## Returns the editing information.
+  self.editing
+
+func editing*(mSelf): var SimulatorEditing {.inline.} =
+  ## Returns the editing information.
+  result = mSelf.editing
 
 # ------------------------------------------------
 # Edit - Other
