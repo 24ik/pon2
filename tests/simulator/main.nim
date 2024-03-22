@@ -140,7 +140,8 @@ rg|"""
       simulator.deletePairPosition 0
       check wrappedNazoPuyo.puyoPuyo.pairsPositions == @[pairPos2, pairPos3]
 
-      simulator.editing.pair.index = 1
+      simulator.toggleFocus
+      simulator.moveCursorDown
       simulator.deletePairPosition
       check wrappedNazoPuyo.puyoPuyo.pairsPositions == @[pairPos2]
 
@@ -153,12 +154,11 @@ rg|"""
     var simulator = initPuyoPuyo[TsuField]().initSimulator
 
     simulator.nazoPuyoWrap.get:
-      simulator.editing.cell = Cell.Red
+      simulator.editingCell = Cell.Red
       simulator.writeCell Row.high, Column.high
       check wrappedNazoPuyo.puyoPuyo.field == parseField[TsuField]("t-r", Izumiya)
 
-      simulator.editing.field = (Row.high, Column.low)
-      simulator.editing.focusField = true
+      simulator.moveCursorUp
       simulator.writeCell Cell.Garbage
       check wrappedNazoPuyo.puyoPuyo.field == parseField[TsuField]("t-o....r", Izumiya)
 
@@ -167,24 +167,25 @@ rg|"""
     var simulator = initPuyoPuyo[TsuField]().initSimulator
 
     simulator.nazoPuyoWrap.get:
-      simulator.editing.cell = Cell.Red
+      simulator.editingCell = Cell.Red
       simulator.writeCell 0, true
       check wrappedNazoPuyo.puyoPuyo.pairsPositions == "rr|".parsePairsPositions
 
-      simulator.editing.cell = Cell.Green
+      simulator.editingCell = Cell.Green
       simulator.writeCell 0, false
       check wrappedNazoPuyo.puyoPuyo.pairsPositions == "rg|".parsePairsPositions
 
-      simulator.editing.cell = Cell.Blue
+      simulator.editingCell = Cell.Blue
       simulator.writeCell 1, true
       check wrappedNazoPuyo.puyoPuyo.pairsPositions == "rg|\nbb|".parsePairsPositions
 
-      simulator.editing.pair = (1, false)
-      simulator.editing.focusField = false
+      simulator.toggleFocus
+      simulator.moveCursorDown
+      simulator.moveCursorRight
       simulator.writeCell Cell.Yellow
       check wrappedNazoPuyo.puyoPuyo.pairsPositions == "rg|\nby|".parsePairsPositions
 
-      simulator.editing.cell = Cell.None
+      simulator.editingCell = Cell.None
       simulator.writeCell 0, true
       check wrappedNazoPuyo.puyoPuyo.pairsPositions == "by|".parsePairsPositions
 
