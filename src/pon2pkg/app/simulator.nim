@@ -44,10 +44,7 @@ type
     focusField*: bool
     insert*: bool
 
-  Simulator* = object
-    ## Puyo Puyo simulator.
-    ## Note that `editor` field does not affect the behaviour; it is used only
-    ## by rendering.
+  Simulator* = object ## Puyo Puyo simulator.
     nazoPuyoWrap: NazoPuyoWrap
     moveResult: MoveResult
 
