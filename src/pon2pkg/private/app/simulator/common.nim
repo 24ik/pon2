@@ -50,8 +50,10 @@ proc fieldCellBackgroundColor*(
 
 func needPairPointer*(simulator: Simulator, idx: Natural): bool {.inline.} =
   ## Returns `true` if it is need to show the pointer to the pair.
-  simulator.mode != Edit and simulator.state == Stable and
-    simulator.operating.index == idx
+  let operatingIdx = simulator.nazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.operatingIndex
+
+  result = simulator.mode != Edit and simulator.state == Stable and operatingIdx == idx
 
 proc pairCellBackgroundColor*(
     simulator: Simulator, idx: Natural, axis: bool
@@ -78,7 +80,7 @@ func operatingPairCell*(
 ): Cell {.inline.} =
   ## Returns the cell in the pairs being operated.
   let
-    pos = simulator.operating.position
+    pos = simulator.operatingPosition
     noPosLeft: bool
     nextPair: Pair
   simulator.nazoPuyoWrap.get:

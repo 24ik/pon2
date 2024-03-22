@@ -4,7 +4,8 @@
 
 import std/[setutils, strutils, unittest]
 import
-  ../../src/pon2pkg/core/[cell, field {.all.}, fieldtype, host, pair, position, rule]
+  ../../src/pon2pkg/core/
+    [cell, field {.all.}, fieldtype, host, pair, pairposition, position, rule]
 
 proc main*() =
   # ------------------------------------------------
@@ -234,7 +235,7 @@ r.....
       check field == parseField[TsuField]("......\n".repeat(12) & ".rg...")
       field.put BlueYellow, Left3
       check field == parseField[TsuField]("......\n".repeat(11) & "..y...\n.rgb..")
-      field.put RedPurple, Up3
+      field.put PairPosition(pair: RedPurple, position: Up3)
       check field ==
         parseField[TsuField]("......\n".repeat(10) & "...p..\n..yr..\n.rgb..")
 

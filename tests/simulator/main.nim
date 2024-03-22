@@ -29,7 +29,7 @@ proc main*() =
     check simulator.originalNazoPuyoWrap == initNazoPuyo[WaterField]().initNazoPuyoWrap
     check simulator.editor == false
     check simulator.state == Stable
-    check simulator.operating == (0.Natural, Up2)
+    check simulator.operatingPosition == Up2
     check simulator.editing.cell == Cell.None
     check simulator.editing.field == (Row.low, Column.low)
     check simulator.editing.pair == (0.Natural, true)
@@ -307,24 +307,23 @@ rg|"""
   block:
     var
       simulator = initPuyoPuyo[TsuField]().initSimulator
-      pos = Up3
-    simulator.operating.position = pos
+      pos = simulator.operatingPosition
 
     simulator.moveOperatingPositionRight
     pos.moveRight
-    check simulator.operating.position == pos
+    check simulator.operatingPosition == pos
 
     simulator.moveOperatingPositionLeft
     pos.moveLeft
-    check simulator.operating.position == pos
+    check simulator.operatingPosition == pos
 
     simulator.rotateOperatingPositionRight
     pos.rotateRight
-    check simulator.operating.position == pos
+    check simulator.operatingPosition == pos
 
     simulator.rotateOperatingPositionLeft
     pos.rotateLeft
-    check simulator.operating.position == pos
+    check simulator.operatingPosition == pos
 
   # ------------------------------------------------
   # Forward / Backward
@@ -336,27 +335,27 @@ rg|"""
       "https://ishikawapuyo.net/simu/pn.html?Mp6j92mS_o1q1__u03".parseUri.parseSimulator
 
     simulator.nazoPuyoWrap.get:
-      simulator.operating.position = Up5
-      simulator.forward
+      wrappedNazoPuyo.puyoPuyo.operatingPairPosition.position = Up5
+      simulator.forward(replay = true)
       check simulator.state == WillDisappear
       wrappedNazoPuyo.checkNazoPuyoEqual parseNazoPuyo[TsuField](
         "30010Mp6j92mS_oaq1__u03", Ishikawa
       )
-      check simulator.operating.index == 0
+      check wrappedNazoPuyo.puyoPuyo.operatingIndex == 0
 
       simulator.forward
       check simulator.state == Disappearing
       wrappedNazoPuyo.checkNazoPuyoEqual parseNazoPuyo[TsuField](
         "30000Mo6j02m0_oaq1__u03", Ishikawa
       )
-      check simulator.operating.index == 0
+      check wrappedNazoPuyo.puyoPuyo.operatingIndex == 0
 
       simulator.forward
       check simulator.state == Stable
       wrappedNazoPuyo.checkNazoPuyoEqual parseNazoPuyo[TsuField](
         "M06j02mr_oaq1__u03", Ishikawa
       )
-      check simulator.operating.index == 1
+      check wrappedNazoPuyo.puyoPuyo.operatingIndex == 1
 
   # forward w/ arguments
   block:
@@ -384,16 +383,27 @@ rg|"""
       parseNazoPuyo[TsuField]("Mp6j92mS_o1q1__u03", Ishikawa).initSimulator
 
     simulator.nazoPuyoWrap.get:
-      simulator.operating.position = Up5
+      wrappedNazoPuyo.puyoPuyo.operatingPairPosition.position = Up5
+      simulator.forward(replay = true)
+      simulator.backward
+      wrappedNazoPuyo.checkNazoPuyoEqual parseNazoPuyo[TsuField](
+        "Mp6j92mS_oaq1__u03", Ishikawa
+      )
+      check simulator.state == Stable
+      check wrappedNazoPuyo.puyoPuyo.operatingIndex == 0
+
+      wrappedNazoPuyo.puyoPuyo.operatingPairPosition.position = Up5
+      simulator.forward(replay = true)
       simulator.forward
       simulator.backward
       wrappedNazoPuyo.checkNazoPuyoEqual parseNazoPuyo[TsuField](
         "Mp6j92mS_oaq1__u03", Ishikawa
       )
       check simulator.state == Stable
-      check simulator.operating.index == 0
+      check wrappedNazoPuyo.puyoPuyo.operatingIndex == 0
 
-      simulator.operating.position = Up5
+      wrappedNazoPuyo.puyoPuyo.operatingPairPosition.position = Up5
+      simulator.forward(replay = true)
       simulator.forward
       simulator.forward
       simulator.backward
@@ -401,45 +411,34 @@ rg|"""
         "Mp6j92mS_oaq1__u03", Ishikawa
       )
       check simulator.state == Stable
-      check simulator.operating.index == 0
+      check wrappedNazoPuyo.puyoPuyo.operatingIndex == 0
 
-      simulator.operating.position = Up5
+      wrappedNazoPuyo.puyoPuyo.operatingPairPosition.position = Up5
+      simulator.forward(replay = true)
       simulator.forward
       simulator.forward
-      simulator.forward
-      simulator.backward
-      wrappedNazoPuyo.checkNazoPuyoEqual parseNazoPuyo[TsuField](
-        "Mp6j92mS_oaq1__u03", Ishikawa
-      )
-      check simulator.state == Stable
-      check simulator.operating.index == 0
-
-      simulator.operating.position = Up5
-      simulator.forward
-      simulator.forward
-      simulator.forward
-      simulator.operating.position = Right0
-      simulator.forward
+      wrappedNazoPuyo.puyoPuyo.operatingPairPosition.position = Right0
+      simulator.forward(replay = true)
       simulator.backward
       wrappedNazoPuyo.checkNazoPuyoEqual parseNazoPuyo[TsuField](
         "M06j02mr_oaqc__u03", Ishikawa
       )
       check simulator.state == Stable
-      check simulator.operating.index == 1
+      check wrappedNazoPuyo.puyoPuyo.operatingIndex == 1
 
       simulator.reset false
       wrappedNazoPuyo.checkNazoPuyoEqual parseNazoPuyo[TsuField](
         "Mp6j92mS_oaqc__u03", Ishikawa
       )
       check simulator.state == Stable
-      check simulator.operating.index == 0
+      check wrappedNazoPuyo.puyoPuyo.operatingIndex == 0
 
       simulator.reset
       wrappedNazoPuyo.checkNazoPuyoEqual parseNazoPuyo[TsuField](
         "Mp6j92mS_o1q1__u03", Ishikawa
       )
       check simulator.state == Stable
-      check simulator.operating.index == 0
+      check wrappedNazoPuyo.puyoPuyo.operatingIndex == 0
 
   # ------------------------------------------------
   # Simulator <-> URI

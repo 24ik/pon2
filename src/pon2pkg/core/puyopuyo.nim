@@ -106,6 +106,13 @@ func operatingPairPosition*[F: TsuField or WaterField](
   ## If no pairs left, `IndexDefect` is raised.
   self.pairsPositions[self.operatingIdx]
 
+func operatingPairPosition*[F: TsuField or WaterField](
+    mSelf: var PuyoPuyo[F]
+): var PairPosition {.inline.} =
+  ## Returns the pair&position being operated.
+  ## If no pairs left, `IndexDefect` is raised.
+  result = mSelf.pairsPositions[mSelf.operatingIdx]
+
 # ------------------------------------------------
 # Count
 # ------------------------------------------------

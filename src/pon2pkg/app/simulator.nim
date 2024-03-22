@@ -37,10 +37,6 @@ type
     WillDisappear
     Disappearing
 
-  SimulatorOperating* = object ## Operating information.
-    index*: Natural
-    position*: Position
-
   SimulatorEditing* = object ## Editing information.
     cell*: Cell
     field*: tuple[row: Row, column: Column]
@@ -63,7 +59,7 @@ type
     undoDeque: Deque[NazoPuyoWrap]
     redoDeque: Deque[NazoPuyoWrap]
 
-    operating: SimulatorOperating
+    operatingPosition: Position
     editing: SimulatorEditing
 
 using
@@ -97,8 +93,7 @@ func initSimulator*(
     result.undoDeque = initDeque[NazoPuyoWrap](wrappedNazoPuyo.moveCount)
     result.redoDeque = initDeque[NazoPuyoWrap](wrappedNazoPuyo.moveCount)
 
-  result.operating.index = 0
-  result.operating.position = InitPos
+  result.operatingPosition = InitPos
   result.editing.cell = Cell.None
   result.editing.field = (Row.low, Column.low)
   result.editing.pair = (Natural 0, true)
@@ -187,13 +182,9 @@ func state*(self): SimulatorState {.inline.} =
 func score*(self): int {.inline.} = ## Returns the score.
   self.moveResult.score
 
-func operating*(self): SimulatorOperating {.inline.} =
-  ## Returns the operating information.
-  self.operating
-
-func operating*(mSelf): var SimulatorOperating {.inline.} =
-  ## Returns the operating information.
-  result = mSelf.operating
+func operatingPosition*(self): Position {.inline.} =
+  ## Returns the operating position.
+  self.operatingPosition
 
 func editing*(self): SimulatorEditing {.inline.} =
   ## Returns the editing information.
@@ -455,19 +446,19 @@ func redo*(mSelf) {.inline.} =
 
 func moveOperatingPositionRight*(mSelf) {.inline.} =
   ## Moves the operating position right.
-  mSelf.operating.position.moveRight
+  mSelf.operatingPosition.moveRight
 
 func moveOperatingPositionLeft*(mSelf) {.inline.} =
   ## Moves the operating position left.
-  mSelf.operating.position.moveLeft
+  mSelf.operatingPosition.moveLeft
 
 func rotateOperatingPositionRight*(mSelf) {.inline.} =
   ## Rotates the operating position right.
-  mSelf.operating.position.rotateRight
+  mSelf.operatingPosition.rotateRight
 
 func rotateOperatingPositionLeft*(mSelf) {.inline.} =
   ## Rotates the operating position left.
-  mSelf.operating.position.rotateLeft
+  mSelf.operatingPosition.rotateLeft
 
 # ------------------------------------------------
 # Forward / Backward
@@ -485,24 +476,19 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
       mSelf.moveResult = DefaultMoveResult
       mSelf.save
 
-      if not replay:
-        wrappedNazoPuyo.puyoPuyo.pairsPositions[mSelf.operating.index].position =
-          if skip: Position.None else: mSelf.operating.position
-
       # put
-      block:
-        let pairPos = wrappedNazoPuyo.puyoPuyo.pairsPositions[mSelf.operating.index]
-        wrappedNazoPuyo.puyoPuyo.field.put pairPos.pair, pairPos.position
+      if not replay:
+        wrappedNazoPuyo.puyoPuyo.operatingPairPosition.position =
+          if skip: Position.None else: mSelf.operatingPosition
+      wrappedNazoPuyo.puyoPuyo.field.put wrappedNazoPuyo.puyoPuyo.operatingPairPosition
 
       # disappear
-      block:
-        if wrappedNazoPuyo.puyoPuyo.field.willDisappear:
-          mSelf.state = WillDisappear
-        else:
-          mSelf.state = Stable
-          mSelf.operating.index.inc
-          mSelf.operating.position = InitPos
-          wrappedNazoPuyo.puyoPuyo.incrementOperatingIndex
+      if wrappedNazoPuyo.puyoPuyo.field.willDisappear:
+        mSelf.state = WillDisappear
+      else:
+        mSelf.state = Stable
+        mSelf.operatingPosition = InitPos
+        wrappedNazoPuyo.puyoPuyo.incrementOperatingIndex
     of WillDisappear:
       let disappearRes = wrappedNazoPuyo.puyoPuyo.field.disappear
 
@@ -517,8 +503,7 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
         mSelf.state = WillDisappear
       else:
         mSelf.state = Stable
-        mSelf.operating.index.inc
-        mSelf.operating.position = InitPos
+        mSelf.operatingPosition = InitPos
         wrappedNazoPuyo.puyoPuyo.incrementOperatingIndex
 
 func backward*(mSelf) {.inline.} =
@@ -528,17 +513,16 @@ func backward*(mSelf) {.inline.} =
 
   mSelf.moveResult = DefaultMoveResult
 
-  if mSelf.state == Stable:
-    mSelf.operating.index.dec
+  let pairsPositions: PairsPositions
+  mSelf.nazoPuyoWrap.get:
+    pairsPositions = wrappedNazoPuyo.puyoPuyo.pairsPositions
+
+  mSelf.nazoPuyoWrap = mSelf.undoDeque.popLast
+  mSelf.state = Stable
+  mSelf.operatingPosition = InitPos
 
   mSelf.nazoPuyoWrap.get:
-    let savePos =
-      wrappedNazoPuyo.puyoPuyo.pairsPositions[mSelf.operating.index].position
-    mSelf.nazoPuyoWrap = mSelf.undoDeque.popLast
-    mSelf.state = Stable
-    mSelf.operating.position = InitPos
-
-    wrappedNazoPuyo.puyoPuyo.pairsPositions[mSelf.operating.index].position = savePos
+    wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
 
 func reset*(mSelf; resetPosition = true) {.inline.} =
   ## Resets the simulator.
@@ -549,8 +533,7 @@ func reset*(mSelf; resetPosition = true) {.inline.} =
       mSelf.nazoPuyoWrap = mSelf.undoDeque.popFirst
     mSelf.undoDeque.clear
     mSelf.redoDeque.clear
-    mSelf.operating.index = 0
-    mSelf.operating.position = InitPos
+    mSelf.operatingPosition = InitPos
     mSelf.moveResult = DefaultMoveResult
 
     for i in 0 ..< wrappedNazoPuyo.puyoPuyo.pairsPositions.len:

@@ -121,6 +121,14 @@ func flipH*(mSelf: var (TsuField or WaterField)) {.inline.} =
   mSelf = mSelf.flippedH
 
 # ------------------------------------------------
+# Put
+# ------------------------------------------------
+
+func put*(mSelf: var (TsuField or WaterField), pairPos: PairPosition) {.inline.} =
+  ## Puts the pair.
+  mSelf.put pairPos.pair, pairPos.position
+
+# ------------------------------------------------
 # Move - Level0
 # ------------------------------------------------
 
