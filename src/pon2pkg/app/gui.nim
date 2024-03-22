@@ -223,9 +223,8 @@ proc nextReplay*(mSelf) {.inline.} =
   else:
     mSelf.replayIndex.inc
 
-  mSelf.replaySimulator[].nazoPuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions =
-      mSelf.replayPairsPositionsSeq.get[mSelf.replayIndex]
+  mSelf.replaySimulator[].pairsPositions =
+    mSelf.replayPairsPositionsSeq.get[mSelf.replayIndex]
   mSelf.replaySimulator[].reset false
 
 proc prevReplay*(mSelf) {.inline.} =
@@ -238,9 +237,8 @@ proc prevReplay*(mSelf) {.inline.} =
   else:
     mSelf.replayIndex.dec
 
-  mSelf.replaySimulator[].nazoPuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions =
-      mSelf.replayPairsPositionsSeq.get[mSelf.replayIndex]
+  mSelf.replaySimulator[].pairsPositions =
+    mSelf.replayPairsPositionsSeq.get[mSelf.replayIndex]
   mSelf.replaySimulator[].reset false
 
 # ------------------------------------------------

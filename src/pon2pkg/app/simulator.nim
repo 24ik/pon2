@@ -152,20 +152,20 @@ func `mode=`*(mSelf; mode: SimulatorMode) {.inline.} =
   mSelf.mode = mode
 
 # ------------------------------------------------
-# Property - Nazo Puyo
+# Property - Nazo Puyo / Pairs&Positions
 # ------------------------------------------------
 
 func nazoPuyoWrap*(self): NazoPuyoWrap {.inline.} =
   ## Returns the wrapped Nazo Puyo.
   self.nazoPuyoWrap
 
-func nazoPuyoWrap*(mSelf): var NazoPuyoWrap {.inline.} =
-  ## Returns the wrapped Nazo Puyo.
-  result = mSelf.nazoPuyoWrap
-
 func originalNazoPuyoWrap*(self): NazoPuyoWrap {.inline.} =
   ## Returns the wrapped Nazo Puyo before any moves.
   if self.undoDeque.len > 0: self.undoDeque.peekFirst else: self.nazoPuyoWrap
+
+func `pairsPositions=`*(mSelf; pairsPositions: PairsPositions) {.inline.} =
+  mSelf.nazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
 
 # ------------------------------------------------
 # Property - Other

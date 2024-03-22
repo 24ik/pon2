@@ -9,7 +9,7 @@
 {.experimental: "views".}
 
 import std/[algorithm, critbits, math, os, sequtils, strutils, sugar, random]
-import ./[key, nazopuyo, simulator]
+import ./[key, simulator]
 import ../core/[cell, field, puyopuyo]
 import ../private/[misc]
 import ../private/app/marathon/[common]
@@ -247,11 +247,8 @@ func match*(mSelf; prefix: string) {.inline.} =
 
 proc play(mSelf; pairsStr: string) {.inline.} =
   ## Plays a marathon mode with the given pairs.
-  let pairsPositions = pairsStr.toPairsPositions
-
   mSelf.simulator[].reset true
-  mSelf.simulator[].nazopuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
+  mSelf.simulator[].pairsPositions = pairsStr.toPairsPositions
 
   mSelf.focusSimulator = true
 
