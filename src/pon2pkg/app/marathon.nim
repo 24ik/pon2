@@ -21,7 +21,7 @@ type
     pageIndex*: Natural
 
   Marathon* = object ## Marathon manager.
-    simulator*: ref Simulator
+    simulator*: Simulator
 
     allPairsStrs: tuple[`seq`: seq[string], tree: CritBitTree[void]]
     matchResult: MarathonMatchResult
@@ -43,8 +43,7 @@ using
 
 proc initMarathon*(): Marathon {.inline.} =
   ## Returns a new marathon manager.
-  result.simulator = new Simulator
-  result.simulator[] = initPuyoPuyo[TsuField]().initSimulator(Play, true)
+  result.simulator = initPuyoPuyo[TsuField]().initSimulator(Play, true)
 
   result.allPairsStrs.seq = RawPairsTxt.splitLines
   result.allPairsStrs.tree = result.allPairsStrs.seq.toCritBitTree
@@ -81,7 +80,7 @@ func toggleFocus*(mSelf) {.inline.} = ## Toggles focusing to the simulator or no
 # Table Page
 # ------------------------------------------------
 
-proc nextResultPage*(mSelf) {.inline.} =
+func nextResultPage*(mSelf) {.inline.} =
   ## Shows the next result page.
   if mSelf.matchResult.pageCount == 0:
     return
@@ -91,7 +90,7 @@ proc nextResultPage*(mSelf) {.inline.} =
   else:
     mSelf.matchResult.pageIndex.inc
 
-proc prevResultPage*(mSelf) {.inline.} =
+func prevResultPage*(mSelf) {.inline.} =
   ## Shows the previous result page.
   if mSelf.matchResult.pageCount == 0:
     return
@@ -259,18 +258,18 @@ func match*(mSelf; prefix: string) {.inline.} =
 # Play
 # ------------------------------------------------
 
-proc play(mSelf; pairsStr: string) {.inline.} =
+func play(mSelf; pairsStr: string) {.inline.} =
   ## Plays a marathon mode with the given pairs.
-  mSelf.simulator[].reset true
-  mSelf.simulator[].pairsPositions = pairsStr.toPairsPositions
+  mSelf.simulator.reset true
+  mSelf.simulator.pairsPositions = pairsStr.toPairsPositions
 
   mSelf.focusSimulator = true
 
-proc play*(mSelf; pairsIdx: Natural) {.inline.} =
+func play*(mSelf; pairsIdx: Natural) {.inline.} =
   ## Plays a marathon mode with the given pairs.
   mSelf.play mSelf.matchResult.strsSeq[pairsIdx]
 
-proc play*(mSelf; onlyMatched = true) {.inline.} =
+func play*(mSelf; onlyMatched = true) {.inline.} =
   ## Plays a marathon mode with the random mathced pairs.
   ## If `onlyMatched` is true, the pairs are chosen from the matched result;
   ## otherwise, chosen from all pairs.
@@ -287,7 +286,7 @@ proc play*(mSelf; onlyMatched = true) {.inline.} =
 # Keyboard Operation
 # ------------------------------------------------
 
-proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
+func operate*(mSelf; event: KeyEvent): bool {.inline.} =
   ## Does operation specified by the keyboard input.
   ## Returns `true` if any action is executed.
   if event == initKeyEvent("KeyQ", shift = true):
@@ -295,7 +294,7 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
     return true
 
   if mSelf.focusSimulator:
-    return mSelf.simulator[].operate event
+    return mSelf.simulator.operate event
 
   result = false
 
@@ -325,7 +324,7 @@ when defined(js):
     # assert event of KeyboardEvent # HACK: somehow this assertion fails
     mSelf.runKeyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
 
-  proc initKeyboardEventHandler*(mSelf): (event: dom.Event) -> void {.inline.} =
+  func initKeyboardEventHandler*(mSelf): (event: dom.Event) -> void {.inline.} =
     ## Returns the keyboard event handler.
     (event: dom.Event) => mSelf.runKeyboardEventHandler event
 
