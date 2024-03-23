@@ -2,15 +2,15 @@
 ## and [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 ##
 ## Submodule Documentations:
-## - [color](./apppkg/color.html)
-## - [generate](./apppkg/generate.html)
-## - [gui](./apppkg/gui.html)
-## - [key](./apppkg/key.html)
-## - [marathon](./apppkg/marathon.html)
-## - [nazopuyo](./apppkg/nazopuyo.html)
-## - [permute](./apppkg/permute.html)
-## - [simulator](./apppkg/simulator.html)
-## - [solve](./apppkg/solve.html)
+## - [color](./app/color.html)
+## - [generate](./app/generate.html)
+## - [gui](./app/gui.html)
+## - [key](./app/key.html)
+## - [marathon](./app/marathon.html)
+## - [nazopuyo](./app/nazopuyo.html)
+## - [permute](./app/permute.html)
+## - [simulator](./app/simulator.html)
+## - [solve](./app/solve.html)
 ##
 
 {.experimental: "strictDefs".}
@@ -25,11 +25,13 @@ export
   generate.GenerateError, generate.GenerateRequirementColor,
   generate.GenerateRequirement, generate.generate
 export
-  gui.GuiApplication, gui.initGuiApplication, gui.toggleFocus, gui.solve, gui.permute,
-  gui.nextReplay, gui.prevReplay, gui.operate
+  gui.GuiApplicationReplay, gui.GuiApplication, gui.initGuiApplication, gui.replay,
+  gui.focusEditor, gui.solving, gui.permuting, gui.progressBar, gui.toggleFocus,
+  gui.solve, gui.permute, gui.nextReplay, gui.prevReplay, gui.operate
 export key.KeyEvent, key.initKeyEvent
 export
-  marathon.Marathon, marathon.initMarathon, marathon.toggleFocus,
+  marathon.MarathonMatchResult, marathon.Marathon, marathon.initMarathon,
+  marathon.matchResult, marathon.focusSimulator, marathon.toggleFocus,
   marathon.nextResultPage, marathon.prevResultPage, marathon.match, marathon.play,
   marathon.operate
 export
@@ -38,19 +40,21 @@ export
 export permute.permute
 export
   simulator.SimulatorKind, simulator.SimulatorMode, simulator.SimulatorState,
-  simulator.Simulator, simulator.initSimulator, simulator.rule, simulator.kind,
-  simulator.mode, simulator.`rule=`, simulator.`kind=`, simulator.`mode=`,
-  simulator.score, simulator.originalNazoPuyoWrap, simulator.toggleInserting,
-  simulator.toggleFocus, simulator.moveCursorUp, simulator.moveCursorDown,
-  simulator.moveCursorRight, simulator.moveCursorLeft, simulator.deletePairPosition,
-  simulator.writeCell, simulator.shiftFieldUp, simulator.shiftFieldDown,
-  simulator.shiftFieldRight, simulator.shiftFieldLeft, simulator.flipFieldV,
-  simulator.flipFieldH, simulator.`requirementKind=`, simulator.`requirementColor=`,
-  simulator.`requirementNumber=`, simulator.undo, simulator.redo,
-  simulator.moveNextPositionRight, simulator.moveNextPositionLeft,
-  simulator.rotateNextPositionRight, simulator.rotateNextPositionLeft,
-  simulator.forward, simulator.backward, simulator.reset, simulator.toUri,
-  simulator.parseSimulator, simulator.operate
+  simulator.SimulatorEditing, simulator.Simulator, simulator.initSimulator,
+  simulator.rule, simulator.kind, simulator.mode, simulator.`rule=`, simulator.`kind=`,
+  simulator.`mode=`, simulator.nazoPuyoWrap, simulator.originalNazoPuyoWrap,
+  simulator.`pairsPositions=`, simulator.editing, simulator.`editingCell=`,
+  simulator.editor, simulator.state, simulator.score, simulator.operatingPosition,
+  simulator.toggleInserting, simulator.toggleFocus, simulator.moveCursorUp,
+  simulator.moveCursorDown, simulator.moveCursorRight, simulator.moveCursorLeft,
+  simulator.deletePairPosition, simulator.writeCell, simulator.shiftFieldUp,
+  simulator.shiftFieldDown, simulator.shiftFieldRight, simulator.shiftFieldLeft,
+  simulator.flipFieldV, simulator.flipFieldH, simulator.`requirementKind=`,
+  simulator.`requirementColor=`, simulator.`requirementNumber=`, simulator.undo,
+  simulator.redo, simulator.moveOperatingPositionRight,
+  simulator.moveOperatingPositionLeft, simulator.rotateOperatingPositionRight,
+  simulator.rotateOperatingPositionLeft, simulator.forward, simulator.backward,
+  simulator.reset, simulator.toUri, simulator.parseSimulator, simulator.operate
 export solve.solve
 
 when defined(js):

@@ -85,10 +85,11 @@ export
 export
   puyopuyo.PuyoPuyo, puyopuyo.reset, puyopuyo.initPuyoPuyo, puyopuyo.`==`,
   puyopuyo.toTsuPuyoPuyo, puyopuyo.toWaterPuyoPuyo, puyopuyo.rule,
-  puyopuyo.movingCompleted, puyopuyo.nextPairPosition, puyopuyo.puyoCount,
-  puyopuyo.colorCount, puyopuyo.garbageCount, puyopuyo.move, puyopuyo.move0,
-  puyopuyo.move1, puyopuyo.move2, puyopuyo.`$`, puyopuyo.parsePuyoPuyo,
-  puyopuyo.toUriQuery
+  puyopuyo.operatingIndex, puyopuyo.incrementoperatingIndex,
+  puyopuyo.decrementoperatingIndex, puyopuyo.movingCompleted,
+  puyopuyo.operatingPairPosition, puyopuyo.puyoCount, puyopuyo.colorCount,
+  puyopuyo.garbageCount, puyopuyo.move, puyopuyo.move0, puyopuyo.move1, puyopuyo.move2,
+  puyopuyo.`$`, puyopuyo.parsePuyoPuyo, puyopuyo.toUriQuery
 export
   requirement.RequirementKind, requirement.RequirementColor,
   requirement.RequirementNumber, requirement.Requirement, requirement.NoColorKinds,

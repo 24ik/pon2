@@ -12,8 +12,8 @@ import ../../../../app/[gui]
 proc initEditorProgressBarNode*(guiApplication: var GuiApplication): VNode {.inline.} =
   ## Returns the editor progress bar node.
   let
-    now = guiApplication.progressBarData.now
-    total = guiApplication.progressBarData.total
+    now = guiApplication.progressBar.now
+    total = guiApplication.progressBar.total
 
   result = buildHtml(
     progress(class = "progress is-primary", value = kstring $now, max = kstring $total)

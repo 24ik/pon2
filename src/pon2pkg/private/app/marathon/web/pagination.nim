@@ -13,15 +13,15 @@ import ../../../../app/[marathon]
 proc initMarathonPaginationNode*(marathon: var Marathon): VNode {.inline.} =
   ## Returns the marathon pagination node.
   let
-    firstIdx = marathon.matchResultPageIdx * MatchResultPairsCountPerPage + 1
+    firstIdx = marathon.matchResult.pageIndex * MatchResultPairsCountPerPage + 1
     lastIdx = min(
-      marathon.matchResultPageIdx.succ * MatchResultPairsCountPerPage,
-      marathon.matchPairsStrsSeq.len,
+      marathon.matchResult.pageIndex.succ * MatchResultPairsCountPerPage,
+      marathon.matchResult.strsSeq.len,
     )
-    ratio = marathon.matchPairsStrsSeq.len / AllPairsCount
+    ratio = marathon.matchResult.strsSeq.len / AllPairsCount
     pageTxt =
-      if marathon.matchPairsStrsSeq.len > 0:
-        &"{firstIdx}〜{lastIdx} / {marathon.matchPairsStrsSeq.len} " &
+      if marathon.matchResult.strsSeq.len > 0:
+        &"{firstIdx}〜{lastIdx} / {marathon.matchResult.strsSeq.len} " &
           &"({ratio * 100 : .1f}%)"
       else:
         "0 / 0 (0.0%)"

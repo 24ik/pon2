@@ -9,24 +9,26 @@
 {.experimental: "views".}
 
 import std/[algorithm, critbits, math, os, sequtils, strutils, sugar, random]
-import ./[key, nazopuyo, simulator]
+import ./[key, simulator]
 import ../core/[cell, field, puyopuyo]
 import ../private/[misc]
 import ../private/app/marathon/[common]
 
-type Marathon* = object ## Marathon manager.
-  simulator*: ref Simulator
+type
+  MarathonMatchResult* = object ## Matching result.
+    strsSeq*: seq[string]
+    pageCount*: Natural
+    pageIndex*: Natural
 
-  matchPairsStrsSeq*: seq[string]
-  matchResultPageCount*: Natural
-  matchResultPageIdx*: Natural
+  Marathon* = object ## Marathon manager.
+    simulator*: Simulator
 
-  allPairsStrsSeq: seq[string]
-  allPairsStrsTree: CritBitTree[void]
+    allPairsStrs: tuple[`seq`: seq[string], tree: CritBitTree[void]]
+    matchResult: MarathonMatchResult
 
-  focusSimulator*: bool
+    focusSimulator: bool
 
-  rng: Rand
+    rng: Rand
 
 const RawPairsTxt = staticRead currentSourcePath().parentDir.parentDir.parentDir.parentDir /
   "assets" / "pairs" / "swap.txt"
@@ -41,20 +43,31 @@ using
 
 proc initMarathon*(): Marathon {.inline.} =
   ## Returns a new marathon manager.
-  result.simulator = new Simulator
-  result.simulator[] = initPuyoPuyo[TsuField]().initSimulator(Play, true)
+  result.simulator = initPuyoPuyo[TsuField]().initSimulator(Play, true)
 
-  result.matchPairsStrsSeq = @[]
-  result.matchResultPageCount = 0
-  result.matchResultPageIdx = 0
+  result.allPairsStrs.seq = RawPairsTxt.splitLines
+  result.allPairsStrs.tree = result.allPairsStrs.seq.toCritBitTree
+  assert result.allPairsStrs.seq.len == AllPairsCount
 
-  result.allPairsStrsSeq = RawPairsTxt.splitLines
-  result.allPairsStrsTree = result.allPairsStrsSeq.toCritBitTree
-  assert result.allPairsStrsSeq.len == AllPairsCount
+  result.matchResult.strsSeq = @[]
+  result.matchResult.pageCount = 0
+  result.matchResult.pageIndex = 0
 
   result.focusSimulator = false
 
   result.rng = initRand()
+
+# ------------------------------------------------
+# Property
+# ------------------------------------------------
+
+func matchResult*(self): MarathonMatchResult {.inline.} =
+  ## Returns the matching result.
+  self.matchResult
+
+func focusSimulator*(self): bool {.inline.} =
+  ## Returns `true` if the simulator is focused.
+  self.focusSimulator
 
 # ------------------------------------------------
 # Edit - Other
@@ -67,25 +80,25 @@ func toggleFocus*(mSelf) {.inline.} = ## Toggles focusing to the simulator or no
 # Table Page
 # ------------------------------------------------
 
-proc nextResultPage*(mSelf) {.inline.} =
+func nextResultPage*(mSelf) {.inline.} =
   ## Shows the next result page.
-  if mSelf.matchResultPageCount == 0:
+  if mSelf.matchResult.pageCount == 0:
     return
 
-  if mSelf.matchResultPageIdx == mSelf.matchResultPageCount.pred:
-    mSelf.matchResultPageIdx = 0
+  if mSelf.matchResult.pageIndex == mSelf.matchResult.pageCount.pred:
+    mSelf.matchResult.pageIndex = 0
   else:
-    mSelf.matchResultPageIdx.inc
+    mSelf.matchResult.pageIndex.inc
 
-proc prevResultPage*(mSelf) {.inline.} =
+func prevResultPage*(mSelf) {.inline.} =
   ## Shows the previous result page.
-  if mSelf.matchResultPageCount == 0:
+  if mSelf.matchResult.pageCount == 0:
     return
 
-  if mSelf.matchResultPageIdx == 0:
-    mSelf.matchResultPageIdx = mSelf.matchResultPageCount.pred
+  if mSelf.matchResult.pageIndex == 0:
+    mSelf.matchResult.pageIndex = mSelf.matchResult.pageCount.pred
   else:
-    mSelf.matchResultPageIdx.dec
+    mSelf.matchResult.pageIndex.dec
 
 # ------------------------------------------------
 # Match
@@ -172,8 +185,6 @@ func swappedPrefixes(prefix: string): seq[string] {.inline.} =
 
 func initReplaceData(keys: string): seq[seq[(string, string)]] {.inline.} =
   ## Returns arguments for prefix replacing.
-  result = @[] # HACK: dummy to suppress warning
-
   case keys.len
   of 1:
     result = collect:
@@ -201,6 +212,7 @@ func initReplaceData(keys: string): seq[seq[(string, string)]] {.inline.} =
               if {p0, p1, p2, p3}.card == 4:
                 @[($keys[0], $p0), ($keys[1], $p1), ($keys[2], $p2), ($keys[3], $p3)]
   else:
+    result = @[] # HACK: dummy to suppress warning
     assert false
 
 const
@@ -213,7 +225,7 @@ const
 {.push warning[Uninit]: off.}
 func match*(mSelf; prefix: string) {.inline.} =
   if prefix == "":
-    mSelf.matchPairsStrsSeq = @[]
+    mSelf.matchResult.strsSeq = @[]
   else:
     var keys = prefix.toSet2
     if keys in NeedReplaceKeysSeq:
@@ -222,23 +234,23 @@ func match*(mSelf; prefix: string) {.inline.} =
 
       let prefix2 = prefix.toUpperAscii # HACK: prevent to confuse 'b' with Blue
 
-      mSelf.matchPairsStrsSeq = newSeqOfCap[string](45000)
+      mSelf.matchResult.strsSeq = newSeqOfCap[string](45000)
       for replaceData in ReplaceDataSeq[keys.card.pred]:
         for prefix3 in prefix2.swappedPrefixes:
           {.push warning[ProveInit]: off.}
-          mSelf.matchPairsStrsSeq &=
-            mSelf.allPairsStrsTree.itemsWithPrefix(prefix3.multiReplace replaceData).toSeq
+          mSelf.matchResult.strsSeq &=
+            mSelf.allPairsStrs.tree.itemsWithPrefix(prefix3.multiReplace replaceData).toSeq
           {.pop.}
     else:
       {.push warning[ProveInit]: off.}
-      mSelf.matchPairsStrsSeq = mSelf.allPairsStrsTree.itemsWithPrefix(prefix).toSeq
+      mSelf.matchResult.strsSeq = mSelf.allPairsStrs.tree.itemsWithPrefix(prefix).toSeq
       {.pop.}
 
-  mSelf.matchResultPageCount =
-    ceil(mSelf.matchPairsStrsSeq.len / MatchResultPairsCountPerPage).Natural
-  mSelf.matchResultPageIdx = 0
+  mSelf.matchResult.pageCount =
+    ceil(mSelf.matchResult.strsSeq.len / MatchResultPairsCountPerPage).Natural
+  mSelf.matchResult.pageIndex = 0
 
-  if mSelf.matchPairsStrsSeq.len > 0:
+  if mSelf.matchResult.strsSeq.len > 0:
     mSelf.focusSimulator = false
 {.pop.}
 
@@ -246,38 +258,35 @@ func match*(mSelf; prefix: string) {.inline.} =
 # Play
 # ------------------------------------------------
 
-proc play(mSelf; pairsStr: string) {.inline.} =
+func play(mSelf; pairsStr: string) {.inline.} =
   ## Plays a marathon mode with the given pairs.
-  let pairsPositions = pairsStr.toPairsPositions
-
-  mSelf.simulator[].reset true
-  mSelf.simulator[].nazopuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
+  mSelf.simulator.reset true
+  mSelf.simulator.pairsPositions = pairsStr.toPairsPositions
 
   mSelf.focusSimulator = true
 
-proc play*(mSelf; pairsIdx: Natural) {.inline.} =
+func play*(mSelf; pairsIdx: Natural) {.inline.} =
   ## Plays a marathon mode with the given pairs.
-  mSelf.play mSelf.matchPairsStrsSeq[pairsIdx]
+  mSelf.play mSelf.matchResult.strsSeq[pairsIdx]
 
-proc play*(mSelf; onlyMatched = true) {.inline.} =
+func play*(mSelf; onlyMatched = true) {.inline.} =
   ## Plays a marathon mode with the random mathced pairs.
   ## If `onlyMatched` is true, the pairs are chosen from the matched result;
   ## otherwise, chosen from all pairs.
   if not onlyMatched:
-    mSelf.play mSelf.rng.sample mSelf.allPairsStrsSeq
+    mSelf.play mSelf.rng.sample mSelf.allPairsStrs.seq
     return
 
-  if mSelf.matchPairsStrsSeq.len == 0:
+  if mSelf.matchResult.strsSeq.len == 0:
     return
 
-  mSelf.play mSelf.rng.sample mSelf.matchPairsStrsSeq
+  mSelf.play mSelf.rng.sample mSelf.matchResult.strsSeq
 
 # ------------------------------------------------
 # Keyboard Operation
 # ------------------------------------------------
 
-proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
+func operate*(mSelf; event: KeyEvent): bool {.inline.} =
   ## Does operation specified by the keyboard input.
   ## Returns `true` if any action is executed.
   if event == initKeyEvent("KeyQ", shift = true):
@@ -285,7 +294,7 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
     return true
 
   if mSelf.focusSimulator:
-    return mSelf.simulator[].operate event
+    return mSelf.simulator.operate event
 
   result = false
 
@@ -315,7 +324,7 @@ when defined(js):
     # assert event of KeyboardEvent # HACK: somehow this assertion fails
     mSelf.runKeyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
 
-  proc initKeyboardEventHandler*(mSelf): (event: dom.Event) -> void {.inline.} =
+  func initKeyboardEventHandler*(mSelf): (event: dom.Event) -> void {.inline.} =
     ## Returns the keyboard event handler.
     (event: dom.Event) => mSelf.runKeyboardEventHandler event
 
@@ -339,7 +348,7 @@ when defined(js):
           mSelf.initMarathonFocusControllerNode
         tdiv(class = "block"):
           mSelf.initMarathonPaginationNode
-        if mSelf.matchPairsStrsSeq.len > 0:
+        if mSelf.matchResult.strsSeq.len > 0:
           tdiv(class = "block"):
             mSelf.initMarathonSearchResultNode
 

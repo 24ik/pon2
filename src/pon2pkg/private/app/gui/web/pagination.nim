@@ -5,17 +5,17 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, strformat, sugar]
+import std/[strformat, sugar]
 import karax/[karax, karaxdsl, vdom]
 import ../../../../app/[gui]
 
 proc initEditorPaginationNode*(guiApplication: var GuiApplication): VNode {.inline.} =
   ## Returns the editor pagination node.
   let showIdx =
-    if guiApplication.replayPairsPositionsSeq.get.len == 0:
+    if guiApplication.replay.pairsPositionsSeq.len == 0:
       0
     else:
-      guiApplication.replayIdx.succ
+      guiApplication.replay.index.succ
 
   result = buildHtml(
     nav(class = "pagination", role = "navigation", aria - label = "pagination")
@@ -24,7 +24,7 @@ proc initEditorPaginationNode*(guiApplication: var GuiApplication): VNode {.inli
       span(class = "icon"):
         italic(class = "fa-solid fa-backward-step")
     button(class = "button pagination-link is-static"):
-      text &"{showIdx} / {guiApplication.replayPairsPositionsSeq.get.len}"
+      text &"{showIdx} / {guiApplication.replay.pairsPositionsSeq.len}"
     button(class = "button pagination-link", onclick = () => guiApplication.nextReplay):
       span(class = "icon"):
         italic(class = "fa-solid fa-forward-step")

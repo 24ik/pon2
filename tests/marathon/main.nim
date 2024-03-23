@@ -28,20 +28,20 @@ proc main*() =
   block:
     var marathon = initMarathon()
     marathon.match("rrgy")
-    doAssert marathon.matchPairsStrsSeq.len > 1
-    check marathon.matchResultPageIdx == 0
+    doAssert marathon.matchResult.strsSeq.len > 1
+    check marathon.matchResult.pageIndex == 0
 
     marathon.nextResultPage
-    check marathon.matchResultPageIdx == 1
+    check marathon.matchResult.pageIndex == 1
 
     marathon.prevResultPage
-    check marathon.matchResultPageIdx == 0
+    check marathon.matchResult.pageIndex == 0
 
     marathon.prevResultPage
-    check marathon.matchResultPageIdx == marathon.matchResultPageCount.pred
+    check marathon.matchResult.pageIndex == marathon.matchResult.pageCount.pred
 
     marathon.nextResultPage
-    check marathon.matchResultPageIdx == 0
+    check marathon.matchResult.pageIndex == 0
 
   # ------------------------------------------------
   # Match
@@ -56,7 +56,7 @@ proc main*() =
       var count = 0
       for color in ColorPuyo:
         marathon.match($color)
-        count.inc marathon.matchPairsStrsSeq.len
+        count.inc marathon.matchResult.strsSeq.len
 
       check count == AllPairsCount
 
@@ -65,7 +65,7 @@ proc main*() =
       var count = 0
       for pattern in ["aa", "ab"]:
         marathon.match(pattern)
-        count.inc marathon.matchPairsStrsSeq.len
+        count.inc marathon.matchResult.strsSeq.len
 
       check count == AllPairsCount
 
@@ -77,7 +77,7 @@ proc main*() =
   block:
     var marathon = initMarathon()
 
-    marathon.simulator[].nazoPuyoWrap.get:
+    marathon.simulator.nazoPuyoWrap.get:
       doAssert wrappedNazoPuyo.puyoPuyo.pairsPositions.len == 0
 
       marathon.play(onlyMatched = false)
@@ -85,8 +85,8 @@ proc main*() =
 
       marathon.match("rg")
       marathon.play
-      check wrappedNazoPuyo.puyoPuyo.pairsPositions[0].pair == RedGreen
+      check wrappedNazoPuyo.puyoPuyo.pairsPositions[0].pair == GreenRed
 
       marathon.play 0
-      check wrappedNazoPuyo.puyoPuyo.pairsPositions[0].pair == RedGreen
-      check marathon.matchPairsStrsSeq[0].startsWith "rg"
+      check wrappedNazoPuyo.puyoPuyo.pairsPositions[0].pair == GreenRed
+      check marathon.matchResult.strsSeq[0].startsWith "rg"

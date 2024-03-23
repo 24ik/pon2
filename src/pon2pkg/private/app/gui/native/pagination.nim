@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, strformat, sugar]
+import std/[strformat, sugar]
 import nigui
 import ../../../../app/[color, gui]
 
@@ -37,17 +37,17 @@ proc drawHandler(control: EditorPaginationControl): (event: DrawEvent) -> void =
 
     let
       showIdx =
-        if control.guiApplication[].replayPairsPositionsSeq.isNone:
+        if not control.guiApplication[].replay.hasData:
           0
-        elif control.guiApplication[].replayPairsPositionsSeq.get.len == 0:
+        elif control.guiApplication[].replay.pairsPositionsSeq.len == 0:
           0
         else:
-          control.guiApplication[].replayIdx
+          control.guiApplication[].replay.index
       showLen =
-        if control.guiApplication[].replayPairsPositionsSeq.isNone:
+        if not control.guiApplication[].replay.hasData:
           0
         else:
-          control.guiApplication[].replayPairsPositionsSeq.get.len
+          control.guiApplication[].replay.pairsPositionsSeq.len
 
     canvas.drawText &"{showIdx} / {showLen}"
 

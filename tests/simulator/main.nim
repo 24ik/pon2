@@ -29,7 +29,7 @@ proc main*() =
     check simulator.originalNazoPuyoWrap == initNazoPuyo[WaterField]().initNazoPuyoWrap
     check simulator.editor == false
     check simulator.state == Stable
-    check simulator.next == (0.Natural, Up2)
+    check simulator.operatingPosition == Up2
     check simulator.editing.cell == Cell.None
     check simulator.editing.field == (Row.low, Column.low)
     check simulator.editing.pair == (0.Natural, true)
@@ -140,7 +140,8 @@ rg|"""
       simulator.deletePairPosition 0
       check wrappedNazoPuyo.puyoPuyo.pairsPositions == @[pairPos2, pairPos3]
 
-      simulator.editing.pair.index = 1
+      simulator.toggleFocus
+      simulator.moveCursorDown
       simulator.deletePairPosition
       check wrappedNazoPuyo.puyoPuyo.pairsPositions == @[pairPos2]
 
@@ -153,12 +154,11 @@ rg|"""
     var simulator = initPuyoPuyo[TsuField]().initSimulator
 
     simulator.nazoPuyoWrap.get:
-      simulator.editing.cell = Cell.Red
+      simulator.editingCell = Cell.Red
       simulator.writeCell Row.high, Column.high
       check wrappedNazoPuyo.puyoPuyo.field == parseField[TsuField]("t-r", Izumiya)
 
-      simulator.editing.field = (Row.high, Column.low)
-      simulator.editing.focusField = true
+      simulator.moveCursorUp
       simulator.writeCell Cell.Garbage
       check wrappedNazoPuyo.puyoPuyo.field == parseField[TsuField]("t-o....r", Izumiya)
 
@@ -167,24 +167,25 @@ rg|"""
     var simulator = initPuyoPuyo[TsuField]().initSimulator
 
     simulator.nazoPuyoWrap.get:
-      simulator.editing.cell = Cell.Red
+      simulator.editingCell = Cell.Red
       simulator.writeCell 0, true
       check wrappedNazoPuyo.puyoPuyo.pairsPositions == "rr|".parsePairsPositions
 
-      simulator.editing.cell = Cell.Green
+      simulator.editingCell = Cell.Green
       simulator.writeCell 0, false
       check wrappedNazoPuyo.puyoPuyo.pairsPositions == "rg|".parsePairsPositions
 
-      simulator.editing.cell = Cell.Blue
+      simulator.editingCell = Cell.Blue
       simulator.writeCell 1, true
       check wrappedNazoPuyo.puyoPuyo.pairsPositions == "rg|\nbb|".parsePairsPositions
 
-      simulator.editing.pair = (1, false)
-      simulator.editing.focusField = false
+      simulator.toggleFocus
+      simulator.moveCursorDown
+      simulator.moveCursorRight
       simulator.writeCell Cell.Yellow
       check wrappedNazoPuyo.puyoPuyo.pairsPositions == "rg|\nby|".parsePairsPositions
 
-      simulator.editing.cell = Cell.None
+      simulator.editingCell = Cell.None
       simulator.writeCell 0, true
       check wrappedNazoPuyo.puyoPuyo.pairsPositions == "by|".parsePairsPositions
 
@@ -299,31 +300,31 @@ rg|"""
     check simulator.nazoPuyoWrap == nazo2
 
   # ------------------------------------------------
-  # Play - Position
+  # Play - Operating
   # ------------------------------------------------
 
-  # moveNextPositionRight, moveNextPositionLeft, rotateNextPositionRight, rotateNextPositionLeft
+  # moveOperatingPositionRight, moveOperatingPositionLeft, rotateOperatingPositionRight,
+  # rotateOperatingPositionLeft
   block:
     var
       simulator = initPuyoPuyo[TsuField]().initSimulator
-      pos = Up3
-    simulator.next.position = pos
+      pos = simulator.operatingPosition
 
-    simulator.moveNextPositionRight
+    simulator.moveOperatingPositionRight
     pos.moveRight
-    check simulator.next.position == pos
+    check simulator.operatingPosition == pos
 
-    simulator.moveNextPositionLeft
+    simulator.moveOperatingPositionLeft
     pos.moveLeft
-    check simulator.next.position == pos
+    check simulator.operatingPosition == pos
 
-    simulator.rotateNextPositionRight
+    simulator.rotateOperatingPositionRight
     pos.rotateRight
-    check simulator.next.position == pos
+    check simulator.operatingPosition == pos
 
-    simulator.rotateNextPositionLeft
+    simulator.rotateOperatingPositionLeft
     pos.rotateLeft
-    check simulator.next.position == pos
+    check simulator.operatingPosition == pos
 
   # ------------------------------------------------
   # Forward / Backward
@@ -335,27 +336,28 @@ rg|"""
       "https://ishikawapuyo.net/simu/pn.html?Mp6j92mS_o1q1__u03".parseUri.parseSimulator
 
     simulator.nazoPuyoWrap.get:
-      simulator.next.position = Up5
+      for _ in 1 .. 3:
+        simulator.moveOperatingPositionRight
       simulator.forward
       check simulator.state == WillDisappear
       wrappedNazoPuyo.checkNazoPuyoEqual parseNazoPuyo[TsuField](
         "30010Mp6j92mS_oaq1__u03", Ishikawa
       )
-      check simulator.next.index == 0
+      check wrappedNazoPuyo.puyoPuyo.operatingIndex == 0
 
       simulator.forward
       check simulator.state == Disappearing
       wrappedNazoPuyo.checkNazoPuyoEqual parseNazoPuyo[TsuField](
         "30000Mo6j02m0_oaq1__u03", Ishikawa
       )
-      check simulator.next.index == 0
+      check wrappedNazoPuyo.puyoPuyo.operatingIndex == 0
 
       simulator.forward
       check simulator.state == Stable
       wrappedNazoPuyo.checkNazoPuyoEqual parseNazoPuyo[TsuField](
         "M06j02mr_oaq1__u03", Ishikawa
       )
-      check simulator.next.index == 1
+      check wrappedNazoPuyo.puyoPuyo.operatingIndex == 1
 
   # forward w/ arguments
   block:
@@ -383,27 +385,18 @@ rg|"""
       parseNazoPuyo[TsuField]("Mp6j92mS_o1q1__u03", Ishikawa).initSimulator
 
     simulator.nazoPuyoWrap.get:
-      simulator.next.position = Up5
+      for _ in 1 .. 3:
+        simulator.moveOperatingPositionRight
       simulator.forward
       simulator.backward
       wrappedNazoPuyo.checkNazoPuyoEqual parseNazoPuyo[TsuField](
         "Mp6j92mS_oaq1__u03", Ishikawa
       )
       check simulator.state == Stable
-      check simulator.next.index == 0
+      check wrappedNazoPuyo.puyoPuyo.operatingIndex == 0
 
-      simulator.next.position = Up5
-      simulator.forward
-      simulator.forward
-      simulator.backward
-      wrappedNazoPuyo.checkNazoPuyoEqual parseNazoPuyo[TsuField](
-        "Mp6j92mS_oaq1__u03", Ishikawa
-      )
-      check simulator.state == Stable
-      check simulator.next.index == 0
-
-      simulator.next.position = Up5
-      simulator.forward
+      for _ in 1 .. 3:
+        simulator.moveOperatingPositionRight
       simulator.forward
       simulator.forward
       simulator.backward
@@ -411,34 +404,49 @@ rg|"""
         "Mp6j92mS_oaq1__u03", Ishikawa
       )
       check simulator.state == Stable
-      check simulator.next.index == 0
+      check wrappedNazoPuyo.puyoPuyo.operatingIndex == 0
 
-      simulator.next.position = Up5
+      for _ in 1 .. 3:
+        simulator.moveOperatingPositionRight
       simulator.forward
       simulator.forward
       simulator.forward
-      simulator.next.position = Right0
+      simulator.backward
+      wrappedNazoPuyo.checkNazoPuyoEqual parseNazoPuyo[TsuField](
+        "Mp6j92mS_oaq1__u03", Ishikawa
+      )
+      check simulator.state == Stable
+      check wrappedNazoPuyo.puyoPuyo.operatingIndex == 0
+
+      for _ in 1 .. 3:
+        simulator.moveOperatingPositionRight
+      simulator.forward
+      simulator.forward
+      simulator.forward
+      for _ in 1 .. 2:
+        simulator.moveOperatingPositionLeft
+      simulator.rotateOperatingPositionRight
       simulator.forward
       simulator.backward
       wrappedNazoPuyo.checkNazoPuyoEqual parseNazoPuyo[TsuField](
         "M06j02mr_oaqc__u03", Ishikawa
       )
       check simulator.state == Stable
-      check simulator.next.index == 1
+      check wrappedNazoPuyo.puyoPuyo.operatingIndex == 1
 
       simulator.reset false
       wrappedNazoPuyo.checkNazoPuyoEqual parseNazoPuyo[TsuField](
         "Mp6j92mS_oaqc__u03", Ishikawa
       )
       check simulator.state == Stable
-      check simulator.next.index == 0
+      check wrappedNazoPuyo.puyoPuyo.operatingIndex == 0
 
       simulator.reset
       wrappedNazoPuyo.checkNazoPuyoEqual parseNazoPuyo[TsuField](
         "Mp6j92mS_o1q1__u03", Ishikawa
       )
       check simulator.state == Stable
-      check simulator.next.index == 0
+      check wrappedNazoPuyo.puyoPuyo.operatingIndex == 0
 
   # ------------------------------------------------
   # Simulator <-> URI

@@ -365,7 +365,7 @@ func willDisappear*(self: TsuField or WaterField): bool {.inline.} =
     self.yellow.willDisappear or self.purple.willDisappear
 
 # ------------------------------------------------
-# Operation
+# Operation - Put
 # ------------------------------------------------
 
 func initFillFields[F: TsuField or WaterField](): array[ColorPuyo, F] {.inline.} =
@@ -423,6 +423,10 @@ func put*(mSelf: var WaterField, pair: Pair, pos: Position) {.inline.} =
     existField2 = mSelf.exist
   mSelf.clearColumn childCol
   mSelf += shiftFields2[existField2.exist(Row.high, childCol)].column childCol
+
+# ------------------------------------------------
+# Operation - Drop
+# ------------------------------------------------
 
 func drop*(mSelf: var TsuField) {.inline.} =
   ## Drops floating puyos.
