@@ -5,13 +5,13 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, sequtils]
+import std/[sequtils]
 import ./[key, nazopuyo, simulator]
 import ../core/[field, nazopuyo, pairposition, puyopuyo, requirement]
 import ../private/[misc]
 
 when defined(js):
-  import std/[sugar]
+  import std/[options, sugar]
   import karax/[karax, karaxdsl, kdom, vdom]
   import ../core/[pair]
   import ../private/[webworker]
@@ -24,19 +24,24 @@ else:
   import ./[permute, solve]
   {.pop.}
 
-type GuiApplication* = object ## GUI application.
-  simulator*: ref Simulator
-  replaySimulator*: ref Simulator
+type
+  GuiApplicationReplay* = object ## Pairs&Positions for the replay simulator.
+    hasData*: bool
+    pairsPositionsSeq*: seq[PairsPositions]
+    index*: Natural
 
-  replayPairsPositionsSeq*: Option[seq[PairsPositions]]
-  replayIndex*: Natural
+  GuiApplication* = object ## GUI application.
+    simulator*: ref Simulator
+    replaySimulator*: ref Simulator
 
-  editor: bool
-  focusEditor: bool
-  solving: bool
-  permuting: bool
+    replay: GuiApplicationReplay
 
-  progressBar: tuple[now: Natural, total: Natural]
+    editor: bool
+    focusEditor: bool
+    solving: bool
+    permuting: bool
+
+    progressBar: tuple[now: Natural, total: Natural]
 
 using
   self: GuiApplication
@@ -53,10 +58,9 @@ proc initGuiApplication*(simulator: Simulator): GuiApplication {.inline.} =
   result.replaySimulator = new Simulator
   result.replaySimulator[] = simulator
 
-  {.push warning[ProveInit]: off.}
-  result.replayPairsPositionsSeq = none seq[PairsPositions]
-  {.pop.}
-  result.replayIndex = 0
+  result.replay.hasData = false
+  result.replay.pairsPositionsSeq = @[]
+  result.replay.index = 0
 
   result.editor = simulator.editor
   result.focusEditor = false
@@ -69,6 +73,10 @@ proc initGuiApplication*(simulator: Simulator): GuiApplication {.inline.} =
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
+
+func replay*(self): GuiApplicationReplay {.inline.} =
+  ## Returns the pairs&positions for the replay simulator.
+  self.replay
 
 func focusEditor*(self): bool {.inline.} =
   ## Returns `true` if the editor simulator is focused.
@@ -105,15 +113,15 @@ proc updateReplaySimulator[F: TsuField or WaterField](
     mSelf; nazo: NazoPuyo[F]
 ) {.inline.} =
   ## Updates the replay simulator.
-  ## This function is assumed to be called after `mSelf.replayPairsPositionsSeq` is set.
-  assert mSelf.replayPairsPositionsSeq.isSome
+  ## This function is assumed to be called after `mSelf.replay.pairsPositionsSeq` is set.
+  assert mSelf.replay.hasData
 
-  if mSelf.replayPairsPositionsSeq.get.len > 0:
+  if mSelf.replay.pairsPositionsSeq.len > 0:
     mSelf.focusEditor = true
-    mSelf.replayIndex = 0
+    mSelf.replay.index = 0
 
     var nazo2 = nazo
-    nazo2.puyoPuyo.pairsPositions = mSelf.replayPairsPositionsSeq.get[0]
+    nazo2.puyoPuyo.pairsPositions = mSelf.replay.pairsPositionsSeq[0]
     mSelf.replaySimulator[] =
       nazo2.initSimulator(mSelf.replaySimulator[].mode, mSelf.replaySimulator[].editor)
   else:
@@ -153,7 +161,8 @@ proc solve*(
         mSelf.progressBar.now = results.len.pred
         if results.allIt it.isSome:
           mSelf.progressBar.total = 0
-          mSelf.replayPairsPositionsSeq = some results.mapIt(it.get).concat
+          mSelf.replay.hasData = true
+          mSelf.replay.pairsPositionsSeq = results.mapIt(it.get).concat
           mSelf.updateReplaySimulator wrappedNazoPuyo
           mSelf.solving = false
           interval.clearInterval
@@ -164,8 +173,9 @@ proc solve*(
       interval = showReplay.setInterval ResultMonitorIntervalMs
     else:
       # FIXME: make asynchronous, redraw
-      mSelf.replayPairsPositionsSeq =
-        some wrappedNazoPuyo.solve(parallelCount = parallelCount)
+      mSelf.replay.hasData = true
+      mSelf.replay.pairsPositionsSeq =
+        wrappedNazoPuyo.solve(parallelCount = parallelCount)
       mSelf.updateReplaySimulator wrappedNazoPuyo
       mSelf.solving = false
 
@@ -210,7 +220,7 @@ proc permute*(
         mSelf.progressBar.now = results.len.pred
         if results.allIt it.isSome:
           mSelf.progressBar.total = 0
-          mSelf.replayPairsPositionsSeq = some results.mapIt(it.get)
+          mSelf.replay.pairsPositionsSeq = results.mapIt(it.get)
           mSelf.updateReplaySimulator wrappedNazoPuyo
           mSelf.permuting = false
           interval.clearInterval
@@ -221,8 +231,8 @@ proc permute*(
       interval = showReplay.setInterval ResultMonitorIntervalMs
     else:
       # FIXME: make asynchronous, redraw
-      mSelf.replayPairsPositionsSeq =
-        some wrappedNazoPuyo.permute(fixMoves, allowDouble, allowLastDouble).toSeq
+      mSelf.replay.pairsPositionsSeq =
+        wrappedNazoPuyo.permute(fixMoves, allowDouble, allowLastDouble).toSeq
       mSelf.updateReplaySimulator wrappedNazoPuyo
       mSelf.permuting = false
 
@@ -234,30 +244,30 @@ proc permute*(
 
 proc nextReplay*(mSelf) {.inline.} =
   ## Shows the next replay.
-  if mSelf.replayPairsPositionsSeq.isNone or mSelf.replayPairsPositionsSeq.get.len == 0:
+  if not mSelf.replay.hasData or mSelf.replay.pairsPositionsSeq.len == 0:
     return
 
-  if mSelf.replayIndex == mSelf.replayPairsPositionsSeq.get.len.pred:
-    mSelf.replayIndex = 0
+  if mSelf.replay.index == mSelf.replay.pairsPositionsSeq.len.pred:
+    mSelf.replay.index = 0
   else:
-    mSelf.replayIndex.inc
+    mSelf.replay.index.inc
 
   mSelf.replaySimulator[].pairsPositions =
-    mSelf.replayPairsPositionsSeq.get[mSelf.replayIndex]
+    mSelf.replay.pairsPositionsSeq[mSelf.replay.index]
   mSelf.replaySimulator[].reset false
 
 proc prevReplay*(mSelf) {.inline.} =
   ## Shows the previous replay.
-  if mSelf.replayPairsPositionsSeq.isNone or mSelf.replayPairsPositionsSeq.get.len == 0:
+  if not mSelf.replay.hasData or mSelf.replay.pairsPositionsSeq.len == 0:
     return
 
-  if mSelf.replayIndex == 0:
-    mSelf.replayIndex = mSelf.replayPairsPositionsSeq.get.len.pred
+  if mSelf.replay.index == 0:
+    mSelf.replay.index = mSelf.replay.pairsPositionsSeq.len.pred
   else:
-    mSelf.replayIndex.dec
+    mSelf.replay.index.dec
 
   mSelf.replaySimulator[].pairsPositions =
-    mSelf.replayPairsPositionsSeq.get[mSelf.replayIndex]
+    mSelf.replay.pairsPositionsSeq[mSelf.replay.index]
   mSelf.replaySimulator[].reset false
 
 # ------------------------------------------------
@@ -338,10 +348,10 @@ when defined(js):
               mSelf.initEditorSettingsNode id
             if mSelf.progressBar.total > 0:
               mSelf.initEditorProgressBarNode
-            if mSelf.replayPairsPositionsSeq.isSome:
+            if mSelf.replay.hasData:
               tdiv(class = "block"):
                 mSelf.initEditorPaginationNode
-              if mSelf.replayPairsPositionsSeq.get.len > 0:
+              if mSelf.replay.pairsPositionsSeq.len > 0:
                 tdiv(class = "block"):
                   mSelf.initEditorSimulatorNode
 
