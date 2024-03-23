@@ -17,12 +17,11 @@ import ../private/app/marathon/[common]
 type Marathon* = object ## Marathon manager.
   simulator*: ref Simulator
 
-  matchPairsStrsSeq*: seq[string]
-  matchResultPageCount*: Natural
-  matchResultPageIndex*: Natural
+  matchPairsStrsSeq: seq[string]
+  matchResultPageCount: Natural
+  matchResultPageIdx: Natural
 
-  allPairsStrsSeq: seq[string]
-  allPairsStrsTree: CritBitTree[void]
+  allPairsStrs: tuple[`seq`: seq[string], tree: CritBitTree[void]]
 
   focusSimulator: bool
 
@@ -46,11 +45,11 @@ proc initMarathon*(): Marathon {.inline.} =
 
   result.matchPairsStrsSeq = @[]
   result.matchResultPageCount = 0
-  result.matchResultPageIndex = 0
+  result.matchResultPageIdx = 0
 
-  result.allPairsStrsSeq = RawPairsTxt.splitLines
-  result.allPairsStrsTree = result.allPairsStrsSeq.toCritBitTree
-  assert result.allPairsStrsSeq.len == AllPairsCount
+  result.allPairsStrs.seq = RawPairsTxt.splitLines
+  result.allPairsStrs.tree = result.allPairsStrs.seq.toCritBitTree
+  assert result.allPairsStrs.seq.len == AllPairsCount
 
   result.focusSimulator = false
 
@@ -59,6 +58,18 @@ proc initMarathon*(): Marathon {.inline.} =
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
+
+func matchPairsStrsSeq*(self): seq[string] {.inline.} =
+  ## Returns the match result.
+  self.matchPairsStrsSeq
+
+func matchResultPageCount*(self): int {.inline.} =
+  ## Returns the number of result pages.
+  self.matchResultPageCount
+
+func matchResultPageIndex*(self): int {.inline.} =
+  ## Returns the index of shown result pages.
+  self.matchResultPageIdx
 
 func focusSimulator*(self): bool {.inline.} =
   ## Returns `true` if the simulator is focused.
@@ -80,20 +91,20 @@ proc nextResultPage*(mSelf) {.inline.} =
   if mSelf.matchResultPageCount == 0:
     return
 
-  if mSelf.matchResultPageIndex == mSelf.matchResultPageCount.pred:
-    mSelf.matchResultPageIndex = 0
+  if mSelf.matchResultPageIdx == mSelf.matchResultPageCount.pred:
+    mSelf.matchResultPageIdx = 0
   else:
-    mSelf.matchResultPageIndex.inc
+    mSelf.matchResultPageIdx.inc
 
 proc prevResultPage*(mSelf) {.inline.} =
   ## Shows the previous result page.
   if mSelf.matchResultPageCount == 0:
     return
 
-  if mSelf.matchResultPageIndex == 0:
-    mSelf.matchResultPageIndex = mSelf.matchResultPageCount.pred
+  if mSelf.matchResultPageIdx == 0:
+    mSelf.matchResultPageIdx = mSelf.matchResultPageCount.pred
   else:
-    mSelf.matchResultPageIndex.dec
+    mSelf.matchResultPageIdx.dec
 
 # ------------------------------------------------
 # Match
@@ -234,16 +245,16 @@ func match*(mSelf; prefix: string) {.inline.} =
         for prefix3 in prefix2.swappedPrefixes:
           {.push warning[ProveInit]: off.}
           mSelf.matchPairsStrsSeq &=
-            mSelf.allPairsStrsTree.itemsWithPrefix(prefix3.multiReplace replaceData).toSeq
+            mSelf.allPairsStrs.tree.itemsWithPrefix(prefix3.multiReplace replaceData).toSeq
           {.pop.}
     else:
       {.push warning[ProveInit]: off.}
-      mSelf.matchPairsStrsSeq = mSelf.allPairsStrsTree.itemsWithPrefix(prefix).toSeq
+      mSelf.matchPairsStrsSeq = mSelf.allPairsStrs.tree.itemsWithPrefix(prefix).toSeq
       {.pop.}
 
   mSelf.matchResultPageCount =
     ceil(mSelf.matchPairsStrsSeq.len / MatchResultPairsCountPerPage).Natural
-  mSelf.matchResultPageIndex = 0
+  mSelf.matchResultPageIdx = 0
 
   if mSelf.matchPairsStrsSeq.len > 0:
     mSelf.focusSimulator = false
@@ -269,7 +280,7 @@ proc play*(mSelf; onlyMatched = true) {.inline.} =
   ## If `onlyMatched` is true, the pairs are chosen from the matched result;
   ## otherwise, chosen from all pairs.
   if not onlyMatched:
-    mSelf.play mSelf.rng.sample mSelf.allPairsStrsSeq
+    mSelf.play mSelf.rng.sample mSelf.allPairsStrs.seq
     return
 
   if mSelf.matchPairsStrsSeq.len == 0:
