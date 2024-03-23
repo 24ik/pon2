@@ -77,7 +77,7 @@ proc main*() =
   block:
     var marathon = initMarathon()
 
-    marathon.simulator[].nazoPuyoWrap.get:
+    marathon.simulator.nazoPuyoWrap.get:
       doAssert wrappedNazoPuyo.puyoPuyo.pairsPositions.len == 0
 
       marathon.play(onlyMatched = false)
