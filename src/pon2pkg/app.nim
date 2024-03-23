@@ -29,9 +29,9 @@ export
   gui.nextReplay, gui.prevReplay, gui.operate
 export key.KeyEvent, key.initKeyEvent
 export
-  marathon.Marathon, marathon.initMarathon, marathon.toggleFocus,
-  marathon.nextResultPage, marathon.prevResultPage, marathon.match, marathon.play,
-  marathon.operate
+  marathon.Marathon, marathon.initMarathon, marathon.focusSimulator,
+  marathon.toggleFocus, marathon.nextResultPage, marathon.prevResultPage,
+  marathon.match, marathon.play, marathon.operate
 export
   nazopuyo.NazoPuyoWrap, nazopuyo.initNazoPuyoWrap, nazopuyo.get, nazopuyo.rule,
   nazopuyo.`rule=`, nazopuyo.`==`

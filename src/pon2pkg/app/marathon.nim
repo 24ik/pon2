@@ -24,7 +24,7 @@ type Marathon* = object ## Marathon manager.
   allPairsStrsSeq: seq[string]
   allPairsStrsTree: CritBitTree[void]
 
-  focusSimulator*: bool
+  focusSimulator: bool
 
   rng: Rand
 
@@ -55,6 +55,14 @@ proc initMarathon*(): Marathon {.inline.} =
   result.focusSimulator = false
 
   result.rng = initRand()
+
+# ------------------------------------------------
+# Property
+# ------------------------------------------------
+
+func focusSimulator*(self): bool {.inline.} =
+  ## Returns `true` if the simulator is focused.
+  self.focusSimulator
 
 # ------------------------------------------------
 # Edit - Other
