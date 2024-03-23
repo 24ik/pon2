@@ -36,8 +36,7 @@ type GuiApplication* = object ## GUI application.
   solving: bool
   permuting: bool
 
-  when defined(js):
-    progressBarData*: tuple[now: Natural, total: Natural]
+  progressBar: tuple[now: Natural, total: Natural]
 
 using
   self: GuiApplication
@@ -64,9 +63,8 @@ proc initGuiApplication*(simulator: Simulator): GuiApplication {.inline.} =
   result.solving = false
   result.permuting = false
 
-  when defined(js):
-    result.progressBarData.now = 0
-    result.progressBarData.total = 0
+  result.progressBar.now = 0
+  result.progressBar.total = 0
 
 # ------------------------------------------------
 # Property
@@ -83,6 +81,11 @@ func solving*(self): bool {.inline.} =
 func permuting*(self): bool {.inline.} =
   ## Returns `true` if a nazo puyo is being permuted.
   self.permuting
+
+func progressBar*(self): tuple[now: int, total: int] {.inline.} =
+  ## Returns the progress bar information.
+  result.now = self.progressBar.now
+  result.total = self.progressBar.total
 
 # ------------------------------------------------
 # Edit - Other
@@ -138,18 +141,18 @@ proc solve*(
       {.pop.}
       wrappedNazoPuyo.asyncSolve(results, parallelCount = parallelCount)
 
-      mSelf.progressBarData.total =
+      mSelf.progressBar.total =
         if wrappedNazoPuyo.puyoPuyo.pairsPositions[0].pair.isDouble:
           wrappedNazoPuyo.puyoPuyo.field.validDoublePositions.card
         else:
           wrappedNazoPuyo.puyoPuyo.field.validPositions.card
-      mSelf.progressBarData.now = 0
+      mSelf.progressBar.now = 0
 
       var interval: Interval
       proc showReplay() =
-        mSelf.progressBarData.now = results.len.pred
+        mSelf.progressBar.now = results.len.pred
         if results.allIt it.isSome:
-          mSelf.progressBarData.total = 0
+          mSelf.progressBar.total = 0
           mSelf.replayPairsPositionsSeq = some results.mapIt(it.get).concat
           mSelf.updateReplaySimulator wrappedNazoPuyo
           mSelf.solving = false
@@ -198,15 +201,15 @@ proc permute*(
         results, fixMoves, allowDouble, allowLastDouble, parallelCount
       )
 
-      mSelf.progressBarData.total =
+      mSelf.progressBar.total =
         wrappedNazoPuyo.allPairsPositionsSeq(fixMoves, allowDouble, allowLastDouble).len
-      mSelf.progressBarData.now = 0
+      mSelf.progressBar.now = 0
 
       var interval: Interval
       proc showReplay() =
-        mSelf.progressBarData.now = results.len.pred
+        mSelf.progressBar.now = results.len.pred
         if results.allIt it.isSome:
-          mSelf.progressBarData.total = 0
+          mSelf.progressBar.total = 0
           mSelf.replayPairsPositionsSeq = some results.mapIt(it.get)
           mSelf.updateReplaySimulator wrappedNazoPuyo
           mSelf.permuting = false
@@ -333,7 +336,7 @@ when defined(js):
               mSelf.initEditorControllerNode id
             tdiv(class = "block"):
               mSelf.initEditorSettingsNode id
-            if mSelf.progressBarData.total > 0:
+            if mSelf.progressBar.total > 0:
               mSelf.initEditorProgressBarNode
             if mSelf.replayPairsPositionsSeq.isSome:
               tdiv(class = "block"):

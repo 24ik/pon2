@@ -26,8 +26,8 @@ export
   generate.GenerateRequirement, generate.generate
 export
   gui.GuiApplication, gui.initGuiApplication, gui.focusEditor, gui.solving,
-  gui.permuting, gui.toggleFocus, gui.solve, gui.permute, gui.nextReplay,
-  gui.prevReplay, gui.operate
+  gui.permuting, gui.progressBar, gui.toggleFocus, gui.solve, gui.permute,
+  gui.nextReplay, gui.prevReplay, gui.operate
 export key.KeyEvent, key.initKeyEvent
 export
   marathon.MarathonMatchResult, marathon.Marathon, marathon.initMarathon,
