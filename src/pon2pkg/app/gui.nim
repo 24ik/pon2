@@ -33,8 +33,8 @@ type GuiApplication* = object ## GUI application.
 
   editor: bool
   focusEditor: bool
-  solving*: bool
-  permuting*: bool
+  solving: bool
+  permuting: bool
 
   when defined(js):
     progressBarData*: tuple[now: Natural, total: Natural]
@@ -73,8 +73,16 @@ proc initGuiApplication*(simulator: Simulator): GuiApplication {.inline.} =
 # ------------------------------------------------
 
 func focusEditor*(self): bool {.inline.} =
-  ## Returns `true` is the editor simulator is focused.
+  ## Returns `true` if the editor simulator is focused.
   self.focusEditor
+
+func solving*(self): bool {.inline.} =
+  ## Returns `true` if a nazo puyo is being solved.
+  self.solving
+
+func permuting*(self): bool {.inline.} =
+  ## Returns `true` if a nazo puyo is being permuted.
+  self.permuting
 
 # ------------------------------------------------
 # Edit - Other
