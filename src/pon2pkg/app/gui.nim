@@ -32,7 +32,7 @@ type GuiApplication* = object ## GUI application.
   replayIndex*: Natural
 
   editor: bool
-  focusEditor*: bool
+  focusEditor: bool
   solving*: bool
   permuting*: bool
 
@@ -67,6 +67,14 @@ proc initGuiApplication*(simulator: Simulator): GuiApplication {.inline.} =
   when defined(js):
     result.progressBarData.now = 0
     result.progressBarData.total = 0
+
+# ------------------------------------------------
+# Property
+# ------------------------------------------------
+
+func focusEditor*(self): bool {.inline.} =
+  ## Returns `true` is the editor simulator is focused.
+  self.focusEditor
 
 # ------------------------------------------------
 # Edit - Other
