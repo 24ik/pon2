@@ -28,20 +28,20 @@ proc main*() =
   block:
     var marathon = initMarathon()
     marathon.match("rrgy")
-    doAssert marathon.matchPairsStrsSeq.len > 1
-    check marathon.matchResultPageIndex == 0
+    doAssert marathon.matchResult.strsSeq.len > 1
+    check marathon.matchResult.pageIndex == 0
 
     marathon.nextResultPage
-    check marathon.matchResultPageIndex == 1
+    check marathon.matchResult.pageIndex == 1
 
     marathon.prevResultPage
-    check marathon.matchResultPageIndex == 0
+    check marathon.matchResult.pageIndex == 0
 
     marathon.prevResultPage
-    check marathon.matchResultPageIndex == marathon.matchResultPageCount.pred
+    check marathon.matchResult.pageIndex == marathon.matchResult.pageCount.pred
 
     marathon.nextResultPage
-    check marathon.matchResultPageIndex == 0
+    check marathon.matchResult.pageIndex == 0
 
   # ------------------------------------------------
   # Match
@@ -56,7 +56,7 @@ proc main*() =
       var count = 0
       for color in ColorPuyo:
         marathon.match($color)
-        count.inc marathon.matchPairsStrsSeq.len
+        count.inc marathon.matchResult.strsSeq.len
 
       check count == AllPairsCount
 
@@ -65,7 +65,7 @@ proc main*() =
       var count = 0
       for pattern in ["aa", "ab"]:
         marathon.match(pattern)
-        count.inc marathon.matchPairsStrsSeq.len
+        count.inc marathon.matchResult.strsSeq.len
 
       check count == AllPairsCount
 
@@ -89,4 +89,4 @@ proc main*() =
 
       marathon.play 0
       check wrappedNazoPuyo.puyoPuyo.pairsPositions[0].pair == GreenRed
-      check marathon.matchPairsStrsSeq[0].startsWith "rg"
+      check marathon.matchResult.strsSeq[0].startsWith "rg"
