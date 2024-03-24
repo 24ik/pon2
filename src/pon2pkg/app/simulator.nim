@@ -805,7 +805,7 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
 # ------------------------------------------------
 
 when defined(js):
-  import karax/[karax, karaxdsl, kdom, vdom]
+  import karax/[karaxdsl, vdom]
   import
     ../private/app/simulator/web/[
       controller,
@@ -819,25 +819,6 @@ when defined(js):
       select,
       share,
     ]
-
-  # ------------------------------------------------
-  # JS - Keyboard Handler
-  # ------------------------------------------------
-
-  proc runKeyboardEventHandler*(mSelf; event: KeyEvent) {.inline.} =
-    ## Runs the keybaord event handler.
-    let needRedraw = mSelf.operate event
-    if needRedraw and not kxi.surpressRedraws:
-      kxi.redraw
-
-  proc runKeyboardEventHandler*(mSelf; event: dom.Event) {.inline.} =
-    ## Runs the keybaord event handler.
-    # assert event of KeyboardEvent # HACK: somehow this assertion fails
-    mSelf.runKeyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
-
-  func initKeyboardEventHandler*(mSelf): (event: dom.Event) -> void {.inline.} =
-    ## Returns the keyboard event handler.
-    (event: dom.Event) => mSelf.runKeyboardEventHandler event
 
   # ------------------------------------------------
   # JS - Node
@@ -878,19 +859,16 @@ when defined(js):
             tdiv(class = "block"):
               mSelf.initPairsNode
 
-  proc initSimulatorNode*(
-      mSelf; setKeyHandler = true, wrapSection = true, id = ""
-  ): VNode {.inline.} =
+  proc initSimulatorNode*(mSelf; wrapSection = true, id = ""): VNode {.inline.} =
     ## Returns the simulator node.
     ## `id` is shared with other node-creating procedures and need to be unique.
-    if setKeyHandler:
-      document.onkeydown = mSelf.initKeyboardEventHandler
+    let node = mSelf.initSimulatorNode id
 
     if wrapSection:
       result = buildHtml(section(class = "section")):
-        mSelf.initSimulatorNode id
+        node
     else:
-      result = mSelf.initSimulatorNode id
+      result = node
 
 else:
   import nigui
@@ -907,35 +885,8 @@ else:
       share,
     ]
 
-  type
-    SimulatorControl* = ref object of LayoutContainer ## Root control of the simulator.
-      simulator*: ref Simulator
-
-    SimulatorWindow* = ref object of WindowImpl ## Application window for the simulator.
-      simulator*: ref Simulator
-
-  # ------------------------------------------------
-  # Native - Keyboard Handler
-  # ------------------------------------------------
-
-  proc runKeyboardEventHandler*(
-      window: SimulatorWindow, event: KeyboardEvent, keys = downKeys()
-  ) {.inline.} =
-    ## Runs the keyboard event handler.
-    let needRedraw = window.simulator[].operate event.toKeyEvent keys
-    if needRedraw:
-      event.window.control.forceRedraw
-
-  proc runKeyboardEventHandler(event: KeyboardEvent) =
-    ## Runs the keyboard event handler.
-    let rawWindow = event.window
-    assert rawWindow of SimulatorWindow
-
-    cast[SimulatorWindow](rawWindow).runKeyboardEventHandler event
-
-  func initKeyboardEventHandler*(): (event: KeyboardEvent) -> void {.inline.} =
-    ## Returns the keyboard event handler.
-    runKeyboardEventHandler
+  type SimulatorControl* = ref object of LayoutContainer
+    ## Root control of the simulator.
 
   # ------------------------------------------------
   # Native - Control
@@ -946,8 +897,6 @@ else:
     result = new SimulatorControl
     result.init
     result.layout = Layout_Vertical
-
-    result.simulator = simulator
 
     let assetsRef = new Assets
     assetsRef[] = initAssets()
@@ -982,30 +931,3 @@ else:
     # set size
     reqControl.setWidth secondRow.naturalWidth
     messages.setWidth field.naturalWidth
-
-  proc initSimulatorWindow*(
-      simulator: ref Simulator,
-      title = "Pon!通シミュレーター",
-      setKeyHandler = true,
-  ): SimulatorWindow {.inline.} =
-    ## Returns the simulator window.
-    result = new SimulatorWindow
-    result.init
-
-    result.simulator = simulator
-
-    result.title = title
-    result.resizable = false
-    if setKeyHandler:
-      result.onKeyDown = runKeyboardEventHandler
-
-    let rootControl = simulator.initSimulatorControl
-    result.add rootControl
-
-    when defined(windows):
-      # FIXME: ad hoc adjustment needed on Windows and need improvement
-      result.width = (rootControl.naturalWidth.float * 1.1).int
-      result.height = (rootControl.naturalHeight.float * 1.1).int
-    else:
-      result.width = rootControl.naturalWidth
-      result.height = rootControl.naturalHeight

@@ -66,9 +66,7 @@ when defined(js):
   export
     marathon.runKeyboardEventHandler, marathon.initKeyboardEventHandler,
     marathon.initMarathonNode
-  export
-    simulator.runKeyboardEventHandler, simulator.initKeyboardEventHandler,
-    simulator.initSimulatorNode
+  export simulator.initSimulatorNode
 else:
   export color.toNiguiColor
   export
@@ -76,7 +74,4 @@ else:
     gui.initKeyboardEventHandler, gui.initGuiApplicationControl,
     gui.initGuiApplicationWindow
   export key.toKeyEvent
-  export
-    simulator.SimulatorControl, simulator.SimulatorWindow,
-    simulator.runKeyboardEventHandler, simulator.initKeyboardEventHandler,
-    simulator.initSimulatorControl, simulator.initSimulatorWindow
+  export simulator.SimulatorControl, simulator.initSimulatorControl

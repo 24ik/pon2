@@ -11,4 +11,4 @@ import ../../../../app/[marathon, simulator]
 proc initMarathonSimulatorNode*(marathon: var Marathon, id = ""): VNode {.inline.} =
   ## Returns the marathon simulator node.
   ## `id` is shared with other node-creating procedures and need to be unique.
-  marathon.simulator.initSimulatorNode(false, false, id)
+  marathon.simulator.initSimulatorNode(wrapSection = false, id = id)

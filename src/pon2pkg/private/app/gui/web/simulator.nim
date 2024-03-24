@@ -13,6 +13,4 @@ proc initEditorSimulatorNode*(
 ): VNode {.inline.} =
   ## Returns the editor simulator node.
   ## `id` is shared with other node-creating procedures and need to be unique.
-  guiApplication.replaySimulator[].initSimulatorNode(
-    setKeyHandler = false, wrapSection = false, id = id
-  )
+  guiApplication.replaySimulator[].initSimulatorNode(wrapSection = false, id = id)

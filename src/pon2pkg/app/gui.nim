@@ -333,8 +333,7 @@ when defined(js):
   proc initGuiApplicationNode(mSelf; id: string): VNode {.inline.} =
     ## Returns the GUI application without the external section.
     ## `id` is shared with other node-creating procedures and need to be unique.
-    let simulatorNode =
-      mSelf.simulator[].initSimulatorNode(setKeyHandler = false, id = id)
+    let simulatorNode = mSelf.simulator[].initSimulatorNode(id = id)
 
     result = buildHtml(tdiv(class = "columns is-mobile is-variable is-1")):
       tdiv(class = "column is-narrow"):
