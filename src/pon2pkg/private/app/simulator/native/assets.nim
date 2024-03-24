@@ -1,6 +1,6 @@
 ## This module implements assets handling.
 ##
-## This module may require the compile option `-d:ssl`.
+## This module requires the compile option `-d:ssl`.
 ##
 
 {.experimental: "strictDefs".}
@@ -11,7 +11,7 @@ import std/[httpclient, net, options, appdirs, dirs, files, paths, strformat]
 import nigui
 import ../../../../core/[cell]
 
-type Assets* = object
+type Assets* = ref object
   cellImages*: array[Cell, Image]
   cellImageSize*: tuple[height: Natural, width: Natural]
 
@@ -23,7 +23,7 @@ const FilePaths: array[Cell, Path] = [
   Path "green.png",
   Path "blue.png",
   Path "yellow.png",
-  Path "purple.png"
+  Path "purple.png",
 ]
 
 proc initAssets*(timeoutSec = 180): Assets =
@@ -31,7 +31,11 @@ proc initAssets*(timeoutSec = 180): Assets =
   ##
   ## This function automatically downloads the missing assets.
   ## Downloading requires the compile option `-d:ssl`.
+  result.new
+
   let client = newHttpClient(timeout = timeoutSec * 1000)
+  defer:
+    client.close
 
   let assetsDir = getDataDir() / "pon2".Path / "assets".Path / "puyo-small".Path
   assetsDir.createDir

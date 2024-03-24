@@ -15,7 +15,7 @@ import ../../../../core/[cell, pair, pairposition, position]
 
 type PairsControl* = ref object of LayoutContainer ## Pairs control.
   simulator: ref Simulator
-  assets: ref Assets
+  assets: Assets
 
 # ------------------------------------------------
 # Pair
@@ -37,7 +37,7 @@ proc cellDrawHandler(
   if idx < pairsPositions.len:
     let pair = pairsPositions[idx].pair
     cell = if axis: pair.axis else: pair.child
-  canvas.drawImage control.assets[].cellImages[cell]
+  canvas.drawImage control.assets.cellImages[cell]
 
 func initCellDrawHandler(
     control: PairsControl, idx: Natural, isAxis: bool
@@ -47,7 +47,7 @@ func initCellDrawHandler(
   (event: DrawEvent) => control.cellDrawHandler(event, idx, isAxis)
 
 proc initPairControl(
-    control: PairsControl, idx: Natural, assets: ref Assets
+    control: PairsControl, idx: Natural, assets: Assets
 ): LayoutContainer {.inline.} =
   ## Returns a pair control.
   result = newLayoutContainer Layout_Horizontal
@@ -61,12 +61,12 @@ proc initPairControl(
   result.add axis
   result.add child
 
-  axis.height = assets[].cellImageSize.height
-  axis.width = assets[].cellImageSize.width
+  axis.height = assets.cellImageSize.height
+  axis.width = assets.cellImageSize.width
   axis.onDraw = control.initCellDrawHandler(idx, true)
 
-  child.height = assets[].cellImageSize.height
-  child.width = assets[].cellImageSize.width
+  child.height = assets.cellImageSize.height
+  child.width = assets.cellImageSize.width
   child.onDraw = control.initCellDrawHandler(idx, false)
 
 # ------------------------------------------------
@@ -135,7 +135,7 @@ proc initPositionControl(control: PairsControl, idx: Natural): Control {.inline.
 # ------------------------------------------------
 
 proc initFullPairControl(
-    control: PairsControl, idx: Natural, assets: ref Assets
+    control: PairsControl, idx: Natural, assets: Assets
 ): LayoutContainer {.inline.} =
   ## Returns a full pair control.
   result = newLayoutContainer Layout_Horizontal
@@ -157,7 +157,7 @@ proc initFullPairControl(
   positionControl.height = pairControl.naturalHeight
 
 proc initPairsControl*(
-    simulator: ref Simulator, assets: ref Assets
+    simulator: ref Simulator, assets: Assets
 ): PairsControl {.inline.} =
   ## Returns a pairs control.
   result = new PairsControl

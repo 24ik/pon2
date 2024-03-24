@@ -35,7 +35,7 @@ func initMessageDrawHandler(control: MessagesControl): (event: DrawEvent) -> voi
   (event: DrawEvent) => control.messagesDrawHandler event
 
 proc initMessagesControl*(
-    simulator: ref Simulator, assets: ref Assets
+    simulator: ref Simulator, assets: Assets
 ): MessagesControl {.inline.} =
   ## Returns a messages control.
   result = new MessagesControl
@@ -43,7 +43,7 @@ proc initMessagesControl*(
 
   result.simulator = simulator
 
-  result.height = assets[].cellImageSize.height
+  result.height = assets.cellImageSize.height
   result.fontSize = result.height.pt
   result.onDraw = result.initMessageDrawHandler
 

@@ -898,9 +898,6 @@ else:
     result.init
     result.layout = Layout_Vertical
 
-    let assetsRef = new Assets
-    assetsRef[] = initAssets()
-
     # row=0
     let reqControl = simulator.initRequirementControl
     result.add reqControl
@@ -914,19 +911,20 @@ else:
     secondRow.add left
 
     let
-      field = simulator.initFieldControl assetsRef
-      messages = simulator.initMessagesControl assetsRef
-    left.add simulator.initOperatingControl assetsRef
+      assets = initAssets()
+      field = simulator.initFieldControl assets
+      messages = simulator.initMessagesControl assets
+    left.add simulator.initOperatingControl assets
     left.add field
     left.add messages
     left.add simulator.initSelectControl reqControl
     left.add simulator.initShareControl
 
     # row=1, center
-    secondRow.add simulator.initImmediatePairsControl assetsRef
+    secondRow.add simulator.initImmediatePairsControl assets
 
     # row=1, right
-    secondRow.add simulator.initPairsControl assetsRef
+    secondRow.add simulator.initPairsControl assets
 
     # set size
     reqControl.setWidth secondRow.naturalWidth
