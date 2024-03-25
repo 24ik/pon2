@@ -16,12 +16,12 @@ proc initMarathonPaginationNode*(marathon: var Marathon): VNode {.inline.} =
     firstIdx = marathon.matchResult.pageIndex * MatchResultPairsCountPerPage + 1
     lastIdx = min(
       marathon.matchResult.pageIndex.succ * MatchResultPairsCountPerPage,
-      marathon.matchResult.strsSeq.len,
+      marathon.matchResult.stringsSeq.len,
     )
-    ratio = marathon.matchResult.strsSeq.len / AllPairsCount
+    ratio = marathon.matchResult.stringsSeq.len / AllPairsCount
     pageTxt =
-      if marathon.matchResult.strsSeq.len > 0:
-        &"{firstIdx}〜{lastIdx} / {marathon.matchResult.strsSeq.len} " &
+      if marathon.matchResult.stringsSeq.len > 0:
+        &"{firstIdx}〜{lastIdx} / {marathon.matchResult.stringsSeq.len} " &
           &"({ratio * 100 : .1f}%)"
       else:
         "0 / 0 (0.0%)"

@@ -17,7 +17,7 @@ proc initMarathonPlayControllerNode*(marathon: var Marathon): VNode {.inline.} =
       button(
         class = "button",
         onclick = () => marathon.play,
-        disabled = marathon.matchResult.strsSeq.len == 0,
+        disabled = marathon.matchResult.stringsSeq.len == 0,
       ):
         text "検索結果"
       button(class = "button", onclick = () => marathon.play(false)):

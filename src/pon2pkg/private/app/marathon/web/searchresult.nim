@@ -27,7 +27,7 @@ proc initMarathonSearchResultNode*(marathon: var Marathon): VNode {.inline.} =
         beginPairIdx = marathon.matchResult.pageIndex * MatchResultPairsCountPerPage
         endPairIdx = min(
           marathon.matchResult.pageIndex.succ * MatchResultPairsCountPerPage,
-          marathon.matchResult.strsSeq.len,
+          marathon.matchResult.stringsSeq.len,
         )
 
       for pairsIdx in beginPairIdx ..< endPairIdx:
@@ -40,7 +40,7 @@ proc initMarathonSearchResultNode*(marathon: var Marathon): VNode {.inline.} =
                 italic(class = "fa-solid fa-gamepad")
 
           let pairsPositions =
-            marathon.matchResult.strsSeq[pairsIdx][0 ..< ShowPairCount * 2].toPairsPositions
+            marathon.matchResult.stringsSeq[pairsIdx][0 ..< ShowPairCount * 2].toPairsPositions
           for idx in 0 ..< ShowPairCount:
             let pair = pairsPositions[idx].pair
 

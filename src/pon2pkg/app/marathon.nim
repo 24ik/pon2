@@ -1,8 +1,5 @@
 ## This module implements marathon mode.
 ##
-# NOTE (Implementation approach): To prevent slow page loading and rendering,
-# data is basically handled as `string` and conversion to `Pair` is performed
-# when necessary.
 
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
@@ -16,12 +13,12 @@ import ../private/app/marathon/[common]
 
 type
   MarathonMatchResult* = object ## Matching result.
-    strsSeq*: seq[string]
+    stringsSeq*: seq[string]
     pageCount*: Natural
     pageIndex*: Natural
 
   Marathon* = object ## Marathon manager.
-    simulator*: Simulator
+    simulator: ref Simulator
 
     allPairsStrs: tuple[`seq`: seq[string], tree: CritBitTree[void]]
     matchResult: MarathonMatchResult
@@ -43,13 +40,14 @@ using
 
 proc initMarathon*(): Marathon {.inline.} =
   ## Returns a new marathon manager.
-  result.simulator = initPuyoPuyo[TsuField]().initSimulator(Play, true)
+  result.simulator.new
+  result.simulator[] = initPuyoPuyo[TsuField]().initSimulator(Play, true)
 
   result.allPairsStrs.seq = RawPairsTxt.splitLines
   result.allPairsStrs.tree = result.allPairsStrs.seq.toCritBitTree
   assert result.allPairsStrs.seq.len == AllPairsCount
 
-  result.matchResult.strsSeq = @[]
+  result.matchResult.stringsSeq = @[]
   result.matchResult.pageCount = 0
   result.matchResult.pageIndex = 0
 
@@ -60,6 +58,10 @@ proc initMarathon*(): Marathon {.inline.} =
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
+
+func simulator*(self): Simulator {.inline.} =
+  ## Returns the simulator.
+  self.simulator[]
 
 func matchResult*(self): MarathonMatchResult {.inline.} =
   ## Returns the matching result.
@@ -225,7 +227,7 @@ const
 {.push warning[Uninit]: off.}
 func match*(mSelf; prefix: string) {.inline.} =
   if prefix == "":
-    mSelf.matchResult.strsSeq = @[]
+    mSelf.matchResult.stringsSeq = @[]
   else:
     var keys = prefix.toSet2
     if keys in NeedReplaceKeysSeq:
@@ -234,23 +236,24 @@ func match*(mSelf; prefix: string) {.inline.} =
 
       let prefix2 = prefix.toUpperAscii # HACK: prevent to confuse 'b' with Blue
 
-      mSelf.matchResult.strsSeq = newSeqOfCap[string](45000)
+      mSelf.matchResult.stringsSeq = newSeqOfCap[string](45000)
       for replaceData in ReplaceDataSeq[keys.card.pred]:
         for prefix3 in prefix2.swappedPrefixes:
           {.push warning[ProveInit]: off.}
-          mSelf.matchResult.strsSeq &=
+          mSelf.matchResult.stringsSeq &=
             mSelf.allPairsStrs.tree.itemsWithPrefix(prefix3.multiReplace replaceData).toSeq
           {.pop.}
     else:
       {.push warning[ProveInit]: off.}
-      mSelf.matchResult.strsSeq = mSelf.allPairsStrs.tree.itemsWithPrefix(prefix).toSeq
+      mSelf.matchResult.stringsSeq =
+        mSelf.allPairsStrs.tree.itemsWithPrefix(prefix).toSeq
       {.pop.}
 
   mSelf.matchResult.pageCount =
-    ceil(mSelf.matchResult.strsSeq.len / MatchResultPairsCountPerPage).Natural
+    ceil(mSelf.matchResult.stringsSeq.len / MatchResultPairsCountPerPage).Natural
   mSelf.matchResult.pageIndex = 0
 
-  if mSelf.matchResult.strsSeq.len > 0:
+  if mSelf.matchResult.stringsSeq.len > 0:
     mSelf.focusSimulator = false
 {.pop.}
 
@@ -258,18 +261,18 @@ func match*(mSelf; prefix: string) {.inline.} =
 # Play
 # ------------------------------------------------
 
-func play(mSelf; pairsStr: string) {.inline.} =
+proc play(mSelf; pairsStr: string) {.inline.} =
   ## Plays a marathon mode with the given pairs.
-  mSelf.simulator.reset true
-  mSelf.simulator.pairsPositions = pairsStr.toPairsPositions
+  mSelf.simulator[].reset true
+  mSelf.simulator[].pairsPositions = pairsStr.toPairsPositions
 
   mSelf.focusSimulator = true
 
-func play*(mSelf; pairsIdx: Natural) {.inline.} =
+proc play*(mSelf; pairsIdx: Natural) {.inline.} =
   ## Plays a marathon mode with the given pairs.
-  mSelf.play mSelf.matchResult.strsSeq[pairsIdx]
+  mSelf.play mSelf.matchResult.stringsSeq[pairsIdx]
 
-func play*(mSelf; onlyMatched = true) {.inline.} =
+proc play*(mSelf; onlyMatched = true) {.inline.} =
   ## Plays a marathon mode with the random mathced pairs.
   ## If `onlyMatched` is true, the pairs are chosen from the matched result;
   ## otherwise, chosen from all pairs.
@@ -277,16 +280,16 @@ func play*(mSelf; onlyMatched = true) {.inline.} =
     mSelf.play mSelf.rng.sample mSelf.allPairsStrs.seq
     return
 
-  if mSelf.matchResult.strsSeq.len == 0:
+  if mSelf.matchResult.stringsSeq.len == 0:
     return
 
-  mSelf.play mSelf.rng.sample mSelf.matchResult.strsSeq
+  mSelf.play mSelf.rng.sample mSelf.matchResult.stringsSeq
 
 # ------------------------------------------------
 # Keyboard Operation
 # ------------------------------------------------
 
-func operate*(mSelf; event: KeyEvent): bool {.inline.} =
+proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
   ## Does operation specified by the keyboard input.
   ## Returns `true` if any action is executed.
   if event == initKeyEvent("KeyQ", shift = true):
@@ -294,7 +297,7 @@ func operate*(mSelf; event: KeyEvent): bool {.inline.} =
     return true
 
   if mSelf.focusSimulator:
-    return mSelf.simulator.operate event
+    return mSelf.simulator[].operate event
 
   result = false
 
@@ -348,7 +351,7 @@ when defined(js):
           mSelf.initMarathonFocusControllerNode
         tdiv(class = "block"):
           mSelf.initMarathonPaginationNode
-        if mSelf.matchResult.strsSeq.len > 0:
+        if mSelf.matchResult.stringsSeq.len > 0:
           tdiv(class = "block"):
             mSelf.initMarathonSearchResultNode
 
