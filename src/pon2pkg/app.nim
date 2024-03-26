@@ -25,7 +25,8 @@ export
   generate.GenerateError, generate.GenerateRequirementColor,
   generate.GenerateRequirement, generate.generate
 export
-  gui.GuiApplicationReplay, gui.GuiApplication, gui.initGuiApplication, gui.replay,
+  gui.GuiApplicationReplay, gui.GuiApplication, gui.initGuiApplication, gui.simulator,
+  gui.simulatorRef, gui.replaySimulator, gui.replaySimulatorRef, gui.replay,
   gui.focusEditor, gui.solving, gui.permuting, gui.progressBar, gui.toggleFocus,
   gui.solve, gui.permute, gui.nextReplay, gui.prevReplay, gui.operate
 export key.KeyEvent, key.initKeyEvent
