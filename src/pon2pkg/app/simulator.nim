@@ -205,11 +205,6 @@ func toggleInserting*(mSelf) {.inline.} = ## Toggles inserting or not.
 func toggleFocus*(mSelf) {.inline.} = ## Toggles focusing field or not.
   mSelf.editing.focusField.toggle
 
-func save(mSelf) {.inline.} =
-  ## Saves the current simulator.
-  mSelf.undoDeque.addLast mSelf.nazoPuyoWrap
-  mSelf.redoDeque.clear
-
 # ------------------------------------------------
 # Edit - Cursor
 # ------------------------------------------------
@@ -255,13 +250,18 @@ func moveCursorLeft*(mSelf) {.inline.} =
 # Edit - Delete
 # ------------------------------------------------
 
+func prepareChange(mSelf) {.inline.} =
+  ## Prepares for changing the simulator.
+  mSelf.undoDeque.addLast mSelf.nazoPuyoWrap
+  mSelf.redoDeque.clear
+
 func deletePairPosition*(mSelf; idx: Natural) {.inline.} =
   ## Deletes the pair&position.
   mSelf.nazoPuyoWrap.get:
     if idx >= wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
       return
 
-    mSelf.save
+    mSelf.prepareChange
     wrappedNazoPuyo.puyoPuyo.pairsPositions.delete idx
 
 func deletePairPosition*(mSelf) {.inline.} =
@@ -274,7 +274,7 @@ func deletePairPosition*(mSelf) {.inline.} =
 
 func writeCell(mSelf; row: Row, col: Column, cell: Cell) {.inline.} =
   ## Writes the cell to the field.
-  mSelf.save
+  mSelf.prepareChange
 
   mSelf.nazoPuyoWrap.get:
     if mSelf.editing.insert:
@@ -293,12 +293,12 @@ func writeCell(mSelf; idx: Natural, axis: bool, cell: Cell) {.inline.} =
   ## Writes the cell to the pairs.
   case cell
   of Cell.None:
-    mSelf.save
+    mSelf.prepareChange
     mSelf.deletePairPosition idx
   of Hard, Cell.Garbage:
     discard
   of Cell.Red .. Cell.Purple:
-    mSelf.save
+    mSelf.prepareChange
 
     let color = ColorPuyo cell
     mSelf.nazoPuyoWrap.get:
@@ -334,25 +334,25 @@ func writeCell*(mSelf; cell: Cell) {.inline.} =
 
 func shiftFieldUp*(mSelf) {.inline.} =
   ## Shifts the field upward.
-  mSelf.save
+  mSelf.prepareChange
   mSelf.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.field.shiftUp
 
 func shiftFieldDown*(mSelf) {.inline.} =
   ## Shifts the field downward.
-  mSelf.save
+  mSelf.prepareChange
   mSelf.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.field.shiftDown
 
 func shiftFieldRight*(mSelf) {.inline.} =
   ## Shifts the field rightward.
-  mSelf.save
+  mSelf.prepareChange
   mSelf.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.field.shiftRight
 
 func shiftFieldLeft*(mSelf) {.inline.} =
   ## Shifts the field leftward.
-  mSelf.save
+  mSelf.prepareChange
   mSelf.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.field.shiftLeft
 
@@ -362,13 +362,13 @@ func shiftFieldLeft*(mSelf) {.inline.} =
 
 func flipFieldV*(mSelf) {.inline.} =
   ## Flips the field vertically.
-  mSelf.save
+  mSelf.prepareChange
   mSelf.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.field.flipV
 
 func flipFieldH*(mSelf) {.inline.} =
   ## Flips the field horizontally.
-  mSelf.save
+  mSelf.prepareChange
   mSelf.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.field.flipH
 
@@ -382,7 +382,7 @@ func `requirementKind=`*(mSelf; kind: RequirementKind) {.inline.} =
     if kind == wrappedNazoPuyo.requirement.kind:
       return
 
-    mSelf.save
+    mSelf.prepareChange
 
     {.cast(uncheckedAssign).}:
       if kind in ColorKinds:
@@ -406,7 +406,7 @@ func `requirementColor=`*(mSelf; color: RequirementColor) {.inline.} =
     if color == wrappedNazoPuyo.requirement.color:
       return
 
-    mSelf.save
+    mSelf.prepareChange
     wrappedNazoPuyo.requirement.color = color
 
 func `requirementNumber=`*(mSelf; num: RequirementNumber) {.inline.} =
@@ -417,7 +417,7 @@ func `requirementNumber=`*(mSelf; num: RequirementNumber) {.inline.} =
     if num == wrappedNazoPuyo.requirement.number:
       return
 
-    mSelf.save
+    mSelf.prepareChange
     wrappedNazoPuyo.requirement.number = num
 
 # ------------------------------------------------
@@ -474,7 +474,7 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
         return
 
       mSelf.moveResult = DefaultMoveResult
-      mSelf.save
+      mSelf.prepareChange
 
       # put
       if not replay:
