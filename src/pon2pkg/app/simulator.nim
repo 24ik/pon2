@@ -56,12 +56,13 @@ type
     undoDeque: Deque[NazoPuyoWrap]
     redoDeque: Deque[NazoPuyoWrap]
 
-    operatingPosition: Position
+    operatingPos: Position
     editing: SimulatorEditing
 
 using
   self: Simulator
   mSelf: var Simulator
+  rSelf: ref Simulator
 
 # ------------------------------------------------
 # Constructor
@@ -90,7 +91,7 @@ func initSimulator*(
     result.undoDeque = initDeque[NazoPuyoWrap](wrappedNazoPuyo.moveCount)
     result.redoDeque = initDeque[NazoPuyoWrap](wrappedNazoPuyo.moveCount)
 
-  result.operatingPosition = InitPos
+  result.operatingPos = InitPos
   result.editing.cell = Cell.None
   result.editing.field = (Row.low, Column.low)
   result.editing.pair = (Natural 0, true)
@@ -192,7 +193,7 @@ func score*(self): int {.inline.} = ## Returns the score.
 
 func operatingPosition*(self): Position {.inline.} =
   ## Returns the operating position.
-  self.operatingPosition
+  self.operatingPos
 
 # ------------------------------------------------
 # Edit - Other
@@ -445,19 +446,19 @@ func redo*(mSelf) {.inline.} =
 
 func moveOperatingPositionRight*(mSelf) {.inline.} =
   ## Moves the operating position right.
-  mSelf.operatingPosition.moveRight
+  mSelf.operatingPos.moveRight
 
 func moveOperatingPositionLeft*(mSelf) {.inline.} =
   ## Moves the operating position left.
-  mSelf.operatingPosition.moveLeft
+  mSelf.operatingPos.moveLeft
 
 func rotateOperatingPositionRight*(mSelf) {.inline.} =
   ## Rotates the operating position right.
-  mSelf.operatingPosition.rotateRight
+  mSelf.operatingPos.rotateRight
 
 func rotateOperatingPositionLeft*(mSelf) {.inline.} =
   ## Rotates the operating position left.
-  mSelf.operatingPosition.rotateLeft
+  mSelf.operatingPos.rotateLeft
 
 # ------------------------------------------------
 # Forward / Backward
@@ -478,7 +479,7 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
       # put
       if not replay:
         wrappedNazoPuyo.puyoPuyo.operatingPairPosition.position =
-          if skip: Position.None else: mSelf.operatingPosition
+          if skip: Position.None else: mSelf.operatingPos
       wrappedNazoPuyo.puyoPuyo.field.put wrappedNazoPuyo.puyoPuyo.operatingPairPosition
 
       # disappear
@@ -486,7 +487,7 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
         mSelf.state = WillDisappear
       else:
         mSelf.state = Stable
-        mSelf.operatingPosition = InitPos
+        mSelf.operatingPos = InitPos
         wrappedNazoPuyo.puyoPuyo.incrementOperatingIndex
     of WillDisappear:
       let disappearRes = wrappedNazoPuyo.puyoPuyo.field.disappear
@@ -502,7 +503,7 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
         mSelf.state = WillDisappear
       else:
         mSelf.state = Stable
-        mSelf.operatingPosition = InitPos
+        mSelf.operatingPos = InitPos
         wrappedNazoPuyo.puyoPuyo.incrementOperatingIndex
 
 func backward*(mSelf) {.inline.} =
@@ -512,13 +513,12 @@ func backward*(mSelf) {.inline.} =
 
   mSelf.moveResult = DefaultMoveResult
 
-  let pairsPositions: PairsPositions
-  mSelf.nazoPuyoWrap.get:
-    pairsPositions = wrappedNazoPuyo.puyoPuyo.pairsPositions
+  let pairsPositions = mSelf.nazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.pairsPositions
 
   mSelf.nazoPuyoWrap = mSelf.undoDeque.popLast
   mSelf.state = Stable
-  mSelf.operatingPosition = InitPos
+  mSelf.operatingPos = InitPos
 
   mSelf.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
@@ -532,7 +532,7 @@ func reset*(mSelf; resetPosition = true) {.inline.} =
       mSelf.nazoPuyoWrap = mSelf.undoDeque.popFirst
     mSelf.undoDeque.clear
     mSelf.redoDeque.clear
-    mSelf.operatingPosition = InitPos
+    mSelf.operatingPos = InitPos
     mSelf.moveResult = DefaultMoveResult
 
     for i in 0 ..< wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
@@ -677,9 +677,9 @@ func parseSimulator*(uri: Uri): Simulator {.inline.} =
         except ValueError:
           raise newException(ValueError, "Invalid simulator: " & $uri)
   of $Ishikawa, $Ips:
-    var
-      kind = SimulatorKind.low
-      mode = SimulatorMode.low
+    let
+      kind: SimulatorKind
+      mode: SimulatorMode
     case uri.path
     of "/simu/pe.html":
       kind = Regular
@@ -694,6 +694,8 @@ func parseSimulator*(uri: Uri): Simulator {.inline.} =
       kind = Nazo
       mode = Play
     else:
+      kind = SimulatorKind.low # HACK: dummy to compile
+      mode = SimulatorMode.low # HACK: dummy to compile
       raise newException(ValueError, "Invalid simulator: " & $uri)
 
     let host = if uri.hostname == $Ishikawa: Ishikawa else: Ips
@@ -824,45 +826,45 @@ when defined(js):
   # JS - Node
   # ------------------------------------------------
 
-  proc initSimulatorNode(mSelf; id: string): VNode {.inline.} =
+  proc initSimulatorNode(rSelf; id: string): VNode {.inline.} =
     ## Returns the node without the external section.
     ## `id` is shared with other node-creating procedures and need to be unique.
     buildHtml(tdiv):
       tdiv(class = "block"):
-        mSelf.initRequirementNode(id = id)
+        rSelf.initRequirementNode(id = id)
       tdiv(class = "block"):
         tdiv(class = "columns is-mobile is-variable is-1"):
           tdiv(class = "column is-narrow"):
-            if mSelf.mode != Edit:
+            if rSelf.mode != Edit:
               tdiv(class = "block"):
-                mSelf.initOperatingNode
+                rSelf.initOperatingNode
             tdiv(class = "block"):
-              mSelf.initFieldNode
-            if mSelf.mode != Edit:
+              rSelf.initFieldNode
+            if rSelf.mode != Edit:
               tdiv(class = "block"):
-                mSelf.initMessagesNode
-            if mSelf.editor:
+                rSelf.initMessagesNode
+            if rSelf.editor:
               tdiv(class = "block"):
-                mSelf.initSelectNode
+                rSelf.initSelectNode
             tdiv(class = "block"):
-              mSelf.initShareNode id
-          if mSelf.mode != Edit:
+              rSelf.initShareNode id
+          if rSelf.mode != Edit:
             tdiv(class = "column is-narrow"):
               tdiv(class = "block"):
-                mSelf.initImmediatePairsNode
+                rSelf.initImmediatePairsNode
           tdiv(class = "column is-narrow"):
             tdiv(class = "block"):
-              mSelf.initControllerNode
-            if mSelf.mode == Edit:
+              rSelf.initControllerNode
+            if rSelf.mode == Edit:
               tdiv(class = "block"):
-                mSelf.initPaletteNode
+                rSelf.initPaletteNode
             tdiv(class = "block"):
-              mSelf.initPairsNode
+              rSelf.initPairsNode
 
-  proc initSimulatorNode*(mSelf; wrapSection = true, id = ""): VNode {.inline.} =
+  proc initSimulatorNode*(rSelf; wrapSection = true, id = ""): VNode {.inline.} =
     ## Returns the simulator node.
     ## `id` is shared with other node-creating procedures and need to be unique.
-    let node = mSelf.initSimulatorNode id
+    let node = rSelf.initSimulatorNode id
 
     if wrapSection:
       result = buildHtml(section(class = "section")):
@@ -892,14 +894,14 @@ else:
   # Native - Control
   # ------------------------------------------------
 
-  proc initSimulatorControl*(simulator: ref Simulator): SimulatorControl {.inline.} =
+  proc initSimulatorControl*(rSelf): SimulatorControl {.inline.} =
     ## Returns the simulator control.
     result = new SimulatorControl
     result.init
     result.layout = Layout_Vertical
 
     # row=0
-    let reqControl = simulator.initRequirementControl
+    let reqControl = rSelf.initRequirementControl
     result.add reqControl
 
     # row=1
@@ -912,19 +914,19 @@ else:
 
     let
       assets = initAssets()
-      field = simulator.initFieldControl assets
-      messages = simulator.initMessagesControl assets
-    left.add simulator.initOperatingControl assets
+      field = rSelf.initFieldControl assets
+      messages = rSelf.initMessagesControl assets
+    left.add rSelf.initOperatingControl assets
     left.add field
     left.add messages
-    left.add simulator.initSelectControl reqControl
-    left.add simulator.initShareControl
+    left.add rSelf.initSelectControl reqControl
+    left.add rSelf.initShareControl
 
     # row=1, center
-    secondRow.add simulator.initImmediatePairsControl assets
+    secondRow.add rSelf.initImmediatePairsControl assets
 
     # row=1, right
-    secondRow.add simulator.initPairsControl assets
+    secondRow.add rSelf.initPairsControl assets
 
     # set size
     reqControl.setWidth secondRow.naturalWidth

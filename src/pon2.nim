@@ -32,24 +32,15 @@ when isMainModule:
     elif defined(pon2.marathon):
       import std/[sugar]
       import karax/[karax]
-      import ./pon2pkg/app/[marathon as marathonModule]
       import ./pon2pkg/private/main/[web]
 
-      var marathon = initMarathon()
-
-      setRenderer () => marathon.initMainMarathonNode
+      setRenderer () => initMainMarathonNode()
     else:
       import std/[sugar]
-      import ./pon2pkg/app/[gui]
       import ./pon2pkg/private/main/[web]
       import karax/[karax]
 
-      var
-        pageInitialized = false
-        guiApplication: GuiApplication
-
-      setRenderer (routerData: RouterData) =>
-        routerData.initGuiApplicationNode(pageInitialized, guiApplication)
+      setRenderer (routerData: RouterData) => routerData.initMainGuiApplicationNode
   else:
     import std/[tables]
     import ./pon2pkg/private/main/[native]

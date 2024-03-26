@@ -13,7 +13,7 @@ import ../private/app/marathon/[common]
 
 type
   MarathonMatchResult* = object ## Matching result.
-    stringsSeq*: seq[string]
+    strings*: seq[string]
     pageCount*: Natural
     pageIndex*: Natural
 
@@ -33,6 +33,7 @@ const RawPairsTxt = staticRead currentSourcePath().parentDir.parentDir.parentDir
 using
   self: Marathon
   mSelf: var Marathon
+  rSelf: ref Marathon
 
 # ------------------------------------------------
 # Constructor
@@ -47,7 +48,7 @@ proc initMarathon*(): Marathon {.inline.} =
   result.allPairsStrs.tree = result.allPairsStrs.seq.toCritBitTree
   assert result.allPairsStrs.seq.len == AllPairsCount
 
-  result.matchResult.stringsSeq = @[]
+  result.matchResult.strings = @[]
   result.matchResult.pageCount = 0
   result.matchResult.pageIndex = 0
 
@@ -62,6 +63,10 @@ proc initMarathon*(): Marathon {.inline.} =
 func simulator*(self): Simulator {.inline.} =
   ## Returns the simulator.
   self.simulator[]
+
+func simulatorRef*(mSelf): ref Simulator {.inline.} =
+  ## Returns the reference to the simulator.
+  mSelf.simulator
 
 func matchResult*(self): MarathonMatchResult {.inline.} =
   ## Returns the matching result.
@@ -227,7 +232,7 @@ const
 {.push warning[Uninit]: off.}
 func match*(mSelf; prefix: string) {.inline.} =
   if prefix == "":
-    mSelf.matchResult.stringsSeq = @[]
+    mSelf.matchResult.strings = @[]
   else:
     var keys = prefix.toSet2
     if keys in NeedReplaceKeysSeq:
@@ -236,24 +241,23 @@ func match*(mSelf; prefix: string) {.inline.} =
 
       let prefix2 = prefix.toUpperAscii # HACK: prevent to confuse 'b' with Blue
 
-      mSelf.matchResult.stringsSeq = newSeqOfCap[string](45000)
+      mSelf.matchResult.strings = newSeqOfCap[string](45000)
       for replaceData in ReplaceDataSeq[keys.card.pred]:
         for prefix3 in prefix2.swappedPrefixes:
           {.push warning[ProveInit]: off.}
-          mSelf.matchResult.stringsSeq &=
+          mSelf.matchResult.strings &=
             mSelf.allPairsStrs.tree.itemsWithPrefix(prefix3.multiReplace replaceData).toSeq
           {.pop.}
     else:
       {.push warning[ProveInit]: off.}
-      mSelf.matchResult.stringsSeq =
-        mSelf.allPairsStrs.tree.itemsWithPrefix(prefix).toSeq
+      mSelf.matchResult.strings = mSelf.allPairsStrs.tree.itemsWithPrefix(prefix).toSeq
       {.pop.}
 
   mSelf.matchResult.pageCount =
-    ceil(mSelf.matchResult.stringsSeq.len / MatchResultPairsCountPerPage).Natural
+    ceil(mSelf.matchResult.strings.len / MatchResultPairsCountPerPage).Natural
   mSelf.matchResult.pageIndex = 0
 
-  if mSelf.matchResult.stringsSeq.len > 0:
+  if mSelf.matchResult.strings.len > 0:
     mSelf.focusSimulator = false
 {.pop.}
 
@@ -270,7 +274,7 @@ proc play(mSelf; pairsStr: string) {.inline.} =
 
 proc play*(mSelf; pairsIdx: Natural) {.inline.} =
   ## Plays a marathon mode with the given pairs.
-  mSelf.play mSelf.matchResult.stringsSeq[pairsIdx]
+  mSelf.play mSelf.matchResult.strings[pairsIdx]
 
 proc play*(mSelf; onlyMatched = true) {.inline.} =
   ## Plays a marathon mode with the random mathced pairs.
@@ -280,10 +284,10 @@ proc play*(mSelf; onlyMatched = true) {.inline.} =
     mSelf.play mSelf.rng.sample mSelf.allPairsStrs.seq
     return
 
-  if mSelf.matchResult.stringsSeq.len == 0:
+  if mSelf.matchResult.strings.len == 0:
     return
 
-  mSelf.play mSelf.rng.sample mSelf.matchResult.stringsSeq
+  mSelf.play mSelf.rng.sample mSelf.matchResult.strings
 
 # ------------------------------------------------
 # Keyboard Operation
@@ -306,65 +310,66 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
 # ------------------------------------------------
 
 when defined(js):
-  import std/[dom]
-  import karax/[karax, karaxdsl, vdom]
+  import karax/[karax, karaxdsl, kdom, vdom]
   import
     ../private/app/marathon/web/
-      [controller, pagination, searchbar, searchresult, simulator]
+      [controller, pagination, searchbar, searchresult, simulator as simulatorModule]
 
   # ------------------------------------------------
   # JS - Keyboard Handler
   # ------------------------------------------------
 
-  proc runKeyboardEventHandler*(mSelf; event: KeyEvent) {.inline.} =
+  proc runKeyboardEventHandler*(rSelf; event: KeyEvent) {.inline.} =
     ## Runs the keyboard event handler.
-    let needRedraw = mSelf.operate event
+    let needRedraw = rSelf[].operate event
     if needRedraw and not kxi.surpressRedraws:
       kxi.redraw
 
-  proc runKeyboardEventHandler*(mSelf; event: dom.Event) {.inline.} =
-    ## Runs the Keybaord event handler.
+  proc runKeyboardEventHandler*(rSelf; event: Event) {.inline.} =
+    ## Runs the keyboard event handler.
     # assert event of KeyboardEvent # HACK: somehow this assertion fails
-    mSelf.runKeyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
+    rSelf.runKeyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
 
-  func initKeyboardEventHandler*(mSelf): (event: dom.Event) -> void {.inline.} =
+  func initKeyboardEventHandler*(rSelf): (event: Event) -> void {.inline.} =
     ## Returns the keyboard event handler.
-    (event: dom.Event) => mSelf.runKeyboardEventHandler event
+    (event: Event) => rSelf.runKeyboardEventHandler event
 
   # ------------------------------------------------
   # JS - Node
   # ------------------------------------------------
 
-  proc initMarathonNode(mSelf; id: string): VNode {.inline.} =
+  proc initMarathonNode(rSelf; id: string): VNode {.inline.} =
     ## Returns the node of marathon manager.
     ## `id` is shared with other node-creating procedures and need to be unique.
     buildHtml(tdiv(class = "columns is-mobile")):
       tdiv(class = "column is-narrow"):
         tdiv(class = "block"):
-          mSelf.initMarathonPlayControllerNode
+          rSelf.initMarathonPlayControllerNode
         tdiv(class = "block"):
-          mSelf.initMarathonSimulatorNode id
+          rSelf.initMarathonSimulatorNode id
       tdiv(class = "column is-narrow"):
         tdiv(class = "block"):
-          mSelf.initMarathonSearchBarNode id
+          rSelf.initMarathonSearchBarNode id
         tdiv(class = "block"):
-          mSelf.initMarathonFocusControllerNode
+          rSelf.initMarathonFocusControllerNode
         tdiv(class = "block"):
-          mSelf.initMarathonPaginationNode
-        if mSelf.matchResult.stringsSeq.len > 0:
+          rSelf.initMarathonPaginationNode
+        if rSelf.matchResult.strings.len > 0:
           tdiv(class = "block"):
-            mSelf.initMarathonSearchResultNode
+            rSelf.initMarathonSearchResultNode
 
   proc initMarathonNode*(
-      mSelf; setKeyHandler = true, wrapSection = true, id = ""
+      rSelf; setKeyHandler = true, wrapSection = true, id = ""
   ): VNode {.inline.} =
     ## Returns the node of marathon manager.
     ## `id` is shared with other node-creating procedures and need to be unique.
     if setKeyHandler:
-      document.onkeydown = mSelf.initKeyboardEventHandler
+      document.onkeydown = rSelf.initKeyboardEventHandler
+
+    let node = rSelf.initMarathonNode id
 
     if wrapSection:
       result = buildHtml(section(class = "section")):
-        mSelf.initMarathonNode id
+        node
     else:
-      result = mSelf.initMarathonNode id
+      result = node

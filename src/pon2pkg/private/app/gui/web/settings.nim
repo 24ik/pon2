@@ -24,7 +24,7 @@ proc getParallelCount(
 .} ## Returns the parallel count.
 
 proc initEditorSettingsNode*(
-    guiApplication: var GuiApplication, id = ""
+    guiApplication: ref GuiApplication, id = ""
 ): VNode {.inline.} =
   ## Returns the editor settings node.
   ## `id` is shared with other node-creating procedures and need to be unique.
@@ -55,7 +55,7 @@ proc initEditorSettingsNode*(
               id = kstring &"{AllowLastDoubleCheckboxIdPrefix}{id}", `type` = "checkbox"
             )
           text "　N手目を固定:"
-          let pairsPositions = guiApplication.simulator[].nazoPuyoWrap.get:
+          let pairsPositions = guiApplication[].simulator.nazoPuyoWrap.get:
             wrappedNazoPuyo.puyoPuyo.pairsPositions
           for pairIdx in 0 ..< pairsPositions.len:
             label(class = "checkbox"):

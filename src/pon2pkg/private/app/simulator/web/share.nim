@@ -53,7 +53,7 @@ func initDownloadHandler(id: string, withPositions: bool): () -> void =
 
   result = handler
 
-proc initShareNode*(simulator: var Simulator, id = ""): VNode {.inline.} =
+proc initShareNode*(simulator: ref Simulator, id = ""): VNode {.inline.} =
   ## Returns the share node.
   let
     urlCopyButtonId = &"{UrlCopyButtonIdPrefix}{id}"
@@ -72,14 +72,14 @@ proc initShareNode*(simulator: var Simulator, id = ""): VNode {.inline.} =
           class = "button is-size-7",
           target = "_blank",
           rel = "noopener noreferrer",
-          href = kstring $simulator.toXlink(withPositions = false, editor = false),
+          href = kstring $simulator[].toXlink(withPositions = false, editor = false),
         ):
           text "操作無"
         a(
           class = "button is-size-7",
           target = "_blank",
           rel = "noopener noreferrer",
-          href = kstring $simulator.toXlink(withPositions = true, editor = false),
+          href = kstring $simulator[].toXlink(withPositions = true, editor = false),
         ):
           text "操作有"
     tdiv(class = "block"):
@@ -96,7 +96,7 @@ proc initShareNode*(simulator: var Simulator, id = ""): VNode {.inline.} =
           id = urlCopyButtonId.kstring,
           class = "button is-size-7",
           onclick = initCopyButtonHandler(
-            () => $simulator.toUri(withPositions = false, editor = false),
+            () => $simulator[].toUri(withPositions = false, editor = false),
             urlCopyButtonId,
           ),
         ):
@@ -105,12 +105,12 @@ proc initShareNode*(simulator: var Simulator, id = ""): VNode {.inline.} =
           id = posUrlCopyButtonId.kstring,
           class = "button is-size-7",
           onclick = initCopyButtonHandler(
-            () => $simulator.toUri(withPositions = true, editor = false),
+            () => $simulator[].toUri(withPositions = true, editor = false),
             posUrlCopyButtonId,
           ),
         ):
           text "操作有"
-    if simulator.editor:
+    if simulator[].editor:
       tdiv(class = "block"):
         text "編集者URLコピー"
         tdiv(class = "buttons"):
@@ -118,7 +118,7 @@ proc initShareNode*(simulator: var Simulator, id = ""): VNode {.inline.} =
             id = editorUrlCopyButtonId.kstring,
             class = "button is-size-7",
             onclick = initCopyButtonHandler(
-              () => $simulator.toUri(withPositions = false, editor = true),
+              () => $simulator[].toUri(withPositions = false, editor = true),
               editorUrlCopyButtonId,
             ),
           ):
@@ -127,7 +127,7 @@ proc initShareNode*(simulator: var Simulator, id = ""): VNode {.inline.} =
             id = editorPosUrlCopyButtonId.kstring,
             class = "button is-size-7",
             onclick = initCopyButtonHandler(
-              () => $simulator.toUri(withPositions = true, editor = true),
+              () => $simulator[].toUri(withPositions = true, editor = true),
               editorPosUrlCopyButtonId,
             ),
           ):

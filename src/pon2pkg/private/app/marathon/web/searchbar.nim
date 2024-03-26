@@ -11,7 +11,7 @@ import ../../../../app/[marathon]
 
 const InputIdPrefix = "pon2-marathon-pairs-input"
 
-proc initMarathonSearchBarNode*(marathon: var Marathon, id = ""): VNode {.inline.} =
+proc initMarathonSearchBarNode*(marathon: ref Marathon, id = ""): VNode {.inline.} =
   ## Returns the search bar node for pairs DB.
   let inputId = kstring &"{InputIdPrefix}{id}"
 
@@ -28,5 +28,5 @@ proc initMarathonSearchBarNode*(marathon: var Marathon, id = ""): VNode {.inline
             `type` = "text",
             placeholder = "例：rgrb もしくは abac",
             maxlength = "16",
-            oninput = () => marathon.match($inputId.getVNodeById.value),
+            oninput = () => marathon[].match($inputId.getVNodeById.value),
           )

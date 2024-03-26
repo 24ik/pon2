@@ -13,20 +13,20 @@ type EditorPaginationControl* = ref object of LayoutContainer
   ## Editor pagination control.
   guiApplication: ref GuiApplication
 
-proc initPrevNextHandler(
+func initPrevNextHandler(
     control: EditorPaginationControl, next: bool
 ): (event: ClickEvent) -> void =
   ## Returns the click handler.
   # NOTE: inlining does not work due to lazy evaluation
-  (event: ClickEvent) => (
-    block:
-      if next:
-        control.guiApplication[].nextReplay
-      else:
-        control.guiApplication[].prevReplay
-  )
+  proc handler(event: ClickEvent) =
+    if next:
+      control.guiApplication[].nextReplay
+    else:
+      control.guiApplication[].prevReplay
 
-proc drawHandler(control: EditorPaginationControl): (event: DrawEvent) -> void =
+  result = handler
+
+proc initDrawHandler(control: EditorPaginationControl): (event: DrawEvent) -> void =
   ## Draws the replay index.
   # NOTE: inlining does not work due to lazy evaluation
   proc handler(event: DrawEvent) =
@@ -72,5 +72,5 @@ proc initEditorPaginationControl*(
   result.add nextButton
 
   prevButton.onClick = result.initPrevNextHandler false
-  replayIdxControl.onDraw = result.drawHandler
+  replayIdxControl.onDraw = result.initDrawHandler
   nextButton.onClick = result.initPrevNextHandler true

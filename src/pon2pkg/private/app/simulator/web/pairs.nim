@@ -12,32 +12,32 @@ import ../../[misc]
 import ../../../../app/[color, nazopuyo, simulator]
 import ../../../../core/[cell, pair]
 
-func initDeleteClickHandler(simulator: var Simulator, idx: Natural): () -> void =
+func initDeleteClickHandler(simulator: ref Simulator, idx: Natural): () -> void =
   ## Returns the click handler for delete buttons.
   # NOTE: cannot inline due to lazy evaluation
-  () => simulator.deletePairPosition(idx)
+  () => simulator[].deletePairPosition(idx)
 
 func initCellClickHandler(
-    simulator: var Simulator, idx: Natural, axis: bool
+    simulator: ref Simulator, idx: Natural, axis: bool
 ): () -> void =
   ## Returns the click handler for cell buttons.
   # NOTE: cannot inline due to lazy evaluation
-  () => simulator.writeCell(idx, axis)
+  () => simulator[].writeCell(idx, axis)
 
-func cellClass(simulator: Simulator, idx: Natural, axis: bool): kstring {.inline.} =
+func cellClass(simulator: ref Simulator, idx: Natural, axis: bool): kstring {.inline.} =
   ## Returns the cell's class.
-  if simulator.pairCellBackgroundColor(idx, axis) == SelectColor:
+  if simulator[].pairCellBackgroundColor(idx, axis) == SelectColor:
     kstring"button p-0 is-selected is-primary"
   else:
     kstring"button p-0"
 
 proc initPairsNode*(
-    simulator: var Simulator, displayMode = false, showPositions = true
+    simulator: ref Simulator, displayMode = false, showPositions = true
 ): VNode {.inline.} =
   ## Returns the pairs node.
   let
-    editMode = simulator.mode == Edit and not displayMode
-    pairsPositions = simulator.nazoPuyoWrap.get:
+    editMode = simulator[].mode == Edit and not displayMode
+    pairsPositions = simulator[].nazoPuyoWrap.get:
       wrappedNazoPuyo.puyoPuyo.pairsPositions
 
   result = buildHtml(table(class = "table is-narrow")):
@@ -47,7 +47,7 @@ proc initPairsNode*(
           pair = pairPos.pair
           pos = pairPos.position
           rowClass =
-            if simulator.needPairPointer(idx) and not displayMode:
+            if simulator[].needPairPointer(idx) and not displayMode:
               kstring"is-selected"
             else:
               kstring""

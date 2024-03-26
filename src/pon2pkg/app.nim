@@ -31,9 +31,9 @@ export
 export key.KeyEvent, key.initKeyEvent
 export
   marathon.MarathonMatchResult, marathon.Marathon, marathon.initMarathon,
-  marathon.simulator, marathon.matchResult, marathon.focusSimulator,
-  marathon.toggleFocus, marathon.nextResultPage, marathon.prevResultPage,
-  marathon.match, marathon.play, marathon.operate
+  marathon.simulator, marathon.simulatorRef, marathon.matchResult,
+  marathon.focusSimulator, marathon.toggleFocus, marathon.nextResultPage,
+  marathon.prevResultPage, marathon.match, marathon.play, marathon.operate
 export
   nazopuyo.NazoPuyoWrap, nazopuyo.initNazoPuyoWrap, nazopuyo.get, nazopuyo.rule,
   nazopuyo.`rule=`, nazopuyo.`==`

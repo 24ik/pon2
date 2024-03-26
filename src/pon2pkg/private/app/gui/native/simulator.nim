@@ -11,4 +11,4 @@ proc initEditorSimulatorControl*(
     guiApplication: ref GuiApplication
 ): SimulatorControl {.inline.} =
   ## Returns the editor simulator control.
-  guiApplication[].replaySimulator.initSimulatorControl
+  guiApplication[].replaySimulatorRef.initSimulatorControl

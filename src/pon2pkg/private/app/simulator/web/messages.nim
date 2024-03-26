@@ -12,14 +12,14 @@ import ../../../[misc]
 import ../../../../app/[simulator]
 import ../../../../core/[notice]
 
-proc initMessagesNode*(simulator: var Simulator): VNode {.inline.} =
+proc initMessagesNode*(simulator: ref Simulator): VNode {.inline.} =
   ## Returns the messages node.
   let
-    (state, score, noticeGarbages) = simulator.getMessages
+    (state, score, noticeGarbages) = simulator[].getMessages
     noneNoticeGarbageCount = ShownNoticeGarbageCount - noticeGarbages.sum2
 
   result = buildHtml(tdiv):
-    if simulator.kind == Regular:
+    if simulator[].kind == Regular:
       table:
         tbody:
           tr:

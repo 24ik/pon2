@@ -228,10 +228,11 @@ proc runGuiApplication*(args: Table[string, Value]) {.inline.} =
   let guiApplication = new GuiApplication
   case args["<uri>"].kind
   of vkNone:
-    guiApplication[] =
-      initPuyoPuyo[TsuField]().initSimulator(editor = true).initGuiApplication
+    guiApplication[] = initGuiApplication()
   of vkStr:
-    guiApplication[] = ($args["<uri>"]).parseUri.parseSimulator.initGuiApplication
+    let simulator = new Simulator
+    simulator[] = ($args["<uri>"]).parseUri.parseSimulator
+    guiApplication[] = simulator.initGuiApplication
   else:
     assert false
 

@@ -14,9 +14,7 @@ type EditorControllerControl* = ref object of LayoutContainer
   ## Editor controller control.
   guiApplication: ref GuiApplication
 
-var globalControl: EditorControllerControl = nil # FIXME: remove global control
-
-proc initToggleHandler(control: EditorControllerControl): (event: ClickEvent) -> void =
+func initToggleHandler(control: EditorControllerControl): (event: ClickEvent) -> void =
   ## Returns the toggler handler.
   # NOTE: inlining does not work due to lazy evaluation
   (event: ClickEvent) => (
@@ -27,7 +25,7 @@ proc initToggleHandler(control: EditorControllerControl): (event: ClickEvent) ->
       )
   )
 
-proc initSolveHandler(control: EditorControllerControl): (event: ClickEvent) -> void =
+func initSolveHandler(control: EditorControllerControl): (event: ClickEvent) -> void =
   ## Returns the solve handler.
   # NOTE: inlining does not work due to lazy evaluation
   (event: ClickEvent) => control.guiApplication[].solve
@@ -39,9 +37,6 @@ proc initEditorControllerControl*(
   result = new EditorControllerControl
   result.init
   result.layout = Layout_Horizontal
-
-  doAssert globalControl.isNil
-  globalControl = result
 
   result.guiApplication = guiApplication
 
