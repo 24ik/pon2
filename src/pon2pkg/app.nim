@@ -43,7 +43,7 @@ export
   simulator.SimulatorKind, simulator.SimulatorMode, simulator.SimulatorState,
   simulator.SimulatorEditing, simulator.Simulator, simulator.initSimulator,
   simulator.rule, simulator.kind, simulator.mode, simulator.`rule=`, simulator.`kind=`,
-  simulator.`mode=`, simulator.nazoPuyoWrap, simulator.originalNazoPuyoWrap,
+  simulator.`mode=`, simulator.nazoPuyoWrap, simulator.initialNazoPuyoWrap,
   simulator.`pairsPositions=`, simulator.editing, simulator.`editingCell=`,
   simulator.editor, simulator.state, simulator.score, simulator.operatingPosition,
   simulator.toggleInserting, simulator.toggleFocus, simulator.moveCursorUp,

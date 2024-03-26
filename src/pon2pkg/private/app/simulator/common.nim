@@ -167,7 +167,7 @@ func getMessages*(
           0 ..< wrappedNazoPuyo.puyoPuyo.operatingIndex
         ]
 
-      simulator.originalNazoPuyoWrap.get:
+      simulator.initialNazoPuyoWrap.get:
         result.state = $wrappedNazoPuyo.mark pairsPositions
   else:
     result.state = "　"

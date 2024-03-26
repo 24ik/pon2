@@ -55,6 +55,9 @@ type
 
     undoDeque: Deque[NazoPuyoWrap]
     redoDeque: Deque[NazoPuyoWrap]
+    moveDeque: Deque[
+      tuple[nazoPuyoWrap: NazoPuyoWrap, state: SimulatorState, moveResult: MoveResult]
+    ]
 
     operatingPos: Position
     editing: SimulatorEditing
@@ -90,6 +93,9 @@ func initSimulator*(
   nazoPuyoWrap.get:
     result.undoDeque = initDeque[NazoPuyoWrap](wrappedNazoPuyo.moveCount)
     result.redoDeque = initDeque[NazoPuyoWrap](wrappedNazoPuyo.moveCount)
+  result.moveDeque = initDeque[
+    tuple[nazoPuyoWrap: NazoPuyoWrap, state: SimulatorState, moveResult: MoveResult]
+  ]()
 
   result.operatingPos = InitPos
   result.editing.cell = Cell.None
@@ -141,11 +147,12 @@ func `mode=`*(mSelf; mode: SimulatorMode) {.inline.} =
     mSelf.editor = true
 
   if mode == Edit or mSelf.mode == Edit:
-    if mSelf.undoDeque.len > 0:
+    if mode == Edit and mSelf.undoDeque.len > 0:
       mSelf.nazoPuyoWrap = mSelf.undoDeque.popFirst
     mSelf.state = Stable
     mSelf.undoDeque.clear
     mSelf.redoDeque.clear
+    mSelf.moveDeque.clear
 
   mSelf.mode = mode
 
@@ -157,9 +164,12 @@ func nazoPuyoWrap*(self): NazoPuyoWrap {.inline.} =
   ## Returns the wrapped Nazo Puyo.
   self.nazoPuyoWrap
 
-func originalNazoPuyoWrap*(self): NazoPuyoWrap {.inline.} =
+func initialNazoPuyoWrap*(self): NazoPuyoWrap {.inline.} =
   ## Returns the wrapped Nazo Puyo before any moves.
-  if self.undoDeque.len > 0: self.undoDeque.peekFirst else: self.nazoPuyoWrap
+  if self.moveDeque.len > 0:
+    self.moveDeque.peekFirst.nazoPuyoWrap
+  else:
+    self.nazoPuyoWrap
 
 func `pairsPositions=`*(mSelf; pairsPositions: PairsPositions) {.inline.} =
   mSelf.nazoPuyoWrap.get:
@@ -474,7 +484,7 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
         return
 
       mSelf.moveResult = DefaultMoveResult
-      mSelf.prepareChange
+      mSelf.moveDeque.addLast (mSelf.nazoPuyoWrap, mSelf.state, mSelf.moveResult)
 
       # put
       if not replay:
@@ -490,6 +500,8 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
         mSelf.operatingPos = InitPos
         wrappedNazoPuyo.puyoPuyo.incrementOperatingIndex
     of WillDisappear:
+      mSelf.moveDeque.addLast (mSelf.nazoPuyoWrap, mSelf.state, mSelf.moveResult)
+
       let disappearRes = wrappedNazoPuyo.puyoPuyo.field.disappear
 
       for puyo in Puyo.low .. Puyo.high:
@@ -498,6 +510,8 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
 
       mSelf.state = Disappearing
     of Disappearing:
+      mSelf.moveDeque.addLast (mSelf.nazoPuyoWrap, mSelf.state, mSelf.moveResult)
+
       wrappedNazoPuyo.puyoPuyo.field.drop
       if wrappedNazoPuyo.puyoPuyo.field.willDisappear:
         mSelf.state = WillDisappear
@@ -506,41 +520,41 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
         mSelf.operatingPos = InitPos
         wrappedNazoPuyo.puyoPuyo.incrementOperatingIndex
 
-func backward*(mSelf) {.inline.} =
+func backward*(mSelf; toStable = true) {.inline.} =
   ## Backwards the simulator.
-  if mSelf.undoDeque.len == 0:
+  if mSelf.moveDeque.len == 0:
     return
-
-  mSelf.moveResult = DefaultMoveResult
 
   let pairsPositions = mSelf.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.pairsPositions
 
-  mSelf.nazoPuyoWrap = mSelf.undoDeque.popLast
-  mSelf.state = Stable
-  mSelf.operatingPos = InitPos
+  if toStable:
+    while mSelf.moveDeque.peekLast.state != Stable:
+      mSelf.moveDeque.popLast
 
+  (mSelf.nazoPuyoWrap, mSelf.state, mSelf.moveResult) = mSelf.moveDeque.popLast
+  mSelf.operatingPos = InitPos
   mSelf.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
 
-func reset*(mSelf; resetPosition = true) {.inline.} =
-  ## Resets the simulator.
-  mSelf.nazoPuyoWrap.get:
-    let savePairsPositions = wrappedNazoPuyo.puyoPuyo.pairsPositions
-    mSelf.state = Stable
-    if mSelf.undoDeque.len > 0:
-      mSelf.nazoPuyoWrap = mSelf.undoDeque.popFirst
-    mSelf.undoDeque.clear
-    mSelf.redoDeque.clear
-    mSelf.operatingPos = InitPos
-    mSelf.moveResult = DefaultMoveResult
+func reset*(mSelf) {.inline.} =
+  ## Backwards the simulator to the initial state.
+  if mSelf.moveDeque.len == 0:
+    return
 
-    for i in 0 ..< wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
-      wrappedNazoPuyo.puyoPuyo.pairsPositions[i].position =
-        if resetPosition:
-          Position.None
-        else:
-          savePairsPositions[i].position
+  let pairsPositions = mSelf.nazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.pairsPositions
+
+  mSelf.nazoPuyoWrap = mSelf.moveDeque.peekFirst.nazoPuyoWrap
+  mSelf.nazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
+
+  mSelf.state = Stable
+  mSelf.undoDeque.clear
+  mSelf.redoDeque.clear
+  mSelf.moveDeque.clear
+  mSelf.operatingPos = InitPos
+  mSelf.moveResult = DefaultMoveResult
 
 # ------------------------------------------------
 # Simulator <-> URI
@@ -560,7 +574,8 @@ const
 
 func toUri*(self; withPositions: bool, editor: bool, host = Izumiya): Uri {.inline.} =
   ## Returns the URI converted from the simulator.
-  ## `self.editor` will be overridden with `editor`.
+  ## Any moves are reset.
+  ## `self.editor` is overridden with `editor`.
   result = initUri()
   result.scheme =
     case host
@@ -584,15 +599,18 @@ func toUri*(self; withPositions: bool, editor: bool, host = Izumiya): Uri {.inli
         'n'
     result.path = &"/simu/p{modeChar}.html"
 
-  let mainQuery: string
-  self.nazoPuyoWrap.get:
-    # position
+  let
+    mainQuery: string
+    pairsPositions = self.nazoPuyoWrap.get:
+      wrappedNazoPuyo.puyoPuyo.pairsPositions
+  self.initialNazoPuyoWrap.get:
     var nazo = wrappedNazoPuyo
-    if not withPositions:
+    if withPositions:
+      nazo.puyoPuyo.pairsPositions = pairsPositions
+    else:
       for pairPos in nazo.puyoPuyo.pairsPositions.mitems:
         pairPos.position = Position.None
 
-    # nazopuyo / puyopuyo
     mainQuery =
       case self.kind
       of Regular:
@@ -615,6 +633,7 @@ func toUri*(self; withPositions: bool, editor: bool, host = Izumiya): Uri {.inli
 
 func toUri*(self; withPositions: bool, host = Izumiya): Uri {.inline.} =
   ## Returns the URI converted from the simulator.
+  ## Any moves are reset.
   self.toUri(withPositions, self.editor, host)
 
 func parseSimulator*(uri: Uri): Simulator {.inline.} =
@@ -783,8 +802,10 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
       mSelf.forward
     elif event == initKeyEvent("KeyW"):
       mSelf.backward
+    elif event == initKeyEvent("KeyW", shift = true):
+      mSelf.backward(toStable = false)
     elif event == initKeyEvent("Digit0"):
-      mSelf.reset false
+      mSelf.reset
     elif event == initKeyEvent("Space"):
       mSelf.forward(skip = true)
     elif event == initKeyEvent("KeyN"):
@@ -795,10 +816,12 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
     # forward / backward / reset
     if event == initKeyEvent("KeyW"):
       mSelf.backward
+    elif event == initKeyEvent("KeyW", shift = true):
+      mSelf.backward(toStable = false)
     elif event == initKeyEvent("KeyS"):
       mSelf.forward(replay = true)
     elif event == initKeyEvent("Digit0"):
-      mSelf.reset false
+      mSelf.reset
     else:
       result = false
 

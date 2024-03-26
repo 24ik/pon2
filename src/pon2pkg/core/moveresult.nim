@@ -73,6 +73,25 @@ func initMoveResult*(
   )
 
 # ------------------------------------------------
+# Operator
+# ------------------------------------------------
+
+func `==`*(self; moveRes: MoveResult): bool {.inline.} =
+  if self.chainCount != moveRes.chainCount or
+      self.disappearCounts != moveRes.disappearCounts or
+      self.trackingLevel != moveRes.trackingLevel:
+    return false
+
+  result =
+    case self.trackingLevel
+    of Level0:
+      true
+    of Level1:
+      self.detailDisappearCounts == moveRes.detailDisappearCounts
+    of Level2:
+      self.fullDisappearCounts == moveRes.fullDisappearCounts
+
+# ------------------------------------------------
 # Count
 # ------------------------------------------------
 

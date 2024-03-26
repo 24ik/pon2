@@ -57,7 +57,7 @@ export host.SimulatorHost
 export mark.MarkResult, mark.mark
 export
   moveresult.MoveTrackingLevel, moveresult.MoveResult, moveresult.initMoveResult,
-  moveresult.puyoCount, moveresult.colorCount, moveresult.garbageCount,
+  moveresult.`==`, moveresult.puyoCount, moveresult.colorCount, moveresult.garbageCount,
   moveresult.puyoCounts, moveresult.colorCounts, moveresult.garbageCounts,
   moveresult.colors, moveresult.colorsSeq, moveresult.colorPlaces,
   moveresult.colorConnects, moveresult.score, moveresult.noticeGarbageCounts
