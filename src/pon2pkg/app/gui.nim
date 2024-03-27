@@ -83,7 +83,7 @@ proc initGuiApplication*(): GuiApplication {.inline.} =
 
 func simulator*(self): Simulator {.inline.} =
   ## Returns the simulator.
-  self.simulator[]
+  self.simulator[].copy
 
 func simulatorRef*(mSelf): ref Simulator {.inline.} =
   ## Returns the reference to the simulator.
@@ -91,7 +91,7 @@ func simulatorRef*(mSelf): ref Simulator {.inline.} =
 
 func replaySimulator*(self): Simulator {.inline.} =
   ## Returns the replay simulator.
-  self.replaySimulator[]
+  self.replaySimulator[].copy
 
 func replaySimulatorRef*(mSelf): ref Simulator {.inline.} =
   ## Returns the reference to the replay simulator.
@@ -277,7 +277,7 @@ proc nextReplay*(mSelf) {.inline.} =
 
   mSelf.replaySimulator[].pairsPositions =
     mSelf.replay.pairsPositionsSeq[mSelf.replay.index]
-  mSelf.replaySimulator[].reset false
+  mSelf.replaySimulator[].reset
 
 proc prevReplay*(mSelf) {.inline.} =
   ## Shows the previous replay.
@@ -291,7 +291,7 @@ proc prevReplay*(mSelf) {.inline.} =
 
   mSelf.replaySimulator[].pairsPositions =
     mSelf.replay.pairsPositionsSeq[mSelf.replay.index]
-  mSelf.replaySimulator[].reset false
+  mSelf.replaySimulator[].reset
 
 # ------------------------------------------------
 # Keyboard Operation
@@ -300,7 +300,7 @@ proc prevReplay*(mSelf) {.inline.} =
 proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
   ## Does operation specified by the keyboard input.
   ## Returns `true` if any action is executed.
-  if event == initKeyEvent("KeyQ", shift = true):
+  if event == initKeyEvent("Tab", shift = true):
     mSelf.toggleFocus
     return true
 
@@ -336,20 +336,24 @@ when defined(js):
   # JS - Keyboard Handler
   # ------------------------------------------------
 
-  proc runKeyboardEventHandler*(rSelf; event: KeyEvent) {.inline.} =
+  proc runKeyboardEventHandler*(rSelf; event: KeyEvent): bool {.inline, discardable.} =
     ## Runs the keyboard event handler.
-    let needRedraw = rSelf[].operate event
-    if needRedraw and not kxi.surpressRedraws:
+    ## Returns `true` if any action is executed.
+    result = rSelf[].operate event
+    if result and not kxi.surpressRedraws:
       kxi.redraw
 
-  proc runKeyboardEventHandler*(rSelf; event: Event) {.inline.} =
+  proc runKeyboardEventHandler*(rSelf; event: Event): bool {.inline, discardable.} =
     ## Keybaord event handler.
-    # assert event of KeyboardEvent # HACK: somehow this assertion fails
-    rSelf.runKeyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
+    assert event of KeyboardEvent
+
+    result = rSelf.runKeyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
+    if result:
+      event.preventDefault
 
   proc initKeyboardEventHandler*(rSelf): (event: Event) -> void {.inline.} =
     ## Returns the keyboard event handler.
-    (event: Event) => rSelf.runKeyboardEventHandler event
+    (event: Event) => (discard rSelf.runKeyboardEventHandler event)
 
   # ------------------------------------------------
   # JS - Node
@@ -412,22 +416,24 @@ else:
 
   proc runKeyboardEventHandler*(
       window: GuiApplicationWindow, event: KeyboardEvent, keys = downKeys()
-  ) {.inline.} =
+  ): bool {.inline, discardable.} =
     ## Runs the keyboard event handler.
-    let needRedraw = window.guiApplication[].operate event.toKeyEvent keys
-    if needRedraw:
+    ## Returns `true` if any action is executed.
+    result = window.guiApplication[].operate event.toKeyEvent keys
+    if result:
       event.window.control.forceRedraw
 
-  proc runKeyboardEventHandler(event: KeyboardEvent) =
+  proc runKeyboardEventHandler(event: KeyboardEvent): bool {.inline, discardable.} =
     ## Runs the keyboard event handler.
+    ## Returns `true` if any action is executed.
     let rawWindow = event.window
     assert rawWindow of GuiApplicationWindow
 
-    cast[GuiApplicationWindow](rawWindow).runKeyboardEventHandler event
+    result = cast[GuiApplicationWindow](rawWindow).runKeyboardEventHandler event
 
   func initKeyboardEventHandler*(): (event: KeyboardEvent) -> void {.inline.} =
     ## Returns the keyboard event handler.
-    runKeyboardEventHandler
+    (event: KeyboardEvent) => (discard event.runKeyboardEventHandler)
 
   # ------------------------------------------------
   # Native - Control / Window

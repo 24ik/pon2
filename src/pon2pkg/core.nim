@@ -48,8 +48,8 @@ export
   field.parseField, field.`==`, field.rule, field.isDead, field.noneCount,
   field.invalidPositions, field.validPositions, field.validDoublePositions,
   field.shiftUp, field.shiftDown, field.shiftRight, field.shiftLeft, field.flipV,
-  field.flipH, field.move, field.move0, field.move1, field.move2, field.`$`,
-  field.toUriQuery
+  field.flipH, field.willDrop, field.move, field.move0, field.move1, field.move2,
+  field.`$`, field.toUriQuery
 export
   fieldtype.Height, fieldtype.Width, fieldtype.WaterHeight, fieldtype.AirHeight,
   fieldtype.Row, fieldtype.Column, fieldtype.WaterRow, fieldtype.AirRow

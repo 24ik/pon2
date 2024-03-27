@@ -227,6 +227,28 @@ rg|"""
       field2.flipV
       check wrappedNazoPuyo.puyoPuyo.field == field2
 
+  # flip
+  block:
+    var
+      field2 = parseField[TsuField]("t-rgb...ypo...", Izumiya)
+      pairsPositions2 = @[PairPosition(pair: RedGreen, position: Right2)]
+      puyoPuyo = initPuyoPuyo[TsuField]()
+    puyoPuyo.field = field2
+    puyoPuyo.pairsPositions = pairsPositions2
+    var simulator = puyoPuyo.initSimulator
+
+    simulator.nazoPuyoWrap.get:
+      simulator.flip
+      field2.flipH
+      check wrappedNazoPuyo.puyoPuyo.field == field2
+      check wrappedNazoPuyo.puyoPuyo.pairsPositions == pairsPositions2
+
+      simulator.toggleFocus
+      simulator.flip
+      pairsPositions2[0].pair.swap
+      check wrappedNazoPuyo.puyoPuyo.field == field2
+      check wrappedNazoPuyo.puyoPuyo.pairsPositions == pairsPositions2
+
   # ------------------------------------------------
   # Edit - Requirement
   # ------------------------------------------------
@@ -365,7 +387,7 @@ rg|"""
         check simulator.moveResult == moveRes1
 
       simulator.forward
-      check simulator.state == Disappearing
+      check simulator.state == WillDrop
       check wrappedNazoPuyo == nazo2
       block:
         simulator.type.privateAccess
@@ -379,7 +401,7 @@ rg|"""
         check simulator.moveResult == moveRes3
 
       simulator.backward(toStable = false)
-      check simulator.state == Disappearing
+      check simulator.state == WillDrop
       check wrappedNazoPuyo == nazo2
       block:
         simulator.type.privateAccess

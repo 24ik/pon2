@@ -50,7 +50,19 @@ proc initControllerNode*(simulator: ref Simulator): VNode {.inline.} =
             italic(class = "fa-solid fa-angles-right")
     of Play:
       tdiv(class = "buttons is-centered mb-0"):
-        button(class = "button is-light", onclick = () => simulator[].reset(false)):
+        button(
+          class = "button is-light",
+          onclick = () => simulator[].backward(toStable = false),
+        ):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-backward")
+        button(
+          class = "button is-light", onclick = () => simulator[].forward(skip = true)
+        ):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-forward")
+      tdiv(class = "buttons is-centered mb-0"):
+        button(class = "button is-light", onclick = () => simulator[].reset):
           span(class = "icon"):
             italic(class = "fa-solid fa-backward-fast")
         button(
@@ -58,11 +70,6 @@ proc initControllerNode*(simulator: ref Simulator): VNode {.inline.} =
         ):
           span(class = "icon"):
             italic(class = "fa-solid fa-forward-step")
-        button(
-          class = "button is-light", onclick = () => simulator[].forward(skip = true)
-        ):
-          span(class = "icon"):
-            italic(class = "fa-solid fa-angles-right")
       tdiv(class = "buttons is-centered mb-0"):
         button(
           class = "button is-info",
@@ -96,15 +103,28 @@ proc initControllerNode*(simulator: ref Simulator): VNode {.inline.} =
           span(class = "icon"):
             italic(class = "fa-solid fa-arrow-right")
     of Replay:
-      tdiv(class = "buttons is-centered"):
-        button(class = "button is-light", onclick = () => simulator[].reset(false)):
+      tdiv(class = "buttons is-centered mb-0"):
+        button(
+          class = "button is-light",
+          onclick = () => simulator[].backward(toStable = false),
+        ):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-backward")
+        button(
+          class = "button is-light", onclick = () => simulator[].forward(skip = true)
+        ):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-forward")
+      tdiv(class = "buttons is-centered mb-0"):
+        button(class = "button is-light", onclick = () => simulator[].reset):
           span(class = "icon"):
             italic(class = "fa-solid fa-backward-fast")
-        button(class = "button is-light", onclick = () => simulator[].backward):
-          span(class = "icon"):
-            italic(class = "fa-solid fa-backward-step")
         button(
           class = "button is-light", onclick = () => simulator[].forward(replay = true)
         ):
           span(class = "icon"):
             italic(class = "fa-solid fa-forward-step")
+      tdiv(class = "buttons is-centered mb-0"):
+        button(class = "button is-light", onclick = () => simulator[].backward):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-backward-step")

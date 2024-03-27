@@ -35,7 +35,7 @@ type
     ## Simulator state.
     Stable
     WillDisappear
-    Disappearing
+    WillDrop
 
   SimulatorEditing* = object ## Editing information.
     cell*: Cell
@@ -119,6 +119,36 @@ func initSimulator*[F: TsuField or WaterField](
   result =
     NazoPuyo[F](puyoPuyo: puyoPuyo, requirement: DefaultReq).initSimulator(mode, editor)
   result.kind = Regular
+
+# ------------------------------------------------
+# Copy
+# ------------------------------------------------
+
+func copy*(self): Simulator {.inline.} =
+  ## Copies the simulator.
+  ## The function may work even when a normal assignment would raise an error.
+  result.nazoPuyoWrap = self.nazoPuyoWrap
+  result.moveResult = self.moveResult
+
+  result.editor = self.editor
+  result.state = self.state
+  result.kind = self.kind
+  result.mode = self.mode
+
+  result.undoDeque = initDeque[NazoPuyoWrap](self.undoDeque.len)
+  result.redoDeque = initDeque[NazoPuyoWrap](self.redoDeque.len)
+  result.moveDeque = initDeque[
+    tuple[nazoPuyoWrap: NazoPuyoWrap, state: SimulatorState, moveResult: MoveResult]
+  ](self.moveDeque.len)
+  for data in self.undoDeque:
+    result.undoDeque.addLast data
+  for data in self.redoDeque:
+    result.redoDeque.addLast data
+  for data in self.moveDeque:
+    result.moveDeque.addLast data
+
+  result.operatingPos = self.operatingPos
+  result.editing = self.editing
 
 # ------------------------------------------------
 # Property - Rule / Kind / Mode
@@ -382,6 +412,14 @@ func flipFieldH*(mSelf) {.inline.} =
   mSelf.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.field.flipH
 
+func flip*(mSelf) {.inline.} =
+  ## Flips the field or pairs.
+  mSelf.nazoPuyoWrap.get:
+    if mSelf.editing.focusField:
+      wrappedNazoPuyo.puyoPuyo.field.flipH
+    else:
+      wrappedNazoPuyo.puyoPuyo.pairsPositions[mSelf.editing.pair.index].pair.swap
+
 # ------------------------------------------------
 # Edit - Requirement
 # ------------------------------------------------
@@ -484,15 +522,19 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
         return
 
       mSelf.moveResult = DefaultMoveResult
-      mSelf.moveDeque.addLast (mSelf.nazoPuyoWrap, mSelf.state, mSelf.moveResult)
 
-      # put
+      # set position
       if not replay:
         wrappedNazoPuyo.puyoPuyo.operatingPairPosition.position =
           if skip: Position.None else: mSelf.operatingPos
+
+      # save to the deque
+      mSelf.moveDeque.addLast (mSelf.nazoPuyoWrap, mSelf.state, mSelf.moveResult)
+
+      # put
       wrappedNazoPuyo.puyoPuyo.field.put wrappedNazoPuyo.puyoPuyo.operatingPairPosition
 
-      # disappear
+      # check disappear
       if wrappedNazoPuyo.puyoPuyo.field.willDisappear:
         mSelf.state = WillDisappear
       else:
@@ -508,8 +550,13 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
         mSelf.moveResult.disappearCounts[puyo].inc disappearRes.puyoCount puyo
       mSelf.moveResult.fullDisappearCounts.add disappearRes.connectionCounts
 
-      mSelf.state = Disappearing
-    of Disappearing:
+      if wrappedNazoPuyo.puyoPuyo.field.willDrop:
+        mSelf.state = WillDrop
+      else:
+        mSelf.state = Stable
+        mSelf.operatingPos = InitPos
+        wrappedNazoPuyo.puyoPuyo.incrementOperatingIndex
+    of WillDrop:
       mSelf.moveDeque.addLast (mSelf.nazoPuyoWrap, mSelf.state, mSelf.moveResult)
 
       wrappedNazoPuyo.puyoPuyo.field.drop
@@ -741,7 +788,7 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
     # insert, focus
     if event == initKeyEvent("KeyI"):
       mSelf.toggleInserting
-    elif event == initKeyEvent("KeyQ"):
+    elif event == initKeyEvent("Tab"):
       mSelf.toggleFocus
     # move cursor
     elif event == initKeyEvent("KeyA"):
@@ -778,11 +825,11 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
       mSelf.shiftFieldUp
     # flip field
     elif event == initKeyEvent("KeyF"):
-      mSelf.flipFieldH
+      mSelf.flip
     # undo, redo
-    elif event == initKeyEvent("KeyZ", shift = true):
+    elif event == initKeyEvent("KeyZ", control = true):
       mSelf.undo
-    elif event == initKeyEvent("KeyX", shift = true):
+    elif event == initKeyEvent("KeyY", control = true):
       mSelf.redo
     else:
       result = false
@@ -804,11 +851,11 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
       mSelf.backward
     elif event == initKeyEvent("KeyW", shift = true):
       mSelf.backward(toStable = false)
-    elif event == initKeyEvent("Digit0"):
+    elif event == initKeyEvent("KeyW", control = true):
       mSelf.reset
     elif event == initKeyEvent("Space"):
       mSelf.forward(skip = true)
-    elif event == initKeyEvent("KeyN"):
+    elif event == initKeyEvent("KeyS", shift = true):
       mSelf.forward(replay = true)
     else:
       result = false
@@ -820,7 +867,7 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
       mSelf.backward(toStable = false)
     elif event == initKeyEvent("KeyS"):
       mSelf.forward(replay = true)
-    elif event == initKeyEvent("Digit0"):
+    elif event == initKeyEvent("KeyW", control = true):
       mSelf.reset
     else:
       result = false

@@ -62,7 +62,7 @@ proc initMarathon*(): Marathon {.inline.} =
 
 func simulator*(self): Simulator {.inline.} =
   ## Returns the simulator.
-  self.simulator[]
+  self.simulator[].copy
 
 func simulatorRef*(mSelf): ref Simulator {.inline.} =
   ## Returns the reference to the simulator.
@@ -267,7 +267,7 @@ func match*(mSelf; prefix: string) {.inline.} =
 
 proc play(mSelf; pairsStr: string) {.inline.} =
   ## Plays a marathon mode with the given pairs.
-  mSelf.simulator[].reset true
+  mSelf.simulator[].reset
   mSelf.simulator[].pairsPositions = pairsStr.toPairsPositions
 
   mSelf.focusSimulator = true
@@ -296,7 +296,7 @@ proc play*(mSelf; onlyMatched = true) {.inline.} =
 proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
   ## Does operation specified by the keyboard input.
   ## Returns `true` if any action is executed.
-  if event == initKeyEvent("KeyQ", shift = true):
+  if event == initKeyEvent("Tab", shift = true):
     mSelf.toggleFocus
     return true
 
@@ -319,20 +319,24 @@ when defined(js):
   # JS - Keyboard Handler
   # ------------------------------------------------
 
-  proc runKeyboardEventHandler*(rSelf; event: KeyEvent) {.inline.} =
+  proc runKeyboardEventHandler*(rSelf; event: KeyEvent): bool {.inline, discardable.} =
     ## Runs the keyboard event handler.
-    let needRedraw = rSelf[].operate event
-    if needRedraw and not kxi.surpressRedraws:
+    ## Returns `true` if any action is executed.
+    result = rSelf[].operate event
+    if result and not kxi.surpressRedraws:
       kxi.redraw
 
-  proc runKeyboardEventHandler*(rSelf; event: Event) {.inline.} =
+  proc runKeyboardEventHandler*(rSelf; event: Event): bool {.inline, discardable.} =
     ## Runs the keyboard event handler.
-    # assert event of KeyboardEvent # HACK: somehow this assertion fails
-    rSelf.runKeyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
+    assert event of KeyboardEvent
+
+    result = rSelf.runKeyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
+    if result:
+      event.preventDefault
 
   func initKeyboardEventHandler*(rSelf): (event: Event) -> void {.inline.} =
     ## Returns the keyboard event handler.
-    (event: Event) => rSelf.runKeyboardEventHandler event
+    (event: Event) => (discard rSelf.runKeyboardEventHandler event)
 
   # ------------------------------------------------
   # JS - Node

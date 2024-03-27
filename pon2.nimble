@@ -1,8 +1,8 @@
 # Package
 
-version = "0.14.0"
+version = "0.15.0"
 author = "Keisuke Izumiya"
-description = "Puyo Puyo and Nazo Puyo Application"
+description = "Application for Puyo Puyo and Nazo Puyo"
 license = "Apache-2.0"
 
 srcDir = "src"
@@ -90,5 +90,4 @@ task web, "Make Web Pages":
   rmDir "src/htmldocs"
 
   # assets
-  exec "nim c -r assets/pairs/generate.nim"
   cpDir "assets", "www/assets"
