@@ -11,7 +11,7 @@ import ../../[misc]
 import ../../../../app/[simulator]
 import ../../../../core/[fieldtype]
 
-proc initOperatingNode*(simulator: var Simulator): VNode {.inline.} =
+proc initOperatingNode*(simulator: ref Simulator): VNode {.inline.} =
   ## Returns the operating node.
   buildHtml(table):
     tbody:
@@ -20,4 +20,4 @@ proc initOperatingNode*(simulator: var Simulator): VNode {.inline.} =
           for col in Column.low .. Column.high:
             td:
               figure(class = "image is-24x24"):
-                img(src = simulator.operatingPairCell(idx, col).cellImageSrc)
+                img(src = simulator[].operatingPairCell(idx, col).cellImageSrc)

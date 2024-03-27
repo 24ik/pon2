@@ -12,47 +12,47 @@ import ../../../../app/[gui, nazopuyo, simulator]
 import ../../../../core/[nazopuyo]
 
 proc initEditorControllerNode*(
-    guiApplication: var GuiApplication, id = ""
+    guiApplication: ref GuiApplication, id = ""
 ): VNode {.inline.} =
   ## Returns the editor controller node.
   ## `id` is shared with other node-creating procedures and need to be unique.
   let
-    workerRunning = guiApplication.solving or guiApplication.permuting
-    noPair = guiApplication.simulator[].nazoPuyoWrap.get:
+    workerRunning = guiApplication[].solving or guiApplication[].permuting
+    noPair = guiApplication[].simulator.nazoPuyoWrap.get:
       wrappedNazoPuyo.puyoPuyo.pairsPositions.len == 0
     workerDisable = workerRunning or noPair
 
     focusButtonClass =
-      if guiApplication.focusEditor:
+      if guiApplication[].focusEditor:
         kstring"button"
       else:
         kstring"button is-selected is-primary"
     solveButtonClass =
-      if guiApplication.solving:
+      if guiApplication[].solving:
         kstring"button is-loading"
       else:
         kstring"button"
     permuteButtonClass =
-      if guiApplication.permuting:
+      if guiApplication[].permuting:
         kstring"button is-loading"
       else:
         kstring"button"
 
   proc permuteHandler() =
-    let (_, fixMoves, allowDouble, allowLastDouble) = guiApplication.simulator[].nazoPuyoWrap.get:
+    let (_, fixMoves, allowDouble, allowLastDouble) = guiApplication[].simulator.nazoPuyoWrap.get:
       getSettings(id, wrappedNazoPuyo.moveCount)
-    guiApplication.permute fixMoves, allowDouble, allowLastDouble
+    guiApplication[].permute fixMoves, allowDouble, allowLastDouble
 
   result = buildHtml(tdiv(class = "buttons")):
     button(
       class = solveButtonClass,
       disabled = workerDisable,
-      onclick = () => (guiApplication.solve getSettings(id, 1).parallelCount),
+      onclick = () => (guiApplication[].solve getSettings(id, 1).parallelCount),
     ):
       text "解探索"
     button(
       class = permuteButtonClass, disabled = workerDisable, onclick = permuteHandler
     ):
       text "ツモ並べ替え"
-    button(class = focusButtonClass, onclick = () => guiApplication.toggleFocus):
+    button(class = focusButtonClass, onclick = () => guiApplication[].toggleFocus):
       text "シミュを操作"

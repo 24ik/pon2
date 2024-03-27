@@ -17,6 +17,8 @@ import
 when defined(js):
   import ../[misc]
 
+const ShownNoticeGarbageCount* = 6
+
 # ------------------------------------------------
 # Field
 # ------------------------------------------------
@@ -143,8 +145,6 @@ func immediateDoubleNextPairCell*(simulator: Simulator, axis: bool): Cell {.inli
 # Message
 # ------------------------------------------------
 
-const ShownNoticeGarbgeCount = 6
-
 func getMessages*(
     simulator: Simulator
 ): tuple[state: string, score: int, noticeGarbages: array[NoticeGarbage, int]] {.
@@ -167,7 +167,7 @@ func getMessages*(
           0 ..< wrappedNazoPuyo.puyoPuyo.operatingIndex
         ]
 
-      simulator.originalNazoPuyoWrap.get:
+      simulator.initialNazoPuyoWrap.get:
         result.state = $wrappedNazoPuyo.mark pairsPositions
   else:
     result.state = "　"
@@ -180,9 +180,9 @@ func getMessages*(
   for notice in countdown(Comet, Small):
     result.noticeGarbages[notice] = originalNoticeGarbages[notice]
     count.inc originalNoticeGarbages[notice]
-    if count > ShownNoticeGarbgeCount:
-      result.noticeGarbages[notice].dec count - ShownNoticeGarbgeCount
-    if count >= ShownNoticeGarbgeCount:
+    if count > ShownNoticeGarbageCount:
+      result.noticeGarbages[notice].dec count - ShownNoticeGarbageCount
+    if count >= ShownNoticeGarbageCount:
       break
 
 # ------------------------------------------------

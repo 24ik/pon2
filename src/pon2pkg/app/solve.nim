@@ -33,8 +33,6 @@ proc solve[F: TsuField or WaterField](
 ): seq[PairsPositions] {.inline.} =
   ## Solves the nazo puyo.
   ## `showProgress` and `parallelCount` will be ignored on JS backend.
-  ## Note that the parallel solving on JS backend is implemented in
-  ## `asyncSolve`.
   if not nazo.requirement.isSupported or nazo.moveCount == 0:
     return @[]
 
@@ -136,8 +134,6 @@ proc solve[F: TsuField or WaterField](
 ): seq[PairsPositions] {.inline.} =
   ## Solves the nazo puyo.
   ## `showProgress` and `parallelCount` will be ignored on JS backend.
-  ## Note that the parallel solving on JS backend is implemented in
-  ## `asyncSolve`.
   assert reqKind in {
     Clear, DisappearCount, DisappearCountMore, ChainClear, ChainMoreClear,
     DisappearCountSametime, DisappearCountMoreSametime, DisappearPlace,
@@ -192,8 +188,6 @@ proc solve*[F: TsuField or WaterField](
 ): seq[PairsPositions] {.inline.} =
   ## Solves the nazo puyo.
   ## `showProgress` and `parallelCount` will be ignored on JS backend.
-  ## Note that the parallel solving on JS backend is implemented in
-  ## `asyncSolve`.
   const DummyColor = RequirementColor.All
 
   result =

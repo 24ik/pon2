@@ -48,8 +48,8 @@ export
   field.parseField, field.`==`, field.rule, field.isDead, field.noneCount,
   field.invalidPositions, field.validPositions, field.validDoublePositions,
   field.shiftUp, field.shiftDown, field.shiftRight, field.shiftLeft, field.flipV,
-  field.flipH, field.move, field.move0, field.move1, field.move2, field.`$`,
-  field.toUriQuery
+  field.flipH, field.willDrop, field.move, field.move0, field.move1, field.move2,
+  field.`$`, field.toUriQuery
 export
   fieldtype.Height, fieldtype.Width, fieldtype.WaterHeight, fieldtype.AirHeight,
   fieldtype.Row, fieldtype.Column, fieldtype.WaterRow, fieldtype.AirRow
@@ -57,7 +57,7 @@ export host.SimulatorHost
 export mark.MarkResult, mark.mark
 export
   moveresult.MoveTrackingLevel, moveresult.MoveResult, moveresult.initMoveResult,
-  moveresult.puyoCount, moveresult.colorCount, moveresult.garbageCount,
+  moveresult.`==`, moveresult.puyoCount, moveresult.colorCount, moveresult.garbageCount,
   moveresult.puyoCounts, moveresult.colorCounts, moveresult.garbageCounts,
   moveresult.colors, moveresult.colorsSeq, moveresult.colorPlaces,
   moveresult.colorConnects, moveresult.score, moveresult.noticeGarbageCounts

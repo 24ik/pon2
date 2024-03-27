@@ -14,7 +14,7 @@ import ../../../../core/[cell]
 
 type ImmediatePairsControl* = ref object of LayoutContainer ## Immediate pairs control.
   simulator: ref Simulator
-  assets: ref Assets
+  assets: Assets
 
 proc cellDrawHandler(
     control: ImmediatePairsControl, event: DrawEvent, idx: Natural
@@ -54,7 +54,7 @@ func initCellDrawHandler(
   (event: DrawEvent) => control.cellDrawHandler(event, idx)
 
 proc initImmediatePairsControl*(
-    simulator: ref Simulator, assets: ref Assets
+    simulator: ref Simulator, assets: Assets
 ): ImmediatePairsControl {.inline.} =
   ## Returns an immediate pairs control.
   result = new ImmediatePairsControl
@@ -71,6 +71,6 @@ proc initImmediatePairsControl*(
     let cell = newControl()
     result.add cell
 
-    cell.height = assets[].cellImageSize.height
-    cell.width = assets[].cellImageSize.width
+    cell.height = assets.cellImageSize.height
+    cell.width = assets.cellImageSize.width
     cell.onDraw = result.initCellDrawHandler idx

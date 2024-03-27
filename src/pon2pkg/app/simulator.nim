@@ -35,7 +35,7 @@ type
     ## Simulator state.
     Stable
     WillDisappear
-    Disappearing
+    WillDrop
 
   SimulatorEditing* = object ## Editing information.
     cell*: Cell
@@ -55,13 +55,17 @@ type
 
     undoDeque: Deque[NazoPuyoWrap]
     redoDeque: Deque[NazoPuyoWrap]
+    moveDeque: Deque[
+      tuple[nazoPuyoWrap: NazoPuyoWrap, state: SimulatorState, moveResult: MoveResult]
+    ]
 
-    operatingPosition: Position
+    operatingPos: Position
     editing: SimulatorEditing
 
 using
   self: Simulator
   mSelf: var Simulator
+  rSelf: ref Simulator
 
 # ------------------------------------------------
 # Constructor
@@ -89,8 +93,11 @@ func initSimulator*(
   nazoPuyoWrap.get:
     result.undoDeque = initDeque[NazoPuyoWrap](wrappedNazoPuyo.moveCount)
     result.redoDeque = initDeque[NazoPuyoWrap](wrappedNazoPuyo.moveCount)
+  result.moveDeque = initDeque[
+    tuple[nazoPuyoWrap: NazoPuyoWrap, state: SimulatorState, moveResult: MoveResult]
+  ]()
 
-  result.operatingPosition = InitPos
+  result.operatingPos = InitPos
   result.editing.cell = Cell.None
   result.editing.field = (Row.low, Column.low)
   result.editing.pair = (Natural 0, true)
@@ -112,6 +119,36 @@ func initSimulator*[F: TsuField or WaterField](
   result =
     NazoPuyo[F](puyoPuyo: puyoPuyo, requirement: DefaultReq).initSimulator(mode, editor)
   result.kind = Regular
+
+# ------------------------------------------------
+# Copy
+# ------------------------------------------------
+
+func copy*(self): Simulator {.inline.} =
+  ## Copies the simulator.
+  ## The function may work even when a normal assignment would raise an error.
+  result.nazoPuyoWrap = self.nazoPuyoWrap
+  result.moveResult = self.moveResult
+
+  result.editor = self.editor
+  result.state = self.state
+  result.kind = self.kind
+  result.mode = self.mode
+
+  result.undoDeque = initDeque[NazoPuyoWrap](self.undoDeque.len)
+  result.redoDeque = initDeque[NazoPuyoWrap](self.redoDeque.len)
+  result.moveDeque = initDeque[
+    tuple[nazoPuyoWrap: NazoPuyoWrap, state: SimulatorState, moveResult: MoveResult]
+  ](self.moveDeque.len)
+  for data in self.undoDeque:
+    result.undoDeque.addLast data
+  for data in self.redoDeque:
+    result.redoDeque.addLast data
+  for data in self.moveDeque:
+    result.moveDeque.addLast data
+
+  result.operatingPos = self.operatingPos
+  result.editing = self.editing
 
 # ------------------------------------------------
 # Property - Rule / Kind / Mode
@@ -140,11 +177,12 @@ func `mode=`*(mSelf; mode: SimulatorMode) {.inline.} =
     mSelf.editor = true
 
   if mode == Edit or mSelf.mode == Edit:
-    if mSelf.undoDeque.len > 0:
+    if mode == Edit and mSelf.undoDeque.len > 0:
       mSelf.nazoPuyoWrap = mSelf.undoDeque.popFirst
     mSelf.state = Stable
     mSelf.undoDeque.clear
     mSelf.redoDeque.clear
+    mSelf.moveDeque.clear
 
   mSelf.mode = mode
 
@@ -156,9 +194,12 @@ func nazoPuyoWrap*(self): NazoPuyoWrap {.inline.} =
   ## Returns the wrapped Nazo Puyo.
   self.nazoPuyoWrap
 
-func originalNazoPuyoWrap*(self): NazoPuyoWrap {.inline.} =
+func initialNazoPuyoWrap*(self): NazoPuyoWrap {.inline.} =
   ## Returns the wrapped Nazo Puyo before any moves.
-  if self.undoDeque.len > 0: self.undoDeque.peekFirst else: self.nazoPuyoWrap
+  if self.moveDeque.len > 0:
+    self.moveDeque.peekFirst.nazoPuyoWrap
+  else:
+    self.nazoPuyoWrap
 
 func `pairsPositions=`*(mSelf; pairsPositions: PairsPositions) {.inline.} =
   mSelf.nazoPuyoWrap.get:
@@ -192,7 +233,7 @@ func score*(self): int {.inline.} = ## Returns the score.
 
 func operatingPosition*(self): Position {.inline.} =
   ## Returns the operating position.
-  self.operatingPosition
+  self.operatingPos
 
 # ------------------------------------------------
 # Edit - Other
@@ -203,11 +244,6 @@ func toggleInserting*(mSelf) {.inline.} = ## Toggles inserting or not.
 
 func toggleFocus*(mSelf) {.inline.} = ## Toggles focusing field or not.
   mSelf.editing.focusField.toggle
-
-func save(mSelf) {.inline.} =
-  ## Saves the current simulator.
-  mSelf.undoDeque.addLast mSelf.nazoPuyoWrap
-  mSelf.redoDeque.clear
 
 # ------------------------------------------------
 # Edit - Cursor
@@ -254,13 +290,18 @@ func moveCursorLeft*(mSelf) {.inline.} =
 # Edit - Delete
 # ------------------------------------------------
 
+func prepareChange(mSelf) {.inline.} =
+  ## Prepares for changing the simulator.
+  mSelf.undoDeque.addLast mSelf.nazoPuyoWrap
+  mSelf.redoDeque.clear
+
 func deletePairPosition*(mSelf; idx: Natural) {.inline.} =
   ## Deletes the pair&position.
   mSelf.nazoPuyoWrap.get:
     if idx >= wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
       return
 
-    mSelf.save
+    mSelf.prepareChange
     wrappedNazoPuyo.puyoPuyo.pairsPositions.delete idx
 
 func deletePairPosition*(mSelf) {.inline.} =
@@ -273,7 +314,7 @@ func deletePairPosition*(mSelf) {.inline.} =
 
 func writeCell(mSelf; row: Row, col: Column, cell: Cell) {.inline.} =
   ## Writes the cell to the field.
-  mSelf.save
+  mSelf.prepareChange
 
   mSelf.nazoPuyoWrap.get:
     if mSelf.editing.insert:
@@ -292,12 +333,12 @@ func writeCell(mSelf; idx: Natural, axis: bool, cell: Cell) {.inline.} =
   ## Writes the cell to the pairs.
   case cell
   of Cell.None:
-    mSelf.save
+    mSelf.prepareChange
     mSelf.deletePairPosition idx
   of Hard, Cell.Garbage:
     discard
   of Cell.Red .. Cell.Purple:
-    mSelf.save
+    mSelf.prepareChange
 
     let color = ColorPuyo cell
     mSelf.nazoPuyoWrap.get:
@@ -333,25 +374,25 @@ func writeCell*(mSelf; cell: Cell) {.inline.} =
 
 func shiftFieldUp*(mSelf) {.inline.} =
   ## Shifts the field upward.
-  mSelf.save
+  mSelf.prepareChange
   mSelf.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.field.shiftUp
 
 func shiftFieldDown*(mSelf) {.inline.} =
   ## Shifts the field downward.
-  mSelf.save
+  mSelf.prepareChange
   mSelf.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.field.shiftDown
 
 func shiftFieldRight*(mSelf) {.inline.} =
   ## Shifts the field rightward.
-  mSelf.save
+  mSelf.prepareChange
   mSelf.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.field.shiftRight
 
 func shiftFieldLeft*(mSelf) {.inline.} =
   ## Shifts the field leftward.
-  mSelf.save
+  mSelf.prepareChange
   mSelf.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.field.shiftLeft
 
@@ -361,15 +402,23 @@ func shiftFieldLeft*(mSelf) {.inline.} =
 
 func flipFieldV*(mSelf) {.inline.} =
   ## Flips the field vertically.
-  mSelf.save
+  mSelf.prepareChange
   mSelf.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.field.flipV
 
 func flipFieldH*(mSelf) {.inline.} =
   ## Flips the field horizontally.
-  mSelf.save
+  mSelf.prepareChange
   mSelf.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.field.flipH
+
+func flip*(mSelf) {.inline.} =
+  ## Flips the field or pairs.
+  mSelf.nazoPuyoWrap.get:
+    if mSelf.editing.focusField:
+      wrappedNazoPuyo.puyoPuyo.field.flipH
+    else:
+      wrappedNazoPuyo.puyoPuyo.pairsPositions[mSelf.editing.pair.index].pair.swap
 
 # ------------------------------------------------
 # Edit - Requirement
@@ -381,7 +430,7 @@ func `requirementKind=`*(mSelf; kind: RequirementKind) {.inline.} =
     if kind == wrappedNazoPuyo.requirement.kind:
       return
 
-    mSelf.save
+    mSelf.prepareChange
 
     {.cast(uncheckedAssign).}:
       if kind in ColorKinds:
@@ -405,7 +454,7 @@ func `requirementColor=`*(mSelf; color: RequirementColor) {.inline.} =
     if color == wrappedNazoPuyo.requirement.color:
       return
 
-    mSelf.save
+    mSelf.prepareChange
     wrappedNazoPuyo.requirement.color = color
 
 func `requirementNumber=`*(mSelf; num: RequirementNumber) {.inline.} =
@@ -416,7 +465,7 @@ func `requirementNumber=`*(mSelf; num: RequirementNumber) {.inline.} =
     if num == wrappedNazoPuyo.requirement.number:
       return
 
-    mSelf.save
+    mSelf.prepareChange
     wrappedNazoPuyo.requirement.number = num
 
 # ------------------------------------------------
@@ -445,19 +494,19 @@ func redo*(mSelf) {.inline.} =
 
 func moveOperatingPositionRight*(mSelf) {.inline.} =
   ## Moves the operating position right.
-  mSelf.operatingPosition.moveRight
+  mSelf.operatingPos.moveRight
 
 func moveOperatingPositionLeft*(mSelf) {.inline.} =
   ## Moves the operating position left.
-  mSelf.operatingPosition.moveLeft
+  mSelf.operatingPos.moveLeft
 
 func rotateOperatingPositionRight*(mSelf) {.inline.} =
   ## Rotates the operating position right.
-  mSelf.operatingPosition.rotateRight
+  mSelf.operatingPos.rotateRight
 
 func rotateOperatingPositionLeft*(mSelf) {.inline.} =
   ## Rotates the operating position left.
-  mSelf.operatingPosition.rotateLeft
+  mSelf.operatingPos.rotateLeft
 
 # ------------------------------------------------
 # Forward / Backward
@@ -473,74 +522,86 @@ func forward*(mSelf; replay = false, skip = false) {.inline.} =
         return
 
       mSelf.moveResult = DefaultMoveResult
-      mSelf.save
 
-      # put
+      # set position
       if not replay:
         wrappedNazoPuyo.puyoPuyo.operatingPairPosition.position =
-          if skip: Position.None else: mSelf.operatingPosition
+          if skip: Position.None else: mSelf.operatingPos
+
+      # save to the deque
+      mSelf.moveDeque.addLast (mSelf.nazoPuyoWrap, mSelf.state, mSelf.moveResult)
+
+      # put
       wrappedNazoPuyo.puyoPuyo.field.put wrappedNazoPuyo.puyoPuyo.operatingPairPosition
 
-      # disappear
+      # check disappear
       if wrappedNazoPuyo.puyoPuyo.field.willDisappear:
         mSelf.state = WillDisappear
       else:
         mSelf.state = Stable
-        mSelf.operatingPosition = InitPos
+        mSelf.operatingPos = InitPos
         wrappedNazoPuyo.puyoPuyo.incrementOperatingIndex
     of WillDisappear:
+      mSelf.moveDeque.addLast (mSelf.nazoPuyoWrap, mSelf.state, mSelf.moveResult)
+
       let disappearRes = wrappedNazoPuyo.puyoPuyo.field.disappear
 
       for puyo in Puyo.low .. Puyo.high:
         mSelf.moveResult.disappearCounts[puyo].inc disappearRes.puyoCount puyo
       mSelf.moveResult.fullDisappearCounts.add disappearRes.connectionCounts
 
-      mSelf.state = Disappearing
-    of Disappearing:
+      if wrappedNazoPuyo.puyoPuyo.field.willDrop:
+        mSelf.state = WillDrop
+      else:
+        mSelf.state = Stable
+        mSelf.operatingPos = InitPos
+        wrappedNazoPuyo.puyoPuyo.incrementOperatingIndex
+    of WillDrop:
+      mSelf.moveDeque.addLast (mSelf.nazoPuyoWrap, mSelf.state, mSelf.moveResult)
+
       wrappedNazoPuyo.puyoPuyo.field.drop
       if wrappedNazoPuyo.puyoPuyo.field.willDisappear:
         mSelf.state = WillDisappear
       else:
         mSelf.state = Stable
-        mSelf.operatingPosition = InitPos
+        mSelf.operatingPos = InitPos
         wrappedNazoPuyo.puyoPuyo.incrementOperatingIndex
 
-func backward*(mSelf) {.inline.} =
+func backward*(mSelf; toStable = true) {.inline.} =
   ## Backwards the simulator.
-  if mSelf.undoDeque.len == 0:
+  if mSelf.moveDeque.len == 0:
     return
 
-  mSelf.moveResult = DefaultMoveResult
+  let pairsPositions = mSelf.nazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.pairsPositions
 
-  let pairsPositions: PairsPositions
-  mSelf.nazoPuyoWrap.get:
-    pairsPositions = wrappedNazoPuyo.puyoPuyo.pairsPositions
+  if toStable:
+    while mSelf.moveDeque.peekLast.state != Stable:
+      mSelf.moveDeque.popLast
 
-  mSelf.nazoPuyoWrap = mSelf.undoDeque.popLast
-  mSelf.state = Stable
-  mSelf.operatingPosition = InitPos
-
+  (mSelf.nazoPuyoWrap, mSelf.state, mSelf.moveResult) = mSelf.moveDeque.popLast
+  mSelf.operatingPos = InitPos
   mSelf.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
 
-func reset*(mSelf; resetPosition = true) {.inline.} =
-  ## Resets the simulator.
-  mSelf.nazoPuyoWrap.get:
-    let savePairsPositions = wrappedNazoPuyo.puyoPuyo.pairsPositions
-    mSelf.state = Stable
-    if mSelf.undoDeque.len > 0:
-      mSelf.nazoPuyoWrap = mSelf.undoDeque.popFirst
-    mSelf.undoDeque.clear
-    mSelf.redoDeque.clear
-    mSelf.operatingPosition = InitPos
-    mSelf.moveResult = DefaultMoveResult
+func reset*(mSelf) {.inline.} =
+  ## Backwards the simulator to the initial state.
+  if mSelf.moveDeque.len == 0:
+    return
 
-    for i in 0 ..< wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
-      wrappedNazoPuyo.puyoPuyo.pairsPositions[i].position =
-        if resetPosition:
-          Position.None
-        else:
-          savePairsPositions[i].position
+  let pairsPositions = mSelf.nazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.pairsPositions
+
+  mSelf.nazoPuyoWrap = mSelf.moveDeque.peekFirst.nazoPuyoWrap
+  mSelf.nazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
+
+  mSelf.state = Stable
+  mSelf.undoDeque.clear
+  mSelf.redoDeque.clear
+  mSelf.moveDeque.clear
+  mSelf.operatingPos = InitPos
+  mSelf.moveResult = DefaultMoveResult
 
 # ------------------------------------------------
 # Simulator <-> URI
@@ -560,7 +621,8 @@ const
 
 func toUri*(self; withPositions: bool, editor: bool, host = Izumiya): Uri {.inline.} =
   ## Returns the URI converted from the simulator.
-  ## `self.editor` will be overridden with `editor`.
+  ## Any moves are reset.
+  ## `self.editor` is overridden with `editor`.
   result = initUri()
   result.scheme =
     case host
@@ -584,15 +646,18 @@ func toUri*(self; withPositions: bool, editor: bool, host = Izumiya): Uri {.inli
         'n'
     result.path = &"/simu/p{modeChar}.html"
 
-  let mainQuery: string
-  self.nazoPuyoWrap.get:
-    # position
+  let
+    mainQuery: string
+    pairsPositions = self.nazoPuyoWrap.get:
+      wrappedNazoPuyo.puyoPuyo.pairsPositions
+  self.initialNazoPuyoWrap.get:
     var nazo = wrappedNazoPuyo
-    if not withPositions:
+    if withPositions:
+      nazo.puyoPuyo.pairsPositions = pairsPositions
+    else:
       for pairPos in nazo.puyoPuyo.pairsPositions.mitems:
         pairPos.position = Position.None
 
-    # nazopuyo / puyopuyo
     mainQuery =
       case self.kind
       of Regular:
@@ -615,6 +680,7 @@ func toUri*(self; withPositions: bool, editor: bool, host = Izumiya): Uri {.inli
 
 func toUri*(self; withPositions: bool, host = Izumiya): Uri {.inline.} =
   ## Returns the URI converted from the simulator.
+  ## Any moves are reset.
   self.toUri(withPositions, self.editor, host)
 
 func parseSimulator*(uri: Uri): Simulator {.inline.} =
@@ -677,9 +743,9 @@ func parseSimulator*(uri: Uri): Simulator {.inline.} =
         except ValueError:
           raise newException(ValueError, "Invalid simulator: " & $uri)
   of $Ishikawa, $Ips:
-    var
-      kind = SimulatorKind.low
-      mode = SimulatorMode.low
+    let
+      kind: SimulatorKind
+      mode: SimulatorMode
     case uri.path
     of "/simu/pe.html":
       kind = Regular
@@ -694,6 +760,8 @@ func parseSimulator*(uri: Uri): Simulator {.inline.} =
       kind = Nazo
       mode = Play
     else:
+      kind = SimulatorKind.low # HACK: dummy to compile
+      mode = SimulatorMode.low # HACK: dummy to compile
       raise newException(ValueError, "Invalid simulator: " & $uri)
 
     let host = if uri.hostname == $Ishikawa: Ishikawa else: Ips
@@ -720,7 +788,7 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
     # insert, focus
     if event == initKeyEvent("KeyI"):
       mSelf.toggleInserting
-    elif event == initKeyEvent("KeyQ"):
+    elif event == initKeyEvent("Tab"):
       mSelf.toggleFocus
     # move cursor
     elif event == initKeyEvent("KeyA"):
@@ -757,11 +825,11 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
       mSelf.shiftFieldUp
     # flip field
     elif event == initKeyEvent("KeyF"):
-      mSelf.flipFieldH
+      mSelf.flip
     # undo, redo
-    elif event == initKeyEvent("KeyZ", shift = true):
+    elif event == initKeyEvent("KeyZ", control = true):
       mSelf.undo
-    elif event == initKeyEvent("KeyX", shift = true):
+    elif event == initKeyEvent("KeyY", control = true):
       mSelf.redo
     else:
       result = false
@@ -781,11 +849,13 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
       mSelf.forward
     elif event == initKeyEvent("KeyW"):
       mSelf.backward
-    elif event == initKeyEvent("Digit0"):
-      mSelf.reset false
+    elif event == initKeyEvent("KeyW", shift = true):
+      mSelf.backward(toStable = false)
+    elif event == initKeyEvent("KeyW", control = true):
+      mSelf.reset
     elif event == initKeyEvent("Space"):
       mSelf.forward(skip = true)
-    elif event == initKeyEvent("KeyN"):
+    elif event == initKeyEvent("KeyS", shift = true):
       mSelf.forward(replay = true)
     else:
       result = false
@@ -793,10 +863,12 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
     # forward / backward / reset
     if event == initKeyEvent("KeyW"):
       mSelf.backward
+    elif event == initKeyEvent("KeyW", shift = true):
+      mSelf.backward(toStable = false)
     elif event == initKeyEvent("KeyS"):
       mSelf.forward(replay = true)
-    elif event == initKeyEvent("Digit0"):
-      mSelf.reset false
+    elif event == initKeyEvent("KeyW", control = true):
+      mSelf.reset
     else:
       result = false
 
@@ -805,7 +877,7 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
 # ------------------------------------------------
 
 when defined(js):
-  import karax/[karax, karaxdsl, kdom, vdom]
+  import karax/[karaxdsl, vdom]
   import
     ../private/app/simulator/web/[
       controller,
@@ -821,76 +893,54 @@ when defined(js):
     ]
 
   # ------------------------------------------------
-  # JS - Keyboard Handler
-  # ------------------------------------------------
-
-  proc runKeyboardEventHandler*(mSelf; event: KeyEvent) {.inline.} =
-    ## Runs the keybaord event handler.
-    let needRedraw = mSelf.operate event
-    if needRedraw and not kxi.surpressRedraws:
-      kxi.redraw
-
-  proc runKeyboardEventHandler*(mSelf; event: dom.Event) {.inline.} =
-    ## Runs the keybaord event handler.
-    # assert event of KeyboardEvent # HACK: somehow this assertion fails
-    mSelf.runKeyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
-
-  func initKeyboardEventHandler*(mSelf): (event: dom.Event) -> void {.inline.} =
-    ## Returns the keyboard event handler.
-    (event: dom.Event) => mSelf.runKeyboardEventHandler event
-
-  # ------------------------------------------------
   # JS - Node
   # ------------------------------------------------
 
-  proc initSimulatorNode(mSelf; id: string): VNode {.inline.} =
+  proc initSimulatorNode(rSelf; id: string): VNode {.inline.} =
     ## Returns the node without the external section.
     ## `id` is shared with other node-creating procedures and need to be unique.
     buildHtml(tdiv):
       tdiv(class = "block"):
-        mSelf.initRequirementNode(id = id)
+        rSelf.initRequirementNode(id = id)
       tdiv(class = "block"):
         tdiv(class = "columns is-mobile is-variable is-1"):
           tdiv(class = "column is-narrow"):
-            if mSelf.mode != Edit:
+            if rSelf.mode != Edit:
               tdiv(class = "block"):
-                mSelf.initOperatingNode
+                rSelf.initOperatingNode
             tdiv(class = "block"):
-              mSelf.initFieldNode
-            if mSelf.mode != Edit:
+              rSelf.initFieldNode
+            if rSelf.mode != Edit:
               tdiv(class = "block"):
-                mSelf.initMessagesNode
-            if mSelf.editor:
+                rSelf.initMessagesNode
+            if rSelf.editor:
               tdiv(class = "block"):
-                mSelf.initSelectNode
+                rSelf.initSelectNode
             tdiv(class = "block"):
-              mSelf.initShareNode id
-          if mSelf.mode != Edit:
+              rSelf.initShareNode id
+          if rSelf.mode != Edit:
             tdiv(class = "column is-narrow"):
               tdiv(class = "block"):
-                mSelf.initImmediatePairsNode
+                rSelf.initImmediatePairsNode
           tdiv(class = "column is-narrow"):
             tdiv(class = "block"):
-              mSelf.initControllerNode
-            if mSelf.mode == Edit:
+              rSelf.initControllerNode
+            if rSelf.mode == Edit:
               tdiv(class = "block"):
-                mSelf.initPaletteNode
+                rSelf.initPaletteNode
             tdiv(class = "block"):
-              mSelf.initPairsNode
+              rSelf.initPairsNode
 
-  proc initSimulatorNode*(
-      mSelf; setKeyHandler = true, wrapSection = true, id = ""
-  ): VNode {.inline.} =
+  proc initSimulatorNode*(rSelf; wrapSection = true, id = ""): VNode {.inline.} =
     ## Returns the simulator node.
     ## `id` is shared with other node-creating procedures and need to be unique.
-    if setKeyHandler:
-      document.onkeydown = mSelf.initKeyboardEventHandler
+    let node = rSelf.initSimulatorNode id
 
     if wrapSection:
       result = buildHtml(section(class = "section")):
-        mSelf.initSimulatorNode id
+        node
     else:
-      result = mSelf.initSimulatorNode id
+      result = node
 
 else:
   import nigui
@@ -907,53 +957,21 @@ else:
       share,
     ]
 
-  type
-    SimulatorControl* = ref object of LayoutContainer ## Root control of the simulator.
-      simulator*: ref Simulator
-
-    SimulatorWindow* = ref object of WindowImpl ## Application window for the simulator.
-      simulator*: ref Simulator
-
-  # ------------------------------------------------
-  # Native - Keyboard Handler
-  # ------------------------------------------------
-
-  proc runKeyboardEventHandler*(
-      window: SimulatorWindow, event: KeyboardEvent, keys = downKeys()
-  ) {.inline.} =
-    ## Runs the keyboard event handler.
-    let needRedraw = window.simulator[].operate event.toKeyEvent keys
-    if needRedraw:
-      event.window.control.forceRedraw
-
-  proc runKeyboardEventHandler(event: KeyboardEvent) =
-    ## Runs the keyboard event handler.
-    let rawWindow = event.window
-    assert rawWindow of SimulatorWindow
-
-    cast[SimulatorWindow](rawWindow).runKeyboardEventHandler event
-
-  func initKeyboardEventHandler*(): (event: KeyboardEvent) -> void {.inline.} =
-    ## Returns the keyboard event handler.
-    runKeyboardEventHandler
+  type SimulatorControl* = ref object of LayoutContainer
+    ## Root control of the simulator.
 
   # ------------------------------------------------
   # Native - Control
   # ------------------------------------------------
 
-  proc initSimulatorControl*(simulator: ref Simulator): SimulatorControl {.inline.} =
+  proc initSimulatorControl*(rSelf): SimulatorControl {.inline.} =
     ## Returns the simulator control.
     result = new SimulatorControl
     result.init
     result.layout = Layout_Vertical
 
-    result.simulator = simulator
-
-    let assetsRef = new Assets
-    assetsRef[] = initAssets()
-
     # row=0
-    let reqControl = simulator.initRequirementControl
+    let reqControl = rSelf.initRequirementControl
     result.add reqControl
 
     # row=1
@@ -965,47 +983,21 @@ else:
     secondRow.add left
 
     let
-      field = simulator.initFieldControl assetsRef
-      messages = simulator.initMessagesControl assetsRef
-    left.add simulator.initOperatingControl assetsRef
+      assets = initAssets()
+      field = rSelf.initFieldControl assets
+      messages = rSelf.initMessagesControl assets
+    left.add rSelf.initOperatingControl assets
     left.add field
     left.add messages
-    left.add simulator.initSelectControl reqControl
-    left.add simulator.initShareControl
+    left.add rSelf.initSelectControl reqControl
+    left.add rSelf.initShareControl
 
     # row=1, center
-    secondRow.add simulator.initImmediatePairsControl assetsRef
+    secondRow.add rSelf.initImmediatePairsControl assets
 
     # row=1, right
-    secondRow.add simulator.initPairsControl assetsRef
+    secondRow.add rSelf.initPairsControl assets
 
     # set size
     reqControl.setWidth secondRow.naturalWidth
     messages.setWidth field.naturalWidth
-
-  proc initSimulatorWindow*(
-      simulator: ref Simulator,
-      title = "Pon!通シミュレーター",
-      setKeyHandler = true,
-  ): SimulatorWindow {.inline.} =
-    ## Returns the simulator window.
-    result = new SimulatorWindow
-    result.init
-
-    result.simulator = simulator
-
-    result.title = title
-    result.resizable = false
-    if setKeyHandler:
-      result.onKeyDown = runKeyboardEventHandler
-
-    let rootControl = simulator.initSimulatorControl
-    result.add rootControl
-
-    when defined(windows):
-      # FIXME: ad hoc adjustment needed on Windows and need improvement
-      result.width = (rootControl.naturalWidth.float * 1.1).int
-      result.height = (rootControl.naturalHeight.float * 1.1).int
-    else:
-      result.width = rootControl.naturalWidth
-      result.height = rootControl.naturalHeight

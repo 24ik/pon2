@@ -73,6 +73,9 @@ when defined(js):
     of Crown: "../assets/noticegarbage/crown.png"
     of Comet: "../assets/noticegarbage/comet.png"
 
+  const NoticeGarbageNoneImageSrc*: kstring = kstring"../assets/noticegarbage/none.png"
+    ## Image src of the no notice garbage.
+
   # ------------------------------------------------
   # JS - Others
   # ------------------------------------------------

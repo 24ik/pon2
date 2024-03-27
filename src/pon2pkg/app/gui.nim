@@ -31,8 +31,8 @@ type
     index*: Natural
 
   GuiApplication* = object ## GUI application.
-    simulator*: ref Simulator
-    replaySimulator*: ref Simulator
+    simulator: ref Simulator
+    replaySimulator: ref Simulator
 
     replay: GuiApplicationReplay
 
@@ -46,23 +46,23 @@ type
 using
   self: GuiApplication
   mSelf: var GuiApplication
+  rSelf: ref GuiApplication
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
-proc initGuiApplication*(simulator: Simulator): GuiApplication {.inline.} =
+proc initGuiApplication*(simulator: ref Simulator): GuiApplication {.inline.} =
   ## Returns a new GUI application.
-  result.simulator = new Simulator
-  result.simulator[] = simulator
-  result.replaySimulator = new Simulator
-  result.replaySimulator[] = simulator
+  result.simulator = simulator
+  result.replaySimulator.new
+  result.replaySimulator[] = initNazoPuyo[TsuField]().initSimulator(Replay, true)
 
   result.replay.hasData = false
   result.replay.pairsPositionsSeq = @[]
   result.replay.index = 0
 
-  result.editor = simulator.editor
+  result.editor = simulator[].editor
   result.focusEditor = false
   result.solving = false
   result.permuting = false
@@ -70,9 +70,32 @@ proc initGuiApplication*(simulator: Simulator): GuiApplication {.inline.} =
   result.progressBar.now = 0
   result.progressBar.total = 0
 
+proc initGuiApplication*(): GuiApplication {.inline.} =
+  ## Returns a new GUI application.
+  let simulator = new Simulator
+  simulator[] = initNazoPuyo[TsuField]().initSimulator(SimulatorMode.Play, true)
+
+  result = simulator.initGuiApplication
+
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
+
+func simulator*(self): Simulator {.inline.} =
+  ## Returns the simulator.
+  self.simulator[].copy
+
+func simulatorRef*(mSelf): ref Simulator {.inline.} =
+  ## Returns the reference to the simulator.
+  mSelf.simulator
+
+func replaySimulator*(self): Simulator {.inline.} =
+  ## Returns the replay simulator.
+  self.replaySimulator[].copy
+
+func replaySimulatorRef*(mSelf): ref Simulator {.inline.} =
+  ## Returns the reference to the replay simulator.
+  mSelf.replaySimulator
 
 func replay*(self): GuiApplicationReplay {.inline.} =
   ## Returns the pairs&positions for the replay simulator.
@@ -254,7 +277,7 @@ proc nextReplay*(mSelf) {.inline.} =
 
   mSelf.replaySimulator[].pairsPositions =
     mSelf.replay.pairsPositionsSeq[mSelf.replay.index]
-  mSelf.replaySimulator[].reset false
+  mSelf.replaySimulator[].reset
 
 proc prevReplay*(mSelf) {.inline.} =
   ## Shows the previous replay.
@@ -268,7 +291,7 @@ proc prevReplay*(mSelf) {.inline.} =
 
   mSelf.replaySimulator[].pairsPositions =
     mSelf.replay.pairsPositionsSeq[mSelf.replay.index]
-  mSelf.replaySimulator[].reset false
+  mSelf.replaySimulator[].reset
 
 # ------------------------------------------------
 # Keyboard Operation
@@ -277,7 +300,7 @@ proc prevReplay*(mSelf) {.inline.} =
 proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
   ## Does operation specified by the keyboard input.
   ## Returns `true` if any action is executed.
-  if event == initKeyEvent("KeyQ", shift = true):
+  if event == initKeyEvent("Tab", shift = true):
     mSelf.toggleFocus
     return true
 
@@ -305,80 +328,87 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
 # ------------------------------------------------
 
 when defined(js):
-  import ../private/app/gui/web/[controller, pagination, settings, progress, simulator]
+  import
+    ../private/app/gui/web/
+      [controller, pagination, settings, progress, simulator as simulatorModule]
 
   # ------------------------------------------------
   # JS - Keyboard Handler
   # ------------------------------------------------
 
-  proc runKeyboardEventHandler*(mSelf; event: KeyEvent) {.inline.} =
+  proc runKeyboardEventHandler*(rSelf; event: KeyEvent): bool {.inline, discardable.} =
     ## Runs the keyboard event handler.
-    let needRedraw = mSelf.operate event
-    if needRedraw and not kxi.surpressRedraws:
+    ## Returns `true` if any action is executed.
+    result = rSelf[].operate event
+    if result and not kxi.surpressRedraws:
       kxi.redraw
 
-  proc runKeyboardEventHandler*(mSelf; event: Event) {.inline.} =
+  proc runKeyboardEventHandler*(rSelf; event: Event): bool {.inline, discardable.} =
     ## Keybaord event handler.
-    # assert event of KeyboardEvent # HACK: somehow this assertion fails
-    mSelf.runKeyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
+    assert event of KeyboardEvent
 
-  proc initKeyboardEventHandler*(mSelf): (event: Event) -> void {.inline.} =
+    result = rSelf.runKeyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
+    if result:
+      event.preventDefault
+
+  proc initKeyboardEventHandler*(rSelf): (event: Event) -> void {.inline.} =
     ## Returns the keyboard event handler.
-    (event: dom.Event) => mSelf.runKeyboardEventHandler event
+    (event: Event) => (discard rSelf.runKeyboardEventHandler event)
 
   # ------------------------------------------------
   # JS - Node
   # ------------------------------------------------
 
-  proc initGuiApplicationNode(mSelf; id: string): VNode {.inline.} =
+  proc initGuiApplicationNode(rSelf; id: string): VNode {.inline.} =
     ## Returns the GUI application without the external section.
     ## `id` is shared with other node-creating procedures and need to be unique.
-    let simulatorNode =
-      mSelf.simulator[].initSimulatorNode(setKeyHandler = false, id = id)
+    let simulatorNode = rSelf.simulator.initSimulatorNode(id = id)
 
     result = buildHtml(tdiv(class = "columns is-mobile is-variable is-1")):
       tdiv(class = "column is-narrow"):
         simulatorNode
-      if mSelf.editor and mSelf.simulator[].kind == Nazo:
+      if rSelf.editor and rSelf.simulator[].kind == Nazo:
         tdiv(class = "column is-narrow"):
           section(class = "section"):
             tdiv(class = "block"):
-              mSelf.initEditorControllerNode id
+              rSelf.initEditorControllerNode id
             tdiv(class = "block"):
-              mSelf.initEditorSettingsNode id
-            if mSelf.progressBar.total > 0:
-              mSelf.initEditorProgressBarNode
-            if mSelf.replay.hasData:
+              rSelf.initEditorSettingsNode id
+            if rSelf.progressBar.total > 0:
+              rSelf.initEditorProgressBarNode
+            if rSelf.replay.hasData:
               tdiv(class = "block"):
-                mSelf.initEditorPaginationNode
-              if mSelf.replay.pairsPositionsSeq.len > 0:
+                rSelf.initEditorPaginationNode
+              if rSelf.replay.pairsPositionsSeq.len > 0:
                 tdiv(class = "block"):
-                  mSelf.initEditorSimulatorNode
+                  rSelf.initEditorSimulatorNode
 
   proc initGuiApplicationNode*(
-      mSelf; setKeyHandler = true, wrapSection = true, id = ""
+      rSelf; setKeyHandler = true, wrapSection = true, id = ""
   ): VNode {.inline.} =
     ## Returns the GUI application node.
     ## `id` is shared with other node-creating procedures and need to be unique.
     if setKeyHandler:
-      document.onkeydown = mSelf.initKeyboardEventHandler
+      document.onkeydown = rSelf.initKeyboardEventHandler
+
+    let node = rSelf.initGuiApplicationNode id
 
     if wrapSection:
       result = buildHtml(section(class = "section")):
-        mSelf.initGuiApplicationNode id
+        node
     else:
-      result = mSelf.initGuiApplicationNode id
+      result = node
 
 else:
-  import ../private/app/gui/native/[controller, pagination, simulator]
+  import
+    ../private/app/gui/native/[controller, pagination, simulator as simulatorModule]
 
   type
     GuiApplicationControl* = ref object of LayoutContainer
       ## Root control of the GUI application.
-      guiApplication*: ref GuiApplication
 
-    GuiApplicationWindow* = ref object of WindowImpl ## Application window.
-      guiApplication*: ref GuiApplication
+    GuiApplicationWindow* = ref object of WindowImpl ## GUI application window.
+      guiApplication: ref GuiApplication
 
   # ------------------------------------------------
   # Native - Keyboard Handler
@@ -386,39 +416,37 @@ else:
 
   proc runKeyboardEventHandler*(
       window: GuiApplicationWindow, event: KeyboardEvent, keys = downKeys()
-  ) {.inline.} =
+  ): bool {.inline, discardable.} =
     ## Runs the keyboard event handler.
-    let needRedraw = window.guiApplication[].operate event.toKeyEvent keys
-    if needRedraw:
+    ## Returns `true` if any action is executed.
+    result = window.guiApplication[].operate event.toKeyEvent keys
+    if result:
       event.window.control.forceRedraw
 
-  proc runKeyboardEventHandler(event: KeyboardEvent) =
-    ## Keyboard event handler.
+  proc runKeyboardEventHandler(event: KeyboardEvent): bool {.inline, discardable.} =
+    ## Runs the keyboard event handler.
+    ## Returns `true` if any action is executed.
     let rawWindow = event.window
     assert rawWindow of GuiApplicationWindow
 
-    cast[GuiApplicationWindow](rawWindow).runKeyboardEventHandler event
+    result = cast[GuiApplicationWindow](rawWindow).runKeyboardEventHandler event
 
   func initKeyboardEventHandler*(): (event: KeyboardEvent) -> void {.inline.} =
     ## Returns the keyboard event handler.
-    runKeyboardEventHandler
+    (event: KeyboardEvent) => (discard event.runKeyboardEventHandler)
 
   # ------------------------------------------------
-  # Native - Control
+  # Native - Control / Window
   # ------------------------------------------------
 
-  proc initGuiApplicationControl*(
-      guiApplication: ref GuiApplication
-  ): GuiApplicationControl {.inline.} =
+  proc initGuiApplicationControl*(rSelf): GuiApplicationControl {.inline.} =
     ## Returns the GUI application control.
     result = new GuiApplicationControl
     result.init
     result.layout = Layout_Horizontal
 
-    result.guiApplication = guiApplication
-
     # col=0
-    let simulatorControl = guiApplication[].simulator.initSimulatorControl
+    let simulatorControl = rSelf[].simulator.initSimulatorControl
     result.add simulatorControl
 
     # col=1
@@ -428,29 +456,29 @@ else:
     secondCol.padding = 10.scaleToDpi
     secondCol.spacing = 10.scaleToDpi
 
-    secondCol.add guiApplication.initEditorControllerControl
-    secondCol.add guiApplication.initEditorPaginationControl
-    secondCol.add guiApplication.initEditorSimulatorControl
+    secondCol.add rSelf.initEditorControllerControl
+    secondCol.add rSelf.initEditorPaginationControl
+    secondCol.add rSelf.initEditorSimulatorControl
 
   proc initGuiApplicationWindow*(
-      guiApplication: ref GuiApplication, title = "Pon!通", setKeyHandler = true
+      rSelf; title = "Pon!通", setKeyHandler = true
   ): GuiApplicationWindow {.inline.} =
     ## Returns the GUI application window.
     result = new GuiApplicationWindow
     result.init
 
-    result.guiApplication = guiApplication
+    result.guiApplication = rSelf
 
     result.title = title
     result.resizable = false
     if setKeyHandler:
-      result.onKeyDown = runKeyboardEventHandler
+      result.onKeyDown = initKeyboardEventHandler()
 
-    let rootControl = guiApplication.initGuiApplicationControl
+    let rootControl = rSelf.initGuiApplicationControl
     result.add rootControl
 
     when defined(windows):
-      # FIXME: ad hoc adjustment needed on Windows and need improvement
+      # FIXME: ad hoc adjustment needed on Windows and should be improved
       result.width = (rootControl.naturalWidth.float * 1.1).int
       result.height = (rootControl.naturalHeight.float * 1.1).int
     else:

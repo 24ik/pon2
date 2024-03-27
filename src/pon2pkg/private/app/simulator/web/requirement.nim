@@ -33,34 +33,38 @@ proc getSelectedNumberIndex(
   importjs: &"document.getElementById('{NumberSelectIdPrefix}' + (#)).selectedIndex"
 .} ## Returns the index of select form for requirement number.
 
-func initKindHandler(simulator: var Simulator, id: string): () -> void =
+func initKindHandler(simulator: ref Simulator, id: string): () -> void =
   ## Returns the handler for the kind.
   # NOTE: cannot inline due to lazy evaluation
-  () => (simulator.requirementKind = id.kstring.getSelectedKindIndex.RequirementKind)
+  () => (simulator[].requirementKind = id.kstring.getSelectedKindIndex.RequirementKind)
 
-func initColorHandler(simulator: var Simulator, id: string): () -> void =
-  ## Returns the handler for the kind.
-  # NOTE: cannot inline due to lazy evaluation
-  () => (simulator.requirementColor = id.kstring.getSelectedColorIndex.RequirementColor)
-
-func initNumberHandler(simulator: var Simulator, id: string): () -> void =
+func initColorHandler(simulator: ref Simulator, id: string): () -> void =
   ## Returns the handler for the kind.
   # NOTE: cannot inline due to lazy evaluation
   () =>
-    (simulator.requirementNumber = id.kstring.getSelectedNumberIndex.RequirementNumber)
+    (simulator[].requirementColor = id.kstring.getSelectedColorIndex.RequirementColor)
+
+func initNumberHandler(simulator: ref Simulator, id: string): () -> void =
+  ## Returns the handler for the kind.
+  # NOTE: cannot inline due to lazy evaluation
+  () =>
+    (
+      simulator[].requirementNumber =
+        id.kstring.getSelectedNumberIndex.RequirementNumber
+    )
 
 proc initRequirementNode*(
-    simulator: var Simulator, displayMode = false, id = ""
+    simulator: ref Simulator, displayMode = false, id = ""
 ): VNode {.inline.} =
   ## Returns the requirement node.
   ## `id` is shared with other node-creating procedures and need to be unique.
-  if simulator.kind == Regular:
+  if simulator[].kind == Regular:
     return buildHtml(text "　")
 
-  let req = simulator.nazoPuyoWrap.get:
+  let req = simulator[].nazoPuyoWrap.get:
     wrappedNazoPuyo.requirement
 
-  if displayMode or simulator.mode != Edit:
+  if displayMode or simulator[].mode != Edit:
     return buildHtml(bold):
       text $req
 

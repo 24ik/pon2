@@ -14,7 +14,7 @@ import ../../../../core/[cell, fieldtype]
 
 type OperatingPairControl* = ref object of LayoutContainer ## Operating control.
   simulator: ref Simulator
-  assets: ref Assets
+  assets: Assets
 
 proc cellDrawHandler(
     control: OperatingPairControl, event: DrawEvent, idx: range[-1 .. 1], col: Column
@@ -25,7 +25,7 @@ proc cellDrawHandler(
   canvas.areaColor = DefaultColor.toNiguiColor
   canvas.fill
 
-  canvas.drawImage control.assets[].cellImages[
+  canvas.drawImage control.assets.cellImages[
     if control.simulator[].mode == Edit:
       None
     else:
@@ -40,7 +40,7 @@ func initCellDrawHandler(
   (event: DrawEvent) => control.cellDrawHandler(event, idx, col)
 
 proc initOperatingControl*(
-    simulator: ref Simulator, assets: ref Assets
+    simulator: ref Simulator, assets: Assets
 ): OperatingPairControl {.inline.} =
   ## Returns an operating control.
   result = new OperatingPairControl
@@ -61,6 +61,6 @@ proc initOperatingControl*(
       let cell = newControl()
       line.add cell
 
-      cell.height = assets[].cellImageSize.height
-      cell.width = assets[].cellImageSize.width
+      cell.height = assets.cellImageSize.height
+      cell.width = assets.cellImageSize.width
       cell.onDraw = result.initCellDrawHandler(idx, col)

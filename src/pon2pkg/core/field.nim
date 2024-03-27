@@ -121,12 +121,20 @@ func flipH*(mSelf: var (TsuField or WaterField)) {.inline.} =
   mSelf = mSelf.flippedH
 
 # ------------------------------------------------
-# Put
+# Operate
 # ------------------------------------------------
 
 func put*(mSelf: var (TsuField or WaterField), pairPos: PairPosition) {.inline.} =
   ## Puts the pair.
   mSelf.put pairPos.pair, pairPos.position
+
+func willDrop*(self: TsuField or WaterField): bool {.inline.} =
+  ## Returns `true` if the field will drop.
+  ## Note that this function calls `drop` internally.
+  var field = self
+  field.drop
+
+  result = field != self
 
 # ------------------------------------------------
 # Move - Level0

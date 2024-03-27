@@ -25,15 +25,16 @@ export
   generate.GenerateError, generate.GenerateRequirementColor,
   generate.GenerateRequirement, generate.generate
 export
-  gui.GuiApplicationReplay, gui.GuiApplication, gui.initGuiApplication, gui.replay,
+  gui.GuiApplicationReplay, gui.GuiApplication, gui.initGuiApplication, gui.simulator,
+  gui.simulatorRef, gui.replaySimulator, gui.replaySimulatorRef, gui.replay,
   gui.focusEditor, gui.solving, gui.permuting, gui.progressBar, gui.toggleFocus,
   gui.solve, gui.permute, gui.nextReplay, gui.prevReplay, gui.operate
 export key.KeyEvent, key.initKeyEvent
 export
   marathon.MarathonMatchResult, marathon.Marathon, marathon.initMarathon,
-  marathon.matchResult, marathon.focusSimulator, marathon.toggleFocus,
-  marathon.nextResultPage, marathon.prevResultPage, marathon.match, marathon.play,
-  marathon.operate
+  marathon.simulator, marathon.simulatorRef, marathon.matchResult,
+  marathon.focusSimulator, marathon.toggleFocus, marathon.nextResultPage,
+  marathon.prevResultPage, marathon.match, marathon.play, marathon.operate
 export
   nazopuyo.NazoPuyoWrap, nazopuyo.initNazoPuyoWrap, nazopuyo.get, nazopuyo.rule,
   nazopuyo.`rule=`, nazopuyo.`==`
@@ -41,20 +42,21 @@ export permute.permute
 export
   simulator.SimulatorKind, simulator.SimulatorMode, simulator.SimulatorState,
   simulator.SimulatorEditing, simulator.Simulator, simulator.initSimulator,
-  simulator.rule, simulator.kind, simulator.mode, simulator.`rule=`, simulator.`kind=`,
-  simulator.`mode=`, simulator.nazoPuyoWrap, simulator.originalNazoPuyoWrap,
-  simulator.`pairsPositions=`, simulator.editing, simulator.`editingCell=`,
-  simulator.editor, simulator.state, simulator.score, simulator.operatingPosition,
-  simulator.toggleInserting, simulator.toggleFocus, simulator.moveCursorUp,
-  simulator.moveCursorDown, simulator.moveCursorRight, simulator.moveCursorLeft,
-  simulator.deletePairPosition, simulator.writeCell, simulator.shiftFieldUp,
-  simulator.shiftFieldDown, simulator.shiftFieldRight, simulator.shiftFieldLeft,
-  simulator.flipFieldV, simulator.flipFieldH, simulator.`requirementKind=`,
-  simulator.`requirementColor=`, simulator.`requirementNumber=`, simulator.undo,
-  simulator.redo, simulator.moveOperatingPositionRight,
-  simulator.moveOperatingPositionLeft, simulator.rotateOperatingPositionRight,
-  simulator.rotateOperatingPositionLeft, simulator.forward, simulator.backward,
-  simulator.reset, simulator.toUri, simulator.parseSimulator, simulator.operate
+  simulator.copy, simulator.rule, simulator.kind, simulator.mode, simulator.`rule=`,
+  simulator.`kind=`, simulator.`mode=`, simulator.nazoPuyoWrap,
+  simulator.initialNazoPuyoWrap, simulator.`pairsPositions=`, simulator.editing,
+  simulator.`editingCell=`, simulator.editor, simulator.state, simulator.score,
+  simulator.operatingPosition, simulator.toggleInserting, simulator.toggleFocus,
+  simulator.moveCursorUp, simulator.moveCursorDown, simulator.moveCursorRight,
+  simulator.moveCursorLeft, simulator.deletePairPosition, simulator.writeCell,
+  simulator.shiftFieldUp, simulator.shiftFieldDown, simulator.shiftFieldRight,
+  simulator.shiftFieldLeft, simulator.flipFieldV, simulator.flipFieldH, simulator.flip,
+  simulator.`requirementKind=`, simulator.`requirementColor=`,
+  simulator.`requirementNumber=`, simulator.undo, simulator.redo,
+  simulator.moveOperatingPositionRight, simulator.moveOperatingPositionLeft,
+  simulator.rotateOperatingPositionRight, simulator.rotateOperatingPositionLeft,
+  simulator.forward, simulator.backward, simulator.reset, simulator.toUri,
+  simulator.parseSimulator, simulator.operate
 export solve.solve
 
 when defined(js):
@@ -66,9 +68,7 @@ when defined(js):
   export
     marathon.runKeyboardEventHandler, marathon.initKeyboardEventHandler,
     marathon.initMarathonNode
-  export
-    simulator.runKeyboardEventHandler, simulator.initKeyboardEventHandler,
-    simulator.initSimulatorNode
+  export simulator.initSimulatorNode
 else:
   export color.toNiguiColor
   export
@@ -76,7 +76,4 @@ else:
     gui.initKeyboardEventHandler, gui.initGuiApplicationControl,
     gui.initGuiApplicationWindow
   export key.toKeyEvent
-  export
-    simulator.SimulatorControl, simulator.SimulatorWindow,
-    simulator.runKeyboardEventHandler, simulator.initKeyboardEventHandler,
-    simulator.initSimulatorControl, simulator.initSimulatorWindow
+  export simulator.SimulatorControl, simulator.initSimulatorControl

@@ -28,7 +28,7 @@ proc main*() =
   block:
     var marathon = initMarathon()
     marathon.match("rrgy")
-    doAssert marathon.matchResult.strsSeq.len > 1
+    doAssert marathon.matchResult.strings.len > 1
     check marathon.matchResult.pageIndex == 0
 
     marathon.nextResultPage
@@ -56,7 +56,7 @@ proc main*() =
       var count = 0
       for color in ColorPuyo:
         marathon.match($color)
-        count.inc marathon.matchResult.strsSeq.len
+        count.inc marathon.matchResult.strings.len
 
       check count == AllPairsCount
 
@@ -65,7 +65,7 @@ proc main*() =
       var count = 0
       for pattern in ["aa", "ab"]:
         marathon.match(pattern)
-        count.inc marathon.matchResult.strsSeq.len
+        count.inc marathon.matchResult.strings.len
 
       check count == AllPairsCount
 
@@ -89,4 +89,4 @@ proc main*() =
 
       marathon.play 0
       check wrappedNazoPuyo.puyoPuyo.pairsPositions[0].pair == GreenRed
-      check marathon.matchResult.strsSeq[0].startsWith "rg"
+      check marathon.matchResult.strings[0].startsWith "rg"

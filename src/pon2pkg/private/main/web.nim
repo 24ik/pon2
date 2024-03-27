@@ -67,8 +67,10 @@ proc workerTask*(
     result.messages = @["Caught invalid task: " & args[0]]
 
 # ------------------------------------------------
-# Main
+# Main - GUI
 # ------------------------------------------------
+
+var globalGuiApplication: ref GuiApplication = nil
 
 proc initFooterNode(): VNode {.inline.} =
   ## Returns the footer node.
@@ -76,18 +78,13 @@ proc initFooterNode(): VNode {.inline.} =
     tdiv(class = "content has-text-centered"):
       text &"Pon!通 Version {Version}"
 
-proc initGuiApplicationNode*(
-    routerData: RouterData,
-    pageInitialized: var bool,
-    guiApplication: var GuiApplication,
-): VNode {.inline.} =
-  ## Returns the GUI application node.
-  if pageInitialized:
+proc initMainGuiApplicationNode*(routerData: RouterData): VNode {.inline.} =
+  ## Returns the main GUI application node.
+  if not globalGuiApplication.isNil:
     return buildHtml(tdiv):
-      guiApplication.initGuiApplicationNode
+      globalGuiApplication.initGuiApplicationNode
       initFooterNode()
 
-  pageInitialized = true
   let query =
     if routerData.queryString == cstring"":
       ""
@@ -101,17 +98,36 @@ proc initGuiApplicationNode*(
   uri.query = query
 
   try:
-    guiApplication = uri.parseSimulator.initGuiApplication
+    let simulator = new Simulator
+    simulator[] = uri.parseSimulator
+
+    globalGuiApplication.new
+    globalGuiApplication[] = simulator.initGuiApplication
+
+    result = buildHtml(tdiv):
+      globalGuiApplication.initGuiApplicationNode
+      initFooterNode()
   except ValueError:
-    return buildHtml(tdiv):
+    globalGuiApplication = nil
+    result = buildHtml(tdiv):
       text "URL形式エラー"
 
-  result = buildHtml(tdiv):
-    guiApplication.initGuiApplicationNode
-    initFooterNode()
+# ------------------------------------------------
+# Main - Marathon
+# ------------------------------------------------
 
-proc initMainMarathonNode*(marathon: var Marathon): VNode {.inline.} =
+var globalMarathon: ref Marathon = nil
+
+proc initMainMarathonNode*(): VNode {.inline.} =
   ## Returns the main marathon node.
-  buildHtml(tdiv):
-    marathon.initMarathonNode
+  if not globalMarathon.isNil:
+    return buildHtml(tdiv):
+      globalMarathon.initMarathonNode
+      initFooterNode()
+
+  globalMarathon.new
+  globalMarathon[] = initMarathon()
+
+  result = buildHtml(tdiv):
+    globalMarathon.initMarathonNode
     initFooterNode()

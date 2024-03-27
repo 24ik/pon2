@@ -14,20 +14,20 @@ import ../../../../core/[pair, pairposition]
 
 const ShowPairCount = 8
 
-proc initPlayHandler(marathon: var Marathon, pairsIdx: Natural): () -> void =
+func initPlayHandler(marathon: ref Marathon, pairsIdx: Natural): () -> void =
   ## Returns a new click handler for play buttons.
   # NOTE: inlining does not work due to lazy evaluation
-  () => (marathon.play pairsIdx)
+  () => (marathon[].play pairsIdx)
 
-proc initMarathonSearchResultNode*(marathon: var Marathon): VNode {.inline.} =
+proc initMarathonSearchResultNode*(marathon: ref Marathon): VNode {.inline.} =
   ## Returns the search result node for pairs DB.
   result = buildHtml(table(class = "table")):
     tbody:
       let
-        beginPairIdx = marathon.matchResult.pageIndex * MatchResultPairsCountPerPage
+        beginPairIdx = marathon[].matchResult.pageIndex * MatchResultPairsCountPerPage
         endPairIdx = min(
-          marathon.matchResult.pageIndex.succ * MatchResultPairsCountPerPage,
-          marathon.matchResult.strsSeq.len,
+          marathon[].matchResult.pageIndex.succ * MatchResultPairsCountPerPage,
+          marathon[].matchResult.strings.len,
         )
 
       for pairsIdx in beginPairIdx ..< endPairIdx:
@@ -40,7 +40,7 @@ proc initMarathonSearchResultNode*(marathon: var Marathon): VNode {.inline.} =
                 italic(class = "fa-solid fa-gamepad")
 
           let pairsPositions =
-            marathon.matchResult.strsSeq[pairsIdx][0 ..< ShowPairCount * 2].toPairsPositions
+            marathon[].matchResult.strings[pairsIdx][0 ..< ShowPairCount * 2].toPairsPositions
           for idx in 0 ..< ShowPairCount:
             let pair = pairsPositions[idx].pair
 
