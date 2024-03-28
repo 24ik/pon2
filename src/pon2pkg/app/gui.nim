@@ -56,7 +56,7 @@ proc initGuiApplication*(simulator: ref Simulator): GuiApplication {.inline.} =
   ## Returns a new GUI application.
   result.simulator = simulator
   result.replaySimulator.new
-  result.replaySimulator[] = initNazoPuyo[TsuField]().initSimulator(Replay, true)
+  result.replaySimulator[] = initNazoPuyo[TsuField]().initSimulator(Replay, false)
 
   result.replay.hasData = false
   result.replay.pairsPositionsSeq = @[]
