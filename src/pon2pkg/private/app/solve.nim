@@ -449,9 +449,10 @@ func toStr(moveResult: MoveResult): string {.inline.} =
 
 func toStr*[F: TsuField or WaterField](node: Node[F]): string {.inline.} =
   ## Returns the string representation of the node.
-  var strs = newSeqOfCap[string](15)
+  var strs = newSeqOfCap[string](16)
 
   strs.add $node.nazoPuyo.toUriQuery Izumiya
+  strs.add $node.nazoPuyo.puyoPuyo.operatingIndex
   strs.add node.moveResult.toStr
 
   strs.add node.disappearedColors.toStr
@@ -522,16 +523,18 @@ func parseNode*[F: TsuField or WaterField](str: string): Node[F] {.inline.} =
   let strs = str.split NodeStrSep
 
   result.nazoPuyo = parseNazoPuyo[F](strs[0], Izumiya)
-  result.moveResult = strs[1].parseMoveResult
+  for _ in 1 .. strs[1].parseInt:
+    result.nazoPuyo.puyoPuyo.incrementOperatingIndex
+  result.moveResult = strs[2].parseMoveResult
 
-  result.disappearedColors = strs[2].parseColors
-  result.disappearedCount = strs[3].parseInt
+  result.disappearedColors = strs[3].parseColors
+  result.disappearedCount = strs[4].parseInt
 
-  var idx = 4
+  var idx = 5
   for color in ColorPuyo.low .. ColorPuyo.high:
     result.fieldCounts[color] = strs[idx].parseInt
     idx.inc
   for color in ColorPuyo.low .. ColorPuyo.high:
     result.pairsCounts[color] = strs[idx].parseInt
     idx.inc
-  result.garbageCount = strs[14].parseInt
+  result.garbageCount = strs[15].parseInt

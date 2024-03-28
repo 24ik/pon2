@@ -91,7 +91,7 @@ proc asyncSolve[F: TsuField or WaterField](
   assert reqKind in {
     RequirementKind.Clear, DisappearCount, DisappearCountMore, ChainClear,
     ChainMoreClear, DisappearCountSametime, DisappearCountMoreSametime, DisappearPlace,
-    DisappearPlaceMore, DisappearConnect, DisappearConnectMore
+    DisappearPlaceMore, DisappearConnect, DisappearConnectMore,
   }
 
   case nazo.requirement.color

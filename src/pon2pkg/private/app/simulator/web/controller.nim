@@ -104,27 +104,21 @@ proc initControllerNode*(simulator: ref Simulator): VNode {.inline.} =
             italic(class = "fa-solid fa-arrow-right")
     of Replay:
       tdiv(class = "buttons is-centered mb-0"):
+        button(class = "button is-light", onclick = () => simulator[].reset):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-backward-fast")
         button(
           class = "button is-light",
           onclick = () => simulator[].backward(toStable = false),
         ):
           span(class = "icon"):
             italic(class = "fa-solid fa-backward")
-        button(
-          class = "button is-light", onclick = () => simulator[].forward(skip = true)
-        ):
-          span(class = "icon"):
-            italic(class = "fa-solid fa-forward")
       tdiv(class = "buttons is-centered mb-0"):
-        button(class = "button is-light", onclick = () => simulator[].reset):
+        button(class = "button is-light", onclick = () => simulator[].backward):
           span(class = "icon"):
-            italic(class = "fa-solid fa-backward-fast")
+            italic(class = "fa-solid fa-backward-step")
         button(
           class = "button is-light", onclick = () => simulator[].forward(replay = true)
         ):
           span(class = "icon"):
             italic(class = "fa-solid fa-forward-step")
-      tdiv(class = "buttons is-centered mb-0"):
-        button(class = "button is-light", onclick = () => simulator[].backward):
-          span(class = "icon"):
-            italic(class = "fa-solid fa-backward-step")
