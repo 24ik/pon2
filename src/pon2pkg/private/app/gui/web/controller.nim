@@ -8,6 +8,7 @@
 import std/[sugar]
 import karax/[karax, karaxdsl, kbase, vdom]
 import ./[settings]
+import ../../[misc]
 import ../../../../app/[gui, nazopuyo, simulator]
 import ../../../../core/[nazopuyo]
 
@@ -23,10 +24,10 @@ proc initEditorControllerNode*(
     workerDisable = workerRunning or noPair
 
     focusButtonClass =
-      if guiApplication[].focusEditor:
-        kstring"button"
-      else:
+      if guiApplication[].focusReplay:
         kstring"button is-selected is-primary"
+      else:
+        kstring"button"
     solveButtonClass =
       if guiApplication[].solving:
         kstring"button is-loading"
@@ -54,5 +55,6 @@ proc initEditorControllerNode*(
       class = permuteButtonClass, disabled = workerDisable, onclick = permuteHandler
     ):
       text "ツモ並べ替え"
-    button(class = focusButtonClass, onclick = () => guiApplication[].toggleFocus):
-      text "シミュを操作"
+    if not isMobile():
+      button(class = focusButtonClass, onclick = () => guiApplication[].toggleFocus):
+        text "解答を操作"

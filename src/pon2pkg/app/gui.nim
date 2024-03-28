@@ -37,7 +37,7 @@ type
     replay: GuiApplicationReplay
 
     editor: bool
-    focusEditor: bool
+    focusReplay: bool
     solving: bool
     permuting: bool
 
@@ -63,7 +63,7 @@ proc initGuiApplication*(simulator: ref Simulator): GuiApplication {.inline.} =
   result.replay.index = 0
 
   result.editor = simulator[].editor
-  result.focusEditor = false
+  result.focusReplay = false
   result.solving = false
   result.permuting = false
 
@@ -101,9 +101,9 @@ func replay*(self): GuiApplicationReplay {.inline.} =
   ## Returns the pairs&positions for the replay simulator.
   self.replay
 
-func focusEditor*(self): bool {.inline.} =
-  ## Returns `true` if the editor simulator is focused.
-  self.focusEditor
+func focusReplay*(self): bool {.inline.} =
+  ## Returns `true` if the replay simulator is focused.
+  self.focusReplay
 
 func solving*(self): bool {.inline.} =
   ## Returns `true` if a nazo puyo is being solved.
@@ -122,8 +122,8 @@ func progressBar*(self): tuple[now: int, total: int] {.inline.} =
 # Edit - Other
 # ------------------------------------------------
 
-func toggleFocus*(mSelf) {.inline.} = ## Toggles focusing to editor tab or not.
-  mSelf.focusEditor.toggle
+func toggleFocus*(mSelf) {.inline.} = ## Toggles focusing to replay simulator or not.
+  mSelf.focusReplay.toggle
 
 # ------------------------------------------------
 # Solve
@@ -140,7 +140,7 @@ proc updateReplaySimulator[F: TsuField or WaterField](
   assert mSelf.replay.hasData
 
   if mSelf.replay.pairsPositionsSeq.len > 0:
-    mSelf.focusEditor = true
+    mSelf.focusReplay = true
     mSelf.replay.index = 0
 
     var nazo2 = nazo
@@ -148,7 +148,7 @@ proc updateReplaySimulator[F: TsuField or WaterField](
     mSelf.replaySimulator[] =
       nazo2.initSimulator(mSelf.replaySimulator[].mode, mSelf.replaySimulator[].editor)
   else:
-    mSelf.focusEditor = false
+    mSelf.focusReplay = false
 
 proc solve*(
     mSelf;
@@ -304,7 +304,7 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
     mSelf.toggleFocus
     return true
 
-  if mSelf.focusEditor:
+  if mSelf.focusReplay:
     # move replay
     if event == initKeyEvent("KeyA"):
       mSelf.prevReplay
