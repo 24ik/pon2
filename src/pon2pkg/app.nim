@@ -27,7 +27,7 @@ export
 export
   gui.GuiApplicationReplay, gui.GuiApplication, gui.initGuiApplication, gui.simulator,
   gui.simulatorRef, gui.replaySimulator, gui.replaySimulatorRef, gui.replay,
-  gui.focusEditor, gui.solving, gui.permuting, gui.progressBar, gui.toggleFocus,
+  gui.focusReplay, gui.solving, gui.permuting, gui.progressBar, gui.toggleFocus,
   gui.solve, gui.permute, gui.nextReplay, gui.prevReplay, gui.operate
 export key.KeyEvent, key.initKeyEvent
 export
