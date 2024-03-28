@@ -311,6 +311,7 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
 
 when defined(js):
   import karax/[karax, karaxdsl, kdom, vdom]
+  import ../private/app/[misc]
   import
     ../private/app/marathon/web/
       [controller, pagination, searchbar, searchresult, simulator as simulatorModule]
@@ -354,8 +355,9 @@ when defined(js):
       tdiv(class = "column is-narrow"):
         tdiv(class = "block"):
           rSelf.initMarathonSearchBarNode id
-        tdiv(class = "block"):
-          rSelf.initMarathonFocusControllerNode
+        if not isMobile():
+          tdiv(class = "block"):
+            rSelf.initMarathonFocusControllerNode
         tdiv(class = "block"):
           rSelf.initMarathonPaginationNode
         if rSelf.matchResult.strings.len > 0:
