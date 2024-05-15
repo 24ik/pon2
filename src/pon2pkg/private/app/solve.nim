@@ -497,17 +497,17 @@ func parseMoveResult(str: string): MoveResult {.inline.} =
   of Level0:
     discard
   of Level1:
-    result.detailDisappearCounts = newSeq[array[Puyo, int]](strs[10].parseInt)
+    result.detailDisappearCounts = newSeq[array[Puyo, int]](strs[9].parseInt)
 
-    var idx = 11
+    var idx = 10
     for counts in result.detailDisappearCounts.mitems:
       for puyo in Puyo.low .. Puyo.high:
         counts[puyo] = strs[idx].parseInt
         idx.inc
   of Level2:
-    result.fullDisappearCounts = newSeq[array[ColorPuyo, seq[int]]](strs[10].parseInt)
+    result.fullDisappearCounts = newSeq[array[ColorPuyo, seq[int]]](strs[9].parseInt)
 
-    var idx = 11
+    var idx = 10
     for detailCounts in result.fullDisappearCounts.mitems:
       for color in ColorPuyo.low .. ColorPuyo.high:
         detailCounts[color] = newSeq[int](strs[idx].parseInt)
