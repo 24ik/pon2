@@ -23,7 +23,6 @@ jobs:
         os:
           - ubuntu-latest
           - windows-latest
-          - macOS-latest
 
     steps:
       - uses: actions/checkout@v3
@@ -69,12 +68,10 @@ jobs:
       - run: |-
           zip -rv Linux.zip ./Linux
           zip -rv Windows.zip ./Windows
-          zip -rv macOS.zip ./macOS
 
       - uses: softprops/action-gh-release@v1
         with:
           files: |-
             ./Linux.zip
             ./Windows.zip
-            ./macOS.zip
           generate_release_notes: true
