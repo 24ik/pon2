@@ -10,7 +10,7 @@ import ./[nazopuyo, solve]
 import
   ../core/[
     cell, field, fieldtype, nazopuyo, pair, pairposition, position, puyopuyo,
-    requirement, rule
+    requirement, rule,
   ]
 import ../private/[misc]
 
@@ -34,8 +34,8 @@ type
     number*: RequirementNumber
 
 const
-  MaxTrialCountSplit = 10000
-  MaxTrialCountGenerate = 100000
+  MaxTrialCountSplit = 10_000
+  MaxTrialCountGenerate = 100_000_000
 
 # ------------------------------------------------
 # Misc
@@ -149,7 +149,7 @@ func split(
   if ratios.anyIt it.isSome and it.get != 0:
     raise newException(
       GenerateError,
-      "If `ratios` contains `none`, it can contain only `none` and `some(0)."
+      "If `ratios` contains `none`, it can contain only `none` and `some(0).",
     )
 
   result = newSeqOfCap[int](ratios.len)
@@ -238,7 +238,7 @@ func generatePuyoPuyo[F: TsuField or WaterField](
 
 const ColorToReqColor: array[ColorPuyo, RequirementColor] = [
   RequirementColor.Red, RequirementColor.Green, RequirementColor.Blue,
-  RequirementColor.Yellow, RequirementColor.Purple
+  RequirementColor.Yellow, RequirementColor.Purple,
 ]
 
 {.push warning[UnsafeSetLen]: off.}
@@ -301,7 +301,7 @@ proc generate*[F: TsuField or WaterField](
         total: Option[Natural],
         vertical: Option[Natural],
         horizontal: Option[Natural],
-        lShape: Option[Natural]
+        lShape: Option[Natural],
       ],
     allowDouble: bool,
     allowLastDouble: bool,
@@ -381,7 +381,7 @@ proc generate*[F: TsuField or WaterField](
         total: Option[Natural],
         vertical: Option[Natural],
         horizontal: Option[Natural],
-        lShape: Option[Natural]
+        lShape: Option[Natural],
       ],
     allowDouble: bool,
     allowLastDouble: bool,
@@ -419,7 +419,7 @@ proc generate*(
         total: Option[Natural],
         vertical: Option[Natural],
         horizontal: Option[Natural],
-        lShape: Option[Natural]
+        lShape: Option[Natural],
       ],
     allowDouble: bool,
     allowLastDouble: bool,
@@ -431,12 +431,12 @@ proc generate*(
   of Tsu:
     generate[TsuField](
       seed, req, moveCount, colorCount, heights, puyoCounts, connect3Counts,
-      allowDouble, allowLastDouble
+      allowDouble, allowLastDouble,
     ).initNazoPuyoWrap
   of Water:
     generate[WaterField](
       seed, req, moveCount, colorCount, heights, puyoCounts, connect3Counts,
-      allowDouble, allowLastDouble
+      allowDouble, allowLastDouble,
     ).initNazoPuyoWrap
 
 proc generate*(
@@ -451,7 +451,7 @@ proc generate*(
         total: Option[Natural],
         vertical: Option[Natural],
         horizontal: Option[Natural],
-        lShape: Option[Natural]
+        lShape: Option[Natural],
       ],
     allowDouble: bool,
     allowLastDouble: bool,
@@ -463,10 +463,10 @@ proc generate*(
   of Tsu:
     generate[TsuField](
       req, moveCount, colorCount, heights, puyoCounts, connect3Counts, allowDouble,
-      allowLastDouble
+      allowLastDouble,
     ).initNazoPuyoWrap
   of Water:
     generate[WaterField](
       req, moveCount, colorCount, heights, puyoCounts, connect3Counts, allowDouble,
-      allowLastDouble
+      allowLastDouble,
     ).initNazoPuyoWrap
