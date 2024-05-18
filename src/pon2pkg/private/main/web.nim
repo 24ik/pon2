@@ -43,20 +43,20 @@ proc workerTask*(
       result.returnCode = Failure
       result.messages = @["Caught invalid number of arguments: " & $args]
   of $Permute:
-    if args2.len == 3:
+    if args2.len == 2:
       result.returnCode = Success
 
       let nazoPuyoWrap: NazoPuyoWrap
-      case args2[2].parseRule
+      case args2[1].parseRule
       of Tsu:
-        nazoPuyoWrap = parseNazoPuyo[TsuField](args2[1], Izumiya).initNazoPuyoWrap
+        nazoPuyoWrap = parseNazoPuyo[TsuField](args2[0], Izumiya).initNazoPuyoWrap
       of Water:
-        nazoPuyoWrap = parseNazoPuyo[WaterField](args2[1], Izumiya).initNazoPuyoWrap
+        nazoPuyoWrap = parseNazoPuyo[WaterField](args2[0], Izumiya).initNazoPuyoWrap
 
       nazoPuyoWrap.get:
         let answers = wrappedNazoPuyo.solve(earlyStopping = true)
         if answers.len == 1:
-          result.messages = @[$true, args2[0], answers[0].toUriQuery Izumiya]
+          result.messages = @[$true, answers[0].toUriQuery Izumiya]
         else:
           result.messages = @[$false]
     else:
