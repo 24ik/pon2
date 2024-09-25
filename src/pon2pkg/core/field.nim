@@ -334,10 +334,10 @@ func parseField*[F: TsuField or WaterField](str: string): F {.inline.} =
 # ------------------------------------------------
 
 const
-  IzumiyaUriRuleFieldSep = "-"
-  IzumiyaUriAirWaterSep = "~"
+  IkUriRuleFieldSep = "-"
+  IkUriAirWaterSep = "~"
 
-  IzumiyaUriToRule = collect:
+  IkUriToRule = collect:
     for rule in Rule:
       {$rule: rule}
 
@@ -355,7 +355,7 @@ func toUriQuery*(self: TsuField or WaterField, host: SimulatorHost): string {.in
   let arr = self.toArray
 
   case host
-  of Izumiya:
+  of Ik:
     let cellsStr =
       case self.rule
       of Tsu:
@@ -376,11 +376,10 @@ func toUriQuery*(self: TsuField or WaterField, host: SimulatorHost): string {.in
               for cell in arr[row]:
                 $cell
 
-        airChars.join.strip(trailing = false, chars = {($None)[0]}) &
-          IzumiyaUriAirWaterSep &
+        airChars.join.strip(trailing = false, chars = {($None)[0]}) & IkUriAirWaterSep &
           underWaterChars.join.strip(leading = false, chars = {($None)[0]})
 
-    result = $self.rule & IzumiyaUriRuleFieldSep & cellsStr
+    result = $self.rule & IkUriRuleFieldSep & cellsStr
   of Ishikawa, Ips:
     var lines = newSeqOfCap[string](Height)
     for row in Row.low .. Row.high:
@@ -408,14 +407,14 @@ func parseField*[F: TsuField or WaterField](
   arr[Row.low][Column.low] = Cell.low # dummy to remove warning
 
   case host
-  of Izumiya:
-    let strs = query.split IzumiyaUriRuleFieldSep
-    if strs.len != 2 or strs[0] notin IzumiyaUriToRule:
+  of Ik:
+    let strs = query.split IkUriRuleFieldSep
+    if strs.len != 2 or strs[0] notin IkUriToRule:
       raise newException(ValueError, "Invalid field: " & query)
 
-    if strs[0] notin IzumiyaUriToRule:
+    if strs[0] notin IkUriToRule:
       raise newException(ValueError, "Invalid field: " & query)
-    let rule = IzumiyaUriToRule[strs[0]]
+    let rule = IkUriToRule[strs[0]]
 
     when F is TsuField:
       if rule != Tsu:
@@ -434,7 +433,7 @@ func parseField*[F: TsuField or WaterField](
         for col in Column.low .. Column.high:
           arr[row][col] = parseCell $cellsStr[row * Width + col]
     of Water:
-      let cellsStrs = strs[1].split IzumiyaUriAirWaterSep
+      let cellsStrs = strs[1].split IkUriAirWaterSep
       if cellsStrs.len != 2 or cellsStrs[0].len > AirHeight * Width or
           cellsStrs[1].len > WaterHeight * Width:
         raise newException(ValueError, "Invalid field: " & query)

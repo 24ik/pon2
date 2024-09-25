@@ -89,7 +89,7 @@ func parsePairPosition*(query: string, host: SimulatorHost): PairPosition {.inli
   ## If the query is invalid, `ValueError` is raised.
   # NOTE: this function is not robust; dependent on the current URI format
   case host
-  of Izumiya:
+  of Ik:
     result.pair = query[0 ..< 2].parsePair host
     result.position = query[2 ..^ 1].parsePosition host
   of Ishikawa, Ips:
@@ -100,7 +100,9 @@ func parsePairPosition*(query: string, host: SimulatorHost): PairPosition {.inli
 # PairsPositions <-> URI
 # ------------------------------------------------
 
-func toUriQuery*(pairsPositions: PairsPositions, host: SimulatorHost): string {.inline.} =
+func toUriQuery*(
+    pairsPositions: PairsPositions, host: SimulatorHost
+): string {.inline.} =
   ## Returns the URI query converted from the pairs&positions.
   let strs = collect:
     for pairPos in pairsPositions:
@@ -108,7 +110,9 @@ func toUriQuery*(pairsPositions: PairsPositions, host: SimulatorHost): string {.
 
   result = strs.join
 
-func parsePairsPositions*(query: string, host: SimulatorHost): PairsPositions {.inline.} =
+func parsePairsPositions*(
+    query: string, host: SimulatorHost
+): PairsPositions {.inline.} =
   ## Returns the pairs&positions converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
   # NOTE: this function is not robust; dependent on the current URI format
@@ -118,7 +122,7 @@ func parsePairsPositions*(query: string, host: SimulatorHost): PairsPositions {.
   result = newSeqOfCap[PairPosition](query.len div 2)
 
   case host
-  of Izumiya:
+  of Ik:
     var idx = 0
     while idx < query.len:
       try:

@@ -619,20 +619,20 @@ const
     for mode in SimulatorMode:
       {$mode: mode}
 
-func toUri*(self; withPositions: bool, editor: bool, host = Izumiya): Uri {.inline.} =
+func toUri*(self; withPositions: bool, editor: bool, host = Ik): Uri {.inline.} =
   ## Returns the URI converted from the simulator.
   ## Any moves are reset.
   ## `self.editor` is overridden with `editor`.
   result = initUri()
   result.scheme =
     case host
-    of Izumiya, Ishikawa: "https"
+    of Ik, Ishikawa: "https"
     of Ips: "http"
   result.hostname = $host
 
   # path
   case host
-  of Izumiya:
+  of Ik:
     result.path = "/pon2/gui/index.html"
   of Ishikawa, Ips:
     let modeChar =
@@ -666,7 +666,7 @@ func toUri*(self; withPositions: bool, editor: bool, host = Izumiya): Uri {.inli
         nazo.toUriQuery host
 
   case host
-  of Izumiya:
+  of Ik:
     # editor, kind, mode
     var queries = newSeq[(string, string)](0)
     if editor:
@@ -678,7 +678,7 @@ func toUri*(self; withPositions: bool, editor: bool, host = Izumiya): Uri {.inli
   of Ishikawa, Ips:
     result.query = mainQuery
 
-func toUri*(self; withPositions: bool, host = Izumiya): Uri {.inline.} =
+func toUri*(self; withPositions: bool, host = Ik): Uri {.inline.} =
   ## Returns the URI converted from the simulator.
   ## Any moves are reset.
   self.toUri(withPositions, self.editor, host)
@@ -689,7 +689,7 @@ func parseSimulator*(uri: Uri): Simulator {.inline.} =
   result = initPuyoPuyo[TsuField]().initSimulator # HACK: dummy to suppress warning
 
   case uri.hostname
-  of $Izumiya:
+  of $Ik:
     if uri.path != "/pon2/gui/index.html":
       raise newException(ValueError, "Invalid simulator: " & $uri)
 
@@ -726,20 +726,18 @@ func parseSimulator*(uri: Uri): Simulator {.inline.} =
     case kind
     of Regular:
       try:
-        result = parsePuyoPuyo[TsuField](mainQuery, Izumiya).initSimulator(mode, editor)
+        result = parsePuyoPuyo[TsuField](mainQuery, Ik).initSimulator(mode, editor)
       except ValueError:
         try:
-          result =
-            parsePuyoPuyo[WaterField](mainQuery, Izumiya).initSimulator(mode, editor)
+          result = parsePuyoPuyo[WaterField](mainQuery, Ik).initSimulator(mode, editor)
         except ValueError:
           raise newException(ValueError, "Invalid simulator: " & $uri)
     of Nazo:
       try:
-        result = parseNazoPuyo[TsuField](mainQuery, Izumiya).initSimulator(mode, editor)
+        result = parseNazoPuyo[TsuField](mainQuery, Ik).initSimulator(mode, editor)
       except ValueError:
         try:
-          result =
-            parseNazoPuyo[WaterField](mainQuery, Izumiya).initSimulator(mode, editor)
+          result = parseNazoPuyo[WaterField](mainQuery, Ik).initSimulator(mode, editor)
         except ValueError:
           raise newException(ValueError, "Invalid simulator: " & $uri)
   of $Ishikawa, $Ips:

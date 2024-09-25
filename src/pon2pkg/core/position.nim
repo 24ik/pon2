@@ -125,11 +125,11 @@ func childDirection*(self): Direction {.inline.} =
 const
   RightPositions: array[Position, Position] = [
     None, Up1, Up2, Up3, Up4, Up5, Up5, Right1, Right2, Right3, Right4, Right4, Down1,
-    Down2, Down3, Down4, Down5, Down5, Left2, Left3, Left4, Left5, Left5
+    Down2, Down3, Down4, Down5, Down5, Left2, Left3, Left4, Left5, Left5,
   ]
   LeftPositions: array[Position, Position] = [
     None, Up0, Up0, Up1, Up2, Up3, Up4, Right0, Right0, Right1, Right2, Right3, Down0,
-    Down0, Down1, Down2, Down3, Down4, Left1, Left1, Left2, Left3, Left4
+    Down0, Down1, Down2, Down3, Down4, Left1, Left1, Left2, Left3, Left4,
   ]
 
 func movedRight*(self): Position {.inline.} = ## Returns the position moved rightward.
@@ -151,11 +151,11 @@ func moveLeft*(mSelf) {.inline.} = ## Moves the position leftward.
 const
   RightRotatePositions: array[Position, Position] = [
     None, Right0, Right1, Right2, Right3, Right4, Right4, Down0, Down1, Down2, Down3,
-    Down4, Left1, Left1, Left2, Left3, Left4, Left5, Up1, Up2, Up3, Up4, Up5
+    Down4, Left1, Left1, Left2, Left3, Left4, Left5, Up1, Up2, Up3, Up4, Up5,
   ]
   LeftRotatePositions: array[Position, Position] = [
     None, Left1, Left1, Left2, Left3, Left4, Left5, Up0, Up1, Up2, Up3, Up4, Right0,
-    Right1, Right2, Right3, Right4, Right4, Down1, Down2, Down3, Down4, Down5
+    Right1, Right2, Right3, Right4, Right4, Down1, Down2, Down3, Down4, Down5,
   ]
 
 func rotatedRight*(self): Position {.inline.} =
@@ -202,7 +202,7 @@ const
 func toUriQuery*(self; host: SimulatorHost): string {.inline.} =
   ## Returns the URI query converted from the position.
   case host
-  of Izumiya:
+  of Ik:
     $self
   of Ishikawa, Ips:
     $PosToIshikawaUri[self.ord]
@@ -211,7 +211,7 @@ func parsePosition*(query: string, host: SimulatorHost): Position {.inline.} =
   ## Returns the position converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
   case host
-  of Izumiya:
+  of Ik:
     result = query.parsePosition
   of Ishikawa, Ips:
     try:

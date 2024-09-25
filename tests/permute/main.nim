@@ -17,10 +17,10 @@ proc main*() =
     let
       nazo = parseNazoPuyo[TsuField]("S00r0Mm6iOi_g1g1__u03", Ishikawa)
 
-      result1gbgb = "gb12gb12".parsePairsPositions Izumiya
-      result1gbbg = "gb12bg21".parsePairsPositions Izumiya
-      result1bgbg = "bg21bg21".parsePairsPositions Izumiya
-      result2 = "gg1Nbb2N".parsePairsPositions Izumiya
+      result1gbgb = "gb12gb12".parsePairsPositions Ik
+      result1gbbg = "gb12bg21".parsePairsPositions Ik
+      result1bgbg = "bg21bg21".parsePairsPositions Ik
+      result2 = "gg1Nbb2N".parsePairsPositions Ik
 
     # allow double
     # w/o fixMoves

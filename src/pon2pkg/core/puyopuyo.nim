@@ -307,7 +307,7 @@ func toUriQuery*[F: TsuField or WaterField](
 ): string {.inline.} =
   ## Returns the URI query converted from the Puyo Puyo.
   case host
-  of Izumiya:
+  of Ik:
     encodeQuery [
       (FieldKey, self.field.toUriQuery host),
       (PairsPositionsKey, self.pairsPositions.toUriQuery host),
@@ -323,7 +323,7 @@ func parsePuyoPuyo*[F: TsuField or WaterField](
   result.operatingIdx = 0
 
   case host
-  of Izumiya:
+  of Ik:
     var
       fieldSet = false
       pairsPositionsSet = false

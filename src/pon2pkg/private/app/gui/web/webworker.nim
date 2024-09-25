@@ -51,7 +51,7 @@ proc asyncSolve[F: TsuField or WaterField](
   proc handler(returnCode: WorkerReturnCode, messages: seq[string]) =
     case returnCode
     of Success:
-      results.add some messages.mapIt it.parsePairsPositions Izumiya
+      results.add some messages.mapIt it.parsePairsPositions Ik
       if results.len == childNodes.len.succ:
         results.del 0 # remove incompletion dummy
         interval.clearInterval
@@ -193,7 +193,7 @@ proc asyncPermute*[F: TsuField or WaterField](
     case returnCode
     of Success:
       if messages[0].parseBool:
-        results.add some messages[1].parsePairsPositions Izumiya
+        results.add some messages[1].parsePairsPositions Ik
       else:
         results.add none PairsPositions
 
@@ -221,7 +221,7 @@ proc asyncPermute*[F: TsuField or WaterField](
 
       var nazo2 = nazo
       nazo2.puyoPuyo.pairsPositions = pairsPositionsSeq[pairsPositionsIdx]
-      worker.run $Permute, $nazo2.toUriQuery Izumiya, $nazo2.puyoPuyo.field.rule
+      worker.run $Permute, $nazo2.toUriQuery Ik, $nazo2.puyoPuyo.field.rule
       pairsPositionsIdx.inc
 
   interval = runWorkers.setInterval WaitLoopIntervalMs

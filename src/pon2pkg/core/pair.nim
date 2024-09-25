@@ -44,9 +44,8 @@ using
 # Constructor
 # ------------------------------------------------
 
-const FirstPairs: array[ColorPuyo, Pair] = [
-  RedRed, GreenRed, BlueRed, YellowRed, PurpleRed
-]
+const FirstPairs: array[ColorPuyo, Pair] =
+  [RedRed, GreenRed, BlueRed, YellowRed, PurpleRed]
 
 func initPair*(axis, child: ColorPuyo): Pair {.inline.} =
   ## Returns a new Pair.
@@ -162,7 +161,7 @@ const
 func toUriQuery*(self; host: SimulatorHost): string {.inline.} =
   ## Returns the URI query converted from the pair.
   case host
-  of Izumiya:
+  of Ik:
     $self
   of Ishikawa, Ips:
     $PairToIshikawaUri[self.ord]
@@ -171,7 +170,7 @@ func parsePair*(query: string, host: SimulatorHost): Pair {.inline.} =
   ## Returns the pair converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
   case host
-  of Izumiya:
+  of Ik:
     result = query.parsePair
   of Ishikawa, Ips:
     try:

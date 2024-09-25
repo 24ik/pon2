@@ -76,10 +76,10 @@ proc main*() =
     check $RedGreen == "rg"
     check "rg".parsePair == RedGreen
 
-    check RedGreen.toUriQuery(Izumiya) == "rg"
+    check RedGreen.toUriQuery(Ik) == "rg"
     check RedGreen.toUriQuery(Ishikawa) == "c"
     check RedGreen.toUriQuery(Ips) == "c"
 
-    check "rg".parsePair(Izumiya) == RedGreen
+    check "rg".parsePair(Ik) == RedGreen
     check "c".parsePair(Ishikawa) == RedGreen
     check "c".parsePair(Ips) == RedGreen

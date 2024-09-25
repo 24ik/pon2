@@ -57,7 +57,7 @@ type
 const
   NoColorKinds* = {
     DisappearColor, DisappearColorMore, Chain, ChainMore, DisappearColorSametime,
-    DisappearColorMoreSametime
+    DisappearColorMoreSametime,
   } ## All requirement kinds not containing 'c'.
   NoNumberKinds* = {Clear} ## All requirement kinds not containing 'n'.
 
@@ -153,7 +153,7 @@ const
 func toUriQuery*(req: Requirement, host: SimulatorHost): string {.inline.} =
   ## Returns the URI query converted from the requirement.
   case host
-  of Izumiya:
+  of Ik:
     var queries = @[(KindKey, $req.kind.ord)]
     if req.kind in ColorKinds:
       queries.add (ColorKey, $req.color.ord)
@@ -186,7 +186,7 @@ func parseRequirement*(query: string, host: SimulatorHost): Requirement {.inline
     number = RequirementNumber.low
 
   case host
-  of Izumiya:
+  of Ik:
     var
       kindSet = false
       colorSet = false

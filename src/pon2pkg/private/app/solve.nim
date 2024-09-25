@@ -451,7 +451,7 @@ func toStr*[F: TsuField or WaterField](node: Node[F]): string {.inline.} =
   ## Returns the string representation of the node.
   var strs = newSeqOfCap[string](16)
 
-  strs.add $node.nazoPuyo.toUriQuery Izumiya
+  strs.add $node.nazoPuyo.toUriQuery Ik
   strs.add $node.nazoPuyo.puyoPuyo.operatingIndex
   strs.add node.moveResult.toStr
 
@@ -522,7 +522,7 @@ func parseNode*[F: TsuField or WaterField](str: string): Node[F] {.inline.} =
   ## If the conversion fails, `ValueError` will be raised.
   let strs = str.split NodeStrSep
 
-  result.nazoPuyo = parseNazoPuyo[F](strs[0], Izumiya)
+  result.nazoPuyo = parseNazoPuyo[F](strs[0], Ik)
   for _ in 1 .. strs[1].parseInt:
     result.nazoPuyo.puyoPuyo.incrementOperatingIndex
   result.moveResult = strs[2].parseMoveResult
