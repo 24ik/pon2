@@ -27,8 +27,8 @@ type
 
   SimulatorMode* {.pure.} = enum
     ## simulator mode.
-    Edit = "e"
     Play = "p"
+    Edit = "e"
     Replay = "r"
 
   SimulatorState* {.pure.} = enum
@@ -85,7 +85,7 @@ func initSimulator*(
   result.nazoPuyoWrap = nazoPuyoWrap
   result.moveResult = DefaultMoveResult
 
-  result.editor = editor or mode == Edit
+  result.editor = editor
   result.state = Stable
   result.kind = Nazo
   result.mode = mode
@@ -172,9 +172,6 @@ func `kind=`*(mSelf; kind: SimulatorKind) {.inline.} =
 func `mode=`*(mSelf; mode: SimulatorMode) {.inline.} =
   if mode == mSelf.mode:
     return
-
-  if mode == Edit:
-    mSelf.editor = true
 
   if mode == Edit or mSelf.mode == Edit:
     if mode == Edit and mSelf.undoDeque.len > 0:
@@ -639,8 +636,8 @@ func toUri*(self; withPositions: bool, editor: bool, host = Ik): Uri {.inline.} 
       case self.kind
       of Regular:
         case self.mode
-        of Edit: 'e'
         of Play: 's'
+        of Edit: 'e'
         of Replay: 'v'
       of Nazo:
         'n'
@@ -911,9 +908,8 @@ when defined(js):
             if rSelf.mode != Edit:
               tdiv(class = "block"):
                 rSelf.initMessagesNode
-            if rSelf.editor:
-              tdiv(class = "block"):
-                rSelf.initSelectNode
+            tdiv(class = "block"):
+              rSelf.initSelectNode
             tdiv(class = "block"):
               rSelf.initShareNode id
           if rSelf.mode != Edit:

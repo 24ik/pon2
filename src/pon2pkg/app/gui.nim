@@ -300,22 +300,22 @@ proc prevReplay*(mSelf) {.inline.} =
 proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
   ## Does operation specified by the keyboard input.
   ## Returns `true` if any action is executed.
-  if event == initKeyEvent("Tab", shift = true):
-    mSelf.toggleFocus
-    return true
-
-  if mSelf.focusReplay:
-    # move replay
-    if event == initKeyEvent("KeyA"):
-      mSelf.prevReplay
-      return true
-    if event == initKeyEvent("KeyD"):
-      mSelf.nextReplay
+  if mSelf.editor:
+    if event == initKeyEvent("Tab", shift = true):
+      mSelf.toggleFocus
       return true
 
-    return mSelf.replaySimulator[].operate event
+    if mSelf.focusReplay:
+      # move replay
+      if event == initKeyEvent("KeyA"):
+        mSelf.prevReplay
+        return true
+      if event == initKeyEvent("KeyD"):
+        mSelf.nextReplay
+        return true
 
-  if mSelf.simulator[].mode == Edit:
+      return mSelf.replaySimulator[].operate event
+
     # solve
     if event == initKeyEvent("Enter"):
       mSelf.solve

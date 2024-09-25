@@ -97,15 +97,15 @@ proc initSelectControl*(
   result.add modeButtons
 
   let
-    editButton = initColorButton "編集"
     playButton = initColorButton "プレイ"
+    editButton = initColorButton "編集"
     replayButton = initColorButton "再生"
-  modeButtons.add editButton
   modeButtons.add playButton
+  modeButtons.add editButton
   modeButtons.add replayButton
 
-  editButton.onClick = result.initModeHandler(Edit, reqControl)
   playButton.onClick = result.initModeHandler(Play, reqControl)
+  editButton.onClick = result.initModeHandler(Edit, reqControl)
   replayButton.onClick = result.initModeHandler(Replay, reqControl)
 
   # rule
@@ -136,10 +136,10 @@ proc initSelectControl*(
 
   # set color
   case simulator[].mode
-  of Edit:
-    editButton.backgroundColor = SelectColor.toNiguiColor
   of Play:
     playButton.backgroundColor = SelectColor.toNiguiColor
+  of Edit:
+    editButton.backgroundColor = SelectColor.toNiguiColor
   of Replay:
     replayButton.backgroundColor = SelectColor.toNiguiColor
 
@@ -156,8 +156,8 @@ proc initSelectControl*(
     nazoButton.backgroundColor = SelectColor.toNiguiColor
 
   # set enabled
-  editButton.enabled = simulator[].editor
   playButton.enabled = simulator[].editor
+  editButton.enabled = simulator[].editor
   replayButton.enabled = simulator[].editor
   tsuButton.enabled = simulator[].editor
   waterButton.enabled = simulator[].editor
