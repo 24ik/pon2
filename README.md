@@ -8,8 +8,8 @@ Features:
 - Generator: Generates the Nazo Puyo.
 - Permuter: Permutes the pairs in the Nazo Puyo to find a unique-solution
 problem.
-- [GUI Application](https://izumiya-keisuke.github.io/pon2/gui?editor&kind=n&mode=e&field=t-&pairs&req-kind=0&req-color=0): GUI simulator for Puyo Puyo and Nazo Puyo.
-- [Marathon](https://izumiya-keisuke.github.io/pon2/marathon): Search for pairs sequence and play a marathon mode.
+- [GUI Application](https://24ik.github.io/pon2/gui?editor&kind=n&mode=e&field=t-&pairs&req-kind=0&req-color=0): GUI simulator for Puyo Puyo and Nazo Puyo.
+- [Marathon](https://24ik.github.io/pon2/marathon): Search for pairs sequence and play a marathon mode.
 
 Not supported now:
 - Wall Puyo, Hard-garbage Puyo, and Iron Puyo
@@ -24,7 +24,7 @@ native-GUI application is beta version.
 ### Downloading Binary
 
 You can get the binary at the
-[latest release](https://github.com/izumiya-keisuke/pon2/releases/latest).
+[latest release](https://github.com/24ik/pon2/releases/latest).
 Note that the built binary may not work on macOS due to the limitation of
 [NiGui](https://github.com/simonkrauter/NiGui).
 
@@ -58,7 +58,7 @@ See the documentations:
 
 ### API Usage
 
-See the [API documentation](https://izumiya-keisuke.github.io/pon2/docs/pon2.html).
+See the [API documentation](https://24ik.github.io/pon2/docs/pon2.html).
 
 ### Running Tests
 

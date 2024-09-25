@@ -7,6 +7,6 @@
 
 type SimulatorHost* {.pure.} = enum
   ## URI host of the web simulator.
-  Izumiya = "izumiya-keisuke.github.io"
+  Ik = "24ik.github.io"
   Ishikawa = "ishikawapuyo.net"
   Ips = "ips.karou.jp"

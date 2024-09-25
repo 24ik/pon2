@@ -48,8 +48,7 @@ proc initAssets*(timeoutSec = 180): Assets =
 
       {.push warning[Uninit]: off.}
       client.downloadFile(
-        "https://github.com/izumiya-keisuke/pon2/raw/main/" &
-          &"assets/puyo-small/{path.string}",
+        &"https://github.com/24ik/pon2/raw/main/assets/puyo-small/{path.string}",
         fullPath.string,
       )
       {.pop.}

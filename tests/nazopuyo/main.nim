@@ -93,15 +93,15 @@ yb|"""
     check $nazo == str
 
     let
-      izumiyaQuery =
+      ikQuery =
         "field=t-oo...bbb...ooo...bbbyyyyyooy&pairs=yb23yb&req-kind=5&req-number=4"
       ishikawaQuery = "S03r06S03rAACQ_ueu1__u04"
       ipsQuery = "S03r06S03rAACQ_ueu1__u04"
 
-    check nazo.toUriQuery(Izumiya) == izumiyaQuery
+    check nazo.toUriQuery(Ik) == ikQuery
     check nazo.toUriQuery(Ishikawa) == ishikawaQuery
     check nazo.toUriQuery(Ips) == ipsQuery
 
-    check parseNazoPuyo[TsuField](izumiyaQuery, Izumiya) == nazo
+    check parseNazoPuyo[TsuField](ikQuery, Ik) == nazo
     check parseNazoPuyo[TsuField](ishikawaQuery, Ishikawa) == nazo
     check parseNazoPuyo[TsuField](ipsQuery, Ips) == nazo

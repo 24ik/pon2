@@ -1,6 +1,6 @@
 # Package
 
-version = "0.16.3"
+version = "0.17.0"
 author = "Keisuke Izumiya"
 description = "Application for Puyo Puyo and Nazo Puyo"
 license = "Apache-2.0"
@@ -11,12 +11,12 @@ bin = @["pon2"]
 
 # Dependencies
 
-requires "nim ^= 2.0.4"
+requires "nim ^= 2.0.8"
 
 requires "docopt ^= 0.7.1"
 requires "karax ^= 1.3.3"
 requires "nigui ^= 0.2.8"
-requires "nimsimd ^= 1.2.10"
+requires "nimsimd ^= 1.2.13"
 requires "suru ^= 0.3.2"
 
 # Tasks

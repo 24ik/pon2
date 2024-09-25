@@ -11,7 +11,7 @@ import
   ]
 
 func parseNazoPuyo[F: TsuField or WaterField](
-    query: string, operatingIdx: Natural, host = Izumiya
+    query: string, operatingIdx: Natural, host = Ik
 ): NazoPuyo[F] =
   result = parseNazoPuyo[F](query, host)
   block:
@@ -157,11 +157,11 @@ rg|"""
     simulator.nazoPuyoWrap.get:
       simulator.editingCell = Cell.Red
       simulator.writeCell Row.high, Column.high
-      check wrappedNazoPuyo.puyoPuyo.field == parseField[TsuField]("t-r", Izumiya)
+      check wrappedNazoPuyo.puyoPuyo.field == parseField[TsuField]("t-r", Ik)
 
       simulator.moveCursorUp
       simulator.writeCell Cell.Garbage
-      check wrappedNazoPuyo.puyoPuyo.field == parseField[TsuField]("t-o....r", Izumiya)
+      check wrappedNazoPuyo.puyoPuyo.field == parseField[TsuField]("t-o....r", Ik)
 
   # writeCell (pair)
   block:
@@ -197,7 +197,7 @@ rg|"""
   # shiftFieldUp, shiftFieldDown, shiftFieldRight, shiftFieldLeft, flipFieldV, flipFieldH
   block:
     var
-      field2 = parseField[TsuField]("t-rgb...ypo...", Izumiya)
+      field2 = parseField[TsuField]("t-rgb...ypo...", Ik)
       puyoPuyo = initPuyoPuyo[TsuField]()
     puyoPuyo.field = field2
     var simulator = puyoPuyo.initSimulator
@@ -230,7 +230,7 @@ rg|"""
   # flip
   block:
     var
-      field2 = parseField[TsuField]("t-rgb...ypo...", Izumiya)
+      field2 = parseField[TsuField]("t-rgb...ypo...", Ik)
       pairsPositions2 = @[PairPosition(pair: RedGreen, position: Right2)]
       puyoPuyo = initPuyoPuyo[TsuField]()
     puyoPuyo.field = field2
@@ -524,15 +524,14 @@ rg|"""
   block:
     let
       uriStr =
-        "https://izumiya-keisuke.github.io/pon2/gui/index.html?" &
+        "https://24ik.github.io/pon2/gui/index.html?" &
         "editor&kind=n&mode=e&field=t-rrb&pairs=rgby12&req-kind=0&req-color=7"
       uriStrNoPos =
-        "https://izumiya-keisuke.github.io/pon2/gui/index.html?" &
+        "https://24ik.github.io/pon2/gui/index.html?" &
         "editor&kind=n&mode=e&field=t-rrb&pairs=rgby&req-kind=0&req-color=7"
       simulator = uriStr.parseUri.parseSimulator
-      nazo = parseNazoPuyo[TsuField](
-        "field=t-rrb&pairs=rgby12&req-kind=0&req-color=7", Izumiya
-      )
+      nazo =
+        parseNazoPuyo[TsuField]("field=t-rrb&pairs=rgby12&req-kind=0&req-color=7", Ik)
 
     check simulator.nazoPuyoWrap == nazo.initNazoPuyoWrap
     check simulator.editor
