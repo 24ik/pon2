@@ -256,6 +256,7 @@ func generateRequirement(
   kind = req.kind
 
   # color
+  {.push warning[ProveInit]: off.}
   if kind in ColorKinds:
     color =
       case req.color
@@ -267,6 +268,7 @@ func generateRequirement(
         RequirementColor.Garbage
       of GenerateRequirementColor.Color:
         RequirementColor.Color
+  {.pop.}
 
   # number
   if kind in NumberKinds:
