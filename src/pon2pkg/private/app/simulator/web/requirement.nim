@@ -73,7 +73,7 @@ proc initRequirementNode*(
       tdiv(class = "select"):
         select(
           id = kstring &"{KindSelectIdPrefix}{id}",
-          onclick = simulator.initKindHandler(id),
+          onchange = simulator.initKindHandler(id),
         ):
           for kind in RequirementKind:
             option(selected = kind == req.kind):
@@ -85,7 +85,7 @@ proc initRequirementNode*(
         tdiv(class = "select"):
           select(
             id = kstring &"{ColorSelectIdPrefix}{id}",
-            onclick = simulator.initColorHandler(id),
+            onchange = simulator.initColorHandler(id),
           ):
             option(selected = req.color == RequirementColor.All):
               text "全"
@@ -98,7 +98,7 @@ proc initRequirementNode*(
         tdiv(class = "select"):
           select(
             id = kstring &"{NumberSelectIdPrefix}{id}",
-            onclick = simulator.initNumberHandler(id),
+            onchange = simulator.initNumberHandler(id),
           ):
             for num in RequirementNumber.low .. RequirementNumber.high:
               option(selected = num == req.number):
