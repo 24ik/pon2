@@ -73,10 +73,10 @@ proc main*() =
     check $Right2 == "34"
     check "34".parsePosition == Right2
 
-    check Right2.toUriQuery(Izumiya) == "34"
+    check Right2.toUriQuery(Ik) == "34"
     check Right2.toUriQuery(Ishikawa) == "g"
     check Right2.toUriQuery(Ips) == "g"
 
-    check "34".parsePosition(Izumiya) == Right2
+    check "34".parsePosition(Ik) == Right2
     check "g".parsePosition(Ishikawa) == Right2
     check "g".parsePosition(Ips) == Right2

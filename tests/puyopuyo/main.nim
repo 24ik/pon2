@@ -225,15 +225,15 @@ rg|"""
       check $puyoPuyo == str
 
       let
-        izumiyaQuery = "field=t-rg.bo.&pairs=yygp21"
+        ikQuery = "field=t-rg.bo.&pairs=yygp21"
         ishikawaQuery = "a3M_G1OC"
         ipsQuery = "a3M_G1OC"
 
-      check puyoPuyo.toUriQuery(Izumiya) == izumiyaQuery
+      check puyoPuyo.toUriQuery(Ik) == ikQuery
       check puyoPuyo.toUriQuery(Ishikawa) == ishikawaQuery
       check puyoPuyo.toUriQuery(Ips) == ipsQuery
 
-      check parsePuyoPuyo[TsuField](izumiyaQuery, Izumiya) == puyoPuyo
+      check parsePuyoPuyo[TsuField](ikQuery, Ik) == puyoPuyo
       check parsePuyoPuyo[TsuField](ishikawaQuery, Ishikawa) == puyoPuyo
       check parsePuyoPuyo[TsuField](ipsQuery, Ips) == puyoPuyo
 
@@ -247,7 +247,7 @@ rg|"""
 
       check $puyoPuyo == str
 
-      let izumiyaQuery = "field=w-rg....~....by&pairs"
+      let ikQuery = "field=w-rg....~....by&pairs"
 
-      check puyoPuyo.toUriQuery(Izumiya) == izumiyaQuery
-      check parsePuyoPuyo[WaterField](izumiyaQuery, Izumiya) == puyoPuyo
+      check puyoPuyo.toUriQuery(Ik) == ikQuery
+      check parsePuyoPuyo[WaterField](ikQuery, Ik) == puyoPuyo

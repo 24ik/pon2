@@ -93,7 +93,7 @@ func toUriQuery*[F: TsuField or WaterField](
   ## Returns the URI query converted from the Nazo Puyo.
   let sep =
     case host
-    of Izumiya: "&"
+    of Ik: "&"
     of Ishikawa, Ips: "__"
 
   result = &"{self.puyoPuyo.toUriQuery host}{sep}{self.requirement.toUriQuery host}"
@@ -104,7 +104,7 @@ func parseNazoPuyo*[F: TsuField or WaterField](
   ## Returns the Nazo Puyo converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
   case host
-  of Izumiya:
+  of Ik:
     var
       puyoPuyoKeyVals = newSeq[(string, string)](0)
       reqKeyVals = newSeq[(string, string)](0)

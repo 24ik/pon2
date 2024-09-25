@@ -15,7 +15,7 @@ proc main*() =
     let pairsPositions =
       @[
         PairPosition(pair: RedGreen, position: Position.None),
-        PairPosition(pair: YellowYellow, position: Position.None)
+        PairPosition(pair: YellowYellow, position: Position.None),
       ]
     check pairsPositions.puyoCount(Red) == 1
     check pairsPositions.puyoCount(Yellow) == 2
@@ -35,11 +35,11 @@ proc main*() =
     check $pairPos == "bp|43"
     check "bp|43".parsePairPosition == pairPos
 
-    check pairPos.toUriQuery(Izumiya) == "bp43"
+    check pairPos.toUriQuery(Ik) == "bp43"
     check pairPos.toUriQuery(Ishikawa) == "QG"
     check pairPos.toUriQuery(Ips) == "QG"
 
-    check "bp43".parsePairPosition(Izumiya) == pairPos
+    check "bp43".parsePairPosition(Ik) == pairPos
     check "QG".parsePairPosition(Ishikawa) == pairPos
     check "QG".parsePairPosition(Ips) == pairPos
 
@@ -52,16 +52,16 @@ proc main*() =
     let pairsPositions =
       @[
         PairPosition(pair: RedGreen, position: Position.None),
-        PairPosition(pair: YellowYellow, position: Up2)
+        PairPosition(pair: YellowYellow, position: Up2),
       ]
 
     check $pairsPositions == "rg|\nyy|3N"
     check "rg|\nyy|3N".parsePairsPositions == pairsPositions
 
-    check pairsPositions.toUriQuery(Izumiya) == "rgyy3N"
+    check pairsPositions.toUriQuery(Ik) == "rgyy3N"
     check pairsPositions.toUriQuery(Ishikawa) == "c1G4"
     check pairsPositions.toUriQuery(Ips) == "c1G4"
 
-    check "rgyy3N".parsePairsPositions(Izumiya) == pairsPositions
+    check "rgyy3N".parsePairsPositions(Ik) == pairsPositions
     check "c1G4".parsePairsPositions(Ishikawa) == pairsPositions
     check "c1G4".parsePairsPositions(Ips) == pairsPositions

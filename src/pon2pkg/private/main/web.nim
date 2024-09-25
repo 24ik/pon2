@@ -34,9 +34,9 @@ proc workerTask*(
       result.messages =
         case args2[0].parseRule
         of Tsu:
-          parseNode[TsuField](args2[1]).solve.mapIt it.toUriQuery Izumiya
+          parseNode[TsuField](args2[1]).solve.mapIt it.toUriQuery Ik
         of Water:
-          parseNode[WaterField](args2[1]).solve.mapIt it.toUriQuery Izumiya
+          parseNode[WaterField](args2[1]).solve.mapIt it.toUriQuery Ik
 
       result.returnCode = Success
     else:
@@ -49,14 +49,14 @@ proc workerTask*(
       let nazoPuyoWrap: NazoPuyoWrap
       case args2[1].parseRule
       of Tsu:
-        nazoPuyoWrap = parseNazoPuyo[TsuField](args2[0], Izumiya).initNazoPuyoWrap
+        nazoPuyoWrap = parseNazoPuyo[TsuField](args2[0], Ik).initNazoPuyoWrap
       of Water:
-        nazoPuyoWrap = parseNazoPuyo[WaterField](args2[0], Izumiya).initNazoPuyoWrap
+        nazoPuyoWrap = parseNazoPuyo[WaterField](args2[0], Ik).initNazoPuyoWrap
 
       nazoPuyoWrap.get:
         let answers = wrappedNazoPuyo.solve(earlyStopping = true)
         if answers.len == 1:
-          result.messages = @[$true, answers[0].toUriQuery Izumiya]
+          result.messages = @[$true, answers[0].toUriQuery Ik]
         else:
           result.messages = @[$false]
     else:
@@ -93,7 +93,7 @@ proc initMainGuiApplicationNode*(routerData: RouterData): VNode {.inline.} =
 
   var uri = initUri()
   uri.scheme = "https"
-  uri.hostname = $Izumiya
+  uri.hostname = $Ik
   uri.path = "/pon2/gui/index.html"
   uri.query = query
 
