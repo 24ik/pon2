@@ -81,7 +81,6 @@ func initSimulator*(
     nazoPuyoWrap: NazoPuyoWrap, mode = Play, editor = false
 ): Simulator {.inline.} =
   ## Returns a new simulator.
-  ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
   result.nazoPuyoWrap = nazoPuyoWrap
   result.moveResult = DefaultMoveResult
 
@@ -108,14 +107,12 @@ func initSimulator*[F: TsuField or WaterField](
     nazo: NazoPuyo[F], mode = Play, editor = false
 ): Simulator {.inline.} =
   ## Returns a new simulator.
-  ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
   initNazoPuyoWrap(nazo).initSimulator(mode, editor)
 
 func initSimulator*[F: TsuField or WaterField](
     puyoPuyo: PuyoPuyo[F], mode = Play, editor = false
 ): Simulator {.inline.} =
   ## Returns a new simulator.
-  ## If `mode` is `Edit`, `editor` will be ignored (*i.e.*, regarded as `true`).
   result =
     NazoPuyo[F](puyoPuyo: puyoPuyo, requirement: DefaultReq).initSimulator(mode, editor)
   result.kind = Regular

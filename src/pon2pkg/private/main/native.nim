@@ -167,8 +167,8 @@ proc runGenerator*(args: Table[string, Value]) {.inline.} =
         not args["-D"].to_bool,
         args["-d"].to_bool,
       ).initSimulator
-      questionUri = simulator.toUri(withPositions = false)
-      answerUri = simulator.toUri(withPositions = true)
+      questionUri = simulator.toUri(withPositions = false, editor = true)
+      answerUri = simulator.toUri(withPositions = true, editor = true)
 
     echo &"(Q{nazoIdx.succ}) {questionUri}"
     echo &"(A{nazoIdx.succ}) {answerUri}"
@@ -203,9 +203,9 @@ proc runPermuter*(args: Table[string, Value]) {.inline.} =
       nazo.puyoPuyo.pairsPositions = pairsPositions
 
       var simulator2 = nazo.initSimulator(mode = Replay)
-      let answerUri = simulator2.toUri(withPositions = true)
+      let answerUri = simulator2.toUri(withPositions = true, editor = true)
       simulator2.mode = Play
-      let questionUri = simulator2.toUri(withPositions = false)
+      let questionUri = simulator2.toUri(withPositions = false, editor = true)
       echo &"(Q{idx.succ}) {questionUri}"
       echo &"(A{idx.succ}) {answerUri}"
       echo ""
