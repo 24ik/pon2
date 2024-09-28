@@ -180,7 +180,6 @@ func `rule=`*(mSelf; rule: Rule) {.inline.} =
 func `kind=`*(mSelf; kind: SimulatorKind) {.inline.} =
   mSelf.kind = kind
 
-# TODO
 func `mode=`*(mSelf; mode: SimulatorMode) {.inline.} =
   if mode == mSelf.mode:
     return
