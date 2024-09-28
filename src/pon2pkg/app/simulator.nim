@@ -753,8 +753,11 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
 
   case mSelf.mode
   of Play, PlayEditor:
+    # mode
+    if event == initKeyEvent("KeyM") and mSelf.mode == PlayEditor:
+      mSelf.mode = Edit
     # rotate position
-    if event == initKeyEvent("KeyJ"):
+    elif event == initKeyEvent("KeyJ"):
       mSelf.rotateOperatingPositionLeft
     elif event == initKeyEvent("KeyK"):
       mSelf.rotateOperatingPositionRight
@@ -780,8 +783,11 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
     else:
       result = false
   of Edit:
+    # mode
+    if event == initKeyEvent("KeyM"):
+      mSelf.mode = PlayEditor
     # insert, focus
-    if event == initKeyEvent("KeyI"):
+    elif event == initKeyEvent("KeyI"):
       mSelf.toggleInserting
     elif event == initKeyEvent("Tab"):
       mSelf.toggleFocus
