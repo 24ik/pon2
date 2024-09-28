@@ -162,6 +162,9 @@ proc solve*(
   ## Solves the nazo puyo.
   if mSelf.solving or mSelf.permuting or mSelf.simulator[].kind != Nazo:
     return
+  mSelf.simulator[].nazoPuyoWrap.get:
+    if wrappedNazoPuyo.moveCount == 0:
+      return
 
   mSelf.solving = true
 
