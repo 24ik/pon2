@@ -33,10 +33,6 @@ type
       color*: GenerateRequirementColor
     number*: RequirementNumber
 
-const
-  MaxTrialCountSplit = 10_000
-  MaxTrialCountGenerate = 100_000_000
-
 # ------------------------------------------------
 # Misc
 # ------------------------------------------------
@@ -129,7 +125,7 @@ func split(
     if sumRatio == 0:
       return rng.split(total, ratios.len, true)
 
-    for _ in 0 ..< MaxTrialCountSplit:
+    while true:
       result = newSeqOfCap[int](ratios.len)
       var last = total
 
@@ -143,8 +139,6 @@ func split(
         return
       else:
         continue
-
-    raise newException(GenerateError, "Reached max trial: `split`.")
 
   if ratios.anyIt it.isSome and it.get != 0:
     raise newException(
@@ -334,7 +328,7 @@ proc generate*[F: TsuField or WaterField](
   # puyo puyo
   {.push warning[UnsafeSetLen]: off.}
   {.push warning[UnsafeDefault]: off.}
-  for _ in 1 .. MaxTrialCountGenerate:
+  while true:
     try:
       result.puyoPuyo =
         generatePuyoPuyo[F](rng, moveCount, useColors, heights, puyoCounts)
@@ -369,8 +363,6 @@ proc generate*[F: TsuField or WaterField](
       return
   {.pop.}
   {.pop.}
-
-  raise newException(GenerateError, "Reached max trial: `generate`.")
 
 proc generate*[F: TsuField or WaterField](
     req: GenerateRequirement,
