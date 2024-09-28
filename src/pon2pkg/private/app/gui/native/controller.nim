@@ -21,7 +21,7 @@ func initToggleHandler(control: EditorControllerControl): (event: ClickEvent) ->
     block:
       control.guiApplication[].toggleFocus
       control.childControls[0].backgroundColor = toNiguiColor(
-        if control.guiApplication[].focusReplay: SelectColor else: DefaultColor
+        if control.guiApplication[].focusAnswer: SelectColor else: DefaultColor
       )
   )
 
@@ -51,4 +51,4 @@ proc initEditorControllerControl*(
 
   # set color
   toggleButton.backgroundColor =
-    toNiguiColor(if guiApplication[].focusReplay: SelectColor else: DefaultColor)
+    toNiguiColor(if guiApplication[].focusAnswer: SelectColor else: DefaultColor)

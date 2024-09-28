@@ -25,18 +25,18 @@ else:
   {.pop.}
 
 type
-  GuiApplicationReplay* = object ## Pairs&Positions for the replay simulator.
+  GuiApplicationAnswer* = object ## Pairs&Positions for the answer simulator.
     hasData*: bool
     pairsPositionsSeq*: seq[PairsPositions]
     index*: Natural
 
   GuiApplication* = object ## GUI application.
     simulator: ref Simulator
-    replaySimulator: ref Simulator
+    answerSimulator: ref Simulator
 
-    replay: GuiApplicationReplay
+    answer: GuiApplicationAnswer
 
-    focusReplay: bool
+    focusAnswer: bool
     solving: bool
     permuting: bool
 
@@ -54,14 +54,14 @@ using
 proc initGuiApplication*(simulator: ref Simulator): GuiApplication {.inline.} =
   ## Returns a new GUI application.
   result.simulator = simulator
-  result.replaySimulator.new
-  result.replaySimulator[] = initNazoPuyo[TsuField]().initSimulator View
+  result.answerSimulator.new
+  result.answerSimulator[] = initNazoPuyo[TsuField]().initSimulator View
 
-  result.replay.hasData = false
-  result.replay.pairsPositionsSeq = @[]
-  result.replay.index = 0
+  result.answer.hasData = false
+  result.answer.pairsPositionsSeq = @[]
+  result.answer.index = 0
 
-  result.focusReplay = false
+  result.focusAnswer = false
   result.solving = false
   result.permuting = false
 
@@ -87,21 +87,21 @@ func simulatorRef*(mSelf): ref Simulator {.inline.} =
   ## Returns the reference to the simulator.
   mSelf.simulator
 
-func replaySimulator*(self): Simulator {.inline.} =
-  ## Returns the replay simulator.
-  self.replaySimulator[].copy
+func answerSimulator*(self): Simulator {.inline.} =
+  ## Returns the answer simulator.
+  self.answerSimulator[].copy
 
-func replaySimulatorRef*(mSelf): ref Simulator {.inline.} =
-  ## Returns the reference to the replay simulator.
-  mSelf.replaySimulator
+func answerSimulatorRef*(mSelf): ref Simulator {.inline.} =
+  ## Returns the reference to the answer simulator.
+  mSelf.answerSimulator
 
-func replay*(self): GuiApplicationReplay {.inline.} =
-  ## Returns the pairs&positions for the replay simulator.
-  self.replay
+func answer*(self): GuiApplicationAnswer {.inline.} =
+  ## Returns the pairs&positions for the answer simulator.
+  self.answer
 
-func focusReplay*(self): bool {.inline.} =
-  ## Returns `true` if the replay simulator is focused.
-  self.focusReplay
+func focusAnswer*(self): bool {.inline.} =
+  ## Returns `true` if the answer simulator is focused.
+  self.focusAnswer
 
 func solving*(self): bool {.inline.} =
   ## Returns `true` if a nazo puyo is being solved.
@@ -120,8 +120,8 @@ func progressBar*(self): tuple[now: int, total: int] {.inline.} =
 # Edit - Other
 # ------------------------------------------------
 
-func toggleFocus*(mSelf) {.inline.} = ## Toggles focusing to replay simulator or not.
-  mSelf.focusReplay.toggle
+func toggleFocus*(mSelf) {.inline.} = ## Toggles focusing to answer simulator or not.
+  mSelf.focusAnswer.toggle
 
 # ------------------------------------------------
 # Solve
@@ -130,22 +130,22 @@ func toggleFocus*(mSelf) {.inline.} = ## Toggles focusing to replay simulator or
 when defined(js):
   const ResultMonitorIntervalMs = 100
 
-proc updateReplaySimulator[F: TsuField or WaterField](
+proc updateAnswerSimulator[F: TsuField or WaterField](
     mSelf; nazo: NazoPuyo[F]
 ) {.inline.} =
-  ## Updates the replay simulator.
-  ## This function is assumed to be called after `mSelf.replay.pairsPositionsSeq` is set.
-  assert mSelf.replay.hasData
+  ## Updates the answer simulator.
+  ## This function is assumed to be called after `mSelf.answer.pairsPositionsSeq` is set.
+  assert mSelf.answer.hasData
 
-  if mSelf.replay.pairsPositionsSeq.len > 0:
-    mSelf.focusReplay = true
-    mSelf.replay.index = 0
+  if mSelf.answer.pairsPositionsSeq.len > 0:
+    mSelf.focusAnswer = true
+    mSelf.answer.index = 0
 
     var nazo2 = nazo
-    nazo2.puyoPuyo.pairsPositions = mSelf.replay.pairsPositionsSeq[0]
-    mSelf.replaySimulator[] = nazo2.initSimulator mSelf.replaySimulator[].mode
+    nazo2.puyoPuyo.pairsPositions = mSelf.answer.pairsPositionsSeq[0]
+    mSelf.answerSimulator[] = nazo2.initSimulator mSelf.answerSimulator[].mode
   else:
-    mSelf.focusReplay = false
+    mSelf.focusAnswer = false
 
 proc solve*(
     mSelf;
@@ -180,26 +180,26 @@ proc solve*(
       mSelf.progressBar.now = 0
 
       var interval: Interval
-      proc showReplay() =
+      proc showAnswer() =
         mSelf.progressBar.now = results.len.pred
         if results.allIt it.isSome:
           mSelf.progressBar.total = 0
-          mSelf.replay.hasData = true
-          mSelf.replay.pairsPositionsSeq = results.mapIt(it.get).concat
-          mSelf.updateReplaySimulator wrappedNazoPuyo
+          mSelf.answer.hasData = true
+          mSelf.answer.pairsPositionsSeq = results.mapIt(it.get).concat
+          mSelf.updateAnswerSimulator wrappedNazoPuyo
           mSelf.solving = false
           interval.clearInterval
 
         if not kxi.surpressRedraws:
           kxi.redraw
 
-      interval = showReplay.setInterval ResultMonitorIntervalMs
+      interval = showAnswer.setInterval ResultMonitorIntervalMs
     else:
       # FIXME: make asynchronous, redraw
-      mSelf.replay.hasData = true
-      mSelf.replay.pairsPositionsSeq =
+      mSelf.answer.hasData = true
+      mSelf.answer.pairsPositionsSeq =
         wrappedNazoPuyo.solve(parallelCount = parallelCount)
-      mSelf.updateReplaySimulator wrappedNazoPuyo
+      mSelf.updateAnswerSimulator wrappedNazoPuyo
       mSelf.solving = false
 
 # ------------------------------------------------
@@ -242,59 +242,59 @@ proc permute*(
       mSelf.progressBar.now = 0
 
       var interval: Interval
-      proc showReplay() =
+      proc showAnswer() =
         mSelf.progressBar.now = results.len.pred
         if results.allIt it.isSome:
           mSelf.progressBar.total = 0
-          mSelf.replay.pairsPositionsSeq = results.mapIt(it.get)
-          mSelf.updateReplaySimulator wrappedNazoPuyo
+          mSelf.answer.pairsPositionsSeq = results.mapIt(it.get)
+          mSelf.updateAnswerSimulator wrappedNazoPuyo
           mSelf.permuting = false
           interval.clearInterval
 
         if not kxi.surpressRedraws:
           kxi.redraw
 
-      interval = showReplay.setInterval ResultMonitorIntervalMs
+      interval = showAnswer.setInterval ResultMonitorIntervalMs
     else:
       # FIXME: make asynchronous, redraw
-      mSelf.replay.pairsPositionsSeq =
+      mSelf.answer.pairsPositionsSeq =
         wrappedNazoPuyo.permute(fixMoves, allowDouble, allowLastDouble).toSeq
-      mSelf.updateReplaySimulator wrappedNazoPuyo
+      mSelf.updateAnswerSimulator wrappedNazoPuyo
       mSelf.permuting = false
 
 {.pop.}
 
 # ------------------------------------------------
-# Replay
+# Answer
 # ------------------------------------------------
 
-proc nextReplay*(mSelf) {.inline.} =
-  ## Shows the next replay.
-  if not mSelf.replay.hasData or mSelf.replay.pairsPositionsSeq.len == 0:
+proc nextAnswer*(mSelf) {.inline.} =
+  ## Shows the next answer.
+  if not mSelf.answer.hasData or mSelf.answer.pairsPositionsSeq.len == 0:
     return
 
-  if mSelf.replay.index == mSelf.replay.pairsPositionsSeq.len.pred:
-    mSelf.replay.index = 0
+  if mSelf.answer.index == mSelf.answer.pairsPositionsSeq.len.pred:
+    mSelf.answer.index = 0
   else:
-    mSelf.replay.index.inc
+    mSelf.answer.index.inc
 
-  mSelf.replaySimulator[].pairsPositions =
-    mSelf.replay.pairsPositionsSeq[mSelf.replay.index]
-  mSelf.replaySimulator[].reset
+  mSelf.answerSimulator[].pairsPositions =
+    mSelf.answer.pairsPositionsSeq[mSelf.answer.index]
+  mSelf.answerSimulator[].reset
 
-proc prevReplay*(mSelf) {.inline.} =
-  ## Shows the previous replay.
-  if not mSelf.replay.hasData or mSelf.replay.pairsPositionsSeq.len == 0:
+proc prevAnswer*(mSelf) {.inline.} =
+  ## Shows the previous answer.
+  if not mSelf.answer.hasData or mSelf.answer.pairsPositionsSeq.len == 0:
     return
 
-  if mSelf.replay.index == 0:
-    mSelf.replay.index = mSelf.replay.pairsPositionsSeq.len.pred
+  if mSelf.answer.index == 0:
+    mSelf.answer.index = mSelf.answer.pairsPositionsSeq.len.pred
   else:
-    mSelf.replay.index.dec
+    mSelf.answer.index.dec
 
-  mSelf.replaySimulator[].pairsPositions =
-    mSelf.replay.pairsPositionsSeq[mSelf.replay.index]
-  mSelf.replaySimulator[].reset
+  mSelf.answerSimulator[].pairsPositions =
+    mSelf.answer.pairsPositionsSeq[mSelf.answer.index]
+  mSelf.answerSimulator[].reset
 
 # ------------------------------------------------
 # Keyboard Operation
@@ -308,16 +308,16 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
       mSelf.toggleFocus
       return true
 
-    if mSelf.focusReplay:
-      # move replay
+    if mSelf.focusAnswer:
+      # move answer
       if event == initKeyEvent("KeyA"):
-        mSelf.prevReplay
+        mSelf.prevAnswer
         return true
       if event == initKeyEvent("KeyD"):
-        mSelf.nextReplay
+        mSelf.nextAnswer
         return true
 
-      return mSelf.replaySimulator[].operate event
+      return mSelf.answerSimulator[].operate event
 
     # solve
     if event == initKeyEvent("Enter"):
@@ -385,10 +385,10 @@ when defined(js):
               rSelf.initEditorSettingsNode id
             if rSelf.progressBar.total > 0:
               rSelf.initEditorProgressBarNode
-            if rSelf.replay.hasData:
+            if rSelf.answer.hasData:
               tdiv(class = "block"):
                 rSelf.initEditorPaginationNode
-              if rSelf.replay.pairsPositionsSeq.len > 0:
+              if rSelf.answer.pairsPositionsSeq.len > 0:
                 tdiv(class = "block"):
                   rSelf.initEditorSimulatorNode &"{RightSimulatorIdPrefix}{id}"
 

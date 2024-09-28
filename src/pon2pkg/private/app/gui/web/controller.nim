@@ -24,7 +24,7 @@ proc initEditorControllerNode*(
     workerDisable = workerRunning or noPair
 
     focusButtonClass =
-      if guiApplication[].focusReplay:
+      if guiApplication[].focusAnswer:
         kstring"button is-selected is-primary"
       else:
         kstring"button"
