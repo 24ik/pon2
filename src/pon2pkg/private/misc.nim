@@ -8,8 +8,7 @@
 import
   std/[algorithm, os, parsecfg, random, sequtils, streams, strutils, typetraits, uri]
 
-const Version* =
-  staticRead(
+const Version* = staticRead(
     currentSourcePath().parentDir.parentDir.parentDir.parentDir / "pon2.nimble"
   ).newStringStream.loadConfig
   .getSectionValue("", "version")
@@ -40,8 +39,8 @@ func initXLink*(text = "", hashTag = "", uri = initUri()): Uri {.inline.} =
   ## Returns a URI for posting to X.
   result = initUri()
   result.scheme = "https"
-  result.hostname = "twitter.com"
-  result.path = "/intent/tweet"
+  result.hostname = "x.com"
+  result.path = "/intent/post"
 
   var queries =
     @[("ref_src", "twsrc^tfw|twcamp^buttonembed|twterm^share|twgr^"), ("text", text)]
