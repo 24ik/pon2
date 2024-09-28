@@ -767,15 +767,16 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
     # forward / backward / reset
     elif event == initKeyEvent("KeyS"):
       mSelf.forward
-    elif event == initKeyEvent("KeyW"):
+    elif event in [initKeyEvent("Digit2"), initKeyEvent("KeyW")]:
       mSelf.backward
-    elif event == initKeyEvent("KeyW", shift = true):
+    elif event in
+        [initKeyEvent("Digit2", shift = true), initKeyEvent("KeyW", shift = true)]:
       mSelf.backward(toStable = false)
-    elif event == initKeyEvent("KeyW", control = true):
+    elif event == initKeyEvent("Digit1"):
       mSelf.reset
     elif event == initKeyEvent("Space"):
       mSelf.forward(skip = true)
-    elif event == initKeyEvent("KeyS", shift = true):
+    elif event == initKeyEvent("Digit3"):
       mSelf.forward(replay = true)
     else:
       result = false
@@ -830,13 +831,14 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
       result = false
   of View:
     # forward / backward / reset
-    if event == initKeyEvent("KeyW"):
+    if event in [initKeyEvent("Digit2"), initKeyEvent("KeyW")]:
       mSelf.backward
-    elif event == initKeyEvent("KeyW", shift = true):
+    elif event in
+        [initKeyEvent("Digit2", shift = true), initKeyEvent("KeyW", shift = true)]:
       mSelf.backward(toStable = false)
-    elif event == initKeyEvent("KeyS"):
+    elif event == initKeyEvent("Digit3"):
       mSelf.forward(replay = true)
-    elif event == initKeyEvent("KeyW", control = true):
+    elif event == initKeyEvent("Digit1"):
       mSelf.reset
     else:
       result = false
