@@ -36,7 +36,6 @@ type
 
     replay: GuiApplicationReplay
 
-    editor: bool
     focusReplay: bool
     solving: bool
     permuting: bool
@@ -56,13 +55,12 @@ proc initGuiApplication*(simulator: ref Simulator): GuiApplication {.inline.} =
   ## Returns a new GUI application.
   result.simulator = simulator
   result.replaySimulator.new
-  result.replaySimulator[] = initNazoPuyo[TsuField]().initSimulator(Replay, false)
+  result.replaySimulator[] = initNazoPuyo[TsuField]().initSimulator View
 
   result.replay.hasData = false
   result.replay.pairsPositionsSeq = @[]
   result.replay.index = 0
 
-  result.editor = simulator[].editor
   result.focusReplay = false
   result.solving = false
   result.permuting = false
@@ -73,7 +71,7 @@ proc initGuiApplication*(simulator: ref Simulator): GuiApplication {.inline.} =
 proc initGuiApplication*(): GuiApplication {.inline.} =
   ## Returns a new GUI application.
   let simulator = new Simulator
-  simulator[] = initNazoPuyo[TsuField]().initSimulator(SimulatorMode.Play, true)
+  simulator[] = initNazoPuyo[TsuField]().initSimulator PlayEditor
 
   result = simulator.initGuiApplication
 
@@ -145,8 +143,7 @@ proc updateReplaySimulator[F: TsuField or WaterField](
 
     var nazo2 = nazo
     nazo2.puyoPuyo.pairsPositions = mSelf.replay.pairsPositionsSeq[0]
-    mSelf.replaySimulator[] =
-      nazo2.initSimulator(mSelf.replaySimulator[].mode, mSelf.replaySimulator[].editor)
+    mSelf.replaySimulator[] = nazo2.initSimulator mSelf.replaySimulator[].mode
   else:
     mSelf.focusReplay = false
 
@@ -303,7 +300,7 @@ proc prevReplay*(mSelf) {.inline.} =
 proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
   ## Does operation specified by the keyboard input.
   ## Returns `true` if any action is executed.
-  if mSelf.editor:
+  if mSelf.simulator[].mode in {PlayEditor, Edit}:
     if event == initKeyEvent("Tab", shift = true):
       mSelf.toggleFocus
       return true
@@ -370,7 +367,7 @@ when defined(js):
     result = buildHtml(tdiv(class = "columns is-mobile is-variable is-1")):
       tdiv(class = "column is-narrow"):
         simulatorNode
-      if rSelf.editor and rSelf.simulator[].kind == Nazo:
+      if rSelf.simulator[].mode in {PlayEditor, Edit} and rSelf.simulator[].kind == Nazo:
         tdiv(class = "column is-narrow"):
           section(class = "section"):
             tdiv(class = "block"):

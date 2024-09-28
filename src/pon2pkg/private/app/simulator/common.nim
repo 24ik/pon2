@@ -167,7 +167,7 @@ func getMessages*(
           0 ..< wrappedNazoPuyo.puyoPuyo.operatingIndex
         ]
 
-      simulator.initialNazoPuyoWrap.get:
+      simulator.nazoPuyoWrapBeforeMoves.get:
         result.state = $wrappedNazoPuyo.mark pairsPositions
   else:
     result.state = "　"
@@ -191,9 +191,9 @@ func getMessages*(
 
 const RuleDescriptions: array[Rule, string] = ["通", "すいちゅう"]
 
-func toXLink*(simulator: Simulator, withPositions: bool, editor: bool): Uri {.inline.} =
+func toXLink*(simulator: Simulator, withPositions: bool): Uri {.inline.} =
   ## Returns the URI for posting to X.
-  let simulatorUri = simulator.toUri(withPositions, editor)
+  let simulatorUri = simulator.toUri withPositions
 
   if simulator.kind == Nazo:
     simulator.nazoPuyoWrap.get:

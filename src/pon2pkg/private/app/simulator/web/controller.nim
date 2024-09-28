@@ -19,36 +19,7 @@ proc initControllerNode*(simulator: ref Simulator): VNode {.inline.} =
 
   result = buildHtml(tdiv):
     case simulator[].mode
-    of Edit:
-      tdiv(class = "buttons is-centered mb-0"):
-        button(
-          class = insertingButtonClass, onclick = () => simulator[].toggleInserting
-        ):
-          span(class = "icon"):
-            italic(class = "fa-solid fa-indent")
-        button(class = "button is-light", onclick = () => simulator[].flipFieldH):
-          span(class = "icon"):
-            italic(class = "fa-solid fa-arrow-right-arrow-left")
-        button(class = "button is-light", onclick = () => simulator[].undo):
-          span(class = "icon"):
-            italic(class = "fa-solid fa-circle-arrow-left")
-        button(class = "button is-light", onclick = () => simulator[].redo):
-          span(class = "icon"):
-            italic(class = "fa-solid fa-circle-arrow-right")
-      tdiv(class = "buttons is-centered"):
-        button(class = "button is-light", onclick = () => simulator[].shiftFieldLeft):
-          span(class = "icon"):
-            italic(class = "fa-solid fa-angles-left")
-        button(class = "button is-light", onclick = () => simulator[].shiftFieldDown):
-          span(class = "icon"):
-            italic(class = "fa-solid fa-angles-down")
-        button(class = "button is-light", onclick = () => simulator[].shiftFieldUp):
-          span(class = "icon"):
-            italic(class = "fa-solid fa-angles-up")
-        button(class = "button is-light", onclick = () => simulator[].shiftFieldRight):
-          span(class = "icon"):
-            italic(class = "fa-solid fa-angles-right")
-    of Play:
+    of Play, PlayEditor:
       tdiv(class = "buttons is-centered mb-0"):
         button(
           class = "button is-light",
@@ -102,7 +73,36 @@ proc initControllerNode*(simulator: ref Simulator): VNode {.inline.} =
         ):
           span(class = "icon"):
             italic(class = "fa-solid fa-arrow-right")
-    of Replay:
+    of Edit:
+      tdiv(class = "buttons is-centered mb-0"):
+        button(
+          class = insertingButtonClass, onclick = () => simulator[].toggleInserting
+        ):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-indent")
+        button(class = "button is-light", onclick = () => simulator[].flipFieldH):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-arrow-right-arrow-left")
+        button(class = "button is-light", onclick = () => simulator[].undo):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-circle-arrow-left")
+        button(class = "button is-light", onclick = () => simulator[].redo):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-circle-arrow-right")
+      tdiv(class = "buttons is-centered"):
+        button(class = "button is-light", onclick = () => simulator[].shiftFieldLeft):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-angles-left")
+        button(class = "button is-light", onclick = () => simulator[].shiftFieldDown):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-angles-down")
+        button(class = "button is-light", onclick = () => simulator[].shiftFieldUp):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-angles-up")
+        button(class = "button is-light", onclick = () => simulator[].shiftFieldRight):
+          span(class = "icon"):
+            italic(class = "fa-solid fa-angles-right")
+    of View:
       tdiv(class = "buttons is-centered mb-0"):
         button(class = "button is-light", onclick = () => simulator[].reset):
           span(class = "icon"):

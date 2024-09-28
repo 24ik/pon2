@@ -28,8 +28,9 @@ type
   SimulatorMode* {.pure.} = enum
     ## simulator mode.
     Play = "p"
+    PlayEditor = "P"
     Edit = "e"
-    Replay = "r"
+    View = "v"
 
   SimulatorState* {.pure.} = enum
     ## Simulator state.
@@ -48,7 +49,6 @@ type
     nazoPuyoWrap: NazoPuyoWrap
     moveResult: MoveResult
 
-    editor: bool
     state: SimulatorState
     kind: SimulatorKind
     mode: SimulatorMode
@@ -77,14 +77,11 @@ const
   DefaultMoveResult =
     initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], newSeq[array[ColorPuyo, seq[int]]](0))
 
-func initSimulator*(
-    nazoPuyoWrap: NazoPuyoWrap, mode = Play, editor = false
-): Simulator {.inline.} =
+func initSimulator*(nazoPuyoWrap: NazoPuyoWrap, mode = Play): Simulator {.inline.} =
   ## Returns a new simulator.
   result.nazoPuyoWrap = nazoPuyoWrap
   result.moveResult = DefaultMoveResult
 
-  result.editor = editor
   result.state = Stable
   result.kind = Nazo
   result.mode = mode
@@ -104,17 +101,16 @@ func initSimulator*(
   result.editing.insert = false
 
 func initSimulator*[F: TsuField or WaterField](
-    nazo: NazoPuyo[F], mode = Play, editor = false
+    nazo: NazoPuyo[F], mode = Play
 ): Simulator {.inline.} =
   ## Returns a new simulator.
-  initNazoPuyoWrap(nazo).initSimulator(mode, editor)
+  initNazoPuyoWrap(nazo).initSimulator mode
 
 func initSimulator*[F: TsuField or WaterField](
-    puyoPuyo: PuyoPuyo[F], mode = Play, editor = false
+    puyoPuyo: PuyoPuyo[F], mode = Play
 ): Simulator {.inline.} =
   ## Returns a new simulator.
-  result =
-    NazoPuyo[F](puyoPuyo: puyoPuyo, requirement: DefaultReq).initSimulator(mode, editor)
+  result = NazoPuyo[F](puyoPuyo: puyoPuyo, requirement: DefaultReq).initSimulator mode
   result.kind = Regular
 
 # ------------------------------------------------
@@ -127,7 +123,6 @@ func copy*(self): Simulator {.inline.} =
   result.nazoPuyoWrap = self.nazoPuyoWrap
   result.moveResult = self.moveResult
 
-  result.editor = self.editor
   result.state = self.state
   result.kind = self.kind
   result.mode = self.mode
@@ -148,6 +143,25 @@ func copy*(self): Simulator {.inline.} =
   result.editing = self.editing
 
 # ------------------------------------------------
+# Property - Nazo Puyo / Pairs&Positions
+# ------------------------------------------------
+
+func nazoPuyoWrap*(self): NazoPuyoWrap {.inline.} =
+  ## Returns the wrapped Nazo Puyo.
+  self.nazoPuyoWrap
+
+func nazoPuyoWrapBeforeMoves*(self): NazoPuyoWrap {.inline.} =
+  ## Returns the wrapped Nazo Puyo before any moves.
+  if self.moveDeque.len > 0:
+    self.moveDeque.peekFirst.nazoPuyoWrap
+  else:
+    self.nazoPuyoWrap
+
+func `pairsPositions=`*(mSelf; pairsPositions: PairsPositions) {.inline.} =
+  mSelf.nazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
+
+# ------------------------------------------------
 # Property - Rule / Kind / Mode
 # ------------------------------------------------
 
@@ -166,38 +180,20 @@ func `rule=`*(mSelf; rule: Rule) {.inline.} =
 func `kind=`*(mSelf; kind: SimulatorKind) {.inline.} =
   mSelf.kind = kind
 
+# TODO
 func `mode=`*(mSelf; mode: SimulatorMode) {.inline.} =
   if mode == mSelf.mode:
     return
 
-  if mode == Edit or mSelf.mode == Edit:
-    if mode == Edit and mSelf.undoDeque.len > 0:
-      mSelf.nazoPuyoWrap = mSelf.undoDeque.popFirst
-    mSelf.state = Stable
-    mSelf.undoDeque.clear
-    mSelf.redoDeque.clear
-    mSelf.moveDeque.clear
+  if mSelf.mode in {Play, View}:
+    return
 
+  mSelf.nazoPuyoWrap = mSelf.nazoPuyoWrapBeforeMoves
   mSelf.mode = mode
-
-# ------------------------------------------------
-# Property - Nazo Puyo / Pairs&Positions
-# ------------------------------------------------
-
-func nazoPuyoWrap*(self): NazoPuyoWrap {.inline.} =
-  ## Returns the wrapped Nazo Puyo.
-  self.nazoPuyoWrap
-
-func initialNazoPuyoWrap*(self): NazoPuyoWrap {.inline.} =
-  ## Returns the wrapped Nazo Puyo before any moves.
-  if self.moveDeque.len > 0:
-    self.moveDeque.peekFirst.nazoPuyoWrap
-  else:
-    self.nazoPuyoWrap
-
-func `pairsPositions=`*(mSelf; pairsPositions: PairsPositions) {.inline.} =
-  mSelf.nazoPuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
+  mSelf.state = Stable
+  mSelf.undoDeque.clear
+  mSelf.redoDeque.clear
+  mSelf.moveDeque.clear
 
 # ------------------------------------------------
 # Property - Editing
@@ -213,10 +209,6 @@ func `editingCell=`*(mSelf; cell: Cell) {.inline.} =
 # ------------------------------------------------
 # Property - Other
 # ------------------------------------------------
-
-func editor*(self): bool {.inline.} =
-  ## Returns `true` if the simulator is in the editor mode.
-  self.editor
 
 func state*(self): SimulatorState {.inline.} =
   ## Returns the simulator state.
@@ -602,7 +594,6 @@ func reset*(mSelf) {.inline.} =
 # ------------------------------------------------
 
 const
-  EditorKey = "editor"
   KindKey = "kind"
   ModeKey = "mode"
 
@@ -613,7 +604,7 @@ const
     for mode in SimulatorMode:
       {$mode: mode}
 
-func toUri*(self; withPositions: bool, editor: bool, host = Ik): Uri {.inline.} =
+func toUri*(self; withPositions: bool, host = Ik): Uri {.inline.} =
   ## Returns the URI converted from the simulator.
   ## Any moves are reset.
   ## `self.editor` is overridden with `editor`.
@@ -633,9 +624,9 @@ func toUri*(self; withPositions: bool, editor: bool, host = Ik): Uri {.inline.} 
       case self.kind
       of Regular:
         case self.mode
-        of Play: 's'
+        of Play, PlayEditor: 's'
         of Edit: 'e'
-        of Replay: 'v'
+        of View: 'v'
       of Nazo:
         'n'
     result.path = &"/simu/p{modeChar}.html"
@@ -644,7 +635,7 @@ func toUri*(self; withPositions: bool, editor: bool, host = Ik): Uri {.inline.} 
     mainQuery: string
     pairsPositions = self.nazoPuyoWrap.get:
       wrappedNazoPuyo.puyoPuyo.pairsPositions
-  self.initialNazoPuyoWrap.get:
+  self.nazoPuyoWrapBeforeMoves.get:
     var nazo = wrappedNazoPuyo
     if withPositions:
       nazo.puyoPuyo.pairsPositions = pairsPositions
@@ -662,20 +653,10 @@ func toUri*(self; withPositions: bool, editor: bool, host = Ik): Uri {.inline.} 
   case host
   of Ik:
     # editor, kind, mode
-    var queries = newSeq[(string, string)](0)
-    if editor:
-      queries.add (EditorKey, "")
-    queries.add (KindKey, $self.kind)
-    queries.add (ModeKey, $self.mode)
-
-    result.query = &"{queries.encodeQuery}&{mainQuery}"
+    let kindModeQuery = [(KindKey, $self.kind), (ModeKey, $self.mode)].encodeQuery
+    result.query = &"{kindModeQuery}&{mainQuery}"
   of Ishikawa, Ips:
     result.query = mainQuery
-
-func toUri*(self; withPositions: bool, host = Ik): Uri {.inline.} =
-  ## Returns the URI converted from the simulator.
-  ## Any moves are reset.
-  self.toUri(withPositions, self.editor, host)
 
 func parseSimulator*(uri: Uri): Simulator {.inline.} =
   ## Returns the simulator converted from the URI.
@@ -688,7 +669,6 @@ func parseSimulator*(uri: Uri): Simulator {.inline.} =
       raise newException(ValueError, "Invalid simulator: " & $uri)
 
     var
-      editor = false
       kindVal = "<invalid>"
       modeVal = "<invalid>"
       mainQueries = newSeq[(string, string)](0)
@@ -697,11 +677,6 @@ func parseSimulator*(uri: Uri): Simulator {.inline.} =
 
     for (key, val) in uri.query.decodeQuery:
       case key
-      of EditorKey:
-        if val == "":
-          editor = true
-        else:
-          raise newException(ValueError, "Invalid simulator: " & $uri)
       of KindKey:
         kindVal = val
       of ModeKey:
@@ -720,18 +695,18 @@ func parseSimulator*(uri: Uri): Simulator {.inline.} =
     case kind
     of Regular:
       try:
-        result = parsePuyoPuyo[TsuField](mainQuery, Ik).initSimulator(mode, editor)
+        result = parsePuyoPuyo[TsuField](mainQuery, Ik).initSimulator mode
       except ValueError:
         try:
-          result = parsePuyoPuyo[WaterField](mainQuery, Ik).initSimulator(mode, editor)
+          result = parsePuyoPuyo[WaterField](mainQuery, Ik).initSimulator mode
         except ValueError:
           raise newException(ValueError, "Invalid simulator: " & $uri)
     of Nazo:
       try:
-        result = parseNazoPuyo[TsuField](mainQuery, Ik).initSimulator(mode, editor)
+        result = parseNazoPuyo[TsuField](mainQuery, Ik).initSimulator mode
       except ValueError:
         try:
-          result = parseNazoPuyo[WaterField](mainQuery, Ik).initSimulator(mode, editor)
+          result = parseNazoPuyo[WaterField](mainQuery, Ik).initSimulator mode
         except ValueError:
           raise newException(ValueError, "Invalid simulator: " & $uri)
   of $Ishikawa, $Ips:
@@ -747,22 +722,24 @@ func parseSimulator*(uri: Uri): Simulator {.inline.} =
       mode = Play
     of "/simu/pv.html":
       kind = Regular
-      mode = Replay
+      mode = View
     of "/simu/pn.html":
       kind = Nazo
       mode = Play
     else:
-      kind = SimulatorKind.low # HACK: dummy to compile
-      mode = SimulatorMode.low # HACK: dummy to compile
+      # HACK: dummy to compile
+      kind = SimulatorKind.low
+      mode = SimulatorMode.low
+
       raise newException(ValueError, "Invalid simulator: " & $uri)
 
     let host = if uri.hostname == $Ishikawa: Ishikawa else: Ips
 
     case kind
     of Regular:
-      result = parsePuyoPuyo[TsuField](uri.query, host).initSimulator(mode, true)
+      result = parsePuyoPuyo[TsuField](uri.query, host).initSimulator mode
     of Nazo:
-      result = parseNazoPuyo[TsuField](uri.query, host).initSimulator(mode, true)
+      result = parseNazoPuyo[TsuField](uri.query, host).initSimulator mode
   else:
     raise newException(ValueError, "Invalid simulator: " & $uri)
 
@@ -776,6 +753,32 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
   result = true
 
   case mSelf.mode
+  of Play, PlayEditor:
+    # rotate position
+    if event == initKeyEvent("KeyJ"):
+      mSelf.rotateOperatingPositionLeft
+    elif event == initKeyEvent("KeyK"):
+      mSelf.rotateOperatingPositionRight
+    # move position
+    elif event == initKeyEvent("KeyA"):
+      mSelf.moveOperatingPositionLeft
+    elif event == initKeyEvent("KeyD"):
+      mSelf.moveOperatingPositionRight
+    # forward / backward / reset
+    elif event == initKeyEvent("KeyS"):
+      mSelf.forward
+    elif event == initKeyEvent("KeyW"):
+      mSelf.backward
+    elif event == initKeyEvent("KeyW", shift = true):
+      mSelf.backward(toStable = false)
+    elif event == initKeyEvent("KeyW", control = true):
+      mSelf.reset
+    elif event == initKeyEvent("Space"):
+      mSelf.forward(skip = true)
+    elif event == initKeyEvent("KeyS", shift = true):
+      mSelf.forward(replay = true)
+    else:
+      result = false
   of Edit:
     # insert, focus
     if event == initKeyEvent("KeyI"):
@@ -825,33 +828,7 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
       mSelf.redo
     else:
       result = false
-  of Play:
-    # rotate position
-    if event == initKeyEvent("KeyJ"):
-      mSelf.rotateOperatingPositionLeft
-    elif event == initKeyEvent("KeyK"):
-      mSelf.rotateOperatingPositionRight
-    # move position
-    elif event == initKeyEvent("KeyA"):
-      mSelf.moveOperatingPositionLeft
-    elif event == initKeyEvent("KeyD"):
-      mSelf.moveOperatingPositionRight
-    # forward / backward / reset
-    elif event == initKeyEvent("KeyS"):
-      mSelf.forward
-    elif event == initKeyEvent("KeyW"):
-      mSelf.backward
-    elif event == initKeyEvent("KeyW", shift = true):
-      mSelf.backward(toStable = false)
-    elif event == initKeyEvent("KeyW", control = true):
-      mSelf.reset
-    elif event == initKeyEvent("Space"):
-      mSelf.forward(skip = true)
-    elif event == initKeyEvent("KeyS", shift = true):
-      mSelf.forward(replay = true)
-    else:
-      result = false
-  of Replay:
+  of View:
     # forward / backward / reset
     if event == initKeyEvent("KeyW"):
       mSelf.backward
