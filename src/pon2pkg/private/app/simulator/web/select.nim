@@ -27,7 +27,9 @@ proc initSelectNode*(simulator: ref Simulator): VNode {.inline.} =
 
   result = buildHtml(tdiv):
     tdiv(class = "buttons has-addons mb-0"):
-      button(class = playEditorButtonClass, onclick = () => (simulator[].mode = Play)):
+      button(
+        class = playEditorButtonClass, onclick = () => (simulator[].mode = PlayEditor)
+      ):
         span(class = "icon"):
           italic(class = "fa-solid fa-gamepad")
       button(class = editButtonClass, onclick = () => (simulator[].mode = Edit)):
