@@ -328,6 +328,7 @@ proc operate*(mSelf; event: KeyEvent): bool {.inline.} =
 # ------------------------------------------------
 
 when defined(js):
+  import std/[strformat]
   import
     ../private/app/gui/web/
       [controller, pagination, settings, progress, simulator as simulatorModule]
@@ -359,10 +360,15 @@ when defined(js):
   # JS - Node
   # ------------------------------------------------
 
+  const
+    LeftSimulatorIdPrefix = "left-"
+    RightSimulatorIdPrefix = "right-"
+
   proc initGuiApplicationNode(rSelf; id: string): VNode {.inline.} =
     ## Returns the GUI application without the external section.
     ## `id` is shared with other node-creating procedures and need to be unique.
-    let simulatorNode = rSelf.simulator.initSimulatorNode(id = id)
+    let simulatorNode =
+      rSelf.simulator.initSimulatorNode(id = &"{LeftSimulatorIdPrefix}{id}")
 
     result = buildHtml(tdiv(class = "columns is-mobile is-variable is-1")):
       tdiv(class = "column is-narrow"):
@@ -381,7 +387,7 @@ when defined(js):
                 rSelf.initEditorPaginationNode
               if rSelf.replay.pairsPositionsSeq.len > 0:
                 tdiv(class = "block"):
-                  rSelf.initEditorSimulatorNode
+                  rSelf.initEditorSimulatorNode &"{RightSimulatorIdPrefix}{id}"
 
   proc initGuiApplicationNode*(
       rSelf; setKeyHandler = true, wrapSection = true, id = ""
