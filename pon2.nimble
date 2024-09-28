@@ -78,8 +78,8 @@ task web, "Make Web Pages":
       cpFile rawJs, dst
 
   # GUI application
-  "src/pon2.nim".compile "www/gui/index.min.js"
-  "src/pon2.nim".compile "www/gui/worker.min.js", "-d:pon2.worker"
+  "src/pon2.nim".compile "www/index.min.js"
+  "src/pon2.nim".compile "www/worker.min.js", "-d:pon2.worker"
 
   # marathon
   "src/pon2.nim".compile "www/marathon/index.min.js", "-d:pon2.marathon"

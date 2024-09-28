@@ -12,8 +12,8 @@
 /www/assets/
 /www/docs/
 /www/marathon/index.min.js
-/www/gui/index.min.js
-/www/gui/worker.min.js
+/www/index.min.js
+/www/worker.min.js
 
 /pon2
 /pon2.exe

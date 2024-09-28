@@ -627,7 +627,7 @@ func toUri*(self; withPositions: bool, editor: bool, host = Ik): Uri {.inline.} 
   # path
   case host
   of Ik:
-    result.path = "/pon2/gui/index.html"
+    result.path = "/pon2/"
   of Ishikawa, Ips:
     let modeChar =
       case self.kind
@@ -684,7 +684,7 @@ func parseSimulator*(uri: Uri): Simulator {.inline.} =
 
   case uri.hostname
   of $Ik:
-    if uri.path != "/pon2/gui/index.html":
+    if uri.path notin ["/pon2/", "/pon2", "/pon2/index.html"]:
       raise newException(ValueError, "Invalid simulator: " & $uri)
 
     var
