@@ -28,7 +28,7 @@ type
   SimulatorMode* {.pure.} = enum
     ## simulator mode.
     Play = "p"
-    PlayEditor = "P"
+    PlayEditor = "pe"
     Edit = "e"
     View = "v"
 
@@ -883,8 +883,9 @@ when defined(js):
             if rSelf.mode != Edit:
               tdiv(class = "block"):
                 rSelf.initMessagesNode
-            tdiv(class = "block"):
-              rSelf.initSelectNode
+            if rSelf.mode in {PlayEditor, Edit}:
+              tdiv(class = "block"):
+                rSelf.initSelectNode
             tdiv(class = "block"):
               rSelf.initShareNode id
           if rSelf.mode != Edit:
