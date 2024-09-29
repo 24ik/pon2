@@ -98,26 +98,26 @@ proc initShareNode*(simulator: ref Simulator, id = ""): VNode {.inline.} =
             text "操作無"
           button(class = "button is-size-7", onclick = initDownloadHandler(id, true)):
             text "操作有"
-    tdiv(class = "block"):
-      text "URLコピー"
-      tdiv(class = "buttons"):
-        button(
-          id = urlCopyButtonId.kstring,
-          class = "button is-size-7",
-          onclick = initCopyButtonHandler(
-            () => $simulator.toPlayUri(withPositions = false), urlCopyButtonId
-          ),
-        ):
-          text "操作無"
-        button(
-          id = posUrlCopyButtonId.kstring,
-          class = "button is-size-7",
-          onclick = initCopyButtonHandler(
-            () => $simulator.toPlayUri(withPositions = true), posUrlCopyButtonId
-          ),
-        ):
-          text "操作有"
-    if simulator[].mode in {PlayEditor, Edit}:
+      tdiv(class = "block"):
+        text "URLコピー"
+        tdiv(class = "buttons"):
+          button(
+            id = urlCopyButtonId.kstring,
+            class = "button is-size-7",
+            onclick = initCopyButtonHandler(
+              () => $simulator.toPlayUri(withPositions = false), urlCopyButtonId
+            ),
+          ):
+            text "操作無"
+          button(
+            id = posUrlCopyButtonId.kstring,
+            class = "button is-size-7",
+            onclick = initCopyButtonHandler(
+              () => $simulator.toPlayUri(withPositions = true), posUrlCopyButtonId
+            ),
+          ):
+            text "操作有"
+    if simulator[].mode != Play:
       tdiv(class = "block"):
         text "編集者URLコピー"
         tdiv(class = "buttons"):
