@@ -184,9 +184,6 @@ func `mode=`*(mSelf; mode: SimulatorMode) {.inline.} =
   if mode == mSelf.mode:
     return
 
-  if mSelf.mode in {Play, View}:
-    return
-
   mSelf.nazoPuyoWrap = mSelf.nazoPuyoWrapBeforeMoves
   mSelf.mode = mode
   mSelf.state = Stable
@@ -841,7 +838,7 @@ func operate*(mSelf; event: KeyEvent): bool {.discardable.} =
     elif event in
         [initKeyEvent("Digit2", shift = true), initKeyEvent("KeyW", shift = true)]:
       mSelf.backward(toStable = false)
-    elif event == initKeyEvent("Digit3"):
+    elif event in [initKeyEvent("Digit3"), initKeyEvent("KeyS")]:
       mSelf.forward(replay = true)
     elif event == initKeyEvent("Digit1"):
       mSelf.reset

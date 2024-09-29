@@ -61,7 +61,7 @@ proc main*() =
     check simulator.mode == Play
 
     simulator.mode = View
-    check simulator.mode == Play
+    check simulator.mode == View
 
   # ------------------------------------------------
   # Property - Score
