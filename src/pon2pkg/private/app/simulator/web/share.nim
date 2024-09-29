@@ -70,33 +70,34 @@ proc initShareNode*(simulator: ref Simulator, id = ""): VNode {.inline.} =
     editorPosUrlCopyButtonId = &"{EditorPosUrlCopyButtonIdPrefix}{id}"
 
   result = buildHtml(tdiv):
-    tdiv(class = "block"):
-      span(class = "icon"):
-        italic(class = "fa-brands fa-x-twitter")
-      span:
-        text "でシェア"
-      tdiv(class = "buttons"):
-        a(
-          class = "button is-size-7",
-          target = "_blank",
-          rel = "noopener noreferrer",
-          href = kstring $simulator[].toXlink(withPositions = false),
-        ):
-          text "操作無"
-        a(
-          class = "button is-size-7",
-          target = "_blank",
-          rel = "noopener noreferrer",
-          href = kstring $simulator[].toXlink(withPositions = true),
-        ):
-          text "操作有"
-    tdiv(class = "block"):
-      text "画像ダウンロード"
-      tdiv(class = "buttons"):
-        button(class = "button is-size-7", onclick = initDownloadHandler(id, false)):
-          text "操作無"
-        button(class = "button is-size-7", onclick = initDownloadHandler(id, true)):
-          text "操作有"
+    if simulator[].mode != View:
+      tdiv(class = "block"):
+        span(class = "icon"):
+          italic(class = "fa-brands fa-x-twitter")
+        span:
+          text "でシェア"
+        tdiv(class = "buttons"):
+          a(
+            class = "button is-size-7",
+            target = "_blank",
+            rel = "noopener noreferrer",
+            href = kstring $simulator[].toXlink(withPositions = false),
+          ):
+            text "操作無"
+          a(
+            class = "button is-size-7",
+            target = "_blank",
+            rel = "noopener noreferrer",
+            href = kstring $simulator[].toXlink(withPositions = true),
+          ):
+            text "操作有"
+      tdiv(class = "block"):
+        text "画像ダウンロード"
+        tdiv(class = "buttons"):
+          button(class = "button is-size-7", onclick = initDownloadHandler(id, false)):
+            text "操作無"
+          button(class = "button is-size-7", onclick = initDownloadHandler(id, true)):
+            text "操作有"
     tdiv(class = "block"):
       text "URLコピー"
       tdiv(class = "buttons"):

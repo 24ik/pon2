@@ -184,9 +184,6 @@ func `mode=`*(mSelf; mode: SimulatorMode) {.inline.} =
   if mode == mSelf.mode:
     return
 
-  if mSelf.mode in {Play, View}:
-    return
-
   mSelf.nazoPuyoWrap = mSelf.nazoPuyoWrapBeforeMoves
   mSelf.mode = mode
   mSelf.state = Stable
