@@ -2,7 +2,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[importutils, options, strutils, unittest, uri]
+import std/[importutils, options, unittest, uri]
 import ../../src/pon2pkg/app/[nazopuyo, simulator {.all.}]
 import
   ../../src/pon2pkg/core/[
