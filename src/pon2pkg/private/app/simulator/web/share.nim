@@ -117,7 +117,7 @@ proc initShareNode*(simulator: ref Simulator, id = ""): VNode {.inline.} =
             ),
           ):
             text "操作有"
-    if simulator[].mode != Play:
+    if simulator[].mode != SimulatorMode.Play:
       tdiv(class = "block"):
         text "編集者URLコピー"
         tdiv(class = "buttons"):
