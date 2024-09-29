@@ -159,6 +159,11 @@ proc runGenerator*(args: Table[string, Value]) {.inline.} =
           garbage: parseSomeInt[Natural](args["--ng"]).get,
         ),
         (
+          total: parseSomeInt[Natural](args["-2"], true),
+          vertical: parseSomeInt[Natural](args["--2v"], true),
+          horizontal: parseSomeInt[Natural](args["--2h"], true),
+        ),
+        (
           total: parseSomeInt[Natural](args["-3"], true),
           vertical: parseSomeInt[Natural](args["--3v"], true),
           horizontal: parseSomeInt[Natural](args["--3h"], true),
@@ -278,6 +283,9 @@ Options:
   -H <>       各列の高さの割合．          [default: 0++++0]
   --nc <>     色ぷよの数．                [default: 24]
   --ng <>     お邪魔ぷよの数．            [default: 2]
+  -2 <>       2連結の数．
+  --2v <>     縦2連結の数．
+  --2h <>     横2連結の数．
   -3 <>       3連結の数．
   --3v <>     縦3連結の数．
   --3h <>     横3連結の数．

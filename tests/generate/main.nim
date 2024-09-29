@@ -29,9 +29,11 @@ proc main*() =
           none Natural,
           none Natural,
           some 0.Natural,
-          some 0.Natural
+          some 0.Natural,
         ]
         puyoCounts = (color: 20.Natural, garbage: 2.Natural)
+        connect2Counts =
+          (total: none Natural, vertical: some 1.Natural, horizontal: some 0.Natural)
         connect3Counts = (
           total: none Natural,
           vertical: some 0.Natural,
@@ -47,6 +49,7 @@ proc main*() =
           colorCount,
           heights,
           puyoCounts,
+          connect2Counts,
           connect3Counts,
           false,
           false,
@@ -73,6 +76,8 @@ proc main*() =
     check nazo.puyoPuyo.colorCount == puyoCounts.color
     check nazo.puyoPuyo.garbageCount == puyoCounts.garbage
 
+    check nazo.puyoPuyo.field.connect2V.colorCount == connect2Counts.vertical.get * 2
+    check nazo.puyoPuyo.field.connect2H.colorCount == connect2Counts.horizontal.get * 2
     check nazo.puyoPuyo.field.connect3V.colorCount == connect3Counts.vertical.get * 3
     check nazo.puyoPuyo.field.connect3H.colorCount == connect3Counts.horizontal.get * 3
 
