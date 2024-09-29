@@ -249,6 +249,36 @@ func garbageCount*(self: TsuField or WaterField): int {.inline.} =
 # Connect
 # ------------------------------------------------
 
+func connect2*[F: TsuField or WaterField](field: F): F {.inline.} =
+  ## Returns the field with only the locations where exactly two color puyos
+  ## are connected.
+  ## This function ignores ghost puyos.
+  field *
+    sum(
+      field.red.connect2, field.green.connect2, field.blue.connect2,
+      field.yellow.connect2, field.purple.connect2,
+    )
+
+func connect2V*[F: TsuField or WaterField](field: F): F {.inline.} =
+  ## Returns the field with only the locations where exactly two color puyos
+  ## are connected vertically.
+  ## This function ignores ghost puyos.
+  field *
+    sum(
+      field.red.connect2V, field.green.connect2V, field.blue.connect2V,
+      field.yellow.connect2V, field.purple.connect2V,
+    )
+
+func connect2H*[F: TsuField or WaterField](field: F): F {.inline.} =
+  ## Returns the field with only the locations where exactly two color puyos
+  ## are connected horizontally.
+  ## This function ignores ghost puyos.
+  field *
+    sum(
+      field.red.connect2H, field.green.connect2H, field.blue.connect2H,
+      field.yellow.connect2H, field.purple.connect2H,
+    )
+
 func connect3*[F: TsuField or WaterField](field: F): F {.inline.} =
   ## Returns the field with only the locations where exactly three color puyos
   ## are connected.

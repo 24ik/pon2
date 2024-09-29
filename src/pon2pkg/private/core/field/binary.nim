@@ -48,19 +48,17 @@ func isDead*(self; rule: Rule): bool {.inline.} =
 
 const
   AllColumns = {Column.low .. Column.high}
-  OuterColumns: array[2, array[Column, set[Column]]] = [
-    [{}, {}, {}, {}, {}, {}], [{0}, {0, 1}, {}, {3, 4, 5}, {4, 5}, {5}]
-  ]
-  LiftPositions: array[2, array[Column, set[Position]]] = [
-    [{}, {}, {}, {}, {}, {}], [{Down0}, {Down1}, {Down2}, {Down3}, {Down4}, {Down5}]
-  ]
+  OuterColumns: array[2, array[Column, set[Column]]] =
+    [[{}, {}, {}, {}, {}, {}], [{0}, {0, 1}, {}, {3, 4, 5}, {4, 5}, {5}]]
+  LiftPositions: array[2, array[Column, set[Position]]] =
+    [[{}, {}, {}, {}, {}, {}], [{Down0}, {Down1}, {Down2}, {Down3}, {Down4}, {Down5}]]
   InvalidPositions: array[Column, set[Position]] = [
     {Up0, Right0, Down0, Left1},
     {Up1, Right1, Down1, Left1, Right0, Left2},
     {Up2, Right2, Down2, Left2, Right1, Left3},
     {Up3, Right3, Down3, Left3, Right2, Left4},
     {Up4, Right4, Down4, Left4, Right3, Left5},
-    {Up5, Down5, Left5, Right4}
+    {Up5, Down5, Left5, Right4},
   ]
 
 func invalidPositions*(self): set[Position] {.inline.} =
@@ -158,7 +156,7 @@ func expanded*(self): BinaryField {.inline.} =
   ## This function does not trim.
   sum(
     self, self.shiftedUpWithoutTrim, self.shiftedDownWithoutTrim,
-    self.shiftedRightWithoutTrim, self.shiftedLeftWithoutTrim
+    self.shiftedRightWithoutTrim, self.shiftedLeftWithoutTrim,
   )
 
 func expandedV(self): BinaryField {.inline.} =
@@ -209,8 +207,9 @@ func disappeared(connection: Connection): BinaryField {.inline.} =
     connect4Left = connection.connect3IL * connection.connect3IL.shiftedLeftWithoutTrim
 
   result =
-    connection.visible *
-    (sum(connection.connect4T, connect4Up, connect4Down, connect4Right, connect4Left)).expanded
+    connection.visible * (
+      sum(connection.connect4T, connect4Up, connect4Down, connect4Right, connect4Left)
+    ).expanded
 
 func disappeared*(self): BinaryField {.inline.} =
   ## Returns the binary field where four or more cells are connected.
@@ -229,6 +228,76 @@ func willDisappear*(self): bool {.inline.} =
 # ------------------------------------------------
 # Connect
 # ------------------------------------------------
+
+func connect2*(self): BinaryField {.inline.} =
+  ## Returns the binary field with only the locations where exactly two
+  ## cells are connected.
+  ## This function ignores ghost puyos.
+  let
+    visibleField = self.visible
+
+    up = visibleField.shiftedUpWithoutTrim
+    down = visibleField.shiftedDownWithoutTrim
+    right = visibleField.shiftedRightWithoutTrim
+    left = visibleField.shiftedLeftWithoutTrim
+
+    upRight = up.shiftedRightWithoutTrim
+
+    seedV =
+      visibleField * up -
+      sum(
+        up.shiftedUpWithoutTrim, down, right, left, upRight, up.shiftedLeftWithoutTrim
+      )
+    seedH =
+      visibleField * right -
+      sum(
+        right.shiftedRightWithoutTrim, up, down, left, upRight,
+        right.shiftedDownWithoutTrim,
+      )
+
+  result = sum(seedV.shiftedDownWithoutTrim, seedV, seedH.shiftedLeftWithoutTrim, seedH)
+
+func connect2V*(self): BinaryField {.inline.} =
+  ## Returns the binary field with only the locations where exactly two
+  ## cells are connected vertically.
+  ## This function ignores ghost puyos.
+  let
+    visibleField = self.visible
+
+    up = visibleField.shiftedUpWithoutTrim
+    down = visibleField.shiftedDownWithoutTrim
+    right = visibleField.shiftedRightWithoutTrim
+    left = visibleField.shiftedLeftWithoutTrim
+
+    seed =
+      visibleField * up -
+      sum(
+        up.shiftedUpWithoutTrim, down, right, left, up.shiftedRightWithoutTrim,
+        up.shiftedLeftWithoutTrim,
+      )
+
+  result = seed + seed.shiftedDownWithoutTrim
+
+func connect2H*(self): BinaryField {.inline.} =
+  ## Returns the binary field with only the locations where exactly two
+  ## cells are connected horizontally.
+  ## This function ignores ghost puyos.
+  let
+    visibleField = self.visible
+
+    up = visibleField.shiftedUpWithoutTrim
+    down = visibleField.shiftedDownWithoutTrim
+    right = visibleField.shiftedRightWithoutTrim
+    left = visibleField.shiftedLeftWithoutTrim
+
+    seed =
+      visibleField * right -
+      sum(
+        right.shiftedRightWithoutTrim, up, down, left, right.shiftedUpWithoutTrim,
+        right.shiftedDownWithoutTrim,
+      )
+
+  result = seed + seed.shiftedLeftWithoutTrim
 
 func connect3*(self): BinaryField {.inline.} =
   ## Returns the binary field with only the locations where exactly three
@@ -255,7 +324,7 @@ func connect3V*(self): BinaryField {.inline.} =
       sum(
         right, left, up.shiftedRightWithoutTrim, up.shiftedLeftWithoutTrim,
         down.shiftedRightWithoutTrim, down.shiftedLeftWithoutTrim,
-        up.shiftedUpWithoutTrim, down.shiftedDownWithoutTrim
+        up.shiftedUpWithoutTrim, down.shiftedDownWithoutTrim,
       )
 
   result = (upDown - exclude).expandedV
@@ -278,7 +347,7 @@ func connect3H*(self): BinaryField {.inline.} =
       sum(
         up, down, up.shiftedRightWithoutTrim, up.shiftedLeftWithoutTrim,
         down.shiftedRightWithoutTrim, down.shiftedLeftWithoutTrim,
-        right.shiftedRightWithoutTrim, left.shiftedLeftWithoutTrim
+        right.shiftedRightWithoutTrim, left.shiftedLeftWithoutTrim,
       )
 
   result = (rightLeft - exclude).expandedH
@@ -292,5 +361,5 @@ func connect3L*(self: BinaryField): BinaryField {.inline.} =
     connection.connect3IL.expanded * connection.visible -
     sum(
       connection.disappeared, connection.hasUpDown.expandedV,
-      connection.hasRightLeft.expandedH
+      connection.hasRightLeft.expandedH,
     )

@@ -87,21 +87,34 @@ func sum*(field1, field2, field3: BinaryField): BinaryField {.inline.} =
   result.left = bitor(field1.left, field2.left, field3.left)
   result.right = bitor(field1.right, field2.right, field3.right)
 
+func sum*(field1, field2, field3, field4: BinaryField): BinaryField {.inline.} =
+  result.left = bitor(field1.left, field2.left, field3.left, field4.left)
+  result.right = bitor(field1.right, field2.right, field3.right, field4.right)
+
 func sum*(field1, field2, field3, field4, field5: BinaryField): BinaryField {.inline.} =
   result.left = bitor(field1.left, field2.left, field3.left, field4.left, field5.left)
   result.right =
     bitor(field1.right, field2.right, field3.right, field4.right, field5.right)
 
 func sum*(
+    field1, field2, field3, field4, field5, field6: BinaryField
+): BinaryField {.inline.} =
+  result.left =
+    bitor(field1.left, field2.left, field3.left, field4.left, field5.left, field6.left)
+  result.right = bitor(
+    field1.right, field2.right, field3.right, field4.right, field5.right, field6.right
+  )
+
+func sum*(
     field1, field2, field3, field4, field5, field6, field7: BinaryField
 ): BinaryField {.inline.} =
   result.left = bitor(
     field1.left, field2.left, field3.left, field4.left, field5.left, field6.left,
-    field7.left
+    field7.left,
   )
   result.right = bitor(
     field1.right, field2.right, field3.right, field4.right, field5.right, field6.right,
-    field7.right
+    field7.right,
   )
 
 func sum*(
@@ -109,11 +122,11 @@ func sum*(
 ): BinaryField {.inline.} =
   result.left = bitor(
     field1.left, field2.left, field3.left, field4.left, field5.left, field6.left,
-    field7.left, field8.left
+    field7.left, field8.left,
   )
   result.right = bitor(
     field1.right, field2.right, field3.right, field4.right, field5.right, field6.right,
-    field7.right, field8.right
+    field7.right, field8.right,
   )
 
 func prod*(field1, field2, field3: BinaryField): BinaryField {.inline.} =
@@ -153,7 +166,7 @@ const ColMasks: array[Column, BinaryField] = [
   BinaryField(left: 0x0000_0000_0000_FFFF'u64, right: 0'u64),
   BinaryField(left: 0'u64, right: 0xFFFF_0000_0000_0000'u64),
   BinaryField(left: 0'u64, right: 0x0000_FFFF_0000_0000'u64),
-  BinaryField(left: 0'u64, right: 0x0000_0000_FFFF_0000'u64)
+  BinaryField(left: 0'u64, right: 0x0000_0000_FFFF_0000'u64),
 ]
 
 func row*(self, row): BinaryField {.inline.} =

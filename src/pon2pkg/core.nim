@@ -41,15 +41,15 @@ export cell.Cell, cell.ColorPuyo, cell.Puyo, cell.parseCell
 export
   field.TsuField, field.WaterField, field.initField, field.toTsuField,
   field.toWaterField, field.`[]`, field.`[]=`, field.insert, field.removeSqueeze,
-  field.puyoCount, field.colorCount, field.garbageCount, field.connect3,
-  field.connect3V, field.connect3H, field.connect3L, field.shiftedUp, field.shiftedDown,
-  field.shiftedRight, field.shiftedLeft, field.flippedV, field.flippedH,
-  field.disappear, field.willDisappear, field.put, field.drop, field.toArray,
-  field.parseField, field.`==`, field.rule, field.isDead, field.noneCount,
-  field.invalidPositions, field.validPositions, field.validDoublePositions,
-  field.shiftUp, field.shiftDown, field.shiftRight, field.shiftLeft, field.flipV,
-  field.flipH, field.willDrop, field.move, field.move0, field.move1, field.move2,
-  field.`$`, field.toUriQuery
+  field.puyoCount, field.colorCount, field.garbageCount, field.connect2,
+  field.connect2V, field.connect2H, field.connect3, field.connect3V, field.connect3H,
+  field.connect3L, field.shiftedUp, field.shiftedDown, field.shiftedRight,
+  field.shiftedLeft, field.flippedV, field.flippedH, field.disappear,
+  field.willDisappear, field.put, field.drop, field.toArray, field.parseField,
+  field.`==`, field.rule, field.isDead, field.noneCount, field.invalidPositions,
+  field.validPositions, field.validDoublePositions, field.shiftUp, field.shiftDown,
+  field.shiftRight, field.shiftLeft, field.flipV, field.flipH, field.willDrop,
+  field.move, field.move0, field.move1, field.move2, field.`$`, field.toUriQuery
 export
   fieldtype.Height, fieldtype.Width, fieldtype.WaterHeight, fieldtype.AirHeight,
   fieldtype.Row, fieldtype.Column, fieldtype.WaterRow, fieldtype.AirRow
