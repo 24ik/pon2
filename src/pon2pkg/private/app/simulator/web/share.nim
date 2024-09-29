@@ -7,7 +7,7 @@
 
 import std/[strformat, sugar, uri]
 import karax/[karax, karaxdsl, kbase, kdom, vdom, vstyles]
-import ./[field, pairs, requirement]
+import ./[field, messages, pairs, requirement]
 import ../[common]
 import ../../[misc]
 import ../../../../app/[simulator]
@@ -57,11 +57,9 @@ proc toPlayUri(
     simulator: ref Simulator, withPositions: bool, editor = false
 ): Uri {.inline.} =
   ## Returns the simulator URI for playing.
-  let oldMode = simulator[].mode
-
-  simulator[].mode = if editor: PlayEditor else: Play
-  result = simulator[].toUri withPositions
-  simulator[].mode = oldMode
+  var simulator2 = simulator[].copy
+  simulator2.mode = if editor: PlayEditor else: Play
+  result = simulator2.toUri withPositions
 
 proc initShareNode*(simulator: ref Simulator, id = ""): VNode {.inline.} =
   ## Returns the share node.
@@ -151,6 +149,8 @@ proc initShareNode*(simulator: ref Simulator, id = ""): VNode {.inline.} =
           tdiv(class = "column is-narrow"):
             tdiv(class = "block"):
               simulator.initFieldNode(true)
+            tdiv(class = "block"):
+              simulator.initMessagesNode
           tdiv(id = kstring &"{DisplayPairDivIdPrefix}{id}", class = "column is-narrow"):
             tdiv(class = "block"):
               simulator.initPairsNode(true, false)
