@@ -57,11 +57,9 @@ proc toPlayUri(
     simulator: ref Simulator, withPositions: bool, editor = false
 ): Uri {.inline.} =
   ## Returns the simulator URI for playing.
-  let oldMode = simulator[].mode
-
-  simulator[].mode = if editor: PlayEditor else: Play
-  result = simulator[].toUri withPositions
-  simulator[].mode = oldMode
+  var simulator2 = simulator[].copy
+  simulator2.mode = if editor: PlayEditor else: Play
+  result = simulator2.toUri withPositions
 
 proc initShareNode*(simulator: ref Simulator, id = ""): VNode {.inline.} =
   ## Returns the share node.
