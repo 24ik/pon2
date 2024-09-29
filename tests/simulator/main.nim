@@ -27,8 +27,8 @@ proc main*() =
   block:
     let simulator = initPuyoPuyo[WaterField]().initSimulator
     check simulator.nazoPuyoWrap == initNazoPuyo[WaterField]().initNazoPuyoWrap
-    check simulator.initialNazoPuyoWrap == initNazoPuyo[WaterField]().initNazoPuyoWrap
-    check simulator.editor == false
+    check simulator.nazoPuyoWrapBeforeMoves ==
+      initNazoPuyo[WaterField]().initNazoPuyoWrap
     check simulator.state == Stable
     check simulator.operatingPosition == Up2
     check simulator.editing.cell == Cell.None
@@ -43,10 +43,10 @@ proc main*() =
 
   # rule, kind, mode, `rule=`, `kind=`, `mode=`
   block:
-    var simulator = initPuyoPuyo[TsuField]().initSimulator
+    var simulator = initPuyoPuyo[TsuField]().initSimulator PlayEditor
     check simulator.rule == Tsu
     check simulator.kind == Regular
-    check simulator.mode == Play
+    check simulator.mode == PlayEditor
 
     simulator.rule = Water
     check simulator.rule == Water
@@ -54,8 +54,14 @@ proc main*() =
     simulator.kind = Nazo
     check simulator.kind == Nazo
 
-    simulator.mode = Replay
-    check simulator.mode == Replay
+    simulator.mode = Edit
+    check simulator.mode == Edit
+
+    simulator.mode = Play
+    check simulator.mode == Edit
+
+    simulator.mode = View
+    check simulator.mode == Edit
 
   # ------------------------------------------------
   # Property - Score
@@ -524,27 +530,21 @@ rg|"""
   block:
     let
       uriStr =
-        "https://24ik.github.io/pon2/gui/index.html?" &
-        "editor&kind=n&mode=e&field=t-rrb&pairs=rgby12&req-kind=0&req-color=7"
+        "https://24ik.github.io/pon2/?" &
+        "kind=n&mode=e&field=t-rrb&pairs=rgby12&req-kind=0&req-color=7"
       uriStrNoPos =
-        "https://24ik.github.io/pon2/gui/index.html?" &
-        "editor&kind=n&mode=e&field=t-rrb&pairs=rgby&req-kind=0&req-color=7"
+        "https://24ik.github.io/pon2/?" &
+        "kind=n&mode=e&field=t-rrb&pairs=rgby&req-kind=0&req-color=7"
       simulator = uriStr.parseUri.parseSimulator
       nazo =
         parseNazoPuyo[TsuField]("field=t-rrb&pairs=rgby12&req-kind=0&req-color=7", Ik)
 
     check simulator.nazoPuyoWrap == nazo.initNazoPuyoWrap
-    check simulator.editor
     check simulator.kind == Nazo
     check simulator.mode == Edit
 
     check simulator.toUri(withPositions = true) == uriStr.parseUri
     check simulator.toUri(withPositions = false) == uriStrNoPos.parseUri
-
-    check simulator.toUri(withPositions = true, editor = false) ==
-      uriStr.replace("editor&", "").parseUri
-    check simulator.toUri(withPositions = false, editor = false) ==
-      uriStrNoPos.replace("editor&", "").parseUri
 
     check simulator.toUri(withPositions = true, host = Ishikawa) ==
       "https://ishikawapuyo.net/simu/pn.html?1b_c1Ec__270".parseUri
