@@ -159,10 +159,10 @@ proc runGenerator*(args: Table[string, Value]) {.inline.} =
           garbage: parseSomeInt[Natural](args["--ng"]).get,
         ),
         (
-          total: parseSomeInt[Natural](args["--tt"], true),
-          vertical: parseSomeInt[Natural](args["--tv"], true),
-          horizontal: parseSomeInt[Natural](args["--th"], true),
-          lShape: parseSomeInt[Natural](args["--tl"], true),
+          total: parseSomeInt[Natural](args["-3"], true),
+          vertical: parseSomeInt[Natural](args["--3v"], true),
+          horizontal: parseSomeInt[Natural](args["--3h"], true),
+          lShape: parseSomeInt[Natural](args["--3l"], true),
         ),
         not args["-D"].to_bool,
         args["-d"].to_bool,
@@ -278,10 +278,10 @@ Options:
   -H <>       各列の高さの割合．          [default: 0++++0]
   --nc <>     色ぷよの数．                [default: 24]
   --ng <>     お邪魔ぷよの数．            [default: 2]
-  --tt <>     3連結の数．
-  --tv <>     縦3連結の数．
-  --th <>     横3連結の数．
-  --tl <>     L字3連結の数．
+  -3 <>       3連結の数．
+  --3v <>     縦3連結の数．
+  --3h <>     横3連結の数．
+  --3l <>     L字3連結の数．
   -s <>       シード．
 
   -f <>...    何手目を固定するか．
