@@ -25,10 +25,10 @@ export
   generate.GenerateError, generate.GenerateRequirementColor,
   generate.GenerateRequirement, generate.generate
 export
-  gui.GuiApplicationReplay, gui.GuiApplication, gui.initGuiApplication, gui.simulator,
-  gui.simulatorRef, gui.replaySimulator, gui.replaySimulatorRef, gui.replay,
-  gui.focusReplay, gui.solving, gui.permuting, gui.progressBar, gui.toggleFocus,
-  gui.solve, gui.permute, gui.nextReplay, gui.prevReplay, gui.operate
+  gui.GuiApplicationAnswer, gui.GuiApplication, gui.initGuiApplication, gui.simulator,
+  gui.simulatorRef, gui.answerSimulator, gui.answerSimulatorRef, gui.answer,
+  gui.focusAnswer, gui.solving, gui.permuting, gui.progressBar, gui.toggleFocus,
+  gui.solve, gui.permute, gui.nextAnswer, gui.prevAnswer, gui.operate
 export key.KeyEvent, key.initKeyEvent
 export
   marathon.MarathonMatchResult, marathon.Marathon, marathon.initMarathon,
@@ -44,8 +44,8 @@ export
   simulator.SimulatorEditing, simulator.Simulator, simulator.initSimulator,
   simulator.copy, simulator.rule, simulator.kind, simulator.mode, simulator.`rule=`,
   simulator.`kind=`, simulator.`mode=`, simulator.nazoPuyoWrap,
-  simulator.initialNazoPuyoWrap, simulator.`pairsPositions=`, simulator.editing,
-  simulator.`editingCell=`, simulator.editor, simulator.state, simulator.score,
+  simulator.nazoPuyoWrapBeforeMoves, simulator.`pairsPositions=`, simulator.editing,
+  simulator.`editingCell=`, simulator.state, simulator.score,
   simulator.operatingPosition, simulator.toggleInserting, simulator.toggleFocus,
   simulator.moveCursorUp, simulator.moveCursorDown, simulator.moveCursorRight,
   simulator.moveCursorLeft, simulator.deletePairPosition, simulator.writeCell,

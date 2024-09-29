@@ -20,14 +20,14 @@ func initPrevNextHandler(
   # NOTE: inlining does not work due to lazy evaluation
   proc handler(event: ClickEvent) =
     if next:
-      control.guiApplication[].nextReplay
+      control.guiApplication[].nextAnswer
     else:
-      control.guiApplication[].prevReplay
+      control.guiApplication[].prevAnswer
 
   result = handler
 
 proc initDrawHandler(control: EditorPaginationControl): (event: DrawEvent) -> void =
-  ## Draws the replay index.
+  ## Draws the answer index.
   # NOTE: inlining does not work due to lazy evaluation
   proc handler(event: DrawEvent) =
     let canvas = event.control.canvas
@@ -37,17 +37,17 @@ proc initDrawHandler(control: EditorPaginationControl): (event: DrawEvent) -> vo
 
     let
       showIdx =
-        if not control.guiApplication[].replay.hasData:
+        if not control.guiApplication[].answer.hasData:
           0
-        elif control.guiApplication[].replay.pairsPositionsSeq.len == 0:
+        elif control.guiApplication[].answer.pairsPositionsSeq.len == 0:
           0
         else:
-          control.guiApplication[].replay.index
+          control.guiApplication[].answer.index
       showLen =
-        if not control.guiApplication[].replay.hasData:
+        if not control.guiApplication[].answer.hasData:
           0
         else:
-          control.guiApplication[].replay.pairsPositionsSeq.len
+          control.guiApplication[].answer.pairsPositionsSeq.len
 
     canvas.drawText &"{showIdx} / {showLen}"
 
@@ -65,12 +65,12 @@ proc initEditorPaginationControl*(
 
   let
     prevButton = newButton "前の解"
-    replayIdxControl = newControl()
+    answerIdxControl = newControl()
     nextButton = newButton "次の解"
   result.add prevButton
-  result.add replayIdxControl
+  result.add answerIdxControl
   result.add nextButton
 
   prevButton.onClick = result.initPrevNextHandler false
-  replayIdxControl.onDraw = result.initDrawHandler
+  answerIdxControl.onDraw = result.initDrawHandler
   nextButton.onClick = result.initPrevNextHandler true

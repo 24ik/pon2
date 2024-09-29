@@ -22,7 +22,7 @@ proc modeHandler(
     reqControl: RequirementControl,
 ) {.inline.} =
   ## Changes the simulator mode.
-  const ModeToIndex: array[SimulatorMode, Natural] = [0, 1, 2]
+  const ModeToIndex: array[SimulatorMode, Natural] = [0, 1, 2, 3]
 
   control.simulator[].mode = mode
 
@@ -99,14 +99,11 @@ proc initSelectControl*(
   let
     playButton = initColorButton "プレイ"
     editButton = initColorButton "編集"
-    replayButton = initColorButton "再生"
   modeButtons.add playButton
   modeButtons.add editButton
-  modeButtons.add replayButton
 
   playButton.onClick = result.initModeHandler(Play, reqControl)
   editButton.onClick = result.initModeHandler(Edit, reqControl)
-  replayButton.onClick = result.initModeHandler(Replay, reqControl)
 
   # rule
   let ruleButtons = newLayoutContainer Layout_Horizontal
@@ -136,12 +133,12 @@ proc initSelectControl*(
 
   # set color
   case simulator[].mode
-  of Play:
+  of PlayEditor:
     playButton.backgroundColor = SelectColor.toNiguiColor
   of Edit:
     editButton.backgroundColor = SelectColor.toNiguiColor
-  of Replay:
-    replayButton.backgroundColor = SelectColor.toNiguiColor
+  of Play, View:
+    assert false
 
   case simulator[].rule
   of Tsu:
@@ -156,10 +153,10 @@ proc initSelectControl*(
     nazoButton.backgroundColor = SelectColor.toNiguiColor
 
   # set enabled
-  playButton.enabled = simulator[].editor
-  editButton.enabled = simulator[].editor
-  replayButton.enabled = simulator[].editor
-  tsuButton.enabled = simulator[].editor
-  waterButton.enabled = simulator[].editor
-  regularButton.enabled = simulator[].editor
-  nazoButton.enabled = simulator[].editor
+  let editorMode = simulator[].mode in {PlayEditor, Edit}
+  playButton.enabled = editorMode
+  editButton.enabled = editorMode
+  tsuButton.enabled = editorMode
+  waterButton.enabled = editorMode
+  regularButton.enabled = editorMode
+  nazoButton.enabled = editorMode

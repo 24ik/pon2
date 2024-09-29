@@ -42,7 +42,7 @@ using
 proc initMarathon*(): Marathon {.inline.} =
   ## Returns a new marathon manager.
   result.simulator.new
-  result.simulator[] = initPuyoPuyo[TsuField]().initSimulator(Play, false)
+  result.simulator[] = initPuyoPuyo[TsuField]().initSimulator Play
 
   result.allPairsStrs.seq = RawPairsTxt.splitLines
   result.allPairsStrs.tree = result.allPairsStrs.seq.toCritBitTree

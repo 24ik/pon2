@@ -94,7 +94,7 @@ proc initMainGuiApplicationNode*(routerData: RouterData): VNode {.inline.} =
   var uri = initUri()
   uri.scheme = "https"
   uri.hostname = $Ik
-  uri.path = "/pon2/gui/index.html"
+  uri.path = "/pon2/"
   uri.query = query
 
   try:

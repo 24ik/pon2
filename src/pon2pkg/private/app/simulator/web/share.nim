@@ -53,6 +53,16 @@ func initDownloadHandler(id: string, withPositions: bool): () -> void =
 
   result = handler
 
+proc toPlayUri(
+    simulator: ref Simulator, withPositions: bool, editor = false
+): Uri {.inline.} =
+  ## Returns the simulator URI for playing.
+  let oldMode = simulator[].mode
+
+  simulator[].mode = if editor: PlayEditor else: Play
+  result = simulator[].toUri withPositions
+  simulator[].mode = oldMode
+
 proc initShareNode*(simulator: ref Simulator, id = ""): VNode {.inline.} =
   ## Returns the share node.
   let
@@ -72,14 +82,14 @@ proc initShareNode*(simulator: ref Simulator, id = ""): VNode {.inline.} =
           class = "button is-size-7",
           target = "_blank",
           rel = "noopener noreferrer",
-          href = kstring $simulator[].toXlink(withPositions = false, editor = false),
+          href = kstring $simulator[].toXlink(withPositions = false),
         ):
           text "操作無"
         a(
           class = "button is-size-7",
           target = "_blank",
           rel = "noopener noreferrer",
-          href = kstring $simulator[].toXlink(withPositions = true, editor = false),
+          href = kstring $simulator[].toXlink(withPositions = true),
         ):
           text "操作有"
     tdiv(class = "block"):
@@ -96,8 +106,7 @@ proc initShareNode*(simulator: ref Simulator, id = ""): VNode {.inline.} =
           id = urlCopyButtonId.kstring,
           class = "button is-size-7",
           onclick = initCopyButtonHandler(
-            () => $simulator[].toUri(withPositions = false, editor = false),
-            urlCopyButtonId,
+            () => $simulator.toPlayUri(withPositions = false), urlCopyButtonId
           ),
         ):
           text "操作無"
@@ -105,12 +114,11 @@ proc initShareNode*(simulator: ref Simulator, id = ""): VNode {.inline.} =
           id = posUrlCopyButtonId.kstring,
           class = "button is-size-7",
           onclick = initCopyButtonHandler(
-            () => $simulator[].toUri(withPositions = true, editor = false),
-            posUrlCopyButtonId,
+            () => $simulator.toPlayUri(withPositions = true), posUrlCopyButtonId
           ),
         ):
           text "操作有"
-    if simulator[].editor:
+    if simulator[].mode in {PlayEditor, Edit}:
       tdiv(class = "block"):
         text "編集者URLコピー"
         tdiv(class = "buttons"):
@@ -118,7 +126,7 @@ proc initShareNode*(simulator: ref Simulator, id = ""): VNode {.inline.} =
             id = editorUrlCopyButtonId.kstring,
             class = "button is-size-7",
             onclick = initCopyButtonHandler(
-              () => $simulator[].toUri(withPositions = false, editor = true),
+              () => $simulator.toPlayUri(withPositions = false, editor = true),
               editorUrlCopyButtonId,
             ),
           ):
@@ -127,7 +135,7 @@ proc initShareNode*(simulator: ref Simulator, id = ""): VNode {.inline.} =
             id = editorPosUrlCopyButtonId.kstring,
             class = "button is-size-7",
             onclick = initCopyButtonHandler(
-              () => $simulator[].toUri(withPositions = true, editor = true),
+              () => $simulator.toPlayUri(withPositions = true, editor = true),
               editorPosUrlCopyButtonId,
             ),
           ):

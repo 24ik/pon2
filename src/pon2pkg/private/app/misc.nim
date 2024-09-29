@@ -6,7 +6,7 @@
 {.experimental: "views".}
 
 when defined(js):
-  import std/[jsffi, sugar]
+  import std/[jsffi, strformat, sugar]
   import karax/[kbase, kdom]
   import ../../core/[cell, notice]
 
@@ -50,30 +50,38 @@ when defined(js):
   # JS - Images
   # ------------------------------------------------
 
+  const WebRootDir = when defined(pon2.marathon): ".." else: "."
+
   func cellImageSrc*(cell: Cell): kstring {.inline.} =
     ## Returns the cell image src.
-    kstring case cell
-    of None: "../assets/puyo/none.png"
-    of Hard: "../assets/puyo/hard.png"
-    of Garbage: "../assets/puyo/garbage.png"
-    of Red: "../assets/puyo/red.png"
-    of Green: "../assets/puyo/green.png"
-    of Blue: "../assets/puyo/blue.png"
-    of Yellow: "../assets/puyo/yellow.png"
-    of Purple: "../assets/puyo/purple.png"
+    let stem =
+      case cell
+      of None: "none"
+      of Hard: "hard"
+      of Garbage: "garbage"
+      of Red: "red"
+      of Green: "green"
+      of Blue: "blue"
+      of Yellow: "yellow"
+      of Purple: "purple"
+
+    result = kstring &"{WebRootDir}/assets/puyo/{stem}.png"
 
   func noticeGarbageImageSrc*(notice: NoticeGarbage): kstring {.inline.} =
     ## Returns the notice garbage image src.
-    kstring case notice
-    of Small: "../assets/noticegarbage/small.png"
-    of Big: "../assets/noticegarbage/big.png"
-    of Rock: "../assets/noticegarbage/rock.png"
-    of Star: "../assets/noticegarbage/star.png"
-    of Moon: "../assets/noticegarbage/moon.png"
-    of Crown: "../assets/noticegarbage/crown.png"
-    of Comet: "../assets/noticegarbage/comet.png"
+    let stem =
+      case notice
+      of Small: "small"
+      of Big: "big"
+      of Rock: "rock"
+      of Star: "star"
+      of Moon: "moon"
+      of Crown: "crown"
+      of Comet: "comet"
 
-  const NoticeGarbageNoneImageSrc*: kstring = kstring"../assets/noticegarbage/none.png"
+    result = kstring &"{WebRootDir}/assets/noticegarbage/{stem}.png"
+
+  const NoticeGarbageNoneImageSrc*: kstring = kstring &"{WebRootDir}/assets/noticegarbage/none.png"
     ## Image src of the no notice garbage.
 
   # ------------------------------------------------
