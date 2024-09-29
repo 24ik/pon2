@@ -155,7 +155,7 @@ proc runGenerator*(args: Table[string, Value]) {.inline.} =
         parseSomeInt[Natural](args["-c"]).get,
         heights,
         (
-          color: parseSomeInt[Natural](args["--nc"]).get,
+          color: parseSomeInt[Natural](args["--nc"], true),
           garbage: parseSomeInt[Natural](args["--ng"]).get,
         ),
         (
@@ -281,8 +281,8 @@ Options:
   --rn <>     クリア条件の数．            [default: 6]
   -c <>       色数．                      [default: 3]
   -H <>       各列の高さの割合．          [default: 0++++0]
-  --nc <>     色ぷよの数．                [default: 24]
-  --ng <>     お邪魔ぷよの数．            [default: 2]
+  --nc <>     色ぷよの数．
+  --ng <>     お邪魔ぷよの数．            [default: 4]
   -2 <>       2連結の数．
   --2v <>     縦2連結の数．
   --2h <>     横2連結の数．

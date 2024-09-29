@@ -19,7 +19,7 @@ proc main*() =
     {.push warning[ProveInit]: off.}
     {.cast(uncheckedAssign).}:
       let
-        moveCount = 3
+        moveCount = 2
         kind = ChainClear
         num = 5.RequirementNumber
         colorCount = 3
@@ -31,7 +31,7 @@ proc main*() =
           some 0.Natural,
           some 0.Natural,
         ]
-        puyoCounts = (color: 20.Natural, garbage: 2.Natural)
+        puyoCounts = (color: none Natural, garbage: 2.Natural)
         connect2Counts =
           (total: none Natural, vertical: some 1.Natural, horizontal: some 0.Natural)
         connect3Counts = (
@@ -73,7 +73,7 @@ proc main*() =
         if height.get == 0:
           check (Row.low .. Row.high).allIt fieldArr[it][col] == None
 
-    check nazo.puyoPuyo.colorCount == puyoCounts.color
+    check nazo.puyoPuyo.colorCount == num * 4
     check nazo.puyoPuyo.garbageCount == puyoCounts.garbage
 
     check nazo.puyoPuyo.field.connect2V.colorCount == connect2Counts.vertical.get * 2
