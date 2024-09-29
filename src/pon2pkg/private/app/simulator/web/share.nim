@@ -7,7 +7,7 @@
 
 import std/[strformat, sugar, uri]
 import karax/[karax, karaxdsl, kbase, kdom, vdom, vstyles]
-import ./[field, pairs, requirement]
+import ./[field, messages, pairs, requirement]
 import ../[common]
 import ../../[misc]
 import ../../../../app/[simulator]
@@ -149,6 +149,8 @@ proc initShareNode*(simulator: ref Simulator, id = ""): VNode {.inline.} =
           tdiv(class = "column is-narrow"):
             tdiv(class = "block"):
               simulator.initFieldNode(true)
+            tdiv(class = "block"):
+              simulator.initMessagesNode
           tdiv(id = kstring &"{DisplayPairDivIdPrefix}{id}", class = "column is-narrow"):
             tdiv(class = "block"):
               simulator.initPairsNode(true, false)
