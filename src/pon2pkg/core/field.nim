@@ -22,10 +22,10 @@ else:
 export
   main.TsuField, main.WaterField, main.initField, main.toTsuField, main.toWaterField,
   main.`[]`, main.`[]=`, main.insert, main.removeSqueeze, main.puyoCount,
-  main.colorCount, main.garbageCount, main.connect3, main.connect3V, main.connect3H,
-  main.connect3L, main.shiftedUp, main.shiftedDown, main.shiftedRight, main.shiftedLeft,
-  main.flippedV, main.flippedH, main.disappear, main.willDisappear, main.put, main.drop,
-  main.toArray, main.parseField
+  main.colorCount, main.garbageCount, main.connect2, main.connect2V, main.connect2H,
+  main.connect3, main.connect3V, main.connect3H, main.connect3L, main.shiftedUp,
+  main.shiftedDown, main.shiftedRight, main.shiftedLeft, main.flippedV, main.flippedH,
+  main.disappear, main.willDisappear, main.put, main.drop, main.toArray, main.parseField
 
 # ------------------------------------------------
 # Operator

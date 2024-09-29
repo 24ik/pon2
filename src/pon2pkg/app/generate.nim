@@ -291,7 +291,11 @@ proc generate*[F: TsuField or WaterField](
     moveCount: Positive,
     colorCount: range[1 .. 5],
     heights: array[Column, Option[Natural]],
-    puyoCounts: tuple[color: Natural, garbage: Natural],
+    puyoCounts: tuple[color: Option[Natural], garbage: Natural],
+    connect2Counts:
+      tuple[
+        total: Option[Natural], vertical: Option[Natural], horizontal: Option[Natural]
+      ],
     connect3Counts:
       tuple[
         total: Option[Natural],
@@ -305,14 +309,26 @@ proc generate*[F: TsuField or WaterField](
   ## Returns a randomly generated nazo puyo that has a unique solution.
   ## If generation fails, `GenerateError` will be raised.
   ## `parallelCount` will be ignored on JS backend.
+  ## If `puyoCounts.color` is `none`, it is inferred from the requirement if
+  ## the kind is chain-like; otherwise `GenerateError` will be raised.
   result = initNazoPuyo[F]() # HACK: dummy to remove warning
+
+  # infer color count if not specified
+  var puyoCounts2 = (color: 0.Natural, garbage: puyoCounts.garbage)
+  if puyoCounts.color.isSome:
+    puyoCounts2.color = puyoCounts.color.get
+  else:
+    if req.kind in {Chain, ChainMore, ChainClear, ChainMoreClear}:
+      puyoCounts2.color = req.number * 4
+    else:
+      raise newException(GenerateError, "The number of color puyoes is not specified.")
 
   # validate the arguments
   # TODO: validate more strictly
-  if puyoCounts.color + puyoCounts.garbage - 2 * moveCount notin
+  if puyoCounts2.color + puyoCounts.garbage - 2 * moveCount notin
       0 .. (when F is TsuField: Height else: WaterHeight) * Width:
     raise newException(GenerateError, "The number of puyos exceeds limit.")
-  if puyoCounts.color div 4 < colorCount:
+  if puyoCounts2.color div 4 < colorCount:
     raise newException(GenerateError, "The number of colors is too big.")
 
   var rng = seed.int64.initRand
@@ -331,7 +347,7 @@ proc generate*[F: TsuField or WaterField](
   while true:
     try:
       result.puyoPuyo =
-        generatePuyoPuyo[F](rng, moveCount, useColors, heights, puyoCounts)
+        generatePuyoPuyo[F](rng, moveCount, useColors, heights, puyoCounts2)
     except GenerateError:
       continue
 
@@ -343,6 +359,15 @@ proc generate*[F: TsuField or WaterField](
     if not allowDouble and result.puyoPuyo.pairsPositions.hasDouble:
       continue
     if not allowLastDouble and result.puyoPuyo.pairsPositions[^1].pair.isDouble:
+      continue
+    if connect2Counts.total.isSome and
+        result.puyoPuyo.field.connect2.colorCount != connect2Counts.total.get * 2:
+      continue
+    if connect2Counts.vertical.isSome and
+        result.puyoPuyo.field.connect2V.colorCount != connect2Counts.vertical.get * 2:
+      continue
+    if connect2Counts.horizontal.isSome and
+        result.puyoPuyo.field.connect2H.colorCount != connect2Counts.horizontal.get * 2:
       continue
     if connect3Counts.total.isSome and
         result.puyoPuyo.field.connect3.colorCount != connect3Counts.total.get * 3:
@@ -369,7 +394,11 @@ proc generate*[F: TsuField or WaterField](
     moveCount: Positive,
     colorCount: range[1 .. 5],
     heights: array[Column, Option[Natural]],
-    puyoCounts: tuple[color: Natural, garbage: Natural],
+    puyoCounts: tuple[color: Option[Natural], garbage: Natural],
+    connect2Counts:
+      tuple[
+        total: Option[Natural], vertical: Option[Natural], horizontal: Option[Natural]
+      ],
     connect3Counts:
       tuple[
         total: Option[Natural],
@@ -391,6 +420,7 @@ proc generate*[F: TsuField or WaterField](
     colorCount,
     heights,
     puyoCounts,
+    connect2Counts,
     connect3Counts,
     allowDouble,
     allowLastDouble,
@@ -407,7 +437,11 @@ proc generate*(
     moveCount: Positive,
     colorCount: range[1 .. 5],
     heights: array[Column, Option[Natural]],
-    puyoCounts: tuple[color: Natural, garbage: Natural],
+    puyoCounts: tuple[color: Option[Natural], garbage: Natural],
+    connect2Counts:
+      tuple[
+        total: Option[Natural], vertical: Option[Natural], horizontal: Option[Natural]
+      ],
     connect3Counts:
       tuple[
         total: Option[Natural],
@@ -424,13 +458,13 @@ proc generate*(
   case rule
   of Tsu:
     generate[TsuField](
-      seed, req, moveCount, colorCount, heights, puyoCounts, connect3Counts,
-      allowDouble, allowLastDouble,
+      seed, req, moveCount, colorCount, heights, puyoCounts, connect2Counts,
+      connect3Counts, allowDouble, allowLastDouble,
     ).initNazoPuyoWrap
   of Water:
     generate[WaterField](
-      seed, req, moveCount, colorCount, heights, puyoCounts, connect3Counts,
-      allowDouble, allowLastDouble,
+      seed, req, moveCount, colorCount, heights, puyoCounts, connect2Counts,
+      connect3Counts, allowDouble, allowLastDouble,
     ).initNazoPuyoWrap
 
 proc generate*(
@@ -439,7 +473,11 @@ proc generate*(
     moveCount: Positive,
     colorCount: range[1 .. 5],
     heights: array[Column, Option[Natural]],
-    puyoCounts: tuple[color: Natural, garbage: Natural],
+    puyoCounts: tuple[color: Option[Natural], garbage: Natural],
+    connect2Counts:
+      tuple[
+        total: Option[Natural], vertical: Option[Natural], horizontal: Option[Natural]
+      ],
     connect3Counts:
       tuple[
         total: Option[Natural],
@@ -456,11 +494,11 @@ proc generate*(
   case rule
   of Tsu:
     generate[TsuField](
-      req, moveCount, colorCount, heights, puyoCounts, connect3Counts, allowDouble,
-      allowLastDouble,
+      req, moveCount, colorCount, heights, puyoCounts, connect2Counts, connect3Counts,
+      allowDouble, allowLastDouble,
     ).initNazoPuyoWrap
   of Water:
     generate[WaterField](
-      req, moveCount, colorCount, heights, puyoCounts, connect3Counts, allowDouble,
-      allowLastDouble,
+      req, moveCount, colorCount, heights, puyoCounts, connect2Counts, connect3Counts,
+      allowDouble, allowLastDouble,
     ).initNazoPuyoWrap

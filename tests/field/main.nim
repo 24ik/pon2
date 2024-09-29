@@ -116,10 +116,50 @@ proc main*() =
   # Connect
   # ------------------------------------------------
 
+  # connect2
+  block:
+    let
+      fieldTop = "p.....\np.....\n" & "......\n".repeat 6
+      fieldTopEmpty = "......\n".repeat 8
+      fieldBottom =
+        """
+bbbrry
+yggbgy
+ygbbgg
+yrbyyy
+bbrggy"""
+      two =
+        """
+...rry
+.....y
+......
+......
+bb.gg."""
+      twoV =
+        """
+.....y
+.....y
+......
+......
+......"""
+      twoH =
+        """
+...rr.
+......
+......
+......
+bb.gg."""
+
+    let field = parseField[TsuField](fieldTop & fieldBottom)
+    check field.connect2 == parseField[TsuField](fieldTopEmpty & two)
+    check field.connect2V == parseField[TsuField](fieldTopEmpty & twoV)
+    check field.connect2H == parseField[TsuField](fieldTopEmpty & twoH)
+
   # connect3
   block:
     let
-      fieldTop = "......\n".repeat 8
+      fieldTop = "pp....\np.....\n" & "......\n".repeat 6
+      fieldTopEmpty = "......\n".repeat 8
       fieldBottom =
         """
 bbbbrr
@@ -157,10 +197,10 @@ r.....
 ......"""
 
     let field = parseField[TsuField](fieldTop & fieldBottom)
-    check field.connect3 == parseField[TsuField](fieldTop & three)
-    check field.connect3V == parseField[TsuField](fieldTop & threeV)
-    check field.connect3H == parseField[TsuField](fieldTop & threeH)
-    check field.connect3L == parseField[TsuField](fieldTop & threeL)
+    check field.connect3 == parseField[TsuField](fieldTopEmpty & three)
+    check field.connect3V == parseField[TsuField](fieldTopEmpty & threeV)
+    check field.connect3H == parseField[TsuField](fieldTopEmpty & threeH)
+    check field.connect3L == parseField[TsuField](fieldTopEmpty & threeL)
 
   # ------------------------------------------------
   # Shift

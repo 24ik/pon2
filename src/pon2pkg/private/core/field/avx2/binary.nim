@@ -96,6 +96,11 @@ func sum*(field1, field2, field3, field4, field5: BinaryField): BinaryField {.in
   (field1 + field2) + (field3 + field4 + field5)
 
 func sum*(
+    field1, field2, field3, field4, field5, field6: BinaryField
+): BinaryField {.inline.} =
+  (field1 + field2) + (field3 + field4) + (field5 + field6)
+
+func sum*(
     field1, field2, field3, field4, field5, field6, field7, field8: BinaryField
 ): BinaryField {.inline.} =
   ((field1 + field2) + (field3 + field4)) + ((field5 + field6) + (field7 + field8))
