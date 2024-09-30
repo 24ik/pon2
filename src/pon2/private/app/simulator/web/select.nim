@@ -26,7 +26,7 @@ proc initSelectNode*(simulator: ref Simulator): VNode {.inline.} =
       if simulator[].rule == Water: SelectedClass else: NotSelectedClass
 
   result = buildHtml(tdiv):
-    tdiv(class = "buttons has-addons mb-0"):
+    tdiv(class = "buttons has-addons mb-1"):
       button(
         class = playEditorButtonClass, onclick = () => (simulator[].mode = PlayEditor)
       ):
@@ -36,7 +36,7 @@ proc initSelectNode*(simulator: ref Simulator): VNode {.inline.} =
         span(class = "icon"):
           italic(class = "fa-solid fa-pen-to-square")
     if simulator[].mode == Edit:
-      tdiv(class = "buttons has-addons mb-0"):
+      tdiv(class = "buttons has-addons"):
         button(class = tsuButtonClass, onclick = () => (simulator[].rule = Tsu)):
           text "通"
         button(class = waterButtonClass, onclick = () => (simulator[].rule = Water)):
