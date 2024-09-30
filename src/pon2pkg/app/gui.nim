@@ -181,7 +181,9 @@ proc solve*(
 
       var interval: Interval
       proc showAnswer() =
+        let oldBarCount = mSelf.progressBar.now
         mSelf.progressBar.now = results.len.pred
+
         if results.allIt it.isSome:
           mSelf.progressBar.total = 0
           mSelf.answer.hasData = true
@@ -190,7 +192,7 @@ proc solve*(
           mSelf.solving = false
           interval.clearInterval
 
-        if not kxi.surpressRedraws:
+        if mSelf.progressBar.now != oldBarCount and not kxi.surpressRedraws:
           kxi.redraw
 
       interval = showAnswer.setInterval ResultMonitorIntervalMs
@@ -243,15 +245,18 @@ proc permute*(
 
       var interval: Interval
       proc showAnswer() =
+        let oldBarCount = mSelf.progressBar.now
         mSelf.progressBar.now = results.len.pred
+
         if results.allIt it.isSome:
           mSelf.progressBar.total = 0
+          mSelf.answer.hasData = true
           mSelf.answer.pairsPositionsSeq = results.mapIt(it.get)
           mSelf.updateAnswerSimulator wrappedNazoPuyo
           mSelf.permuting = false
           interval.clearInterval
 
-        if not kxi.surpressRedraws:
+        if mSelf.progressBar.now != oldBarCount and not kxi.surpressRedraws:
           kxi.redraw
 
       interval = showAnswer.setInterval ResultMonitorIntervalMs
