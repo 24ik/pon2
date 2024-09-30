@@ -10,14 +10,13 @@ import
 
 const
   Pon2RootDirCandidate = currentSourcePath().parentDir.parentDir.parentDir
-  Pon2NimbleFileCandidate = Pon2RootDirCandidate / "pon2.nimble"
-  Pon2NimbleFile =
-    when Pon2NimbleFileCandidate.lastPathPart.startsWith "pon2":
-      Pon2NimbleFileCandidate
+  Pon2RootDir =
+    when Pon2RootDirCandidate.lastPathPart.startsWith "pon2":
+      Pon2RootDirCandidate
     else:
-      Pon2RootDirCandidate.parentDir / "pon2.nimble"
-  Pon2Version* =
-    staticRead(Pon2NimbleFile).newStringStream.loadConfig.getSectionValue("", "version")
+      Pon2RootDirCandidate.parentDir
+  Pon2Version* = staticRead(Pon2RootDir / "pon2.nimble").newStringStream.loadConfig
+    .getSectionValue("", "version")
 
 # ------------------------------------------------
 # Warning-suppress Version
