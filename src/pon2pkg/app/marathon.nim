@@ -27,8 +27,7 @@ type
 
     rng: Rand
 
-const RawPairsTxt = staticRead currentSourcePath().parentDir.parentDir.parentDir.parentDir /
-  "assets" / "pairs" / "swap.txt"
+const RawPairsTxt = staticRead Pon2RootDir / "assets" / "pairs" / "swap.txt"
 
 using
   self: Marathon
