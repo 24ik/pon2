@@ -3,8 +3,8 @@
 {.experimental: "views".}
 
 import std/[sequtils, sets, sugar, unittest, uri]
-import ../../src/pon2pkg/app/[solve {.all.}]
-import ../../src/pon2pkg/core/[field, host, nazopuyo, pairposition, position, puyopuyo]
+import ../../src/pon2/app/[solve {.all.}]
+import ../../src/pon2/core/[field, host, nazopuyo, pairposition, position, puyopuyo]
 
 proc checkSolve(question: string, answers: varargs[string]) =
   {.push warning[ProveInit]: off.}

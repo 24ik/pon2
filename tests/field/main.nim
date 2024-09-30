@@ -4,7 +4,7 @@
 
 import std/[setutils, strutils, unittest]
 import
-  ../../src/pon2pkg/core/
+  ../../src/pon2/core/
     [cell, field {.all.}, fieldtype, host, pair, pairposition, position, rule]
 
 proc main*() =

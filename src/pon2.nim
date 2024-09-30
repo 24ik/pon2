@@ -3,8 +3,8 @@
 ## [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 ##
 ## To access APIs, import the following submodules:
-## - [pon2pkg/core](./pon2pkg/core.html)
-## - [pon2pkg/app](./pon2pkg/app.html)
+## - [pon2/core](./pon2/core.html)
+## - [pon2/app](./pon2/app.html)
 ##
 ## Compile Options:
 ## | Option                            | Description                 | Default |
@@ -25,25 +25,25 @@
 when isMainModule:
   when defined(js):
     when defined(pon2.worker):
-      import ./pon2pkg/private/[webworker]
-      import ./pon2pkg/private/main/[web]
+      import ./pon2/private/[webworker]
+      import ./pon2/private/main/[web]
 
       assignToWorker workerTask
     elif defined(pon2.marathon):
       import std/[sugar]
       import karax/[karax]
-      import ./pon2pkg/private/main/[web]
+      import ./pon2/private/main/[web]
 
       setRenderer () => initMainMarathonNode()
     else:
       import std/[sugar]
-      import ./pon2pkg/private/main/[web]
+      import ./pon2/private/main/[web]
       import karax/[karax]
 
       setRenderer (routerData: RouterData) => routerData.initMainGuiApplicationNode
   else:
     import std/[tables]
-    import ./pon2pkg/private/main/[native]
+    import ./pon2/private/main/[native]
 
     let args = getCommandLineArguments()
     if args["solve"] or args["s"]:
@@ -56,8 +56,8 @@ when isMainModule:
       args.runGuiApplication
 
 when defined(nimdoc):
-  import ./pon2pkg/app
-  import ./pon2pkg/core
+  import ./pon2/app
+  import ./pon2/core
 
   # HACK: dummy to suppress warning
   discard SelectColor

@@ -3,11 +3,11 @@
 {.experimental: "views".}
 
 import std/[options, sequtils, unittest]
-import ../../src/pon2pkg/app/[generate {.all.}, solve]
+import ../../src/pon2/app/[generate {.all.}, solve]
 import
-  ../../src/pon2pkg/core/
+  ../../src/pon2/core/
     [cell, field, fieldtype, mark, nazopuyo, pair, pairposition, puyopuyo, requirement]
-import ../../src/pon2pkg/private/[misc]
+import ../../src/pon2/private/[misc]
 
 proc main*() =
   # ------------------------------------------------

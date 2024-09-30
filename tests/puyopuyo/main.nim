@@ -4,7 +4,7 @@
 
 import std/[sequtils, strformat, strutils, unittest, uri]
 import
-  ../../src/pon2pkg/core/
+  ../../src/pon2/core/
     [
       cell,
       field,

@@ -1,7 +1,7 @@
 {.experimental: "strictDefs".}
 
 import std/[math, monotimes, times]
-import ../src/pon2pkg/[app, core]
+import ../src/pon2/[app, core]
 
 template benchmark(
     desc: string, loop: Positive, prepare: untyped, measure: untyped

@@ -3,7 +3,7 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2pkg/app/[color {.all.}]
+import ../../src/pon2/app/[color {.all.}]
 
 when defined(js):
   import karax/[kbase]
