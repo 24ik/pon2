@@ -4,7 +4,7 @@
 
 import std/[options, unittest]
 import
-  ../../src/pon2pkg/core/
+  ../../src/pon2/core/
     [field, host, nazopuyo {.all.}, pairposition, puyopuyo, requirement, rule]
 
 proc moveCount(uriStr: string): int =

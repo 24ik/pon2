@@ -3,9 +3,9 @@
 {.experimental: "views".}
 
 import std/[importutils, options, unittest, uri]
-import ../../src/pon2pkg/app/[nazopuyo, simulator {.all.}]
+import ../../src/pon2/app/[nazopuyo, simulator {.all.}]
 import
-  ../../src/pon2pkg/core/[
+  ../../src/pon2/core/[
     cell, field, fieldtype, host, moveresult, nazopuyo, pair, pairposition, position,
     puyopuyo, requirement, rule,
   ]

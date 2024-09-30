@@ -3,9 +3,9 @@
 {.experimental: "views".}
 
 import std/[strutils, unittest]
-import ../../src/pon2pkg/app/[marathon {.all.}, nazopuyo, simulator]
-import ../../src/pon2pkg/core/[cell, pair, pairposition]
-import ../../src/pon2pkg/private/app/marathon/[common]
+import ../../src/pon2/app/[marathon {.all.}, nazopuyo, simulator]
+import ../../src/pon2/core/[cell, pair, pairposition]
+import ../../src/pon2/private/app/marathon/[common]
 
 proc main*() =
   # ------------------------------------------------

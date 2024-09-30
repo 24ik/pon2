@@ -3,7 +3,7 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2pkg/core/[field, host, mark {.all.}, nazopuyo]
+import ../../src/pon2/core/[field, host, mark {.all.}, nazopuyo]
 
 func mark(uriStr: string): MarkResult =
   parseNazoPuyo[TsuField](uriStr, Ishikawa).mark

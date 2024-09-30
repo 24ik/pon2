@@ -3,8 +3,8 @@
 {.experimental: "views".}
 
 import std/[sequtils, unittest, uri]
-import ../../src/pon2pkg/app/[permute {.all.}]
-import ../../src/pon2pkg/core/[field, host, nazopuyo, pairposition]
+import ../../src/pon2/app/[permute {.all.}]
+import ../../src/pon2/core/[field, host, nazopuyo, pairposition]
 
 {.push warning[Uninit]: off.}
 proc main*() =

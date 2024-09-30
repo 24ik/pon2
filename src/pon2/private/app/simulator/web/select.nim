@@ -1,0 +1,43 @@
+## This module implements the select node.
+##
+
+{.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
+
+import std/[sugar]
+import karax/[karax, karaxdsl, kbase, vdom]
+import ../../../../app/[simulator]
+import ../../../../core/[rule]
+
+const
+  SelectedClass = kstring"button is-selected is-primary"
+  NotSelectedClass = kstring"button"
+
+proc initSelectNode*(simulator: ref Simulator): VNode {.inline.} =
+  ## Returns the select node.
+  let
+    playEditorButtonClass =
+      if simulator[].mode == PlayEditor: SelectedClass else: NotSelectedClass
+    editButtonClass = if simulator[].mode == Edit: SelectedClass else: NotSelectedClass
+
+    tsuButtonClass = if simulator[].rule == Tsu: SelectedClass else: NotSelectedClass
+    waterButtonClass =
+      if simulator[].rule == Water: SelectedClass else: NotSelectedClass
+
+  result = buildHtml(tdiv):
+    tdiv(class = "buttons has-addons mb-0"):
+      button(
+        class = playEditorButtonClass, onclick = () => (simulator[].mode = PlayEditor)
+      ):
+        span(class = "icon"):
+          italic(class = "fa-solid fa-gamepad")
+      button(class = editButtonClass, onclick = () => (simulator[].mode = Edit)):
+        span(class = "icon"):
+          italic(class = "fa-solid fa-pen-to-square")
+    if simulator[].mode == Edit:
+      tdiv(class = "buttons has-addons mb-0"):
+        button(class = tsuButtonClass, onclick = () => (simulator[].rule = Tsu)):
+          text "通"
+        button(class = waterButtonClass, onclick = () => (simulator[].rule = Water)):
+          text "水中"

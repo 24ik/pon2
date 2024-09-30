@@ -3,7 +3,7 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2pkg/core/[cell {.all.}]
+import ../../src/pon2/core/[cell {.all.}]
 
 proc main*() =
   # ------------------------------------------------
