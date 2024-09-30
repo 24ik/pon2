@@ -76,7 +76,7 @@ proc initFooterNode(): VNode {.inline.} =
   ## Returns the footer node.
   buildHtml(footer(class = "footer")):
     tdiv(class = "content has-text-centered"):
-      text &"Pon!通 Version {Version}"
+      text &"Pon!通 Version {Pon2Version}"
 
 proc initMainGuiApplicationNode*(routerData: RouterData): VNode {.inline.} =
   ## Returns the main GUI application node.

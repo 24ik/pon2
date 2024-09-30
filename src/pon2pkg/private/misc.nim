@@ -6,12 +6,21 @@
 {.experimental: "views".}
 
 import
-  std/[algorithm, os, parsecfg, random, sequtils, streams, strutils, typetraits, uri]
+  std/[
+    algorithm, files, os, parsecfg, paths, random, sequtils, streams, strutils,
+    typetraits, uri,
+  ]
 
-const Version* = staticRead(
-    currentSourcePath().parentDir.parentDir.parentDir.parentDir / "pon2.nimble"
-  ).newStringStream.loadConfig
-  .getSectionValue("", "version")
+const
+  Pon2RootDirCandidate = currentSourcePath().parentDir.parentDir.parentDir
+  Pon2NimbleFileCandidate = Pon2RootDirCandidate / "pon2.nimble"
+  Pon2NimbleFile =
+    when Pon2NimbleFileCandidate.Path.fileExists:
+      Pon2NimbleFileCandidate
+    else:
+      Pon2RootDirCandidate.parentDir / "pon2.nimble"
+  Pon2Version* =
+    staticRead(Pon2NimbleFile).newStringStream.loadConfig.getSectionValue("", "version")
 
 # ------------------------------------------------
 # Warning-suppress Version
