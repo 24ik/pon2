@@ -20,7 +20,7 @@ proc initControllerNode*(simulator: ref Simulator): VNode {.inline.} =
   result = buildHtml(tdiv):
     case simulator[].mode
     of Play, PlayEditor:
-      tdiv(class = "buttons is-centered mb-0"):
+      tdiv(class = "buttons is-centered mb-3"):
         button(
           class = "button is-light",
           onclick = () => simulator[].backward(toStable = false),
@@ -32,7 +32,7 @@ proc initControllerNode*(simulator: ref Simulator): VNode {.inline.} =
         ):
           span(class = "icon"):
             italic(class = "fa-solid fa-square-caret-right")
-      tdiv(class = "buttons is-centered mb-0"):
+      tdiv(class = "buttons is-centered mb-3"):
         button(class = "button is-light", onclick = () => simulator[].reset):
           span(class = "icon"):
             italic(class = "fa-solid fa-backward-fast")
@@ -44,7 +44,7 @@ proc initControllerNode*(simulator: ref Simulator): VNode {.inline.} =
         ):
           span(class = "icon"):
             italic(class = "fa-solid fa-forward-step")
-      tdiv(class = "buttons is-centered mb-0"):
+      tdiv(class = "buttons is-centered mb-3"):
         button(
           class = "button is-info",
           onclick = () => simulator[].rotateOperatingPositionLeft,
@@ -60,7 +60,7 @@ proc initControllerNode*(simulator: ref Simulator): VNode {.inline.} =
         ):
           span(class = "icon"):
             italic(class = "fa-solid fa-arrow-rotate-right")
-      tdiv(class = "buttons is-centered mb-0"):
+      tdiv(class = "buttons is-centered mb-3"):
         button(
           class = "button is-info",
           onclick = () => simulator[].moveOperatingPositionLeft,
@@ -77,7 +77,7 @@ proc initControllerNode*(simulator: ref Simulator): VNode {.inline.} =
           span(class = "icon"):
             italic(class = "fa-solid fa-arrow-right")
     of Edit:
-      tdiv(class = "buttons is-centered mb-0"):
+      tdiv(class = "buttons is-centered mb-3"):
         button(
           class = insertingButtonClass, onclick = () => simulator[].toggleInserting
         ):
@@ -106,7 +106,7 @@ proc initControllerNode*(simulator: ref Simulator): VNode {.inline.} =
           span(class = "icon"):
             italic(class = "fa-solid fa-angles-right")
     of View:
-      tdiv(class = "buttons is-centered mb-0"):
+      tdiv(class = "buttons is-centered mb-3"):
         button(class = "button is-light", onclick = () => simulator[].reset):
           span(class = "icon"):
             italic(class = "fa-solid fa-backward-fast")
@@ -116,7 +116,7 @@ proc initControllerNode*(simulator: ref Simulator): VNode {.inline.} =
         ):
           span(class = "icon"):
             italic(class = "fa-solid fa-caret-left")
-      tdiv(class = "buttons is-centered mb-0"):
+      tdiv(class = "buttons is-centered mb-3"):
         button(class = "button is-light", onclick = () => simulator[].backward):
           span(class = "icon"):
             italic(class = "fa-solid fa-backward-step")
