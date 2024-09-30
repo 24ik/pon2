@@ -50,6 +50,9 @@ See the documentations:
 
 ## For Developers
 
+When using pon2 as a library, it is necessary to copy `assets` directory as a
+sibling of the output file.
+
 ### Known Issues
 
 - On Windows, the followings does not work:
@@ -59,12 +62,6 @@ See the documentations:
 ### API Usage
 
 See the [API documentation](https://24ik.github.io/pon2/docs/pon2.html).
-
-### Developing Web GUI
-
-When using pon2 as a library, it is necessary to create `assets` directory as a
-sibling of the output `.js` file, and copy `assets/puyo` and
-`assets/noticegarbage` directories under it.
 
 ### Running Tests
 

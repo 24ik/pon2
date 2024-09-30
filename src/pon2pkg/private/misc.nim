@@ -10,7 +10,7 @@ import
 
 const
   Pon2RootDirCandidate = currentSourcePath().parentDir.parentDir.parentDir
-  Pon2RootDir =
+  Pon2RootDir* =
     when Pon2RootDirCandidate.lastPathPart.startsWith "pon2":
       Pon2RootDirCandidate
     else:
