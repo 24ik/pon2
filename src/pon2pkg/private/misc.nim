@@ -6,16 +6,13 @@
 {.experimental: "views".}
 
 import
-  std/[
-    algorithm, files, os, parsecfg, paths, random, sequtils, streams, strutils,
-    typetraits, uri,
-  ]
+  std/[algorithm, os, parsecfg, random, sequtils, streams, strutils, typetraits, uri]
 
 const
   Pon2RootDirCandidate = currentSourcePath().parentDir.parentDir.parentDir
   Pon2NimbleFileCandidate = Pon2RootDirCandidate / "pon2.nimble"
   Pon2NimbleFile =
-    when Pon2NimbleFileCandidate.Path.fileExists:
+    when Pon2NimbleFileCandidate.lastPathPart.startsWith "pon2":
       Pon2NimbleFileCandidate
     else:
       Pon2RootDirCandidate.parentDir / "pon2.nimble"
