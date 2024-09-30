@@ -9,7 +9,7 @@ import std/[algorithm, critbits, math, os, sequtils, strutils, sugar, random]
 import ./[key, simulator]
 import ../core/[cell, field, puyopuyo]
 import ../private/[misc]
-import ../private/app/marathon/[common]
+import ../private/app/marathon/[common, pairs]
 
 type
   MarathonMatchResult* = object ## Matching result.
@@ -27,8 +27,6 @@ type
 
     rng: Rand
 
-const RawPairsTxt = staticRead Pon2RootDir / "assets" / "pairs" / "swap.txt"
-
 using
   self: Marathon
   mSelf: var Marathon
@@ -43,7 +41,7 @@ proc initMarathon*(): Marathon {.inline.} =
   result.simulator.new
   result.simulator[] = initPuyoPuyo[TsuField]().initSimulator Play
 
-  result.allPairsStrs.seq = RawPairsTxt.splitLines
+  result.allPairsStrs.seq = MarathonPairsTextRaw.splitLines
   result.allPairsStrs.tree = result.allPairsStrs.seq.toCritBitTree
   assert result.allPairsStrs.seq.len == AllPairsCount
 
