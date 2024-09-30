@@ -8,10 +8,15 @@
 import
   std/[algorithm, os, parsecfg, random, sequtils, streams, strutils, typetraits, uri]
 
-const Version* = staticRead(
-    currentSourcePath().parentDir.parentDir.parentDir.parentDir / "pon2.nimble"
-  ).newStringStream.loadConfig
-  .getSectionValue("", "version")
+const
+  Pon2RootDirCandidate = currentSourcePath().parentDir.parentDir.parentDir
+  Pon2RootDir =
+    when Pon2RootDirCandidate.lastPathPart.startsWith "pon2":
+      Pon2RootDirCandidate
+    else:
+      Pon2RootDirCandidate.parentDir
+  Pon2Version* = staticRead(Pon2RootDir / "pon2.nimble").newStringStream.loadConfig
+    .getSectionValue("", "version")
 
 # ------------------------------------------------
 # Warning-suppress Version

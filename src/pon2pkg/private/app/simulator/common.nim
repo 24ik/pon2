@@ -198,12 +198,15 @@ func toXLink*(simulator: Simulator, withPositions: bool): Uri {.inline.} =
   if simulator.kind == Nazo:
     simulator.nazoPuyoWrap.get:
       let
-        ruleStr = RuleDescriptions[simulator.rule]
+        ruleStr =
+          if simulator.rule == Tsu:
+            ""
+          else:
+            RuleDescriptions[simulator.rule]
         moveCount = wrappedNazoPuyo.moveCount
         reqStr = $wrappedNazoPuyo.requirement
 
-      result = initXLink(
-        &"{ruleStr}・{moveCount}手・{reqStr}", "なぞぷよ", simulatorUri
-      )
+      result =
+        initXLink(&"{ruleStr}{moveCount}手・{reqStr}", "なぞぷよ", simulatorUri)
   else:
     result = initXLink(uri = simulatorUri)
