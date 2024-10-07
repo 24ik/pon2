@@ -6,6 +6,9 @@
 ## | `-d:pon2.waterheight=<int>` | Height of the water. | `8`     |
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}

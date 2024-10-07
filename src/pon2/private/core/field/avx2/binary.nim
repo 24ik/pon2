@@ -1,6 +1,9 @@
 ## This module implements binary fields with AVX2.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -25,13 +28,6 @@ type
       PextMask[uint16]
     ,
   ] ## Mask used in `drop`.
-
-using
-  self: BinaryField
-  mSelf: var BinaryField
-
-  row: Row
-  col: Column
 
 # ------------------------------------------------
 # Constructor
@@ -60,30 +56,31 @@ func filled*(which: WhichColor): BinaryField {.inline.} =
 # Operator
 # ------------------------------------------------
 
-func `==`*(self; field: BinaryField): bool {.inline.} =
-  bool mm256_testc_si256(mm256_setzero_si256(), mm256_xor_si256(self, field))
+func `==`*(field1, field2: BinaryField): bool {.inline.} =
+  bool mm256_testc_si256(mm256_setzero_si256(), mm256_xor_si256(field1, field2))
 
-func `+`*(self; field: BinaryField): BinaryField {.inline.} =
-  mm256_or_si256(self, field)
+func `+`*(field1, field2: BinaryField): BinaryField {.inline.} =
+  mm256_or_si256(field1, field2)
 
-func `-`*(self; field: BinaryField): BinaryField {.inline.} =
+func `-`*(self, field: BinaryField): BinaryField {.inline.} =
   mm256_andnot_si256(field, self)
 
-func `*`*(self; field: BinaryField): BinaryField {.inline.} =
-  mm256_and_si256(self, field)
+func `*`*(field1, field2: BinaryField): BinaryField {.inline.} =
+  mm256_and_si256(field1, field2)
 
-func `xor`*(self; field: BinaryField): BinaryField {.inline.} =
-  mm256_xor_si256(self, field)
+func `xor`*(field1, field2: BinaryField): BinaryField {.inline.} =
+  mm256_xor_si256(field1, field2)
 
-func `+=`*(mSelf; field: BinaryField) {.inline.} =
-  mSelf = mSelf + field
-func `-=`*(mSelf; field: BinaryField) {.inline.} =
-  mSelf = mSelf - field
+func `+=`*(self: var BinaryField, field: BinaryField) {.inline.} =
+  self = self + field
 
-func `shl`(self; imm8: int32): BinaryField {.inline.} =
+func `-=`*(self: var BinaryField, field: BinaryField) {.inline.} =
+  self = self - field
+
+func `shl`(self: BinaryField, imm8: int32): BinaryField {.inline.} =
   mm256_slli_epi16(self, imm8)
 
-func `shr`(self; imm8: int32): BinaryField {.inline.} =
+func `shr`(self: BinaryField, imm8: int32): BinaryField {.inline.} =
   mm256_srli_epi16(self, imm8)
 
 func sum*(field1, field2, field3: BinaryField): BinaryField {.inline.} =
@@ -112,7 +109,7 @@ func prod*(field1, field2, field3: BinaryField): BinaryField {.inline.} =
 # Population Count
 # ------------------------------------------------
 
-func popcnt*(self; color: static range[0 .. 1]): int {.inline.} =
+func popcnt*(self: BinaryField, color: static range[0 .. 1]): int {.inline.} =
   ## Population count for the `color`.
   # NOTE: YMM[e3, e2, e1, e0] == array[e0, e1, e2, e3]
   const Idx = 2 - 2 * color
@@ -120,10 +117,10 @@ func popcnt*(self; color: static range[0 .. 1]): int {.inline.} =
 
   result = arr[Idx].popcount + arr[Idx.succ].popcount
 
-func popcnt*(self): int {.inline.} =
+func popcnt*(self: BinaryField): int {.inline.} =
   ## Population count.
   let arr = cast[array[4, uint64]](self)
-  result = arr[0].popcount + arr[1].popcount + arr[2].popcount + arr[3].popcount
+  result = (arr[0].popcount + arr[1].popcount) + (arr[2].popcount + arr[3].popcount)
 
 # ------------------------------------------------
 # Trim
@@ -133,29 +130,29 @@ func initMask[T: int64 or uint64](left, right: T): BinaryField {.inline.} =
   ## Returns the mask.
   mm256_set_epi64x(left, right, left, right)
 
-func trimmed*(self): BinaryField {.inline.} =
+func trimmed*(self: BinaryField): BinaryField {.inline.} =
   ## Returns the binary field with padding cleared.
   self * initMask(0x0000_3FFE_3FFE_3FFE'u64, 0x3FFE_3FFE_3FFE_0000'u64)
 
-func visible*(self): BinaryField {.inline.} =
+func visible*(self: BinaryField): BinaryField {.inline.} =
   ## Returns the binary field with only the visible area.
   self * initMask(0x0000_1FFE_1FFE_1FFE'u64, 0x1FFE_1FFE_1FFE_0000'u64)
 
 func initAirTrimMasks(): tuple[left: uint64, right: uint64] {.inline.} =
   ## Constructor of `AirTrimMasks`.
-  result.left = 0
+  result = (0, 0)
+
   result.left.setMask (13 - AirHeight + 1) .. 13
   result.left.setMask (29 - AirHeight + 1) .. 29
   result.left.setMask (45 - AirHeight + 1) .. 45
 
-  result.right = 0
   result.right.setMask (29 - AirHeight + 1) .. 29
   result.right.setMask (45 - AirHeight + 1) .. 45
   result.right.setMask (61 - AirHeight + 1) .. 61
 
 const AirTrimMasks = initAirTrimMasks()
 
-func airTrimmed*(self): BinaryField {.inline.} =
+func airTrimmed*(self: BinaryField): BinaryField {.inline.} =
   ## Returns the binary field with only the air area in the Water rule.
   self * initMask(AirTrimMasks.left, AirTrimMasks.right)
 
@@ -163,17 +160,16 @@ func airTrimmed*(self): BinaryField {.inline.} =
 # Row, Column
 # ------------------------------------------------
 
-func row*(self, row): BinaryField {.inline.} =
+func row*(self: BinaryField, row: Row): BinaryField {.inline.} =
   ## Returns the binary field with only the given row.
   self * initMask(0x0000_2000_2000_2000'u64 shr row, 0x2000_2000_2000_0000'u64 shr row)
 
-func leftRightMasks(col): tuple[left: int64, right: int64] {.inline.} =
+func leftRightMasks(col: Column): tuple[left: int64, right: int64] {.inline.} =
   ## Returns `(-1, 0)` if `col` is in {0, 1, 2}; otherwise returns `(0, -1)`.
   let left = [-1, -1, -1, 0, 0, 0][col]
-  result.left = left
-  result.right = -1 - left
+  result = (left: left, right: -1 - left)
 
-func column*(self, col): BinaryField {.inline.} =
+func column*(self: BinaryField, col: Column): BinaryField {.inline.} =
   ## Returns the binary field with only the given column.
   let
     (leftMask, rightMask) = col.leftRightMasks
@@ -184,39 +180,47 @@ func column*(self, col): BinaryField {.inline.} =
 
   result = self * initMask(left, right)
 
-func clearColumn*(mSelf, col) {.inline.} =
-  mSelf -= mSelf.column col ## Clears the given column.
+func clearColumn*(self: var BinaryField, col: Column) {.inline.} =
+  ## Clears the given column.
+  self -= self.column col
 
 # ------------------------------------------------
 # Indexer
 # ------------------------------------------------
 
-func cellMasks(row, col): tuple[left: int64, right: int64] {.inline.} =
+func cellMasks(row: Row, col: Column): tuple[left: int64, right: int64] {.inline.} =
   ## Returns two masks with only the bit at position `(row, col)` set to `1`.
   let (leftMask, rightMask) = col.leftRightMasks
-  result.left = bitand(0x0000_2000_0000_0000'i64 shr (16 * col + row), leftMask)
-  result.right = bitand(
-    0x0000_0000_0002_0000'i64 shl (16 * (Column.high - col) + Row.high - row), rightMask
+  result = (
+    left: bitand(0x0000_2000_0000_0000'i64 shr (16 * col + row), leftMask),
+    right: bitand(
+      0x0000_0000_0002_0000'i64 shl (16 * (Column.high - col) + Row.high - row),
+      rightMask,
+    ),
   )
 
-func `[]`*(self, row, col): WhichColor {.inline.} =
+func `[]`*(self: BinaryField, row: Row, col: Column): WhichColor {.inline.} =
   let (left, right) = cellMasks(row, col)
-  result.color1 = mm256_testc_si256(self, mm256_set_epi64x(left, right, 0, 0))
-  result.color2 = mm256_testc_si256(self, mm256_set_epi64x(0, 0, left, right))
+  result = WhichColor(
+    color1: mm256_testc_si256(self, mm256_set_epi64x(left, right, 0, 0)),
+    color2: mm256_testc_si256(self, mm256_set_epi64x(0, 0, left, right)),
+  )
 
-func exist*(self, row, col): int {.inline.} =
+func exist*(self: BinaryField, row: Row, col: Column): int {.inline.} =
   ## Returns `1` if the bit `(row, col)` is set; otherwise, returns `0`.
   let which = self[row, col]
-  result = int bitor(which.color1, which.color2)
+  result = bitor(which.color1, which.color2).int
 
-func `[]=`*(mSelf; row; col; which: WhichColor) {.inline.} =
+func `[]=`*(
+    self: var BinaryField, row: Row, col: Column, which: WhichColor
+) {.inline.} =
   let
     (left, right) = cellMasks(row, col)
     color1 = -which.color1
     color2 = -which.color2
 
-  mSelf =
-    mSelf - initMask(left, right) +
+  self =
+    self - initMask(left, right) +
     mm256_set_epi64x(
       bitand(left, color1),
       bitand(right, color1),
@@ -228,31 +232,38 @@ func `[]=`*(mSelf; row; col; which: WhichColor) {.inline.} =
 # Insert / RemoveSqueeze
 # ------------------------------------------------
 
-func aboveMasks(row, col): tuple[left: int64, right: int64] {.inline.} =
+func aboveMasks(row: Row, col: Column): tuple[left: int64, right: int64] {.inline.} =
   ## Returns two masks with only the bits above `(row, col)` set to `1`.
   ## Including `(row, col)`.
   let (left, right) = col.leftRightMasks
-  result.left =
-    bitand(-1'i64.masked 16 * (2 - col) + Row.high - row + 1 ..< 16 * (3 - col), left)
-  result.right =
-    bitand(-1'i64.masked 16 * (6 - col) + Row.high - row + 1 ..< 16 * (7 - col), right)
+  result = (
+    left:
+      bitand(-1'i64.masked 16 * (2 - col) + Row.high - row + 1 ..< 16 * (3 - col), left),
+    right: bitand(
+      -1'i64.masked 16 * (6 - col) + Row.high - row + 1 ..< 16 * (7 - col), right
+    ),
+  )
 
-func belowMasks(row, col): tuple[left: int64, right: int64] {.inline.} =
+func belowMasks(row: Row, col: Column): tuple[left: int64, right: int64] {.inline.} =
   ## Returns two masks with only the bits below `(row, col)` set to `1`.
   ## Including `(row, col)`.
   let (left, right) = col.leftRightMasks
-  result.left =
-    bitand(-1'i64.masked 16 * (2 - col) .. 16 * (2 - col) + Row.high - row + 1, left)
-  result.right =
-    bitand(-1'i64.masked 16 * (6 - col) .. 16 * (6 - col) + Row.high - row + 1, right)
+  result = (
+    left:
+      bitand(-1'i64.masked 16 * (2 - col) .. 16 * (2 - col) + Row.high - row + 1, left),
+    right:
+      bitand(-1'i64.masked 16 * (6 - col) .. 16 * (6 - col) + Row.high - row + 1, right),
+  )
 
-func tsuInsert*(mSelf; row; col; which: WhichColor) {.inline.} =
+func tsuInsert*(
+    self: var BinaryField, row: Row, col: Column, which: WhichColor
+) {.inline.} =
   ## Inserts `which` and shifts the field upward above the location
   ## where `which` is inserted.
   let
     (left, right) = aboveMasks(row, col)
     moveMask = initMask(left, right)
-    moveField = moveMask * mSelf
+    moveField = moveMask * self
 
     color1 = -which.color1
     color2 = -which.color2
@@ -265,9 +276,11 @@ func tsuInsert*(mSelf; row; col; which: WhichColor) {.inline.} =
         bitand(right, color2),
       )
 
-  mSelf = mSelf - moveField + ((moveField shl 1).trimmed + insertField)
+  self = self - moveField + ((moveField shl 1).trimmed + insertField)
 
-func waterInsert*(mSelf; row; col; which: WhichColor) {.inline.} =
+func waterInsert*(
+    self: var BinaryField, row: Row, col: Column, which: WhichColor
+) {.inline.} =
   ## Inserts `which` and shifts the field and shifts the field.
   ## If `(row, col)` is in the air, shifts the field upward above
   ## the location where inserted.
@@ -280,7 +293,7 @@ func waterInsert*(mSelf; row; col; which: WhichColor) {.inline.} =
     # air: above, upward
     (leftAir, rightAir) = aboveMasks(row, col)
     moveMaskAir = initMask(leftAir, rightAir)
-    moveFieldAir = moveMaskAir * mSelf
+    moveFieldAir = moveMaskAir * self
     insertFieldAir =
       (moveMaskAir xor (moveMaskAir shl 1)) *
       mm256_set_epi64x(
@@ -294,7 +307,7 @@ func waterInsert*(mSelf; row; col; which: WhichColor) {.inline.} =
     # water: below, downward
     (leftWater, rightWater) = belowMasks(row, col)
     moveMaskWater = initMask(leftWater, rightWater)
-    moveFieldWater = moveMaskWater * mSelf
+    moveFieldWater = moveMaskWater * self
     insertFieldWater =
       (moveMaskWater xor (moveMaskWater shr 1)) *
       mm256_set_epi64x(
@@ -309,19 +322,19 @@ func waterInsert*(mSelf; row; col; which: WhichColor) {.inline.} =
     removeField = [moveFieldWater, moveFieldAir][insertIntoAir]
     addField = [addFieldWater, addFieldAir][insertIntoAir]
 
-  mSelf = mSelf - removeField + addField
+  self = self - removeField + addField
 
-func tsuRemoveSqueeze*(mSelf, row, col) {.inline.} =
+func tsuRemoveSqueeze*(self: var BinaryField, row: Row, col: Column) {.inline.} =
   ## Removes the value at `(row, col)` and shifts the field downward
   ## above the location where the cell is removed.
   let
     (left, right) = aboveMasks(row, col)
     moveMask = initMask(left, right)
-    moveField = moveMask * mSelf
+    moveField = moveMask * self
 
-  mSelf = mSelf - moveField + (moveField - (moveMask xor (moveMask shl 1))) shr 1
+  self = self - moveField + (moveField - (moveMask xor (moveMask shl 1))) shr 1
 
-func waterRemoveSqueeze*(mSelf, row, col) {.inline.} =
+func waterRemoveSqueeze*(self: var BinaryField, row: Row, col: Column) {.inline.} =
   ## Removes the value at `(row, col)` and shifts the field.
   ## If `(row, col)` is in the air, shifts the field downward above
   ## the location where removed.
@@ -331,30 +344,30 @@ func waterRemoveSqueeze*(mSelf, row, col) {.inline.} =
     # air: above, downward
     (leftAir, rightAir) = aboveMasks(row, col)
     moveMaskAir = initMask(leftAir, rightAir)
-    moveFieldAir = moveMaskAir * mSelf
+    moveFieldAir = moveMaskAir * self
     addFieldAir = (moveFieldAir - (moveMaskAir xor (moveMaskAir shl 1))) shr 1
 
     # water: below, upward
     (leftWater, rightWater) = belowMasks(row, col)
     moveMaskWater = initMask(leftWater, rightWater)
-    moveFieldWater = moveMaskWater * mSelf
+    moveFieldWater = moveMaskWater * self
     addFieldWater = (moveFieldWater - (moveMaskWater xor (moveMaskWater shr 1))) shl 1
 
     removeFromAir = int row in AirRow.low .. AirRow.high
     removeField = [moveFieldWater, moveFieldAir][removeFromAir]
     addField = [addFieldWater, addFieldAir][removeFromAir]
 
-  mSelf = mSelf - removeField + addField
+  self = self - removeField + addField
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-func isZero*(self): bool {.inline.} =
+func isZero*(self: BinaryField): bool {.inline.} =
   ## Returns `true` if all elements are zero.
   bool mm256_testc_si256(zeroBinaryField(), self)
 
-func exist*(self): BinaryField {.inline.} =
+func exist*(self: BinaryField): BinaryField {.inline.} =
   ## Returns the field where any cells exist.
   self + mm256_permute4x64_epi64(self, 0b01_00_11_10)
 
@@ -362,19 +375,23 @@ func exist*(self): BinaryField {.inline.} =
 # Shift
 # ------------------------------------------------
 
-func shiftedUpWithoutTrim*(self; amount: static int32 = 1): BinaryField {.inline.} =
+func shiftedUpWithoutTrim*(
+    self: BinaryField, amount: static int32 = 1
+): BinaryField {.inline.} =
   ## Returns the binary field shifted upward.
   self shl amount
 
-func shiftedDownWithoutTrim*(self; amount: static int32 = 1): BinaryField {.inline.} =
+func shiftedDownWithoutTrim*(
+    self: BinaryField, amount: static int32 = 1
+): BinaryField {.inline.} =
   ## Returns the binary field shifted downward.
   self shr amount
 
-func shiftedRightWithoutTrim*(self): BinaryField {.inline.} =
+func shiftedRightWithoutTrim*(self: BinaryField): BinaryField {.inline.} =
   ## Returns the binary field shifted rightward.
   mm256_srli_si256(self, 2)
 
-func shiftedLeftWithoutTrim*(self): BinaryField {.inline.} =
+func shiftedLeftWithoutTrim*(self: BinaryField): BinaryField {.inline.} =
   ## Returns the binary field shifted leftward.
   mm256_slli_si256(self, 2)
 
@@ -391,7 +408,7 @@ func flippedV(val: uint64): uint64 {.inline.} =
       rev.rotateRightBits(16).masked 0xFFFF_0000_FFFF_0000'u64,
     ) shr 1
 
-func flippedV*(self): BinaryField {.inline.} =
+func flippedV*(self: BinaryField): BinaryField {.inline.} =
   ## Returns the binary field flipped vertically.
   var arr = cast[array[4, uint64]](self)
 
@@ -400,7 +417,7 @@ func flippedV*(self): BinaryField {.inline.} =
 
   result = cast[BinaryField](arr)
 
-func flippedH*(self): BinaryField {.inline.} =
+func flippedH*(self: BinaryField): BinaryField {.inline.} =
   ## Returns the binary field flipped horizontally.
   let arr = cast[array[16, uint16]](self)
 
@@ -424,7 +441,7 @@ func toDropMask*(existField: BinaryField): DropMask {.inline.} =
   ## Returns a drop mask converted from the exist field.
   let existArray = cast[array[16, uint16]](existField + floorBinaryField())
 
-  result[0] = when UseBmi2: 0 else: 0'u16.toPextMask # dummy to remove warning
+  result[0] = when UseBmi2: 0 else: 0'u16.toPextMask # HACK: dummy to suppress warning
   for col in 1 .. 6:
     result[col.pred] =
       when UseBmi2:
@@ -438,9 +455,9 @@ func toDropMask*(existField: BinaryField): DropMask {.inline.} =
       else:
         existArray[col].toPextMask
 
-func drop*(mSelf; mask: DropMask) {.inline.} =
+func drop*(self: var BinaryField, mask: DropMask) {.inline.} =
   ## Drops floating cells.
-  let arr = cast[array[16, uint16]](mSelf)
+  let arr = cast[array[16, uint16]](self)
 
   var resultArray: array[16, uint16]
   resultArray[0] = 0
@@ -452,9 +469,9 @@ func drop*(mSelf; mask: DropMask) {.inline.} =
     resultArray[col] = arr[col].pext mask[col.pred 3]
   resultArray[15] = 0
 
-  mSelf = cast[BinaryField](resultArray)
+  self = cast[BinaryField](resultArray)
 
-func waterDrop*(
+func waterDropped*(
     waterDropExistField, dropField, waterDropField: BinaryField
 ): BinaryField {.inline.} =
   ## Drops floating cells in Water rule.
@@ -484,12 +501,12 @@ func waterDrop*(
 # BinaryField <-> array
 # ------------------------------------------------
 
-func toArray*(self): array[Row, array[Column, WhichColor]] {.inline.} =
+func toArray*(self: BinaryField): array[Row, array[Column, WhichColor]] {.inline.} =
   ## Returns the array converted from the field.
   let arr = cast[array[16, int16]](self)
 
   result[Row.low][Column.low] = WhichColor(color1: 0, color2: 0)
-    # dummy to remove warning
+    # HACK: dummy to suppress warning
   for col in Column.low .. Column.high:
     # NOTE: YMM[e15, ..., e0] == array[e0, ..., e15]
     let

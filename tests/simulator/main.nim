@@ -1,19 +1,22 @@
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[importutils, options, unittest, uri]
-import ../../src/pon2/app/[nazopuyo, simulator {.all.}]
+import std/[importutils, options, strformat, unittest, uri]
+import ../../src/pon2/app/[nazopuyo, simulator]
 import
   ../../src/pon2/core/[
-    cell, field, fieldtype, host, moveresult, nazopuyo, pair, pairposition, position,
+    cell, field, fieldtype, fqdn, moveresult, nazopuyo, pair, pairposition, position,
     puyopuyo, requirement, rule,
   ]
 
 func parseNazoPuyo[F: TsuField or WaterField](
-    query: string, operatingIdx: Natural, host = Ik
+    query: string, operatingIdx: Natural, fqdn = Pon2
 ): NazoPuyo[F] =
-  result = parseNazoPuyo[F](query, host)
+  result = parseNazoPuyo[F](query, fqdn)
   block:
     result.puyoPuyo.type.privateAccess
     result.puyoPuyo.operatingIdx = operatingIdx
@@ -163,11 +166,11 @@ rg|"""
     simulator.nazoPuyoWrap.get:
       simulator.editingCell = Cell.Red
       simulator.writeCell Row.high, Column.high
-      check wrappedNazoPuyo.puyoPuyo.field == parseField[TsuField]("t-r", Ik)
+      check wrappedNazoPuyo.puyoPuyo.field == parseField[TsuField]("t-r", Pon2)
 
       simulator.moveCursorUp
       simulator.writeCell Cell.Garbage
-      check wrappedNazoPuyo.puyoPuyo.field == parseField[TsuField]("t-o....r", Ik)
+      check wrappedNazoPuyo.puyoPuyo.field == parseField[TsuField]("t-o....r", Pon2)
 
   # writeCell (pair)
   block:
@@ -203,7 +206,7 @@ rg|"""
   # shiftFieldUp, shiftFieldDown, shiftFieldRight, shiftFieldLeft, flipFieldV, flipFieldH
   block:
     var
-      field2 = parseField[TsuField]("t-rgb...ypo...", Ik)
+      field2 = parseField[TsuField]("t-rgb...ypo...", Pon2)
       puyoPuyo = initPuyoPuyo[TsuField]()
     puyoPuyo.field = field2
     var simulator = puyoPuyo.initSimulator
@@ -236,7 +239,7 @@ rg|"""
   # flip
   block:
     var
-      field2 = parseField[TsuField]("t-rgb...ypo...", Ik)
+      field2 = parseField[TsuField]("t-rgb...ypo...", Pon2)
       pairsPositions2 = @[PairPosition(pair: RedGreen, position: Right2)]
       puyoPuyo = initPuyoPuyo[TsuField]()
     puyoPuyo.field = field2
@@ -264,29 +267,29 @@ rg|"""
     var simulator = initPuyoPuyo[TsuField]().initSimulator
 
     simulator.nazoPuyoWrap.get:
-      check wrappedNazoPuyo.requirement ==
-        Requirement(kind: Clear, color: RequirementColor.low, number: 0)
+      check wrappedNazoPuyo.requirement == initRequirement(Clear, All)
 
       simulator.requirementColor = RequirementColor.Color
-      check wrappedNazoPuyo.requirement ==
-        Requirement(kind: Clear, color: RequirementColor.Color, number: 0)
+      check wrappedNazoPuyo.requirement == initRequirement(
+        Clear, RequirementColor.Color
+      )
 
-      simulator.requirementNumber = 1
-      check wrappedNazoPuyo.requirement ==
-        Requirement(kind: Clear, color: RequirementColor.Color, number: 0)
+      simulator.requirementNumber = 0
+      check wrappedNazoPuyo.requirement == initRequirement(
+        Clear, RequirementColor.Color
+      )
 
       simulator.requirementKind = Chain
-      check wrappedNazoPuyo.requirement == Requirement(kind: Chain, number: 0)
+      check wrappedNazoPuyo.requirement == initRequirement(Chain, 0)
 
       simulator.requirementNumber = 1
-      check wrappedNazoPuyo.requirement == Requirement(kind: Chain, number: 1)
+      check wrappedNazoPuyo.requirement == initRequirement(Chain, 1)
 
       simulator.requirementColor = RequirementColor.Garbage
-      check wrappedNazoPuyo.requirement == Requirement(kind: Chain, number: 1)
+      check wrappedNazoPuyo.requirement == initRequirement(Chain, 1)
 
       simulator.requirementKind = ChainClear
-      check wrappedNazoPuyo.requirement ==
-        Requirement(kind: ChainClear, color: RequirementColor.low, number: 1)
+      check wrappedNazoPuyo.requirement == initRequirement(ChainClear, All, 1)
 
   # ------------------------------------------------
   # Edit - Undo / Redo
@@ -368,11 +371,11 @@ rg|"""
       nazo2 = parseNazoPuyo[TsuField]("30000Mo6j02m0_oaq1__u03", Ishikawa)
       nazo3 = parseNazoPuyo[TsuField]("M06j02mr_oaq1__u03", 1, Ishikawa)
 
-      moveRes0 =
-        initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], newSeq[array[ColorPuyo, seq[int]]](0))
+      moveRes0 = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
       moveRes1 = moveRes0
-      detail: array[ColorPuyo, seq[int]] = [@[4], @[], @[], @[], @[]]
-      moveRes2 = initMoveResult(0, [0, 2, 4, 0, 0, 0, 0], @[detail])
+      detail: array[Puyo, int] = [0, 2, 4, 0, 0, 0, 0]
+      full: array[ColorPuyo, seq[int]] = [@[4], @[], @[], @[], @[]]
+      moveRes2 = initMoveResult(0, [0, 2, 4, 0, 0, 0, 0], @[detail], @[full])
       moveRes3 = moveRes2
 
     var simulator = nazo0.initSimulator
@@ -526,25 +529,22 @@ rg|"""
   # Simulator <-> URI
   # ------------------------------------------------
 
-  # toUri, parseSimulator
+  # toUriQuery, parseSimulator
   block:
     let
-      uriStr =
-        "https://24ik.github.io/pon2/?" &
-        "kind=n&mode=e&field=t-rrb&pairs=rgby12&req-kind=0&req-color=7"
-      uriStrNoPos =
-        "https://24ik.github.io/pon2/?" &
-        "kind=n&mode=e&field=t-rrb&pairs=rgby&req-kind=0&req-color=7"
-      simulator = uriStr.parseUri.parseSimulator
-      nazo =
-        parseNazoPuyo[TsuField]("field=t-rrb&pairs=rgby12&req-kind=0&req-color=7", Ik)
+      mainQuery = "field=t-rrb&pairs=rgby12&req-kind=0&req-color=7"
+      mainQueryNoPos = "field=t-rrb&pairs=rgby&req-kind=0&req-color=7"
+      kindModeQuery = "kind=n&mode=e"
+      query = &"{kindModeQuery}&{mainQuery}"
+      queryNoPos = &"{kindModeQuery}&{mainQueryNoPos}"
+      simulator = query.parseSimulator Pon2
+      nazo = parseNazoPuyo[TsuField](mainQuery, Pon2)
 
     check simulator.nazoPuyoWrap == nazo.initNazoPuyoWrap
     check simulator.kind == Nazo
     check simulator.mode == Edit
 
-    check simulator.toUri(withPositions = true) == uriStr.parseUri
-    check simulator.toUri(withPositions = false) == uriStrNoPos.parseUri
+    check simulator.toUriQuery(withPositions = true) == query
+    check simulator.toUriQuery(withPositions = false) == queryNoPos
 
-    check simulator.toUri(withPositions = true, host = Ishikawa) ==
-      "https://ishikawapuyo.net/simu/pn.html?1b_c1Ec__270".parseUri
+    check simulator.toUriQuery(withPositions = true, fqdn = Ishikawa) == "1b_c1Ec__270"

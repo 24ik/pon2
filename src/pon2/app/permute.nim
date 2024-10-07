@@ -1,6 +1,9 @@
 ## This module implements Nazo Puyo permuters.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -36,9 +39,8 @@ iterator permute*[F: TsuField or WaterField](
     nazo.allPairsPositionsSeq(fixMoves, allowDouble, allowLastDouble)
 
   when not defined(js):
-    var bar: SuruBar
+    var bar = initSuruBar()
     if showProgress:
-      bar = initSuruBar()
       bar[0].total = pairsPositionsSeq.len
       bar.setup
 

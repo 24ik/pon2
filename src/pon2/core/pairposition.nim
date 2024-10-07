@@ -1,12 +1,15 @@
 ## This module implements pairs with positions.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[sequtils, strformat, strutils, sugar]
-import ./[cell, host, pair, position]
+import ./[cell, fqdn, pair, position]
 import ../private/[misc]
 
 type
@@ -52,8 +55,7 @@ func parsePairPosition*(str: string): PairPosition {.inline.} =
   if strs.len != 2:
     raise newException(ValueError, "Invalid pair&position: " & str)
 
-  result.pair = strs[0].parsePair
-  result.position = strs[1].parsePosition
+  result = PairPosition(pair: strs[0].parsePair, position: strs[1].parsePosition)
 
 # ------------------------------------------------
 # PairsPositions <-> string
@@ -72,7 +74,7 @@ func parsePairsPositions*(str: string): PairsPositions {.inline.} =
   ## Returns the pairs&positions converted from the string representation.
   ## If the string is invalid, `ValueError` is raised.
   if str == "":
-    newSeq[PairPosition](0)
+    @[]
   else:
     str.split(PairsPositionsSep).mapIt it.parsePairPosition
 
@@ -80,60 +82,57 @@ func parsePairsPositions*(str: string): PairsPositions {.inline.} =
 # PairPosition <-> URI
 # ------------------------------------------------
 
-func toUriQuery*(pairPosition: PairPosition, host: SimulatorHost): string {.inline.} =
+func toUriQuery*(pairPosition: PairPosition, fqdn = Pon2): string {.inline.} =
   ## Returns the URI query converted from the pair&position.
-  &"{pairPosition.pair.toUriQuery host}{pairPosition.position.toUriQuery host}"
+  &"{pairPosition.pair.toUriQuery fqdn}{pairPosition.position.toUriQuery fqdn}"
 
-func parsePairPosition*(query: string, host: SimulatorHost): PairPosition {.inline.} =
+func parsePairPosition*(query: string, fqdn: IdeFqdn): PairPosition {.inline.} =
   ## Returns the pair&position converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
   # NOTE: this function is not robust; dependent on the current URI format
-  case host
-  of Ik:
-    result.pair = query[0 ..< 2].parsePair host
-    result.position = query[2 ..^ 1].parsePosition host
+  case fqdn
+  of Pon2:
+    PairPosition(
+      pair: query[0 ..< 2].parsePair fqdn, position: query[2 ..^ 1].parsePosition fqdn
+    )
   of Ishikawa, Ips:
-    result.pair = query[0 .. 0].parsePair host
-    result.position = query[1 ..^ 1].parsePosition host
+    PairPosition(
+      pair: query[0 .. 0].parsePair fqdn, position: query[1 ..^ 1].parsePosition fqdn
+    )
 
 # ------------------------------------------------
 # PairsPositions <-> URI
 # ------------------------------------------------
 
-func toUriQuery*(
-    pairsPositions: PairsPositions, host: SimulatorHost
-): string {.inline.} =
+func toUriQuery*(pairsPositions: PairsPositions, fqdn = Pon2): string {.inline.} =
   ## Returns the URI query converted from the pairs&positions.
   let strs = collect:
     for pairPos in pairsPositions:
-      pairPos.toUriQuery host
+      pairPos.toUriQuery fqdn
 
   result = strs.join
 
-func parsePairsPositions*(
-    query: string, host: SimulatorHost
-): PairsPositions {.inline.} =
+func parsePairsPositions*(query: string, fqdn: IdeFqdn): PairsPositions {.inline.} =
   ## Returns the pairs&positions converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
-  # NOTE: this function is not robust; dependent on the current URI format
   if query.len mod 2 != 0:
     raise newException(ValueError, "Invalid pairs&positions: " & query)
 
-  result = newSeqOfCap[PairPosition](query.len div 2)
+  result = newSeqOfCap(query.len div 2)
 
-  case host
-  of Ik:
+  case fqdn
+  of Pon2:
     var idx = 0
     while idx < query.len:
       try:
         if idx.succ(4) > query.len:
           raise newException(ValueError, "This exception should be caught.")
 
-        result.add query[idx ..< idx.succ 4].parsePairPosition host
+        result.add query[idx ..< idx.succ 4].parsePairPosition fqdn
         idx.inc 4
       except ValueError:
-        result.add query[idx ..< idx.succ 2].parsePairPosition host
+        result.add query[idx ..< idx.succ 2].parsePairPosition fqdn
         idx.inc 2
   of Ishikawa, Ips:
     for i in countup(0, query.len.pred, 2):
-      result.add query[i .. i.succ].parsePairPosition host
+      result.add query[i .. i.succ].parsePairPosition fqdn

@@ -8,7 +8,7 @@ Features:
 - Generator: Generates the Nazo Puyo.
 - Permuter: Permutes the pairs in the Nazo Puyo to find a unique-solution
 problem.
-- [GUI Application](https://24ik.github.io/pon2/?kind=n&mode=e&field=t-&pairs&req-kind=0&req-color=0): GUI simulator for Puyo Puyo and Nazo Puyo.
+- [IDE](https://24ik.github.io/pon2/?kind=n&mode=e&field=t-&pairs&req-kind=0&req-color=0): IDE for Puyo Puyo and Nazo Puyo.
 - [Marathon](https://24ik.github.io/pon2/marathon/): Search for pairs sequence and play a marathon mode.
 
 Not supported now:
@@ -46,12 +46,12 @@ See the documentations:
 - [Solver](./docs/solve.md)
 - [Generator](./docs/generate.md)
 - [Permuter](./docs/permute.md)
-- [GUI Application](./docs/gui.md)
+- [IDE](./docs/ide.md)
 
 ## For Developers
 
-When using pon2 as a library, it is necessary to copy `assets` directory as a
-sibling of the output file.
+When using pon2 as a library for web development, it is necessary to copy
+`assets` directory as a sibling of the output file.
 
 ### Known Issues
 

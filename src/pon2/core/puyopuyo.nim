@@ -1,12 +1,15 @@
 ## This module implements Puyo Puyo.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[strformat, strutils, tables, uri]
-import ./[cell, field, host, moveresult, pair, pairposition, position, rule]
+import ./[cell, field, fqdn, moveresult, pair, pairposition, position, rule]
 
 type PuyoPuyo*[F: TsuField or WaterField] = object ## Puyo Puyo game.
   field*: F
@@ -18,11 +21,11 @@ type PuyoPuyo*[F: TsuField or WaterField] = object ## Puyo Puyo game.
 # Reset
 # ------------------------------------------------
 
-func reset*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]) {.inline.} =
+func reset*[F: TsuField or WaterField](self: var PuyoPuyo[F]) {.inline.} =
   ## Resets the Puyo Puyo game.
-  mSelf.field = initField[F]()
-  mSelf.pairsPositions.setLen 0
-  mSelf.operatingIdx = 0
+  self.field = initField[F]()
+  self.pairsPositions.setLen 0
+  self.operatingIdx = 0
 
 # ------------------------------------------------
 # Constructor
@@ -30,7 +33,7 @@ func reset*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]) {.inline.} =
 
 func initPuyoPuyo*[F: TsuField or WaterField](): PuyoPuyo[F] {.inline.} =
   ## Returns a new Puyo Puyo game.
-  result = default PuyoPuyo[F] # HACK: dummy to suppress warning
+  result = default PuyoPuyo[F]
   result.reset
 
 # ------------------------------------------------
@@ -51,17 +54,21 @@ func toTsuPuyoPuyo*[F: TsuField or WaterField](
     self: PuyoPuyo[F]
 ): PuyoPuyo[TsuField] {.inline.} =
   ## Returns the Tsu Puyo Puyo converted from the given Puyo Puyo.
-  result.field = self.field.toTsuField
-  result.pairsPositions = self.pairsPositions
-  result.operatingIdx = self.operatingIdx
+  PuyoPuyo[TsuField](
+    field: self.field.toTsuField,
+    pairsPositions: self.pairsPositions,
+    operatingIdx: self.operatingIdx,
+  )
 
 func toWaterPuyoPuyo*[F: TsuField or WaterField](
     self: PuyoPuyo[F]
 ): PuyoPuyo[WaterField] {.inline.} =
   ## Returns the Water Puyo Puyo converted from the given Puyo Puyo.
-  result.field = self.field.toWaterField
-  result.pairsPositions = self.pairsPositions
-  result.operatingIdx = self.operatingIdx
+  PuyoPuyo[WaterField](
+    field: self.field.toWaterField,
+    pairsPositions: self.pairsPositions,
+    operatingIdx: self.operatingIdx,
+  )
 
 # ------------------------------------------------
 # Property
@@ -76,24 +83,24 @@ func operatingIndex*[F: TsuField or WaterField](self: PuyoPuyo[F]): int {.inline
   self.operatingIdx
 
 func incrementOperatingIndex*[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F]
+    self: var PuyoPuyo[F]
 ) {.inline.} =
   ## Increments the index of pair being operated.
   ## The result is clipped.
-  if mSelf.operatingIdx >= mSelf.pairsPositions.len:
+  if self.operatingIdx >= self.pairsPositions.len:
     return
 
-  mSelf.operatingIdx.inc
+  self.operatingIdx.inc
 
 func decrementOperatingIndex*[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F]
+    self: var PuyoPuyo[F]
 ) {.inline.} =
   ## Decrements the index of pair being operated.
   ## The result is clipped.
-  if mSelf.operatingIdx <= 0:
+  if self.operatingIdx <= 0:
     return
 
-  mSelf.operatingIdx.dec
+  self.operatingIdx.dec
 
 func movingCompleted*[F: TsuField or WaterField](self: PuyoPuyo[F]): bool {.inline.} =
   ## Returns `true` if all pairs in the Puyo Puyo game are put (or skipped).
@@ -107,11 +114,11 @@ func operatingPairPosition*[F: TsuField or WaterField](
   self.pairsPositions[self.operatingIdx]
 
 func operatingPairPosition*[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F]
+    self: var PuyoPuyo[F]
 ): var PairPosition {.inline.} =
   ## Returns the pair&position being operated.
   ## If no pairs left, `IndexDefect` is raised.
-  result = mSelf.pairsPositions[mSelf.operatingIdx]
+  result = self.pairsPositions[self.operatingIdx]
 
 # ------------------------------------------------
 # Count
@@ -140,100 +147,100 @@ func garbageCount*[F: TsuField or WaterField](self: PuyoPuyo[F]): int {.inline.}
 # ------------------------------------------------
 
 func move[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F], pos: Position, overwritePos: static bool
+    self: var PuyoPuyo[F], pos: Position, overwritePos: static bool
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
-  if mSelf.movingCompleted:
+  if self.movingCompleted:
     return initMoveResult(0, [0, 0, 0, 0, 0, 0, 0])
 
   when overwritePos:
-    mSelf.pairsPositions[mSelf.operatingIdx].position = pos
+    self.pairsPositions[self.operatingIdx].position = pos
 
-  result = mSelf.field.move mSelf.operatingPairPosition
-  mSelf.operatingIdx.inc
+  result = self.field.move self.operatingPairPosition
+  self.operatingIdx.inc
 
 func move*[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F]
+    self: var PuyoPuyo[F]
 ): MoveResult {.inline, discardable.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
-  mSelf.move(Position.low, false)
+  self.move(Position.low, false)
 
 func move*[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F], pos: Position
+    self: var PuyoPuyo[F], pos: Position
 ): MoveResult {.inline, discardable.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
-  mSelf.move(pos, true)
+  self.move(pos, true)
 
-func move0*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]): MoveResult {.inline.} =
+func move0*[F: TsuField or WaterField](self: var PuyoPuyo[F]): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
-  result = mSelf.move
+  self.move
 
 func move0*[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F], pos: Position
+    self: var PuyoPuyo[F], pos: Position
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
-  result = mSelf.move pos
+  self.move pos
 
 # ------------------------------------------------
 # Move - Level1
 # ------------------------------------------------
 
 func move1[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F], pos: Position, overwritePos: static bool
+    self: var PuyoPuyo[F], pos: Position, overwritePos: static bool
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
   ## - Number of puyos that disappeared in each chain
-  if mSelf.movingCompleted:
-    return initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], newSeq[array[Puyo, int]](0))
+  if self.movingCompleted:
+    return initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[])
 
   when overwritePos:
-    mSelf.pairsPositions[mSelf.operatingIdx].position = pos
+    self.pairsPositions[self.operatingIdx].position = pos
 
-  result = mSelf.field.move1 mSelf.operatingPairPosition
-  mSelf.operatingIdx.inc
+  result = self.field.move1 self.operatingPairPosition
+  self.operatingIdx.inc
 
-func move1*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]): MoveResult {.inline.} =
+func move1*[F: TsuField or WaterField](self: var PuyoPuyo[F]): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
   ## - Number of puyos that disappeared in each chain
-  mSelf.move1(Position.low, false)
+  self.move1(Position.low, false)
 
 func move1*[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F], pos: Position
+    self: var PuyoPuyo[F], pos: Position
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
   ## - Number of puyos that disappeared in each chain
-  mSelf.move1(pos, true)
+  self.move1(pos, true)
 
 # ------------------------------------------------
 # Move - Level2
 # ------------------------------------------------
 
 func move2[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F], pos: Position, overwritePos: static bool
+    self: var PuyoPuyo[F], pos: Position, overwritePos: static bool
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
@@ -241,27 +248,26 @@ func move2[F: TsuField or WaterField](
   ## - Number of puyos that disappeared
   ## - Number of puyos that disappeared in each chain
   ## - Number of color puyos in each connected component that disappeared in each chain
-  if mSelf.movingCompleted:
-    return
-      initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], newSeq[array[ColorPuyo, seq[int]]](0))
+  if self.movingCompleted:
+    return initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
 
   when overwritePos:
-    mSelf.pairsPositions[mSelf.operatingIdx].position = pos
+    self.pairsPositions[self.operatingIdx].position = pos
 
-  result = mSelf.field.move2 mSelf.operatingPairPosition
-  mSelf.operatingIdx.inc
+  result = self.field.move2 self.operatingPairPosition
+  self.operatingIdx.inc
 
-func move2*[F: TsuField or WaterField](mSelf: var PuyoPuyo[F]): MoveResult {.inline.} =
+func move2*[F: TsuField or WaterField](self: var PuyoPuyo[F]): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
   ## - Number of puyos that disappeared in each chain
   ## - Number of color puyos in each connected component that disappeared in each chain
-  mSelf.move2(Position.low, false)
+  self.move2(Position.low, false)
 
 func move2*[F: TsuField or WaterField](
-    mSelf: var PuyoPuyo[F], pos: Position
+    self: var PuyoPuyo[F], pos: Position
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
@@ -269,7 +275,7 @@ func move2*[F: TsuField or WaterField](
   ## - Number of puyos that disappeared
   ## - Number of puyos that disappeared in each chain
   ## - Number of color puyos in each connected component that disappeared in each chain
-  mSelf.move2(pos, true)
+  self.move2(pos, true)
 
 # ------------------------------------------------
 # Puyo Puyo <-> string
@@ -288,11 +294,11 @@ func parsePuyoPuyo*[F: TsuField or WaterField](str: string): PuyoPuyo[F] {.inlin
   if strs.len != 2:
     raise newException(ValueError, "Invalid Puyo Puyo: " & str)
 
-  result.reset
-
-  result.field = parseField[F](strs[0])
-  result.pairsPositions = strs[1].parsePairsPositions
-  result.operatingIdx = 0
+  result = PuyoPuyo[F](
+    field: parseField[F](strs[0]),
+    pairsPositions: strs[1].parsePairsPositions,
+    operatingIdx: 0,
+  )
 
 # ------------------------------------------------
 # Puyo Puyo Game <-> URI
@@ -303,27 +309,28 @@ const
   PairsPositionsKey = "pairs"
 
 func toUriQuery*[F: TsuField or WaterField](
-    self: PuyoPuyo[F], host: SimulatorHost
+    self: PuyoPuyo[F], fqdn = Pon2
 ): string {.inline.} =
   ## Returns the URI query converted from the Puyo Puyo.
-  case host
-  of Ik:
+  case fqdn
+  of Pon2:
     encodeQuery [
-      (FieldKey, self.field.toUriQuery host),
-      (PairsPositionsKey, self.pairsPositions.toUriQuery host),
+      (FieldKey, self.field.toUriQuery fqdn),
+      (PairsPositionsKey, self.pairsPositions.toUriQuery fqdn),
     ]
   of Ishikawa, Ips:
-    &"{self.field.toUriQuery host}_{self.pairsPositions.toUriQuery host}"
+    &"{self.field.toUriQuery fqdn}_{self.pairsPositions.toUriQuery fqdn}"
 
 func parsePuyoPuyo*[F: TsuField or WaterField](
-    query: string, host: SimulatorHost
+    query: string, fqdn: IdeFqdn
 ): PuyoPuyo[F] {.inline.} =
   ## Returns the Puyo Puyo converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
+  result = default PuyoPuyo[F]
   result.operatingIdx = 0
 
-  case host
-  of Ik:
+  case fqdn
+  of Pon2:
     var
       fieldSet = false
       pairsPositionsSet = false
@@ -331,10 +338,16 @@ func parsePuyoPuyo*[F: TsuField or WaterField](
     for (key, val) in query.decodeQuery:
       case key
       of FieldKey:
-        result.field = parseField[F](val, host)
+        if fieldSet:
+          raise newException(ValueError, "Invalid Puyo Puyo: " & query)
+
+        result.field = parseField[F](val, fqdn)
         fieldSet = true
       of PairsPositionsKey:
-        result.pairsPositions = val.parsePairsPositions host
+        if pairsPositionsSet:
+          raise newException(ValueError, "Invalid Puyo Puyo: " & query)
+
+        result.pairsPositions = val.parsePairsPositions fqdn
         pairsPositionsSet = true
       else:
         raise newException(ValueError, "Invalid Puyo Puyo: " & query)
@@ -347,8 +360,8 @@ func parsePuyoPuyo*[F: TsuField or WaterField](
     of 1:
       result.pairsPositions.setLen 0
     of 2:
-      result.pairsPositions = queries[1].parsePairsPositions host
+      result.pairsPositions = queries[1].parsePairsPositions fqdn
     else:
       raise newException(ValueError, "Invalid Puyo Puyo: " & query)
 
-    result.field = parseField[F](queries[0], host)
+    result.field = parseField[F](queries[0], fqdn)

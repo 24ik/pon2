@@ -12,6 +12,9 @@
 ## - Copyright (c) 2020 Zach Wegner
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -23,10 +26,6 @@ const
   # FIXME: somehow AVX2 cannot used on Windows
   UseAvx2* = Avx2 and (defined(i386) or defined(amd64)) and not defined(windows)
   UseBmi2* = Bmi2 and (defined(i386) or defined(amd64))
-
-static:
-  echo "[pon2] AVX2 is " & (if UseAvx2: "enabled." else: "disabled.")
-  echo "[pon2] BMI2 is " & (if UseBmi2: "enabled." else: "disabled.")
 
 # ------------------------------------------------
 # AVX2
@@ -65,7 +64,16 @@ else:
 
   type PextMask*[T: uint64 or uint32 or uint16] = object ## Mask used in `pext`.
     mask: T
-    bits: array[BitNum64, T] # HACK: cannot use BitNum32/16 due to Nim's bug
+    bits: array[
+      when T is uint64:
+        BitNum64
+      elif T is uint32:
+        BitNum32
+      else:
+        BitNum16
+      ,
+      T,
+    ]
 
   func toPextMask*[T: uint64 or uint32 or uint16](mask: T): PextMask[T] {.inline.} =
     ## Converts `mask` to the pext mask.
@@ -77,7 +85,17 @@ else:
       else:
         BitNum16
 
-    result.mask = mask
+    result = PextMask[T](
+      mask: mask,
+      bits:
+        when T is uint64:
+          [0, 0, 0, 0, 0, 0]
+        elif T is uint32:
+          [0, 0, 0, 0, 0]
+        else:
+          [0, 0, 0, 0]
+      ,
+    )
 
     var lastMask = mask.bitnot
     for i in 0 ..< BitNum.pred:
@@ -88,7 +106,7 @@ else:
       result.bits[i] = bit
       lastMask = bitand(lastMask, bit)
 
-    result.bits[BitNum.pred] = (T.high - lastMask + 1) shl 1
+    result.bits[^1] = (T.high - lastMask + 1) shl 1
 
   func pext*[T: uint64 or uint32 or uint16](a: T, mask: PextMask[T]): T {.inline.} =
     ## Parallel bits extract.

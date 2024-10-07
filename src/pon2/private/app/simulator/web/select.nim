@@ -1,6 +1,9 @@
 ## This module implements the select node.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -14,7 +17,7 @@ const
   SelectedClass = kstring"button is-selected is-primary"
   NotSelectedClass = kstring"button"
 
-proc initSelectNode*(simulator: ref Simulator): VNode {.inline.} =
+proc newSelectNode*(simulator: ref Simulator): VNode {.inline.} =
   ## Returns the select node.
   let
     playEditorButtonClass =

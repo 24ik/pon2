@@ -1,6 +1,9 @@
 ## This module implements disappearing results with primitive field.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -23,43 +26,41 @@ type DisappearResult* = object ## Disappearing result.
   garbage*: BinaryField
   color*: BinaryField
 
-using disRes: DisappearResult
-
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-func notDisappeared*(disRes): bool {.inline.} =
+func notDisappeared*(self: DisappearResult): bool {.inline.} =
   ## Returns `true` if no puyos disappeared.
-  disRes.color.isZero
+  self.color.isZero
 
 # ------------------------------------------------
 # Count
 # ------------------------------------------------
 
-func colorCount*(disRes): int {.inline.} =
+func colorCount*(self: DisappearResult): int {.inline.} =
   ## Returns the number of color puyos that disappeared.
-  disRes.red.popcnt + disRes.green.popcnt + disRes.blue.popcnt + disRes.yellow.popcnt +
-    disRes.purple.popcnt
+  self.red.popcnt + self.green.popcnt + self.blue.popcnt + self.yellow.popcnt +
+    self.purple.popcnt
 
-func garbageCount*(disRes): int {.inline.} =
+func garbageCount*(self: DisappearResult): int {.inline.} =
   ## Returns the number of garbage puyos that disappeared.
-  disRes.garbage.popcnt
+  self.garbage.popcnt
 
-func puyoCount*(disRes; puyo: Puyo): int {.inline.} =
+func puyoCount*(self: DisappearResult, puyo: Puyo): int {.inline.} =
   ## Returns the number of `puyo` that disappeared.
   case puyo
   of Hard: 0
-  of Garbage: disRes.garbage.popcnt
-  of Red: disRes.red.popcnt
-  of Green: disRes.green.popcnt
-  of Blue: disRes.blue.popcnt
-  of Yellow: disRes.yellow.popcnt
-  of Purple: disRes.purple.popcnt
+  of Garbage: self.garbage.popcnt
+  of Red: self.red.popcnt
+  of Green: self.green.popcnt
+  of Blue: self.blue.popcnt
+  of Yellow: self.yellow.popcnt
+  of Purple: self.purple.popcnt
 
-func puyoCount*(disRes): int {.inline.} =
+func puyoCount*(self: DisappearResult): int {.inline.} =
   ## Returns the number of puyos that disappeared.
-  disRes.colorCount + disRes.garbageCount
+  self.colorCount + self.garbageCount
 
 # ------------------------------------------------
 # Connection
@@ -67,7 +68,7 @@ func puyoCount*(disRes): int {.inline.} =
 
 func initDefaultComponents(): array[Height + 2, array[Width + 2, Natural]] {.inline.} =
   ## Returns `DefaultComponents`.
-  result[0][0] = 0 # dummy to remove warning
+  result[0][0] = 0 # HACK: dummy to suppress warning
   for i in 0 ..< Height.succ 2:
     for j in 0 ..< Width.succ 2:
       result[i][j] = 0
@@ -117,10 +118,10 @@ func connectionCounts(field: BinaryField): seq[int] {.inline.} =
 
   result.keepItIf it > 0
 
-func connectionCounts*(disRes): array[ColorPuyo, seq[int]] {.inline.} =
+func connectionCounts*(self: DisappearResult): array[ColorPuyo, seq[int]] {.inline.} =
   ## Returns the number of puyos in each connected component.
-  result[Red] = disRes.red.connectionCounts
-  result[Green] = disRes.green.connectionCounts
-  result[Blue] = disRes.blue.connectionCounts
-  result[Yellow] = disRes.yellow.connectionCounts
-  result[Purple] = disRes.purple.connectionCounts
+  result[Red] = self.red.connectionCounts
+  result[Green] = self.green.connectionCounts
+  result[Blue] = self.blue.connectionCounts
+  result[Yellow] = self.yellow.connectionCounts
+  result[Purple] = self.purple.connectionCounts

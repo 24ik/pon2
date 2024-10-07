@@ -1,12 +1,15 @@
 ## This module implements positions.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[sugar, tables]
-import ./[fieldtype, host]
+import ./[fieldtype, fqdn]
 
 type
   Direction* {.pure.} = enum
@@ -45,10 +48,6 @@ type
 const
   AllPositions* = {Up0 .. Left5}
   AllDoublePositions* = {Up0 .. Right4}
-
-using
-  self: Position
-  mSelf: var Position
 
 # ------------------------------------------------
 # Constructor
@@ -108,13 +107,14 @@ func initPosToChildDir(): array[Position, Direction] {.inline.} =
 
 const PosToChildDir = initPosToChildDir()
 
-func axisColumn*(self): Column {.inline.} = ## Returns the axis-puyo's column.
+func axisColumn*(self: Position): Column {.inline.} = ## Returns the axis-puyo's column.
   PosToAxisCol[self]
 
-func childColumn*(self): Column {.inline.} = ## Returns the child-puyo's column.
+func childColumn*(self: Position): Column {.inline.} =
+  ## Returns the child-puyo's column.
   PosToChildCol[self]
 
-func childDirection*(self): Direction {.inline.} =
+func childDirection*(self: Position): Direction {.inline.} =
   ## Returns the child-puyo's direction.
   PosToChildDir[self]
 
@@ -132,17 +132,19 @@ const
     Down0, Down1, Down2, Down3, Down4, Left1, Left1, Left2, Left3, Left4,
   ]
 
-func movedRight*(self): Position {.inline.} = ## Returns the position moved rightward.
+func movedRight*(self: Position): Position {.inline.} =
+  ## Returns the position moved rightward.
   RightPositions[self]
 
-func movedLeft*(self): Position {.inline.} = ## Returns the position moved leftward.
+func movedLeft*(self: Position): Position {.inline.} =
+  ## Returns the position moved leftward.
   LeftPositions[self]
 
-func moveRight*(mSelf) {.inline.} = ## Moves the position rightward.
-  mSelf = mSelf.movedRight
+func moveRight*(self: var Position) {.inline.} = ## Moves the position rightward.
+  self = self.movedRight
 
-func moveLeft*(mSelf) {.inline.} = ## Moves the position leftward.
-  mSelf = mSelf.movedLeft
+func moveLeft*(self: var Position) {.inline.} = ## Moves the position leftward.
+  self = self.movedLeft
 
 # ------------------------------------------------
 # Rotate
@@ -158,19 +160,19 @@ const
     Right1, Right2, Right3, Right4, Right4, Down1, Down2, Down3, Down4, Down5,
   ]
 
-func rotatedRight*(self): Position {.inline.} =
+func rotatedRight*(self: Position): Position {.inline.} =
   ## Returns the position rotated right (clockwise).
   RightRotatePositions[self]
 
-func rotatedLeft*(self): Position {.inline.} =
+func rotatedLeft*(self: Position): Position {.inline.} =
   ## Returns the position rotated left (counterclockwise).
   LeftRotatePositions[self]
 
-func rotateRight*(mSelf) {.inline.} = ## Rotates the position right.
-  mSelf = mSelf.rotatedRight
+func rotateRight*(self: var Position) {.inline.} = ## Rotates the position right.
+  self = self.rotatedRight
 
-func rotateLeft*(mSelf) {.inline.} = ## Rotates the position left.
-  mSelf = mSelf.rotatedLeft
+func rotateLeft*(self: var Position) {.inline.} = ## Rotates the position left.
+  self = self.rotatedLeft
 
 # ------------------------------------------------
 # Position <-> string
@@ -199,19 +201,19 @@ const
     for pos in Position:
       {$PosToIshikawaUri[pos.ord]: pos}
 
-func toUriQuery*(self; host: SimulatorHost): string {.inline.} =
+func toUriQuery*(self: Position, fqdn = Pon2): string {.inline.} =
   ## Returns the URI query converted from the position.
-  case host
-  of Ik:
+  case fqdn
+  of Pon2:
     $self
   of Ishikawa, Ips:
     $PosToIshikawaUri[self.ord]
 
-func parsePosition*(query: string, host: SimulatorHost): Position {.inline.} =
+func parsePosition*(query: string, fqdn: IdeFqdn): Position {.inline.} =
   ## Returns the position converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
-  case host
-  of Ik:
+  case fqdn
+  of Pon2:
     result = query.parsePosition
   of Ishikawa, Ips:
     try:

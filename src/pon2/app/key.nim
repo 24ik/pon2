@@ -1,6 +1,9 @@
 ## This module implements keyboard events.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -20,11 +23,7 @@ func initKeyEvent*(
     code: string, shift = false, control = false, alt = false, meta = false
 ): KeyEvent {.inline.} =
   ## Returns a new `KeyEvent`.
-  result.code = code
-  result.shift = shift
-  result.control = control
-  result.alt = alt
-  result.meta = meta
+  KeyEvent(code: code, shift: shift, control: control, alt: alt, meta: meta)
 
 # ------------------------------------------------
 # Backend-specific
@@ -96,7 +95,7 @@ else:
     Key_ScrollLock: "ScrollLock",
     Key_NumLock: "NumLock",
     Key_Pause: "Pause",
-    Key_CapsLock: "CapsLock"
+    Key_CapsLock: "CapsLock",
   }.toTable
 
   func toKeyEvent*(event: KeyboardEvent, keys = downKeys()): KeyEvent {.inline.} =
@@ -121,7 +120,7 @@ else:
       for key in keys:
         if key notin {
           Key_ShiftL, Key_ShiftR, Key_ControlL, Key_ControlR, Key_AltL, Key_AltR,
-          Key_SuperL, Key_SuperR
+          Key_SuperL, Key_SuperR,
         }:
           onlyModifier = false
           code = KeyToCode[key]

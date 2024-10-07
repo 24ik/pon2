@@ -1,6 +1,10 @@
 ## This module implements Nazo Puyo generators.
 ##
+# TODO: make object type of generate arguments
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -25,13 +29,92 @@ type
     Color
 
   GenerateRequirement* = object ## Requirement for generation.
-    case kind*: RequirementKind
-    of DisappearColor, DisappearColorMore, Chain, ChainMore, DisappearColorSametime,
-        DisappearColorMoreSametime:
-      discard
-    else:
-      color*: GenerateRequirementColor
-    number*: RequirementNumber
+    kind: RequirementKind
+    color: Option[GenerateRequirementColor]
+    number: Option[RequirementNumber]
+
+# ------------------------------------------------
+# Constructor
+# ------------------------------------------------
+
+func initGenerateRequirement*(
+    kind: RequirementKind, color: GenerateRequirementColor, number: RequirementNumber
+): GenerateRequirement {.inline.} =
+  ## Returns a requirement.
+  GenerateRequirement(kind: kind, color: some color, number: some number)
+
+func initGenerateRequirement*(
+    kind: RequirementKind, color: GenerateRequirementColor
+): GenerateRequirement {.inline.} =
+  ## Returns a requirement.
+  GenerateRequirement(kind: kind, color: some color, number: none RequirementNumber)
+
+func initGenerateRequirement*(
+    kind: RequirementKind, number: RequirementNumber
+): GenerateRequirement {.inline.} =
+  GenerateRequirement(
+    kind: kind, color: none GenerateRequirementColor, number: some number
+  )
+
+# ------------------------------------------------
+# Property
+# ------------------------------------------------
+
+const
+  DefaultColor = GenerateRequirementColor.All
+  DefaultNumber = 0.RequirementNumber
+
+func kind*(self: GenerateRequirement): RequirementKind {.inline.} =
+  ## Returns the kind of the requirement.
+  self.kind
+
+func color*(self: GenerateRequirement): GenerateRequirementColor {.inline.} =
+  ## Returns the color of the requirement.
+  ## If the requirement does not have a color, `UnpackDefect` is raised.
+  self.color.get
+
+func number*(self: GenerateRequirement): RequirementNumber {.inline.} =
+  ## Returns the number of the requirement.
+  ## If the requirement does not have a number, `UnpackDefect` is raised.
+  self.number.get
+
+func `kind=`*(self: var GenerateRequirement, kind: RequirementKind) {.inline.} =
+  ## Sets the kind of the requirement.
+  if self.kind == kind:
+    return
+  self.kind = kind
+
+  if kind in ColorKinds:
+    if self.color.isNone:
+      self.color = some DefaultColor
+  else:
+    if self.color.isSome:
+      self.color = none GenerateRequirementColor
+
+  if kind in NumberKinds:
+    if self.number.isNone:
+      self.number = some DefaultNumber
+  else:
+    if self.number.isSome:
+      self.number = none RequirementNumber
+
+func `color=`*(
+    self: var GenerateRequirement, color: GenerateRequirementColor
+) {.inline.} =
+  ## Sets the color of the requirement.
+  ## If the requirement does not have a color, `UnpackDefect` is raised.
+  if self.kind in NoColorKinds:
+    raise newException(UnpackDefect, "The requirement does not have a color.")
+
+  self.color = some color
+
+func `number=`*(self: var GenerateRequirement, number: RequirementNumber) {.inline.} =
+  ## Sets the number of the requirement.
+  ## If the requirement does not have a color, `UnpackDefect` is raised.
+  if self.kind in NoNumberKinds:
+    raise newException(UnpackDefect, "The requirement does not have a number.")
+
+  self.number = some number
 
 # ------------------------------------------------
 # Misc
@@ -126,7 +209,7 @@ func split(
       return rng.split(total, ratios.len, true)
 
     while true:
-      result = newSeqOfCap[int](ratios.len)
+      result = newSeqOfCap(ratios.len)
       var last = total
 
       for mean in ratios2.mapIt total * it / sumRatio:
@@ -146,7 +229,7 @@ func split(
       "If `ratios` contains `none`, it can contain only `none` and `some(0).",
     )
 
-  result = newSeqOfCap[int](ratios.len)
+  result = newSeqOfCap(ratios.len)
   let counts = rng.split(total, ratios.countIt it.isNone, false)
   var idx = 0
   for ratio in ratios:
@@ -179,28 +262,30 @@ func generatePuyoPuyo[F: TsuField or WaterField](
     extras = rng.split(extraCount, useColors.len, true)
 
   # shuffle for pairs&positions
-  {.push warning[ProveInit]: off.}
   var puyos = newSeqOfCap[Puyo](puyoCounts.color + puyoCounts.garbage)
   for color, chain, surplus in zip(useColors, chains, extras):
+    {.push warning[UnsafeDefault]: off.}
+    {.push warning[UnsafeSetLen]: off.}
+    {.push warning[ProveInit]: off.}
     puyos &= color.Puyo.repeat chain * 4 + surplus
+    {.pop.}
+    {.pop.}
+    {.pop.}
   rng.shuffle puyos
-  {.pop.}
 
   # make pairs&positions
-  {.push warning[ProveInit]: off.}
   let pairsPositions = collect:
     for i in 0 ..< moveCount:
       PairPosition(
         pair: initPair(puyos[2 * i], puyos[2 * i + 1]), position: Position.None
       )
-  {.pop.}
 
   # shuffle for field
   {.push warning[ProveInit]: off.}
   var fieldPuyos =
     puyos[2 * moveCount .. ^1] & Cell.Garbage.Puyo.repeat puyoCounts.garbage
-  rng.shuffle fieldPuyos
   {.pop.}
+  rng.shuffle fieldPuyos
 
   # calc heights
   let colCounts = rng.split(fieldCount, heights)
@@ -235,25 +320,25 @@ const ColorToReqColor: array[ColorPuyo, RequirementColor] = [
   RequirementColor.Yellow, RequirementColor.Purple,
 ]
 
-{.push warning[UnsafeSetLen]: off.}
-{.push warning[UnsafeDefault]: off.}
 func generateRequirement(
     rng: var Rand, req: GenerateRequirement, useColors: seq[ColorPuyo]
 ): Requirement {.inline.} =
   ## Returns a random requirement.
   ## If generation fails, `GenerateError` will be raised.
-  var
-    kind = RequirementKind.low
-    color = RequirementColor.low
-    number = RequirementNumber.low
-
-  kind = req.kind
+  if req.kind in NoColorKinds:
+    result = initRequirement(req.kind, req.number.get)
+  elif req.kind in NoNumberKinds:
+    result = initRequirement(req.kind, RequirementColor.low)
+  else:
+    result = initRequirement(req.kind, RequirementColor.low, req.number.get)
 
   # color
-  {.push warning[ProveInit]: off.}
-  if kind in ColorKinds:
-    color =
-      case req.color
+  if req.kind in ColorKinds:
+    {.push warning[ProveInit]: off.}
+    {.push warning[UnsafeSetLen]: off.}
+    {.push warning[UnsafeDefault]: off.}
+    result.color =
+      case req.color.get
       of GenerateRequirementColor.All:
         RequirementColor.All
       of GenerateRequirementColor.SingleColor:
@@ -262,28 +347,13 @@ func generateRequirement(
         RequirementColor.Garbage
       of GenerateRequirementColor.Color:
         RequirementColor.Color
-  {.pop.}
-
-  # number
-  if kind in NumberKinds:
-    number = req.number
-
-  {.cast(uncheckedAssign).}:
-    if kind in ColorKinds:
-      result = Requirement(kind: kind, color: color, number: number)
-    else:
-      result = Requirement(kind: kind, number: number)
-{.pop.}
-{.pop.}
+    {.pop.}
+    {.pop.}
+    {.pop.}
 
 # ------------------------------------------------
 # Generate - Generics
 # ------------------------------------------------
-
-func hasDouble(pairsPositions: PairsPositions): bool {.inline.} =
-  ## Returns `true` if any pair in the pairs&positions is double.
-  # HACK: Cutting this function out is needed due to Nim's bug
-  pairsPositions.anyIt it.pair.isDouble
 
 proc generate*[F: TsuField or WaterField](
     seed: SomeSignedInt,
@@ -311,7 +381,7 @@ proc generate*[F: TsuField or WaterField](
   ## `parallelCount` will be ignored on JS backend.
   ## If `puyoCounts.color` is `none`, it is inferred from the requirement if
   ## the kind is chain-like; otherwise `GenerateError` will be raised.
-  result = initNazoPuyo[F]() # HACK: dummy to remove warning
+  result = initNazoPuyo[F]() # HACK: dummy to suppress warning
 
   # infer color count if not specified
   var puyoCounts2 = (color: 0.Natural, garbage: puyoCounts.garbage)
@@ -319,7 +389,7 @@ proc generate*[F: TsuField or WaterField](
     puyoCounts2.color = puyoCounts.color.get
   else:
     if req.kind in {Chain, ChainMore, ChainClear, ChainMoreClear}:
-      puyoCounts2.color = req.number * 4
+      puyoCounts2.color = req.number.get * 4
     else:
       raise newException(GenerateError, "The number of color puyoes is not specified.")
 
@@ -335,15 +405,15 @@ proc generate*[F: TsuField or WaterField](
 
   # requirement
   {.push warning[UnsafeSetLen]: off.}
+  {.push warning[ProveInit]: off.}
   let useColors = rng.sample((ColorPuyo.low .. ColorPuyo.high).toSeq, colorCount)
+  {.pop.}
   {.pop.}
   result.requirement = rng.generateRequirement(req, useColors)
   if not result.requirement.isSupported:
     raise newException(GenerateError, "Unsupported requirement.")
 
   # puyo puyo
-  {.push warning[UnsafeSetLen]: off.}
-  {.push warning[UnsafeDefault]: off.}
   while true:
     try:
       result.puyoPuyo =
@@ -356,7 +426,7 @@ proc generate*[F: TsuField or WaterField](
       continue
     if result.puyoPuyo.field.willDisappear:
       continue
-    if not allowDouble and result.puyoPuyo.pairsPositions.hasDouble:
+    if not allowDouble and result.puyoPuyo.pairsPositions.anyIt it.pair.isDouble:
       continue
     if not allowLastDouble and result.puyoPuyo.pairsPositions[^1].pair.isDouble:
       continue
@@ -386,8 +456,6 @@ proc generate*[F: TsuField or WaterField](
     if answers.len == 1 and answers[0][^1].position != Position.None:
       result.puyoPuyo.pairsPositions = answers[0]
       return
-  {.pop.}
-  {.pop.}
 
 proc generate*[F: TsuField or WaterField](
     req: GenerateRequirement,
@@ -413,8 +481,8 @@ proc generate*[F: TsuField or WaterField](
   ## If generation fails, `GenerateError` will be raised.
   ## `parallelCount` will be ignored on JS backend.
   var rng = initRand()
-  generate[F](
-    rng.rand(int),
+  result = generate[F](
+    rng.rand int,
     req,
     moveCount,
     colorCount,

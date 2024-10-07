@@ -1,11 +1,13 @@
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[options, unittest]
 import
-  ../../src/pon2/core/
-    [field, host, nazopuyo {.all.}, pairposition, puyopuyo, requirement, rule]
+  ../../src/pon2/core/[field, fqdn, nazopuyo, pairposition, puyopuyo, requirement, rule]
 
 proc moveCount(uriStr: string): int =
   parseNazoPuyo[TsuField](uriStr, Ishikawa).moveCount
@@ -20,9 +22,7 @@ proc main*() =
     let
       tsu = initNazoPuyo[TsuField]()
       water = initNazoPuyo[WaterField]()
-      req = Requirement(
-        kind: Clear, color: RequirementColor.All, number: RequirementNumber.low
-      )
+      req = initRequirement(Clear, RequirementColor.All)
 
     check tsu.puyoPuyo.field == initField[TsuField]()
     check tsu.puyoPuyo.pairsPositions.len == 0
@@ -93,15 +93,15 @@ yb|"""
     check $nazo == str
 
     let
-      ikQuery =
+      pon2Query =
         "field=t-oo...bbb...ooo...bbbyyyyyooy&pairs=yb23yb&req-kind=5&req-number=4"
       ishikawaQuery = "S03r06S03rAACQ_ueu1__u04"
       ipsQuery = "S03r06S03rAACQ_ueu1__u04"
 
-    check nazo.toUriQuery(Ik) == ikQuery
+    check nazo.toUriQuery(Pon2) == pon2Query
     check nazo.toUriQuery(Ishikawa) == ishikawaQuery
     check nazo.toUriQuery(Ips) == ipsQuery
 
-    check parseNazoPuyo[TsuField](ikQuery, Ik) == nazo
+    check parseNazoPuyo[TsuField](pon2Query, Pon2) == nazo
     check parseNazoPuyo[TsuField](ishikawaQuery, Ishikawa) == nazo
     check parseNazoPuyo[TsuField](ipsQuery, Ips) == nazo

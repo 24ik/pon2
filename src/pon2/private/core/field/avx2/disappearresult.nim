@@ -1,6 +1,9 @@
 ## This module implements disappearing results with AVX2.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -18,15 +21,11 @@ type DisappearResult* = object ## Disappearing result.
   garbage*: BinaryField
   color*: BinaryField
 
-using
-  self: DisappearResult
-  mSelf: var DisappearResult
-
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-func notDisappeared*(self): bool {.inline.} =
+func notDisappeared*(self: DisappearResult): bool {.inline.} =
   ## Returns `true` if no puyos disappeared.
   self.color.isZero
 
@@ -34,15 +33,15 @@ func notDisappeared*(self): bool {.inline.} =
 # Count
 # ------------------------------------------------
 
-func colorCount*(self): int {.inline.} =
+func colorCount*(self: DisappearResult): int {.inline.} =
   ## Returns the number of color puyos that disappeared.
   self.red.popcnt + self.greenBlue.popcnt + self.yellowPurple.popcnt
 
-func garbageCount*(self): int {.inline.} =
+func garbageCount*(self: DisappearResult): int {.inline.} =
   ## Returns the number of garbage puyos that disappeared.
   self.garbage.popcnt
 
-func puyoCount*(self; puyo: Puyo): int {.inline.} =
+func puyoCount*(self: DisappearResult, puyo: Puyo): int {.inline.} =
   ## Returns the number of `puyo` that disappeared.
   case puyo
   of Hard:
@@ -60,7 +59,7 @@ func puyoCount*(self; puyo: Puyo): int {.inline.} =
   of Purple:
     self.yellowPurple.popcnt 1
 
-func puyoCount*(self): int {.inline.} =
+func puyoCount*(self: DisappearResult): int {.inline.} =
   ## Returns the number of puyos that disappeared.
   self.colorCount + self.garbageCount
 
@@ -72,7 +71,7 @@ func initDefaultComponents(): array[
     Height + 2, array[Width + 2, tuple[color: 0 .. 2, idx: Natural]]
 ] {.inline.} =
   ## Returns `DefaultComponents`.
-  result[0][0] = (0, 0) # dummy to remove warning
+  result[0][0] = (0, 0) # HACK: dummy to suppress warning
   for i in 0 ..< Height.succ 2:
     for j in 0 ..< Width.succ 2:
       result[i][j].color = 0
@@ -139,7 +138,7 @@ func connectionCounts(field: BinaryField): array[2, seq[int]] {.inline.} =
   result[0].keepItIf it > 0
   result[1].keepItIf it > 0
 
-func connectionCounts*(self): array[ColorPuyo, seq[int]] {.inline.} =
+func connectionCounts*(self: DisappearResult): array[ColorPuyo, seq[int]] {.inline.} =
   ## Returns the number of color puyos in each connected component.
   let
     greenBlue = self.greenBlue.connectionCounts

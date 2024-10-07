@@ -1,12 +1,15 @@
 ## This modules implements pairs.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[setutils, sugar, tables]
-import ./[cell, host]
+import ./[cell, fqdn]
 
 type Pair* {.pure.} = enum
   ## The pair of two color puyos.
@@ -35,10 +38,6 @@ type Pair* {.pure.} = enum
   PurpleBlue = $Purple & $Blue
   PurpleYellow = $Purple & $Yellow
   PurplePurple = $Purple & $Purple
-
-using
-  self: Pair
-  mSelf: var Pair
 
 # ------------------------------------------------
 # Constructor
@@ -71,13 +70,13 @@ const
   PairToAxis = initPairToAxis()
   PairToChild = initPairToChild()
 
-func axis*(self): Cell {.inline.} = ## Returns the axis-puyo.
+func axis*(self: Pair): Cell {.inline.} = ## Returns the axis-puyo.
   PairToAxis[self]
 
-func child*(self): Cell {.inline.} = ## Returns the child-puyo.
+func child*(self: Pair): Cell {.inline.} = ## Returns the child-puyo.
   PairToChild[self]
 
-func isDouble*(self): bool {.inline.} =
+func isDouble*(self: Pair): bool {.inline.} =
   ## Returns `true` if the pair is double (monochromatic).
   self in {RedRed, GreenGreen, BlueBlue, YellowYellow, PurplePurple}
 
@@ -85,13 +84,13 @@ func isDouble*(self): bool {.inline.} =
 # Operator
 # ------------------------------------------------
 
-func `axis=`*(mSelf; color: ColorPuyo) {.inline.} =
+func `axis=`*(self: var Pair, color: ColorPuyo) {.inline.} =
   ## Sets the axis-puyo.
-  mSelf.inc (color.ord - mSelf.axis.ord) * ColorPuyo.fullSet.card
+  self.inc (color.ord - self.axis.ord) * ColorPuyo.fullSet.card
 
-func `child=`*(mSelf; color: ColorPuyo) {.inline.} =
+func `child=`*(self: var Pair, color: ColorPuyo) {.inline.} =
   ## Sets the child-puyo.
-  mSelf.inc color.ord - mSelf.child.ord
+  self.inc color.ord - self.child.ord
 
 # ------------------------------------------------
 # Swap
@@ -105,29 +104,30 @@ func initPairToSwapPair(): array[Pair, Pair] {.inline.} =
 
 const PairToSwapPair = initPairToSwapPair()
 
-func swapped*(self): Pair {.inline.} =
+func swapped*(self: Pair): Pair {.inline.} =
   ## Returns the pair with axis-puyo and child-puyo swapped.
   PairToSwapPair[self]
 
-func swap*(mSelf) {.inline.} = ## Swaps the axis-puyo and child-puyo.
-  mSelf = mSelf.swapped
+func swap*(self: var Pair) {.inline.} = ## Swaps the axis-puyo and child-puyo.
+  self = self.swapped
 
 # ------------------------------------------------
 # Count
 # ------------------------------------------------
 
-func puyoCount*(self; puyo: Puyo): int {.inline.} =
+func puyoCount*(self: Pair, puyo: Puyo): int {.inline.} =
   ## Returns the number of `puyo` in the pair.
   (self.axis == puyo).int + (self.child == puyo).int
 
-func puyoCount*(self): int {.inline.} = ## Returns the number of puyos in the pair.
+func puyoCount*(self: Pair): int {.inline.} =
+  ## Returns the number of puyos in the pair.
   2
 
-func colorCount*(self): int {.inline.} =
+func colorCount*(self: Pair): int {.inline.} =
   ## Returns the number of color puyos in the pair.
   self.puyoCount
 
-func garbageCount*(self): int {.inline.} =
+func garbageCount*(self: Pair): int {.inline.} =
   ## Returns the number of garbage puyos in the pair.
   0
 
@@ -158,19 +158,19 @@ const
     for pair in Pair:
       {$PairToIshikawaUri[pair.ord]: pair}
 
-func toUriQuery*(self; host: SimulatorHost): string {.inline.} =
+func toUriQuery*(self: Pair, fqdn = Pon2): string {.inline.} =
   ## Returns the URI query converted from the pair.
-  case host
-  of Ik:
+  case fqdn
+  of Pon2:
     $self
   of Ishikawa, Ips:
     $PairToIshikawaUri[self.ord]
 
-func parsePair*(query: string, host: SimulatorHost): Pair {.inline.} =
+func parsePair*(query: string, fqdn: IdeFqdn): Pair {.inline.} =
   ## Returns the pair converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
-  case host
-  of Ik:
+  case fqdn
+  of Pon2:
     result = query.parsePair
   of Ishikawa, Ips:
     try:

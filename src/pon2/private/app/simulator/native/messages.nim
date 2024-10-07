@@ -1,6 +1,9 @@
 ## This module implements the messages control.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -12,7 +15,7 @@ import ../[common]
 import ../../[misc]
 import ../../../../app/[color, simulator]
 
-type MessagesControl* = ref object of ControlImpl ## Messages control.
+type MessagesControl* = ref object of ControlImpl not nil ## Messages control.
   simulator: ref Simulator
 
 # ------------------------------------------------
@@ -29,12 +32,12 @@ proc messagesDrawHandler(control: MessagesControl, event: DrawEvent) {.inline.} 
   if control.simulator[].mode != Edit:
     canvas.drawText control.simulator[].getMessages.state
 
-func initMessageDrawHandler(control: MessagesControl): (event: DrawEvent) -> void =
+func newMessageDrawHandler(control: MessagesControl): (event: DrawEvent) -> void =
   ## Returns the handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: DrawEvent) => control.messagesDrawHandler event
 
-proc initMessagesControl*(
+proc newMessagesControl*(
     simulator: ref Simulator, assets: Assets
 ): MessagesControl {.inline.} =
   ## Returns a messages control.
@@ -45,7 +48,7 @@ proc initMessagesControl*(
 
   result.height = assets.cellImageSize.height
   result.fontSize = result.height.pt
-  result.onDraw = result.initMessageDrawHandler
+  result.onDraw = result.newMessageDrawHandler
 
 # ------------------------------------------------
 # API

@@ -1,9 +1,12 @@
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[unittest]
-import ../../src/pon2/core/[cell, field, moveresult {.all.}, position, puyopuyo]
+import std/[options, unittest]
+import ../../src/pon2/core/[cell, field, moveresult, position, puyopuyo]
 
 proc main*() =
   # ------------------------------------------------
@@ -88,37 +91,33 @@ rg|"""
         red = @[0, 0, 4]
         puyo = @[6, 10, 9]
 
-      expect FieldDefect:
+      expect UnpackDefect:
         discard res0.puyoCounts(Red)
       check res1.puyoCounts(Red) == red
-      expect FieldDefect:
-        discard res2.puyoCounts(Red)
+      check res2.puyoCounts(Red) == red
 
-      expect FieldDefect:
+      expect UnpackDefect:
         discard res0.puyoCounts
       check res1.puyoCounts == puyo
-      expect FieldDefect:
-        discard res2.puyoCounts
+      check res2.puyoCounts == puyo
 
     # colorCounts
     block:
       let color = @[5, 10, 8]
 
-      expect FieldDefect:
+      expect UnpackDefect:
         discard res0.colorCounts
       check res1.colorCounts == color
-      expect FieldDefect:
-        discard res2.colorCounts
+      check res2.colorCounts == color
 
     # garbageCounts
     block:
       let garbage = @[1, 0, 1]
 
-      expect FieldDefect:
+      expect UnpackDefect:
         discard res0.garbageCounts
       check res1.garbageCounts == garbage
-      expect FieldDefect:
-        discard res2.garbageCounts
+      check res2.garbageCounts == garbage
 
     # colors
     block:
@@ -132,11 +131,10 @@ rg|"""
     block:
       let colorsSeq = @[{Blue.ColorPuyo}, {Green}, {Red, Purple}]
 
-      expect FieldDefect:
+      expect UnpackDefect:
         discard res0.colorsSeq
       check res1.colorsSeq == colorsSeq
-      expect FieldDefect:
-        discard res2.colorsSeq
+      check res2.colorsSeq == colorsSeq
 
     # colorPlaces
     block:
@@ -144,15 +142,15 @@ rg|"""
         red = @[0, 0, 1]
         color = @[1, 2, 2]
 
-      expect FieldDefect:
+      expect UnpackDefect:
         discard res0.colorPlaces(Red)
-      expect FieldDefect:
+      expect UnpackDefect:
         discard res1.colorPlaces(Red)
       check res2.colorPlaces(Red) == red
 
-      expect FieldDefect:
+      expect UnpackDefect:
         discard res0.colorPlaces
-      expect FieldDefect:
+      expect UnpackDefect:
         discard res1.colorPlaces
       check res2.colorPlaces == color
 
@@ -162,15 +160,15 @@ rg|"""
         red = @[4]
         color = @[5, 4, 6, 4, 4]
 
-      expect FieldDefect:
+      expect UnpackDefect:
         discard res0.colorConnects(Red)
-      expect FieldDefect:
+      expect UnpackDefect:
         discard res1.colorConnects(Red)
       check res2.colorConnects(Red) == red
 
-      expect FieldDefect:
+      expect UnpackDefect:
         discard res0.colorConnects
-      expect FieldDefect:
+      expect UnpackDefect:
         discard res1.colorConnects
       check res2.colorConnects == color
 
@@ -178,8 +176,8 @@ rg|"""
     block:
       let score = 2720
 
-      expect FieldDefect:
+      expect UnpackDefect:
         discard res0.score
-      expect FieldDefect:
+      expect UnpackDefect:
         discard res1.score
       check res2.score == score

@@ -1,6 +1,9 @@
 ## This module implements the controller node.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -9,7 +12,7 @@ import std/[sugar]
 import karax/[karax, karaxdsl, kbase, vdom]
 import ../../../../app/[simulator]
 
-proc initControllerNode*(simulator: ref Simulator): VNode {.inline.} =
+proc newControllerNode*(simulator: ref Simulator): VNode {.inline.} =
   ## Returns the controller node.
   let insertingButtonClass =
     if simulator[].editing.insert:

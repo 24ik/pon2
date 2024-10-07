@@ -1,9 +1,12 @@
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[strutils, unittest]
-import ../../src/pon2/app/[marathon {.all.}, nazopuyo, simulator]
+import ../../src/pon2/app/[marathon, nazopuyo, simulator]
 import ../../src/pon2/core/[cell, pair, pairposition]
 import ../../src/pon2/private/app/marathon/[common]
 
@@ -14,7 +17,7 @@ proc main*() =
 
   # toggleFocus
   block:
-    var marathon = initMarathon()
+    var marathon = newMarathon()
     check not marathon.focusSimulator
 
     marathon.toggleFocus
@@ -26,7 +29,7 @@ proc main*() =
 
   # nextResultPage, prevResultPage
   block:
-    var marathon = initMarathon()
+    var marathon = newMarathon()
     marathon.match("rrgy")
     doAssert marathon.matchResult.strings.len > 1
     check marathon.matchResult.pageIndex == 0
@@ -49,13 +52,13 @@ proc main*() =
 
   # match
   block:
-    var marathon = initMarathon()
+    var marathon = newMarathon()
 
     # specify colors
     block:
       var count = 0
       for color in ColorPuyo:
-        marathon.match($color)
+        marathon.match $color
         count.inc marathon.matchResult.strings.len
 
       check count == AllPairsCount
@@ -64,7 +67,7 @@ proc main*() =
     block:
       var count = 0
       for pattern in ["aa", "ab"]:
-        marathon.match(pattern)
+        marathon.match pattern
         count.inc marathon.matchResult.strings.len
 
       check count == AllPairsCount
@@ -75,15 +78,15 @@ proc main*() =
 
   # play
   block:
-    var marathon = initMarathon()
+    var marathon = newMarathon()
 
-    marathon.simulator.nazoPuyoWrap.get:
+    marathon.simulator[].nazoPuyoWrap.get:
       doAssert wrappedNazoPuyo.puyoPuyo.pairsPositions.len == 0
 
       marathon.play(onlyMatched = false)
       check wrappedNazoPuyo.puyoPuyo.pairsPositions.len > 0
 
-      marathon.match("rg")
+      marathon.match "rg"
       marathon.play
       check wrappedNazoPuyo.puyoPuyo.pairsPositions[0].pair == GreenRed
 

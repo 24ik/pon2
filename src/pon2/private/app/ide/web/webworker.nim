@@ -1,16 +1,19 @@
 ## This module implements procedures that use web workers.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[dom, options, sequtils, strutils, sugar, uri]
+import std/[dom, options, sequtils, strutils, uri]
 import ../../[permute, solve]
 import ../../../[webworker]
 import
   ../../../../core/
-    [field, host, nazopuyo, pair, pairposition, position, puyopuyo, requirement]
+    [field, fqdn, nazopuyo, pair, pairposition, position, puyopuyo, requirement]
 
 type TaskKind* = enum
   ## Worker task kind.
@@ -25,7 +28,7 @@ const WaitLoopIntervalMs = 50
 
 proc asyncSolve[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
-    results: var seq[Option[seq[PairsPositions]]],
+    results: ref seq[Option[seq[PairsPositions]]],
     reqKind: static RequirementKind,
     reqColor: static RequirementColor,
     earlyStopping: static bool,
@@ -34,54 +37,55 @@ proc asyncSolve[F: TsuField or WaterField](
   ## Solves the nazo puyo.
   ## Solve results are stored in `results`.
   if not nazo.requirement.isSupported or nazo.moveCount == 0:
-    results = @[some newSeq[PairsPositions](0)]
+    results[] = @[some newSeq[PairsPositions](0)]
     return
 
   let rootNode = nazo.initNode
   if rootNode.canPrune(reqKind, reqColor):
-    results = @[some newSeq[PairsPositions](0)]
+    results[] = @[some newSeq[PairsPositions](0)]
     return
 
   let childNodes = rootNode.children(reqKind, reqColor)
-  results = newSeqOfCap[Option[seq[PairsPositions]]](childNodes.len.succ)
-  results.add none seq[PairsPositions] # HACK: represent incompletion
+  results[] = newSeqOfCap[Option[seq[PairsPositions]]](childNodes.len.succ)
+  results[].add none seq[PairsPositions] # HACK: represent incompletion
 
   # result-register handler
   var interval: Interval
   proc handler(returnCode: WorkerReturnCode, messages: seq[string]) =
     case returnCode
     of Success:
-      results.add some messages.mapIt it.parsePairsPositions Ik
-      if results.len == childNodes.len.succ:
-        results.del 0 # remove incompletion dummy
+      results[].add some messages.mapIt it.parsePairsPositions Pon2
+      if results[].len == childNodes.len.succ:
+        results[].del 0 # remove incompletion dummy
         interval.clearInterval
     of Failure:
       discard
 
   # setup workers
-  var workers = collect:
-    for _ in 1 .. parallelCount:
-      initWorker()
-  for worker in workers.mitems:
+  let workers = new seq[Worker]
+  workers[] = newSeqOfCap[Worker](parallelCount)
+  for _ in 1 .. parallelCount:
+    let worker = newWorker()
     worker.completeHandler = handler
+    workers[].add worker
 
   # run workers
   var childIdx = 0
   proc runWorkers() =
-    for worker in workers.mitems:
+    for worker in workers[]:
       if childIdx >= childNodes.len:
         break
       if worker.running:
         continue
 
-      worker.run $Solve, $nazo.puyoPuyo.field.rule, childNodes[childIdx].toStr
+      worker.run $Solve, $nazo.rule, childNodes[childIdx].toStr
       childIdx.inc
 
   interval = runWorkers.setInterval WaitLoopIntervalMs
 
 proc asyncSolve[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
-    results: var seq[Option[seq[PairsPositions]]],
+    results: ref seq[Option[seq[PairsPositions]]],
     reqKind: static RequirementKind,
     earlyStopping: static bool,
     parallelCount: Positive,
@@ -120,7 +124,7 @@ proc asyncSolve[F: TsuField or WaterField](
 
 proc asyncSolve*[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
-    results: var seq[Option[seq[PairsPositions]]],
+    results: ref seq[Option[seq[PairsPositions]]],
     showProgress = false,
     earlyStopping: static bool = false,
     parallelCount: Positive = 6,
@@ -174,7 +178,7 @@ proc asyncSolve*[F: TsuField or WaterField](
 
 proc asyncPermute*[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
-    results: var seq[Option[PairsPositions]],
+    results: ref seq[Option[PairsPositions]],
     fixMoves: seq[Positive],
     allowDouble: bool,
     allowLastDouble: bool,
@@ -184,8 +188,8 @@ proc asyncPermute*[F: TsuField or WaterField](
   ## Results are stored in `results`.
   let pairsPositionsSeq =
     nazo.allPairsPositionsSeq(fixMoves, allowDouble, allowLastDouble)
-  results = newSeqOfCap[Option[PairsPositions]](pairsPositionsSeq.len.succ)
-  results.add none PairsPositions # HACK: represent incompletion
+  results[] = newSeqOfCap[Option[PairsPositions]](pairsPositionsSeq.len.succ)
+  results[].add none PairsPositions # HACK: represent incompletion
 
   # result-register handler
   var interval: Interval
@@ -193,27 +197,28 @@ proc asyncPermute*[F: TsuField or WaterField](
     case returnCode
     of Success:
       if messages[0].parseBool:
-        results.add some messages[1].parsePairsPositions Ik
+        results[].add some messages[1].parsePairsPositions Pon2
       else:
-        results.add none PairsPositions
+        results[].add none PairsPositions
 
-      if results.len == pairsPositionsSeq.len.succ:
-        results.keepItIf it.isSome
+      if results[].len == pairsPositionsSeq.len.succ:
+        results[].keepItIf it.isSome
         interval.clearInterval
     of Failure:
       discard
 
   # setup workers
-  var workers = collect:
-    for _ in 1 .. parallelCount:
-      initWorker()
-  for worker in workers.mitems:
+  let workers = new seq[Worker]
+  workers[] = newSeqOfCap[Worker](parallelCount)
+  for _ in 1 .. parallelCount:
+    let worker = newWorker()
     worker.completeHandler = handler
+    workers[].add worker
 
   # run workers
   var pairsPositionsIdx = 0
   proc runWorkers() =
-    for worker in workers.mitems:
+    for worker in workers[]:
       if pairsPositionsIdx >= pairsPositionsSeq.len:
         break
       if worker.running:
@@ -221,7 +226,7 @@ proc asyncPermute*[F: TsuField or WaterField](
 
       var nazo2 = nazo
       nazo2.puyoPuyo.pairsPositions = pairsPositionsSeq[pairsPositionsIdx]
-      worker.run $Permute, $nazo2.toUriQuery Ik, $nazo2.puyoPuyo.field.rule
+      worker.run $Permute, $nazo2.toUriQuery, $nazo2.puyoPuyo.field.rule
       pairsPositionsIdx.inc
 
   interval = runWorkers.setInterval WaitLoopIntervalMs

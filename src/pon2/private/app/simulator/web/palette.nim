@@ -1,6 +1,9 @@
 ## This module implements the palette node.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -15,12 +18,12 @@ const
   ButtonClass = kstring"button px-2"
   SelectedButtonClass = kstring"button px-2 is-selected is-primary"
 
-func initClickHandler(simulator: ref Simulator, cell: Cell): () -> void =
+func newClickHandler(simulator: ref Simulator, cell: Cell): () -> void =
   ## Returns the click handler.
   # NOTE: cannot inline due to lazy evaluation
   () => (simulator[].editingCell = cell)
 
-proc initPaletteNode*(simulator: ref Simulator): VNode {.inline.} =
+proc newPaletteNode*(simulator: ref Simulator): VNode {.inline.} =
   ## Returns the palette node.
   buildHtml(tdiv):
     table(style = style(StyleAttr.border, kstring"1px black solid")):
@@ -34,7 +37,7 @@ proc initPaletteNode*(simulator: ref Simulator): VNode {.inline.} =
                 else:
                   ButtonClass
 
-              button(class = cellClass, onclick = simulator.initClickHandler(cell)):
+              button(class = cellClass, onclick = simulator.newClickHandler(cell)):
                 figure(class = "image is-24x24"):
                   img(src = cell.cellImageSrc)
         tr:
@@ -46,6 +49,6 @@ proc initPaletteNode*(simulator: ref Simulator): VNode {.inline.} =
                 else:
                   ButtonClass
 
-              button(class = cellClass, onclick = simulator.initClickHandler(cell)):
+              button(class = cellClass, onclick = simulator.newClickHandler(cell)):
                 figure(class = "image is-24x24"):
                   img(src = cell.cellImageSrc)

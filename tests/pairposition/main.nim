@@ -1,9 +1,12 @@
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2/core/[cell, host, pair, pairposition {.all.}, position]
+import ../../src/pon2/core/[cell, fqdn, pair, pairposition, position]
 
 proc main*() =
   # ------------------------------------------------
@@ -35,11 +38,11 @@ proc main*() =
     check $pairPos == "bp|43"
     check "bp|43".parsePairPosition == pairPos
 
-    check pairPos.toUriQuery(Ik) == "bp43"
+    check pairPos.toUriQuery(Pon2) == "bp43"
     check pairPos.toUriQuery(Ishikawa) == "QG"
     check pairPos.toUriQuery(Ips) == "QG"
 
-    check "bp43".parsePairPosition(Ik) == pairPos
+    check "bp43".parsePairPosition(Pon2) == pairPos
     check "QG".parsePairPosition(Ishikawa) == pairPos
     check "QG".parsePairPosition(Ips) == pairPos
 
@@ -58,10 +61,10 @@ proc main*() =
     check $pairsPositions == "rg|\nyy|3N"
     check "rg|\nyy|3N".parsePairsPositions == pairsPositions
 
-    check pairsPositions.toUriQuery(Ik) == "rgyy3N"
+    check pairsPositions.toUriQuery(Pon2) == "rgyy3N"
     check pairsPositions.toUriQuery(Ishikawa) == "c1G4"
     check pairsPositions.toUriQuery(Ips) == "c1G4"
 
-    check "rgyy3N".parsePairsPositions(Ik) == pairsPositions
+    check "rgyy3N".parsePairsPositions(Pon2) == pairsPositions
     check "c1G4".parsePairsPositions(Ishikawa) == pairsPositions
     check "c1G4".parsePairsPositions(Ips) == pairsPositions

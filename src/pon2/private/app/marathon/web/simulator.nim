@@ -1,6 +1,9 @@
 ## This module implements the marathon simulator node.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -8,7 +11,7 @@
 import karax/[vdom]
 import ../../../../app/[marathon, simulator]
 
-proc initMarathonSimulatorNode*(marathon: ref Marathon, id = ""): VNode {.inline.} =
+proc newMarathonSimulatorNode*(marathon: Marathon, id: string): VNode {.inline.} =
   ## Returns the marathon simulator node.
   ## `id` is shared with other node-creating procedures and need to be unique.
-  marathon[].simulatorRef.initSimulatorNode(wrapSection = false, id = id)
+  marathon.simulator.newSimulatorNode(wrapSection = false, id = id)

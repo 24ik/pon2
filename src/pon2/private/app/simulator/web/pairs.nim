@@ -1,6 +1,9 @@
 ## This module implements the pairs node.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -12,12 +15,12 @@ import ../../[misc]
 import ../../../../app/[color, nazopuyo, simulator]
 import ../../../../core/[cell, pair]
 
-func initDeleteClickHandler(simulator: ref Simulator, idx: Natural): () -> void =
+func newDeleteClickHandler(simulator: ref Simulator, idx: Natural): () -> void =
   ## Returns the click handler for delete buttons.
   # NOTE: cannot inline due to lazy evaluation
   () => simulator[].deletePairPosition(idx)
 
-func initCellClickHandler(
+func newCellClickHandler(
     simulator: ref Simulator, idx: Natural, axis: bool
 ): () -> void =
   ## Returns the click handler for cell buttons.
@@ -31,7 +34,7 @@ func cellClass(simulator: ref Simulator, idx: Natural, axis: bool): kstring {.in
   else:
     kstring"button p-0"
 
-proc initPairsNode*(
+proc newPairsNode*(
     simulator: ref Simulator, displayMode = false, showPositions = true
 ): VNode {.inline.} =
   ## Returns the pairs node.
@@ -58,7 +61,7 @@ proc initPairsNode*(
             td:
               button(
                 class = "button is-size-7",
-                onclick = simulator.initDeleteClickHandler(idx),
+                onclick = simulator.newDeleteClickHandler(idx),
               ):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-trash")
@@ -78,7 +81,7 @@ proc initPairsNode*(
                   button(
                     class = simulator.cellClass(idx, true),
                     style = style(StyleAttr.maxHeight, kstring"24px"),
-                    onclick = simulator.initCellClickHandler(idx, true),
+                    onclick = simulator.newCellClickHandler(idx, true),
                   ):
                     figure(class = "image is-24x24"):
                       img(src = axisSrc)
@@ -93,7 +96,7 @@ proc initPairsNode*(
                   button(
                     class = simulator.cellClass(idx, false),
                     style = style(StyleAttr.maxHeight, kstring"24px"),
-                    onclick = simulator.initCellClickHandler(idx, false),
+                    onclick = simulator.newCellClickHandler(idx, false),
                   ):
                     figure(class = "image is-24x24"):
                       img(src = childSrc)
@@ -124,7 +127,7 @@ proc initPairsNode*(
                 button(
                   class = simulator.cellClass(pairsPositions.len, true),
                   style = style(StyleAttr.maxHeight, kstring"24px"),
-                  onclick = simulator.initCellClickHandler(pairsPositions.len, true),
+                  onclick = simulator.newCellClickHandler(pairsPositions.len, true),
                 ):
                   figure(class = "image is-24x24"):
                     img(src = Cell.None.cellImageSrc)
@@ -132,7 +135,7 @@ proc initPairsNode*(
                 button(
                   class = simulator.cellClass(pairsPositions.len, false),
                   style = style(StyleAttr.maxHeight, kstring"24px"),
-                  onclick = simulator.initCellClickHandler(pairsPositions.len, false),
+                  onclick = simulator.newCellClickHandler(pairsPositions.len, false),
                 ):
                   figure(class = "image is-24x24"):
                     img(src = Cell.None.cellImageSrc)

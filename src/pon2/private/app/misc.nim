@@ -1,13 +1,16 @@
 ## This module implements miscellaneous things.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 when defined(js):
   import std/[jsffi, strformat, sugar]
-  import karax/[kbase, kdom]
+  import karax/[karax, kbase, kdom]
   import ../../core/[cell, notice]
 
   # ------------------------------------------------
@@ -16,33 +19,33 @@ when defined(js):
 
   proc getNavigator(): JsObject {.importjs: "(navigator)".} ## Returns the navigator.
 
-  proc copyToClipboard(text: kstring) =
+  proc copyToClipboard(text: cstring) =
     ## Writes the text to the clipboard.
     getNavigator().clipboard.writeText text
 
   proc showFlashMessage(
-      element: Element, messageHtml: string, timeMs = Natural 500
+      element: Element, messageHtml: string, showMs = 500.Natural
   ) {.inline.} =
-    ## Sets the flash message on the element for `timeMs` ms.
+    ## Sets the flash message on the element for `showMs` ms.
     let oldHtml = element.innerHTML
     element.innerHTML = messageHtml
-    discard setTimeout(() => (element.innerHTML = oldHtml), timeMs)
+    runLater () => (element.innerHTML = oldHtml), showMs
 
-  func initCopyButtonHandler*(
-      copyStr: () -> string, id: string, disableMs = Natural 500
+  func newCopyButtonHandler*(
+      copyStr: () -> string, id: string, disableMs = 500.Natural
   ): () -> void {.inline.} =
     proc handler() =
       let btn = document.getElementById id.kstring
 
       btn.disabled = true
-      copyToClipboard copyStr().kstring
+      copyToClipboard copyStr().cstring
 
       btn.showFlashMessage(
         "<span class='icon'><i class='fa-solid fa-check'></i></span>" &
           "<span>コピー</span>",
         disableMs,
       )
-      discard setTimeout(() => (btn.disabled = false), disableMs)
+      runLater () => (btn.disabled = false), disableMs
 
     result = handler
 
@@ -56,7 +59,7 @@ when defined(js):
     ## Returns the cell image src.
     let stem =
       case cell
-      of None: "none"
+      of Cell.None: "none"
       of Hard: "hard"
       of Garbage: "garbage"
       of Red: "red"
@@ -103,7 +106,7 @@ else:
   type ColorButton* = ref object of Button
     ## [Button with color](https://github.com/simonkrauter/NiGui/issues/9).
 
-  proc initColorButton*(text = ""): ColorButton {.inline.} =
+  proc newColorButton*(text = ""): ColorButton {.inline.} =
     ## Returns a new color button.
     result = new ColorButton
     result.init

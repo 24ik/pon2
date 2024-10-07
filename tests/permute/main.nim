@@ -1,12 +1,14 @@
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[sequtils, unittest, uri]
-import ../../src/pon2/app/[permute {.all.}]
-import ../../src/pon2/core/[field, host, nazopuyo, pairposition]
+import ../../src/pon2/app/[permute]
+import ../../src/pon2/core/[field, fqdn, nazopuyo, pairposition]
 
-{.push warning[Uninit]: off.}
 proc main*() =
   # ------------------------------------------------
   # Permute
@@ -17,10 +19,10 @@ proc main*() =
     let
       nazo = parseNazoPuyo[TsuField]("S00r0Mm6iOi_g1g1__u03", Ishikawa)
 
-      result1gbgb = "gb12gb12".parsePairsPositions Ik
-      result1gbbg = "gb12bg21".parsePairsPositions Ik
-      result1bgbg = "bg21bg21".parsePairsPositions Ik
-      result2 = "gg1Nbb2N".parsePairsPositions Ik
+      result1gbgb = "gb12gb12".parsePairsPositions Pon2
+      result1gbbg = "gb12bg21".parsePairsPositions Pon2
+      result1bgbg = "bg21bg21".parsePairsPositions Pon2
+      result2 = "gg1Nbb2N".parsePairsPositions Pon2
 
     # allow double
     # w/o fixMoves
@@ -41,5 +43,3 @@ proc main*() =
     check nazo.permute(
       newSeq[Positive](0), allowDouble = false, allowLastDouble = false
     ).toSeq == @[result1gbgb]
-
-{.pop.}

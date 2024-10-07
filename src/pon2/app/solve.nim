@@ -1,6 +1,9 @@
 ## This module implements Nazo Puyo solvers.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -10,14 +13,12 @@ import ./[nazopuyo]
 import ../core/[field, nazopuyo, pairposition, requirement]
 import ../private/app/[solve]
 
-when defined(js):
-  import std/[dom]
-else:
+when not defined(js):
   {.push warning[Deprecated]: off.}
   import std/[cpuinfo, os, threadpool]
-  import ../private/[misc]
   {.pop.}
   import suru
+  import ../private/[misc]
 
 # ------------------------------------------------
 # Solve
@@ -54,9 +55,8 @@ proc solve[F: TsuField or WaterField](
     const ParallelSolvingWaitIntervalMs = 10
 
     # setup progress bar
-    var progressBar: SuruBar
+    var progressBar = initSuruBar()
     if showProgress:
-      progressBar = initSuruBar()
       progressBar[0].total = childNodes.len
       progressBar.setup
 
@@ -68,20 +68,16 @@ proc solve[F: TsuField or WaterField](
           progressBar.finish
 
     # spawn tasks
-    {.push warning[Effect]: off.}
     var
       threadsRunning = false.repeat parallelCount
       futures = newSeq[FlowVar[seq[PairsPositions]]](parallelCount)
       results = newSeqOfCap[seq[PairsPositions]](childNodes.len)
-    {.pop.}
     for child in childNodes:
       var spawned = false
       while not spawned:
         for threadIdx in 0 ..< parallelCount:
           if threadsRunning[threadIdx] and futures[threadIdx].isReady:
-            {.push warning[Uninit]: off.}
             results.add ^futures[threadIdx]
-            {.pop.}
             threadsRunning[threadIdx] = false
 
             progressBar.inc

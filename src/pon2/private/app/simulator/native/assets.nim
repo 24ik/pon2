@@ -3,6 +3,9 @@
 ## This module requires the compile option `-d:ssl`.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -11,9 +14,12 @@ import std/[httpclient, net, options, appdirs, dirs, files, paths, strformat]
 import nigui
 import ../../../../core/[cell]
 
-type Assets* = ref object
-  cellImages*: array[Cell, Image]
-  cellImageSize*: tuple[height: Natural, width: Natural]
+type
+  AssetsObj = object
+    cellImages*: array[Cell, Image]
+    cellImageSize*: tuple[height: Natural, width: Natural]
+
+  Assets* = ref AssetsObj not nil
 
 const FilePaths: array[Cell, Path] = [
   Path "none.png",
@@ -26,7 +32,7 @@ const FilePaths: array[Cell, Path] = [
   Path "purple.png",
 ]
 
-proc initAssets*(timeoutSec = 180): Assets =
+proc newAssets*(timeoutSec = 180): Assets =
   ## Returns the assets.
   ##
   ## This function automatically downloads the missing assets.
@@ -44,8 +50,6 @@ proc initAssets*(timeoutSec = 180): Assets =
   for cell, path in FilePaths:
     let fullPath = assetsDir / path
     if not fullPath.fileExists:
-      echo "[pon2] Downloading ", path.string, " ..."
-
       {.push warning[Uninit]: off.}
       client.downloadFile(
         &"https://github.com/24ik/pon2/raw/main/assets/puyo-small/{path.string}",

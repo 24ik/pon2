@@ -1,11 +1,14 @@
 ## This module implements helper functions for Nazo Puyo marking.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, tables]
+import std/[options, sequtils, tables]
 import ../../core/[cell, moveresult, requirement]
 
 # ------------------------------------------------
@@ -14,7 +17,7 @@ import ../../core/[cell, moveresult, requirement]
 
 const ExactKinds = {
   DisappearColor, DisappearCount, Chain, ChainClear, DisappearColorSametime,
-  DisappearCountSametime, DisappearPlace, DisappearConnect
+  DisappearCountSametime, DisappearPlace, DisappearConnect,
 }
 
 func satisfied[T: SomeNumber or Natural](
@@ -89,7 +92,7 @@ const ReqColorToPuyo = {
   RequirementColor.Green: Cell.Green.Puyo,
   RequirementColor.Blue: Cell.Blue.Puyo,
   RequirementColor.Yellow: Cell.Yellow.Puyo,
-  RequirementColor.Purple: Cell.Purple.Puyo
+  RequirementColor.Purple: Cell.Purple.Puyo,
 }.toTable
 
 func disappearCountSametimeSatisfied*(

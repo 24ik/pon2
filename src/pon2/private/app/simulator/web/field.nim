@@ -1,6 +1,9 @@
 ## This module implements the field node.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -12,12 +15,12 @@ import ../../[misc]
 import ../../../../app/[color, nazopuyo, simulator]
 import ../../../../core/[cell, field, fieldtype]
 
-func initClickHandler(simulator: ref Simulator, row: Row, col: Column): () -> void =
+func newClickHandler(simulator: ref Simulator, row: Row, col: Column): () -> void =
   ## Returns the click handler.
   # NOTE: cannot inline due to lazy evaluation
   () => simulator[].writeCell(row, col)
 
-proc initFieldNode*(simulator: ref Simulator, displayMode = false): VNode {.inline.} =
+proc newFieldNode*(simulator: ref Simulator, displayMode = false): VNode {.inline.} =
   ## Returns the field node.
   let arr: array[Height, array[Width, Cell]]
   simulator[].nazoPuyoWrap.get:
@@ -40,7 +43,7 @@ proc initFieldNode*(simulator: ref Simulator, displayMode = false): VNode {.inli
                 button(
                   class = "button p-0",
                   style = style(StyleAttr.maxHeight, kstring"24px"),
-                  onclick = simulator.initClickHandler(row, col),
+                  onclick = simulator.newClickHandler(row, col),
                 ):
                   figure(class = "image is-24x24"):
                     img(src = imgSrc, style = cellStyle)

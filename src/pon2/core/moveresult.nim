@@ -1,38 +1,22 @@
 ## This module implements moving results.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[math, sequtils, setutils, sugar]
+import std/[math, options, sequtils, setutils, sugar]
 import ./[cell, fieldtype, notice, rule]
 import ../private/[misc]
 
-type
-  MoveTrackingLevel* = enum
-    ## Tracking level.
-    ## The number of chains and puyos that disappeared are tracked in all level.
-    ## Additionally, the followings are tracked:
-    ## - Level0: None
-    ## - Level1: Puyos that disappeared in each chain
-    ## - Level2: Puyos that disappeared in each connected component in each chain
-    Level0
-    Level1
-    Level2
-
-  MoveResult* = object ## Moving result.
-    chainCount*: Natural
-    disappearCounts*: array[Puyo, int]
-
-    case trackingLevel*: MoveTrackingLevel
-    of Level0: discard
-    of Level1: detailDisappearCounts*: seq[array[Puyo, int]]
-    of Level2: fullDisappearCounts*: seq[array[ColorPuyo, seq[int]]]
-
-using
-  self: MoveResult
-  mSelf: var MoveResult
+type MoveResult* = object ## Moving result.
+  chainCount*: Natural
+  disappearCounts*: array[Puyo, int]
+  detailDisappearCounts*: Option[seq[array[Puyo, int]]]
+  fullDisappearCounts*: Option[seq[array[ColorPuyo, seq[int]]]]
 
 # ------------------------------------------------
 # Constructor
@@ -43,7 +27,10 @@ func initMoveResult*(
 ): MoveResult {.inline.} =
   ## Returns a new move result.
   MoveResult(
-    chainCount: chainCount, disappearCounts: disappearCounts, trackingLevel: Level0
+    chainCount: chainCount,
+    disappearCounts: disappearCounts,
+    detailDisappearCounts: none seq[array[Puyo, int]],
+    fullDisappearCounts: none seq[array[ColorPuyo, seq[int]]],
   )
 
 func initMoveResult*(
@@ -55,59 +42,41 @@ func initMoveResult*(
   MoveResult(
     chainCount: chainCount,
     disappearCounts: disappearCounts,
-    trackingLevel: Level1,
-    detailDisappearCounts: detailDisappearCounts,
+    detailDisappearCounts: some detailDisappearCounts,
+    fullDisappearCounts: none seq[array[ColorPuyo, seq[int]]],
   )
 
 func initMoveResult*(
     chainCount: Natural,
     disappearCounts: array[Puyo, int],
+    detailDisappearCounts: seq[array[Puyo, int]],
     fullDisappearCounts: seq[array[ColorPuyo, seq[int]]],
 ): MoveResult {.inline.} =
   ## Returns a new move result.
   MoveResult(
     chainCount: chainCount,
     disappearCounts: disappearCounts,
-    trackingLevel: Level2,
-    fullDisappearCounts: fullDisappearCounts,
+    detailDisappearCounts: some detailDisappearCounts,
+    fullDisappearCounts: some fullDisappearCounts,
   )
-
-# ------------------------------------------------
-# Operator
-# ------------------------------------------------
-
-func `==`*(self; moveRes: MoveResult): bool {.inline.} =
-  if self.chainCount != moveRes.chainCount or
-      self.disappearCounts != moveRes.disappearCounts or
-      self.trackingLevel != moveRes.trackingLevel:
-    return false
-
-  result =
-    case self.trackingLevel
-    of Level0:
-      true
-    of Level1:
-      self.detailDisappearCounts == moveRes.detailDisappearCounts
-    of Level2:
-      self.fullDisappearCounts == moveRes.fullDisappearCounts
 
 # ------------------------------------------------
 # Count
 # ------------------------------------------------
 
-func puyoCount*(self; puyo: Puyo): int {.inline.} =
+func puyoCount*(self: MoveResult, puyo: Puyo): int {.inline.} =
   ## Returns the number of `puyo` that disappeared.
   self.disappearCounts[puyo]
 
-func puyoCount*(self): int {.inline.} =
+func puyoCount*(self: MoveResult): int {.inline.} =
   ## Returns the number of puyos that disappeared.
   self.disappearCounts.sum2
 
-func colorCount*(self): int {.inline.} =
+func colorCount*(self: MoveResult): int {.inline.} =
   ## Returns the number of color puyos that disappeared.
   self.disappearCounts[ColorPuyo.low .. ColorPuyo.high].sum2
 
-func garbageCount*(self): int {.inline.} =
+func garbageCount*(self: MoveResult): int {.inline.} =
   ## Returns the number of garbage puyos that disappeared.
   self.disappearCounts[Hard] + self.disappearCounts[Garbage]
 
@@ -115,42 +84,43 @@ func garbageCount*(self): int {.inline.} =
 # Counts
 # ------------------------------------------------
 
-func puyoCounts*(self; puyo: Puyo): seq[int] {.inline.} =
+func puyoCounts*(self: MoveResult, puyo: Puyo): seq[int] {.inline.} =
   ## Returns the number of `puyo` that disappeared in each chain.
-  ## `FieldDefect` is raised if not supported.
-  self.detailDisappearCounts.mapIt it[puyo]
+  ## `UnpackDefect` is raised if not supported.
+  self.detailDisappearCounts.get.mapIt it[puyo]
 
-func puyoCounts*(self): seq[int] {.inline.} =
+func puyoCounts*(self: MoveResult): seq[int] {.inline.} =
   ## Returns the number of puyos that disappeared in each chain.
-  ## `FieldDefect` is raised if not supported.
-  self.detailDisappearCounts.mapIt it.sum2
+  ## `UnpackDefect` is raised if not supported.
+  self.detailDisappearCounts.get.mapIt it.sum2
 
-func colorCounts*(self): seq[int] {.inline.} =
+func colorCounts*(self: MoveResult): seq[int] {.inline.} =
   ## Returns the number of color puyos that disappeared in each chain.
-  ## `FieldDefect` is raised if not supported.
-  self.detailDisappearCounts.mapIt it[ColorPuyo.low .. ColorPuyo.high].sum2
+  ## `UnpackDefect` is raised if not supported.
+  self.detailDisappearCounts.get.mapIt it[ColorPuyo.low .. ColorPuyo.high].sum2
 
-func garbageCounts*(self): seq[int] {.inline.} =
+func garbageCounts*(self: MoveResult): seq[int] {.inline.} =
   ## Returns the number of garbage puyos that disappeared in each chain.
-  ## `FieldDefect` is raised if not supported.
-  self.detailDisappearCounts.mapIt it[Hard] + it[Garbage]
+  ## `UnpackDefect` is raised if not supported.
+  self.detailDisappearCounts.get.mapIt it[Hard] + it[Garbage]
 
 # ------------------------------------------------
 # Colors
 # ------------------------------------------------
 
-func colors*(self): set[ColorPuyo] {.inline.} =
+func colors*(self: MoveResult): set[ColorPuyo] {.inline.} =
   ## Returns the set of color puyos that disappeared.
   result = {}
+
   for color in ColorPuyo:
     if self.disappearCounts[color] > 0:
       result.incl color
 
-func colorsSeq*(self): seq[set[ColorPuyo]] {.inline.} =
+func colorsSeq*(self: MoveResult): seq[set[ColorPuyo]] {.inline.} =
   ## Returns the sequence of the set of color puyos that disappeared.
-  ## `FieldDefect` is raised if not supported.
+  ## `UnpackDefect` is raised if not supported.
   collect:
-    for arr in self.detailDisappearCounts:
+    for arr in self.detailDisappearCounts.get:
       var colors = set[ColorPuyo]({})
 
       for color in ColorPuyo:
@@ -163,31 +133,31 @@ func colorsSeq*(self): seq[set[ColorPuyo]] {.inline.} =
 # Place
 # ------------------------------------------------
 
-func colorPlaces*(self; color: ColorPuyo): seq[int] {.inline.} =
+func colorPlaces*(self: MoveResult, color: ColorPuyo): seq[int] {.inline.} =
   ## Returns the number of places where `color` disappeared in each chain.
-  ## `FieldDefect` is raised if not supported.
-  self.fullDisappearCounts.mapIt it[color].len
+  ## `UnpackDefect` is raised if not supported.
+  self.fullDisappearCounts.get.mapIt it[color].len
 
-func colorPlaces*(self): seq[int] {.inline.} =
+func colorPlaces*(self: MoveResult): seq[int] {.inline.} =
   ## Returns the number of places where color puyos disappeared in each chain.
-  ## `FieldDefect` is raised if not supported.
+  ## `UnpackDefect` is raised if not supported.
   collect:
-    for countsArr in self.fullDisappearCounts:
+    for countsArr in self.fullDisappearCounts.get:
       sum2 (ColorPuyo.low .. ColorPuyo.high).mapIt countsArr[it].len
 
 # ------------------------------------------------
 # Connect
 # ------------------------------------------------
 
-func colorConnects*(self; color: ColorPuyo): seq[int] {.inline.} =
+func colorConnects*(self: MoveResult, color: ColorPuyo): seq[int] {.inline.} =
   ## Returns the number of connections of `color` that disappeared.
-  ## `FieldDefect` is raised if not supported.
-  concat self.fullDisappearCounts.mapIt it[color]
+  ## `UnpackDefect` is raised if not supported.
+  concat self.fullDisappearCounts.get.mapIt it[color]
 
-func colorConnects*(self): seq[int] {.inline.} =
+func colorConnects*(self: MoveResult): seq[int] {.inline.} =
   ## Returns the number of connections of color puyos that disappeared.
-  ## `FieldDefect` is raised if not supported.
-  concat self.fullDisappearCounts.mapIt it[ColorPuyo.low .. ColorPuyo.high].concat
+  ## `UnpackDefect` is raised if not supported.
+  concat self.fullDisappearCounts.get.mapIt it[ColorPuyo.low .. ColorPuyo.high].concat
 
 # ------------------------------------------------
 # Score
@@ -224,12 +194,12 @@ func connectBonus(puyoCounts: seq[int]): int {.inline.} =
   for count in puyoCounts:
     result.inc ConnectBonuses[count]
 
-func score*(self): int {.inline.} =
+func score*(self: MoveResult): int {.inline.} =
   ## Returns the score.
-  ## `FieldDefect` is raised if not supported.
+  ## `UnpackDefect` is raised if not supported.
   result = 0
 
-  for chainIdx, countsArray in self.fullDisappearCounts:
+  for chainIdx, countsArray in self.fullDisappearCounts.get:
     var
       connectBonus = 0
       puyoCount = 0
@@ -252,7 +222,9 @@ func score*(self): int {.inline.} =
 # Notice Garbage
 # ------------------------------------------------
 
-func noticeGarbageCounts*(self; rule: Rule): array[NoticeGarbage, int] {.inline.} =
+func noticeGarbageCounts*(
+    self: MoveResult, rule: Rule
+): array[NoticeGarbage, int] {.inline.} =
   ## Returns the number of notice garbages.
   ## Note that this function calls `score()`.
   self.score.noticeGarbageCounts rule

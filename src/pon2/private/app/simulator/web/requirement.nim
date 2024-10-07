@@ -1,6 +1,9 @@
 ## This module implements the requirement node.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -11,9 +14,9 @@ import ../../../../app/[nazopuyo, simulator]
 import ../../../../core/[requirement]
 
 const
-  KindSelectIdPrefix = "pon2-req-kind"
-  ColorSelectIdPrefix = "pon2-req-color"
-  NumberSelectIdPrefix = "pon2-req-number"
+  KindSelectIdPrefix = "pon2-simulator-req-kind-"
+  ColorSelectIdPrefix = "pon2-simulator-req-color-"
+  NumberSelectIdPrefix = "pon2-simulator-req-number-"
 
 proc getSelectedKindIndex(
   id: kstring
@@ -33,18 +36,18 @@ proc getSelectedNumberIndex(
   importjs: &"document.getElementById('{NumberSelectIdPrefix}' + (#)).selectedIndex"
 .} ## Returns the index of select form for requirement number.
 
-func initKindHandler(simulator: ref Simulator, id: string): () -> void =
+func newKindHandler(simulator: ref Simulator, id: string): () -> void =
   ## Returns the handler for the kind.
   # NOTE: cannot inline due to lazy evaluation
   () => (simulator[].requirementKind = id.kstring.getSelectedKindIndex.RequirementKind)
 
-func initColorHandler(simulator: ref Simulator, id: string): () -> void =
+func newColorHandler(simulator: ref Simulator, id: string): () -> void =
   ## Returns the handler for the kind.
   # NOTE: cannot inline due to lazy evaluation
   () =>
     (simulator[].requirementColor = id.kstring.getSelectedColorIndex.RequirementColor)
 
-func initNumberHandler(simulator: ref Simulator, id: string): () -> void =
+func newNumberHandler(simulator: ref Simulator, id: string): () -> void =
   ## Returns the handler for the kind.
   # NOTE: cannot inline due to lazy evaluation
   () =>
@@ -53,13 +56,14 @@ func initNumberHandler(simulator: ref Simulator, id: string): () -> void =
         id.kstring.getSelectedNumberIndex.RequirementNumber
     )
 
-proc initRequirementNode*(
-    simulator: ref Simulator, displayMode = false, id = ""
+proc newRequirementNode*(
+    simulator: ref Simulator, displayMode = false, id: string
 ): VNode {.inline.} =
   ## Returns the requirement node.
   ## `id` is shared with other node-creating procedures and need to be unique.
   if simulator[].kind == Regular:
-    return buildHtml(text "　")
+    return buildHtml(tdiv):
+      discard
 
   let req = simulator[].nazoPuyoWrap.get:
     wrappedNazoPuyo.requirement
@@ -73,7 +77,7 @@ proc initRequirementNode*(
       tdiv(class = "select"):
         select(
           id = kstring &"{KindSelectIdPrefix}{id}",
-          onchange = simulator.initKindHandler(id),
+          onchange = simulator.newKindHandler(id),
         ):
           for kind in RequirementKind:
             option(selected = kind == req.kind):
@@ -85,7 +89,7 @@ proc initRequirementNode*(
         tdiv(class = "select"):
           select(
             id = kstring &"{ColorSelectIdPrefix}{id}",
-            onchange = simulator.initColorHandler(id),
+            onchange = simulator.newColorHandler(id),
           ):
             option(selected = req.color == RequirementColor.All):
               text "全"
@@ -98,7 +102,7 @@ proc initRequirementNode*(
         tdiv(class = "select"):
           select(
             id = kstring &"{NumberSelectIdPrefix}{id}",
-            onchange = simulator.initNumberHandler(id),
+            onchange = simulator.newNumberHandler(id),
           ):
             for num in RequirementNumber.low .. RequirementNumber.high:
               option(selected = num == req.number):

@@ -1,32 +1,35 @@
 ## This module implements the editor pagination control.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[strformat, sugar]
 import nigui
-import ../../../../app/[color, gui]
+import ../../../../app/[color, ide]
 
-type EditorPaginationControl* = ref object of LayoutContainer
+type EditorPaginationControl* = ref object of LayoutContainer not nil
   ## Editor pagination control.
-  guiApplication: ref GuiApplication
+  ide: Ide
 
-func initPrevNextHandler(
+func newPrevNextHandler(
     control: EditorPaginationControl, next: bool
 ): (event: ClickEvent) -> void =
   ## Returns the click handler.
   # NOTE: inlining does not work due to lazy evaluation
   proc handler(event: ClickEvent) =
     if next:
-      control.guiApplication[].nextAnswer
+      control.ide.nextAnswer
     else:
-      control.guiApplication[].prevAnswer
+      control.ide.prevAnswer
 
   result = handler
 
-proc initDrawHandler(control: EditorPaginationControl): (event: DrawEvent) -> void =
+proc newDrawHandler(control: EditorPaginationControl): (event: DrawEvent) -> void =
   ## Draws the answer index.
   # NOTE: inlining does not work due to lazy evaluation
   proc handler(event: DrawEvent) =
@@ -37,31 +40,33 @@ proc initDrawHandler(control: EditorPaginationControl): (event: DrawEvent) -> vo
 
     let
       showIdx =
-        if not control.guiApplication[].answer.hasData:
+        if not control.ide.answerData.hasData:
           0
-        elif control.guiApplication[].answer.pairsPositionsSeq.len == 0:
+        elif control.ide.answerData.pairsPositionsSeq.len == 0:
           0
         else:
-          control.guiApplication[].answer.index
+          control.ide.answerData.index
       showLen =
-        if not control.guiApplication[].answer.hasData:
+        if not control.ide.answerData.hasData:
           0
         else:
-          control.guiApplication[].answer.pairsPositionsSeq.len
+          control.ide.answerData.pairsPositionsSeq.len
 
     canvas.drawText &"{showIdx} / {showLen}"
 
   result = handler
 
-proc initEditorPaginationControl*(
-    guiApplication: ref GuiApplication
+proc newEditorPaginationControl*(
+    ide: Ide
 ): EditorPaginationControl {.inline.} =
   ## Returns the editor pagination control.
-  result = new EditorPaginationControl
+  {.push warning[ProveInit]: off.}
+  result.new
+  {.pop.}
   result.init
   result.layout = Layout_Horizontal
 
-  result.guiApplication = guiApplication
+  result.ide = ide
 
   let
     prevButton = newButton "前の解"
@@ -71,6 +76,6 @@ proc initEditorPaginationControl*(
   result.add answerIdxControl
   result.add nextButton
 
-  prevButton.onClick = result.initPrevNextHandler false
-  answerIdxControl.onDraw = result.initDrawHandler
-  nextButton.onClick = result.initPrevNextHandler true
+  prevButton.onClick = result.newPrevNextHandler false
+  answerIdxControl.onDraw = result.newDrawHandler
+  nextButton.onClick = result.newPrevNextHandler true

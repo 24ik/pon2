@@ -1,6 +1,9 @@
 ## This module implements the requirement control.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -10,7 +13,7 @@ import nigui
 import ../../../../app/[nazopuyo, simulator]
 import ../../../../core/[requirement]
 
-type RequirementControl* = ref object of LayoutContainer ## Requirement control.
+type RequirementControl* = ref object of LayoutContainer not nil ## Requirement control.
   simulator: ref Simulator
 
 # ------------------------------------------------
@@ -76,28 +79,28 @@ proc numberHandler(control: RequirementControl, event: ComboBoxChangeEvent) =
 
   control.updateDescription
 
-func initKindHandler(
+func newKindHandler(
     control: RequirementControl
 ): (event: ComboBoxChangeEvent) -> void =
   ## Returns the kind handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: ComboBoxChangeEvent) => control.kindHandler event
 
-func initColorHandler(
+func newColorHandler(
     control: RequirementControl
 ): (event: ComboBoxChangeEvent) -> void =
   ## Returns the color handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: ComboBoxChangeEvent) => control.colorHandler event
 
-func initNumberHandler(
+func newNumberHandler(
     control: RequirementControl
 ): (event: ComboBoxChangeEvent) -> void =
   ## Returns the number handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: ComboBoxChangeEvent) => control.numberHandler event
 
-proc initRequirementControl*(simulator: ref Simulator): RequirementControl {.inline.} =
+proc newRequirementControl*(simulator: ref Simulator): RequirementControl {.inline.} =
   ## Returns a requirement control.
   result = new RequirementControl
   result.init
@@ -119,7 +122,7 @@ proc initRequirementControl*(simulator: ref Simulator): RequirementControl {.inl
   let kind = newComboBox((RequirementKind.low .. RequirementKind.high).toSeq.mapIt $it)
   result.add kind
 
-  kind.onChange = result.initKindHandler
+  kind.onChange = result.newKindHandler
 
   # row=2
   let thirdRow = newLayoutContainer Layout_Horizontal
@@ -136,8 +139,8 @@ proc initRequirementControl*(simulator: ref Simulator): RequirementControl {.inl
   thirdRow.add color
   thirdRow.add num
 
-  color.onChange = result.initColorHandler
-  num.onChange = result.initNumberHandler
+  color.onChange = result.newColorHandler
+  num.onChange = result.newNumberHandler
 
   # set index
   if simulator[].mode == Edit:

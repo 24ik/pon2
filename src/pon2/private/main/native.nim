@@ -1,6 +1,9 @@
 ## This module implements helper functions for the native main file.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -9,7 +12,7 @@ import std/[browsers, options, random, sequtils, strformat, strutils, uri]
 import docopt
 import nigui
 import ../[misc]
-import ../../app/[generate, gui, nazopuyo, permute, simulator, solve]
+import ../../app/[generate, ide, nazopuyo, permute, simulator, solve]
 import ../../core/[field, fieldtype, nazopuyo, puyopuyo, requirement, rule]
 
 # ------------------------------------------------
@@ -22,9 +25,7 @@ func parseSomeInt[T: SomeInteger or Natural or Positive](
   ## Converts the value to the given type `T`.
   ## If the conversion fails, `ValueError` will be raised.
   ## If `allowNone` is `true`, `vkNone` is accepted as `val` and `none` is returned.
-  {.push warning[ProveInit]: off.}
   result = none T
-  {.pop.}
 
   case val.kind
   of vkNone:
@@ -81,16 +82,18 @@ proc runSolver*(args: Table[string, Value]) {.inline.} =
   if args["-B"].to_bool:
     questionUriStr.openDefaultBrowser
 
-  let simulator = questionUriStr.parseUri.parseSimulator
-  if simulator.kind != Nazo:
+  let ide = questionUriStr.parseUri.parseIde
+  if ide.simulator[].kind != Nazo:
     raise newException(ValueError, "The question should be a Nazo Puyo.")
 
-  simulator.nazoPuyoWrap.get:
+  ide.simulator[].nazoPuyoWrap.get:
     for answerIdx, answer in wrappedNazoPuyo.solve(showProgress = true):
       var nazo = wrappedNazoPuyo
       nazo.puyoPuyo.pairsPositions = answer
 
-      let answerUri = nazo.initSimulator(PlayEditor).toUri(withPositions = true)
+      let simulator = new Simulator
+      simulator[] = nazo.initSimulator(PlayEditor)
+      let answerUri = simulator.newIde.toUri(withPositions = true)
       echo &"({answerIdx.succ}) {answerUri}"
 
       if args["-b"].to_bool:
@@ -112,42 +115,35 @@ proc runGenerator*(args: Table[string, Value]) {.inline.} =
   # requirement
   let
     kind = args["--rk"].parseRequirementKind
-    color =
-      if kind in ColorKinds:
-        args["--rc"].parseGenerateRequirementColor
+    req =
+      if kind in NoColorKinds:
+        initGenerateRequirement(kind, args["--rn"].parseRequirementNumber)
+      elif kind in NoNumberKinds:
+        initGenerateRequirement(kind, args["--rc"].parseGenerateRequirementColor)
       else:
-        GenerateRequirementColor.low
-    number =
-      if kind in NumberKinds:
-        args["--rn"].parseRequirementNumber
-      else:
-        RequirementNumber.low
-    req: GenerateRequirement
-  {.cast(uncheckedAssign).}:
-    if kind in ColorKinds:
-      req = GenerateRequirement(kind: kind, color: color, number: number)
-    else:
-      req = GenerateRequirement(kind: kind, number: number)
+        initGenerateRequirement(
+          kind,
+          args["--rc"].parseGenerateRequirementColor,
+          args["--rn"].parseRequirementNumber,
+        )
 
   # heights
   if ($args["-H"]).len != 6:
     raise newException(ValueError, "`-H` option should be the length 6.")
   var heights: array[Column, Option[Natural]]
-  {.push warning[ProveInit]: off.}
   heights[Column.low] = none Natural # HACK: dummy to suppress warning
   for i, c in ($args["-H"]):
     heights[Column i] =
       if c == '+':
         none Natural
       else:
-        some parseSomeInt[Natural, char](c)
-  {.pop.}
+        some parseSomeInt[Natural](c)
 
   # generate
   let rule = args["-r"].parseRule
   for nazoIdx in 0 ..< parseSomeInt[Natural](args["-n"]).get:
-    let
-      simulator = generate(
+    let simulator = new Simulator
+    simulator[] = generate(
         (rng.rand int.low .. int.high),
         rule,
         req,
@@ -171,9 +167,12 @@ proc runGenerator*(args: Table[string, Value]) {.inline.} =
         ),
         not args["-D"].to_bool,
         args["-d"].to_bool,
-      ).initSimulator PlayEditor
-      questionUri = simulator.toUri(withPositions = false)
-      answerUri = simulator.toUri(withPositions = true)
+      )
+      .initSimulator(PlayEditor)
+    let
+      ide = simulator.newIde
+      questionUri = ide.toUri(withPositions = false)
+      answerUri = ide.toUri(withPositions = true)
 
     echo &"(Q{nazoIdx.succ}) {questionUri}"
     echo &"(A{nazoIdx.succ}) {answerUri}"
@@ -192,14 +191,14 @@ proc runPermuter*(args: Table[string, Value]) {.inline.} =
   ## Runs the CUI permuter.
   let
     questionUriStr = $args["<question>"]
-    simulator = questionUriStr.parseUri.parseSimulator
+    ide = questionUriStr.parseUri.parseIde
 
   var idx = 0
   {.push warning[UnsafeDefault]: off.}
   {.push warning[UnsafeSetLen]: off.}
-  simulator.nazoPuyoWrap.get:
+  ide.simulator[].nazoPuyoWrap.get:
     for pairsPositions in wrappedNazoPuyo.permute(
-      args["-f"].mapIt(parseSomeInt[Positive, string](it)),
+      args["-f"].mapIt parseSomeInt[Positive](it),
       not args["-D"].to_bool,
       args["-d"].to_bool,
       showProgress = true,
@@ -207,10 +206,12 @@ proc runPermuter*(args: Table[string, Value]) {.inline.} =
       var nazo = wrappedNazoPuyo
       nazo.puyoPuyo.pairsPositions = pairsPositions
 
+      let simulator = new Simulator
+      simulator[] = nazo.initSimulator(PlayEditor)
       let
-        simulator2 = nazo.initSimulator PlayEditor
-        questionUri = simulator2.toUri(withPositions = false)
-        answerUri = simulator2.toUri(withPositions = true)
+        ide2 = simulator.newIde
+        questionUri = ide2.toUri(withPositions = false)
+        answerUri = ide2.toUri(withPositions = true)
       echo &"(Q{idx.succ}) {questionUri}"
       echo &"(A{idx.succ}) {answerUri}"
       echo ""
@@ -225,24 +226,23 @@ proc runPermuter*(args: Table[string, Value]) {.inline.} =
   {.pop.}
 
 # ------------------------------------------------
-# GUI Application
+# IDE
 # ------------------------------------------------
 
-proc runGuiApplication*(args: Table[string, Value]) {.inline.} =
-  ## Runs the GUI application.
-  let guiApplication = new GuiApplication
+proc runIde*(args: Table[string, Value]) {.inline.} =
+  ## Runs the IDE.
+  let ide: Ide
   case args["<uri>"].kind
   of vkNone:
-    guiApplication[] = initGuiApplication()
+    ide = newIde()
   of vkStr:
-    let simulator = new Simulator
-    simulator[] = ($args["<uri>"]).parseUri.parseSimulator
-    guiApplication[] = simulator.initGuiApplication
+    ide = ($args["<uri>"]).parseUri.parseIde
   else:
+    ide = newIde() # HACK: dummy to suppress warning
     assert false
 
   app.init
-  guiApplication.initGuiApplicationWindow.show
+  ide.newIdeWindow.show
   app.run
 
 # ------------------------------------------------
@@ -256,7 +256,7 @@ const Document =
 * なぞぷよ解探索
 * なぞぷよ生成
 * なぞぷよツモ探索
-* GUIアプリケーション
+* IDE
 
 Usage:
   pon2 (solve | s) <question> [-bB] [-h | --help]
@@ -282,7 +282,7 @@ Options:
   -c <>       色数．                      [default: 3]
   -H <>       各列の高さの割合．          [default: 0++++0]
   --nc <>     色ぷよの数．
-  --ng <>     お邪魔ぷよの数．            [default: 4]
+  --ng <>     お邪魔ぷよの数．            [default: 2]
   -2 <>       2連結の数．
   --2v <>     縦2連結の数．
   --2h <>     横2連結の数．

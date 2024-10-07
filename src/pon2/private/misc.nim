@@ -1,6 +1,9 @@
 ## This module implements miscellaneous things.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -11,10 +14,10 @@ import
 const
   Pon2RootDirCandidate = currentSourcePath().parentDir.parentDir.parentDir
   Pon2RootDir* =
-    when Pon2RootDirCandidate.lastPathPart.startsWith "pon2":
+    when Pon2RootDirCandidate.lastPathPart.startsWith "pon2": # pon2 as a library
       Pon2RootDirCandidate
     else:
-      Pon2RootDirCandidate.parentDir
+      Pon2RootDirCandidate.parentDir # pon2 as a binary
   Pon2Version* = staticRead(Pon2RootDir / "pon2.nimble").newStringStream.loadConfig
     .getSectionValue("", "version")
 
@@ -45,10 +48,9 @@ func initXLink*(text = "", hashTag = "", uri = initUri()): Uri {.inline.} =
   result = initUri()
   result.scheme = "https"
   result.hostname = "x.com"
-  result.path = "/intent/post"
+  result.path = "/intent/tweet" # NOTE: "/post" does not open the X app.
 
-  var queries =
-    @[("ref_src", "twsrc^tfw|twcamp^buttonembed|twterm^share|twgr^"), ("text", text)]
+  var queries = @[("text", text)]
   if hashTag != "":
     queries.add ("hashtags", hashTag)
   if uri != initUri():
@@ -59,12 +61,15 @@ func initXLink*(text = "", hashTag = "", uri = initUri()): Uri {.inline.} =
 # Parse
 # ------------------------------------------------
 
-func parseSomeInt*[T: SomeNumber or Natural or Positive, U: char or string](
-    val: U
-): T {.inline.} =
-  ## Converts the char or string to the given type `T`.
+func parseSomeInt*[T: SomeNumber or Natural or Positive](val: string): T {.inline.} =
+  ## Converts the string to the given type `T`.
   ## If the conversion fails, `ValueError` will be raised.
-  T parseInt $val
+  T parseInt val
+
+func parseSomeInt*[T: SomeNumber or Natural or Positive](val: char): T {.inline.} =
+  ## Converts the char to the given type `T`.
+  ## If the conversion fails, `ValueError` will be raised.
+  parseSomeInt[T] $val
 
 # ------------------------------------------------
 # Others
@@ -97,9 +102,7 @@ func sample*[T](rng: var Rand, arr: openArray[T], count: Natural): seq[T] {.inli
   ## Selects and returns `count` elements in the array without duplicates.
   var arr2 = arr.toSeq
   rng.shuffle arr2
-  {.push warning[ProveInit]: off.}
   result = arr2[0 ..< count]
-  {.pop.}
 
 func incRot*[T: Ordinal](x: var T) {.inline.} =
   ## Rotating `inc`.
