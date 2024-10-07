@@ -15,7 +15,7 @@ import ../[common]
 import ../../../../app/[color, simulator]
 import ../../../../core/[cell]
 
-type ImmediatePairsControl* = ref object of LayoutContainer not nil ## Immediate pairs control.
+type ImmediatePairsControl* = ref object of LayoutContainer ## Immediate pairs control.
   simulator: ref Simulator
   assets: Assets
 

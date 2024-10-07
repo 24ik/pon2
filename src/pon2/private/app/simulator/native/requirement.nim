@@ -13,7 +13,7 @@ import nigui
 import ../../../../app/[nazopuyo, simulator]
 import ../../../../core/[requirement]
 
-type RequirementControl* = ref object of LayoutContainer not nil ## Requirement control.
+type RequirementControl* = ref object of LayoutContainer ## Requirement control.
   simulator: ref Simulator
 
 # ------------------------------------------------
@@ -79,9 +79,7 @@ proc numberHandler(control: RequirementControl, event: ComboBoxChangeEvent) =
 
   control.updateDescription
 
-func newKindHandler(
-    control: RequirementControl
-): (event: ComboBoxChangeEvent) -> void =
+func newKindHandler(control: RequirementControl): (event: ComboBoxChangeEvent) -> void =
   ## Returns the kind handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: ComboBoxChangeEvent) => control.kindHandler event

@@ -30,7 +30,7 @@ type
 
     rng: Rand
 
-  Marathon* = ref MarathonObj not nil ## Marathon manager.
+  Marathon* = ref MarathonObj ## Marathon manager.
 
 # ------------------------------------------------
 # Constructor
@@ -45,7 +45,7 @@ proc newMarathon*(rng = initRand()): Marathon {.inline.} =
 
   result = Marathon(
     simulator: simulator,
-    allPairsStrs : (`seq`: allPairsStrsSeq, tree: allPairsStrsSeq.toCritBitTree),
+    allPairsStrs: (`seq`: allPairsStrsSeq, tree: allPairsStrsSeq.toCritBitTree),
     matchResult: MarathonMatchResult(strings: @[], pageCount: 0, pageIndex: 0),
     focusSimulator: false,
     rng: rng,
@@ -73,7 +73,8 @@ func focusSimulator*(self: Marathon): bool {.inline.} =
 # Edit - Other
 # ------------------------------------------------
 
-proc toggleFocus*(self: Marathon) {.inline.} = ## Toggles focusing to the simulator or not.
+proc toggleFocus*(self: Marathon) {.inline.} =
+  ## Toggles focusing to the simulator or not.
   self.focusSimulator.toggle
 
 # ------------------------------------------------
@@ -313,14 +314,18 @@ when defined(js):
   # JS - Keyboard Handler
   # ------------------------------------------------
 
-  proc runKeyboardEventHandler*(self: Marathon, event: KeyEvent): bool {.inline, discardable.} =
+  proc runKeyboardEventHandler*(
+      self: Marathon, event: KeyEvent
+  ): bool {.inline, discardable.} =
     ## Runs the keyboard event handler.
     ## Returns `true` if any action is executed.
     result = self.operate event
     if result and not kxi.surpressRedraws:
       kxi.redraw
 
-  proc runKeyboardEventHandler*(self: Marathon, event: Event): bool {.inline, discardable.} =
+  proc runKeyboardEventHandler*(
+      self: Marathon, event: Event
+  ): bool {.inline, discardable.} =
     ## Runs the keyboard event handler.
     assert event of KeyboardEvent
 

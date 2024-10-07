@@ -15,7 +15,7 @@ import ../[common]
 import ../../[misc]
 import ../../../../app/[color, simulator]
 
-type MessagesControl* = ref object of ControlImpl not nil ## Messages control.
+type MessagesControl* = ref object of ControlImpl ## Messages control.
   simulator: ref Simulator
 
 # ------------------------------------------------

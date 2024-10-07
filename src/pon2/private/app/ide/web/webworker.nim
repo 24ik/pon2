@@ -8,8 +8,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[dom, options, sequtils, strutils, uri]
-import ../../[permute, solve]
+import std/[dom, options, sequtils, strutils, sugar, uri]
+import ../../[solve]
 import ../../../[webworker]
 import
   ../../../../core/
@@ -28,7 +28,7 @@ const WaitLoopIntervalMs = 50
 
 proc asyncSolve[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
-    results: ref seq[Option[seq[PairsPositions]]],
+    results: ref seq[seq[PairsPositions]],
     reqKind: static RequirementKind,
     reqColor: static RequirementColor,
     earlyStopping: static bool,
@@ -36,27 +36,26 @@ proc asyncSolve[F: TsuField or WaterField](
 ) {.inline.} =
   ## Solves the nazo puyo.
   ## Solve results are stored in `results`.
-  if not nazo.requirement.isSupported or nazo.moveCount == 0:
-    results[] = @[some newSeq[PairsPositions](0)]
+  let
+    rootNode = nazo.initNode
+    childNodes = rootNode.children(reqKind, reqColor)
+
+  if not nazo.requirement.isSupported or nazo.moveCount == 0 or
+      rootNode.canPrune(reqKind, reqColor):
+    results[] = collect:
+      for _ in 1 .. childNodes.len:
+        newSeq[PairsPositions](0)
     return
 
-  let rootNode = nazo.initNode
-  if rootNode.canPrune(reqKind, reqColor):
-    results[] = @[some newSeq[PairsPositions](0)]
-    return
-
-  let childNodes = rootNode.children(reqKind, reqColor)
-  results[] = newSeqOfCap[Option[seq[PairsPositions]]](childNodes.len.succ)
-  results[].add none seq[PairsPositions] # HACK: represent incompletion
+  results[] = newSeqOfCap[seq[PairsPositions]](childNodes.len)
 
   # result-register handler
   var interval: Interval
   proc handler(returnCode: WorkerReturnCode, messages: seq[string]) =
     case returnCode
     of Success:
-      results[].add some messages.mapIt it.parsePairsPositions Pon2
-      if results[].len == childNodes.len.succ:
-        results[].del 0 # remove incompletion dummy
+      results[].add messages.mapIt it.parsePairsPositions Pon2
+      if results[].len == childNodes.len:
         interval.clearInterval
     of Failure:
       discard
@@ -85,7 +84,7 @@ proc asyncSolve[F: TsuField or WaterField](
 
 proc asyncSolve[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
-    results: ref seq[Option[seq[PairsPositions]]],
+    results: ref seq[seq[PairsPositions]],
     reqKind: static RequirementKind,
     earlyStopping: static bool,
     parallelCount: Positive,
@@ -124,7 +123,7 @@ proc asyncSolve[F: TsuField or WaterField](
 
 proc asyncSolve*[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
-    results: ref seq[Option[seq[PairsPositions]]],
+    results: ref seq[seq[PairsPositions]],
     showProgress = false,
     earlyStopping: static bool = false,
     parallelCount: Positive = 6,
@@ -179,6 +178,7 @@ proc asyncSolve*[F: TsuField or WaterField](
 proc asyncPermute*[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
     results: ref seq[Option[PairsPositions]],
+    pairsPositionsSeq: seq[PairsPositions],
     fixMoves: seq[Positive],
     allowDouble: bool,
     allowLastDouble: bool,
@@ -186,10 +186,7 @@ proc asyncPermute*[F: TsuField or WaterField](
 ) {.inline.} =
   ## Permutes the pairs.
   ## Results are stored in `results`.
-  let pairsPositionsSeq =
-    nazo.allPairsPositionsSeq(fixMoves, allowDouble, allowLastDouble)
-  results[] = newSeqOfCap[Option[PairsPositions]](pairsPositionsSeq.len.succ)
-  results[].add none PairsPositions # HACK: represent incompletion
+  results[] = newSeqOfCap[Option[PairsPositions]](pairsPositionsSeq.len)
 
   # result-register handler
   var interval: Interval
@@ -201,8 +198,7 @@ proc asyncPermute*[F: TsuField or WaterField](
       else:
         results[].add none PairsPositions
 
-      if results[].len == pairsPositionsSeq.len.succ:
-        results[].keepItIf it.isSome
+      if results[].len == pairsPositionsSeq.len:
         interval.clearInterval
     of Failure:
       discard

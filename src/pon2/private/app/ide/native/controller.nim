@@ -13,7 +13,7 @@ import nigui
 import ../../[misc]
 import ../../../../app/[color, ide]
 
-type EditorControllerControl* = ref object of LayoutContainer not nil
+type EditorControllerControl* = ref object of LayoutContainer
   ## Editor controller control.
   ide: Ide
 
@@ -23,9 +23,8 @@ func newToggleHandler(control: EditorControllerControl): (event: ClickEvent) -> 
   (event: ClickEvent) => (
     block:
       control.ide.toggleFocus
-      control.childControls[0].backgroundColor = toNiguiColor(
-        if control.ide.focusAnswer: SelectColor else: DefaultColor
-      )
+      control.childControls[0].backgroundColor =
+        toNiguiColor(if control.ide.focusAnswer: SelectColor else: DefaultColor)
   )
 
 func newSolveHandler(control: EditorControllerControl): (event: ClickEvent) -> void =
@@ -33,9 +32,7 @@ func newSolveHandler(control: EditorControllerControl): (event: ClickEvent) -> v
   # NOTE: inlining does not work due to lazy evaluation
   (event: ClickEvent) => control.ide.solve
 
-proc newEditorControllerControl*(
-    ide: Ide
-): EditorControllerControl {.inline.} =
+proc newEditorControllerControl*(ide: Ide): EditorControllerControl {.inline.} =
   ## Returns a new editor controller control.
   {.push warning[ProveInit]: off.}
   result.new

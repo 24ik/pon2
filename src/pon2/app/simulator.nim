@@ -855,7 +855,7 @@ else:
       select,
     ]
 
-  type SimulatorControl* = ref object of LayoutContainer not nil
+  type SimulatorControl* = ref object of LayoutContainer
     ## Root control of the simulator.
 
   # ------------------------------------------------

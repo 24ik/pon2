@@ -12,7 +12,7 @@ import std/[strformat, sugar]
 import nigui
 import ../../../../app/[color, ide]
 
-type EditorPaginationControl* = ref object of LayoutContainer not nil
+type EditorPaginationControl* = ref object of LayoutContainer
   ## Editor pagination control.
   ide: Ide
 
@@ -22,10 +22,7 @@ func newPrevNextHandler(
   ## Returns the click handler.
   # NOTE: inlining does not work due to lazy evaluation
   proc handler(event: ClickEvent) =
-    if next:
-      control.ide.nextAnswer
-    else:
-      control.ide.prevAnswer
+    if next: control.ide.nextAnswer else: control.ide.prevAnswer
 
   result = handler
 
@@ -56,9 +53,7 @@ proc newDrawHandler(control: EditorPaginationControl): (event: DrawEvent) -> voi
 
   result = handler
 
-proc newEditorPaginationControl*(
-    ide: Ide
-): EditorPaginationControl {.inline.} =
+proc newEditorPaginationControl*(ide: Ide): EditorPaginationControl {.inline.} =
   ## Returns the editor pagination control.
   {.push warning[ProveInit]: off.}
   result.new

@@ -15,7 +15,7 @@ import ../../[misc]
 import ../../../../app/[color, simulator]
 import ../../../../core/[rule]
 
-type SelectControl* = ref object of LayoutContainer not nil ## Select control.
+type SelectControl* = ref object of LayoutContainer ## Select control.
   simulator: ref Simulator
 
 proc modeHandler(

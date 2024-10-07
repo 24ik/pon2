@@ -50,7 +50,8 @@ type
 
     progressBarData: tuple[now: Natural, total: Natural]
 
-  Ide* = ref IdeObj not nil ## Puyo Puyo & Nazo Puyo IDE.
+  #Ide* = ref IdeObj not nil ## Puyo Puyo & Nazo Puyo IDE.
+  Ide* = ref IdeObj ## Puyo Puyo & Nazo Puyo IDE.
 
 const IdeUriPath* {.define: "pon2.path".} = "/pon2/"
 
@@ -167,8 +168,7 @@ proc solve*(
 
   self.simulator[].nazoPuyoWrap.get:
     when defined(js):
-      let results = new seq[Option[seq[PairsPositions]]]
-      results[] = @[none seq[PairsPositions]]
+      let results = new seq[seq[PairsPositions]]
       wrappedNazoPuyo.asyncSolve(results, parallelCount = parallelCount)
 
       self.progressBarData.total =
@@ -181,12 +181,12 @@ proc solve*(
       var interval: Interval
       proc showAnswer() =
         let oldBarCount = self.progressBarData.now
-        self.progressBarData.now = results[].len.pred
+        self.progressBarData.now = results[].len
 
-        if results[].allIt it.isSome:
+        if results[].len == self.progressBarData.total:
           self.progressBarData.total = 0
           self.answerData.hasData = true
-          self.answerData.pairsPositionsSeq = results[].mapIt(it.get).concat
+          self.answerData.pairsPositionsSeq = results[].concat
           self.updateAnswerSimulator wrappedNazoPuyo
           self.solving = false
           interval.clearInterval
@@ -230,14 +230,16 @@ proc permute*(
 
   self.simulator[].nazoPuyoWrap.get:
     when defined(js):
-      let results = new seq[Option[PairsPositions]]
-      results[] = @[none PairsPositions]
+      let
+        results = new seq[Option[PairsPositions]]
+        pairsPositionsSeq =
+          wrappedNazoPuyo.allPairsPositionsSeq(fixMoves, allowDouble, allowLastDouble)
       wrappedNazoPuyo.asyncPermute(
-        results, fixMoves, allowDouble, allowLastDouble, parallelCount
+        results, pairsPositionsSeq, fixMoves, allowDouble, allowLastDouble,
+        parallelCount,
       )
 
-      self.progressBarData.total =
-        wrappedNazoPuyo.allPairsPositionsSeq(fixMoves, allowDouble, allowLastDouble).len
+      self.progressBarData.total = pairsPositionsSeq.len
       self.progressBarData.now = 0
 
       var interval: Interval
@@ -245,10 +247,10 @@ proc permute*(
         let oldBarCount = self.progressBarData.now
         self.progressBarData.now = results[].len.pred
 
-        if results[].allIt it.isSome:
+        if results[].len == pairsPositionsSeq.len:
           self.progressBarData.total = 0
           self.answerData.hasData = true
-          self.answerData.pairsPositionsSeq = results[].mapIt it.get
+          self.answerData.pairsPositionsSeq = results[].filterIt(it.isSome).mapIt it.get
           self.updateAnswerSimulator wrappedNazoPuyo
           self.permuting = false
           interval.clearInterval
@@ -279,7 +281,8 @@ proc nextAnswer*(self: Ide) {.inline.} =
     self.answerData.index.inc
 
   self.answerSimulator[].nazoPuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions = self.answerData.pairsPositionsSeq[self.answerData.index]
+    wrappedNazoPuyo.puyoPuyo.pairsPositions =
+      self.answerData.pairsPositionsSeq[self.answerData.index]
   self.answerSimulator[].reset
 
 proc prevAnswer*(self: Ide) {.inline.} =
@@ -293,7 +296,8 @@ proc prevAnswer*(self: Ide) {.inline.} =
     self.answerData.index.dec
 
   self.answerSimulator[].nazoPuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions = self.answerData.pairsPositionsSeq[self.answerData.index]
+    wrappedNazoPuyo.puyoPuyo.pairsPositions =
+      self.answerData.pairsPositionsSeq[self.answerData.index]
   self.answerSimulator[].reset
 
 # ------------------------------------------------
@@ -420,14 +424,15 @@ proc operate*(self: Ide, event: KeyEvent): bool {.inline.} =
 
 when defined(js):
   import
-    ../private/app/ide/web/
-      [answer, controller, pagination, settings, share, progress]
+    ../private/app/ide/web/[answer, controller, pagination, settings, share, progress]
 
   # ------------------------------------------------
   # JS - Keyboard Handler
   # ------------------------------------------------
 
-  proc runKeyboardEventHandler*(self: Ide, event: KeyEvent): bool {.inline, discardable.} =
+  proc runKeyboardEventHandler*(
+      self: Ide, event: KeyEvent
+  ): bool {.inline, discardable.} =
     ## Runs the keyboard event handler.
     ## Returns `true` if any action is executed.
     result = self.operate event
@@ -500,14 +505,12 @@ when defined(js):
       result = node
 
 else:
-  import
-    ../private/app/ide/native/[answer, controller, pagination]
+  import ../private/app/ide/native/[answer, controller, pagination]
 
   type
-    IdeControl* = ref object of LayoutContainer not nil
-      ## Root control of the GUI application.
+    IdeControl* = ref object of LayoutContainer ## Root control of the IDE.
 
-    IdeWindow* = ref object of WindowImpl not nil ## GUI application window.
+    IdeWindow* = ref object of WindowImpl ## GUI application window.
       ide: Ide
 
   # ------------------------------------------------

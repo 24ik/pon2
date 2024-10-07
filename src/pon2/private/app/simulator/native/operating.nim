@@ -15,7 +15,7 @@ import ../[common]
 import ../../../../app/[color, simulator]
 import ../../../../core/[cell, fieldtype]
 
-type OperatingPairControl* = ref object of LayoutContainer not nil ## Operating control.
+type OperatingPairControl* = ref object of LayoutContainer ## Operating control.
   simulator: ref Simulator
   assets: Assets
 

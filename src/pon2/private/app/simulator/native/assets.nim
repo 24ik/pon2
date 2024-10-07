@@ -19,7 +19,7 @@ type
     cellImages*: array[Cell, Image]
     cellImageSize*: tuple[height: Natural, width: Natural]
 
-  Assets* = ref AssetsObj not nil
+  Assets* = ref AssetsObj
 
 const FilePaths: array[Cell, Path] = [
   Path "none.png",

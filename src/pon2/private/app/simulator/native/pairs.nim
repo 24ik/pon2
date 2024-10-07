@@ -16,7 +16,7 @@ import ../../[misc]
 import ../../../../app/[color, nazopuyo, simulator]
 import ../../../../core/[cell, pair, pairposition, position]
 
-type PairsControl* = ref object of LayoutContainer not nil ## Pairs control.
+type PairsControl* = ref object of LayoutContainer ## Pairs control.
   simulator: ref Simulator
   assets: Assets
 

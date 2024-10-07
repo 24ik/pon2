@@ -15,7 +15,7 @@ import ../[common]
 import ../../../../app/[color, nazopuyo, simulator]
 import ../../../../core/[cell, field, fieldtype]
 
-type FieldControl* = ref object of LayoutContainer not nil ## Field control.
+type FieldControl* = ref object of LayoutContainer ## Field control.
   simulator: ref Simulator
   assets: Assets
 

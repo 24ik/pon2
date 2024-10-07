@@ -184,7 +184,7 @@ func insert(
     row: Row,
     col: Column,
     cell: Cell,
-    insertFn: type(tsuInsert) not nil,
+    insertFn: type(tsuInsert),
 ) {.inline.} =
   ## Inserts the cell and shifts the field.
   let (hardGarbage, noneRed, greenBlue, yellowPurple) = cell.toWhichColor
@@ -211,7 +211,7 @@ func removeSqueeze(
     self: var (TsuField or WaterField),
     row: Row,
     col: Column,
-    removeSqueezeFn: type(tsuRemoveSqueeze) not nil,
+    removeSqueezeFn: type(tsuRemoveSqueeze),
 ) {.inline.} =
   ## Removes the cell at `(row, col)` and shifts the field.
   self.hardGarbage.removeSqueezeFn row, col
