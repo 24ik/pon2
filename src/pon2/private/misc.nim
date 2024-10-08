@@ -13,8 +13,11 @@ import
 
 proc getPon2RootDir(): string =
   result = currentSourcePath().parentDir
-  while (result / "pon2.nimble").fileExists:
-    return
+  while true:
+    if (result / "pon2.nimble").fileExists:
+      return
+
+    result = result.parentDir
 
 const
   Pon2RootDir* = getPon2RootDir()
