@@ -11,32 +11,32 @@
 import
   std/[algorithm, os, parsecfg, random, sequtils, streams, strutils, typetraits, uri]
 
-func parentDir2(path: string): string {.inline.} =
+func splitPath2(path: string): tuple[head: string, tail: string] {.inline.} =
   ## Returns the parent directory.
   when not defined(js):
-    path.parentDir
+    path.splitPath
   else:
     if '\\' in path:
-      path.rsplit('\\', 1)[0]
+      let paths = path.rsplit('\\', 1)[0]
+      (head: paths[0], tail: paths[1])
     else:
-      path.parentDir
+      path.splitPath
 
-func joinPath2(path1, path2: string): string {.inline.} =
+func joinPath2(head, tail: string): string {.inline.} =
   ## Returns the path by joining two paths.
   when not defined(js):
-    path1 / path2
+    head / tail
   else:
-    if '\\' in path1:
-      path1 & '\\' & path2
+    if '\\' in head:
+      head & '\\' & tail
     else:
-      path1 / path2
+      head / tail
 
 proc getPon2RootDir(): string {.inline.} =
   ## Returns the root directory of Pon2.
-  result = currentSourcePath().parentDir2.parentDir2.parentDir2
+  let (head, tail) = currentSourcePath().splitPath2.head.splitPath2.head.splitPath2
 
-  if result.lastPathPart == "src":
-    result = result.parentDir2
+  result = if tail == "src": head.splitPath2.head else head
 
 const
   Pon2RootDir* = getPon2RootDir()
