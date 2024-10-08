@@ -10,7 +10,7 @@
 ## 1. The main file launches the web worker by `initWorker()`.
 ## 1. The main file assigns the handler that executed after the task is done.
 ## 1. The main file makes the worker do the task. The task is implemented in the
-## worker file by `assignToWorker()`.
+##   worker file by `assignToWorker()`.
 ## 1. The handler is executed.
 ##
 ## The following example shows the number-increment task.
@@ -21,9 +21,9 @@ runnableExamples:
   proc show(returnCode: WorkerReturnCode, messages: seq[string]) =
     echo "returnCode: ", returnCode, " messages: ", messages
 
-  let worker = initWorker
+  let worker = newWorker()
   worker.completeHandler = show
-  worker.run 6
+  worker.run $6
 
 runnableExamples:
   # Worker File
