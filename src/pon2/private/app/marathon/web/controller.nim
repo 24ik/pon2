@@ -23,7 +23,10 @@ proc newMarathonPlayControllerNode*(marathon: Marathon): VNode {.inline.} =
         disabled = marathon.matchResult.strings.len == 0,
       ):
         text "検索結果"
-      button(class = "button", onclick = () => marathon.play(false)):
+      button(
+        class = (if marathon.isReady: "button" else: "button is-loading").kstring,
+        onclick = () => marathon.play(false),
+      ):
         text "全ツモ"
 
 proc newMarathonFocusControllerNode*(marathon: Marathon): VNode {.inline.} =

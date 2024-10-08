@@ -1,18 +1,22 @@
 ## This module implements marathon mode.
 ##
 
-# NOTE: std/critbits is incompatible with `strictCaseObjects` in Nim2.2.0
+# NOTE: `std/critbits` is incompatible with `strictCaseObjects` in Nim-2.2.0
 {.experimental: "inferGenericTypes".}
 {.experimental: "notnil".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[algorithm, critbits, math, sequtils, strutils, sugar, random]
+import std/[algorithm, critbits, math, options, os, sequtils, strutils, sugar, random]
 import ./[key, nazopuyo, simulator]
 import ../core/[cell, field, puyopuyo]
 import ../private/[misc]
-import ../private/app/marathon/[common, pairs]
+import ../private/app/[misc]
+import ../private/app/marathon/[common]
+
+when defined(js):
+  import std/[asyncjs, jsconsole, jsfetch]
 
 type
   MarathonMatchResult* = object ## Matching result.
@@ -23,7 +27,7 @@ type
   MarathonObj = object ## Marathon manager.
     simulator: ref Simulator
 
-    allPairsStrs: tuple[`seq`: seq[string], tree: CritBitTree[void]]
+    allPairsStrs: Option[tuple[`seq`: seq[string], tree: CritBitTree[void]]]
     matchResult: MarathonMatchResult
 
     focusSimulator: bool
@@ -37,21 +41,51 @@ type
 # ------------------------------------------------
 
 proc newMarathon*(rng = initRand()): Marathon {.inline.} =
-  ## Returns a new marathon manager.
+  ## Returns a new marathon manager without pairs' data loaded.
   let simulator = new Simulator
   simulator[] = initPuyoPuyo[TsuField]().initSimulator Play
 
-  let allPairsStrsSeq = MarathonPairsTextRaw.splitLines
-
   result = Marathon(
     simulator: simulator,
-    allPairsStrs: (`seq`: allPairsStrsSeq, tree: allPairsStrsSeq.toCritBitTree),
+    allPairsStrs: none tuple[`seq`: seq[string], tree: CritBitTree[void]],
     matchResult: MarathonMatchResult(strings: @[], pageCount: 0, pageIndex: 0),
     focusSimulator: false,
     rng: rng,
   )
 
-  assert result.allPairsStrs.seq.len == AllPairsCount
+proc loadData(self: Marathon, pairsStr: string) {.inline.} =
+  ## Loads pairs' data.
+  let allPairsStrsSeq = pairsStr.splitLines
+  assert allPairsStrsSeq.len == AllPairsCount
+
+  self.allPairsStrs = some (`seq`: allPairsStrsSeq, tree: allPairsStrsSeq.toCritBitTree)
+
+when defined(js):
+  {.push warning[Uninit]: off.}
+  proc asyncLoadDataImpl(self: Marathon, completeHandler: () -> void) {.async.} =
+    ## Loads pairs' data asynchronously.
+    ## This procedure should be called with `discard`.
+    {.push warning[ProveInit]: off.}
+    await (WebAssetsDir / "pairs" / "swap.txt").cstring.fetch
+    .then((r: Response) => r.text)
+    .then((s: cstring) => (self.loadData $s; completeHandler()))
+    .catch((e: Error) => console.error e)
+    {.pop.}
+
+  {.pop.}
+
+  proc asyncLoadData*(
+      self: Marathon, completeHandler: () -> void = () => (discard)
+  ) {.inline.} =
+    ## Loads pairs' data asynchronously.
+    discard self.asyncLoadDataImpl completeHandler
+
+else:
+  const SwapPairsTxt = staticRead NativeAssetsDir / "pairs" / "swap.txt"
+
+  proc loadData*(self: Marathon) {.inline.} =
+    ## Loads pairs' data.
+    self.loadData SwapPairsTxt
 
 # ------------------------------------------------
 # Property
@@ -68,6 +102,10 @@ func matchResult*(self: Marathon): MarathonMatchResult {.inline.} =
 func focusSimulator*(self: Marathon): bool {.inline.} =
   ## Returns `true` if the simulator is focused.
   self.focusSimulator
+
+func isReady*(self: Marathon): bool {.inline.} =
+  ## Returns `true` if the pairs' data is loaded.
+  self.allPairsStrs.isSome
 
 # ------------------------------------------------
 # Edit - Other
@@ -239,10 +277,11 @@ proc match*(self: Marathon, prefix: string) {.inline.} =
         for prefix3 in prefix2.swappedPrefixes:
           {.push warning[ProveInit]: off.}
           self.matchResult.strings &=
-            self.allPairsStrs.tree.itemsWithPrefix(prefix3.multiReplace replaceData).toSeq
+            self.allPairsStrs.get.tree.itemsWithPrefix(prefix3.multiReplace replaceData).toSeq
           {.pop.}
     else:
-      self.matchResult.strings = self.allPairsStrs.tree.itemsWithPrefix(prefix).toSeq
+      self.matchResult.strings =
+        self.allPairsStrs.get.tree.itemsWithPrefix(prefix).toSeq
 
   self.matchResult.pageCount =
     ceil(self.matchResult.strings.len / MatchResultPairsCountPerPage).Natural
@@ -273,7 +312,7 @@ proc play*(self: Marathon, onlyMatched = true) {.inline.} =
   ## otherwise, chosen from all pairs.
   if not onlyMatched:
     {.push warning[ProveInit]: off.}
-    self.play self.rng.sample self.allPairsStrs.seq
+    self.play self.rng.sample self.allPairsStrs.get.seq
     {.pop.}
     return
 
@@ -305,7 +344,6 @@ proc operate*(self: Marathon, event: KeyEvent): bool {.inline.} =
 when defined(js):
   import std/[strformat]
   import karax/[karax, karaxdsl, kdom, vdom]
-  import ../private/app/[misc]
   import
     ../private/app/marathon/web/
       [controller, pagination, searchbar, searchresult, simulator as simulatorModule]
@@ -327,7 +365,7 @@ when defined(js):
       self: Marathon, event: Event
   ): bool {.inline, discardable.} =
     ## Runs the keyboard event handler.
-    assert event of KeyboardEvent
+    # assert event of KeyboardEvent # HACK: somehow this fails
 
     result = self.runKeyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
     if result:

@@ -8,9 +8,6 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-# NOTE: Importing unnecessary modules increases the memory used by the web
-# worker. In particular, `private/app/marathon/pairs.nim` has a very
-# memory-consuming constant and should not be imported if not needed.
 when defined(pon2.worker):
   import std/[sequtils]
   import ../[webworker]
@@ -86,6 +83,8 @@ else:
         text &"Pon!通 Version {Pon2Version}"
 
   when defined(pon2.marathon):
+    import std/[sugar]
+    import karax/[karax]
     import ../../app/[marathon]
 
     # ------------------------------------------------
@@ -93,6 +92,8 @@ else:
     # ------------------------------------------------
 
     let globalMarathon = newMarathon()
+    globalMarathon.asyncLoadData () => (if not kxi.surpressRedraws: kxi.redraw
+    )
 
     proc newMainMarathonNode(marathon: Marathon): VNode {.inline.} =
       ## Returns the main marathon node.

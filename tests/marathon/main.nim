@@ -6,9 +6,19 @@
 {.experimental: "views".}
 
 import std/[strutils, unittest]
-import ../../src/pon2/app/[marathon, nazopuyo, simulator]
+import ../../src/pon2/app/[marathon {.all.}, nazopuyo, simulator]
 import ../../src/pon2/core/[cell, pair, pairposition]
 import ../../src/pon2/private/app/marathon/[common]
+
+when defined(js):
+  import std/[os]
+  import ../../src/pon2/private/app/[misc]
+
+  const SwapPairsTxt = staticRead NativeAssetsDir / "pairs" / "swap.txt"
+
+  proc loadData(self: Marathon) {.inline.} =
+    ## Loads pairs' data.
+    self.loadData SwapPairsTxt
 
 proc main*() =
   # ------------------------------------------------
@@ -17,7 +27,8 @@ proc main*() =
 
   # toggleFocus
   block:
-    var marathon = newMarathon()
+    let marathon = newMarathon()
+    marathon.loadData
     check not marathon.focusSimulator
 
     marathon.toggleFocus
@@ -29,7 +40,8 @@ proc main*() =
 
   # nextResultPage, prevResultPage
   block:
-    var marathon = newMarathon()
+    let marathon = newMarathon()
+    marathon.loadData
     marathon.match("rrgy")
     doAssert marathon.matchResult.strings.len > 1
     check marathon.matchResult.pageIndex == 0
@@ -52,7 +64,8 @@ proc main*() =
 
   # match
   block:
-    var marathon = newMarathon()
+    let marathon = newMarathon()
+    marathon.loadData
 
     # specify colors
     block:
@@ -78,7 +91,8 @@ proc main*() =
 
   # play
   block:
-    var marathon = newMarathon()
+    let marathon = newMarathon()
+    marathon.loadData
 
     marathon.simulator[].nazoPuyoWrap.get:
       doAssert wrappedNazoPuyo.puyoPuyo.pairsPositions.len == 0

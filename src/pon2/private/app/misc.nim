@@ -1,5 +1,11 @@
 ## This module implements miscellaneous things.
 ##
+## Compile Options:
+## | Option                        | Description                      | Default             |
+## | ----------------------------- | -------------------------------- | ------------------- |
+## | `-d:pon2.assets.native=<str>` | Assets directory for native app. | `<Pon2Root>/assets` |
+## | `-d:pon2.assets.web=<str>`    | Assets directory for web app.    | `./assets`          |
+##
 
 {.experimental: "inferGenericTypes".}
 {.experimental: "notnil".}
@@ -7,6 +13,13 @@
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+
+import std/[os]
+import ../[misc]
+
+const
+  NativeAssetsDir* {.define: "pon2.assets.native".} = Pon2RootDir / "assets"
+  WebAssetsDir* {.define: "pon2.assets.web".} = "./assets"
 
 when defined(js):
   import std/[jsffi, strformat, sugar]
@@ -53,8 +66,6 @@ when defined(js):
   # JS - Images
   # ------------------------------------------------
 
-  const WebRootDir = when defined(pon2.marathon): ".." else: "."
-
   func cellImageSrc*(cell: Cell): kstring {.inline.} =
     ## Returns the cell image src.
     let stem =
@@ -68,7 +79,7 @@ when defined(js):
       of Yellow: "yellow"
       of Purple: "purple"
 
-    result = kstring &"{WebRootDir}/assets/puyo/{stem}.png"
+    result = kstring &"{WebAssetsDir}/puyo/{stem}.png"
 
   func noticeGarbageImageSrc*(notice: NoticeGarbage): kstring {.inline.} =
     ## Returns the notice garbage image src.
@@ -82,9 +93,9 @@ when defined(js):
       of Crown: "crown"
       of Comet: "comet"
 
-    result = kstring &"{WebRootDir}/assets/noticegarbage/{stem}.png"
+    result = kstring &"{WebAssetsDir}/noticegarbage/{stem}.png"
 
-  const NoticeGarbageNoneImageSrc*: kstring = kstring &"{WebRootDir}/assets/noticegarbage/none.png"
+  const NoticeGarbageNoneImageSrc*: kstring = kstring &"{WebAssetsDir}/noticegarbage/none.png"
     ## Image src of the no notice garbage.
 
   # ------------------------------------------------

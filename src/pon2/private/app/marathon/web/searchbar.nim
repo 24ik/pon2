@@ -28,4 +28,5 @@ proc newMarathonSearchBarNode*(marathon: Marathon, id: string): VNode {.inline.}
             placeholder = "例：rgrb もしくは abac",
             maxlength = "16",
             oninput = () => marathon.match($id.getVNodeById.getInputText),
+            disabled = not marathon.isReady,
           )

@@ -7,18 +7,20 @@
 ## - [pon2/app](./pon2/app.html)
 ##
 ## Compile Options:
-## | Option                            | Description                  | Default          |
-## | --------------------------------- | ---------------------------- | ---------------- |
-## | `-d:pon2.waterheight=<int>`       | Height of the water.         | `8`              |
-## | `-d:pon2.garbagerate.tsu=<int>`   | Garbage rate in Tsu rule.    | `70`             |
-## | `-d:pon2.garbagerate.water=<int>` | Garbage rate in Water rule.  | `90`             |
-## | `-d:pon2.avx2=<bool>`             | Use AVX2 instructions.       | `true`           |
-## | `-d:pon2.bmi2=<bool>`             | Use BMI2 instructions.       | `true`           |
-## | `-d:pon2.fqdn=<str>`              | FQDN of the web IDE.         | `24ik.github.io` |
-## | `-d:pon2.path=<str>`              | URI path of the web IDE.     | `/pon2/`         |
-## | `-d:pon2.workerfilename=<str>`    | File name of the web worker. | `worker.min.js`  |
-## | `-d:pon2.worker`                  | Generates web worker file.   | `<undefined>`    |
-## | `-d:pon2.marathon`                | Generates marathon JS file.  | `<undefined>`    |
+## | Option                            | Description                      | Default             |
+## | --------------------------------- | -------------------------------- | ------------------- |
+## | `-d:pon2.waterheight=<int>`       | Height of the water.             | `8`                 |
+## | `-d:pon2.garbagerate.tsu=<int>`   | Garbage rate in Tsu rule.        | `70`                |
+## | `-d:pon2.garbagerate.water=<int>` | Garbage rate in Water rule.      | `90`                |
+## | `-d:pon2.avx2=<bool>`             | Use AVX2 instructions.           | `true`              |
+## | `-d:pon2.bmi2=<bool>`             | Use BMI2 instructions.           | `true`              |
+## | `-d:pon2.fqdn=<str>`              | FQDN of the web IDE.             | `24ik.github.io`    |
+## | `-d:pon2.path=<str>`              | URI path of the web IDE.         | `/pon2/`            |
+## | `-d:pon2.workerfilename=<str>`    | File name of the web worker.     | `worker.min.js`     |
+## | `-d:pon2.assets.native=<str>`     | Assets directory for native app. | `<Pon2Root>/assets` |
+## | `-d:pon2.assets.web=<str>`        | Assets directory for web app.    | `./assets`          |
+## | `-d:pon2.worker`                  | Generates web worker file.       | `<undefined>`       |
+## | `-d:pon2.marathon`                | Generates marathon JS file.      | `<undefined>`       |
 ##
 
 {.experimental: "inferGenericTypes".}

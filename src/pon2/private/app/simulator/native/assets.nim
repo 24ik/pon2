@@ -1,7 +1,5 @@
 ## This module implements assets handling.
 ##
-## This module requires the compile option `-d:ssl`.
-##
 
 {.experimental: "inferGenericTypes".}
 {.experimental: "notnil".}
@@ -10,8 +8,9 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[httpclient, net, options, appdirs, dirs, files, paths, strformat]
+import std/[appdirs, dirs, files, paths, strformat, syncio]
 import nigui
+import puppy
 import ../../../../core/[cell]
 
 type
@@ -34,14 +33,8 @@ const FilePaths: array[Cell, Path] = [
 
 proc newAssets*(timeoutSec = 180): Assets =
   ## Returns the assets.
-  ##
   ## This function automatically downloads the missing assets.
-  ## Downloading requires the compile option `-d:ssl`.
   result.new
-
-  let client = newHttpClient(timeout = timeoutSec * 1000)
-  defer:
-    client.close
 
   let assetsDir = getDataDir() / "pon2".Path / "assets".Path / "puyo-small".Path
   assetsDir.createDir
@@ -50,12 +43,7 @@ proc newAssets*(timeoutSec = 180): Assets =
   for cell, path in FilePaths:
     let fullPath = assetsDir / path
     if not fullPath.fileExists:
-      {.push warning[Uninit]: off.}
-      client.downloadFile(
-        &"https://github.com/24ik/pon2/raw/main/assets/puyo-small/{path.string}",
-        fullPath.string,
-      )
-      {.pop.}
+      ($fullPath).writeFile fetch &"https://github.com/24ik/pon2/raw/main/assets/puyo-small/{path.string}"
 
     let img = newImage()
     img.loadFromFile fullPath.string

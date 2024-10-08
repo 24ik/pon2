@@ -17,6 +17,7 @@ requires "docopt ^= 0.7.1"
 requires "karax ^= 1.3.3"
 requires "nigui ^= 0.2.8"
 requires "nimsimd ^= 1.2.13"
+requires "puppy ^= 2.1.2"
 requires "suru ^= 0.3.2"
 
 # Tasks
@@ -79,16 +80,17 @@ task web, "Make Web Pages":
       cpFile rawJs, dst
 
   # GUI application
-  "src/pon2.nim".compile "www/index.min.js"
-  "src/pon2.nim".compile "www/worker.min.js", "-d:pon2.worker"
+  #"src/pon2.nim".compile "www/index.min.js"
+  #"src/pon2.nim".compile "www/worker.min.js", "-d:pon2.worker"
 
   # marathon
-  "src/pon2.nim".compile "www/marathon/index.min.js", "-d:pon2.marathon"
+  #"src/pon2.nim".compile "www/marathon/index.min.js", "-d:pon2.marathon"
+  "src/pon2.nim".compile "www/marathon/index.min.js", "-d:pon2.marathon", "-d:pon2.assets.web=../assets"
 
   # documentation
-  exec "nimble -y documentation"
-  cpDir "src/htmldocs", "www/docs"
-  rmDir "src/htmldocs"
+  #exec "nimble -y documentation"
+  #cpDir "src/htmldocs", "www/docs"
+  #rmDir "src/htmldocs"
 
   # assets
-  cpDir "assets", "www/assets"
+  #cpDir "assets", "www/assets"

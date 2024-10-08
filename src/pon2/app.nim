@@ -13,10 +13,12 @@
 ## - [solve](./app/solve.html)
 ##
 ## Compile Options:
-## | Option                         | Description                  | Default         |
-## | ------------------------------ | ---------------------------- | --------------- |
-## | `-d:pon2.path=<str>`           | URI path of the web IDE.     | `/pon2/`        |
-## | `-d:pon2.workerfilename=<str>` | File name of the web worker. | `worker.min.js` |
+## | Option                         | Description                      | Default             |
+## | ------------------------------ | -------------------------------- | ------------------- |
+## | `-d:pon2.path=<str>`           | URI path of the web IDE.         | `/pon2/`            |
+## | `-d:pon2.workerfilename=<str>` | File name of the web worker.     | `worker.min.js`     |
+## | `-d:pon2.assets.native=<str>`  | Assets directory for native app. | `<Pon2Root>/assets` |
+## | `-d:pon2.assets.web=<str>`     | Assets directory for web app.    | `./assets`          |
 ##
 
 {.experimental: "inferGenericTypes".}
@@ -41,7 +43,7 @@ export
 export key.KeyEvent, key.initKeyEvent
 export
   marathon.MarathonMatchResult, marathon.Marathon, marathon.newMarathon,
-  marathon.simulator, marathon.matchResult, marathon.focusSimulator,
+  marathon.simulator, marathon.matchResult, marathon.focusSimulator, marathon.isReady,
   marathon.toggleFocus, marathon.nextResultPage, marathon.prevResultPage,
   marathon.match, marathon.play, marathon.operate
 export
@@ -72,13 +74,14 @@ when defined(js):
   export ide.runKeyboardEventHandler, ide.newKeyboardEventHandler, ide.newIdeNode
   export key.toKeyEvent
   export
-    marathon.runKeyboardEventHandler, marathon.newKeyboardEventHandler,
-    marathon.newMarathonNode
+    marathon.asyncLoadData, marathon.runKeyboardEventHandler,
+    marathon.newKeyboardEventHandler, marathon.newMarathonNode
   export simulator.newSimulatorNode
 else:
   export color.toNiguiColor
   export
     ide.IdeControl, ide.IdeWindow, ide.runKeyboardEventHandler,
     ide.newKeyboardEventHandler, ide.newIdeControl, ide.newIdeWindow
+  export marathon.loadData
   export key.toKeyEvent
   export simulator.SimulatorControl, simulator.newSimulatorControl
