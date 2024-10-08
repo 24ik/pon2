@@ -11,13 +11,13 @@
 import
   std/[algorithm, os, parsecfg, random, sequtils, streams, strutils, typetraits, uri]
 
+proc getPon2RootDir(): string =
+  result = currentSourcePath().parentDir
+  while (result / "pon2.nimble").fileExists:
+    return
+
 const
-  Pon2RootDirCandidate = currentSourcePath().parentDir.parentDir.parentDir
-  Pon2RootDir* =
-    when Pon2RootDirCandidate.lastPathPart.startsWith "pon2": # pon2 as a library
-      Pon2RootDirCandidate
-    else:
-      Pon2RootDirCandidate.parentDir # pon2 as a binary
+  Pon2RootDir* = getPon2RootDir()
   Pon2Version* = staticRead(Pon2RootDir / "pon2.nimble").newStringStream.loadConfig
     .getSectionValue("", "version")
 
