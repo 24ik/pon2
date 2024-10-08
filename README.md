@@ -21,12 +21,10 @@ native-GUI application is beta version.
 
 ## Installation
 
-### Downloading Binary
+### Downloading Built Binary
 
-You can get the binary at the
+You can get the built binary at the
 [latest release](https://github.com/24ik/pon2/releases/latest).
-Note that the built binary may not work on macOS due to the limitation of
-[NiGui](https://github.com/simonkrauter/NiGui).
 
 ### Manual Installation
 
@@ -50,14 +48,12 @@ See the documentations:
 
 ## For Developers
 
-When using pon2 as a library for web development, it is necessary to copy
-`assets` directory as a sibling of the output file.
+It is necessary to place the `assets` directory to the one specified by
+`-d:pon2.assets.native` or `-d:pon2.assets.web`.
 
 ### Known Issues
 
-- On Windows, the followings does not work:
-    - cpp and JS backend
-    - AVX2
+- AVX2 only works on Linux.
 
 ### API Usage
 
