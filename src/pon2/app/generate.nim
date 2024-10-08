@@ -131,7 +131,7 @@ func split(
     rng: var Rand, total: Natural, chunkCount: Positive, allowZeroChunk: bool
 ): seq[int] {.inline.} =
   ## Splits the number `total` into `chunkCount` chunks.
-  ## If splitting fails, `GenerateError` will be raised.
+  ## If splitting fails, `GenerateError` is raised.
   runnableExamples:
     import std/[math, random, sequtils]
 
@@ -190,7 +190,7 @@ func split(
   ## `ratios` can contain `none` to specify a random positive ratio, and
   ## cannot contain anything but `none` and `some(0)` when doing so.
   ## If all elements in `ratios` are all `some(0)`, splits randomly.
-  ## If splitting fails, `GenerateError` will be raised.
+  ## If splitting fails, `GenerateError` is raised.
   runnableExamples:
     import std/[random]
 
@@ -252,7 +252,7 @@ func generatePuyoPuyo[F: TsuField or WaterField](
     puyoCounts: tuple[color: Natural, garbage: Natural],
 ): PuyoPuyo[F] {.inline.} =
   ## Returns a random Puyo Puyo game.
-  ## If generation fails, `GenerateError` will be raised.
+  ## If generation fails, `GenerateError` is raised.
   let
     fieldCount = puyoCounts.color + puyoCounts.garbage - 2 * moveCount
     chainCount = puyoCounts.color div 4
@@ -324,7 +324,7 @@ func generateRequirement(
     rng: var Rand, req: GenerateRequirement, useColors: seq[ColorPuyo]
 ): Requirement {.inline.} =
   ## Returns a random requirement.
-  ## If generation fails, `GenerateError` will be raised.
+  ## If generation fails, `GenerateError` is raised.
   if req.kind in NoColorKinds:
     result = initRequirement(req.kind, req.number.get)
   elif req.kind in NoNumberKinds:
@@ -377,10 +377,10 @@ proc generate*[F: TsuField or WaterField](
     allowLastDouble: bool,
 ): NazoPuyo[F] {.inline.} =
   ## Returns a randomly generated nazo puyo that has a unique solution.
-  ## If generation fails, `GenerateError` will be raised.
-  ## `parallelCount` will be ignored on JS backend.
+  ## If generation fails, `GenerateError` is raised.
   ## If `puyoCounts.color` is `none`, it is inferred from the requirement if
-  ## the kind is chain-like; otherwise `GenerateError` will be raised.
+  ## the kind is chain-like; otherwise `GenerateError` is raised.
+  ## `parallelCount` is ignored on JS backend.
   result = initNazoPuyo[F]() # HACK: dummy to suppress warning
 
   # infer color count if not specified
@@ -521,8 +521,8 @@ proc generate*(
     allowLastDouble: bool,
 ): NazoPuyoWrap {.inline.} =
   ## Returns a randomly generated nazo puyo that has a unique solution.
-  ## If generation fails, `GenerateError` will be raised.
-  ## `parallelCount` will be ignored on JS backend.
+  ## If generation fails, `GenerateError` is raised.
+  ## `parallelCount` is ignored on JS backend.
   case rule
   of Tsu:
     generate[TsuField](

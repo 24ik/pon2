@@ -25,7 +25,7 @@ iterator permute*[F: TsuField or WaterField](
     fixMoves: seq[Positive],
     allowDouble: bool,
     allowLastDouble: bool,
-    showProgress = false,
+    showProgress: static bool = false,
     parallelCount: Positive =
       when defined(js):
         1
@@ -35,14 +35,14 @@ iterator permute*[F: TsuField or WaterField](
 ): PairsPositions {.inline.} =
   ## Yields pairs&positions of the nazo puyo that is obtained by permuting
   ## pairs and has a unique solution.
+  ## `showProgress` and `parallelCount` is ignored on JS backend.
   let pairsPositionsSeq =
     nazo.allPairsPositionsSeq(fixMoves, allowDouble, allowLastDouble)
 
-  when not defined(js):
-    var bar = initSuruBar()
-    if showProgress:
-      bar[0].total = pairsPositionsSeq.len
-      bar.setup
+  when not defined(js) and showProgress:
+    var progressBar = initSuruBar()
+    progressBar[0].total = pairsPositionsSeq.len
+    progressBar.setup
 
   for pairsPositions in pairsPositionsSeq:
     var nazo2 = nazo
@@ -50,13 +50,12 @@ iterator permute*[F: TsuField or WaterField](
 
     let answers = nazo2.solve(earlyStopping = true, parallelCount = parallelCount)
 
-    when not defined(js):
-      bar.inc
-      bar.update
+    when not defined(js) and showProgress:
+      progressBar.inc
+      progressBar.update
 
     if answers.len == 1:
       yield answers[0]
 
-  when not defined(js):
-    if showProgress:
-      bar.finish
+  when not defined(js) and showProgress:
+    progressBar.finish

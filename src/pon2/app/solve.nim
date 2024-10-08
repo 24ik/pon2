@@ -28,12 +28,12 @@ proc solve[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
     reqKind: static RequirementKind,
     reqColor: static RequirementColor,
-    showProgress: bool,
+    showProgress: static bool,
     earlyStopping: static bool,
     parallelCount: Positive,
 ): seq[PairsPositions] {.inline.} =
   ## Solves the nazo puyo.
-  ## `showProgress` and `parallelCount` will be ignored on JS backend.
+  ## `showProgress` and `parallelCount` is ignored on JS backend.
   if not nazo.requirement.isSupported or nazo.moveCount == 0:
     return @[]
 
@@ -55,14 +55,13 @@ proc solve[F: TsuField or WaterField](
     const ParallelSolvingWaitIntervalMs = 10
 
     # setup progress bar
-    var progressBar = initSuruBar()
-    if showProgress:
+    when showProgress:
+      var progressBar = initSuruBar()
       progressBar[0].total = childNodes.len
       progressBar.setup
 
-    when earlyStopping:
-      proc shutDownProgressBar() =
-        if showProgress:
+      when earlyStopping:
+        proc shutDownProgressBar() =
           progressBar.inc progressBar[0].total - progressBar[0].progress
           progressBar.update
           progressBar.finish
@@ -80,12 +79,15 @@ proc solve[F: TsuField or WaterField](
             results.add ^futures[threadIdx]
             threadsRunning[threadIdx] = false
 
-            progressBar.inc
-            progressBar.update
+            when showProgress:
+              progressBar.inc
+              progressBar.update
 
             when earlyStopping:
               if results.mapIt(it.len).sum2 > 1:
-                shutDownProgressBar()
+                when showProgress:
+                  shutDownProgressBar()
+
                 return results.concat
 
           if not threadsRunning[threadIdx]:
@@ -106,30 +108,33 @@ proc solve[F: TsuField or WaterField](
           results.add ^futures[threadIdx]
           runningThreadIdxes.excl threadIdx
 
-          progressBar.inc
-          progressBar.update
+          when showProgress:
+            progressBar.inc
+            progressBar.update
 
           when earlyStopping:
             if results.mapIt(it.len).sum2 > 1:
-              shutDownProgressBar()
+              when showProgress:
+                shutDownProgressBar()
+
               return results.concat
 
       sleep ParallelSolvingWaitIntervalMs
 
     result = results.concat
 
-    if showProgress:
+    when showProgress:
       progressBar.finish
 
 proc solve[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
     reqKind: static RequirementKind,
-    showProgress: bool,
+    showProgress: static bool,
     earlyStopping: static bool,
     parallelCount: Positive,
 ): seq[PairsPositions] {.inline.} =
   ## Solves the nazo puyo.
-  ## `showProgress` and `parallelCount` will be ignored on JS backend.
+  ## `showProgress` and `parallelCount` is ignored on JS backend.
   assert reqKind in {
     Clear, DisappearCount, DisappearCountMore, ChainClear, ChainMoreClear,
     DisappearCountSametime, DisappearCountMoreSametime, DisappearPlace,
@@ -173,7 +178,7 @@ proc solve[F: TsuField or WaterField](
 
 proc solve*[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
-    showProgress = false,
+    showProgress: static bool = false,
     earlyStopping: static bool = false,
     parallelCount: Positive =
       when defined(js):
@@ -183,7 +188,7 @@ proc solve*[F: TsuField or WaterField](
     ,
 ): seq[PairsPositions] {.inline.} =
   ## Solves the nazo puyo.
-  ## `showProgress` and `parallelCount` will be ignored on JS backend.
+  ## `showProgress` and `parallelCount` is ignored on JS backend.
   const DummyColor = RequirementColor.All
 
   result =
