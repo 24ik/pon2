@@ -14,10 +14,13 @@ import
 func parentDir2(path: string): string {.inline.} =
   ## Returns the parent directory.
   ## This function fixes the bug in `parentDir` on JS and Windows.
-  when defined(windows) and defined(js):
-    path.rsplit('\\', 1)[0]
-  else:
+  when not defined(js):
     path.parentDir
+  else:
+    if '\\' in path:
+      path.rsplit('\\', 1)[0]
+    else:
+      path.parentDir
 
 proc getPon2RootDir(): string {.inline.} =
   ## Returns the root directory of Pon2.
