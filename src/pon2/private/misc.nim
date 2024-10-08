@@ -13,7 +13,6 @@ import
 
 func parentDir2(path: string): string {.inline.} =
   ## Returns the parent directory.
-  ## This function fixes the bug in `parentDir` on JS and Windows.
   when not defined(js):
     path.parentDir
   else:
@@ -21,6 +20,16 @@ func parentDir2(path: string): string {.inline.} =
       path.rsplit('\\', 1)[0]
     else:
       path.parentDir
+
+func joinPath2(path1, path2: string): string {.inline.} =
+  ## Returns the path by joining two paths.
+  when not defined(js):
+    path1 / path2
+  else:
+    if '\\' in path:
+      path1 & '\\' & path2
+    else:
+      path1 / path2
 
 proc getPon2RootDir(): string {.inline.} =
   ## Returns the root directory of Pon2.
@@ -31,7 +40,8 @@ proc getPon2RootDir(): string {.inline.} =
 
 const
   Pon2RootDir* = getPon2RootDir()
-  Pon2Version* = staticRead(Pon2RootDir / "pon2.nimble").newStringStream.loadConfig
+  Pon2Version* = Pon2RootDir
+    .joinPath2("pon2.nimble").staticRead.newStringStream.loadConfig
     .getSectionValue("", "version")
 
 # ------------------------------------------------
