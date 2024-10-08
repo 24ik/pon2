@@ -26,7 +26,7 @@ func joinPath2(path1, path2: string): string {.inline.} =
   when not defined(js):
     path1 / path2
   else:
-    if '\\' in path:
+    if '\\' in path1:
       path1 & '\\' & path2
     else:
       path1 / path2
