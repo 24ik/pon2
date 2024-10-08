@@ -23,7 +23,6 @@ const
   Avx2 {.define: "pon2.avx2".} = true
   Bmi2 {.define: "pon2.bmi2".} = true
 
-  # FIXME: somehow AVX2 cannot used on Windows
   UseAvx2* = Avx2 and (defined(i386) or defined(amd64)) and not defined(windows)
   UseBmi2* = Bmi2 and (defined(i386) or defined(amd64))
 

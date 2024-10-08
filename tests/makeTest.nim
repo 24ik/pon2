@@ -47,9 +47,8 @@ main()
       for values in product([Avx2Seq, Bmi2Seq]):
         &"-d:pon2.avx2={values[0]} -d:pon2.bmi2={values[1]}"
 
-    # NOTE: On Windows and non-c backend, the test fails due to Nim's bug
     fileContent = FileContentTemplate.replace(Matrix, matrixSeq.join "; ").replace(
-        Targets, when defined(windows): "c" else: "c cpp js"
+        Targets, "c cpp js"
       )
 
   for kind, path in currentSourcePath().Path.parentDir.walkDir:
