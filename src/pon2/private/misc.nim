@@ -17,7 +17,7 @@ func splitPath2(path: string): tuple[head: string, tail: string] {.inline.} =
     path.splitPath
   else:
     if '\\' in path:
-      let paths = path.rsplit('\\', 1)[0]
+      let paths = path.rsplit('\\', 1)
       (head: paths[0], tail: paths[1])
     else:
       path.splitPath
