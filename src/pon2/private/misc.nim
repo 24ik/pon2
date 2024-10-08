@@ -11,12 +11,20 @@
 import
   std/[algorithm, os, parsecfg, random, sequtils, streams, strutils, typetraits, uri]
 
+func parentDir2(path: string): string {.inline.} =
+  ## Returns the parent directory.
+  ## This function fixes the bug in `parentDir` on JS and Windows.
+  when defined(windows) and defined(js):
+    path.rsplit('\\', 1)[0]
+  else:
+    path.parentDir
+
 proc getPon2RootDir(): string =
   ## Returns the root directory of Pon2.
-  result = currentSourcePath().parentDir.parentDir.parentDir
+  result = currentSourcePath().parentDir2.parentDir2.parentDir2
 
   if result.lastPathPart == "src":
-    result = result.parentDir
+    result = result.parentDir2
 
 const
   Pon2RootDir* = getPon2RootDir()

@@ -89,7 +89,6 @@ func toUriQuery*(pairPosition: PairPosition, fqdn = Pon2): string {.inline.} =
 func parsePairPosition*(query: string, fqdn: IdeFqdn): PairPosition {.inline.} =
   ## Returns the pair&position converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
-  # NOTE: this function is not robust; dependent on the current URI format
   case fqdn
   of Pon2:
     PairPosition(
