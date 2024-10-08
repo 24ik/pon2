@@ -12,11 +12,10 @@ import
   std/[algorithm, os, parsecfg, random, sequtils, streams, strutils, typetraits, uri]
 
 proc getPon2RootDir(): string =
-  result = currentSourcePath().parentDir
-  while true:
-    if (result / "pon2.nimble").fileExists:
-      return
+  ## Returns the root directory of Pon2.
+  result = currentSourcePath().parentDir.parentDir.parentDir
 
+  if result.lastPathPart == "src":
     result = result.parentDir
 
 const
