@@ -19,7 +19,7 @@ func parentDir2(path: string): string {.inline.} =
   else:
     path.parentDir
 
-proc getPon2RootDir(): string =
+proc getPon2RootDir(): string {.inline.} =
   ## Returns the root directory of Pon2.
   result = currentSourcePath().parentDir2.parentDir2.parentDir2
 
