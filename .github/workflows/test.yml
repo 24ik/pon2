@@ -23,7 +23,6 @@ jobs:
         os:
           - ubuntu-latest
           - windows-latest
-          - macos-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -39,11 +38,5 @@ jobs:
         with:
           nim-version: "2.2.x"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - run: |-
-          brew install gtk+3
-          brew unlink gtk+3
-          brew link gtk+3
-        if: runner.os == 'macOS'
 
       - run: nimble -y test
