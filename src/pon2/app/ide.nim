@@ -464,8 +464,9 @@ when defined(js):
   proc newIdeNode(self: Ide, id: string): VNode {.inline.} =
     ## Returns the IDE node without the external section.
     let
-      simulatorNode =
-        self.simulator.newSimulatorNode(id = &"{MainSimulatorIdPrefix}{id}")
+      simulatorNode = self.simulator.newSimulatorNode(
+        wrapSection = false, id = &"{MainSimulatorIdPrefix}{id}"
+      )
       settingsId = &"{SettingsIdPrefix}{id}"
 
     result = buildHtml(tdiv(class = "columns is-mobile is-variable is-1")):
