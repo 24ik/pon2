@@ -7,10 +7,6 @@
 ## | `-d:pon2.avx2=<bool>` | Use AVX2 instructions. | `true`  |
 ## | `-d:pon2.bmi2=<bool>` | Use BMI2 instructions. | `true`  |
 ##
-## This module partly uses [zp7](https://github.com/zwegner/zp7),
-## distributed under the [MIT license](https://opensource.org/license/mit/).
-## - Copyright (c) 2020 Zach Wegner
-##
 
 {.experimental: "inferGenericTypes".}
 {.experimental: "notnil".}

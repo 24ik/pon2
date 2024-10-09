@@ -86,3 +86,5 @@ Please work on a new branch and then submit a PR for the `main` branch.
 ## License
 
 Apache-2.0
+
+See [LICENSE](./LICENSE) and [NOTICE](./NOTICE) for details.
