@@ -471,7 +471,8 @@ when defined(js):
 
     result = buildHtml(tdiv(class = "columns is-mobile is-variable is-1")):
       tdiv(class = "column is-narrow"):
-        simulatorNode
+        tdiv(class = "block"):
+          simulatorNode
         tdiv(class = "block"):
           self.newShareNode &"{ShareIdPrefix}{id}"
       if self.simulator[].mode in {PlayEditor, Edit} and self.simulator[].kind == Nazo:
