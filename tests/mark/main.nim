@@ -1,9 +1,12 @@
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2/core/[field, host, mark {.all.}, nazopuyo]
+import ../../src/pon2/core/[field, fqdn, mark, nazopuyo]
 
 func mark(uriStr: string): MarkResult =
   parseNazoPuyo[TsuField](uriStr, Ishikawa).mark

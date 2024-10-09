@@ -5,7 +5,7 @@
 ## - [cell](./core/cell.html)
 ## - [field](./core/field.html)
 ## - [fieldtype](./core/fieldtype.html)
-## - [host](./core/host.html)
+## - [fqdn](./core/fqdn.html)
 ## - [mark](./core/mark.html)
 ## - [moveresult](./core/moveresult.html)
 ## - [nazopuyo](./core/nazopuyo.html)
@@ -18,22 +18,26 @@
 ## - [rule](./core/rule.html)
 ##
 ## Compile Options:
-## | Option                            | Description                 | Default |
-## | --------------------------------- | --------------------------- | ------- |
-## | `-d:pon2.waterheight=<int>`       | Height of the water.        | `8`     |
-## | `-d:pon2.garbagerate.tsu=<int>`   | Garbage rate in Tsu rule.   | `70`    |
-## | `-d:pon2.garbagerate.water=<int>` | Garbage rate in Water rule. | `90`    |
-## | `-d:pon2.avx2=<bool>`             | Use AVX2 instructions.      | `true`  |
-## | `-d:pon2.bmi2=<bool>`             | Use BMI2 instructions.      | `true`  |
+## | Option                            | Description                 | Default          |
+## | --------------------------------- | --------------------------- | ---------------- |
+## | `-d:pon2.waterheight=<int>`       | Height of the water.        | `8`              |
+## | `-d:pon2.garbagerate.tsu=<int>`   | Garbage rate in Tsu rule.   | `70`             |
+## | `-d:pon2.garbagerate.water=<int>` | Garbage rate in Water rule. | `90`             |
+## | `-d:pon2.avx2=<bool>`             | Use AVX2 instructions.      | `true`           |
+## | `-d:pon2.bmi2=<bool>`             | Use BMI2 instructions.      | `true`           |
+## | `-d:pon2.fqdn=<str>`              | FQDN of the web IDE.        | `24ik.github.io` |
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import
   ./core/[
-    cell, field, fieldtype, host, mark, moveresult, nazopuyo, notice, pair,
+    cell, field, fieldtype, fqdn, mark, moveresult, nazopuyo, notice, pair,
     pairposition, position, puyopuyo, requirement, rule,
   ]
 
@@ -53,14 +57,14 @@ export
 export
   fieldtype.Height, fieldtype.Width, fieldtype.WaterHeight, fieldtype.AirHeight,
   fieldtype.Row, fieldtype.Column, fieldtype.WaterRow, fieldtype.AirRow
-export host.SimulatorHost
+export fqdn.IdeFqdn
 export mark.MarkResult, mark.mark
 export
-  moveresult.MoveTrackingLevel, moveresult.MoveResult, moveresult.initMoveResult,
-  moveresult.`==`, moveresult.puyoCount, moveresult.colorCount, moveresult.garbageCount,
-  moveresult.puyoCounts, moveresult.colorCounts, moveresult.garbageCounts,
-  moveresult.colors, moveresult.colorsSeq, moveresult.colorPlaces,
-  moveresult.colorConnects, moveresult.score, moveresult.noticeGarbageCounts
+  moveresult.MoveResult, moveresult.initMoveResult, moveresult.puyoCount,
+  moveresult.colorCount, moveresult.garbageCount, moveresult.puyoCounts,
+  moveresult.colorCounts, moveresult.garbageCounts, moveresult.colors,
+  moveresult.colorsSeq, moveresult.colorPlaces, moveresult.colorConnects,
+  moveresult.score, moveresult.noticeGarbageCounts
 export
   nazopuyo.NazoPuyo, nazopuyo.initNazoPuyo, nazopuyo.`==`, nazopuyo.toTsuNazoPuyo,
   nazopuyo.toWaterNazoPuyo, nazopuyo.rule, nazopuyo.moveCount, nazopuyo.`$`,
@@ -94,6 +98,8 @@ export
   requirement.RequirementKind, requirement.RequirementColor,
   requirement.RequirementNumber, requirement.Requirement, requirement.NoColorKinds,
   requirement.NoNumberKinds, requirement.ColorKinds, requirement.NumberKinds,
-  requirement.`==`, requirement.isSupported, requirement.`$`,
-  requirement.parseRequirement, requirement.toUriQuery
+  requirement.initRequirement, requirement.isSupported, requirement.kind,
+  requirement.color, requirement.number, requirement.`kind=`, requirement.`color=`,
+  requirement.`number=`, requirement.`$`, requirement.parseRequirement,
+  requirement.toUriQuery
 export rule.Rule, rule.parseRule

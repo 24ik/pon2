@@ -1,6 +1,9 @@
 ## This module implements Nazo Puyo marking.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}

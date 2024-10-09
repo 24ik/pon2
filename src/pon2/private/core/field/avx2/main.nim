@@ -1,6 +1,9 @@
 ## This module implements fields with AVX2.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -25,30 +28,28 @@ type
     greenBlue: BinaryField
     yellowPurple: BinaryField
 
-using
-  row: Row
-  col: Column
-
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
 func initField*[F: TsuField or WaterField](): F {.inline.} =
   ## Returns the field with all cells None.
-  result.hardGarbage = zeroBinaryField()
-  result.noneRed = zeroBinaryField()
-  result.greenBlue = zeroBinaryField()
-  result.yellowPurple = zeroBinaryField()
+  F(
+    hardGarbage: zeroBinaryField(),
+    noneRed: zeroBinaryField(),
+    greenBlue: zeroBinaryField(),
+    yellowPurple: zeroBinaryField(),
+  )
 
 # ------------------------------------------------
 # Operator
 # ------------------------------------------------
 
-func `+=`[F: TsuField or WaterField](field1: var F, field2: F) {.inline.} =
-  field1.hardGarbage += field2.hardGarbage
-  field1.noneRed += field2.noneRed
-  field1.greenBlue += field2.greenBlue
-  field1.yellowPurple += field2.yellowPurple
+func `+=`[F: TsuField or WaterField](self: var F, field: F) {.inline.} =
+  self.hardGarbage += field.hardGarbage
+  self.noneRed += field.noneRed
+  self.greenBlue += field.greenBlue
+  self.yellowPurple += field.yellowPurple
 
 # ------------------------------------------------
 # Convert
@@ -56,17 +57,21 @@ func `+=`[F: TsuField or WaterField](field1: var F, field2: F) {.inline.} =
 
 func toTsuField*(self: WaterField): TsuField {.inline.} =
   ## Returns the Tsu field converted from the Water field.
-  result.hardGarbage = self.hardGarbage
-  result.noneRed = self.noneRed
-  result.greenBlue = self.greenBlue
-  result.yellowPurple = self.yellowPurple
+  TsuField(
+    hardGarbage: self.hardGarbage,
+    noneRed: self.noneRed,
+    greenBlue: self.greenBlue,
+    yellowPurple: self.yellowPurple,
+  )
 
 func toWaterField*(self: TsuField): WaterField {.inline.} =
   ## Returns the Water field converted from the Tsu field.
-  result.hardGarbage = self.hardGarbage
-  result.noneRed = self.noneRed
-  result.greenBlue = self.greenBlue
-  result.yellowPurple = self.yellowPurple
+  WaterField(
+    hardGarbage: self.hardGarbage,
+    noneRed: self.noneRed,
+    greenBlue: self.greenBlue,
+    yellowPurple: self.yellowPurple,
+  )
 
 # ------------------------------------------------
 # Property
@@ -80,19 +85,21 @@ func exist*(self: TsuField or WaterField): BinaryField {.inline.} =
 # Row, Column
 # ------------------------------------------------
 
-func column[F: TsuField or WaterField](self: F, col): F {.inline.} =
+func column[F: TsuField or WaterField](self: F, col: Column): F {.inline.} =
   ## Returns the field with only the given column.
-  result.hardGarbage = self.hardGarbage.column col
-  result.noneRed = self.noneRed.column col
-  result.greenBlue = self.greenBlue.column col
-  result.yellowPurple = self.yellowPurple.column col
+  F(
+    hardGarbage: self.hardGarbage.column col,
+    noneRed: self.noneRed.column col,
+    greenBlue: self.greenBlue.column col,
+    yellowPurple: self.yellowPurple.column col,
+  )
 
-func clearColumn(mSelf: var (TsuField or WaterField), col) {.inline.} =
+func clearColumn(self: var (TsuField or WaterField), col: Column) {.inline.} =
   ## Clears the given column.
-  mSelf.hardGarbage.clearColumn col
-  mSelf.noneRed.clearColumn col
-  mSelf.greenBlue.clearColumn col
-  mSelf.yellowPurple.clearColumn col
+  self.hardGarbage.clearColumn col
+  self.noneRed.clearColumn col
+  self.greenBlue.clearColumn col
+  self.yellowPurple.clearColumn col
 
 # ------------------------------------------------
 # Indexer
@@ -102,7 +109,8 @@ func toCell(
     hardGarbage, noneRed, greenBlue, yellowPurple: WhichColor
 ): Cell {.inline.} =
   ## Returns the cell converted from which-colors.
-  Cell bitor(
+
+  bitor(
     # digit-0
     hardGarbage.color1.int64,
     noneRed.color2.int64,
@@ -118,9 +126,9 @@ func toCell(
       greenBlue.color1.int64, greenBlue.color2.int64, yellowPurple.color1.int64,
       yellowPurple.color2.int64,
     ) shl 2,
-  )
+  ).Cell
 
-func `[]`*(self: TsuField or WaterField, row, col): Cell {.inline.} =
+func `[]`*(self: TsuField or WaterField, row: Row, col: Column): Cell {.inline.} =
   toCell(
     self.hardGarbage[row, col],
     self.noneRed[row, col],
@@ -146,73 +154,83 @@ func toWhichColor(
     notBit1: range[0'i64 .. 1'i64] = 1 - bit1
     notBit0: range[0'i64 .. 1'i64] = 1 - bit0
 
-  result.hardGarbage.color1 = bitand(notBit2, notBit1, bit0)
-  result.hardGarbage.color2 = bitand(notBit2, bit1, notBit0)
-  result.noneRed.color1 = 0'i64
-  result.noneRed.color2 = bitand(notBit2, bit1, bit0)
-  result.greenBlue.color1 = bitand(bit2, notBit1, notBit0)
-  result.greenBlue.color2 = bitand(bit2, notBit1, bit0)
-  result.yellowPurple.color1 = bitand(bit2, bit1, notBit0)
-  result.yellowPurple.color2 = bitand(bit2, bit1, bit0)
+  result = (
+    hardGarbage: WhichColor(
+      color1: bitand(notBit2, notBit1, bit0), color2: bitand(notBit2, bit1, notBit0)
+    ),
+    noneRed: WhichColor(color1: 0'i64, color2: bitand(notBit2, bit1, bit0)),
+    greenBlue: WhichColor(
+      color1: bitand(bit2, notBit1, notBit0), color2: bitand(bit2, notBit1, bit0)
+    ),
+    yellowPurple:
+      WhichColor(color1: bitand(bit2, bit1, notBit0), color2: bitand(bit2, bit1, bit0)),
+  )
 
-func `[]=`*(mSelf: var (TsuField or WaterField), row, col; cell: Cell) {.inline.} =
+func `[]=`*(
+    self: var (TsuField or WaterField), row: Row, col: Column, cell: Cell
+) {.inline.} =
   let (hardGarbage, noneRed, greenBlue, yellowPurple) = cell.toWhichColor
-  mSelf.hardGarbage[row, col] = hardGarbage
-  mSelf.noneRed[row, col] = noneRed
-  mSelf.greenBlue[row, col] = greenBlue
-  mSelf.yellowPurple[row, col] = yellowPurple
+  self.hardGarbage[row, col] = hardGarbage
+  self.noneRed[row, col] = noneRed
+  self.greenBlue[row, col] = greenBlue
+  self.yellowPurple[row, col] = yellowPurple
 
 # ------------------------------------------------
 # Insert / RemoveSqueeze
 # ------------------------------------------------
 
 func insert(
-    mSelf: var (TsuField or WaterField), row, col; cell: Cell, insertFn: type(tsuInsert)
+    self: var (TsuField or WaterField),
+    row: Row,
+    col: Column,
+    cell: Cell,
+    insertFn: type(tsuInsert),
 ) {.inline.} =
   ## Inserts the cell and shifts the field.
   let (hardGarbage, noneRed, greenBlue, yellowPurple) = cell.toWhichColor
 
-  mSelf.hardGarbage.insertFn row, col, hardGarbage
-  mSelf.noneRed.insertFn row, col, noneRed
-  mSelf.greenBlue.insertFn row, col, greenBlue
-  mSelf.yellowPurple.insertFn row, col, yellowPurple
+  self.hardGarbage.insertFn row, col, hardGarbage
+  self.noneRed.insertFn row, col, noneRed
+  self.greenBlue.insertFn row, col, greenBlue
+  self.yellowPurple.insertFn row, col, yellowPurple
 
-func insert*(mSelf: var TsuField, row, col; cell: Cell) {.inline.} =
+func insert*(self: var TsuField, row: Row, col: Column, cell: Cell) {.inline.} =
   ## Inserts `which` and shifts the field upward above the location
   ## where `which` is inserted.
-  mSelf.insert row, col, cell, tsuInsert
+  self.insert row, col, cell, tsuInsert
 
-func insert*(mSelf: var WaterField, row, col; cell: Cell) {.inline.} =
+func insert*(self: var WaterField, row: Row, col: Column, cell: Cell) {.inline.} =
   ## Inserts `which` and shifts the field and shifts the field.
   ## If `(row, col)` is in the air, shifts the field upward above
   ## the location where inserted.
   ## If it is in the water, shifts the fields downward below the location
   ## where inserted.
-  mSelf.insert row, col, cell, waterInsert
+  self.insert row, col, cell, waterInsert
 
 func removeSqueeze(
-    mSelf: var (TsuField or WaterField),
-    row, col;
+    self: var (TsuField or WaterField),
+    row: Row,
+    col: Column,
     removeSqueezeFn: type(tsuRemoveSqueeze),
 ) {.inline.} =
   ## Removes the cell at `(row, col)` and shifts the field.
-  mSelf.hardGarbage.removeSqueezeFn row, col
-  mSelf.noneRed.removeSqueezeFn row, col
-  mSelf.greenBlue.removeSqueezeFn row, col
-  mSelf.yellowPurple.removeSqueezeFn row, col
+  self.hardGarbage.removeSqueezeFn row, col
+  self.noneRed.removeSqueezeFn row, col
+  self.greenBlue.removeSqueezeFn row, col
+  self.yellowPurple.removeSqueezeFn row, col
 
-func removeSqueeze*(mSelf: var TsuField, row, col) {.inline.} =
+func removeSqueeze*(self: var TsuField, row: Row, col: Column) {.inline.} =
   ## Removes the value at `(row, col)` and shifts the field downward
   ## above the location where the cell is removed.
-  mSelf.removeSqueeze row, col, tsuRemoveSqueeze
+  self.removeSqueeze row, col, tsuRemoveSqueeze
 
-func removeSqueeze*(mSelf: var WaterField, row, col) {.inline.} =
+func removeSqueeze*(self: var WaterField, row: Row, col: Column) {.inline.} =
   ## Removes the value at `(row, col)` and shifts the field.
   ## If `(row, col)` is in the air, shifts the field downward above
   ## the location where removed.
   ## If it is in the water, shifts the fields upward below the location
   ## where removed.
-  mSelf.removeSqueeze row, col, waterRemoveSqueeze
+  self.removeSqueeze row, col, waterRemoveSqueeze
 
 # ------------------------------------------------
 # Count
@@ -256,64 +274,78 @@ func connect2*[F: TsuField or WaterField](self: F): F {.inline.} =
   ## Returns the field with only the locations where exactly two color puyos
   ## are connected.
   ## This function ignores ghost puyos.
-  result.noneRed = self.noneRed.connect2
-  result.hardGarbage = zeroBinaryField()
-  result.greenBlue = self.greenBlue.connect2
-  result.yellowPurple = self.yellowPurple.connect2
+  F(
+    noneRed: self.noneRed.connect2,
+    hardGarbage: zeroBinaryField(),
+    greenBlue: self.greenBlue.connect2,
+    yellowPurple: self.yellowPurple.connect2,
+  )
 
 func connect2V*[F: TsuField or WaterField](self: F): F {.inline.} =
   ## Returns the field with only the locations where exactly two color puyos
   ## are connected vertically.
   ## This function ignores ghost puyos.
-  result.noneRed = self.noneRed.connect2V
-  result.hardGarbage = zeroBinaryField()
-  result.greenBlue = self.greenBlue.connect2V
-  result.yellowPurple = self.yellowPurple.connect2V
+  F(
+    noneRed: self.noneRed.connect2V,
+    hardGarbage: zeroBinaryField(),
+    greenBlue: self.greenBlue.connect2V,
+    yellowPurple: self.yellowPurple.connect2V,
+  )
 
 func connect2H*[F: TsuField or WaterField](self: F): F {.inline.} =
   ## Returns the field with only the locations where exactly two color puyos
   ## are connected horizontally.
   ## This function ignores ghost puyos.
-  result.noneRed = self.noneRed.connect2H
-  result.hardGarbage = zeroBinaryField()
-  result.greenBlue = self.greenBlue.connect2H
-  result.yellowPurple = self.yellowPurple.connect2H
+  F(
+    noneRed: self.noneRed.connect2H,
+    hardGarbage: zeroBinaryField(),
+    greenBlue: self.greenBlue.connect2H,
+    yellowPurple: self.yellowPurple.connect2H,
+  )
 
 func connect3*[F: TsuField or WaterField](self: F): F {.inline.} =
   ## Returns the field with only the locations where exactly three color puyos
   ## are connected.
   ## This function ignores ghost puyos.
-  result.noneRed = self.noneRed.connect3
-  result.hardGarbage = zeroBinaryField()
-  result.greenBlue = self.greenBlue.connect3
-  result.yellowPurple = self.yellowPurple.connect3
+  F(
+    noneRed: self.noneRed.connect3,
+    hardGarbage: zeroBinaryField(),
+    greenBlue: self.greenBlue.connect3,
+    yellowPurple: self.yellowPurple.connect3,
+  )
 
 func connect3V*[F: TsuField or WaterField](self: F): F {.inline.} =
   ## Returns the field with only the locations where exactly three color puyos
   ## are connected vertically.
   ## This function ignores ghost puyos.
-  result.noneRed = self.noneRed.connect3V
-  result.hardGarbage = zeroBinaryField()
-  result.greenBlue = self.greenBlue.connect3V
-  result.yellowPurple = self.yellowPurple.connect3V
+  F(
+    noneRed: self.noneRed.connect3V,
+    hardGarbage: zeroBinaryField(),
+    greenBlue: self.greenBlue.connect3V,
+    yellowPurple: self.yellowPurple.connect3V,
+  )
 
 func connect3H*[F: TsuField or WaterField](self: F): F {.inline.} =
   ## Returns the field with only the locations where exactly three color puyos
   ## are connected horizontally.
   ## This function ignores ghost puyos.
-  result.noneRed = self.noneRed.connect3H
-  result.hardGarbage = zeroBinaryField()
-  result.greenBlue = self.greenBlue.connect3H
-  result.yellowPurple = self.yellowPurple.connect3H
+  F(
+    noneRed: self.noneRed.connect3H,
+    hardGarbage: zeroBinaryField(),
+    greenBlue: self.greenBlue.connect3H,
+    yellowPurple: self.yellowPurple.connect3H,
+  )
 
 func connect3L*[F: TsuField or WaterField](self: F): F {.inline.} =
   ## Returns the field with only the locations where exactly three color puyos
   ## are connected by L-shape.
   ## This function ignores ghost puyos.
-  result.noneRed = self.noneRed.connect3L
-  result.hardGarbage = zeroBinaryField()
-  result.greenBlue = self.greenBlue.connect3L
-  result.yellowPurple = self.yellowPurple.connect3L
+  F(
+    noneRed: self.noneRed.connect3L,
+    hardGarbage: zeroBinaryField(),
+    greenBlue: self.greenBlue.connect3L,
+    yellowPurple: self.yellowPurple.connect3L,
+  )
 
 # ------------------------------------------------
 # Shift
@@ -321,38 +353,48 @@ func connect3L*[F: TsuField or WaterField](self: F): F {.inline.} =
 
 func shiftedUp*[F: TsuField or WaterField](self: F): F {.inline.} =
   ## Returns the field shifted upward.
-  result.hardGarbage = self.hardGarbage.shiftedUp
-  result.noneRed = self.noneRed.shiftedUp
-  result.greenBlue = self.greenBlue.shiftedUp
-  result.yellowPurple = self.yellowPurple.shiftedUp
+  F(
+    hardGarbage: self.hardGarbage.shiftedUp,
+    noneRed: self.noneRed.shiftedUp,
+    greenBlue: self.greenBlue.shiftedUp,
+    yellowPurple: self.yellowPurple.shiftedUp,
+  )
 
 func shiftedDown*[F: TsuField or WaterField](self: F): F {.inline.} =
   ## Returns the field shifted downward.
-  result.hardGarbage = self.hardGarbage.shiftedDown
-  result.noneRed = self.noneRed.shiftedDown
-  result.greenBlue = self.greenBlue.shiftedDown
-  result.yellowPurple = self.yellowPurple.shiftedDown
+  F(
+    hardGarbage: self.hardGarbage.shiftedDown,
+    noneRed: self.noneRed.shiftedDown,
+    greenBlue: self.greenBlue.shiftedDown,
+    yellowPurple: self.yellowPurple.shiftedDown,
+  )
 
 func shiftedRight*[F: TsuField or WaterField](self: F): F {.inline.} =
   ## Returns the field shifted rightward.
-  result.hardGarbage = self.hardGarbage.shiftedRight
-  result.noneRed = self.noneRed.shiftedRight
-  result.greenBlue = self.greenBlue.shiftedRight
-  result.yellowPurple = self.yellowPurple.shiftedRight
+  F(
+    hardGarbage: self.hardGarbage.shiftedRight,
+    noneRed: self.noneRed.shiftedRight,
+    greenBlue: self.greenBlue.shiftedRight,
+    yellowPurple: self.yellowPurple.shiftedRight,
+  )
 
 func shiftedLeft*[F: TsuField or WaterField](self: F): F {.inline.} =
   ## Returns the field shifted leftward.
-  result.hardGarbage = self.hardGarbage.shiftedLeft
-  result.noneRed = self.noneRed.shiftedLeft
-  result.greenBlue = self.greenBlue.shiftedLeft
-  result.yellowPurple = self.yellowPurple.shiftedLeft
+  F(
+    hardGarbage: self.hardGarbage.shiftedLeft,
+    noneRed: self.noneRed.shiftedLeft,
+    greenBlue: self.greenBlue.shiftedLeft,
+    yellowPurple: self.yellowPurple.shiftedLeft,
+  )
 
 func shiftedDownWithoutTrim[F: TsuField or WaterField](self: F): F {.inline.} =
   ## Returns the field shifted downward without trimming.
-  result.hardGarbage = self.hardGarbage.shiftedDownWithoutTrim
-  result.noneRed = self.noneRed.shiftedDownWithoutTrim
-  result.greenBlue = self.greenBlue.shiftedDownWithoutTrim
-  result.yellowPurple = self.yellowPurple.shiftedDownWithoutTrim
+  F(
+    hardGarbage: self.hardGarbage.shiftedDownWithoutTrim,
+    noneRed: self.noneRed.shiftedDownWithoutTrim,
+    greenBlue: self.greenBlue.shiftedDownWithoutTrim,
+    yellowPurple: self.yellowPurple.shiftedDownWithoutTrim,
+  )
 
 # ------------------------------------------------
 # Flip
@@ -360,37 +402,50 @@ func shiftedDownWithoutTrim[F: TsuField or WaterField](self: F): F {.inline.} =
 
 func flippedV*[F: TsuField or WaterField](self: F): F {.inline.} =
   ## Returns the field flipped vertically.
-  result.hardGarbage = self.hardGarbage.flippedV
-  result.noneRed = self.noneRed.flippedV
-  result.greenBlue = self.greenBlue.flippedV
-  result.yellowPurple = self.yellowPurple.flippedV
+  F(
+    hardGarbage: self.hardGarbage.flippedV,
+    noneRed: self.noneRed.flippedV,
+    greenBlue: self.greenBlue.flippedV,
+    yellowPurple: self.yellowPurple.flippedV,
+  )
 
 func flippedH*[F: TsuField or WaterField](self: F): F {.inline.} =
   ## Returns the field flipped horizontally.
-  result.hardGarbage = self.hardGarbage.flippedH
-  result.noneRed = self.noneRed.flippedH
-  result.greenBlue = self.greenBlue.flippedH
-  result.yellowPurple = self.yellowPurple.flippedH
+  F(
+    hardGarbage: self.hardGarbage.flippedH,
+    noneRed: self.noneRed.flippedH,
+    greenBlue: self.greenBlue.flippedH,
+    yellowPurple: self.yellowPurple.flippedH,
+  )
 
 # ------------------------------------------------
 # Disappear
 # ------------------------------------------------
 
 func disappear*(
-    mSelf: var (TsuField or WaterField)
+    self: var (TsuField or WaterField)
 ): DisappearResult {.inline, discardable.} =
   ## Removes puyos that should disappear.
-  result.red = mSelf.noneRed.disappeared
-  result.greenBlue = mSelf.greenBlue.disappeared
-  result.yellowPurple = mSelf.yellowPurple.disappeared
+  let
+    red = self.noneRed.disappeared
+    greenBlue = self.greenBlue.disappeared
+    yellowPurple = self.yellowPurple.disappeared
 
-  result.color = sum(result.red, result.greenBlue, result.yellowPurple).exist
-  result.garbage = result.color.expanded * mSelf.hardGarbage
+    color = sum(red, greenBlue, yellowPurple).exist
+    garbage = color.expanded * self.hardGarbage
 
-  mSelf.hardGarbage -= result.garbage
-  mSelf.noneRed -= result.red
-  mSelf.greenBlue -= result.greenBlue
-  mSelf.yellowPurple -= result.yellowPurple
+  result = DisappearResult(
+    red: red,
+    greenBlue: greenBlue,
+    yellowPurple: yellowPurple,
+    color: color,
+    garbage: garbage,
+  )
+
+  self.hardGarbage -= garbage
+  self.noneRed -= red
+  self.greenBlue -= greenBlue
+  self.yellowPurple -= yellowPurple
 
 func willDisappear*(self: TsuField or WaterField): bool {.inline.} =
   ## Returns `true` if any puyos will disappear.
@@ -401,13 +456,13 @@ func willDisappear*(self: TsuField or WaterField): bool {.inline.} =
 # Operation - Put
 # ------------------------------------------------
 
-func put*(mSelf: var TsuField, pair: Pair, pos: Position) {.inline.} =
+func put*(self: var TsuField, pair: Pair, pos: Position) {.inline.} =
   ## Puts the pair.
   if pos == Position.None:
     return
 
   let
-    existField = mSelf.exist
+    existField = self.exist
     nextPutMask = existField xor (existField + floorBinaryField()).shiftedUp
     nextPutMasks = [nextPutMask, nextPutMask.shiftedUp]
     axisMask = nextPutMasks[int pos in Down0 .. Down5].column pos.axisColumn
@@ -416,14 +471,14 @@ func put*(mSelf: var TsuField, pair: Pair, pos: Position) {.inline.} =
     axisWhich = pair.axis.toWhichColor
     childWhich = pair.child.toWhichColor
 
-  mSelf.noneRed +=
+  self.noneRed +=
     axisMask * axisWhich.noneRed.filled + childMask * childWhich.noneRed.filled
-  mSelf.greenBlue +=
+  self.greenBlue +=
     axisMask * axisWhich.greenBlue.filled + childMask * childWhich.greenBlue.filled
-  mSelf.yellowPurple +=
+  self.yellowPurple +=
     axisMask * axisWhich.yellowPurple.filled + childMask * childWhich.yellowPurple.filled
 
-func put*(mSelf: var WaterField, pair: Pair, pos: Position) {.inline.} =
+func put*(self: var WaterField, pair: Pair, pos: Position) {.inline.} =
   ## Puts the pair.
   if pos == Position.None:
     return
@@ -432,7 +487,7 @@ func put*(mSelf: var WaterField, pair: Pair, pos: Position) {.inline.} =
     axisCol = pos.axisColumn
     childCol = pos.childColumn
 
-    existField = mSelf.exist
+    existField = self.exist
     nextPutMask =
       (existField xor (existField + waterHighField()).shiftedUpWithoutTrim).airTrimmed
     nextPutMasks = [nextPutMask, nextPutMask.shiftedUp]
@@ -442,39 +497,39 @@ func put*(mSelf: var WaterField, pair: Pair, pos: Position) {.inline.} =
     axisWhich = pair.axis.toWhichColor
     childWhich = pair.child.toWhichColor
 
-  mSelf.noneRed +=
+  self.noneRed +=
     axisMask * axisWhich.noneRed.filled + childMask * childWhich.noneRed.filled
-  mSelf.greenBlue +=
+  self.greenBlue +=
     axisMask * axisWhich.greenBlue.filled + childMask * childWhich.greenBlue.filled
-  mSelf.yellowPurple +=
+  self.yellowPurple +=
     axisMask * axisWhich.yellowPurple.filled + childMask * childWhich.yellowPurple.filled
 
-  let shiftFields1 = [mSelf.shiftedDownWithoutTrim, mSelf]
-  mSelf.clearColumn axisCol
-  mSelf += shiftFields1[existField.exist(Row.high, axisCol)].column axisCol
+  let shiftFields1 = [self.shiftedDownWithoutTrim, self]
+  self.clearColumn axisCol
+  self += shiftFields1[existField.exist(Row.high, axisCol)].column axisCol
 
   let
-    shiftFields2 = [mSelf.shiftedDownWithoutTrim, mSelf]
-    existField2 = mSelf.exist
-  mSelf.clearColumn childCol
-  mSelf += shiftFields2[existField2.exist(Row.high, childCol)].column childCol
+    shiftFields2 = [self.shiftedDownWithoutTrim, self]
+    existField2 = self.exist
+  self.clearColumn childCol
+  self += shiftFields2[existField2.exist(Row.high, childCol)].column childCol
 
 # ------------------------------------------------
 # Operation - Drop
 # ------------------------------------------------
 
-func drop*(mSelf: var TsuField) {.inline.} =
+func drop*(self: var TsuField) {.inline.} =
   ## Drops floating puyos.
-  let mask = mSelf.exist.toDropMask
+  let mask = self.exist.toDropMask
 
-  mSelf.hardGarbage.drop mask
-  mSelf.noneRed.drop mask
-  mSelf.greenBlue.drop mask
-  mSelf.yellowPurple.drop mask
+  self.hardGarbage.drop mask
+  self.noneRed.drop mask
+  self.greenBlue.drop mask
+  self.yellowPurple.drop mask
 
-func drop*(mSelf: var WaterField) {.inline.} =
+func drop*(self: var WaterField) {.inline.} =
   ## Drops floating puyos.
-  var dropField = mSelf
+  var dropField = self
   block:
     let mask = dropField.exist.toDropMask
     dropField.hardGarbage.drop mask
@@ -483,34 +538,35 @@ func drop*(mSelf: var WaterField) {.inline.} =
     dropField.yellowPurple.drop mask
 
   block:
-    mSelf.hardGarbage.flipV
-    mSelf.noneRed.flipV
-    mSelf.greenBlue.flipV
-    mSelf.yellowPurple.flipV
+    self.hardGarbage.flipV
+    self.noneRed.flipV
+    self.greenBlue.flipV
+    self.yellowPurple.flipV
 
-    let mask = mSelf.exist.toDropMask
-    mSelf.hardGarbage.drop mask
-    mSelf.noneRed.drop mask
-    mSelf.greenBlue.drop mask
-    mSelf.yellowPurple.drop mask
+    let mask = self.exist.toDropMask
+    self.hardGarbage.drop mask
+    self.noneRed.drop mask
+    self.greenBlue.drop mask
+    self.yellowPurple.drop mask
 
-    mSelf.hardGarbage.flipV
-    mSelf.noneRed.flipV
-    mSelf.greenBlue.flipV
-    mSelf.yellowPurple.flipV
+    self.hardGarbage.flipV
+    self.noneRed.flipV
+    self.greenBlue.flipV
+    self.yellowPurple.flipV
 
-    mSelf.hardGarbage.shiftDownWithoutTrim Height - WaterHeight
-    mSelf.noneRed.shiftDownWithoutTrim Height - WaterHeight
-    mSelf.greenBlue.shiftDownWithoutTrim Height - WaterHeight
-    mSelf.yellowPurple.shiftDownWithoutTrim Height - WaterHeight
+    self.hardGarbage.shiftDownWithoutTrim Height - WaterHeight
+    self.noneRed.shiftDownWithoutTrim Height - WaterHeight
+    self.greenBlue.shiftDownWithoutTrim Height - WaterHeight
+    self.yellowPurple.shiftDownWithoutTrim Height - WaterHeight
 
-  let waterDropExistField = mSelf.exist
-  mSelf.hardGarbage =
-    waterDrop(waterDropExistField, dropField.hardGarbage, mSelf.hardGarbage)
-  mSelf.noneRed = waterDrop(waterDropExistField, dropField.noneRed, mSelf.noneRed)
-  mSelf.greenBlue = waterDrop(waterDropExistField, dropField.greenBlue, mSelf.greenBlue)
-  mSelf.yellowPurple =
-    waterDrop(waterDropExistField, dropField.yellowPurple, mSelf.yellowPurple)
+  let waterDropExistField = self.exist
+  self.hardGarbage =
+    waterDropped(waterDropExistField, dropField.hardGarbage, self.hardGarbage)
+  self.noneRed = waterDropped(waterDropExistField, dropField.noneRed, self.noneRed)
+  self.greenBlue =
+    waterDropped(waterDropExistField, dropField.greenBlue, self.greenBlue)
+  self.yellowPurple =
+    waterDropped(waterDropExistField, dropField.yellowPurple, self.yellowPurple)
 
 # ------------------------------------------------
 # Field <-> array
@@ -556,7 +612,9 @@ func parseField*[F: TsuField or WaterField](
       greenBlueArr[row][col] = greenBlue
       yellowPurpleArr[row][col] = yellowPurple
 
-  result.hardGarbage = hardGarbageArr.parseBinaryField
-  result.noneRed = noneRedArr.parseBinaryField
-  result.greenBlue = greenBlueArr.parseBinaryField
-  result.yellowPurple = yellowPurpleArr.parseBinaryField
+  result = F(
+    hardGarbage: hardGarbageArr.parseBinaryField,
+    noneRed: noneRedArr.parseBinaryField,
+    greenBlue: greenBlueArr.parseBinaryField,
+    yellowPurple: yellowPurpleArr.parseBinaryField,
+  )

@@ -4,7 +4,7 @@
 ## Submodule Documentations:
 ## - [color](./app/color.html)
 ## - [generate](./app/generate.html)
-## - [gui](./app/gui.html)
+## - [ide](./app/ide.html)
 ## - [key](./app/key.html)
 ## - [marathon](./app/marathon.html)
 ## - [nazopuyo](./app/nazopuyo.html)
@@ -12,12 +12,23 @@
 ## - [simulator](./app/simulator.html)
 ## - [solve](./app/solve.html)
 ##
+## Compile Options:
+## | Option                         | Description                      | Default             |
+## | ------------------------------ | -------------------------------- | ------------------- |
+## | `-d:pon2.path=<str>`           | URI path of the web IDE.         | `/pon2/`            |
+## | `-d:pon2.workerfilename=<str>` | File name of the web worker.     | `worker.min.js`     |
+## | `-d:pon2.assets.native=<str>`  | Assets directory for native app. | `<Pon2Root>/assets` |
+## | `-d:pon2.assets.web=<str>`     | Assets directory for web app.    | `./assets`          |
+##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./app/[color, generate, gui, key, marathon, nazopuyo, permute, simulator, solve]
+import ./app/[color, generate, ide, key, marathon, nazopuyo, permute, simulator, solve]
 
 export
   color.Color, color.SelectColor, color.GhostColor, color.WaterColor, color.DefaultColor
@@ -25,16 +36,16 @@ export
   generate.GenerateError, generate.GenerateRequirementColor,
   generate.GenerateRequirement, generate.generate
 export
-  gui.GuiApplicationAnswer, gui.GuiApplication, gui.initGuiApplication, gui.simulator,
-  gui.simulatorRef, gui.answerSimulator, gui.answerSimulatorRef, gui.answer,
-  gui.focusAnswer, gui.solving, gui.permuting, gui.progressBar, gui.toggleFocus,
-  gui.solve, gui.permute, gui.nextAnswer, gui.prevAnswer, gui.operate
+  ide.AnswerData, ide.Ide, ide.newIde, ide.simulator, ide.answerSimulator,
+  ide.answerData, ide.focusAnswer, ide.solving, ide.permuting, ide.progressBarData,
+  ide.toggleFocus, ide.solve, ide.permute, ide.nextAnswer, ide.prevAnswer, ide.toUri,
+  ide.parseIde, ide.operate
 export key.KeyEvent, key.initKeyEvent
 export
-  marathon.MarathonMatchResult, marathon.Marathon, marathon.initMarathon,
-  marathon.simulator, marathon.simulatorRef, marathon.matchResult,
-  marathon.focusSimulator, marathon.toggleFocus, marathon.nextResultPage,
-  marathon.prevResultPage, marathon.match, marathon.play, marathon.operate
+  marathon.MarathonMatchResult, marathon.Marathon, marathon.newMarathon,
+  marathon.simulator, marathon.matchResult, marathon.focusSimulator, marathon.isReady,
+  marathon.toggleFocus, marathon.nextResultPage, marathon.prevResultPage,
+  marathon.match, marathon.play, marathon.operate
 export
   nazopuyo.NazoPuyoWrap, nazopuyo.initNazoPuyoWrap, nazopuyo.get, nazopuyo.rule,
   nazopuyo.`rule=`, nazopuyo.`==`
@@ -42,38 +53,35 @@ export permute.permute
 export
   simulator.SimulatorKind, simulator.SimulatorMode, simulator.SimulatorState,
   simulator.SimulatorEditing, simulator.Simulator, simulator.initSimulator,
-  simulator.copy, simulator.rule, simulator.kind, simulator.mode, simulator.`rule=`,
-  simulator.`kind=`, simulator.`mode=`, simulator.nazoPuyoWrap,
-  simulator.nazoPuyoWrapBeforeMoves, simulator.`pairsPositions=`, simulator.editing,
-  simulator.`editingCell=`, simulator.state, simulator.score,
-  simulator.operatingPosition, simulator.toggleInserting, simulator.toggleFocus,
-  simulator.moveCursorUp, simulator.moveCursorDown, simulator.moveCursorRight,
-  simulator.moveCursorLeft, simulator.deletePairPosition, simulator.writeCell,
-  simulator.shiftFieldUp, simulator.shiftFieldDown, simulator.shiftFieldRight,
-  simulator.shiftFieldLeft, simulator.flipFieldV, simulator.flipFieldH, simulator.flip,
-  simulator.`requirementKind=`, simulator.`requirementColor=`,
-  simulator.`requirementNumber=`, simulator.undo, simulator.redo,
-  simulator.moveOperatingPositionRight, simulator.moveOperatingPositionLeft,
-  simulator.rotateOperatingPositionRight, simulator.rotateOperatingPositionLeft,
-  simulator.forward, simulator.backward, simulator.reset, simulator.toUri,
-  simulator.parseSimulator, simulator.operate
+  simulator.copy, simulator.nazoPuyoWrap, simulator.nazoPuyoWrapBeforeMoves,
+  simulator.rule, simulator.kind, simulator.mode, simulator.`rule=`, simulator.`kind=`,
+  simulator.`mode=`, simulator.editing, simulator.`editingCell=`, simulator.state,
+  simulator.score, simulator.operatingPosition, simulator.toggleInserting,
+  simulator.toggleFocus, simulator.moveCursorUp, simulator.moveCursorDown,
+  simulator.moveCursorRight, simulator.moveCursorLeft, simulator.deletePairPosition,
+  simulator.writeCell, simulator.shiftFieldUp, simulator.shiftFieldDown,
+  simulator.shiftFieldRight, simulator.shiftFieldLeft, simulator.flipFieldV,
+  simulator.flipFieldH, simulator.flip, simulator.`requirementKind=`,
+  simulator.`requirementColor=`, simulator.`requirementNumber=`, simulator.undo,
+  simulator.redo, simulator.moveOperatingPositionRight,
+  simulator.moveOperatingPositionLeft, simulator.rotateOperatingPositionRight,
+  simulator.rotateOperatingPositionLeft, simulator.forward, simulator.backward,
+  simulator.reset, simulator.toUriQuery, simulator.parseSimulator, simulator.operate
 export solve.solve
 
 when defined(js):
   export color.toColorCode
-  export
-    gui.runKeyboardEventHandler, gui.initKeyboardEventHandler,
-    gui.initGuiApplicationNode
+  export ide.runKeyboardEventHandler, ide.newKeyboardEventHandler, ide.newIdeNode
   export key.toKeyEvent
   export
-    marathon.runKeyboardEventHandler, marathon.initKeyboardEventHandler,
-    marathon.initMarathonNode
-  export simulator.initSimulatorNode
+    marathon.asyncLoadData, marathon.runKeyboardEventHandler,
+    marathon.newKeyboardEventHandler, marathon.newMarathonNode
+  export simulator.newSimulatorNode
 else:
   export color.toNiguiColor
   export
-    gui.GuiApplicationControl, gui.GuiApplicationWindow, gui.runKeyboardEventHandler,
-    gui.initKeyboardEventHandler, gui.initGuiApplicationControl,
-    gui.initGuiApplicationWindow
+    ide.IdeControl, ide.IdeWindow, ide.runKeyboardEventHandler,
+    ide.newKeyboardEventHandler, ide.newIdeControl, ide.newIdeWindow
+  export marathon.loadData
   export key.toKeyEvent
-  export simulator.SimulatorControl, simulator.initSimulatorControl
+  export simulator.SimulatorControl, simulator.newSimulatorControl

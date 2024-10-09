@@ -1,9 +1,12 @@
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2/private/[intrinsic {.all.}]
+import ../../src/pon2/private/[intrinsic]
 
 proc main*() =
   # ------------------------------------------------

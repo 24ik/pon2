@@ -4,12 +4,15 @@
 ## - Bitboard with primitive types
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[sequtils, setutils, strutils, sugar, tables]
-import ./[cell, fieldtype, host, moveresult, pair, pairposition, position, rule]
+import ./[cell, fieldtype, fqdn, moveresult, pair, pairposition, position, rule]
 import ../private/[intrinsic]
 import ../private/core/field/[binary]
 
@@ -31,10 +34,10 @@ export
 # Operator
 # ------------------------------------------------
 
-func `==`*(self: TsuField, field: WaterField): bool {.inline.} =
+func `==`*(field1: TsuField, field2: WaterField): bool {.inline.} =
   false
 
-func `==`*(self: WaterField, field: TsuField): bool {.inline.} =
+func `==`*(field1: WaterField, field2: TsuField): bool {.inline.} =
   false
 
 # ------------------------------------------------
@@ -43,11 +46,11 @@ func `==`*(self: WaterField, field: TsuField): bool {.inline.} =
 
 func toTsuField*(self: TsuField): TsuField {.inline.} =
   ## Returns the Tsu field converted from the given field.
-  result = self
+  self
 
 func toWaterField*(self: WaterField): WaterField {.inline.} =
   ## Returns the Water field converted from the given field.
-  result = self
+  self
 
 # ------------------------------------------------
 # Property
@@ -92,41 +95,41 @@ func validDoublePositions*(self: TsuField or WaterField): set[Position] {.inline
 # Shift
 # ------------------------------------------------
 
-func shiftUp*(mSelf: var (TsuField or WaterField)) {.inline.} =
+func shiftUp*(self: var (TsuField or WaterField)) {.inline.} =
   ## Shifts the field upward.
-  mSelf = mSelf.shiftedUp
+  self = self.shiftedUp
 
-func shiftDown*(mSelf: var (TsuField or WaterField)) {.inline.} =
+func shiftDown*(self: var (TsuField or WaterField)) {.inline.} =
   ## Shifts the field downward.
-  mSelf = mSelf.shiftedDown
+  self = self.shiftedDown
 
-func shiftRight*(mSelf: var (TsuField or WaterField)) {.inline.} =
+func shiftRight*(self: var (TsuField or WaterField)) {.inline.} =
   ## Shifts the field rightward.
-  mSelf = mSelf.shiftedRight
+  self = self.shiftedRight
 
-func shiftLeft*(mSelf: var (TsuField or WaterField)) {.inline.} =
+func shiftLeft*(self: var (TsuField or WaterField)) {.inline.} =
   ## Shifts the field leftward.
-  mSelf = mSelf.shiftedLeft
+  self = self.shiftedLeft
 
 # ------------------------------------------------
 # Flip
 # ------------------------------------------------
 
-func flipV*(mSelf: var (TsuField or WaterField)) {.inline.} =
+func flipV*(self: var (TsuField or WaterField)) {.inline.} =
   ## Flips the field vertically.
-  mSelf = mSelf.flippedV
+  self = self.flippedV
 
-func flipH*(mSelf: var (TsuField or WaterField)) {.inline.} =
+func flipH*(self: var (TsuField or WaterField)) {.inline.} =
   ## Flips the field horizontally.
-  mSelf = mSelf.flippedH
+  self = self.flippedH
 
 # ------------------------------------------------
 # Operate
 # ------------------------------------------------
 
-func put*(mSelf: var (TsuField or WaterField), pairPos: PairPosition) {.inline.} =
+func put*(self: var (TsuField or WaterField), pairPos: PairPosition) {.inline.} =
   ## Puts the pair.
-  mSelf.put pairPos.pair, pairPos.position
+  self.put pairPos.pair, pairPos.position
 
 func willDrop*(self: TsuField or WaterField): bool {.inline.} =
   ## Returns `true` if the field will drop.
@@ -141,7 +144,7 @@ func willDrop*(self: TsuField or WaterField): bool {.inline.} =
 # ------------------------------------------------
 
 func move*(
-    mSelf: var (TsuField or WaterField), pair: Pair, pos: Position
+    self: var (TsuField or WaterField), pair: Pair, pos: Position
 ): MoveResult {.inline, discardable.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
@@ -151,54 +154,54 @@ func move*(
     chainCount = 0
     disappearCounts: array[Puyo, int] = [0, 0, 0, 0, 0, 0, 0]
 
-  mSelf.put pair, pos
+  self.put pair, pos
 
   while true:
-    let disappearResult = mSelf.disappear
+    let disappearResult = self.disappear
     if disappearResult.notDisappeared:
       return initMoveResult(chainCount, disappearCounts)
 
-    mSelf.drop
+    self.drop
 
     chainCount.inc
     for puyo in Puyo:
       disappearCounts[puyo].inc disappearResult.puyoCount puyo
 
-  result = initMoveResult(chainCount, disappearCounts) # HACK: dummy to suppress warning
+  result = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0]) # HACK: dummy to suppress warning
 
 func move*(
-    mSelf: var (TsuField or WaterField), pairPos: PairPosition
+    self: var (TsuField or WaterField), pairPos: PairPosition
 ): MoveResult {.inline, discardable.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
-  result = mSelf.move(pairPos.pair, pairPos.position)
+  self.move(pairPos.pair, pairPos.position)
 
 func move0*(
-    mSelf: var (TsuField or WaterField), pair: Pair, pos: Position
+    self: var (TsuField or WaterField), pair: Pair, pos: Position
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
-  result = mSelf.move(pair, pos)
+  self.move(pair, pos)
 
 func move0*(
-    mSelf: var (TsuField or WaterField), pairPos: PairPosition
+    self: var (TsuField or WaterField), pairPos: PairPosition
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
-  result = mSelf.move pairPos
+  self.move pairPos
 
 # ------------------------------------------------
 # Move - Level1
 # ------------------------------------------------
 
 func move1*(
-    mSelf: var (TsuField or WaterField), pair: Pair, pos: Position
+    self: var (TsuField or WaterField), pair: Pair, pos: Position
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
@@ -208,46 +211,45 @@ func move1*(
   var
     chainCount = 0
     disappearCounts: array[Puyo, int] = [0, 0, 0, 0, 0, 0, 0]
-    detailDisappearCounts: seq[array[Puyo, int]] = @[]
+    detailDisappearCounts = newSeq[array[Puyo, int]](0)
 
-  mSelf.put pair, pos
+  self.put pair, pos
 
   while true:
-    let disappearResult = mSelf.disappear
+    let disappearResult = self.disappear
     if disappearResult.notDisappeared:
       return initMoveResult(chainCount, disappearCounts, detailDisappearCounts)
 
-    mSelf.drop
+    self.drop
 
     chainCount.inc
 
     var counts: array[Puyo, int]
-    counts[Puyo.low] = Natural.low # HACK: dummy to suppress warning
+    counts[Puyo.low] = int.low # HACK: dummy to suppress warning
     for puyo in Puyo.low .. Puyo.high:
       let count = disappearResult.puyoCount puyo
       counts[puyo] = count
       disappearCounts[puyo].inc count
     detailDisappearCounts.add counts
 
-  # HACK: dummy to suppress warning
-  result = initMoveResult(chainCount, disappearCounts, detailDisappearCounts)
+  result = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0]) # HACK: dummy to suppress warning
 
 func move1*(
-    mSelf: var (TsuField or WaterField), pairPos: PairPosition
+    self: var (TsuField or WaterField), pairPos: PairPosition
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
   ## - Number of chains
   ## - Number of puyos that disappeared
   ## - Number of puyos that disappeared in each chain
-  result = mSelf.move1(pairPos.pair, pairPos.position)
+  self.move1(pairPos.pair, pairPos.position)
 
 # ------------------------------------------------
 # Move - Level2
 # ------------------------------------------------
 
 func move2*(
-    mSelf: var (TsuField or WaterField), pair: Pair, pos: Position
+    self: var (TsuField or WaterField), pair: Pair, pos: Position
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
@@ -258,29 +260,35 @@ func move2*(
   var
     chainCount = 0
     disappearCounts: array[Puyo, int] = [0, 0, 0, 0, 0, 0, 0]
-    fullDisappearCounts: seq[array[ColorPuyo, seq[int]]] = @[]
+    detailDisappearCounts = newSeq[array[Puyo, int]](0)
+    fullDisappearCounts = newSeq[array[ColorPuyo, seq[int]]](0)
 
-  mSelf.put pair, pos
+  self.put pair, pos
 
   while true:
-    let disappearResult = mSelf.disappear
+    let disappearResult = self.disappear
     if disappearResult.notDisappeared:
-      return initMoveResult(chainCount, disappearCounts, fullDisappearCounts)
+      return initMoveResult(
+        chainCount, disappearCounts, detailDisappearCounts, fullDisappearCounts
+      )
 
-    mSelf.drop
+    self.drop
 
     chainCount.inc
 
+    var counts: array[Puyo, int]
+    counts[Puyo.low] = int.low # HACK: dummy to suppress warning
     for puyo in Puyo.low .. Puyo.high:
       let count = disappearResult.puyoCount puyo
+      counts[puyo] = count
       disappearCounts[puyo].inc count
+    detailDisappearCounts.add counts
     fullDisappearCounts.add disappearResult.connectionCounts
 
-  # HACK: dummy to suppress warning
-  result = initMoveResult(chainCount, disappearCounts, fullDisappearCounts)
+  result = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0]) # HACK: dummy to suppress warning
 
 func move2*(
-    mSelf: var (TsuField or WaterField), pairPos: PairPosition
+    self: var (TsuField or WaterField), pairPos: PairPosition
 ): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
   ## This function tracks:
@@ -288,24 +296,14 @@ func move2*(
   ## - Number of puyos that disappeared
   ## - Number of puyos that disappeared in each chain
   ## - Number of color puyos in each connected component that disappeared in each chain
-  result = mSelf.move2(pairPos.pair, pairPos.position)
+  self.move2(pairPos.pair, pairPos.position)
 
 # ------------------------------------------------
 # Field <-> string
 # ------------------------------------------------
 
-func `$`*(self: TsuField): string {.inline.} =
-  # NOTE: using generics for `$` raises error
-  let
-    arr = self.toArray
-    lines = collect:
-      for row in Row.low .. Row.high:
-        join arr[row].mapIt $it
-
-  result = lines.join "\n"
-
-func `$`*(self: WaterField): string {.inline.} =
-  # NOTE: using generics for `$` raises error
+func `$`*(self: TsuField or WaterField): string {.inline.} =
+  # NOTE: using explicit generics for `$` does not work
   let
     arr = self.toArray
     lines = collect:
@@ -322,7 +320,7 @@ func parseField*[F: TsuField or WaterField](str: string): F {.inline.} =
     raise newException(ValueError, "Invalid field: " & str)
 
   var arr: array[Row, array[Column, Cell]]
-  arr[Row.low][Column.low] = Cell.low # dummy to remove warning
+  arr[Row.low][Column.low] = Cell.low # HACK: dummy to suppress warning
   for row in Row.low .. Row.high:
     for col in Column.low .. Column.high:
       arr[row][col] = ($lines[row][col]).parseCell
@@ -334,10 +332,10 @@ func parseField*[F: TsuField or WaterField](str: string): F {.inline.} =
 # ------------------------------------------------
 
 const
-  IkUriRuleFieldSep = "-"
-  IkUriAirWaterSep = "~"
+  Pon2UriRuleFieldSep = "-"
+  Pon2UriAirWaterSep = "~"
 
-  IkUriToRule = collect:
+  Pon2UriToRule = collect:
     for rule in Rule:
       {$rule: rule}
 
@@ -350,12 +348,12 @@ const
     for cell, idx in CellToIshikawaIdx:
       {idx: cell}
 
-func toUriQuery*(self: TsuField or WaterField, host: SimulatorHost): string {.inline.} =
+func toUriQuery*(self: TsuField or WaterField, fqdn = Pon2): string {.inline.} =
   ## Returns the URI query converted from the field.
   let arr = self.toArray
 
-  case host
-  of Ik:
+  case fqdn
+  of Pon2:
     let cellsStr =
       case self.rule
       of Tsu:
@@ -376,10 +374,10 @@ func toUriQuery*(self: TsuField or WaterField, host: SimulatorHost): string {.in
               for cell in arr[row]:
                 $cell
 
-        airChars.join.strip(trailing = false, chars = {($None)[0]}) & IkUriAirWaterSep &
+        airChars.join.strip(trailing = false, chars = {($None)[0]}) & Pon2UriAirWaterSep &
           underWaterChars.join.strip(leading = false, chars = {($None)[0]})
 
-    result = $self.rule & IkUriRuleFieldSep & cellsStr
+    result = $self.rule & Pon2UriRuleFieldSep & cellsStr
   of Ishikawa, Ips:
     var lines = newSeqOfCap[string](Height)
     for row in Row.low .. Row.high:
@@ -399,22 +397,22 @@ func toUriQuery*(self: TsuField or WaterField, host: SimulatorHost): string {.in
     result = lines.join.strip(trailing = false, chars = {'0'})
 
 func parseField*[F: TsuField or WaterField](
-    query: string, host: SimulatorHost
+    query: string, fqdn: IdeFqdn
 ): F {.inline.} =
   ## Returns the field converted from the query.
   ## If the query is invalid, `ValueError` is raised.
   var arr: array[Row, array[Column, Cell]]
-  arr[Row.low][Column.low] = Cell.low # dummy to remove warning
+  arr[Row.low][Column.low] = Cell.low # HAKC: dummy to suppress warning
 
-  case host
-  of Ik:
-    let strs = query.split IkUriRuleFieldSep
-    if strs.len != 2 or strs[0] notin IkUriToRule:
+  case fqdn
+  of Pon2:
+    let strs = query.split Pon2UriRuleFieldSep
+    if strs.len != 2 or strs[0] notin Pon2UriToRule:
       raise newException(ValueError, "Invalid field: " & query)
 
-    if strs[0] notin IkUriToRule:
+    if strs[0] notin Pon2UriToRule:
       raise newException(ValueError, "Invalid field: " & query)
-    let rule = IkUriToRule[strs[0]]
+    let rule = Pon2UriToRule[strs[0]]
 
     when F is TsuField:
       if rule != Tsu:
@@ -433,7 +431,7 @@ func parseField*[F: TsuField or WaterField](
         for col in Column.low .. Column.high:
           arr[row][col] = parseCell $cellsStr[row * Width + col]
     of Water:
-      let cellsStrs = strs[1].split IkUriAirWaterSep
+      let cellsStrs = strs[1].split Pon2UriAirWaterSep
       if cellsStrs.len != 2 or cellsStrs[0].len > AirHeight * Width or
           cellsStrs[1].len > WaterHeight * Width:
         raise newException(ValueError, "Invalid field: " & query)

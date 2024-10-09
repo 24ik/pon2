@@ -1,9 +1,12 @@
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2/core/[host, position {.all.}]
+import ../../src/pon2/core/[fqdn, position]
 
 proc main*() =
   # ------------------------------------------------
@@ -73,10 +76,10 @@ proc main*() =
     check $Right2 == "34"
     check "34".parsePosition == Right2
 
-    check Right2.toUriQuery(Ik) == "34"
+    check Right2.toUriQuery(Pon2) == "34"
     check Right2.toUriQuery(Ishikawa) == "g"
     check Right2.toUriQuery(Ips) == "g"
 
-    check "34".parsePosition(Ik) == Right2
+    check "34".parsePosition(Pon2) == Right2
     check "g".parsePosition(Ishikawa) == Right2
     check "g".parsePosition(Ips) == Right2

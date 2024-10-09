@@ -1,12 +1,13 @@
 ## This module implements helper functions for the simulator.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, uri]
-import ../../[misc]
 import ../../../app/[color, nazopuyo, simulator]
 import
   ../../../core/[
@@ -152,6 +153,8 @@ func getMessages*(
 .} =
   ## Returns the messages.
   ## Note that `noticeGarbages` in the result should be used only in rendering.
+  result = ("", 0, [0, 0, 0, 0, 0, 0, 0]) # HACK: dummy to suppress warning
+
   if simulator.state == Stable:
     case simulator.kind
     of Regular:
@@ -184,29 +187,3 @@ func getMessages*(
       result.noticeGarbages[notice].dec count - ShownNoticeGarbageCount
     if count >= ShownNoticeGarbageCount:
       break
-
-# ------------------------------------------------
-# X
-# ------------------------------------------------
-
-const RuleDescriptions: array[Rule, string] = ["通", "すいちゅう"]
-
-func toXLink*(simulator: Simulator, withPositions: bool): Uri {.inline.} =
-  ## Returns the URI for posting to X.
-  let simulatorUri = simulator.toUri withPositions
-
-  if simulator.kind == Nazo:
-    simulator.nazoPuyoWrap.get:
-      let
-        ruleStr =
-          if simulator.rule == Tsu:
-            ""
-          else:
-            RuleDescriptions[simulator.rule]
-        moveCount = wrappedNazoPuyo.moveCount
-        reqStr = $wrappedNazoPuyo.requirement
-
-      result =
-        initXLink(&"{ruleStr}{moveCount}手・{reqStr}", "なぞぷよ", simulatorUri)
-  else:
-    result = initXLink(uri = simulatorUri)

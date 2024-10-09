@@ -1,16 +1,19 @@
 ## This module implements nodes of solution search tree.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, setutils, strutils, sugar, tables, uri]
+import std/[options, sequtils, setutils, strutils, sugar, tables, uri]
 import ../[misc]
 import ../core/[mark]
 import
   ../../core/[
-    cell, field, host, moveresult, nazopuyo, pair, pairposition, position, puyopuyo,
+    cell, field, fqdn, moveresult, nazopuyo, pair, pairposition, position, puyopuyo,
     requirement,
   ]
 
@@ -33,16 +36,19 @@ type Node*[F: TsuField or WaterField] = object ## Node of solution search tree.
 
 func initNode*[F: TsuField or WaterField](nazo: NazoPuyo[F]): Node[F] {.inline.} =
   ## Returns the root node of the nazo puyo.
-  result.nazoPuyo = nazo
-  result.moveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0])
-
-  result.disappearedColors = {}
-  result.disappearedCount = 0
+  result = Node[F](
+    nazoPuyo: nazo,
+    moveResult: initMoveResult(0, [0, 0, 0, 0, 0, 0, 0]),
+    disappearedColors: {},
+    disappearedCount: 0,
+    fieldCounts: [0, 0, 0, 0, 0],
+    pairsCounts: [0, 0, 0, 0, 0],
+    garbageCount: nazo.puyoPuyo.field.garbageCount,
+  )
 
   for color in ColorPuyo:
     result.fieldCounts[color] = nazo.puyoPuyo.field.puyoCount color
     result.pairsCounts[color] = nazo.puyoPuyo.pairsPositions.puyoCount color
-  result.garbageCount = nazo.puyoPuyo.field.garbageCount
 
 # ------------------------------------------------
 # Property
@@ -412,8 +418,8 @@ func solve*[F: TsuField or WaterField](
 # ------------------------------------------------
 
 const
-  NodeStrSep = "<pon2-node-sep>"
-  NodeStrAuxSep = "<pon2-node-aux-sep>"
+  NodeStrSep = "<pon2-solve-node-sep>"
+  NodeStrAuxSep = "<pon2-solve-node-aux-sep>"
 
 func toStr(colors: set[ColorPuyo]): string {.inline.} =
   ## Returns the string representation of the colors.
@@ -423,27 +429,36 @@ func toStr(colors: set[ColorPuyo]): string {.inline.} =
 
   result = strs.join NodeStrAuxSep
 
+func trackingLevel(moveResult: MoveResult): int {.inline.} =
+  ## Returns the tracking level of the move result.
+  result =
+    if moveResult.fullDisappearCounts.isSome:
+      2
+    elif moveResult.detailDisappearCounts.isSome:
+      1
+    else:
+      0
+
 func toStr(moveResult: MoveResult): string {.inline.} =
   ## Returns the string representation of the move result.
   var strs = newSeq[string](0)
 
   strs.add $moveResult.chainCount
   strs &= moveResult.disappearCounts.mapIt $it
-  strs.add $moveResult.trackingLevel.ord
+  let level = moveResult.trackingLevel
+  strs.add $level
 
-  case moveResult.trackingLevel
-  of Level0:
-    discard
-  of Level1:
-    strs.add $moveResult.detailDisappearCounts.len
-    for counts in moveResult.detailDisappearCounts:
+  if level > 0:
+    strs.add $moveResult.detailDisappearCounts.get.len
+    for counts in moveResult.detailDisappearCounts.get:
       strs &= counts.mapIt $it
-  of Level2:
-    strs.add $moveResult.fullDisappearCounts.len
-    for detailCounts in moveResult.fullDisappearCounts:
-      for color in ColorPuyo.low .. ColorPuyo.high:
-        strs.add $detailCounts[color].len
-        strs &= detailCounts[color].mapIt $it
+
+    if level > 1:
+      strs.add $moveResult.fullDisappearCounts.get.len
+      for detailCounts in moveResult.fullDisappearCounts.get:
+        for color in ColorPuyo.low .. ColorPuyo.high:
+          strs.add $detailCounts[color].len
+          strs &= detailCounts[color].mapIt $it
 
   result = strs.join NodeStrAuxSep
 
@@ -451,7 +466,7 @@ func toStr*[F: TsuField or WaterField](node: Node[F]): string {.inline.} =
   ## Returns the string representation of the node.
   var strs = newSeqOfCap[string](16)
 
-  strs.add $node.nazoPuyo.toUriQuery Ik
+  strs.add $node.nazoPuyo.toUriQuery
   strs.add $node.nazoPuyo.puyoPuyo.operatingIndex
   strs.add node.moveResult.toStr
 
@@ -478,51 +493,55 @@ func parseMoveResult(str: string): MoveResult {.inline.} =
   ## If the conversion fails, `ValueError` will be raised.
   let strs = str.split NodeStrAuxSep
 
+  let level: int
   const Zeros: array[Puyo, int] = [0, 0, 0, 0, 0, 0, 0]
   case strs[8].parseInt
   of 0:
+    level = 0
     result = initMoveResult(0, Zeros)
   of 1:
-    result = initMoveResult(0, Zeros, newSeq[array[Puyo, int]](0))
+    level = 1
+    result = initMoveResult(0, Zeros, @[])
   of 2:
-    result = initMoveResult(0, Zeros, newSeq[array[ColorPuyo, seq[int]]](0))
+    level = 2
+    result = initMoveResult(0, Zeros, @[], @[])
   else:
-    raise newException(ValueError, "Invalid move result: " & str)
+    level = 0 # HACK: dummy to compile
+    result = initMoveResult(0, Zeros) # HACK: dummy to suppress warning
+    assert false
 
   result.chainCount = strs[0].parseInt
   for i in 0 ..< 7:
     result.disappearCounts[Puyo.low.succ i] = strs[1 + i].parseInt
 
-  case result.trackingLevel
-  of Level0:
-    discard
-  of Level1:
-    result.detailDisappearCounts = newSeq[array[Puyo, int]](strs[9].parseInt)
+  if level > 0:
+    result.detailDisappearCounts = some newSeq[array[Puyo, int]](strs[9].parseInt)
 
     var idx = 10
-    for counts in result.detailDisappearCounts.mitems:
+    for counts in result.detailDisappearCounts.get.mitems:
       for puyo in Puyo.low .. Puyo.high:
         counts[puyo] = strs[idx].parseInt
         idx.inc
-  of Level2:
-    result.fullDisappearCounts = newSeq[array[ColorPuyo, seq[int]]](strs[9].parseInt)
 
-    var idx = 10
-    for detailCounts in result.fullDisappearCounts.mitems:
-      for color in ColorPuyo.low .. ColorPuyo.high:
-        detailCounts[color] = newSeq[int](strs[idx].parseInt)
-        idx.inc
+    if level > 1:
+      result.fullDisappearCounts =
+        some newSeq[array[ColorPuyo, seq[int]]](strs[idx].parseInt)
 
-        for count in detailCounts[color].mitems:
-          count = strs[idx].parseInt
+      for detailCounts in result.fullDisappearCounts.get.mitems:
+        for color in ColorPuyo.low .. ColorPuyo.high:
+          detailCounts[color] = newSeq(strs[idx].parseInt)
           idx.inc
+
+          for count in detailCounts[color].mitems:
+            count = strs[idx].parseInt
+            idx.inc
 
 func parseNode*[F: TsuField or WaterField](str: string): Node[F] {.inline.} =
   ## Converts the string to the node.
   ## If the conversion fails, `ValueError` will be raised.
   let strs = str.split NodeStrSep
 
-  result.nazoPuyo = parseNazoPuyo[F](strs[0], Ik)
+  result = initNode[F](parseNazoPuyo[F](strs[0], Pon2))
   for _ in 1 .. strs[1].parseInt:
     result.nazoPuyo.puyoPuyo.incrementOperatingIndex
   result.moveResult = strs[2].parseMoveResult

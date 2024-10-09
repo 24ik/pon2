@@ -1,12 +1,15 @@
 ## This module implements Nazo Puyo requirements.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[setutils, strutils, sugar, tables, uri]
-import ../core/[host]
+import std/[options, setutils, strutils, sugar, tables, uri]
+import ../core/[fqdn]
 
 type
   RequirementKind* {.pure.} = enum
@@ -42,17 +45,10 @@ type
 
   RequirementNumber* = range[0 .. 63] ## 'n' in the `RequirementKind`.
 
-  Requirement* = object
-    ## Nazo Puyo requirement to clear.
-    ## Note that `Clear` kind has no number, but it is included due to technical
-    ## reason in Nim; the value should be zero.
-    case kind*: RequirementKind
-    of DisappearColor, DisappearColorMore, Chain, ChainMore, DisappearColorSametime,
-        DisappearColorMoreSametime:
-      discard
-    else:
-      color*: RequirementColor
-    number*: RequirementNumber
+  Requirement* = object ## Nazo Puyo requirement to clear.
+    kind: RequirementKind
+    color: Option[RequirementColor]
+    number: Option[RequirementNumber]
 
 const
   NoColorKinds* = {
@@ -64,52 +60,117 @@ const
   ColorKinds* = NoColorKinds.complement ## All requirement kinds containing 'c'.
   NumberKinds* = NoNumberKinds.complement ## All requirement kinds containing 'n'.
 
-using
-  self: Requirement
-  mSelf: var Requirement
-
 # ------------------------------------------------
-# Operator
+# Constructor
 # ------------------------------------------------
 
-func `==`*(self; req: Requirement): bool {.inline.} =
-  self.kind == req.kind and self.number == req.number and
-    (req.kind notin ColorKinds or self.color == req.color)
+func initRequirement*(
+    kind: RequirementKind, color: RequirementColor, number: RequirementNumber
+): Requirement {.inline.} =
+  ## Returns a requirement.
+  Requirement(kind: kind, color: some color, number: some number)
+
+func initRequirement*(
+    kind: RequirementKind, color: RequirementColor
+): Requirement {.inline.} =
+  ## Returns a requirement.
+  Requirement(kind: kind, color: some color, number: none RequirementNumber)
+
+func initRequirement*(
+    kind: RequirementKind, number: RequirementNumber
+): Requirement {.inline.} =
+  Requirement(kind: kind, color: none RequirementColor, number: some number)
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-func isSupported*(self): bool {.inline.} =
+const
+  DefaultColor = All
+  DefaultNumber = 0.RequirementNumber
+
+func isSupported*(self: Requirement): bool {.inline.} =
   ## Returns `true` if the requirement is supported.
   self.kind notin
     {DisappearPlace, DisappearPlaceMore, DisappearConnect, DisappearConnectMore} or
-    self.color != Garbage
+    self.color != some Garbage
+
+func kind*(self: Requirement): RequirementKind {.inline.} =
+  ## Returns the kind of the requirement.
+  self.kind
+
+func color*(self: Requirement): RequirementColor {.inline.} =
+  ## Returns the color of the requirement.
+  ## If the requirement does not have a color, `UnpackDefect` is raised.
+  self.color.get
+
+func number*(self: Requirement): RequirementNumber {.inline.} =
+  ## Returns the number of the requirement.
+  ## If the requirement does not have a number, `UnpackDefect` is raised.
+  self.number.get
+
+func `kind=`*(self: var Requirement, kind: RequirementKind) {.inline.} =
+  ## Sets the kind of the requirement.
+  if self.kind == kind:
+    return
+  self.kind = kind
+
+  if kind in ColorKinds:
+    if self.color.isNone:
+      self.color = some DefaultColor
+  else:
+    if self.color.isSome:
+      self.color = none RequirementColor
+
+  if kind in NumberKinds:
+    if self.number.isNone:
+      self.number = some DefaultNumber
+  else:
+    if self.number.isSome:
+      self.number = none RequirementNumber
+
+func `color=`*(self: var Requirement, color: RequirementColor) {.inline.} =
+  ## Sets the color of the requirement.
+  ## If the requirement does not have a color, `UnpackDefect` is raised.
+  if self.kind in NoColorKinds:
+    raise newException(UnpackDefect, "The requirement does not have a color.")
+
+  self.color = some color
+
+func `number=`*(self: var Requirement, number: RequirementNumber) {.inline.} =
+  ## Sets the number of the requirement.
+  ## If the requirement does not have a color, `UnpackDefect` is raised.
+  if self.kind in NoNumberKinds:
+    raise newException(UnpackDefect, "The requirement does not have a number.")
+
+  self.number = some number
 
 # ------------------------------------------------
 # Requirement <-> string
 # ------------------------------------------------
 
-func `$`*(req: Requirement): string {.inline.} =
-  result = ($req.kind).replace("n", $req.number)
-  if req.kind in ColorKinds:
-    result = result.replace("c", $req.color)
+func `$`*(self: Requirement): string {.inline.} =
+  result = $self.kind
+  if self.kind in ColorKinds:
+    result = result.replace("c", $self.color.get)
+  if self.kind in NumberKinds:
+    result = result.replace("n", $self.number.get)
 
 # NOTE: this should be put after `$`
 {.cast(uncheckedAssign).}:
   const
     AllRequirementsClear = collect:
       for color in RequirementColor:
-        Requirement(kind: Clear, color: color, number: 0)
+        initRequirement(Clear, color)
     AllRequirementsWithColor = collect:
       for kind in ColorKinds - {Clear}:
         for color in RequirementColor:
           for num in RequirementNumber.low .. RequirementNumber.high:
-            Requirement(kind: kind, color: color, number: num)
+            initRequirement(kind, color, num)
     AllRequirementsWithoutColor = collect:
       for kind in NoColorKinds:
         for num in RequirementNumber.low .. RequirementNumber.high:
-          Requirement(kind: kind, number: num)
+          initRequirement(kind, num)
 const StrToRequirement = collect:
   for req in AllRequirementsClear & AllRequirementsWithColor &
       AllRequirementsWithoutColor:
@@ -150,93 +211,88 @@ const
 
   RequirementQueryKeys* = [KindKey, ColorKey, NumberKey]
 
-func toUriQuery*(req: Requirement, host: SimulatorHost): string {.inline.} =
+func toUriQuery*(self: Requirement, fqdn = Pon2): string {.inline.} =
   ## Returns the URI query converted from the requirement.
-  case host
-  of Ik:
-    var queries = @[(KindKey, $req.kind.ord)]
-    if req.kind in ColorKinds:
-      queries.add (ColorKey, $req.color.ord)
-    if req.kind in NumberKinds:
-      queries.add (NumberKey, $req.number)
+  case fqdn
+  of Pon2:
+    var queries = @[(KindKey, $self.kind.ord)]
+    if self.kind in ColorKinds:
+      queries.add (ColorKey, $self.color.get.ord)
+    if self.kind in NumberKinds:
+      queries.add (NumberKey, $self.number.get)
 
     result = queries.encodeQuery
   of Ishikawa, Ips:
     let
-      kindChar = KindToIshikawaUri[req.kind.ord]
+      kindChar = KindToIshikawaUri[self.kind.ord]
       colorChar =
-        if req.kind in ColorKinds:
-          ColorToIshikawaUri[req.color.ord]
+        if self.kind in ColorKinds:
+          ColorToIshikawaUri[self.color.get.ord]
         else:
           EmptyIshikawaUri
       numChar =
-        if req.kind in NumberKinds:
-          NumberToIshikawaUri[req.number]
+        if self.kind in NumberKinds:
+          NumberToIshikawaUri[self.number.get]
         else:
           EmptyIshikawaUri
 
     result = kindChar & colorChar & numChar
 
-func parseRequirement*(query: string, host: SimulatorHost): Requirement {.inline.} =
+func parseRequirement*(query: string, fqdn: IdeFqdn): Requirement {.inline.} =
   ## Returns the requirement converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
-  var
-    kind = RequirementKind.low
-    color = RequirementColor.low
-    number = RequirementNumber.low
+  result = Requirement(
+    kind: RequirementKind.low,
+    color: none RequirementColor,
+    number: none RequirementNumber,
+  )
 
-  case host
-  of Ik:
-    var
-      kindSet = false
-      colorSet = false
-      numberSet = false
-
+  case fqdn
+  of Pon2:
+    var kindSet = false
     for (key, val) in query.decodeQuery:
       case key
       of KindKey:
+        if kindSet:
+          raise newException(ValueError, "Invalid requirement: " & query)
+
         let kindInt = val.parseInt
         if kindInt notin RequirementKind.low.ord .. RequirementKind.high.ord:
           raise newException(ValueError, "Invalid requirement: " & query)
 
-        kind = kindInt.RequirementKind
+        result.kind = kindInt.RequirementKind
         kindSet = true
       of ColorKey:
-        var colorInt = val.parseInt
+        if result.color.isSome:
+          raise newException(ValueError, "Invalid requirement: " & query)
+
+        let colorInt = val.parseInt
         if colorInt notin RequirementColor.low.ord .. RequirementColor.high.ord:
           raise newException(ValueError, "Invalid requirement: " & query)
 
-        color = colorInt.RequirementColor
-        colorSet = true
+        result.color = some colorInt.RequirementColor
       of NumberKey:
+        if result.number.isSome:
+          raise newException(ValueError, "Invalid requirement: " & query)
+
         let numberInt = val.parseInt
         if numberInt notin RequirementNumber.low.ord .. RequirementNumber.high.ord:
           raise newException(ValueError, "Invalid requirement: " & query)
 
-        number = numberInt.RequirementNumber
-        numberSet = true
+        result.number = some numberInt.RequirementNumber
       else:
         raise newException(ValueError, "Invalid requirement: " & query)
 
-    if not kindSet or (kind in ColorKinds != colorSet) or
-        (kind in NumberKinds != numberSet):
+    if not kindSet or (result.kind in ColorKinds != result.color.isSome) or
+        (result.kind in NumberKinds != result.number.isSome):
       raise newException(ValueError, "Invalid requirement: " & query)
   of Ishikawa, Ips:
     if query.len != 3 or query[0] notin IshikawaUriToKind or
         query[1] notin IshikawaUriToColor or query[2] notin IshikawaUriToNumber:
       raise newException(ValueError, "Invalid requirement: " & query)
 
-    kind = IshikawaUriToKind[query[0]]
-    if kind in ColorKinds:
-      color = IshikawaUriToColor[query[1]]
-    if kind in NumberKinds:
-      number = IshikawaUriToNumber[query[2]]
-
-    if kind == Clear:
-      number = RequirementNumber.low
-
-  {.cast(uncheckedAssign).}:
-    if kind in ColorKinds:
-      result = Requirement(kind: kind, color: color, number: number)
-    else:
-      result = Requirement(kind: kind, number: number)
+    result.kind = IshikawaUriToKind[query[0]]
+    if result.kind in ColorKinds:
+      result.color = some IshikawaUriToColor[query[1]]
+    if result.kind in NumberKinds:
+      result.number = some IshikawaUriToNumber[query[2]]

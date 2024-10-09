@@ -1,13 +1,15 @@
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[sequtils, sets, sugar, unittest, uri]
-import ../../src/pon2/app/[solve {.all.}]
-import ../../src/pon2/core/[field, host, nazopuyo, pairposition, position, puyopuyo]
+import ../../src/pon2/app/[solve]
+import ../../src/pon2/core/[field, fqdn, nazopuyo, pairposition, position, puyopuyo]
 
 proc checkSolve(question: string, answers: varargs[string]) =
-  {.push warning[ProveInit]: off.}
   let
     nazo = parseNazoPuyo[TsuField](question, Ishikawa)
     answersSeq = collect:
@@ -19,11 +21,8 @@ proc checkSolve(question: string, answers: varargs[string]) =
           )
         )
     answersSet = answersSeq.toHashSet
-  {.pop.}
 
-  {.push warning[ProveInit]: off.}
   check nazo.solve.toHashSet == answersSet
-  {.pop.}
 
 proc main*() =
   # ------------------------------------------------

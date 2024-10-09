@@ -1,9 +1,12 @@
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2/core/[cell, host, pair {.all.}]
+import ../../src/pon2/core/[cell, fqdn, pair]
 
 proc main*() =
   # ------------------------------------------------
@@ -76,10 +79,10 @@ proc main*() =
     check $RedGreen == "rg"
     check "rg".parsePair == RedGreen
 
-    check RedGreen.toUriQuery(Ik) == "rg"
+    check RedGreen.toUriQuery(Pon2) == "rg"
     check RedGreen.toUriQuery(Ishikawa) == "c"
     check RedGreen.toUriQuery(Ips) == "c"
 
-    check "rg".parsePair(Ik) == RedGreen
+    check "rg".parsePair(Pon2) == RedGreen
     check "c".parsePair(Ishikawa) == RedGreen
     check "c".parsePair(Ips) == RedGreen

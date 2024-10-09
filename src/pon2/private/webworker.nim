@@ -1,10 +1,16 @@
 ## This module implements the web worker.
+##
+## Compile Options:
+## | Option                         | Description                  | Default         |
+## | ------------------------------ | ---------------------------- | --------------- |
+## | `-d:pon2.workerfilename=<str>` | File name of the web worker. | `worker.min.js` |
+##
 ## Outline of the processing flow:
 ##
 ## 1. The main file launches the web worker by `initWorker()`.
 ## 1. The main file assigns the handler that executed after the task is done.
 ## 1. The main file makes the worker do the task. The task is implemented in the
-## worker file by `assignToWorker()`.
+##   worker file by `assignToWorker()`.
 ## 1. The handler is executed.
 ##
 ## The following example shows the number-increment task.
@@ -15,9 +21,9 @@ runnableExamples:
   proc show(returnCode: WorkerReturnCode, messages: seq[string]) =
     echo "returnCode: ", returnCode, " messages: ", messages
 
-  let worker = initWorker
+  let worker = newWorker()
   worker.completeHandler = show
-  worker.run 6
+  worker.run $6
 
 runnableExamples:
   # Worker File
@@ -40,6 +46,9 @@ runnableExamples:
   when isMainModule:
     assignToWorker(myInc)
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -53,14 +62,13 @@ type
     Failure = "failure"
 
   WorkerTask* =
-    (seq[string] -> tuple[returnCode: WorkerReturnCode, messages: seq[string]])
+    seq[string] -> tuple[returnCode: WorkerReturnCode, messages: seq[string]]
     ## Task executed in a new thread.
 
-  WorkerCompleteHandler* =
-    ((returnCode: WorkerReturnCode, messages: seq[string]) -> void)
+  WorkerCompleteHandler* = (returnCode: WorkerReturnCode, messages: seq[string]) -> void
     ## Handler executed after the `WorkerTask` completed.
 
-  Worker* = object ## Web worker.
+  Worker* = ref object ## Web worker.
     running*: bool
     webWorker: JsObject
 
@@ -73,10 +81,6 @@ const
 
   HeaderSep = "|-<pon2-webworker-header-sep>-|"
   MessageSep = "|-<pon2-webworker-sep>-|"
-
-using
-  self: Worker
-  mSelf: var Worker
 
 # ------------------------------------------------
 # Task
@@ -96,28 +100,28 @@ func split2(str: string, sep: string): seq[string] {.inline.} =
 proc assignToWorker*(task: WorkerTask) {.inline.} =
   ## Assigns the task to the worker.
   proc runTask(event: JsObject) =
-    let (returnCode, messages) = task(($event.data.to(cstring)).split2 MessageSep)
-    getSelf().postMessage(cstring &"{returnCode}{HeaderSep}{messages.join MessageSep}")
+    let (returnCode, messages) = task(($event.data.to cstring).split2 MessageSep)
+    getSelf().postMessage cstring &"{returnCode}{HeaderSep}{messages.join MessageSep}"
 
   getSelf().onmessage = runTask
 
-proc run*(mSelf; args: varargs[string]) {.inline.} =
+proc run*(self: Worker, args: varargs[string]) {.inline.} =
   ## Runs the task and sends the message to the caller of the worker.
-  mSelf.running = true
-  mSelf.webWorker.postMessage cstring args.join MessageSep
+  self.running = true
+  self.webWorker.postMessage cstring args.join MessageSep
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
-proc initWebWorker(): JsObject {.importjs: &"new Worker('{WorkerFileName}')".}
+proc newWebWorker(): JsObject {.importjs: &"new Worker('{WorkerFileName}')".}
   ## Returns the web worker launched by the caller.
 
-proc `completeHandler=`*(mSelf; handler: WorkerCompleteHandler) {.inline.} =
+proc `completeHandler=`*(self: Worker, handler: WorkerCompleteHandler) {.inline.} =
   proc runHandler(event: JsObject) =
-    mSelf.running = false
+    self.running = false
 
-    let messages = ($event.data.to(cstring)).split HeaderSep
+    let messages = ($event.data.to cstring).split HeaderSep
     if messages.len != 2:
       echo "Invalid arguments are passed to the complete handler: ", $messages
       return
@@ -130,10 +134,9 @@ proc `completeHandler=`*(mSelf; handler: WorkerCompleteHandler) {.inline.} =
     else:
       echo "Invalid return code is passed to the complete handler: ", messages[0]
 
-  mSelf.webWorker.onmessage = runHandler
+  self.webWorker.onmessage = runHandler
 
-proc initWorker*(): Worker {.inline.} =
+proc newWorker*(): Worker {.inline.} =
   ## Returns the worker.
-  result.running = false
-  result.webWorker = initWebWorker()
+  result = Worker(running: false, webWorker: newWebWorker())
   result.completeHandler = DefaultWorkerCompleteHandler

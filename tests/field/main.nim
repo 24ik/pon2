@@ -1,11 +1,12 @@
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[setutils, strutils, unittest]
-import
-  ../../src/pon2/core/
-    [cell, field {.all.}, fieldtype, host, pair, pairposition, position, rule]
+import std/[strutils, unittest]
+import ../../src/pon2/core/[cell, field, fieldtype, pair, pairposition, position, rule]
 
 proc main*() =
   # ------------------------------------------------

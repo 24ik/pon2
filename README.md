@@ -8,7 +8,7 @@ Features:
 - Generator: Generates the Nazo Puyo.
 - Permuter: Permutes the pairs in the Nazo Puyo to find a unique-solution
 problem.
-- [GUI Application](https://24ik.github.io/pon2/?kind=n&mode=e&field=t-&pairs&req-kind=0&req-color=0): GUI simulator for Puyo Puyo and Nazo Puyo.
+- [IDE](https://24ik.github.io/pon2/?kind=n&mode=e&field=t-&pairs&req-kind=0&req-color=0): IDE for Puyo Puyo and Nazo Puyo.
 - [Marathon](https://24ik.github.io/pon2/marathon/): Search for pairs sequence and play a marathon mode.
 
 Not supported now:
@@ -21,12 +21,10 @@ native-GUI application is beta version.
 
 ## Installation
 
-### Downloading Binary
+### Downloading Built Binary
 
-You can get the binary at the
+You can get the built binary at the
 [latest release](https://github.com/24ik/pon2/releases/latest).
-Note that the built binary may not work on macOS due to the limitation of
-[NiGui](https://github.com/simonkrauter/NiGui).
 
 ### Manual Installation
 
@@ -46,18 +44,16 @@ See the documentations:
 - [Solver](./docs/solve.md)
 - [Generator](./docs/generate.md)
 - [Permuter](./docs/permute.md)
-- [GUI Application](./docs/gui.md)
+- [IDE](./docs/ide.md)
 
 ## For Developers
 
-When using pon2 as a library, it is necessary to copy `assets` directory as a
-sibling of the output file.
+It is necessary to place the `assets` directory to the one specified by
+`-d:pon2.assets.native` or `-d:pon2.assets.web`.
 
 ### Known Issues
 
-- On Windows, the followings does not work:
-    - cpp and JS backend
-    - AVX2
+- AVX2 only works on Linux.
 
 ### API Usage
 
@@ -90,3 +86,5 @@ Please work on a new branch and then submit a PR for the `main` branch.
 ## License
 
 Apache-2.0
+
+See [LICENSE](./LICENSE) and [NOTICE](./NOTICE) for details.

@@ -1,6 +1,6 @@
 # Package
 
-version = "0.21.2"
+version = "0.22.0"
 author = "Keisuke Izumiya"
 description = "Application for Puyo Puyo and Nazo Puyo"
 license = "Apache-2.0"
@@ -11,12 +11,13 @@ bin = @["pon2"]
 
 # Dependencies
 
-requires "nim ^= 2.0.8"
+requires "nim ^= 2.2.0"
 
 requires "docopt ^= 0.7.1"
 requires "karax ^= 1.3.3"
 requires "nigui ^= 0.2.8"
 requires "nimsimd ^= 1.2.13"
+requires "puppy ^= 2.1.2"
 requires "suru ^= 0.3.2"
 
 # Tasks
@@ -40,6 +41,7 @@ task benchmark, "Benchmarking":
 
 task documentation, "Make Documentation":
   exec &"nim doc --project -d:pon2.avx2=true src/pon2.nim"
+  rmDir "src/htmldocs2"
   mvDir "src/htmldocs", "src/htmldocs2"
 
   exec &"nim doc --project -d:pon2.avx2=false src/pon2.nim"
@@ -82,7 +84,7 @@ task web, "Make Web Pages":
   "src/pon2.nim".compile "www/worker.min.js", "-d:pon2.worker"
 
   # marathon
-  "src/pon2.nim".compile "www/marathon/index.min.js", "-d:pon2.marathon"
+  "src/pon2.nim".compile "www/marathon/index.min.js", "-d:pon2.marathon", "-d:pon2.assets.web=../assets"
 
   # documentation
   exec "nimble -y documentation"

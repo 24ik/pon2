@@ -7,40 +7,42 @@
 ## - [pon2/app](./pon2/app.html)
 ##
 ## Compile Options:
-## | Option                            | Description                 | Default |
-## | --------------------------------- | --------------------------- | ------- |
-## | `-d:pon2.waterheight=<int>`       | Height of the water.        | `8`     |
-## | `-d:pon2.garbagerate.tsu=<int>`   | Garbage rate in Tsu rule.   | `70`    |
-## | `-d:pon2.garbagerate.water=<int>` | Garbage rate in Water rule. | `90`    |
-## | `-d:pon2.avx2=<bool>`             | Use AVX2 instructions.      | `true`  |
-## | `-d:pon2.bmi2=<bool>`             | Use BMI2 instructions.      | `true`  |
-## | `-d:pon2.worker`                  | Generate web worker file.   |         |
-## | `-d:pon2.marathon`                | Generate marathon JS file.  |         |
+## | Option                            | Description                      | Default             |
+## | --------------------------------- | -------------------------------- | ------------------- |
+## | `-d:pon2.waterheight=<int>`       | Height of the water.             | `8`                 |
+## | `-d:pon2.garbagerate.tsu=<int>`   | Garbage rate in Tsu rule.        | `70`                |
+## | `-d:pon2.garbagerate.water=<int>` | Garbage rate in Water rule.      | `90`                |
+## | `-d:pon2.avx2=<bool>`             | Use AVX2 instructions.           | `true`              |
+## | `-d:pon2.bmi2=<bool>`             | Use BMI2 instructions.           | `true`              |
+## | `-d:pon2.fqdn=<str>`              | FQDN of the web IDE.             | `24ik.github.io`    |
+## | `-d:pon2.path=<str>`              | URI path of the web IDE.         | `/pon2/`            |
+## | `-d:pon2.workerfilename=<str>`    | File name of the web worker.     | `worker.min.js`     |
+## | `-d:pon2.assets.native=<str>`     | Assets directory for native app. | `<Pon2Root>/assets` |
+## | `-d:pon2.assets.web=<str>`        | Assets directory for web app.    | `./assets`          |
+## | `-d:pon2.worker`                  | Generates web worker file.       | `<undefined>`       |
+## | `-d:pon2.marathon`                | Generates marathon JS file.      | `<undefined>`       |
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 when isMainModule:
   when defined(js):
+    import ./pon2/private/main/[web]
+
     when defined(pon2.worker):
       import ./pon2/private/[webworker]
-      import ./pon2/private/main/[web]
-
       assignToWorker workerTask
     elif defined(pon2.marathon):
-      import std/[sugar]
       import karax/[karax]
-      import ./pon2/private/main/[web]
-
-      setRenderer () => initMainMarathonNode()
+      setRenderer marathonRenderer
     else:
-      import std/[sugar]
-      import ./pon2/private/main/[web]
       import karax/[karax]
-
-      setRenderer (routerData: RouterData) => routerData.initMainGuiApplicationNode
+      setRenderer ideRenderer
   else:
     import std/[tables]
     import ./pon2/private/main/[native]
@@ -53,7 +55,7 @@ when isMainModule:
     elif args["permute"] or args["p"]:
       args.runPermuter
     else:
-      args.runGuiApplication
+      args.runIde
 
 when defined(nimdoc):
   import ./pon2/app

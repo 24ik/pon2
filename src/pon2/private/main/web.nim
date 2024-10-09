@@ -1,133 +1,159 @@
 ## This module implements helper functions for the web main file.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, strformat, strutils, uri]
-import karax/[karax, karaxdsl, vdom]
-import ../[misc, webworker]
-import ../app/[solve]
-import ../app/gui/web/[webworker]
-import ../../app/[gui, marathon, nazopuyo, simulator, solve]
-import ../../core/[field, host, nazopuyo, pairposition, puyopuyo, rule]
+when defined(pon2.worker):
+  import std/[sequtils]
+  import ../[webworker]
+  import ../app/[solve]
+  import ../app/ide/web/[webworker]
+  import ../../app/[nazopuyo, solve]
+  import ../../core/[field, fqdn, nazopuyo, pairposition, rule]
 
-# ------------------------------------------------
-# Web Worker
-# ------------------------------------------------
+  # ------------------------------------------------
+  # Web Worker
+  # ------------------------------------------------
 
-proc workerTask*(
-    args: seq[string]
-): tuple[returnCode: WorkerReturnCode, messages: seq[string]] =
-  ## Worker's task.
-  # NOTE: cannot inline due to the type of `assignWebWorker` argument
-  if args.len == 0:
-    result.returnCode = Failure
-    result.messages = @["No arguments."]
-    return
+  proc workerTask*(
+      args: seq[string]
+  ): tuple[returnCode: WorkerReturnCode, messages: seq[string]] =
+    ## Worker's task.
+    result = (returnCode: Failure, messages: @["No arguments."])
+    if args.len == 0:
+      return
 
-  let args2 = args[1 ..^ 1]
-  case args[0]
-  of $Solve:
-    if args2.len == 2:
-      result.messages =
-        case args2[0].parseRule
+    let args2 = args[1 ..^ 1]
+    case args[0]
+    of $Solve:
+      if args2.len == 2:
+        result.messages =
+          case args2[0].parseRule
+          of Tsu:
+            parseNode[TsuField](args2[1]).solve.mapIt it.toUriQuery
+          of Water:
+            parseNode[WaterField](args2[1]).solve.mapIt it.toUriQuery
+
+        result.returnCode = Success
+      else:
+        result.returnCode = Failure
+        result.messages = @["Caught invalid number of arguments: " & $args]
+    of $Permute:
+      if args2.len == 2:
+        result.returnCode = Success
+
+        let nazoPuyoWrap: NazoPuyoWrap
+        case args2[1].parseRule
         of Tsu:
-          parseNode[TsuField](args2[1]).solve.mapIt it.toUriQuery Ik
+          nazoPuyoWrap = parseNazoPuyo[TsuField](args2[0], Pon2).initNazoPuyoWrap
         of Water:
-          parseNode[WaterField](args2[1]).solve.mapIt it.toUriQuery Ik
+          nazoPuyoWrap = parseNazoPuyo[WaterField](args2[0], Pon2).initNazoPuyoWrap
 
-      result.returnCode = Success
+        nazoPuyoWrap.get:
+          let answers = wrappedNazoPuyo.solve(earlyStopping = true)
+          if answers.len == 1:
+            result.messages = @[$true, answers[0].toUriQuery]
+          else:
+            result.messages = @[$false]
+      else:
+        result.returnCode = Failure
+        result.messages = @["Caught invalid number of arguments: " & $args]
     else:
       result.returnCode = Failure
-      result.messages = @["Caught invalid number of arguments: " & $args]
-  of $Permute:
-    if args2.len == 2:
-      result.returnCode = Success
+      result.messages = @["Caught invalid task: " & args[0]]
 
-      let nazoPuyoWrap: NazoPuyoWrap
-      case args2[1].parseRule
-      of Tsu:
-        nazoPuyoWrap = parseNazoPuyo[TsuField](args2[0], Ik).initNazoPuyoWrap
-      of Water:
-        nazoPuyoWrap = parseNazoPuyo[WaterField](args2[0], Ik).initNazoPuyoWrap
+else:
+  import std/[strformat]
+  import karax/[karaxdsl, vdom]
+  import ../[misc]
 
-      nazoPuyoWrap.get:
-        let answers = wrappedNazoPuyo.solve(earlyStopping = true)
-        if answers.len == 1:
-          result.messages = @[$true, answers[0].toUriQuery Ik]
-        else:
-          result.messages = @[$false]
-    else:
-      result.returnCode = Failure
-      result.messages = @["Caught invalid number of arguments: " & $args]
+  # ------------------------------------------------
+  # Main
+  # ------------------------------------------------
+
+  proc newFooterNode(): VNode {.inline.} =
+    ## Returns the footer node.
+    buildHtml(footer(class = "footer")):
+      tdiv(class = "content has-text-centered"):
+        text &"Pon!通 Version {Pon2Version}"
+
+  when defined(pon2.marathon):
+    import std/[sugar]
+    import karax/[karax]
+    import ../../app/[marathon]
+
+    # ------------------------------------------------
+    # Main - Marathon
+    # ------------------------------------------------
+
+    let globalMarathon = newMarathon()
+    globalMarathon.asyncLoadData () => (if not kxi.surpressRedraws: kxi.redraw
+    )
+
+    proc newMainMarathonNode(marathon: Marathon): VNode {.inline.} =
+      ## Returns the main marathon node.
+      buildHtml(tdiv):
+        marathon.newMarathonNode()
+        newFooterNode()
+
+    proc marathonRenderer*(): VNode =
+      ## Renderer procedure for the marathon.
+      globalMarathon.newMainMarathonNode
+
   else:
-    result.returnCode = Failure
-    result.messages = @["Caught invalid task: " & args[0]]
+    import std/[uri]
+    import karax/[karax]
+    import ../../app/[ide]
+    import ../../core/[fqdn]
 
-# ------------------------------------------------
-# Main - GUI
-# ------------------------------------------------
+    # ------------------------------------------------
+    # Main - IDE
+    # ------------------------------------------------
 
-var globalGuiApplication: ref GuiApplication = nil
+    var
+      globalIde = newIde()
+      globalIdeIsSet = false
+      globalIdeIsInvalid = false
 
-proc initFooterNode(): VNode {.inline.} =
-  ## Returns the footer node.
-  buildHtml(footer(class = "footer")):
-    tdiv(class = "content has-text-centered"):
-      text &"Pon!通 Version {Pon2Version}"
+    proc newMainIdeNode(ide: Ide, error: bool): VNode {.inline.} =
+      ## Returns the main IDE node.
+      buildHtml(tdiv):
+        if error:
+          text "URL形式エラー"
+        else:
+          ide.newIdeNode()
+          newFooterNode()
 
-proc initMainGuiApplicationNode*(routerData: RouterData): VNode {.inline.} =
-  ## Returns the main GUI application node.
-  if not globalGuiApplication.isNil:
-    return buildHtml(tdiv):
-      globalGuiApplication.initGuiApplicationNode
-      initFooterNode()
+    proc setGlobalIde(routerData: RouterData) {.inline.} =
+      ## Sets the global IDE.
+      ## If the URI is invalid, `none` is set.
+      if globalIdeIsSet:
+        return
 
-  let query =
-    if routerData.queryString == cstring"":
-      ""
-    else:
-      ($routerData.queryString)[1 ..^ 1]
+      let query =
+        if routerData.queryString == cstring"":
+          ""
+        else:
+          ($routerData.queryString)[1 ..^ 1]
 
-  var uri = initUri()
-  uri.scheme = "https"
-  uri.hostname = $Ik
-  uri.path = "/pon2/"
-  uri.query = query
+      var uri = initUri()
+      uri.scheme = "https"
+      uri.hostname = $Pon2
+      uri.path = IdeUriPath
+      uri.query = query
 
-  try:
-    let simulator = new Simulator
-    simulator[] = uri.parseSimulator
+      try:
+        globalIde = uri.parseIde
+      except ValueError:
+        globalIdeIsInvalid = true
+      globalIdeIsSet = true
 
-    globalGuiApplication.new
-    globalGuiApplication[] = simulator.initGuiApplication
-
-    result = buildHtml(tdiv):
-      globalGuiApplication.initGuiApplicationNode
-      initFooterNode()
-  except ValueError:
-    globalGuiApplication = nil
-    result = buildHtml(tdiv):
-      text "URL形式エラー"
-
-# ------------------------------------------------
-# Main - Marathon
-# ------------------------------------------------
-
-var globalMarathon: ref Marathon = nil
-
-proc initMainMarathonNode*(): VNode {.inline.} =
-  ## Returns the main marathon node.
-  if not globalMarathon.isNil:
-    return buildHtml(tdiv):
-      globalMarathon.initMarathonNode
-      initFooterNode()
-
-  globalMarathon.new
-  globalMarathon[] = initMarathon()
-
-  result = buildHtml(tdiv):
-    globalMarathon.initMarathonNode
-    initFooterNode()
+    proc ideRenderer*(routerData: RouterData): VNode =
+      ## Renderer procedure for the IDE.
+      routerData.setGlobalIde
+      result = globalIde.newMainIdeNode globalIdeIsInvalid

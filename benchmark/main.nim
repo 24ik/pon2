@@ -1,4 +1,9 @@
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
 
 import std/[math, monotimes, times]
 import ../src/pon2/[app, core]

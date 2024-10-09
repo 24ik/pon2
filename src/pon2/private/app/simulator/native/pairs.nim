@@ -1,6 +1,9 @@
 ## This module implements the pairs control.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -39,14 +42,14 @@ proc cellDrawHandler(
     cell = if axis: pair.axis else: pair.child
   canvas.drawImage control.assets.cellImages[cell]
 
-func initCellDrawHandler(
+func newCellDrawHandler(
     control: PairsControl, idx: Natural, isAxis: bool
 ): (event: DrawEvent) -> void =
   ## Returns the pair's draw handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: DrawEvent) => control.cellDrawHandler(event, idx, isAxis)
 
-proc initPairControl(
+proc newPairControl(
     control: PairsControl, idx: Natural, assets: Assets
 ): LayoutContainer {.inline.} =
   ## Returns a pair control.
@@ -63,11 +66,11 @@ proc initPairControl(
 
   axis.height = assets.cellImageSize.height
   axis.width = assets.cellImageSize.width
-  axis.onDraw = control.initCellDrawHandler(idx, true)
+  axis.onDraw = control.newCellDrawHandler(idx, true)
 
   child.height = assets.cellImageSize.height
   child.width = assets.cellImageSize.width
-  child.onDraw = control.initCellDrawHandler(idx, false)
+  child.onDraw = control.newCellDrawHandler(idx, false)
 
 # ------------------------------------------------
 # Index
@@ -85,17 +88,17 @@ proc indexDrawHandler(
   let nextArrow = if control.simulator[].needPairPointer(idx): "> " else: "  "
   canvas.drawText nextArrow & $idx.succ
 
-func initIndexDrawHandler(
+func newIndexDrawHandler(
     control: PairsControl, idx: Natural
 ): (event: DrawEvent) -> void =
   ## Returns the index's draw handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: DrawEvent) => control.indexDrawHandler(event, idx)
 
-proc initIndexControl(control: PairsControl, idx: Natural): Control {.inline.} =
+proc newIndexControl(control: PairsControl, idx: Natural): Control {.inline.} =
   ## Returns an index control.
   result = newControl()
-  result.onDraw = control.initIndexDrawHandler idx
+  result.onDraw = control.newIndexDrawHandler idx
 
 # ------------------------------------------------
 # Position
@@ -118,32 +121,32 @@ proc positionDrawHandler(
         Position.None
     canvas.drawText $pos
 
-func initPositionDrawHandler(
+func newPositionDrawHandler(
     control: PairsControl, idx: Natural
 ): (event: DrawEvent) -> void =
   ## Returns the position's draw handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: DrawEvent) => control.positionDrawHandler(event, idx)
 
-proc initPositionControl(control: PairsControl, idx: Natural): Control {.inline.} =
+proc newPositionControl(control: PairsControl, idx: Natural): Control {.inline.} =
   ## Returns a position control.
   result = newControl()
-  result.onDraw = control.initPositionDrawHandler idx
+  result.onDraw = control.newPositionDrawHandler idx
 
 # ------------------------------------------------
 # Pairs
 # ------------------------------------------------
 
-proc initFullPairControl(
+proc newFullPairControl(
     control: PairsControl, idx: Natural, assets: Assets
 ): LayoutContainer {.inline.} =
   ## Returns a full pair control.
   result = newLayoutContainer Layout_Horizontal
 
   let
-    idxControl = control.initIndexControl idx
-    pairControl = control.initPairControl(idx, assets)
-    positionControl = control.initPositionControl idx
+    idxControl = control.newIndexControl idx
+    pairControl = control.newPairControl(idx, assets)
+    positionControl = control.newPositionControl idx
   result.add idxControl
   result.add pairControl
   result.add positionControl
@@ -156,11 +159,13 @@ proc initFullPairControl(
   positionControl.width = positionControl.getTextWidth $Position.low
   positionControl.height = pairControl.naturalHeight
 
-proc initPairsControl*(
+proc newPairsControl*(
     simulator: ref Simulator, assets: Assets
 ): PairsControl {.inline.} =
   ## Returns a pairs control.
-  result = new PairsControl
+  {.push warning[ProveInit]: off.}
+  result.new
+  {.pop.}
   result.init
   result.layout = Layout_Vertical
 
@@ -169,4 +174,4 @@ proc initPairsControl*(
 
   simulator[].nazoPuyoWrap.get:
     for idx in 0 .. wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
-      result.add result.initFullPairControl(idx, assets)
+      result.add result.newFullPairControl(idx, assets)

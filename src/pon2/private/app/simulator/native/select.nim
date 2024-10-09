@@ -1,6 +1,9 @@
 ## This module implements the select control.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -63,26 +66,26 @@ proc kindHandler(
   reqControl.updateRequirementControl event
   event.control.parentWindow.control.forceRedraw
 
-func initModeHandler(
+func newModeHandler(
     control: SelectControl, mode: SimulatorMode, reqControl: RequirementControl
 ): (event: ClickEvent) -> void =
   ## Returns the mode handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: ClickEvent) => control.modeHandler(event, mode, reqControl)
 
-func initRuleHandler(control: SelectControl, rule: Rule): (event: ClickEvent) -> void =
+func newRuleHandler(control: SelectControl, rule: Rule): (event: ClickEvent) -> void =
   ## Returns the rule handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: ClickEvent) => control.ruleHandler(event, rule)
 
-func initKindHandler(
+func newKindHandler(
     control: SelectControl, kind: SimulatorKind, reqControl: RequirementControl
 ): (event: ClickEvent) -> void =
   ## Returns the kind handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: ClickEvent) => control.kindHandler(event, kind, reqControl)
 
-proc initSelectControl*(
+proc newSelectControl*(
     simulator: ref Simulator, reqControl: RequirementControl
 ): SelectControl {.inline.} =
   ## Returns a select control.
@@ -97,39 +100,39 @@ proc initSelectControl*(
   result.add modeButtons
 
   let
-    playButton = initColorButton "プレイ"
-    editButton = initColorButton "編集"
+    playButton = newColorButton "プレイ"
+    editButton = newColorButton "編集"
   modeButtons.add playButton
   modeButtons.add editButton
 
-  playButton.onClick = result.initModeHandler(Play, reqControl)
-  editButton.onClick = result.initModeHandler(Edit, reqControl)
+  playButton.onClick = result.newModeHandler(Play, reqControl)
+  editButton.onClick = result.newModeHandler(Edit, reqControl)
 
   # rule
   let ruleButtons = newLayoutContainer Layout_Horizontal
   result.add ruleButtons
 
   let
-    tsuButton = initColorButton "通"
-    waterButton = initColorButton "水中"
+    tsuButton = newColorButton "通"
+    waterButton = newColorButton "水中"
   ruleButtons.add tsuButton
   ruleButtons.add waterButton
 
-  tsuButton.onClick = result.initRuleHandler Tsu
-  waterButton.onClick = result.initRuleHandler Water
+  tsuButton.onClick = result.newRuleHandler Tsu
+  waterButton.onClick = result.newRuleHandler Water
 
   # kind
   let kindButtons = newLayoutContainer Layout_Horizontal
   result.add kindButtons
 
   let
-    regularButton = initColorButton "とこ"
-    nazoButton = initColorButton "なぞ"
+    regularButton = newColorButton "とこ"
+    nazoButton = newColorButton "なぞ"
   kindButtons.add regularButton
   kindButtons.add nazoButton
 
-  regularButton.onClick = result.initKindHandler(Regular, reqControl)
-  nazoButton.onClick = result.initKindHandler(Nazo, reqControl)
+  regularButton.onClick = result.newKindHandler(Regular, reqControl)
+  nazoButton.onClick = result.newKindHandler(Nazo, reqControl)
 
   # set color
   case simulator[].mode

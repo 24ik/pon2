@@ -1,6 +1,9 @@
 ## This module implements the field control.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -30,18 +33,20 @@ proc cellDrawHandler(
     cell = wrappedNazoPuyo.puyoPuyo.field[row, col]
   canvas.drawImage control.assets[].cellImages[cell]
 
-func initCellDrawHandler(
+func newCellDrawHandler(
     control: FieldControl, row: Row, col: Column
 ): (event: DrawEvent) -> void =
   ## Returns the handler.
   # NOTE: cannot inline due to lazy evaluation
   (event: DrawEvent) => control.cellDrawHandler(event, row, col)
 
-proc initFieldControl*(
+proc newFieldControl*(
     simulator: ref Simulator, assets: Assets
 ): FieldControl {.inline.} =
   ## Returns a field control.
-  result = new FieldControl
+  {.push warning[ProveInit]: off.}
+  result.new
+  {.pop.}
   result.init
   result.layout = Layout_Vertical
 
@@ -61,4 +66,4 @@ proc initFieldControl*(
 
       cell.height = assets.cellImageSize.height
       cell.width = assets.cellImageSize.width
-      cell.onDraw = result.initCellDrawHandler(row, col)
+      cell.onDraw = result.newCellDrawHandler(row, col)

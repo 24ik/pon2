@@ -1,6 +1,9 @@
 ## This module implements miscellaneous things.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -8,14 +11,39 @@
 import
   std/[algorithm, os, parsecfg, random, sequtils, streams, strutils, typetraits, uri]
 
-const
-  Pon2RootDirCandidate = currentSourcePath().parentDir.parentDir.parentDir
-  Pon2RootDir* =
-    when Pon2RootDirCandidate.lastPathPart.startsWith "pon2":
-      Pon2RootDirCandidate
+func splitPath2(path: string): tuple[head: string, tail: string] {.inline.} =
+  ## Returns the parent directory.
+  when not defined(js):
+    path.splitPath
+  else:
+    if '\\' in path:
+      let paths = path.rsplit('\\', 1)
+      (head: paths[0], tail: paths[1])
     else:
-      Pon2RootDirCandidate.parentDir
-  Pon2Version* = staticRead(Pon2RootDir / "pon2.nimble").newStringStream.loadConfig
+      path.splitPath
+
+func joinPath2(head, tail: string): string {.inline.} =
+  ## Returns the path by joining two paths.
+  when not defined(js):
+    head / tail
+  else:
+    if '\\' in head:
+      head & '\\' & tail
+    else:
+      head / tail
+
+proc getPon2RootDir(): string {.inline.} =
+  ## Returns the root directory of Pon2.
+  let
+    (head, _) = currentSourcePath().splitPath2.head.splitPath2.head.splitPath2
+    (head2, tail2) = head.splitPath2
+
+  result = if tail2 == "src": head2 else: head
+
+const
+  Pon2RootDir* = getPon2RootDir()
+  Pon2Version* = Pon2RootDir
+    .joinPath2("pon2.nimble").staticRead.newStringStream.loadConfig
     .getSectionValue("", "version")
 
 # ------------------------------------------------
@@ -45,10 +73,9 @@ func initXLink*(text = "", hashTag = "", uri = initUri()): Uri {.inline.} =
   result = initUri()
   result.scheme = "https"
   result.hostname = "x.com"
-  result.path = "/intent/post"
+  result.path = "/intent/tweet" # NOTE: "/post" does not open the X app.
 
-  var queries =
-    @[("ref_src", "twsrc^tfw|twcamp^buttonembed|twterm^share|twgr^"), ("text", text)]
+  var queries = @[("text", text)]
   if hashTag != "":
     queries.add ("hashtags", hashTag)
   if uri != initUri():
@@ -59,12 +86,15 @@ func initXLink*(text = "", hashTag = "", uri = initUri()): Uri {.inline.} =
 # Parse
 # ------------------------------------------------
 
-func parseSomeInt*[T: SomeNumber or Natural or Positive, U: char or string](
-    val: U
-): T {.inline.} =
-  ## Converts the char or string to the given type `T`.
+func parseSomeInt*[T: SomeNumber or Natural or Positive](val: string): T {.inline.} =
+  ## Converts the string to the given type `T`.
   ## If the conversion fails, `ValueError` will be raised.
-  T parseInt $val
+  T parseInt val
+
+func parseSomeInt*[T: SomeNumber or Natural or Positive](val: char): T {.inline.} =
+  ## Converts the char to the given type `T`.
+  ## If the conversion fails, `ValueError` will be raised.
+  parseSomeInt[T] $val
 
 # ------------------------------------------------
 # Others
@@ -97,9 +127,7 @@ func sample*[T](rng: var Rand, arr: openArray[T], count: Natural): seq[T] {.inli
   ## Selects and returns `count` elements in the array without duplicates.
   var arr2 = arr.toSeq
   rng.shuffle arr2
-  {.push warning[ProveInit]: off.}
   result = arr2[0 ..< count]
-  {.pop.}
 
 func incRot*[T: Ordinal](x: var T) {.inline.} =
   ## Rotating `inc`.

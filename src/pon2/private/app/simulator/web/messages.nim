@@ -1,6 +1,9 @@
 ## This module implements the messages node.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -12,7 +15,7 @@ import ../../../[misc]
 import ../../../../app/[simulator]
 import ../../../../core/[notice]
 
-proc initMessagesNode*(simulator: ref Simulator): VNode {.inline.} =
+proc newMessagesNode*(simulator: ref Simulator): VNode {.inline.} =
   ## Returns the messages node.
   let
     (state, score, noticeGarbages) = simulator[].getMessages

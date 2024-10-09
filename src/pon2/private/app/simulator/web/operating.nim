@@ -1,6 +1,9 @@
 ## This module implements the operating node.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -11,7 +14,7 @@ import ../../[misc]
 import ../../../../app/[simulator]
 import ../../../../core/[fieldtype]
 
-proc initOperatingNode*(simulator: ref Simulator): VNode {.inline.} =
+proc newOperatingNode*(simulator: ref Simulator): VNode {.inline.} =
   ## Returns the operating node.
   buildHtml(table):
     tbody:

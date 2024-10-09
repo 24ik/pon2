@@ -7,6 +7,9 @@
 ## | `-d:pon2.garbagerate.water=<int>` | Garbage rate in Water rule. | `90`     |
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -38,7 +41,7 @@ func noticeGarbageCounts*(
     score: Natural, rule: Rule, useComet = false
 ): array[NoticeGarbage, int] {.inline.} =
   ## Returns the number of notice garbages.
-  result[Small] = 0 # HACK: dummy to suppress warning
+  result[Comet] = 0
 
   let highestNotice = if useComet: Comet else: Crown
   var score2 = score div GarbageRates[rule]

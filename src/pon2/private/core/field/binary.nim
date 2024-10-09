@@ -1,6 +1,9 @@
 ## This module implements binary fields.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -26,19 +29,15 @@ type Connection = object ## Intermediate results for calculating connections.
   connect4T: BinaryField
   connect3IL: BinaryField
 
-using
-  self: BinaryField
-  mSelf: var BinaryField
-
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-func isDead*(self; rule: Rule): bool {.inline.} =
+func isDead*(self: BinaryField, rule: Rule): bool {.inline.} =
   ## Returns `true` if the field is in a defeated state.
   case rule
   of Tsu:
-    bool self.exist(1, 2)
+    self.exist(1, 2).bool
   of Water:
     not self.row(WaterRow.low.pred).isZero
 
@@ -61,7 +60,7 @@ const
     {Up5, Down5, Left5, Right4},
   ]
 
-func invalidPositions*(self): set[Position] {.inline.} =
+func invalidPositions*(self: BinaryField): set[Position] {.inline.} =
   ## Returns the invalid positions.
   ## `Position.None` is not included.
   result = {}
@@ -89,12 +88,12 @@ func invalidPositions*(self): set[Position] {.inline.} =
   for col in usableColumns.complement:
     result.incl InvalidPositions[col]
 
-func validPositions*(self): set[Position] {.inline.} =
+func validPositions*(self: BinaryField): set[Position] {.inline.} =
   ## Returns the valid positions.
   ## `Position.None` is not included.
   AllPositions - self.invalidPositions
 
-func validDoublePositions*(self): set[Position] {.inline.} =
+func validDoublePositions*(self: BinaryField): set[Position] {.inline.} =
   ## Returns the valid positions for a double pair.
   ## `Position.None` is not included.
   AllDoublePositions - self.invalidPositions
@@ -103,35 +102,35 @@ func validDoublePositions*(self): set[Position] {.inline.} =
 # Shift
 # ------------------------------------------------
 
-func shiftUpWithoutTrim*(mSelf; amount: static int32 = 1) {.inline.} =
+func shiftUpWithoutTrim*(self: var BinaryField, amount: static int32 = 1) {.inline.} =
   ## Shifts the binary field upward.
-  mSelf = mSelf.shiftedUpWithoutTrim amount
+  self = self.shiftedUpWithoutTrim amount
 
-func shiftDownWithoutTrim*(mSelf; amount: static int32 = 1) {.inline.} =
+func shiftDownWithoutTrim*(self: var BinaryField, amount: static int32 = 1) {.inline.} =
   ## Shifts the binary field downward.
-  mSelf = mSelf.shiftedDownWithoutTrim amount
+  self = self.shiftedDownWithoutTrim amount
 
-func shiftRightWithoutTrim*(mSelf) {.inline.} =
+func shiftRightWithoutTrim*(self: var BinaryField) {.inline.} =
   ## Shifts the binary field rightward.
-  mSelf = mSelf.shiftedRightWithoutTrim
+  self = self.shiftedRightWithoutTrim
 
-func shiftLeftWithoutTrim*(mSelf) {.inline.} =
+func shiftLeftWithoutTrim*(self: var BinaryField) {.inline.} =
   ## Shifts the binary field leftward.
-  mSelf = mSelf.shiftedLeftWithoutTrim
+  self = self.shiftedLeftWithoutTrim
 
-func shiftedUp*(self): BinaryField {.inline.} =
+func shiftedUp*(self: BinaryField): BinaryField {.inline.} =
   ## Returns the binary field shifted upward and then trimmed.
   self.shiftedUpWithoutTrim.trimmed
 
-func shiftedDown*(self): BinaryField {.inline.} =
+func shiftedDown*(self: BinaryField): BinaryField {.inline.} =
   ## Returns the binary field shifted downward and then trimmed.
   self.shiftedDownWithoutTrim.trimmed
 
-func shiftedRight*(self): BinaryField {.inline.} =
+func shiftedRight*(self: BinaryField): BinaryField {.inline.} =
   ## Returns the binary field shifted rightward and then trimmed.
   self.shiftedRightWithoutTrim.trimmed
 
-func shiftedLeft*(self): BinaryField {.inline.} =
+func shiftedLeft*(self: BinaryField): BinaryField {.inline.} =
   ## Returns the binary field shifted leftward and then trimmed.
   self.shiftedLeftWithoutTrim.trimmed
 
@@ -139,19 +138,19 @@ func shiftedLeft*(self): BinaryField {.inline.} =
 # Flip
 # ------------------------------------------------
 
-func flipV*(mSelf) {.inline.} =
-  mSelf = mSelf.flippedV
-  # Flips the binary field vertically.
+func flipV*(self: var BinaryField) {.inline.} =
+  ## Flips the binary field vertically.
+  self = self.flippedV
 
-func flipH*(mSelf) {.inline.} =
-  mSelf = mSelf.flippedH
-  # Flips the binary field horizontally.
+func flipH*(self: var BinaryField) {.inline.} =
+  ## Flips the binary field horizontally.
+  self = self.flippedH
 
 # ------------------------------------------------
 # Expand
 # ------------------------------------------------
 
-func expanded*(self): BinaryField {.inline.} =
+func expanded*(self: BinaryField): BinaryField {.inline.} =
   ## Dilates the binary field.
   ## This function does not trim.
   sum(
@@ -159,12 +158,12 @@ func expanded*(self): BinaryField {.inline.} =
     self.shiftedRightWithoutTrim, self.shiftedLeftWithoutTrim,
   )
 
-func expandedV(self): BinaryField {.inline.} =
+func expandedV(self: BinaryField): BinaryField {.inline.} =
   ## Dilates the binary field vertically.
   ## This function does not trim.
   sum(self, self.shiftedUpWithoutTrim, self.shiftedDownWithoutTrim)
 
-func expandedH(self): BinaryField {.inline.} =
+func expandedH(self: BinaryField): BinaryField {.inline.} =
   ## Dilates the binary field horizontally.
   ## This function does not trim.
   sum(self, self.shiftedRightWithoutTrim, self.shiftedLeftWithoutTrim)
@@ -173,7 +172,7 @@ func expandedH(self): BinaryField {.inline.} =
 # Disappear
 # ------------------------------------------------
 
-func connections(self): Connection {.inline.} =
+func connections(self: BinaryField): Connection {.inline.} =
   ## Returns intermediate results for calculating connections.
   let
     visibleCells = self.visible
@@ -191,11 +190,13 @@ func connections(self): Connection {.inline.} =
     connect4T = hasUpDown * hasRightOrLeft + hasRightLeft * hasUpOrDown
     connect3IL = sum(hasUpDown, hasRightLeft, hasUpOrDown * hasRightOrLeft)
 
-  result.visible = visibleCells
-  result.hasUpDown = hasUpDown
-  result.hasRightLeft = hasRightLeft
-  result.connect4T = connect4T
-  result.connect3IL = connect3IL
+  result = Connection(
+    visible: visibleCells,
+    hasUpDown: hasUpDown,
+    hasRightLeft: hasRightLeft,
+    connect4T: connect4T,
+    connect3IL: connect3IL,
+  )
 
 func disappeared(connection: Connection): BinaryField {.inline.} =
   ## Returns the binary field where four or more cells are connected.
@@ -211,11 +212,11 @@ func disappeared(connection: Connection): BinaryField {.inline.} =
       sum(connection.connect4T, connect4Up, connect4Down, connect4Right, connect4Left)
     ).expanded
 
-func disappeared*(self): BinaryField {.inline.} =
+func disappeared*(self: BinaryField): BinaryField {.inline.} =
   ## Returns the binary field where four or more cells are connected.
   self.connections.disappeared
 
-func willDisappear*(self): bool {.inline.} =
+func willDisappear*(self: BinaryField): bool {.inline.} =
   ## Returns `true` if four or more cells are connected.
   let
     connection = self.connections
@@ -229,7 +230,7 @@ func willDisappear*(self): bool {.inline.} =
 # Connect
 # ------------------------------------------------
 
-func connect2*(self): BinaryField {.inline.} =
+func connect2*(self: BinaryField): BinaryField {.inline.} =
   ## Returns the binary field with only the locations where exactly two
   ## cells are connected.
   ## This function ignores ghost puyos.
@@ -257,7 +258,7 @@ func connect2*(self): BinaryField {.inline.} =
 
   result = sum(seedV.shiftedDownWithoutTrim, seedV, seedH.shiftedLeftWithoutTrim, seedH)
 
-func connect2V*(self): BinaryField {.inline.} =
+func connect2V*(self: BinaryField): BinaryField {.inline.} =
   ## Returns the binary field with only the locations where exactly two
   ## cells are connected vertically.
   ## This function ignores ghost puyos.
@@ -278,7 +279,7 @@ func connect2V*(self): BinaryField {.inline.} =
 
   result = seed + seed.shiftedDownWithoutTrim
 
-func connect2H*(self): BinaryField {.inline.} =
+func connect2H*(self: BinaryField): BinaryField {.inline.} =
   ## Returns the binary field with only the locations where exactly two
   ## cells are connected horizontally.
   ## This function ignores ghost puyos.
@@ -299,14 +300,14 @@ func connect2H*(self): BinaryField {.inline.} =
 
   result = seed + seed.shiftedLeftWithoutTrim
 
-func connect3*(self): BinaryField {.inline.} =
+func connect3*(self: BinaryField): BinaryField {.inline.} =
   ## Returns the binary field with only the locations where exactly three
   ## cells are connected.
   ## This function ignores ghost puyos.
   let connection = self.connections
   result = connection.connect3IL.expanded * connection.visible - connection.disappeared
 
-func connect3V*(self): BinaryField {.inline.} =
+func connect3V*(self: BinaryField): BinaryField {.inline.} =
   ## Returns the binary field with only the locations where exactly three
   ## cells are connected vertically.
   ## This function ignores ghost puyos.
@@ -329,7 +330,7 @@ func connect3V*(self): BinaryField {.inline.} =
 
   result = (upDown - exclude).expandedV
 
-func connect3H*(self): BinaryField {.inline.} =
+func connect3H*(self: BinaryField): BinaryField {.inline.} =
   ## Returns the binary field with only the locations where exactly three
   ## cells are connected horizontally.
   ## This function ignores ghost puyos.

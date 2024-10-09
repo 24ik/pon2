@@ -1,13 +1,29 @@
 ## This module implements miscellaneous things.
 ##
+## Compile Options:
+## | Option                        | Description                      | Default             |
+## | ----------------------------- | -------------------------------- | ------------------- |
+## | `-d:pon2.assets.native=<str>` | Assets directory for native app. | `<Pon2Root>/assets` |
+## | `-d:pon2.assets.web=<str>`    | Assets directory for web app.    | `./assets`          |
+##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
+import std/[os]
+import ../[misc]
+
+const
+  NativeAssetsDir* {.define: "pon2.assets.native".} = Pon2RootDir / "assets"
+  WebAssetsDir* {.define: "pon2.assets.web".} = "./assets"
+
 when defined(js):
   import std/[jsffi, strformat, sugar]
-  import karax/[kbase, kdom]
+  import karax/[karax, kbase, kdom]
   import ../../core/[cell, notice]
 
   # ------------------------------------------------
@@ -16,33 +32,33 @@ when defined(js):
 
   proc getNavigator(): JsObject {.importjs: "(navigator)".} ## Returns the navigator.
 
-  proc copyToClipboard(text: kstring) =
+  proc copyToClipboard(text: cstring) =
     ## Writes the text to the clipboard.
     getNavigator().clipboard.writeText text
 
   proc showFlashMessage(
-      element: Element, messageHtml: string, timeMs = Natural 500
+      element: Element, messageHtml: string, showMs = 500.Natural
   ) {.inline.} =
-    ## Sets the flash message on the element for `timeMs` ms.
+    ## Sets the flash message on the element for `showMs` ms.
     let oldHtml = element.innerHTML
     element.innerHTML = messageHtml
-    discard setTimeout(() => (element.innerHTML = oldHtml), timeMs)
+    runLater () => (element.innerHTML = oldHtml), showMs
 
-  func initCopyButtonHandler*(
-      copyStr: () -> string, id: string, disableMs = Natural 500
+  func newCopyButtonHandler*(
+      copyStr: () -> string, id: string, disableMs = 500.Natural
   ): () -> void {.inline.} =
     proc handler() =
       let btn = document.getElementById id.kstring
 
       btn.disabled = true
-      copyToClipboard copyStr().kstring
+      copyToClipboard copyStr().cstring
 
       btn.showFlashMessage(
         "<span class='icon'><i class='fa-solid fa-check'></i></span>" &
           "<span>コピー</span>",
         disableMs,
       )
-      discard setTimeout(() => (btn.disabled = false), disableMs)
+      runLater () => (btn.disabled = false), disableMs
 
     result = handler
 
@@ -50,13 +66,11 @@ when defined(js):
   # JS - Images
   # ------------------------------------------------
 
-  const WebRootDir = when defined(pon2.marathon): ".." else: "."
-
   func cellImageSrc*(cell: Cell): kstring {.inline.} =
     ## Returns the cell image src.
     let stem =
       case cell
-      of None: "none"
+      of Cell.None: "none"
       of Hard: "hard"
       of Garbage: "garbage"
       of Red: "red"
@@ -65,7 +79,7 @@ when defined(js):
       of Yellow: "yellow"
       of Purple: "purple"
 
-    result = kstring &"{WebRootDir}/assets/puyo/{stem}.png"
+    result = kstring &"{WebAssetsDir}/puyo/{stem}.png"
 
   func noticeGarbageImageSrc*(notice: NoticeGarbage): kstring {.inline.} =
     ## Returns the notice garbage image src.
@@ -79,9 +93,9 @@ when defined(js):
       of Crown: "crown"
       of Comet: "comet"
 
-    result = kstring &"{WebRootDir}/assets/noticegarbage/{stem}.png"
+    result = kstring &"{WebAssetsDir}/noticegarbage/{stem}.png"
 
-  const NoticeGarbageNoneImageSrc*: kstring = kstring &"{WebRootDir}/assets/noticegarbage/none.png"
+  const NoticeGarbageNoneImageSrc*: kstring = kstring &"{WebAssetsDir}/noticegarbage/none.png"
     ## Image src of the no notice garbage.
 
   # ------------------------------------------------
@@ -103,7 +117,7 @@ else:
   type ColorButton* = ref object of Button
     ## [Button with color](https://github.com/simonkrauter/NiGui/issues/9).
 
-  proc initColorButton*(text = ""): ColorButton {.inline.} =
+  proc newColorButton*(text = ""): ColorButton {.inline.} =
     ## Returns a new color button.
     result = new ColorButton
     result.init

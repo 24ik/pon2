@@ -1,3 +1,6 @@
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -5,17 +8,7 @@
 import std/[sequtils, strformat, strutils, unittest, uri]
 import
   ../../src/pon2/core/
-    [
-      cell,
-      field,
-      host,
-      moveresult,
-      pair,
-      pairposition,
-      position,
-      puyopuyo {.all.},
-      rule,
-    ]
+    [cell, field, fqdn, moveresult, pair, pairposition, position, puyopuyo, rule]
 
 proc main*() =
   # ------------------------------------------------
@@ -225,15 +218,15 @@ rg|"""
       check $puyoPuyo == str
 
       let
-        ikQuery = "field=t-rg.bo.&pairs=yygp21"
+        pon2Query = "field=t-rg.bo.&pairs=yygp21"
         ishikawaQuery = "a3M_G1OC"
         ipsQuery = "a3M_G1OC"
 
-      check puyoPuyo.toUriQuery(Ik) == ikQuery
+      check puyoPuyo.toUriQuery(Pon2) == pon2Query
       check puyoPuyo.toUriQuery(Ishikawa) == ishikawaQuery
       check puyoPuyo.toUriQuery(Ips) == ipsQuery
 
-      check parsePuyoPuyo[TsuField](ikQuery, Ik) == puyoPuyo
+      check parsePuyoPuyo[TsuField](pon2Query, Pon2) == puyoPuyo
       check parsePuyoPuyo[TsuField](ishikawaQuery, Ishikawa) == puyoPuyo
       check parsePuyoPuyo[TsuField](ipsQuery, Ips) == puyoPuyo
 
@@ -247,7 +240,7 @@ rg|"""
 
       check $puyoPuyo == str
 
-      let ikQuery = "field=w-rg....~....by&pairs"
+      let pon2Query = "field=w-rg....~....by&pairs"
 
-      check puyoPuyo.toUriQuery(Ik) == ikQuery
-      check parsePuyoPuyo[WaterField](ikQuery, Ik) == puyoPuyo
+      check puyoPuyo.toUriQuery(Pon2) == pon2Query
+      check parsePuyoPuyo[WaterField](pon2Query, Pon2) == puyoPuyo

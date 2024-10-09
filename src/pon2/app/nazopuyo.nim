@@ -1,20 +1,20 @@
 ## This module implements Nazo Puyo wrap for all rules.
 ##
 
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
+import std/[options]
 import ../core/[field, nazopuyo, pairposition, puyopuyo, requirement, rule]
 
 type NazoPuyoWrap* = object ## Nazo puyo type that accepts all rules.
-  case rule: Rule
-  of Tsu: tsu: NazoPuyo[TsuField]
-  of Water: water: NazoPuyo[WaterField]
-
-using
-  self: NazoPuyoWrap
-  mSelf: var NazoPuyoWrap
+  rule: Rule
+  tsu: Option[NazoPuyo[TsuField]]
+  water: Option[NazoPuyo[WaterField]]
 
 # ------------------------------------------------
 # Constructor
@@ -25,51 +25,61 @@ func initNazoPuyoWrap*[F: TsuField or WaterField](
 ): NazoPuyoWrap {.inline.} =
   ## Returns a new nazo puyo wrap.
   when F is TsuField:
-    NazoPuyoWrap(rule: Tsu, tsu: nazo)
+    NazoPuyoWrap(rule: Tsu, tsu: some nazo, water: none NazoPuyo[WaterField])
   else:
-    NazoPuyoWrap(rule: Water, water: nazo)
+    NazoPuyoWrap(rule: Water, tsu: none NazoPuyo[TsuField], water: some nazo)
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-template get*(self; body: untyped): untyped =
+template get*(self: NazoPuyoWrap, body: untyped): untyped =
   ## Runs `body` with `wrappedNazoPuyo` exposed.
   case self.rule
   of Tsu:
-    template wrappedNazoPuyo(): auto {.redefine.} =
-      self.tsu
+    template wrappedNazoPuyo(): auto =
+      self.tsu.get
 
     body
   of Water:
-    template wrappedNazoPuyo(): auto {.redefine.} =
-      self.water
+    template wrappedNazoPuyo(): auto =
+      self.water.get
 
     body
 
-func rule*(self): Rule {.inline.} =
+func rule*(self: NazoPuyoWrap): Rule {.inline.} =
+  ## Returns the rule.
   self.rule
 
-func `rule=`*(mSelf; rule: Rule) {.inline.} =
-  if rule == mSelf.rule:
-    return
-
-  mSelf.get:
+func `rule=`*(self: var NazoPuyoWrap, rule: Rule) {.inline.} =
+  ## Sets the rule.
+  case self.rule
+  of Tsu:
     case rule
     of Tsu:
-      mSelf = wrappedNazoPuyo.toTsuNazoPuyo.initNazoPuyoWrap
+      return
     of Water:
-      mSelf = wrappedNazoPuyo.toWaterNazoPuyo.initNazoPuyoWrap
+      self.water = some self.tsu.get.toWaterNazoPuyo
+      self.tsu = none NazoPuyo[TsuField]
+
+      self.rule = rule
+  of Water:
+    case rule
+    of Tsu:
+      self.tsu = some self.water.get.toTsuNazoPuyo
+      self.water = none NazoPuyo[WaterField]
+
+      self.rule = rule
+    of Water:
+      return
 
 # ------------------------------------------------
 # Operator
 # ------------------------------------------------
 
-func `==`*(self; nazoPuyoWrap: NazoPuyoWrap): bool {.inline.} =
-  case self.rule
+func `==`*(nazo1, nazo2: NazoPuyoWrap): bool {.inline.} =
+  case nazo1.rule
   of Tsu:
-    result = nazoPuyoWrap.get:
-      self.tsu == wrappedNazoPuyo
+    nazo1.tsu == nazo2.tsu
   of Water:
-    result = nazoPuyoWrap.get:
-      self.water == wrappedNazoPuyo
+    nazo1.water == nazo2.water
