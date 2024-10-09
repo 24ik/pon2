@@ -35,7 +35,7 @@ func joinPath2(head, tail: string): string {.inline.} =
 proc getPon2RootDir(): string {.inline.} =
   ## Returns the root directory of Pon2.
   let
-    (head, tail) = currentSourcePath().splitPath2.head.splitPath2.head.splitPath2
+    (head, _) = currentSourcePath().splitPath2.head.splitPath2.head.splitPath2
     (head2, tail2) = head.splitPath2
 
   result = if tail2 == "src": head2 else: head
