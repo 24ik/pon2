@@ -15,15 +15,15 @@ import ../../[misc]
 import ../../../../app/[color, nazopuyo, simulator]
 import ../../../../core/[cell, field, fieldtype]
 
-func newClickHandler(simulator: ref Simulator, row: Row, col: Column): () -> void =
+func newClickHandler(simulator: Simulator, row: Row, col: Column): () -> void =
   ## Returns the click handler.
   # NOTE: cannot inline due to lazy evaluation
-  () => simulator[].writeCell(row, col)
+  () => simulator.writeCell(row, col)
 
-proc newFieldNode*(simulator: ref Simulator, displayMode = false): VNode {.inline.} =
+proc newFieldNode*(simulator: Simulator, displayMode = false): VNode {.inline.} =
   ## Returns the field node.
   let arr: array[Height, array[Width, Cell]]
-  simulator[].nazoPuyoWrap.get:
+  simulator.nazoPuyoWrap.get:
     arr = wrappedNazoPuyo.puyoPuyo.field.toArray
 
   result = buildHtml(table(style = style(StyleAttr.border, kstring"1px black solid"))):
@@ -35,11 +35,11 @@ proc newFieldNode*(simulator: ref Simulator, displayMode = false): VNode {.inlin
               imgSrc = arr[row][col].cellImageSrc
               cellStyle = style(
                 StyleAttr.backgroundColor,
-                simulator[].fieldCellBackgroundColor(row, col, displayMode).toColorCode,
+                simulator.fieldCellBackgroundColor(row, col, displayMode).toColorCode,
               )
 
             td:
-              if not displayMode and simulator[].mode == Edit:
+              if not displayMode and simulator.mode == Edit:
                 button(
                   class = "button p-0",
                   style = style(StyleAttr.maxHeight, kstring"24px"),

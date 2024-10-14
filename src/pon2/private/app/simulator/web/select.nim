@@ -17,30 +17,29 @@ const
   SelectedClass = kstring"button is-selected is-primary"
   NotSelectedClass = kstring"button"
 
-proc newSelectNode*(simulator: ref Simulator): VNode {.inline.} =
+proc newSelectNode*(simulator: Simulator): VNode {.inline.} =
   ## Returns the select node.
   let
     playEditorButtonClass =
-      if simulator[].mode == PlayEditor: SelectedClass else: NotSelectedClass
-    editButtonClass = if simulator[].mode == Edit: SelectedClass else: NotSelectedClass
+      if simulator.mode == PlayEditor: SelectedClass else: NotSelectedClass
+    editButtonClass = if simulator.mode == Edit: SelectedClass else: NotSelectedClass
 
-    tsuButtonClass = if simulator[].rule == Tsu: SelectedClass else: NotSelectedClass
-    waterButtonClass =
-      if simulator[].rule == Water: SelectedClass else: NotSelectedClass
+    tsuButtonClass = if simulator.rule == Tsu: SelectedClass else: NotSelectedClass
+    waterButtonClass = if simulator.rule == Water: SelectedClass else: NotSelectedClass
 
   result = buildHtml(tdiv):
     tdiv(class = "buttons has-addons mb-1"):
       button(
-        class = playEditorButtonClass, onclick = () => (simulator[].mode = PlayEditor)
+        class = playEditorButtonClass, onclick = () => (simulator.mode = PlayEditor)
       ):
         span(class = "icon"):
           italic(class = "fa-solid fa-gamepad")
-      button(class = editButtonClass, onclick = () => (simulator[].mode = Edit)):
+      button(class = editButtonClass, onclick = () => (simulator.mode = Edit)):
         span(class = "icon"):
           italic(class = "fa-solid fa-pen-to-square")
-    if simulator[].mode == Edit:
+    if simulator.mode == Edit:
       tdiv(class = "buttons has-addons"):
-        button(class = tsuButtonClass, onclick = () => (simulator[].rule = Tsu)):
+        button(class = tsuButtonClass, onclick = () => (simulator.rule = Tsu)):
           text "通"
-        button(class = waterButtonClass, onclick = () => (simulator[].rule = Water)):
+        button(class = waterButtonClass, onclick = () => (simulator.rule = Water)):
           text "水中"

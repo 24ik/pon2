@@ -16,7 +16,7 @@ import ../../../../app/[color, nazopuyo, simulator]
 import ../../../../core/[cell, field, fieldtype]
 
 type FieldControl* = ref object of LayoutContainer ## Field control.
-  simulator: ref Simulator
+  simulator: Simulator
   assets: Assets
 
 proc cellDrawHandler(
@@ -25,11 +25,11 @@ proc cellDrawHandler(
   ## Draws the cell.
   let canvas = event.control.canvas
 
-  canvas.areaColor = control.simulator[].fieldCellBackgroundColor(row, col).toNiguiColor
+  canvas.areaColor = control.simulator.fieldCellBackgroundColor(row, col).toNiguiColor
   canvas.fill
 
   let cell: Cell
-  control.simulator[].nazoPuyoWrap.get:
+  control.simulator.nazoPuyoWrap.get:
     cell = wrappedNazoPuyo.puyoPuyo.field[row, col]
   canvas.drawImage control.assets[].cellImages[cell]
 
@@ -40,9 +40,7 @@ func newCellDrawHandler(
   # NOTE: cannot inline due to lazy evaluation
   (event: DrawEvent) => control.cellDrawHandler(event, row, col)
 
-proc newFieldControl*(
-    simulator: ref Simulator, assets: Assets
-): FieldControl {.inline.} =
+proc newFieldControl*(simulator: Simulator, assets: Assets): FieldControl {.inline.} =
   ## Returns a field control.
   {.push warning[ProveInit]: off.}
   result.new

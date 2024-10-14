@@ -16,7 +16,7 @@ import ../../../../app/[color, simulator]
 import ../../../../core/[cell]
 
 type ImmediatePairsControl* = ref object of LayoutContainer ## Immediate pairs control.
-  simulator: ref Simulator
+  simulator: Simulator
   assets: Assets
 
 proc cellDrawHandler(
@@ -29,22 +29,22 @@ proc cellDrawHandler(
   canvas.fill
 
   let cell =
-    if control.simulator[].mode == Edit:
+    if control.simulator.mode == Edit:
       None
     else:
       case idx
       of 0 .. 2:
         Cell.None
       of 3:
-        control.simulator[].immediateNextPairCell false
+        control.simulator.immediateNextPairCell false
       of 4:
-        control.simulator[].immediateNextPairCell true
+        control.simulator.immediateNextPairCell true
       of 5:
         Cell.None
       of 6:
-        control.simulator[].immediateDoubleNextPairCell false
+        control.simulator.immediateDoubleNextPairCell false
       of 7:
-        control.simulator[].immediateDoubleNextPairCell true
+        control.simulator.immediateDoubleNextPairCell true
       else:
         Cell.None
   canvas.drawImage control.assets[].cellImages[cell]
@@ -57,7 +57,7 @@ func newCellDrawHandler(
   (event: DrawEvent) => control.cellDrawHandler(event, idx)
 
 proc newImmediatePairsControl*(
-    simulator: ref Simulator, assets: Assets
+    simulator: Simulator, assets: Assets
 ): ImmediatePairsControl {.inline.} =
   ## Returns an immediate pairs control.
   {.push warning[ProveInit]: off.}

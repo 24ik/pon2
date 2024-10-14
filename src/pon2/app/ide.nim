@@ -38,9 +38,9 @@ type
     pairsPositionsSeq*: seq[PairsPositions]
     index*: Natural
 
-  IdeObj = object ## Puyo Puyo & Nazo Puyo IDE.
-    simulator: ref Simulator
-    answerSimulator: ref Simulator
+  Ide* = ref object ## Puyo Puyo & Nazo Puyo IDE.
+    simulator: Simulator
+    answerSimulator: Simulator
 
     answerData: AnswerData
 
@@ -49,8 +49,6 @@ type
     permuting: bool
 
     progressBarData: tuple[now: Natural, total: Natural]
-
-  Ide* = ref IdeObj ## Puyo Puyo & Nazo Puyo IDE.
 
 const IdeUriPath* {.define: "pon2.path".} = "/pon2/"
 
@@ -61,14 +59,11 @@ static:
 # Constructor
 # ------------------------------------------------
 
-proc newIde*(simulator: ref Simulator): Ide {.inline.} =
+func newIde*(simulator: Simulator): Ide {.inline.} =
   ## Returns a new IDE.
-  let answerSimulator = new Simulator
-  answerSimulator[] = initNazoPuyo[TsuField]().initSimulator View
-
-  result = Ide(
+  Ide(
     simulator: simulator,
-    answerSimulator: answerSimulator,
+    answerSimulator: initNazoPuyo[TsuField]().newSimulator View,
     answerData: AnswerData(hasData: false, pairsPositionsSeq: @[], index: 0),
     focusAnswer: false,
     solving: false,
@@ -76,22 +71,19 @@ proc newIde*(simulator: ref Simulator): Ide {.inline.} =
     progressBarData: (now: 0, total: 0),
   )
 
-proc newIde*(): Ide {.inline.} =
+func newIde*(): Ide {.inline.} =
   ## Returns a new IDE.
-  let simulator = new Simulator
-  simulator[] = initNazoPuyo[TsuField]().initSimulator PlayEditor
-
-  result = simulator.newIde
+  initNazoPuyo[TsuField]().newSimulator(PlayEditor).newIde
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-func simulator*(self: Ide): ref Simulator {.inline.} =
+func simulator*(self: Ide): Simulator {.inline.} =
   ## Returns the simulator.
   self.simulator
 
-func answerSimulator*(self: Ide): ref Simulator {.inline.} =
+func answerSimulator*(self: Ide): Simulator {.inline.} =
   ## Returns the answer simulator.
   self.answerSimulator
 
@@ -143,7 +135,7 @@ proc updateAnswerSimulator[F: TsuField or WaterField](
 
     var nazo2 = nazo
     nazo2.puyoPuyo.pairsPositions = self.answerData.pairsPositionsSeq[0]
-    self.answerSimulator[] = nazo2.initSimulator self.answerSimulator[].mode
+    self.answerSimulator = nazo2.newSimulator self.answerSimulator.mode
   else:
     self.focusAnswer = false
 
@@ -157,16 +149,16 @@ proc solve*(
     ,
 ) {.inline.} =
   ## Solves the nazo puyo.
-  if self.solving or self.permuting or self.simulator[].kind != Nazo or
-      self.simulator[].state != Stable:
+  if self.solving or self.permuting or self.simulator.kind != Nazo or
+      self.simulator.state != Stable:
     return
-  self.simulator[].nazoPuyoWrap.get:
+  self.simulator.nazoPuyoWrap.get:
     if wrappedNazoPuyo.moveCount == 0:
       return
 
   self.solving = true
 
-  self.simulator[].nazoPuyoWrap.get:
+  self.simulator.nazoPuyoWrap.get:
     when defined(js):
       let results = new seq[seq[SolveAnswer]]
       wrappedNazoPuyo.asyncSolve(results, parallelCount = parallelCount)
@@ -227,16 +219,16 @@ proc permute*(
     ,
 ) {.inline.} =
   ## Permutes the nazo puyo.
-  if self.solving or self.permuting or self.simulator[].kind != Nazo or
-      self.simulator[].state != Stable:
+  if self.solving or self.permuting or self.simulator.kind != Nazo or
+      self.simulator.state != Stable:
     return
-  self.simulator[].nazoPuyoWrap.get:
+  self.simulator.nazoPuyoWrap.get:
     if wrappedNazoPuyo.moveCount == 0:
       return
 
   self.permuting = true
 
-  self.simulator[].nazoPuyoWrap.get:
+  self.simulator.nazoPuyoWrap.get:
     when defined(js):
       let
         results = new seq[Option[PairsPositions]]
@@ -288,10 +280,10 @@ proc nextAnswer*(self: Ide) {.inline.} =
   else:
     self.answerData.index.inc
 
-  self.answerSimulator[].nazoPuyoWrap.get:
+  self.answerSimulator.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.pairsPositions =
       self.answerData.pairsPositionsSeq[self.answerData.index]
-  self.answerSimulator[].reset
+  self.answerSimulator.reset
 
 proc prevAnswer*(self: Ide) {.inline.} =
   ## Shows the previous answer.
@@ -303,10 +295,10 @@ proc prevAnswer*(self: Ide) {.inline.} =
   else:
     self.answerData.index.dec
 
-  self.answerSimulator[].nazoPuyoWrap.get:
+  self.answerSimulator.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.pairsPositions =
       self.answerData.pairsPositionsSeq[self.answerData.index]
-  self.answerSimulator[].reset
+  self.answerSimulator.reset
 
 # ------------------------------------------------
 # IDE <-> URI
@@ -320,7 +312,7 @@ func toUri*(self: Ide, withPositions = true, fqdn = Pon2): Uri {.inline.} =
     of Pon2, Ishikawa: "https"
     of Ips: "http"
   result.hostname = $fqdn
-  result.query = self.simulator[].toUriQuery(withPositions, fqdn)
+  result.query = self.simulator.toUriQuery(withPositions, fqdn)
 
   # path
   case fqdn
@@ -328,9 +320,9 @@ func toUri*(self: Ide, withPositions = true, fqdn = Pon2): Uri {.inline.} =
     result.path = IdeUriPath
   of Ishikawa, Ips:
     let modeChar =
-      case self.simulator[].kind
+      case self.simulator.kind
       of Regular:
-        case self.simulator[].mode
+        case self.simulator.mode
         of Play, PlayEditor: 's'
         of Edit: 'e'
         of View: 'v'
@@ -387,12 +379,10 @@ proc parseIde*(uri: Uri): Ide {.inline.} =
     result = newIde() # HACK: dummy to suppress warning
     raise newException(ValueError, "Invalid IDE: " & $uri)
 
-  let simulator = new Simulator
-  simulator[] = uri.query.parseSimulator fqdn
-
+  let simulator = uri.query.parseSimulator fqdn
   if fqdn in {Ishikawa, Ips}:
-    simulator[].kind = kind
-    simulator[].mode = mode
+    simulator.kind = kind
+    simulator.mode = mode
 
   result = simulator.newIde
 
@@ -403,7 +393,7 @@ proc parseIde*(uri: Uri): Ide {.inline.} =
 proc operate*(self: Ide, event: KeyEvent): bool {.inline.} =
   ## Does operation specified by the keyboard input.
   ## Returns `true` if any action is executed.
-  if self.simulator[].mode in {PlayEditor, Edit}:
+  if self.simulator.mode in {PlayEditor, Edit}:
     if event == initKeyEvent("Tab", shift = true):
       self.toggleFocus
       return true
@@ -417,14 +407,14 @@ proc operate*(self: Ide, event: KeyEvent): bool {.inline.} =
         self.nextAnswer
         return true
 
-      return self.answerSimulator[].operate event
+      return self.answerSimulator.operate event
 
     # solve
     if event == initKeyEvent("Enter"):
       self.solve
       return true
 
-  return self.simulator[].operate event
+  return self.simulator.operate event
 
 # ------------------------------------------------
 # Backend-specific Implementation
@@ -483,7 +473,7 @@ when defined(js):
           simulatorNode
         tdiv(class = "block"):
           self.newShareNode &"{ShareIdPrefix}{id}"
-      if self.simulator[].mode in {PlayEditor, Edit} and self.simulator[].kind == Nazo:
+      if self.simulator.mode in {PlayEditor, Edit} and self.simulator.kind == Nazo:
         tdiv(class = "column is-narrow"):
           section(class = "section"):
             tdiv(class = "block"):

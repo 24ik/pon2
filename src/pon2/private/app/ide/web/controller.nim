@@ -19,9 +19,9 @@ proc newEditorControllerNode*(ide: Ide, settingsId: string): VNode {.inline.} =
   ## Returns the editor controller node.
   let
     workerRunning = ide.solving or ide.permuting
-    noPair = ide.simulator[].nazoPuyoWrap.get:
+    noPair = ide.simulator.nazoPuyoWrap.get:
       wrappedNazoPuyo.puyoPuyo.pairsPositions.len == 0
-    btnDisable = workerRunning or noPair or ide.simulator[].state != Stable
+    btnDisable = workerRunning or noPair or ide.simulator.state != Stable
 
     focusButtonClass =
       if ide.focusAnswer:
@@ -40,7 +40,7 @@ proc newEditorControllerNode*(ide: Ide, settingsId: string): VNode {.inline.} =
         kstring"button"
 
   proc permuteHandler() =
-    let (_, fixMoves, allowDouble, allowLastDouble) = ide.simulator[].nazoPuyoWrap.get:
+    let (_, fixMoves, allowDouble, allowLastDouble) = ide.simulator.nazoPuyoWrap.get:
       getSettings(settingsId, wrappedNazoPuyo.moveCount)
     ide.permute fixMoves, allowDouble, allowLastDouble
 

@@ -24,8 +24,8 @@ type
     pageCount*: Natural
     pageIndex*: Natural
 
-  MarathonObj = object ## Marathon manager.
-    simulator: ref Simulator
+  Marathon* = ref object ## Marathon manager.
+    simulator: Simulator
 
     allPairsStrs: Option[tuple[`seq`: seq[string], tree: CritBitTree[void]]]
     matchResult: MarathonMatchResult
@@ -34,19 +34,14 @@ type
 
     rng: Rand
 
-  Marathon* = ref MarathonObj ## Marathon manager.
-
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
-proc newMarathon*(rng = initRand()): Marathon {.inline.} =
+func newMarathon*(rng = initRand()): Marathon {.inline.} =
   ## Returns a new marathon manager without pairs' data loaded.
-  let simulator = new Simulator
-  simulator[] = initSimulator[TsuField](Play)
-
-  result = Marathon(
-    simulator: simulator,
+  Marathon(
+    simulator: newSimulator[TsuField](Play),
     allPairsStrs: none tuple[`seq`: seq[string], tree: CritBitTree[void]],
     matchResult: MarathonMatchResult(strings: @[], pageCount: 0, pageIndex: 0),
     focusSimulator: false,
@@ -91,7 +86,7 @@ else:
 # Property
 # ------------------------------------------------
 
-func simulator*(self: Marathon): ref Simulator {.inline.} =
+func simulator*(self: Marathon): Simulator {.inline.} =
   ## Returns the simulator.
   self.simulator
 
@@ -296,8 +291,8 @@ proc match*(self: Marathon, prefix: string) {.inline.} =
 
 proc play(self: Marathon, pairsStr: string) {.inline.} =
   ## Plays a marathon mode with the given pairs.
-  self.simulator[].reset
-  self.simulator[].nazoPuyoWrap.get:
+  self.simulator.reset
+  self.simulator.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsStr.toPairsPositions
 
   self.focusSimulator = true
@@ -333,7 +328,7 @@ proc operate*(self: Marathon, event: KeyEvent): bool {.inline.} =
     return true
 
   if self.focusSimulator:
-    return self.simulator[].operate event
+    return self.simulator.operate event
 
   result = false
 

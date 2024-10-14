@@ -55,7 +55,7 @@ proc newEditorSettingsNode*(ide: Ide, id: string): VNode {.inline.} =
               id = kstring &"{AllowLastDoubleCheckboxIdPrefix}{id}", `type` = "checkbox"
             )
           text "　N手目を固定:"
-          let pairsPositions = ide.simulator[].nazoPuyoWrap.get:
+          let pairsPositions = ide.simulator.nazoPuyoWrap.get:
             wrappedNazoPuyo.puyoPuyo.pairsPositions
           for pairIdx in 0 ..< pairsPositions.len:
             label(class = "checkbox"):

@@ -15,32 +15,30 @@ import ../../[misc]
 import ../../../../app/[color, nazopuyo, simulator]
 import ../../../../core/[cell, pair]
 
-func newDeleteClickHandler(simulator: ref Simulator, idx: Natural): () -> void =
+func newDeleteClickHandler(simulator: Simulator, idx: Natural): () -> void =
   ## Returns the click handler for delete buttons.
   # NOTE: cannot inline due to lazy evaluation
-  () => simulator[].deletePairPosition(idx)
+  () => simulator.deletePairPosition(idx)
 
-func newCellClickHandler(
-    simulator: ref Simulator, idx: Natural, axis: bool
-): () -> void =
+func newCellClickHandler(simulator: Simulator, idx: Natural, axis: bool): () -> void =
   ## Returns the click handler for cell buttons.
   # NOTE: cannot inline due to lazy evaluation
-  () => simulator[].writeCell(idx, axis)
+  () => simulator.writeCell(idx, axis)
 
-func cellClass(simulator: ref Simulator, idx: Natural, axis: bool): kstring {.inline.} =
+func cellClass(simulator: Simulator, idx: Natural, axis: bool): kstring {.inline.} =
   ## Returns the cell's class.
-  if simulator[].pairCellBackgroundColor(idx, axis) == SelectColor:
+  if simulator.pairCellBackgroundColor(idx, axis) == SelectColor:
     kstring"button p-0 is-selected is-primary"
   else:
     kstring"button p-0"
 
 proc newPairsNode*(
-    simulator: ref Simulator, displayMode = false, showPositions = true
+    simulator: Simulator, displayMode = false, showPositions = true
 ): VNode {.inline.} =
   ## Returns the pairs node.
   let
-    editMode = simulator[].mode == Edit and not displayMode
-    pairsPositions = simulator[].nazoPuyoWrapBeforeMoves.get:
+    editMode = simulator.mode == Edit and not displayMode
+    pairsPositions = simulator.nazoPuyoWrapBeforeMoves.get:
       wrappedNazoPuyo.puyoPuyo.pairsPositions
 
   result = buildHtml(table(class = "table is-narrow")):
@@ -48,9 +46,9 @@ proc newPairsNode*(
       for pairIdx, pairPos in pairsPositions:
         let
           pair = pairPos.pair
-          pos = simulator[].positions[pairIdx]
+          pos = simulator.positions[pairIdx]
           rowClass =
-            if simulator[].needPairPointer(pairIdx) and not displayMode:
+            if simulator.needPairPointer(pairIdx) and not displayMode:
               kstring"is-selected"
             else:
               kstring""

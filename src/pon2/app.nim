@@ -52,7 +52,7 @@ export
 export permute.permute
 export
   simulator.SimulatorKind, simulator.SimulatorMode, simulator.SimulatorState,
-  simulator.SimulatorEditing, simulator.Simulator, simulator.initSimulator,
+  simulator.SimulatorEditing, simulator.Simulator, simulator.newSimulator,
   simulator.copy, simulator.nazoPuyoWrap, simulator.nazoPuyoWrapBeforeMoves,
   simulator.rule, simulator.kind, simulator.mode, simulator.`rule=`, simulator.`kind=`,
   simulator.`mode=`, simulator.editing, simulator.`editingCell=`, simulator.state,

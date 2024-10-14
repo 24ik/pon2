@@ -19,19 +19,19 @@ import ../../../core/[nazopuyo, requirement, rule]
 
 const RuleDescriptions: array[Rule, string] = ["通", "すいちゅう"]
 
-proc toXLink*(ide: Ide, withPositions: bool): Uri {.inline.} =
+func toXLink*(ide: Ide, withPositions: bool): Uri {.inline.} =
   ## Returns the URI for posting to X.
   let ideUri = ide.toUri withPositions
 
-  case ide.simulator[].kind
+  case ide.simulator.kind
   of Nazo:
-    ide.simulator[].nazoPuyoWrapBeforeMoves.get:
+    ide.simulator.nazoPuyoWrapBeforeMoves.get:
       let
         ruleStr =
-          if ide.simulator[].rule == Tsu:
+          if ide.simulator.rule == Tsu:
             ""
           else:
-            RuleDescriptions[ide.simulator[].rule]
+            RuleDescriptions[ide.simulator.rule]
         moveCount = wrappedNazoPuyo.moveCount
         reqStr = $wrappedNazoPuyo.requirement
 

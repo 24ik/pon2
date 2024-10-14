@@ -16,7 +16,7 @@ import ../../../../app/[color, simulator]
 import ../../../../core/[rule]
 
 type SelectControl* = ref object of LayoutContainer ## Select control.
-  simulator: ref Simulator
+  simulator: Simulator
 
 proc modeHandler(
     control: SelectControl,
@@ -27,7 +27,7 @@ proc modeHandler(
   ## Changes the simulator mode.
   const ModeToIndex: array[SimulatorMode, Natural] = [0, 1, 2, 3]
 
-  control.simulator[].mode = mode
+  control.simulator.mode = mode
 
   for mode2 in SimulatorMode:
     control.childControls[0].childControls[ModeToIndex[mode2]].backgroundColor =
@@ -40,7 +40,7 @@ proc ruleHandler(control: SelectControl, event: ClickEvent, rule: Rule) {.inline
   ## Changes the rule.
   const RuleToIndex: array[Rule, Natural] = [0, 1]
 
-  control.simulator[].rule = rule
+  control.simulator.rule = rule
 
   for rule2 in Rule:
     control.childControls[1].childControls[RuleToIndex[rule2]].backgroundColor =
@@ -57,7 +57,7 @@ proc kindHandler(
   ## Changes the simulator kind.
   const KindToIndex: array[SimulatorKind, Natural] = [0, 1]
 
-  control.simulator[].kind = kind
+  control.simulator.kind = kind
 
   for kind2 in SimulatorKind:
     control.childControls[2].childControls[KindToIndex[kind2]].backgroundColor =
@@ -86,7 +86,7 @@ func newKindHandler(
   (event: ClickEvent) => control.kindHandler(event, kind, reqControl)
 
 proc newSelectControl*(
-    simulator: ref Simulator, reqControl: RequirementControl
+    simulator: Simulator, reqControl: RequirementControl
 ): SelectControl {.inline.} =
   ## Returns a select control.
   result = new SelectControl
@@ -135,7 +135,7 @@ proc newSelectControl*(
   nazoButton.onClick = result.newKindHandler(Nazo, reqControl)
 
   # set color
-  case simulator[].mode
+  case simulator.mode
   of PlayEditor:
     playButton.backgroundColor = SelectColor.toNiguiColor
   of Edit:
@@ -143,20 +143,20 @@ proc newSelectControl*(
   of Play, View:
     assert false
 
-  case simulator[].rule
+  case simulator.rule
   of Tsu:
     tsuButton.backgroundColor = SelectColor.toNiguiColor
   of Water:
     waterButton.backgroundColor = SelectColor.toNiguiColor
 
-  case simulator[].kind
+  case simulator.kind
   of Regular:
     regularButton.backgroundColor = SelectColor.toNiguiColor
   of Nazo:
     nazoButton.backgroundColor = SelectColor.toNiguiColor
 
   # set enabled
-  let editorMode = simulator[].mode in {PlayEditor, Edit}
+  let editorMode = simulator.mode in {PlayEditor, Edit}
   playButton.enabled = editorMode
   editButton.enabled = editorMode
   tsuButton.enabled = editorMode

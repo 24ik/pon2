@@ -35,9 +35,9 @@ proc main*() =
       ide = uriStr.parseUri.parseIde
       nazo = parseNazoPuyo[TsuField](mainQuery, Pon2)
 
-    check ide.simulator[].nazoPuyoWrap == nazo.initNazoPuyoWrap
-    check ide.simulator[].kind == Nazo
-    check ide.simulator[].mode == Edit
+    check ide.simulator.nazoPuyoWrap == nazo.initNazoPuyoWrap
+    check ide.simulator.kind == Nazo
+    check ide.simulator.mode == Edit
 
     check ide.toUri(withPositions = true) == uriStr.parseUri
     check ide.toUri(withPositions = false) == uriStrNoPos.parseUri

@@ -18,9 +18,9 @@ proc main*() =
   # Constructor
   # ------------------------------------------------
 
-  # initSimulator
+  # newSimulator
   block:
-    let simulator = initSimulator[WaterField]()
+    let simulator = newSimulator[WaterField]()
     check simulator.nazoPuyoWrap == initNazoPuyo[WaterField]().initNazoPuyoWrap
     check simulator.nazoPuyoWrapBeforeMoves ==
       initNazoPuyo[WaterField]().initNazoPuyoWrap
@@ -40,7 +40,7 @@ proc main*() =
 
   # rule, kind, mode, `rule=`, `kind=`, `mode=`
   block:
-    var simulator = initSimulator[TsuField](PlayEditor)
+    var simulator = newSimulator[TsuField](PlayEditor)
     check simulator.rule == Tsu
     check simulator.kind == Regular
     check simulator.mode == PlayEditor
@@ -84,7 +84,7 @@ proc main*() =
 ------
 rb|4F
 rg|"""
-    ).initSimulator
+    ).newSimulator
 
     simulator.forward(replay = true)
     while simulator.state != Stable:
@@ -98,7 +98,7 @@ rg|"""
 
   # toggleInserting, toggleFocus
   block:
-    var simulator = initSimulator[TsuField]()
+    var simulator = newSimulator[TsuField]()
 
     simulator.toggleInserting
     check simulator.editing.insert
@@ -112,7 +112,7 @@ rg|"""
 
   # moveCursorUp, moveCursorDown, moveCursorRight, moveCursorLeft
   block:
-    var simulator = initSimulator[TsuField]()
+    var simulator = newSimulator[TsuField]()
 
     simulator.moveCursorUp
     check simulator.editing.field == (Row.high, Column.low)
@@ -140,7 +140,7 @@ rg|"""
     puyoPuyo.pairsPositions.addLast pairPos1
     puyoPuyo.pairsPositions.addLast pairPos2
     puyoPuyo.pairsPositions.addLast pairPos3
-    var simulator = puyoPuyo.initSimulator
+    var simulator = puyoPuyo.newSimulator
 
     simulator.nazoPuyoWrap.get:
       simulator.deletePairPosition 0
@@ -157,7 +157,7 @@ rg|"""
 
   # writeCell (field)
   block:
-    var simulator = initSimulator[TsuField]()
+    var simulator = newSimulator[TsuField]()
 
     simulator.nazoPuyoWrap.get:
       simulator.editingCell = Cell.Red
@@ -170,7 +170,7 @@ rg|"""
 
   # writeCell (pair)
   block:
-    var simulator = initSimulator[TsuField]()
+    var simulator = newSimulator[TsuField]()
 
     simulator.nazoPuyoWrap.get:
       simulator.editingCell = Cell.Red
@@ -205,7 +205,7 @@ rg|"""
       field2 = parseField[TsuField]("t-rgb...ypo...", Pon2)
       puyoPuyo = initPuyoPuyo[TsuField]()
     puyoPuyo.field = field2
-    var simulator = puyoPuyo.initSimulator
+    var simulator = puyoPuyo.newSimulator
 
     simulator.nazoPuyoWrap.get:
       simulator.shiftFieldUp
@@ -240,7 +240,7 @@ rg|"""
       puyoPuyo = initPuyoPuyo[TsuField]()
     puyoPuyo.field = field2
     puyoPuyo.pairsPositions = pairsPositions2
-    var simulator = puyoPuyo.initSimulator
+    var simulator = puyoPuyo.newSimulator
 
     simulator.nazoPuyoWrap.get:
       simulator.flip
@@ -260,7 +260,7 @@ rg|"""
 
   # `requirementKind=`, `requirementColor=`, `requirementNumber=`
   block:
-    var simulator = initSimulator[TsuField]()
+    var simulator = newSimulator[TsuField]()
 
     simulator.nazoPuyoWrap.get:
       check wrappedNazoPuyo.requirement == initRequirement(Clear, All)
@@ -293,7 +293,7 @@ rg|"""
 
   # undo, redo
   block:
-    var simulator = initSimulator[TsuField]()
+    var simulator = newSimulator[TsuField]()
     let nazo1 = simulator.nazoPuyoWrap
 
     simulator.undo
@@ -335,7 +335,7 @@ rg|"""
   # rotateOperatingPositionLeft
   block:
     var
-      simulator = initSimulator[TsuField]()
+      simulator = newSimulator[TsuField]()
       pos = simulator.operatingPosition
 
     simulator.moveOperatingPositionRight
@@ -373,7 +373,7 @@ rg|"""
       moveRes2 = initMoveResult(0, [0, 2, 4, 0, 0, 0, 0], @[detail], @[full])
       moveRes3 = moveRes2
 
-    var simulator = nazo0.initSimulator
+    var simulator = nazo0.newSimulator
     simulator.nazoPuyoWrap.get:
       check simulator.state == Stable
       check wrappedNazoPuyo == nazo0
@@ -444,7 +444,7 @@ rg|"""
     # replay
     block:
       var simulator =
-        parseNazoPuyo[TsuField]("Mp6j92mS_oaq1__u03", Ishikawa).initSimulator
+        parseNazoPuyo[TsuField]("Mp6j92mS_oaq1__u03", Ishikawa).newSimulator
       simulator.forward(replay = true)
       simulator.nazoPuyoWrap.get:
         check wrappedNazoPuyo ==
@@ -455,7 +455,7 @@ rg|"""
     # skip
     block:
       var simulator =
-        parseNazoPuyo[TsuField]("Mp6j92mS_oaq1__u03", Ishikawa).initSimulator
+        parseNazoPuyo[TsuField]("Mp6j92mS_oaq1__u03", Ishikawa).newSimulator
       simulator.forward(skip = true)
       simulator.nazoPuyoWrap.get:
         check wrappedNazoPuyo == parseNazoPuyo[TsuField]("Mp6j92mS_q1__u03", Ishikawa)
@@ -464,8 +464,7 @@ rg|"""
 
   # backward, reset
   block:
-    var simulator =
-      parseNazoPuyo[TsuField]("Mp6j92mS_o1q1__u03", Ishikawa).initSimulator
+    var simulator = parseNazoPuyo[TsuField]("Mp6j92mS_o1q1__u03", Ishikawa).newSimulator
 
     simulator.nazoPuyoWrap.get:
       for _ in 1 .. 3:
@@ -525,7 +524,7 @@ rg|"""
       nazo0 = parseNazoPuyo[TsuField]("Mp6j92mS_oa__u03", Ishikawa)
       nazo1 = parseNazoPuyo[TsuField]("M06j02mr__u03", Ishikawa)
 
-    var simulator = nazo0.initSimulator
+    var simulator = nazo0.newSimulator
     simulator.nazoPuyoWrap.get:
       simulator.forward(replay = true)
       simulator.forward

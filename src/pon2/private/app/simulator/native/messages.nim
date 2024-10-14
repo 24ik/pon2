@@ -16,7 +16,7 @@ import ../../[misc]
 import ../../../../app/[color, simulator]
 
 type MessagesControl* = ref object of ControlImpl ## Messages control.
-  simulator: ref Simulator
+  simulator: Simulator
 
 # ------------------------------------------------
 # Control
@@ -29,8 +29,8 @@ proc messagesDrawHandler(control: MessagesControl, event: DrawEvent) {.inline.} 
   canvas.areaColor = DefaultColor.toNiguiColor
   canvas.fill
 
-  if control.simulator[].mode != Edit:
-    canvas.drawText control.simulator[].getMessages.state
+  if control.simulator.mode != Edit:
+    canvas.drawText control.simulator.getMessages.state
 
 func newMessageDrawHandler(control: MessagesControl): (event: DrawEvent) -> void =
   ## Returns the handler.
@@ -38,7 +38,7 @@ func newMessageDrawHandler(control: MessagesControl): (event: DrawEvent) -> void
   (event: DrawEvent) => control.messagesDrawHandler event
 
 proc newMessagesControl*(
-    simulator: ref Simulator, assets: Assets
+    simulator: Simulator, assets: Assets
 ): MessagesControl {.inline.} =
   ## Returns a messages control.
   result = new MessagesControl

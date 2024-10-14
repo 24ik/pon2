@@ -94,7 +94,7 @@ proc main*() =
     let marathon = newMarathon()
     marathon.loadData
 
-    marathon.simulator[].nazoPuyoWrap.get:
+    marathon.simulator.nazoPuyoWrap.get:
       doAssert wrappedNazoPuyo.puyoPuyo.pairsPositions.len == 0
 
       marathon.play(onlyMatched = false)
