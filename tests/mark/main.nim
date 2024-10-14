@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[unittest]
+import std/[deques, unittest]
 import ../../src/pon2/core/[field, fqdn, mark, nazopuyo]
 
 func mark(uriStr: string): MarkResult =

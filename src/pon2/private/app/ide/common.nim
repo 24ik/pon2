@@ -25,7 +25,7 @@ proc toXLink*(ide: Ide, withPositions: bool): Uri {.inline.} =
 
   case ide.simulator[].kind
   of Nazo:
-    ide.simulator[].nazoPuyoWrap.get:
+    ide.simulator[].nazoPuyoWrapBeforeMoves.get:
       let
         ruleStr =
           if ide.simulator[].rule == Tsu:

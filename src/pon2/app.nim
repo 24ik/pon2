@@ -56,18 +56,19 @@ export
   simulator.copy, simulator.nazoPuyoWrap, simulator.nazoPuyoWrapBeforeMoves,
   simulator.rule, simulator.kind, simulator.mode, simulator.`rule=`, simulator.`kind=`,
   simulator.`mode=`, simulator.editing, simulator.`editingCell=`, simulator.state,
-  simulator.score, simulator.operatingPosition, simulator.toggleInserting,
-  simulator.toggleFocus, simulator.moveCursorUp, simulator.moveCursorDown,
-  simulator.moveCursorRight, simulator.moveCursorLeft, simulator.deletePairPosition,
-  simulator.writeCell, simulator.shiftFieldUp, simulator.shiftFieldDown,
-  simulator.shiftFieldRight, simulator.shiftFieldLeft, simulator.flipFieldV,
-  simulator.flipFieldH, simulator.flip, simulator.`requirementKind=`,
-  simulator.`requirementColor=`, simulator.`requirementNumber=`, simulator.undo,
-  simulator.redo, simulator.moveOperatingPositionRight,
-  simulator.moveOperatingPositionLeft, simulator.rotateOperatingPositionRight,
-  simulator.rotateOperatingPositionLeft, simulator.forward, simulator.backward,
-  simulator.reset, simulator.toUriQuery, simulator.parseSimulator, simulator.operate
-export solve.solve
+  simulator.score, simulator.positions, simulator.operatingIndex,
+  simulator.operatingPosition, simulator.toggleInserting, simulator.toggleFocus,
+  simulator.moveCursorUp, simulator.moveCursorDown, simulator.moveCursorRight,
+  simulator.moveCursorLeft, simulator.deletePairPosition, simulator.writeCell,
+  simulator.shiftFieldUp, simulator.shiftFieldDown, simulator.shiftFieldRight,
+  simulator.shiftFieldLeft, simulator.flipFieldV, simulator.flipFieldH, simulator.flip,
+  simulator.`requirementKind=`, simulator.`requirementColor=`,
+  simulator.`requirementNumber=`, simulator.undo, simulator.redo,
+  simulator.moveOperatingPositionRight, simulator.moveOperatingPositionLeft,
+  simulator.rotateOperatingPositionRight, simulator.rotateOperatingPositionLeft,
+  simulator.forward, simulator.backward, simulator.reset, simulator.toUriQuery,
+  simulator.parseSimulator, simulator.operate
+export solve.SolveAnswer, solve.solve
 
 when defined(js):
   export color.toColorCode

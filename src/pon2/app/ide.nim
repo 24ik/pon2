@@ -13,21 +13,21 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, strformat, strutils, uri]
+import std/[deques, sequtils, strformat, strutils, sugar, uri]
 import ./[key, nazopuyo, simulator]
 import ../core/[field, fqdn, nazopuyo, pairposition, puyopuyo, requirement]
 import ../private/[misc]
 
 when defined(js):
-  import std/[options, sugar]
+  import std/[options]
   import karax/[karax, karaxdsl, kdom, vdom]
   import ../core/[pair]
   import ../private/[webworker]
-  import ../private/app/[permute]
+  import ../private/app/[solve, permute]
   import ../private/app/ide/web/[webworker]
 else:
   {.push warning[Deprecated]: off.}
-  import std/[cpuinfo, sugar, threadpool]
+  import std/[cpuinfo, threadpool]
   {.pop.}
   import nigui
   import ./[permute, solve]
@@ -50,7 +50,6 @@ type
 
     progressBarData: tuple[now: Natural, total: Natural]
 
-  #Ide* = ref IdeObj not nil ## Puyo Puyo & Nazo Puyo IDE.
   Ide* = ref IdeObj ## Puyo Puyo & Nazo Puyo IDE.
 
 const IdeUriPath* {.define: "pon2.path".} = "/pon2/"
@@ -158,7 +157,8 @@ proc solve*(
     ,
 ) {.inline.} =
   ## Solves the nazo puyo.
-  if self.solving or self.permuting or self.simulator[].kind != Nazo:
+  if self.solving or self.permuting or self.simulator[].kind != Nazo or
+      self.simulator[].state != Stable:
     return
   self.simulator[].nazoPuyoWrap.get:
     if wrappedNazoPuyo.moveCount == 0:
@@ -168,11 +168,11 @@ proc solve*(
 
   self.simulator[].nazoPuyoWrap.get:
     when defined(js):
-      let results = new seq[seq[PairsPositions]]
+      let results = new seq[seq[SolveAnswer]]
       wrappedNazoPuyo.asyncSolve(results, parallelCount = parallelCount)
 
       self.progressBarData.total =
-        if wrappedNazoPuyo.puyoPuyo.pairsPositions[0].pair.isDouble:
+        if wrappedNazoPuyo.puyoPuyo.pairsPositions.peekFirst.pair.isDouble:
           wrappedNazoPuyo.puyoPuyo.field.validDoublePositions.card
         else:
           wrappedNazoPuyo.puyoPuyo.field.validPositions.card
@@ -186,7 +186,11 @@ proc solve*(
         if results[].len == self.progressBarData.total:
           self.progressBarData.total = 0
           self.answerData.hasData = true
-          self.answerData.pairsPositionsSeq = results[].concat
+          self.answerData.pairsPositionsSeq = collect:
+            for answer in results[].concat:
+              var pairsPositions = wrappedNazoPuyo.puyoPuyo.pairsPositions
+              pairsPositions.positions = answer
+              pairsPositions
           self.updateAnswerSimulator wrappedNazoPuyo
           self.solving = false
           interval.clearInterval
@@ -198,8 +202,11 @@ proc solve*(
     else:
       # FIXME: make asynchronous, redraw
       self.answerData.hasData = true
-      self.answerData.pairsPositionsSeq =
-        wrappedNazoPuyo.solve(parallelCount = parallelCount)
+      self.answerData.pairsPositionsSeq = collect:
+        for answer in wrappedNazoPuyo.solve(parallelCount = parallelCount):
+          var pairsPositions = wrappedNazoPuyo.puyoPuyo.pairsPositions
+          pairsPositions.positions = answer
+          pairsPositions
       self.updateAnswerSimulator wrappedNazoPuyo
       self.solving = false
 
@@ -220,7 +227,8 @@ proc permute*(
     ,
 ) {.inline.} =
   ## Permutes the nazo puyo.
-  if self.solving or self.permuting or self.simulator[].kind != Nazo:
+  if self.solving or self.permuting or self.simulator[].kind != Nazo or
+      self.simulator[].state != Stable:
     return
   self.simulator[].nazoPuyoWrap.get:
     if wrappedNazoPuyo.moveCount == 0:
@@ -245,7 +253,7 @@ proc permute*(
       var interval: Interval
       proc showAnswer() =
         let oldBarCount = self.progressBarData.now
-        self.progressBarData.now = results[].len.pred
+        self.progressBarData.now = results[].len
 
         if results[].len == pairsPositionsSeq.len:
           self.progressBarData.total = 0
@@ -441,7 +449,7 @@ when defined(js):
 
   proc runKeyboardEventHandler*(self: Ide, event: Event): bool {.inline, discardable.} =
     ## Keybaord event handler.
-    assert event of KeyboardEvent
+    # assert event of KeyboardEvent # HACK: somehow this fails
 
     result = self.runKeyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
     if result:

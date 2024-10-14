@@ -8,7 +8,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sugar]
+import std/[deques, sugar]
 import nigui
 import ./[assets]
 import ../[common]
@@ -116,7 +116,7 @@ proc positionDrawHandler(
   control.simulator[].nazoPuyoWrap.get:
     let pos =
       if idx < wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
-        wrappedNazoPuyo.puyoPuyo.pairsPositions[idx].position
+        control.simulator[].positions[idx]
       else:
         Position.None
     canvas.drawText $pos
@@ -172,6 +172,6 @@ proc newPairsControl*(
   result.simulator = simulator
   result.assets = assets
 
-  simulator[].nazoPuyoWrap.get:
+  simulator[].nazoPuyoWrapBeforeMoves.get:
     for idx in 0 .. wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
       result.add result.newFullPairControl(idx, assets)

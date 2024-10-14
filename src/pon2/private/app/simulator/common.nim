@@ -8,6 +8,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
+import std/[deques]
 import ../../../app/[color, nazopuyo, simulator]
 import
   ../../../core/[
@@ -53,10 +54,8 @@ proc fieldCellBackgroundColor*(
 
 func needPairPointer*(simulator: Simulator, idx: Natural): bool {.inline.} =
   ## Returns `true` if it is need to show the pointer to the pair.
-  let operatingIdx = simulator.nazoPuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.operatingIndex
-
-  result = simulator.mode != Edit and simulator.state == Stable and operatingIdx == idx
+  simulator.mode != Edit and simulator.state == Stable and
+    simulator.operatingIndex == idx
 
 proc pairCellBackgroundColor*(
     simulator: Simulator, idx: Natural, axis: bool
@@ -84,12 +83,15 @@ func operatingPairCell*(
   ## Returns the cell in the pairs being operated.
   let
     pos = simulator.operatingPosition
-    noPosLeft: bool
+    noPosLeft = simulator.nazoPuyoWrap.get:
+      wrappedNazoPuyo.puyoPuyo.movingCompleted
     nextPair: Pair
-  simulator.nazoPuyoWrap.get:
-    noPosLeft = wrappedNazoPuyo.puyoPuyo.movingCompleted
+  simulator.nazoPuyoWrapBeforeMoves.get:
     nextPair =
-      if noPosLeft: Pair.low else: wrappedNazoPuyo.puyoPuyo.operatingPairPosition.pair
+      if noPosLeft:
+        Pair.low
+      else:
+        wrappedNazoPuyo.puyoPuyo.pairsPositions[simulator.operatingIndex].pair
 
   result =
     if simulator.state != Stable:
@@ -124,8 +126,8 @@ func operatingPairCell*(
 
 func immediateNextPairCell*(simulator: Simulator, axis: bool): Cell {.inline.} =
   ## Returns the next-pair's cell in the immediate pairs.
-  simulator.nazoPuyoWrap.get:
-    let nextIdx = wrappedNazoPuyo.puyoPuyo.operatingIndex.succ
+  simulator.nazoPuyoWrapBeforeMoves.get:
+    let nextIdx = simulator.operatingIndex.succ
     if nextIdx >= wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
       return Cell.None
 
@@ -134,8 +136,8 @@ func immediateNextPairCell*(simulator: Simulator, axis: bool): Cell {.inline.} =
 
 func immediateDoubleNextPairCell*(simulator: Simulator, axis: bool): Cell {.inline.} =
   ## Returns the double-next-pair's cell in the immediate pairs.
-  simulator.nazoPuyoWrap.get:
-    let doubleNextIdx = wrappedNazoPuyo.puyoPuyo.operatingIndex.succ 2
+  simulator.nazoPuyoWrapBeforeMoves.get:
+    let doubleNextIdx = simulator.operatingIndex.succ 2
     if doubleNextIdx >= wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
       return Cell.None
 
@@ -165,13 +167,9 @@ func getMessages*(
           else:
             "　"
     of Nazo:
-      let pairsPositions: PairsPositions = simulator.nazoPuyoWrap.get:
-        wrappedNazoPuyo.puyoPuyo.pairsPositions[
-          0 ..< wrappedNazoPuyo.puyoPuyo.operatingIndex
-        ]
-
       simulator.nazoPuyoWrapBeforeMoves.get:
-        result.state = $wrappedNazoPuyo.mark pairsPositions
+        result.state =
+          $wrappedNazoPuyo.mark simulator.positions[0 ..< simulator.operatingIndex]
   else:
     result.state = "　"
 

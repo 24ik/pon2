@@ -8,7 +8,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options]
+import std/[deques, options]
 import
   ./[cell, field, moveresult, nazopuyo, pairposition, position, puyopuyo, requirement]
 import ../private/core/[mark]
@@ -35,6 +35,7 @@ func mark*[F: TsuField or WaterField](
     nazo: NazoPuyo[F], pairsPositions: PairsPositions
 ): MarkResult {.inline.} =
   ## Marks the positions.
+  ## Pairs in the `pairsPositions` are ignored.
   if not nazo.requirement.isSupported:
     return NotSupport
 
@@ -162,3 +163,15 @@ func mark*[F: TsuField or WaterField](
 func mark*[F: TsuField or WaterField](nazo: NazoPuyo[F]): MarkResult {.inline.} =
   ## Marks the positions.
   nazo.mark nazo.puyoPuyo.pairsPositions
+
+func mark*[F: TsuField or WaterField](
+    nazo: NazoPuyo[F], positions: seq[Position]
+): MarkResult {.inline.} =
+  ## Marks the positions.
+  var pairsPositions = initDeque[PairPosition](positions.len)
+  for idx, pos in positions:
+    pairsPositions.addLast PairPosition(
+      pair: nazo.puyoPuyo.pairsPositions[idx].pair, position: pos
+    )
+
+  result = nazo.mark pairsPositions

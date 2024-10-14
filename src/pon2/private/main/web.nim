@@ -9,7 +9,7 @@
 {.experimental: "views".}
 
 when defined(pon2.worker):
-  import std/[sequtils]
+  import std/[deques, sequtils, strutils]
   import ../[webworker]
   import ../app/[solve]
   import ../app/ide/web/[webworker]
@@ -31,13 +31,21 @@ when defined(pon2.worker):
     let args2 = args[1 ..^ 1]
     case args[0]
     of $Solve:
-      if args2.len == 2:
-        result.messages =
-          case args2[0].parseRule
-          of Tsu:
-            parseNode[TsuField](args2[1]).solve.mapIt it.toUriQuery
-          of Water:
-            parseNode[WaterField](args2[1]).solve.mapIt it.toUriQuery
+      if args2.len == 4:
+        let
+          moveCount = args2[1].parseInt
+          answers =
+            case args2[0].parseRule
+            of Tsu:
+              parseNode[TsuField](args2[3]).solve moveCount
+            of Water:
+              parseNode[WaterField](args2[3]).solve moveCount
+
+        result.messages = @[$answers.len, args2[2]]
+        for answer in answers:
+          result.messages.add $answer.len
+          for pos in answer:
+            result.messages.add $pos
 
         result.returnCode = Success
       else:
@@ -57,7 +65,9 @@ when defined(pon2.worker):
         nazoPuyoWrap.get:
           let answers = wrappedNazoPuyo.solve(earlyStopping = true)
           if answers.len == 1:
-            result.messages = @[$true, answers[0].toUriQuery]
+            var nazo = wrappedNazoPuyo
+            nazo.puyoPuyo.pairsPositions.positions = answers[0]
+            result.messages = @[$true, nazo.puyoPuyo.pairsPositions.toUriQuery]
           else:
             result.messages = @[$false]
       else:

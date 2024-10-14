@@ -8,16 +8,16 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, strformat]
+import std/[deques, sequtils, strformat]
 import karax/[karaxdsl, kbase, kdom, vdom]
 import ../../../../app/[ide, nazopuyo, simulator]
 import ../../../../core/[position]
 
 const
-  ParallelCountSelectIdPrefix = "pon2-gui-settings-parallel-"
-  AllowDoubleCheckboxIdPrefix = "pon2-gui-settings-double-"
-  AllowLastDoubleCheckboxIdPrefix = "pon2-gui-settings-lastdouble-"
-  FixMovesCheckboxIdPrefix = "pon2-gui-settings-fixmoves-"
+  ParallelCountSelectIdPrefix = "pon2-ide-settings-parallel-"
+  AllowDoubleCheckboxIdPrefix = "pon2-ide-settings-double-"
+  AllowLastDoubleCheckboxIdPrefix = "pon2-ide-settings-lastdouble-"
+  FixMovesCheckboxIdPrefix = "pon2-ide-settings-fixmoves-"
 
 proc getParallelCount(
   id: kstring

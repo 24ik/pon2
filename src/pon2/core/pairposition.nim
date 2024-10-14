@@ -8,16 +8,35 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, strformat, strutils, sugar]
+import std/[deques, sequtils, strformat, strutils, sugar]
 import ./[cell, fqdn, pair, position]
 import ../private/[misc]
+
+export deques.`==` # NOTE: need to be exported otherwise system.`==` is used
 
 type
   PairPosition* = object ## Pair and position.
     pair*: Pair
     position*: Position
 
-  PairsPositions* = seq[PairPosition] ## Pairs and Positions.
+  PairsPositions* = Deque[PairPosition] ## Pairs and Positions.
+
+# ------------------------------------------------
+# Property
+# ------------------------------------------------
+
+func `positions=`*(
+    pairsPositions: var PairsPositions, positions: Deque[Position]
+) {.inline.} =
+  ## Sets the positions.
+  ## If `positions` is shorter than `pairsPositions`, the rest of the positions
+  ## are filled with `Position.None`.
+  assert positions.len <= pairsPositions.len
+
+  for pairIdx, pos in positions:
+    pairsPositions[pairIdx].position = pos
+  for pairIdx in positions.len ..< pairsPositions.len:
+    pairsPositions[pairIdx].position = Position.None
 
 # ------------------------------------------------
 # Count
@@ -73,10 +92,13 @@ func `$`*(pairsPositions: PairsPositions): string {.inline.} =
 func parsePairsPositions*(str: string): PairsPositions {.inline.} =
   ## Returns the pairs&positions converted from the string representation.
   ## If the string is invalid, `ValueError` is raised.
-  if str == "":
-    @[]
-  else:
-    str.split(PairsPositionsSep).mapIt it.parsePairPosition
+  {.push warning[Uninit]: off.}
+  result =
+    if str == "":
+      initDeque[PairPosition]()
+    else:
+      str.split(PairsPositionsSep).mapIt(it.parsePairPosition).toDeque
+  {.pop.}
 
 # ------------------------------------------------
 # PairPosition <-> URI
@@ -117,7 +139,7 @@ func parsePairsPositions*(query: string, fqdn: IdeFqdn): PairsPositions {.inline
   if query.len mod 2 != 0:
     raise newException(ValueError, "Invalid pairs&positions: " & query)
 
-  result = newSeqOfCap(query.len div 2)
+  result = initDeque(query.len div 2)
 
   case fqdn
   of Pon2:
@@ -127,11 +149,11 @@ func parsePairsPositions*(query: string, fqdn: IdeFqdn): PairsPositions {.inline
         if idx.succ(4) > query.len:
           raise newException(ValueError, "This exception should be caught.")
 
-        result.add query[idx ..< idx.succ 4].parsePairPosition fqdn
+        result.addLast query[idx ..< idx.succ 4].parsePairPosition fqdn
         idx.inc 4
       except ValueError:
-        result.add query[idx ..< idx.succ 2].parsePairPosition fqdn
+        result.addLast query[idx ..< idx.succ 2].parsePairPosition fqdn
         idx.inc 2
   of Ishikawa, Ips:
     for i in countup(0, query.len.pred, 2):
-      result.add query[i .. i.succ].parsePairPosition fqdn
+      result.addLast query[i .. i.succ].parsePairPosition fqdn

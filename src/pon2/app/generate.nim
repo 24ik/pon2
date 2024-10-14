@@ -9,7 +9,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[algorithm, options, random, sequtils, sugar]
+import std/[algorithm, deques, options, random, sequtils, sugar]
 import ./[nazopuyo, solve]
 import
   ../core/[
@@ -274,11 +274,11 @@ func generatePuyoPuyo[F: TsuField or WaterField](
   rng.shuffle puyos
 
   # make pairs&positions
-  let pairsPositions = collect:
-    for i in 0 ..< moveCount:
-      PairPosition(
-        pair: initPair(puyos[2 * i], puyos[2 * i + 1]), position: Position.None
-      )
+  var pairsPositions = initDeque[PairPosition](moveCount)
+  for i in 0 ..< moveCount:
+    pairsPositions.addLast PairPosition(
+      pair: initPair(puyos[2 * i], puyos[2 * i + 1]), position: Position.None
+    )
 
   # shuffle for field
   {.push warning[ProveInit]: off.}
@@ -453,8 +453,8 @@ proc generate*[F: TsuField or WaterField](
       continue
 
     let answers = result.solve(earlyStopping = true)
-    if answers.len == 1 and answers[0][^1].position != Position.None:
-      result.puyoPuyo.pairsPositions = answers[0]
+    if answers.len == 1 and answers[0].len == result.moveCount:
+      result.puyoPuyo.pairsPositions.positions = answers[0]
       return
 
 proc generate*[F: TsuField or WaterField](

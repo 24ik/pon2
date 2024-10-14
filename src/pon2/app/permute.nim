@@ -55,7 +55,8 @@ iterator permute*[F: TsuField or WaterField](
       progressBar.update
 
     if answers.len == 1:
-      yield answers[0]
+      nazo2.puyoPuyo.pairsPositions.positions = answers[0]
+      yield nazo2.puyoPuyo.pairsPositions
 
   when not defined(js) and showProgress:
     progressBar.finish

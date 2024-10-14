@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, sequtils, unittest]
+import std/[deques, options, sequtils, unittest]
 import ../../src/pon2/app/[generate, solve]
 import
   ../../src/pon2/core/
@@ -55,7 +55,7 @@ proc main*() =
       )
       fieldArr = nazo.puyoPuyo.field.toArray
 
-    check nazo.solve == @[nazo.puyoPuyo.pairsPositions]
+    check nazo.solve == @[nazo.puyoPuyo.pairsPositions.mapIt(it.position).toDeque]
     check nazo.mark == Accept
     check nazo.moveCount == moveCount
     check nazo.requirement == initRequirement(kind, RequirementColor.All, num)

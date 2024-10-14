@@ -8,7 +8,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, strformat, strutils, tables, uri]
+import std/[deques, options, strformat, strutils, tables, uri]
 import ./[field, fqdn, puyopuyo, requirement, rule]
 
 type NazoPuyo*[F: TsuField or WaterField] = object ## Nazo Puyo.

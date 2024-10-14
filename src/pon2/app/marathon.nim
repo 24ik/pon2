@@ -43,7 +43,7 @@ type
 proc newMarathon*(rng = initRand()): Marathon {.inline.} =
   ## Returns a new marathon manager without pairs' data loaded.
   let simulator = new Simulator
-  simulator[] = initPuyoPuyo[TsuField]().initSimulator Play
+  simulator[] = initSimulator[TsuField](Play)
 
   result = Marathon(
     simulator: simulator,

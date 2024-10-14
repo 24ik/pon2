@@ -8,7 +8,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sugar]
+import std/[deques, sugar]
 import karax/[karax, karaxdsl, kbase, vdom, vstyles]
 import ../[common]
 import ../../[misc]
@@ -40,17 +40,17 @@ proc newPairsNode*(
   ## Returns the pairs node.
   let
     editMode = simulator[].mode == Edit and not displayMode
-    pairsPositions = simulator[].nazoPuyoWrap.get:
+    pairsPositions = simulator[].nazoPuyoWrapBeforeMoves.get:
       wrappedNazoPuyo.puyoPuyo.pairsPositions
 
   result = buildHtml(table(class = "table is-narrow")):
     tbody:
-      for idx, pairPos in pairsPositions:
+      for pairIdx, pairPos in pairsPositions:
         let
           pair = pairPos.pair
-          pos = pairPos.position
+          pos = simulator[].positions[pairIdx]
           rowClass =
-            if simulator[].needPairPointer(idx) and not displayMode:
+            if simulator[].needPairPointer(pairIdx) and not displayMode:
               kstring"is-selected"
             else:
               kstring""
@@ -61,14 +61,14 @@ proc newPairsNode*(
             td:
               button(
                 class = "button is-size-7",
-                onclick = simulator.newDeleteClickHandler(idx),
+                onclick = simulator.newDeleteClickHandler(pairIdx),
               ):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-trash")
 
           # index
           td:
-            text $idx.succ
+            text $pairIdx.succ
 
           # pair
           td:
@@ -79,9 +79,9 @@ proc newPairsNode*(
 
                 if editMode:
                   button(
-                    class = simulator.cellClass(idx, true),
+                    class = simulator.cellClass(pairIdx, true),
                     style = style(StyleAttr.maxHeight, kstring"24px"),
-                    onclick = simulator.newCellClickHandler(idx, true),
+                    onclick = simulator.newCellClickHandler(pairIdx, true),
                   ):
                     figure(class = "image is-24x24"):
                       img(src = axisSrc)
@@ -94,9 +94,9 @@ proc newPairsNode*(
 
                 if editMode:
                   button(
-                    class = simulator.cellClass(idx, false),
+                    class = simulator.cellClass(pairIdx, false),
                     style = style(StyleAttr.maxHeight, kstring"24px"),
-                    onclick = simulator.newCellClickHandler(idx, false),
+                    onclick = simulator.newCellClickHandler(pairIdx, false),
                   ):
                     figure(class = "image is-24x24"):
                       img(src = childSrc)

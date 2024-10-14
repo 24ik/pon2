@@ -13,7 +13,8 @@ import docopt
 import nigui
 import ../[misc]
 import ../../app/[generate, ide, nazopuyo, permute, simulator, solve]
-import ../../core/[field, fieldtype, nazopuyo, puyopuyo, requirement, rule]
+import
+  ../../core/[field, fieldtype, nazopuyo, pairposition, puyopuyo, requirement, rule]
 
 # ------------------------------------------------
 # Parse
@@ -89,7 +90,7 @@ proc runSolver*(args: Table[string, Value]) {.inline.} =
   ide.simulator[].nazoPuyoWrap.get:
     for answerIdx, answer in wrappedNazoPuyo.solve(showProgress = true):
       var nazo = wrappedNazoPuyo
-      nazo.puyoPuyo.pairsPositions = answer
+      nazo.puyoPuyo.pairsPositions.positions = answer
 
       let simulator = new Simulator
       simulator[] = nazo.initSimulator(PlayEditor)

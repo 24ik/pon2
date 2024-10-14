@@ -62,6 +62,8 @@ type
       tuple[nazoPuyoWrap: NazoPuyoWrap, state: SimulatorState, moveResult: MoveResult]
     ]
 
+    positions: seq[Position] # use this instead of the positions in the nazopuyoWrap
+    operatingIdx: Natural # used to draw
     operatingPos: Position
     editing: SimulatorEditing
 
@@ -84,9 +86,11 @@ func initSimulator*(nazoPuyoWrap: NazoPuyoWrap, mode = Play): Simulator {.inline
       state: Stable,
       kind: Nazo,
       mode: mode,
-      undoDeque: initDeque(wrappedNazoPuyo.moveCount),
-      redoDeque: initDeque(wrappedNazoPuyo.moveCount),
-      moveDeque: initDeque(),
+      undoDeque: initDeque(),
+      redoDeque: initDeque(),
+      moveDeque: initDeque(wrappedNazoPuyo.moveCount),
+      positions: wrappedNazoPuyo.puyoPuyo.pairsPositions.mapIt it.position,
+      operatingIdx: 0,
       operatingPos: InitPos,
       editing: SimulatorEditing(
         cell: Cell.None,
@@ -111,6 +115,10 @@ func initSimulator*[F: TsuField or WaterField](
   result = NazoPuyo[F](puyoPuyo: puyoPuyo, requirement: DefaultReq).initSimulator mode
   result.kind = Regular
 
+func initSimulator*[F: TsuField or WaterField](mode = Play): Simulator {.inline.} =
+  ## Returns a new simulator.
+  initPuyoPuyo[F]().initSimulator mode
+
 # ------------------------------------------------
 # Copy
 # ------------------------------------------------
@@ -124,9 +132,11 @@ func copy*(self: Simulator): Simulator {.inline.} =
     state: self.state,
     kind: self.kind,
     mode: self.mode,
-    undoDeque: self.undoDeque.toSeq.toDeque,
-    redoDeque: self.redoDeque.toSeq.toDeque,
-    moveDeque: self.moveDeque.toSeq.toDeque,
+    undoDeque: self.undoDeque.copy,
+    redoDeque: self.redoDeque.copy,
+    moveDeque: self.moveDeque.copy,
+    positions: self.positions,
+    operatingIdx: self.operatingIdx,
     operatingPos: self.operatingPos,
     editing: self.editing,
   )
@@ -146,6 +156,7 @@ func nazoPuyoWrap*(self: var Simulator): var NazoPuyoWrap {.inline.} =
 
 func nazoPuyoWrapBeforeMoves*(self: Simulator): NazoPuyoWrap {.inline.} =
   ## Returns the wrapped Nazo Puyo before any moves.
+  ## Positions are not included.
   if self.moveDeque.len > 0:
     self.moveDeque.peekFirst.nazoPuyoWrap
   else:
@@ -180,6 +191,7 @@ func `mode=`*(self: var Simulator, mode: SimulatorMode) {.inline.} =
   self.undoDeque.clear
   self.redoDeque.clear
   self.moveDeque.clear
+  self.operatingIdx = 0
 
 # ------------------------------------------------
 # Property - Editing
@@ -202,6 +214,14 @@ func state*(self: Simulator): SimulatorState {.inline.} =
 
 func score*(self: Simulator): int {.inline.} = ## Returns the score.
   self.moveResult.score
+
+func positions*(self: Simulator): seq[Position] {.inline.} =
+  ## Returns the positions.
+  self.positions
+
+func operatingIndex*(self: Simulator): int {.inline.} =
+  ## Returns the operating index.
+  self.operatingIdx
 
 func operatingPosition*(self: Simulator): Position {.inline.} =
   ## Returns the operating position.
@@ -274,6 +294,8 @@ func deletePairPosition*(self: var Simulator, idx: Natural) {.inline.} =
   self.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.pairsPositions.delete idx
 
+  self.positions.delete idx
+
 func deletePairPosition*(self: var Simulator) {.inline.} =
   ## Deletes the pair&position at selecting index.
   self.deletePairPosition self.editing.pair.index
@@ -313,14 +335,16 @@ func writeCell(self: var Simulator, idx: Natural, axis: bool, cell: Cell) {.inli
     let color = ColorPuyo cell
     self.nazoPuyoWrap.get:
       if idx == wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
-        wrappedNazoPuyo.puyoPuyo.pairsPositions.add PairPosition(
+        wrappedNazoPuyo.puyoPuyo.pairsPositions.addLast PairPosition(
           pair: initPair(color, color), position: Position.None
         )
+        self.positions.add Position.None
       else:
         if self.editing.insert:
           wrappedNazoPuyo.puyoPuyo.pairsPositions.insert PairPosition(
             pair: initPair(color, color), position: Position.None
           ), idx
+          self.positions.insert Position.None, idx
         else:
           if axis:
             wrappedNazoPuyo.puyoPuyo.pairsPositions[idx].pair.axis = color
@@ -479,25 +503,24 @@ func forward*(self: var Simulator, replay = false, skip = false) {.inline.} =
         return
 
       self.moveResult = DefaultMoveResult
+      self.moveDeque.addLast (self.nazoPuyoWrap, self.state, self.moveResult)
 
       # set position
       if not replay:
-        wrappedNazoPuyo.puyoPuyo.operatingPairPosition.position =
+        self.positions[self.operatingIdx] =
           if skip: Position.None else: self.operatingPos
 
-      # save to the deque
-      self.moveDeque.addLast (self.nazoPuyoWrap, self.state, self.moveResult)
-
       # put
-      wrappedNazoPuyo.puyoPuyo.field.put wrappedNazoPuyo.puyoPuyo.operatingPairPosition
+      wrappedNazoPuyo.puyoPuyo.field.put wrappedNazoPuyo.puyoPuyo.pairsPositions.popFirst.pair,
+        self.positions[self.operatingIdx]
 
       # check disappear
       if wrappedNazoPuyo.puyoPuyo.field.willDisappear:
         self.state = WillDisappear
       else:
         self.state = Stable
+        self.operatingIdx.inc
         self.operatingPos = InitPos
-        wrappedNazoPuyo.puyoPuyo.incrementOperatingIndex
     of WillDisappear:
       self.moveDeque.addLast (self.nazoPuyoWrap, self.state, self.moveResult)
 
@@ -516,8 +539,8 @@ func forward*(self: var Simulator, replay = false, skip = false) {.inline.} =
         self.state = WillDrop
       else:
         self.state = Stable
+        self.operatingIdx.inc
         self.operatingPos = InitPos
-        wrappedNazoPuyo.puyoPuyo.incrementOperatingIndex
     of WillDrop:
       self.moveDeque.addLast (self.nazoPuyoWrap, self.state, self.moveResult)
 
@@ -526,16 +549,16 @@ func forward*(self: var Simulator, replay = false, skip = false) {.inline.} =
         self.state = WillDisappear
       else:
         self.state = Stable
+        self.operatingIdx.inc
         self.operatingPos = InitPos
-        wrappedNazoPuyo.puyoPuyo.incrementOperatingIndex
 
 func backward*(self: var Simulator, toStable = true) {.inline.} =
   ## Backwards the simulator.
   if self.moveDeque.len == 0:
     return
 
-  let pairsPositions = self.nazoPuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions
+  if self.state == Stable:
+    self.operatingIdx.dec
 
   if toStable:
     while self.moveDeque.peekLast.state != Stable:
@@ -543,27 +566,20 @@ func backward*(self: var Simulator, toStable = true) {.inline.} =
 
   (self.nazoPuyoWrap, self.state, self.moveResult) = self.moveDeque.popLast
   self.operatingPos = InitPos
-  self.nazoPuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
 
 func reset*(self: var Simulator) {.inline.} =
   ## Backwards the simulator to the initial state.
   if self.moveDeque.len == 0:
     return
 
-  let pairsPositions = self.nazoPuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions
-
   self.nazoPuyoWrap = self.moveDeque.peekFirst.nazoPuyoWrap
-  self.nazoPuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
-
+  self.moveResult = DefaultMoveResult
   self.state = Stable
   self.undoDeque.clear
   self.redoDeque.clear
   self.moveDeque.clear
+  self.operatingIdx = 0
   self.operatingPos = InitPos
-  self.moveResult = DefaultMoveResult
 
 # ------------------------------------------------
 # Simulator <-> URI
@@ -585,18 +601,17 @@ func toUriQuery*(
 ): string {.inline.} =
   ## Returns the URI query converted from the simulator.
   ## Any moves are reset.
-
-  let
-    mainQuery: string
-    pairsPositions = self.nazoPuyoWrap.get:
-      wrappedNazoPuyo.puyoPuyo.pairsPositions
+  let mainQuery: string
   self.nazoPuyoWrapBeforeMoves.get:
+    assert wrappedNazoPuyo.puyoPuyo.pairsPositions.len == self.positions.len
+
     var nazo = wrappedNazoPuyo
-    if withPositions:
-      nazo.puyoPuyo.pairsPositions = pairsPositions
-    else:
-      for pairPos in nazo.puyoPuyo.pairsPositions.mitems:
-        pairPos.position = Position.None
+    for pairIdx in 0 ..< nazo.puyoPuyo.pairsPositions.len:
+      nazo.puyoPuyo.pairsPositions[pairIdx].position =
+        if withPositions:
+          self.positions[pairIdx]
+        else:
+          Position.None
 
     mainQuery =
       case self.kind
@@ -618,8 +633,6 @@ func parseSimulator*(query: string, fqdn: IdeFqdn): Simulator {.inline.} =
   ## If the URI is invalid, `ValueError` is raised.
   ## If the FQDN is not `Pon2`, the kind is set to `Regular`, and the mode is
   ## set to `Play`.
-  result = initPuyoPuyo[TsuField]().initSimulator # HACK: dummy to suppress warning
-
   case fqdn
   of Pon2:
     var
@@ -639,6 +652,7 @@ func parseSimulator*(query: string, fqdn: IdeFqdn): Simulator {.inline.} =
         mainQueries.add (key, val)
 
     if kindVal notin StrToKind or modeVal notin StrToMode:
+      result = initSimulator[TsuField]() # HACK: dummy to suppress warning
       raise newException(ValueError, "Invalid simulator: " & query)
 
     let
@@ -654,6 +668,7 @@ func parseSimulator*(query: string, fqdn: IdeFqdn): Simulator {.inline.} =
         try:
           result = parsePuyoPuyo[WaterField](mainQuery, Pon2).initSimulator mode
         except ValueError:
+          result = initSimulator[TsuField]() # HACK: dummy to suppress warning
           raise newException(ValueError, "Invalid simulator: " & query)
     of Nazo:
       try:
@@ -662,6 +677,7 @@ func parseSimulator*(query: string, fqdn: IdeFqdn): Simulator {.inline.} =
         try:
           result = parseNazoPuyo[WaterField](mainQuery, Pon2).initSimulator mode
         except ValueError:
+          result = initSimulator[TsuField]() # HACK: dummy to suppress warning
           raise newException(ValueError, "Invalid simulator: " & query)
   of Ishikawa, Ips:
     result = parsePuyoPuyo[TsuField](query, fqdn).initSimulator Play

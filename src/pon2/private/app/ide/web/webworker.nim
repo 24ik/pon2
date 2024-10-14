@@ -8,7 +8,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[dom, options, sequtils, strutils, sugar, uri]
+import std/[deques, dom, options, strutils, sugar, uri]
 import ../../[solve]
 import ../../../[webworker]
 import
@@ -26,9 +26,31 @@ type TaskKind* = enum
 
 const WaitLoopIntervalMs = 50
 
+func parseAnswers(messages: seq[string]): seq[SolveAnswer] {.inline.} =
+  ## Returns the answers converted from the messages.
+  result = newSeqOfCap[SolveAnswer](messages[0].parseInt)
+  let firstPos = messages[1].parsePosition
+
+  var idx = 2
+  while idx < messages.len:
+    let answerLen = messages[idx].parseInt
+    idx.inc
+
+    {.push warning[Uninit]: off.}
+    var answer = initDeque[Position](answerLen.succ)
+    {.pop.}
+    answer.addFirst firstPos
+    for _ in 1 .. answerLen:
+      answer.addLast messages[idx].parsePosition
+      idx.inc
+
+    result.add answer
+
+  assert idx == messages.len
+
 proc asyncSolve[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
-    results: ref seq[seq[PairsPositions]],
+    results: ref seq[seq[SolveAnswer]],
     reqKind: static RequirementKind,
     reqColor: static RequirementColor,
     earlyStopping: static bool,
@@ -44,17 +66,18 @@ proc asyncSolve[F: TsuField or WaterField](
       rootNode.canPrune(reqKind, reqColor):
     results[] = collect:
       for _ in 1 .. childNodes.len:
-        newSeq[PairsPositions](0)
+        newSeq[SolveAnswer](0)
     return
 
-  results[] = newSeqOfCap[seq[PairsPositions]](childNodes.len)
+  results[] = newSeqOfCap[seq[SolveAnswer]](childNodes.len)
 
   # result-register handler
   var interval: Interval
   proc handler(returnCode: WorkerReturnCode, messages: seq[string]) =
     case returnCode
     of Success:
-      results[].add messages.mapIt it.parsePairsPositions Pon2
+      results[].add messages.parseAnswers
+
       if results[].len == childNodes.len:
         interval.clearInterval
     of Failure:
@@ -77,14 +100,15 @@ proc asyncSolve[F: TsuField or WaterField](
       if worker.running:
         continue
 
-      worker.run $Solve, $nazo.rule, childNodes[childIdx].toStr
+      let (child, pos) = childNodes[childIdx]
+      worker.run $Solve, $nazo.rule, $nazo.moveCount, $pos, child.toStr
       childIdx.inc
 
   interval = runWorkers.setInterval WaitLoopIntervalMs
 
 proc asyncSolve[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
-    results: ref seq[seq[PairsPositions]],
+    results: ref seq[seq[SolveAnswer]],
     reqKind: static RequirementKind,
     earlyStopping: static bool,
     parallelCount: Positive,
@@ -123,7 +147,7 @@ proc asyncSolve[F: TsuField or WaterField](
 
 proc asyncSolve*[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
-    results: ref seq[seq[PairsPositions]],
+    results: ref seq[seq[SolveAnswer]],
     showProgress = false,
     earlyStopping: static bool = false,
     parallelCount: Positive = 6,

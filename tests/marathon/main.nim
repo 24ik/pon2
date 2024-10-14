@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strutils, unittest]
+import std/[deques, strutils, unittest]
 import ../../src/pon2/app/[marathon {.all.}, nazopuyo, simulator]
 import ../../src/pon2/core/[cell, pair, pairposition]
 import ../../src/pon2/private/app/marathon/[common]
