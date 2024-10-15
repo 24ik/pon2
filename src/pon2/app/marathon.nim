@@ -13,8 +13,8 @@ when defined(js):
 {.experimental: "views".}
 
 import std/[algorithm, critbits, math, options, os, sequtils, strutils, sugar, random]
-import ./[key, nazopuyo, simulator]
-import ../core/[cell, field, puyopuyo]
+import ./[key, simulator]
+import ../core/[cell, field]
 import ../private/[misc]
 import ../private/app/[misc]
 import ../private/app/marathon/[common]
@@ -296,8 +296,7 @@ proc match*(self: Marathon, prefix: string) {.inline.} =
 proc play(self: Marathon, pairsStr: string) {.inline.} =
   ## Plays a marathon mode with the given pairs.
   self.simulator.reset
-  self.simulator.nazoPuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsStr.toPairsPositions
+  self.simulator.pairsPositions = pairsStr.toPairsPositions
 
   self.focusSimulator = true
 

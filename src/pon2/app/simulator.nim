@@ -70,7 +70,7 @@ type
       tuple[nazoPuyoWrap: NazoPuyoWrap, state: SimulatorState, moveResult: MoveResult]
     ]
 
-    positions: seq[Position] # use this instead of the positions in the nazopuyoWrap
+    positions: Deque[Position] # use this instead of the positions in the nazopuyoWrap
     operatingIdx: Natural # used to draw
     operatingPos: Position
     editing: SimulatorEditing
@@ -99,7 +99,7 @@ func newSimulator(
       undoDeque: initDeque(),
       redoDeque: initDeque(),
       moveDeque: initDeque(wrappedNazoPuyo.moveCount),
-      positions: wrappedNazoPuyo.puyoPuyo.pairsPositions.mapIt it.position,
+      positions: wrappedNazoPuyo.puyoPuyo.pairsPositions.mapIt(it.position).toDeque,
       operatingIdx: 0,
       operatingPos: InitPos,
       editing: SimulatorEditing(
@@ -150,7 +150,7 @@ func copy*(self: Simulator): Simulator {.inline.} =
     undoDeque: self.undoDeque.copy,
     redoDeque: self.redoDeque.copy,
     moveDeque: self.moveDeque.copy,
-    positions: self.positions,
+    positions: self.positions.copy,
     operatingIdx: self.operatingIdx,
     operatingPos: self.operatingPos,
     editing: self.editing,
@@ -161,7 +161,7 @@ func copy*(self: Simulator): Simulator {.inline.} =
 # Property - Nazo Puyo
 # ------------------------------------------------
 
-func nazoPuyoWrap*(self: Simulator): var NazoPuyoWrap {.inline.} =
+func nazoPuyoWrap*(self: Simulator): NazoPuyoWrap {.inline.} =
   ## Returns the wrapped Nazo Puyo.
   self.nazoPuyoWrap
 
@@ -218,6 +218,26 @@ proc `editingCell=`*(self: Simulator, cell: Cell) {.inline.} =
   self.editing.cell = cell
 
 # ------------------------------------------------
+# Property - Pairs&Positions
+# ------------------------------------------------
+
+proc `pairsPositions=`*(self: Simulator, pairsPositions: PairsPositions) {.inline.} =
+  ## Sets the pairs and positions.
+  ## This procedure changes both `self.nazoPuyoWrap` and `self.positions`.
+  self.nazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
+
+  self.positions = pairsPositions.mapIt(it.position).toDeque
+
+proc `positions=`*(self: Simulator, positions: Deque[Position]) {.inline.} =
+  ## Sets the positions.
+  ## This procedure changes both `self.nazoPuyoWrap` and `self.positions`.
+  self.nazoPuyoWrap.get:
+    wrappedNazoPuyo.puyoPuyo.pairsPositions.positions = positions
+
+  self.positions = positions
+
+# ------------------------------------------------
 # Property - Other
 # ------------------------------------------------
 
@@ -228,7 +248,7 @@ func state*(self: Simulator): SimulatorState {.inline.} =
 func score*(self: Simulator): int {.inline.} = ## Returns the score.
   self.moveResult.score
 
-func positions*(self: Simulator): seq[Position] {.inline.} =
+func positions*(self: Simulator): Deque[Position] {.inline.} =
   ## Returns the positions.
   self.positions
 
@@ -351,7 +371,7 @@ proc writeCell(self: Simulator, idx: Natural, axis: bool, cell: Cell) {.inline.}
         wrappedNazoPuyo.puyoPuyo.pairsPositions.addLast PairPosition(
           pair: initPair(color, color), position: Position.None
         )
-        self.positions.add Position.None
+        self.positions.addLast Position.None
       else:
         if self.editing.insert:
           wrappedNazoPuyo.puyoPuyo.pairsPositions.insert PairPosition(
@@ -620,9 +640,10 @@ func toUriQuery*(
 
     var nazo = wrappedNazoPuyo
     for pairIdx in 0 ..< nazo.puyoPuyo.pairsPositions.len:
+      let positions = self.positions # HACK: this is necessary due to Nim's bug
       nazo.puyoPuyo.pairsPositions[pairIdx].position =
         if withPositions:
-          self.positions[pairIdx]
+          positions[pairIdx]
         else:
           Position.None
 

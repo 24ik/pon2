@@ -10,6 +10,7 @@ import ../../src/pon2/app/[solve]
 import ../../src/pon2/core/[field, fqdn, nazopuyo, pairposition, position, puyopuyo]
 
 proc checkSolve(question: string, answers: varargs[string]) =
+  {.push warning[Uninit]: off.}
   let
     nazo = parseNazoPuyo[TsuField](question, Ishikawa)
     answersSeq = collect:
@@ -18,6 +19,7 @@ proc checkSolve(question: string, answers: varargs[string]) =
           answer[2 * it ..< 2 * it.succ].parsePosition
         ).toDeque
     answersSet = answersSeq.toHashSet
+  {.pop.}
 
   check nazo.solve.toHashSet == answersSet
 

@@ -76,9 +76,10 @@ export
   pair.garbageCount, pair.parsePair, pair.toUriQuery
 export
   pairposition.`==`, pairposition.PairPosition, pairposition.PairsPositions,
-  pairposition.`positions=`, pairposition.puyoCount, pairposition.colorCount,
-  pairposition.garbageCount, pairposition.`$`, pairposition.parsePairPosition,
-  pairposition.parsePairsPositions, pairposition.toUriQuery
+  pairposition.copy, pairposition.`positions=`, pairposition.puyoCount,
+  pairposition.colorCount, pairposition.garbageCount, pairposition.`$`,
+  pairposition.parsePairPosition, pairposition.parsePairsPositions,
+  pairposition.toUriQuery
 export
   position.Direction, position.Position, position.AllPositions,
   position.AllDoublePositions, position.initPosition, position.axisColumn,

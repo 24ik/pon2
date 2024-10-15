@@ -55,7 +55,9 @@ proc main*() =
       nazo = generate[TsuField](option, 42)
       fieldArr = nazo.puyoPuyo.field.toArray
 
+    {.push warning[Uninit]: off.}
     check nazo.solve == @[nazo.puyoPuyo.pairsPositions.mapIt(it.position).toDeque]
+    {.pop.}
     check nazo.mark == Accept
     check nazo.moveCount == moveCount
     check nazo.requirement == initRequirement(kind, RequirementColor.All, num)

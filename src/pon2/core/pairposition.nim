@@ -22,6 +22,14 @@ type
   PairsPositions* = Deque[PairPosition] ## Pairs and Positions.
 
 # ------------------------------------------------
+# Copy
+# ------------------------------------------------
+
+func copy*(pairsPositions: PairsPositions): PairsPositions {.inline.} =
+  ## Returns a copy of the pairs&positions.
+  misc.copy pairsPositions
+
+# ------------------------------------------------
 # Property
 # ------------------------------------------------
 

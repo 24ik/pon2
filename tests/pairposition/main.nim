@@ -20,7 +20,9 @@ proc main*() =
       PairPosition(pair: YellowYellow, position: Right3),
       PairPosition(pair: BluePurple, position: Left2),
     ].toDeque
+    {.push warning[Uninit]: off.}
     pairsPositions.positions = [Up0, Position.None].toDeque
+    {.pop.}
     check pairsPositions == [
       PairPosition(pair: RedGreen, position: Up0),
       PairPosition(pair: YellowYellow, position: Position.None),
