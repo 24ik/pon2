@@ -8,7 +8,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[deques]
+import std/[deques, sugar]
 import ../../../app/[color, nazopuyo, simulator]
 import
   ../../../core/[
@@ -167,9 +167,11 @@ func getMessages*(
           else:
             "　"
     of Nazo:
+      let positions = collect:
+        for pairIdx in 0 ..< simulator.operatingIndex:
+          simulator.positions[pairIdx]
       simulator.nazoPuyoWrapBeforeMoves.get:
-        result.state =
-          $wrappedNazoPuyo.mark simulator.positions[0 ..< simulator.operatingIndex]
+        result.state = $wrappedNazoPuyo.mark positions
   else:
     result.state = "　"
 

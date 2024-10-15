@@ -108,7 +108,9 @@ func parseSomeInt*[T: SomeNumber or Natural or Positive](val: char): T {.inline.
 
 func copy*[T](deque: Deque[T]): Deque[T] {.inline.} =
   ## Returns a copy of the deque.
+  {.push warning[Uninit]: off.}
   result = initDeque(deque.len)
+  {.pop.}
   for e in deque:
     result.addLast e
 

@@ -288,10 +288,9 @@ proc nextAnswer*(self: Ide) {.inline.} =
   else:
     self.answerData.index.inc
 
-  self.answerSimulator.nazoPuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions =
-      self.answerData.pairsPositionsSeq[self.answerData.index]
   self.answerSimulator.reset
+  self.answerSimulator.pairsPositions =
+    self.answerData.pairsPositionsSeq[self.answerData.index]
 
 proc prevAnswer*(self: Ide) {.inline.} =
   ## Shows the previous answer.
@@ -303,10 +302,9 @@ proc prevAnswer*(self: Ide) {.inline.} =
   else:
     self.answerData.index.dec
 
-  self.answerSimulator.nazoPuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions =
-      self.answerData.pairsPositionsSeq[self.answerData.index]
   self.answerSimulator.reset
+  self.answerSimulator.pairsPositions =
+    self.answerData.pairsPositionsSeq[self.answerData.index]
 
 # ------------------------------------------------
 # IDE <-> URI
