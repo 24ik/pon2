@@ -8,7 +8,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ../../../../app/[ide, simulator]
+import ../../../../app/[ide]
+import ../../../../app/simulator/[native]
 
 proc newAnswerSimulatorControl*(ide: Ide): SimulatorControl {.inline.} =
   ## Returns the answer simulator control.

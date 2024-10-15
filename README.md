@@ -57,7 +57,7 @@ It is necessary to place the `assets` directory to the one specified by
 
 ### API Usage
 
-See the [API documentation](https://24ik.github.io/pon2/docs/pon2.html).
+See the [API documentation](https://24ik.github.io/pon2/docs/).
 
 ### Running Tests
 

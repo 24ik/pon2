@@ -1,5 +1,13 @@
 ## This module implements Puyo Puyo simulators.
 ##
+when defined(js):
+  ## See also the [backend-specific documentation](./simulator/web.html).
+  ##
+  discard
+else:
+  ## See also the [backend-specific documentation](./simulator/native.html).
+  ##
+  discard
 
 {.experimental: "inferGenericTypes".}
 {.experimental: "notnil".}
@@ -792,132 +800,3 @@ proc operate*(self: Simulator, event: KeyEvent): bool {.discardable.} =
       self.reset
     else:
       result = false
-
-# ------------------------------------------------
-# Backend-specific Implementation
-# ------------------------------------------------
-
-when defined(js):
-  import karax/[karaxdsl, vdom]
-  import
-    ../private/app/simulator/web/[
-      controller,
-      field,
-      immediatepairs,
-      messages,
-      operating as operatingModule,
-      pairs as pairsModule,
-      palette,
-      requirement,
-      select,
-    ]
-
-  # ------------------------------------------------
-  # JS - Node
-  # ------------------------------------------------
-
-  const ReqIdPrefix = "pon2-simulator-req-"
-
-  proc newSimulatorNode(self: Simulator, id: string): VNode {.inline.} =
-    ## Returns the node without the external section.
-    buildHtml(tdiv):
-      tdiv(class = "block"):
-        self.newRequirementNode(id = &"{ReqIdPrefix}{id}")
-      tdiv(class = "block"):
-        tdiv(class = "columns is-mobile is-variable is-1"):
-          tdiv(class = "column is-narrow"):
-            if self.mode != Edit:
-              tdiv(class = "block"):
-                self.newOperatingNode
-            tdiv(class = "block"):
-              self.newFieldNode
-            if self.mode != Edit:
-              tdiv(class = "block"):
-                self.newMessagesNode
-            if self.mode in {PlayEditor, Edit}:
-              tdiv(class = "block"):
-                self.newSelectNode
-          if self.mode != Edit:
-            tdiv(class = "column is-narrow"):
-              tdiv(class = "block"):
-                self.newImmediatePairsNode
-          tdiv(class = "column is-narrow"):
-            tdiv(class = "block"):
-              self.newControllerNode
-            if self.mode == Edit:
-              tdiv(class = "block"):
-                self.newPaletteNode
-            tdiv(class = "block"):
-              self.newPairsNode
-
-  proc newSimulatorNode*(
-      self: Simulator, wrapSection = true, id = ""
-  ): VNode {.inline.} =
-    ## Returns the simulator node.
-    let node = self.newSimulatorNode id
-
-    if wrapSection:
-      result = buildHtml(section(class = "section")):
-        node
-    else:
-      result = node
-
-else:
-  import nigui
-  import
-    ../private/app/simulator/native/[
-      assets,
-      field,
-      immediatepairs,
-      messages,
-      operating as operatingModule,
-      pairs as pairsModule,
-      requirement,
-      select,
-    ]
-
-  type SimulatorControl* = ref object of LayoutContainer
-    ## Root control of the simulator.
-
-  # ------------------------------------------------
-  # Native - Control
-  # ------------------------------------------------
-
-  proc newSimulatorControl*(self: Simulator): SimulatorControl {.inline.} =
-    ## Returns the simulator control.
-    {.push warning[ProveInit]: off.}
-    result.new
-    {.pop.}
-    result.init
-    result.layout = Layout_Vertical
-
-    # row=0
-    let reqControl = self.newRequirementControl
-    result.add reqControl
-
-    # row=1
-    let secondRow = newLayoutContainer Layout_Horizontal
-    result.add secondRow
-
-    # row=1, left
-    let left = newLayoutContainer Layout_Vertical
-    secondRow.add left
-
-    let
-      assets = newAssets()
-      field = self.newFieldControl assets
-      messages = self.newMessagesControl assets
-    left.add self.newOperatingControl assets
-    left.add field
-    left.add messages
-    left.add self.newSelectControl reqControl
-
-    # row=1, center
-    secondRow.add self.newImmediatePairsControl assets
-
-    # row=1, right
-    secondRow.add self.newPairsControl assets
-
-    # set size
-    reqControl.setWidth secondRow.naturalWidth
-    messages.setWidth field.naturalWidth

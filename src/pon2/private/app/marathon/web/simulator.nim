@@ -9,7 +9,8 @@
 {.experimental: "views".}
 
 import karax/[vdom]
-import ../../../../app/[marathon, simulator]
+import ../../../../app/[marathon]
+import ../../../../app/simulator/[web]
 
 proc newMarathonSimulatorNode*(marathon: Marathon, id: string): VNode {.inline.} =
   ## Returns the marathon simulator node.

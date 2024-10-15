@@ -5,6 +5,14 @@
 ## | -------------------- | ------------------------ | -------- |
 ## | `-d:pon2.path=<str>` | URI path of the web IDE. | `/pon2/` |
 ##
+when defined(js):
+  ## See also the [backend-specific documentation](./ide/web.html).
+  ##
+  discard
+else:
+  ## See also the [backend-specific documentation](./ide/native.html).
+  ##
+  discard
 
 {.experimental: "inferGenericTypes".}
 {.experimental: "notnil".}
@@ -20,7 +28,7 @@ import ../private/[misc]
 
 when defined(js):
   import std/[options]
-  import karax/[karax, karaxdsl, kdom, vdom]
+  import karax/[karax, kdom, vdom]
   import ../core/[pair]
   import ../private/[webworker]
   import ../private/app/[solve, permute]
@@ -415,179 +423,3 @@ proc operate*(self: Ide, event: KeyEvent): bool {.inline.} =
       return true
 
   return self.simulator.operate event
-
-# ------------------------------------------------
-# Backend-specific Implementation
-# ------------------------------------------------
-
-when defined(js):
-  import
-    ../private/app/ide/web/[answer, controller, pagination, settings, share, progress]
-
-  # ------------------------------------------------
-  # JS - Keyboard Handler
-  # ------------------------------------------------
-
-  proc runKeyboardEventHandler*(
-      self: Ide, event: KeyEvent
-  ): bool {.inline, discardable.} =
-    ## Runs the keyboard event handler.
-    ## Returns `true` if any action is executed.
-    result = self.operate event
-    if result and not kxi.surpressRedraws:
-      kxi.redraw
-
-  proc runKeyboardEventHandler*(self: Ide, event: Event): bool {.inline, discardable.} =
-    ## Keybaord event handler.
-    # assert event of KeyboardEvent # HACK: somehow this fails
-
-    result = self.runKeyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
-    if result:
-      event.preventDefault
-
-  func newKeyboardEventHandler*(self: Ide): (event: Event) -> void {.inline.} =
-    ## Returns the keyboard event handler.
-    (event: Event) => (discard self.runKeyboardEventHandler event)
-
-  # ------------------------------------------------
-  # JS - Node
-  # ------------------------------------------------
-
-  const
-    MainSimulatorIdPrefix = "pon2-ide-mainsimulator-"
-    AnswerSimulatorIdPrefix = "pon2-ide-answersimulator-"
-    SettingsIdPrefix = "pon2-ide-settings-"
-    ShareIdPrefix = "pon2-ide-share-"
-
-  proc newIdeNode(self: Ide, id: string): VNode {.inline.} =
-    ## Returns the IDE node without the external section.
-    let
-      simulatorNode = self.simulator.newSimulatorNode(
-        wrapSection = false, id = &"{MainSimulatorIdPrefix}{id}"
-      )
-      settingsId = &"{SettingsIdPrefix}{id}"
-
-    result = buildHtml(tdiv(class = "columns is-mobile is-variable is-1")):
-      tdiv(class = "column is-narrow"):
-        tdiv(class = "block"):
-          simulatorNode
-        tdiv(class = "block"):
-          self.newShareNode &"{ShareIdPrefix}{id}"
-      if self.simulator.mode in {PlayEditor, Edit} and self.simulator.kind == Nazo:
-        tdiv(class = "column is-narrow"):
-          section(class = "section"):
-            tdiv(class = "block"):
-              self.newEditorControllerNode settingsId
-            tdiv(class = "block"):
-              self.newEditorSettingsNode settingsId
-            if self.progressBarData.total > 0:
-              self.newEditorProgressBarNode
-            if self.answerData.hasData:
-              tdiv(class = "block"):
-                self.newEditorPaginationNode
-              if self.answerData.pairsPositionsSeq.len > 0:
-                tdiv(class = "block"):
-                  self.newAnswerSimulatorNode &"{AnswerSimulatorIdPrefix}{id}"
-
-  proc newIdeNode*(
-      self: Ide, setKeyHandler = true, wrapSection = true, id = ""
-  ): VNode {.inline.} =
-    ## Returns the IDE node.
-    if setKeyHandler:
-      document.onkeydown = self.newKeyboardEventHandler
-
-    let node = self.newIdeNode id
-
-    if wrapSection:
-      result = buildHtml(section(class = "section")):
-        node
-    else:
-      result = node
-
-else:
-  import ../private/app/ide/native/[answer, controller, pagination]
-
-  type
-    IdeControl* = ref object of LayoutContainer ## Root control of the IDE.
-
-    IdeWindow* = ref object of WindowImpl ## GUI application window.
-      ide: Ide
-
-  # ------------------------------------------------
-  # Native - Keyboard Handler
-  # ------------------------------------------------
-
-  proc runKeyboardEventHandler*(
-      window: IdeWindow, event: KeyboardEvent, keys = downKeys()
-  ): bool {.inline, discardable.} =
-    ## Runs the keyboard event handler.
-    ## Returns `true` if any action is executed.
-    result = window.ide.operate event.toKeyEvent keys
-    if result:
-      event.window.control.forceRedraw
-
-  proc runKeyboardEventHandler(event: KeyboardEvent): bool {.inline, discardable.} =
-    ## Runs the keyboard event handler.
-    ## Returns `true` if any action is executed.
-    let rawWindow = event.window
-    assert rawWindow of IdeWindow
-
-    result = cast[IdeWindow](rawWindow).runKeyboardEventHandler event
-
-  func newKeyboardEventHandler*(): (event: KeyboardEvent) -> void {.inline.} =
-    ## Returns the keyboard event handler.
-    (event: KeyboardEvent) => (discard event.runKeyboardEventHandler)
-
-  # ------------------------------------------------
-  # Native - Control / Window
-  # ------------------------------------------------
-
-  proc newIdeControl*(self: Ide): IdeControl {.inline.} =
-    ## Returns the IDE control.
-    {.push warning[ProveInit]: off.}
-    result.new
-    {.pop.}
-    result.init
-    result.layout = Layout_Horizontal
-
-    # col=0
-    let simulatorControl = self.simulator.newSimulatorControl
-    result.add simulatorControl
-
-    # col=1
-    let secondCol = newLayoutContainer Layout_Vertical
-    result.add secondCol
-
-    secondCol.padding = 10.scaleToDpi
-    secondCol.spacing = 10.scaleToDpi
-
-    secondCol.add self.newEditorControllerControl
-    secondCol.add self.newEditorPaginationControl
-    secondCol.add self.newAnswerSimulatorControl
-
-  proc newIdeWindow*(
-      self: Ide, title = "Pon!通", setKeyHandler = true
-  ): IdeWindow {.inline.} =
-    ## Returns the IDE window.
-    {.push warning[ProveInit]: off.}
-    result.new
-    {.pop.}
-    result.init
-
-    result.ide = self
-
-    result.title = title
-    result.resizable = false
-    if setKeyHandler:
-      result.onKeyDown = newKeyboardEventHandler()
-
-    let rootControl = self.newIdeControl
-    result.add rootControl
-
-    when defined(windows):
-      # FIXME: ad hoc adjustment needed on Windows and should be improved
-      result.width = (rootControl.naturalWidth.float * 1.1).int
-      result.height = (rootControl.naturalHeight.float * 1.1).int
-    else:
-      result.width = rootControl.naturalWidth
-      result.height = rootControl.naturalHeight

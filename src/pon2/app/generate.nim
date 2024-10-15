@@ -16,9 +16,9 @@ import
     requirement, rule,
   ]
 import ../private/[misc]
-import ../private/app/[generate as generateLib]
+import ../private/app/[generate as generateModule]
 
-export generateLib.GenerateError
+export generateModule.GenerateError
 
 type
   GenerateRequirementColor* {.pure.} = enum

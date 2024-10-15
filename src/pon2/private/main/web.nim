@@ -96,6 +96,7 @@ else:
     import std/[sugar]
     import karax/[karax]
     import ../../app/[marathon]
+    import ../../app/marathon/[web]
 
     # ------------------------------------------------
     # Main - Marathon
@@ -119,6 +120,7 @@ else:
     import std/[uri]
     import karax/[karax]
     import ../../app/[ide]
+    import ../../app/ide/[web]
     import ../../core/[fqdn]
 
     # ------------------------------------------------

@@ -10,7 +10,8 @@
 /src/htmldocs/
 
 /www/assets/
-/www/docs/
+/www/docs/native/
+/www/docs/web/
 /www/marathon/index.min.js
 /www/index.min.js
 /www/worker.min.js

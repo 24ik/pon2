@@ -71,18 +71,26 @@ export
 export solve.SolveAnswer, solve.solve
 
 when defined(js):
+  import ./app/ide/[web as ideWeb]
+  import ./app/marathon/[web as marathonWeb]
+  import ./app/simulator/[web as simulatorWeb]
+
   export color.toColorCode
-  export ide.runKeyboardEventHandler, ide.newKeyboardEventHandler, ide.newIdeNode
+  export
+    ideWeb.runKeyboardEventHandler, ideWeb.newKeyboardEventHandler, ideWeb.newIdeNode
   export key.toKeyEvent
   export
-    marathon.asyncLoadData, marathon.runKeyboardEventHandler,
-    marathon.newKeyboardEventHandler, marathon.newMarathonNode
-  export simulator.newSimulatorNode
+    marathon.asyncLoadData, marathonWeb.runKeyboardEventHandler,
+    marathonWeb.newKeyboardEventHandler, marathonWeb.newMarathonNode
+  export simulatorWeb.newSimulatorNode
 else:
+  import ./app/ide/[native as ideNative]
+  import ./app/simulator/[native as simulatorNative]
+
   export color.toNiguiColor
   export
-    ide.IdeControl, ide.IdeWindow, ide.runKeyboardEventHandler,
-    ide.newKeyboardEventHandler, ide.newIdeControl, ide.newIdeWindow
+    ideNative.IdeControl, ideNative.IdeWindow, ideNative.runKeyboardEventHandler,
+    ideNative.newKeyboardEventHandler, ideNative.newIdeControl, ideNative.newIdeWindow
   export marathon.loadData
   export key.toKeyEvent
-  export simulator.SimulatorControl, simulator.newSimulatorControl
+  export simulatorNative.SimulatorControl, simulatorNative.newSimulatorControl

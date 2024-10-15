@@ -9,7 +9,8 @@
 {.experimental: "views".}
 
 import karax/[vdom]
-import ../../../../app/[ide, simulator]
+import ../../../../app/[ide]
+import ../../../../app/simulator/[web]
 
 proc newAnswerSimulatorNode*(ide: Ide, id: string): VNode {.inline.} =
   ## Returns the answer simulator node.

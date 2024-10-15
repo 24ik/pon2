@@ -13,6 +13,7 @@ import docopt
 import nigui
 import ../[misc]
 import ../../app/[generate, ide, nazopuyo, permute, simulator, solve]
+import ../../app/ide/[native]
 import
   ../../core/[field, fieldtype, nazopuyo, pairposition, puyopuyo, requirement, rule]
 

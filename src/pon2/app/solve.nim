@@ -12,7 +12,7 @@ import std/[deques, options, sequtils, setutils, tables]
 import ./[nazopuyo]
 import ../core/[field, nazopuyo, pairposition, position, requirement]
 import ../private/[misc]
-import ../private/app/[solve as solveLib]
+import ../private/app/[solve as solveModule]
 
 when not defined(js):
   {.push warning[Deprecated]: off.}
@@ -20,7 +20,7 @@ when not defined(js):
   {.pop.}
   import suru
 
-export solveLib.SolveAnswer
+export solveModule.SolveAnswer
 
 # ------------------------------------------------
 # Solve
