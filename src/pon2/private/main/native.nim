@@ -138,35 +138,37 @@ proc runGenerator*(args: Table[string, Value]) {.inline.} =
       else:
         some parseSomeInt[Natural](c)
 
+  # option
+  let option = GenerateOption(
+    requirement: req,
+    moveCount: parseSomeInt[Positive](args["-m"]).get,
+    colorCount: parseSomeInt[int](args["-c"]).get,
+    heights: heights,
+    puyoCounts: (
+      color: parseSomeInt[Natural](args["--nc"], true),
+      garbage: parseSomeInt[Natural](args["--ng"]).get,
+    ),
+    connect2Counts: (
+      total: parseSomeInt[Natural](args["-2"], true),
+      vertical: parseSomeInt[Natural](args["--2v"], true),
+      horizontal: parseSomeInt[Natural](args["--2h"], true),
+    ),
+    connect3Counts: (
+      total: parseSomeInt[Natural](args["-3"], true),
+      vertical: parseSomeInt[Natural](args["--3v"], true),
+      horizontal: parseSomeInt[Natural](args["--3h"], true),
+      lShape: parseSomeInt[Natural](args["--3l"], true),
+    ),
+    allowDouble: not args["-D"].to_bool,
+    allowLastDouble: args["-d"].to_bool,
+  )
+
   # generate
   let rule = args["-r"].parseRule
   for nazoIdx in 0 ..< parseSomeInt[Natural](args["-n"]).get:
     let
-      ide = generate(
-          (rng.rand int.low .. int.high),
-          rule,
-          req,
-          parseSomeInt[Natural](args["-m"]).get,
-          parseSomeInt[Natural](args["-c"]).get,
-          heights,
-          (
-            color: parseSomeInt[Natural](args["--nc"], true),
-            garbage: parseSomeInt[Natural](args["--ng"]).get,
-          ),
-          (
-            total: parseSomeInt[Natural](args["-2"], true),
-            vertical: parseSomeInt[Natural](args["--2v"], true),
-            horizontal: parseSomeInt[Natural](args["--2h"], true),
-          ),
-          (
-            total: parseSomeInt[Natural](args["-3"], true),
-            vertical: parseSomeInt[Natural](args["--3v"], true),
-            horizontal: parseSomeInt[Natural](args["--3h"], true),
-            lShape: parseSomeInt[Natural](args["--3l"], true),
-          ),
-          not args["-D"].to_bool,
-          args["-d"].to_bool,
-        )
+      ide = option
+        .generate(rule, (rng.rand int.low .. int.high))
         .newSimulator(PlayEditor).newIde
       questionUri = ide.toUri(withPositions = false)
       answerUri = ide.toUri(withPositions = true)

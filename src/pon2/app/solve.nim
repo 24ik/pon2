@@ -11,14 +11,14 @@
 import std/[deques, options, sequtils, setutils, tables]
 import ./[nazopuyo]
 import ../core/[field, nazopuyo, pairposition, position, requirement]
+import ../private/[misc]
 import ../private/app/[solve as solveLib]
 
 when not defined(js):
   {.push warning[Deprecated]: off.}
-  import std/[cpuinfo, os, threadpool]
+  import std/[os, threadpool]
   {.pop.}
   import suru
-  import ../private/[misc]
 
 export solveLib.SolveAnswer
 
@@ -197,12 +197,7 @@ proc solve*[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
     showProgress: static bool = false,
     earlyStopping: static bool = false,
-    parallelCount: Positive =
-      when defined(js):
-        1
-      else:
-        max(1, countProcessors())
-    ,
+    parallelCount: Positive = processorCount(),
 ): seq[SolveAnswer] {.inline.} =
   ## Solves the nazo puyo.
   ## `showProgress` and `parallelCount` is ignored on JS backend.

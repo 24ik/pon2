@@ -14,6 +14,9 @@ import
     uri,
   ]
 
+when not defined(js):
+  import std/[cpuinfo]
+
 func splitPath2(path: string): tuple[head: string, tail: string] {.inline.} =
   ## Returns the parent directory.
   when not defined(js):
@@ -175,3 +178,12 @@ func decRot*[T: Ordinal](x: var T) {.inline.} =
     x = T.high
   else:
     x.dec
+
+proc processorCount*(): int {.inline.} =
+  ## Returns the number of processors.
+  ## If processors are not detected, returns `1`.
+  ## If the backend is JS, returns `1`.
+  when defined(js):
+    1
+  else:
+    max(countProcessors(), 1)

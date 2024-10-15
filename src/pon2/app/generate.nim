@@ -1,6 +1,5 @@
 ## This module implements Nazo Puyo generators.
 ##
-# TODO: make object type of generate arguments
 
 {.experimental: "inferGenericTypes".}
 {.experimental: "notnil".}
@@ -9,7 +8,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[algorithm, deques, options, random, sequtils, sugar]
+import std/[algorithm, deques, options, random, sequtils]
 import ./[nazopuyo, solve]
 import
   ../core/[
@@ -17,10 +16,11 @@ import
     requirement, rule,
   ]
 import ../private/[misc]
+import ../private/app/[generate as generateLib]
+
+export generateLib.GenerateError
 
 type
-  GenerateError* = object of CatchableError ## Exception in generation.
-
   GenerateRequirementColor* {.pure.} = enum
     ## Requirement color for generation.
     All
@@ -32,6 +32,27 @@ type
     kind: RequirementKind
     color: Option[GenerateRequirementColor]
     number: Option[RequirementNumber]
+
+  GenerateOption* = object ## Option for generation.
+    requirement*: GenerateRequirement
+    moveCount*: Positive
+    colorCount*: range[1 .. 5]
+    heights*: array[Column, Option[Natural]]
+    puyoCounts*: tuple[color: Option[Natural], garbage: Natural]
+      ## `color` can be `none` only if the kind is chain-like.
+    connect2Counts*:
+      tuple[
+        total: Option[Natural], vertical: Option[Natural], horizontal: Option[Natural]
+      ]
+    connect3Counts*:
+      tuple[
+        total: Option[Natural],
+        vertical: Option[Natural],
+        horizontal: Option[Natural],
+        lShape: Option[Natural],
+      ]
+    allowDouble*: bool
+    allowLastDouble*: bool
 
 # ------------------------------------------------
 # Constructor
@@ -117,152 +138,25 @@ func `number=`*(self: var GenerateRequirement, number: RequirementNumber) {.inli
   self.number = some number
 
 # ------------------------------------------------
-# Misc
-# ------------------------------------------------
-
-func round(rng: var Rand, x: SomeNumber or Natural): int {.inline.} =
-  ## Probabilistic round function.
-  ## For example, `rng.round(2.7)` becomes `2` with a 30% probability and
-  ## `3` with a 70% probability.
-  let floorX = x.int
-  result = floorX + (rng.rand(1.0) < x.float - floorX.float).int
-
-func split(
-    rng: var Rand, total: Natural, chunkCount: Positive, allowZeroChunk: bool
-): seq[int] {.inline.} =
-  ## Splits the number `total` into `chunkCount` chunks.
-  ## If splitting fails, `GenerateError` is raised.
-  runnableExamples:
-    import std/[math, random, sequtils]
-
-    var rng = 123.initRand
-    let numbers = rng.split(10, 3, false)
-    assert numbers.sum2 == 10
-    assert numbers.len == 3
-    assert numbers.allIt it > 0
-
-  if chunkCount == 1:
-    if total == 0 and not allowZeroChunk:
-      raise newException(
-        GenerateError, "`total` should be positive if `allowZeroChunk` is false."
-      )
-    else:
-      return @[total.int]
-
-  if total == 1 and not allowZeroChunk:
-    if chunkCount == 1:
-      return @[total.int]
-    else:
-      raise newException(
-        GenerateError,
-        "`total` should be equal or greater than `chunkCount` if" &
-          "`allowZeroChunk` is false.",
-      )
-
-  # separation index
-  let sepIndicesWithoutLast: seq[int]
-  if allowZeroChunk:
-    sepIndicesWithoutLast = collect:
-      for _ in 0 ..< chunkCount.pred:
-        rng.rand total
-  else:
-    if total < chunkCount:
-      raise newException(
-        GenerateError,
-        "`total` should be equal or greater than `chunkCount` if" &
-          "`allowZeroChunk` is false.",
-      )
-
-    var indices = (1 .. total.pred).toSeq
-    rng.shuffle indices
-    sepIndicesWithoutLast = indices[0 ..< chunkCount.pred]
-  let sepIndices = @[0] & sepIndicesWithoutLast.sorted & @[total.int]
-
-  result = collect:
-    for i in 0 ..< chunkCount:
-      sepIndices[i.succ] - sepIndices[i]
-
-func split(
-    rng: var Rand, total: Natural, ratios: openArray[Option[Natural]]
-): seq[int] {.inline.} =
-  ## Splits the number `total` into chunks following the probabilistic
-  ## distribution represented by `ratios`.
-  ## `ratios` can contain `none` to specify a random positive ratio, and
-  ## cannot contain anything but `none` and `some(0)` when doing so.
-  ## If all elements in `ratios` are all `some(0)`, splits randomly.
-  ## If splitting fails, `GenerateError` is raised.
-  runnableExamples:
-    import std/[random]
-
-    var rng = 123.initRand
-    let numbers = rng.split(10, [some Natural 2, some Natural 3])
-    assert numbers == @[4, 6]
-
-  if ratios.len == 0:
-    raise newException(GenerateError, "`ratios` should have at least one element.")
-
-  if ratios.allIt it.isSome:
-    let ratios2 = ratios.mapIt it.get
-
-    let sumRatio = ratios2.sum2
-    if sumRatio == 0:
-      return rng.split(total, ratios.len, true)
-
-    while true:
-      result = newSeqOfCap(ratios.len)
-      var last = total
-
-      for mean in ratios2.mapIt total * it / sumRatio:
-        let count = rng.round mean
-        result.add count
-        last.dec count
-
-      if (ratios2[^1] == 0 and last == 0) or (ratios2[^1] > 0 and last > 0):
-        result.add last
-        return
-      else:
-        continue
-
-  if ratios.anyIt it.isSome and it.get != 0:
-    raise newException(
-      GenerateError,
-      "If `ratios` contains `none`, it can contain only `none` and `some(0).",
-    )
-
-  result = newSeqOfCap(ratios.len)
-  let counts = rng.split(total, ratios.countIt it.isNone, false)
-  var idx = 0
-  for ratio in ratios:
-    if ratio.isSome:
-      assert ratio.get == 0
-      result.add 0
-    else:
-      result.add counts[idx]
-      idx.inc
-
-# ------------------------------------------------
 # Puyo Puyo
 # ------------------------------------------------
 
 func generatePuyoPuyo[F: TsuField or WaterField](
-    rng: var Rand,
-    moveCount: Positive,
-    useColors: seq[ColorPuyo],
-    heights: array[Column, Option[Natural]],
-    puyoCounts: tuple[color: Natural, garbage: Natural],
+    option: GenerateOption, useColors: seq[ColorPuyo], rng: var Rand
 ): PuyoPuyo[F] {.inline.} =
   ## Returns a random Puyo Puyo game.
   ## If generation fails, `GenerateError` is raised.
   let
-    fieldCount = puyoCounts.color + puyoCounts.garbage - 2 * moveCount
-    chainCount = puyoCounts.color div 4
-    extraCount = puyoCounts.color mod 4
+    fieldCount =
+      option.puyoCounts.color.get + option.puyoCounts.garbage - 2 * option.moveCount
+    chainCount = option.puyoCounts.color.get div 4
+    extraCount = option.puyoCounts.color.get mod 4
 
     chains = rng.split(chainCount, useColors.len, false)
     extras = rng.split(extraCount, useColors.len, true)
 
   # shuffle for pairs&positions
-  var puyos = newSeqOfCap[Puyo](puyoCounts.color + puyoCounts.garbage)
+  var puyos = newSeqOfCap[Puyo](option.puyoCounts.color.get + option.puyoCounts.garbage)
   for color, chain, surplus in zip(useColors, chains, extras):
     {.push warning[UnsafeDefault]: off.}
     {.push warning[UnsafeSetLen]: off.}
@@ -274,8 +168,8 @@ func generatePuyoPuyo[F: TsuField or WaterField](
   rng.shuffle puyos
 
   # make pairs&positions
-  var pairsPositions = initDeque[PairPosition](moveCount)
-  for i in 0 ..< moveCount:
+  var pairsPositions = initDeque[PairPosition](option.moveCount)
+  for i in 0 ..< option.moveCount:
     pairsPositions.addLast PairPosition(
       pair: initPair(puyos[2 * i], puyos[2 * i + 1]), position: Position.None
     )
@@ -283,12 +177,13 @@ func generatePuyoPuyo[F: TsuField or WaterField](
   # shuffle for field
   {.push warning[ProveInit]: off.}
   var fieldPuyos =
-    puyos[2 * moveCount .. ^1] & Cell.Garbage.Puyo.repeat puyoCounts.garbage
+    puyos[2 * option.moveCount .. ^1] &
+    Cell.Garbage.Puyo.repeat option.puyoCounts.garbage
   {.pop.}
   rng.shuffle fieldPuyos
 
   # calc heights
-  let colCounts = rng.split(fieldCount, heights)
+  let colCounts = rng.split(fieldCount, option.heights)
   if colCounts.anyIt it > (when F is TsuField: Height else: WaterHeight):
     raise newException(GenerateError, "some height[s] exceeds the limit.")
 
@@ -321,24 +216,26 @@ const ColorToReqColor: array[ColorPuyo, RequirementColor] = [
 ]
 
 func generateRequirement(
-    rng: var Rand, req: GenerateRequirement, useColors: seq[ColorPuyo]
+    option: GenerateOption, useColors: seq[ColorPuyo], rng: var Rand
 ): Requirement {.inline.} =
   ## Returns a random requirement.
   ## If generation fails, `GenerateError` is raised.
-  if req.kind in NoColorKinds:
-    result = initRequirement(req.kind, req.number.get)
-  elif req.kind in NoNumberKinds:
-    result = initRequirement(req.kind, RequirementColor.low)
+  if option.requirement.kind in NoColorKinds:
+    result = initRequirement(option.requirement.kind, option.requirement.number.get)
+  elif option.requirement.kind in NoNumberKinds:
+    result = initRequirement(option.requirement.kind, RequirementColor.low)
   else:
-    result = initRequirement(req.kind, RequirementColor.low, req.number.get)
+    result = initRequirement(
+      option.requirement.kind, RequirementColor.low, option.requirement.number.get
+    )
 
   # color
-  if req.kind in ColorKinds:
+  if option.requirement.kind in ColorKinds:
     {.push warning[ProveInit]: off.}
     {.push warning[UnsafeSetLen]: off.}
     {.push warning[UnsafeDefault]: off.}
     result.color =
-      case req.color.get
+      case option.requirement.color.get
       of GenerateRequirementColor.All:
         RequirementColor.All
       of GenerateRequirementColor.SingleColor:
@@ -356,49 +253,30 @@ func generateRequirement(
 # ------------------------------------------------
 
 proc generate*[F: TsuField or WaterField](
+    option: GenerateOption,
     seed: SomeSignedInt,
-    req: GenerateRequirement,
-    moveCount: Positive,
-    colorCount: range[1 .. 5],
-    heights: array[Column, Option[Natural]],
-    puyoCounts: tuple[color: Option[Natural], garbage: Natural],
-    connect2Counts:
-      tuple[
-        total: Option[Natural], vertical: Option[Natural], horizontal: Option[Natural]
-      ],
-    connect3Counts:
-      tuple[
-        total: Option[Natural],
-        vertical: Option[Natural],
-        horizontal: Option[Natural],
-        lShape: Option[Natural],
-      ],
-    allowDouble: bool,
-    allowLastDouble: bool,
+    parallelCount: Positive = processorCount(),
 ): NazoPuyo[F] {.inline.} =
   ## Returns a randomly generated nazo puyo that has a unique solution.
   ## If generation fails, `GenerateError` is raised.
-  ## If `puyoCounts.color` is `none`, it is inferred from the requirement if
-  ## the kind is chain-like; otherwise `GenerateError` is raised.
   ## `parallelCount` is ignored on JS backend.
   result = initNazoPuyo[F]() # HACK: dummy to suppress warning
 
+  var option2 = option
+
   # infer color count if not specified
-  var puyoCounts2 = (color: 0.Natural, garbage: puyoCounts.garbage)
-  if puyoCounts.color.isSome:
-    puyoCounts2.color = puyoCounts.color.get
-  else:
-    if req.kind in {Chain, ChainMore, ChainClear, ChainMoreClear}:
-      puyoCounts2.color = req.number.get * 4
+  if option.puyoCounts.color.isNone:
+    if option.requirement.kind in {Chain, ChainMore, ChainClear, ChainMoreClear}:
+      option2.puyoCounts.color = some Natural option.requirement.number.get * 4
     else:
       raise newException(GenerateError, "The number of color puyoes is not specified.")
 
   # validate the arguments
   # TODO: validate more strictly
-  if puyoCounts2.color + puyoCounts.garbage - 2 * moveCount notin
+  if option2.puyoCounts.color.get + option2.puyoCounts.garbage - 2 * option2.moveCount notin
       0 .. (when F is TsuField: Height else: WaterHeight) * Width:
     raise newException(GenerateError, "The number of puyos exceeds limit.")
-  if puyoCounts2.color div 4 < colorCount:
+  if option2.puyoCounts.color.get div 4 < option2.colorCount:
     raise newException(GenerateError, "The number of colors is too big.")
 
   var rng = seed.int64.initRand
@@ -406,18 +284,18 @@ proc generate*[F: TsuField or WaterField](
   # requirement
   {.push warning[UnsafeSetLen]: off.}
   {.push warning[ProveInit]: off.}
-  let useColors = rng.sample((ColorPuyo.low .. ColorPuyo.high).toSeq, colorCount)
+  let useColors =
+    rng.sample((ColorPuyo.low .. ColorPuyo.high).toSeq, option2.colorCount)
   {.pop.}
   {.pop.}
-  result.requirement = rng.generateRequirement(req, useColors)
+  result.requirement = option2.generateRequirement(useColors, rng)
   if not result.requirement.isSupported:
     raise newException(GenerateError, "Unsupported requirement.")
 
   # puyo puyo
   while true:
     try:
-      result.puyoPuyo =
-        generatePuyoPuyo[F](rng, moveCount, useColors, heights, puyoCounts2)
+      result.puyoPuyo = generatePuyoPuyo[F](option2, useColors, rng)
     except GenerateError:
       continue
 
@@ -426,147 +304,75 @@ proc generate*[F: TsuField or WaterField](
       continue
     if result.puyoPuyo.field.willDisappear:
       continue
-    if not allowDouble and result.puyoPuyo.pairsPositions.anyIt it.pair.isDouble:
+    if not option2.allowDouble and result.puyoPuyo.pairsPositions.anyIt it.pair.isDouble:
       continue
-    if not allowLastDouble and result.puyoPuyo.pairsPositions[^1].pair.isDouble:
+    if not option2.allowLastDouble and result.puyoPuyo.pairsPositions[^1].pair.isDouble:
       continue
-    if connect2Counts.total.isSome and
-        result.puyoPuyo.field.connect2.colorCount != connect2Counts.total.get * 2:
+    if option2.connect2Counts.total.isSome and
+        result.puyoPuyo.field.connect2.colorCount != option2.connect2Counts.total.get * 2:
       continue
-    if connect2Counts.vertical.isSome and
-        result.puyoPuyo.field.connect2V.colorCount != connect2Counts.vertical.get * 2:
+    if option2.connect2Counts.vertical.isSome and
+        result.puyoPuyo.field.connect2V.colorCount !=
+        option2.connect2Counts.vertical.get * 2:
       continue
-    if connect2Counts.horizontal.isSome and
-        result.puyoPuyo.field.connect2H.colorCount != connect2Counts.horizontal.get * 2:
+    if option2.connect2Counts.horizontal.isSome and
+        result.puyoPuyo.field.connect2H.colorCount !=
+        option2.connect2Counts.horizontal.get * 2:
       continue
-    if connect3Counts.total.isSome and
-        result.puyoPuyo.field.connect3.colorCount != connect3Counts.total.get * 3:
+    if option2.connect3Counts.total.isSome and
+        result.puyoPuyo.field.connect3.colorCount != option2.connect3Counts.total.get * 3:
       continue
-    if connect3Counts.vertical.isSome and
-        result.puyoPuyo.field.connect3V.colorCount != connect3Counts.vertical.get * 3:
+    if option2.connect3Counts.vertical.isSome and
+        result.puyoPuyo.field.connect3V.colorCount !=
+        option2.connect3Counts.vertical.get * 3:
       continue
-    if connect3Counts.horizontal.isSome and
-        result.puyoPuyo.field.connect3H.colorCount != connect3Counts.horizontal.get * 3:
+    if option2.connect3Counts.horizontal.isSome and
+        result.puyoPuyo.field.connect3H.colorCount !=
+        option2.connect3Counts.horizontal.get * 3:
       continue
-    if connect3Counts.lShape.isSome and
-        result.puyoPuyo.field.connect3L.colorCount != connect3Counts.lShape.get * 3:
+    if option2.connect3Counts.lShape.isSome and
+        result.puyoPuyo.field.connect3L.colorCount !=
+        option2.connect3Counts.lShape.get * 3:
       continue
 
-    let answers = result.solve(earlyStopping = true)
+    let answers = result.solve(parallelCount = parallelCount, earlyStopping = true)
     if answers.len == 1 and answers[0].len == result.moveCount:
       result.puyoPuyo.pairsPositions.positions = answers[0]
       return
 
 proc generate*[F: TsuField or WaterField](
-    req: GenerateRequirement,
-    moveCount: Positive,
-    colorCount: range[1 .. 5],
-    heights: array[Column, Option[Natural]],
-    puyoCounts: tuple[color: Option[Natural], garbage: Natural],
-    connect2Counts:
-      tuple[
-        total: Option[Natural], vertical: Option[Natural], horizontal: Option[Natural]
-      ],
-    connect3Counts:
-      tuple[
-        total: Option[Natural],
-        vertical: Option[Natural],
-        horizontal: Option[Natural],
-        lShape: Option[Natural],
-      ],
-    allowDouble: bool,
-    allowLastDouble: bool,
+    option: GenerateOption, parallelCount: Positive = processorCount()
 ): NazoPuyo[F] {.inline.} =
   ## Returns a randomly generated nazo puyo that has a unique solution.
   ## If generation fails, `GenerateError` will be raised.
   ## `parallelCount` will be ignored on JS backend.
   var rng = initRand()
-  result = generate[F](
-    rng.rand int,
-    req,
-    moveCount,
-    colorCount,
-    heights,
-    puyoCounts,
-    connect2Counts,
-    connect3Counts,
-    allowDouble,
-    allowLastDouble,
-  )
+  generate[F](rng.rand int, parallelCount)
 
 # ------------------------------------------------
 # Generate - Wrap
 # ------------------------------------------------
 
 proc generate*(
-    seed: SomeSignedInt,
+    option: GenerateOption,
     rule: Rule,
-    req: GenerateRequirement,
-    moveCount: Positive,
-    colorCount: range[1 .. 5],
-    heights: array[Column, Option[Natural]],
-    puyoCounts: tuple[color: Option[Natural], garbage: Natural],
-    connect2Counts:
-      tuple[
-        total: Option[Natural], vertical: Option[Natural], horizontal: Option[Natural]
-      ],
-    connect3Counts:
-      tuple[
-        total: Option[Natural],
-        vertical: Option[Natural],
-        horizontal: Option[Natural],
-        lShape: Option[Natural],
-      ],
-    allowDouble: bool,
-    allowLastDouble: bool,
+    seed: SomeSignedInt,
+    parallelCount: Positive = processorCount(),
 ): NazoPuyoWrap {.inline.} =
   ## Returns a randomly generated nazo puyo that has a unique solution.
   ## If generation fails, `GenerateError` is raised.
   ## `parallelCount` is ignored on JS backend.
   case rule
   of Tsu:
-    generate[TsuField](
-      seed, req, moveCount, colorCount, heights, puyoCounts, connect2Counts,
-      connect3Counts, allowDouble, allowLastDouble,
-    ).initNazoPuyoWrap
+    generate[TsuField](option, seed, parallelCount).initNazoPuyoWrap
   of Water:
-    generate[WaterField](
-      seed, req, moveCount, colorCount, heights, puyoCounts, connect2Counts,
-      connect3Counts, allowDouble, allowLastDouble,
-    ).initNazoPuyoWrap
+    generate[WaterField](option, seed, parallelCount).initNazoPuyoWrap
 
 proc generate*(
-    rule: Rule,
-    req: GenerateRequirement,
-    moveCount: Positive,
-    colorCount: range[1 .. 5],
-    heights: array[Column, Option[Natural]],
-    puyoCounts: tuple[color: Option[Natural], garbage: Natural],
-    connect2Counts:
-      tuple[
-        total: Option[Natural], vertical: Option[Natural], horizontal: Option[Natural]
-      ],
-    connect3Counts:
-      tuple[
-        total: Option[Natural],
-        vertical: Option[Natural],
-        horizontal: Option[Natural],
-        lShape: Option[Natural],
-      ],
-    allowDouble: bool,
-    allowLastDouble: bool,
+    option: GenerateOption, rule: Rule, parallelCount: Positive = processorCount()
 ): NazoPuyoWrap {.inline.} =
   ## Returns a randomly generated nazo puyo that has a unique solution.
   ## If generation fails, `GenerateError` will be raised.
   ## `parallelCount` will be ignored on JS backend.
-  case rule
-  of Tsu:
-    generate[TsuField](
-      req, moveCount, colorCount, heights, puyoCounts, connect2Counts, connect3Counts,
-      allowDouble, allowLastDouble,
-    ).initNazoPuyoWrap
-  of Water:
-    generate[WaterField](
-      req, moveCount, colorCount, heights, puyoCounts, connect2Counts, connect3Counts,
-      allowDouble, allowLastDouble,
-    ).initNazoPuyoWrap
+  var rng = initRand()
+  option.generate(rule, rng.rand int, parallelCount)

@@ -34,7 +34,7 @@ export
   color.Color, color.SelectColor, color.GhostColor, color.WaterColor, color.DefaultColor
 export
   generate.GenerateError, generate.GenerateRequirementColor,
-  generate.GenerateRequirement, generate.generate
+  generate.GenerateRequirement, generate.GenerateOption, generate.generate
 export
   ide.AnswerData, ide.Ide, ide.newIde, ide.simulator, ide.answerSimulator,
   ide.answerData, ide.focusAnswer, ide.solving, ide.permuting, ide.progressBarData,
