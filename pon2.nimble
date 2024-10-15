@@ -1,6 +1,6 @@
 # Package
 
-version = "0.22.2"
+version = "0.23.0"
 author = "Keisuke Izumiya"
 description = "Application for Puyo Puyo and Nazo Puyo"
 license = "Apache-2.0"
@@ -40,13 +40,11 @@ task benchmark, "Benchmarking":
   exec &"nim c -r -d:pon2.avx2={Avx2} -d:pon2.bmi2={Bmi2} " & "benchmark/main.nim"
 
 task documentation, "Make Documentation":
-  exec &"nim doc --project -d:pon2.avx2=true src/pon2.nim"
-  rmDir "src/htmldocs2"
-  mvDir "src/htmldocs", "src/htmldocs2"
+  rmDir "www/docs/native"
+  exec &"nim doc --project --outdir:www/docs/native src/pon2.nim"
 
-  exec &"nim doc --project -d:pon2.avx2=false src/pon2.nim"
-  cpDir "src/htmldocs2", "src/htmldocs"
-  rmDir "src/htmldocs2"
+  rmDir "www/docs/web"
+  exec &"nim doc --project --outdir:www/docs/web --backend:js src/pon2.nim"
 
 task web, "Make Web Pages":
   const
@@ -88,8 +86,6 @@ task web, "Make Web Pages":
 
   # documentation
   exec "nimble -y documentation"
-  cpDir "src/htmldocs", "www/docs"
-  rmDir "src/htmldocs"
 
   # assets
   cpDir "assets", "www/assets"

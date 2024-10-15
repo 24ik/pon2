@@ -8,24 +8,12 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, strutils, tables, uri]
+import std/[deques, strformat, strutils, tables, uri]
 import ./[cell, field, fqdn, moveresult, pair, pairposition, position, rule]
 
 type PuyoPuyo*[F: TsuField or WaterField] = object ## Puyo Puyo game.
   field*: F
   pairsPositions*: PairsPositions
-
-  operatingIdx: Natural
-
-# ------------------------------------------------
-# Reset
-# ------------------------------------------------
-
-func reset*[F: TsuField or WaterField](self: var PuyoPuyo[F]) {.inline.} =
-  ## Resets the Puyo Puyo game.
-  self.field = initField[F]()
-  self.pairsPositions.setLen 0
-  self.operatingIdx = 0
 
 # ------------------------------------------------
 # Constructor
@@ -33,8 +21,7 @@ func reset*[F: TsuField or WaterField](self: var PuyoPuyo[F]) {.inline.} =
 
 func initPuyoPuyo*[F: TsuField or WaterField](): PuyoPuyo[F] {.inline.} =
   ## Returns a new Puyo Puyo game.
-  result = default PuyoPuyo[F]
-  result.reset
+  result = PuyoPuyo[F](field: initField[F](), pairsPositions: initDeque[PairPosition]())
 
 # ------------------------------------------------
 # Operator
@@ -54,20 +41,14 @@ func toTsuPuyoPuyo*[F: TsuField or WaterField](
     self: PuyoPuyo[F]
 ): PuyoPuyo[TsuField] {.inline.} =
   ## Returns the Tsu Puyo Puyo converted from the given Puyo Puyo.
-  PuyoPuyo[TsuField](
-    field: self.field.toTsuField,
-    pairsPositions: self.pairsPositions,
-    operatingIdx: self.operatingIdx,
-  )
+  PuyoPuyo[TsuField](field: self.field.toTsuField, pairsPositions: self.pairsPositions)
 
 func toWaterPuyoPuyo*[F: TsuField or WaterField](
     self: PuyoPuyo[F]
 ): PuyoPuyo[WaterField] {.inline.} =
   ## Returns the Water Puyo Puyo converted from the given Puyo Puyo.
   PuyoPuyo[WaterField](
-    field: self.field.toWaterField,
-    pairsPositions: self.pairsPositions,
-    operatingIdx: self.operatingIdx,
+    field: self.field.toWaterField, pairsPositions: self.pairsPositions
   )
 
 # ------------------------------------------------
@@ -78,47 +59,9 @@ func rule*[F: TsuField or WaterField](self: PuyoPuyo[F]): Rule {.inline.} =
   ## Returns the rule.
   self.field.rule
 
-func operatingIndex*[F: TsuField or WaterField](self: PuyoPuyo[F]): int {.inline.} =
-  ## Returns the index of pair being operated.
-  self.operatingIdx
-
-func incrementOperatingIndex*[F: TsuField or WaterField](
-    self: var PuyoPuyo[F]
-) {.inline.} =
-  ## Increments the index of pair being operated.
-  ## The result is clipped.
-  if self.operatingIdx >= self.pairsPositions.len:
-    return
-
-  self.operatingIdx.inc
-
-func decrementOperatingIndex*[F: TsuField or WaterField](
-    self: var PuyoPuyo[F]
-) {.inline.} =
-  ## Decrements the index of pair being operated.
-  ## The result is clipped.
-  if self.operatingIdx <= 0:
-    return
-
-  self.operatingIdx.dec
-
 func movingCompleted*[F: TsuField or WaterField](self: PuyoPuyo[F]): bool {.inline.} =
   ## Returns `true` if all pairs in the Puyo Puyo game are put (or skipped).
-  self.operatingIdx >= self.pairsPositions.len
-
-func operatingPairPosition*[F: TsuField or WaterField](
-    self: PuyoPuyo[F]
-): PairPosition {.inline.} =
-  ## Returns the pair&position being operated.
-  ## If no pairs left, `IndexDefect` is raised.
-  self.pairsPositions[self.operatingIdx]
-
-func operatingPairPosition*[F: TsuField or WaterField](
-    self: var PuyoPuyo[F]
-): var PairPosition {.inline.} =
-  ## Returns the pair&position being operated.
-  ## If no pairs left, `IndexDefect` is raised.
-  result = self.pairsPositions[self.operatingIdx]
+  self.pairsPositions.len == 0
 
 # ------------------------------------------------
 # Count
@@ -157,10 +100,9 @@ func move[F: TsuField or WaterField](
     return initMoveResult(0, [0, 0, 0, 0, 0, 0, 0])
 
   when overwritePos:
-    self.pairsPositions[self.operatingIdx].position = pos
+    self.pairsPositions.peekFirst.position = pos
 
-  result = self.field.move self.operatingPairPosition
-  self.operatingIdx.inc
+  result = self.field.move self.pairsPositions.popFirst
 
 func move*[F: TsuField or WaterField](
     self: var PuyoPuyo[F]
@@ -212,10 +154,9 @@ func move1[F: TsuField or WaterField](
     return initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[])
 
   when overwritePos:
-    self.pairsPositions[self.operatingIdx].position = pos
+    self.pairsPositions.peekFirst.position = pos
 
-  result = self.field.move1 self.operatingPairPosition
-  self.operatingIdx.inc
+  result = self.field.move1 self.pairsPositions.popFirst
 
 func move1*[F: TsuField or WaterField](self: var PuyoPuyo[F]): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
@@ -252,10 +193,9 @@ func move2[F: TsuField or WaterField](
     return initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
 
   when overwritePos:
-    self.pairsPositions[self.operatingIdx].position = pos
+    self.pairsPositions.peekFirst.position = pos
 
-  result = self.field.move2 self.operatingPairPosition
-  self.operatingIdx.inc
+  result = self.field.move2 self.pairsPositions.popFirst
 
 func move2*[F: TsuField or WaterField](self: var PuyoPuyo[F]): MoveResult {.inline.} =
   ## Puts the pair and advance the field until chains end.
@@ -295,9 +235,7 @@ func parsePuyoPuyo*[F: TsuField or WaterField](str: string): PuyoPuyo[F] {.inlin
     raise newException(ValueError, "Invalid Puyo Puyo: " & str)
 
   result = PuyoPuyo[F](
-    field: parseField[F](strs[0]),
-    pairsPositions: strs[1].parsePairsPositions,
-    operatingIdx: 0,
+    field: parseField[F](strs[0]), pairsPositions: strs[1].parsePairsPositions
   )
 
 # ------------------------------------------------
@@ -326,8 +264,7 @@ func parsePuyoPuyo*[F: TsuField or WaterField](
 ): PuyoPuyo[F] {.inline.} =
   ## Returns the Puyo Puyo converted from the URI query.
   ## If the query is invalid, `ValueError` is raised.
-  result = default PuyoPuyo[F]
-  result.operatingIdx = 0
+  result = initPuyoPuyo[F]()
 
   case fqdn
   of Pon2:
@@ -358,7 +295,7 @@ func parsePuyoPuyo*[F: TsuField or WaterField](
     let queries = query.split '_'
     case queries.len
     of 1:
-      result.pairsPositions.setLen 0
+      discard
     of 2:
       result.pairsPositions = queries[1].parsePairsPositions fqdn
     else:

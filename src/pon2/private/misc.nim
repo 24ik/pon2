@@ -9,7 +9,13 @@
 {.experimental: "views".}
 
 import
-  std/[algorithm, os, parsecfg, random, sequtils, streams, strutils, typetraits, uri]
+  std/[
+    algorithm, deques, os, parsecfg, random, sequtils, streams, strutils, typetraits,
+    uri,
+  ]
+
+when not defined(js):
+  import std/[cpuinfo]
 
 func splitPath2(path: string): tuple[head: string, tail: string] {.inline.} =
   ## Returns the parent directory.
@@ -97,6 +103,36 @@ func parseSomeInt*[T: SomeNumber or Natural or Positive](val: char): T {.inline.
   parseSomeInt[T] $val
 
 # ------------------------------------------------
+# Deque
+# ------------------------------------------------
+
+func copy*[T](deque: Deque[T]): Deque[T] {.inline.} =
+  ## Returns a copy of the deque.
+  result = initDeque(deque.len)
+  for e in deque:
+    result.addLast e
+
+func insert*[T](deque: var Deque[T], item: sink T, idx = 0.Natural) {.inline.} =
+  ## Inserts the item at the index.
+  ## This is an `O(n)` operation.
+  var newDeque = initDeque[T](deque.len.succ)
+  for itemIdx in 0 ..< deque.len.succ:
+    newDeque.addLast if itemIdx == idx: item else: deque.popFirst
+
+  deque = newDeque
+
+func delete*[T](deque: var Deque[T], idx: Natural) {.inline.} =
+  ## Deletes the item at the index.
+  ## This is an `O(n)` operation.
+  var newDeque = initDeque[T](deque.len.pred)
+  for itemIdx in 0 ..< deque.len:
+    let item = deque.popFirst
+    if itemIdx != idx:
+      newDeque.addLast item
+
+  deque = newDeque
+
+# ------------------------------------------------
 # Others
 # ------------------------------------------------
 
@@ -142,3 +178,12 @@ func decRot*[T: Ordinal](x: var T) {.inline.} =
     x = T.high
   else:
     x.dec
+
+proc processorCount*(): int {.inline.} =
+  ## Returns the number of processors.
+  ## If processors are not detected, returns `1`.
+  ## If the backend is JS, returns `1`.
+  when defined(js):
+    1
+  else:
+    max(countProcessors(), 1)

@@ -58,9 +58,8 @@ func newDownloadHandler(id: string, withPositions: bool): () -> void =
 
 proc toPlayUri(ide: Ide, withPositions: bool, editor = false): Uri {.inline.} =
   ## Returns the IDE URI for playing.
-  let ide2 = newIde()
-  ide2.simulator[] = ide.simulator[].copy
-  ide2.simulator[].mode = if editor: PlayEditor else: Play
+  let ide2 = ide.simulator.copy.newIde
+  ide2.simulator.mode = if editor: PlayEditor else: Play
 
   result = ide2.toUri withPositions
 
@@ -73,7 +72,7 @@ proc newShareNode*(ide: Ide, id: string): VNode {.inline.} =
     editorPosUrlCopyButtonId = &"{EditorPosUrlCopyButtonIdPrefix}{id}"
 
   result = buildHtml(tdiv):
-    if ide.simulator[].mode != View:
+    if ide.simulator.mode != View:
       tdiv(class = "block"):
         span(class = "icon"):
           italic(class = "fa-brands fa-x-twitter")
@@ -120,7 +119,7 @@ proc newShareNode*(ide: Ide, id: string): VNode {.inline.} =
             ),
           ):
             text "操作有"
-    if ide.simulator[].mode != SimulatorMode.Play:
+    if ide.simulator.mode != SimulatorMode.Play:
       tdiv(class = "block"):
         text "編集者URLコピー"
         tdiv(class = "buttons"):

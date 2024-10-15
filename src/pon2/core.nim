@@ -75,10 +75,10 @@ export
   pair.`child=`, pair.swapped, pair.swap, pair.puyoCount, pair.colorCount,
   pair.garbageCount, pair.parsePair, pair.toUriQuery
 export
-  pairposition.PairPosition, pairposition.PairsPositions, pairposition.puyoCount,
-  pairposition.colorCount, pairposition.garbageCount, pairposition.`$`,
-  pairposition.parsePairPosition, pairposition.parsePairsPositions,
-  pairposition.toUriQuery
+  pairposition.`==`, pairposition.PairPosition, pairposition.PairsPositions,
+  pairposition.`positions=`, pairposition.puyoCount, pairposition.colorCount,
+  pairposition.garbageCount, pairposition.`$`, pairposition.parsePairPosition,
+  pairposition.parsePairsPositions, pairposition.toUriQuery
 export
   position.Direction, position.Position, position.AllPositions,
   position.AllDoublePositions, position.initPosition, position.axisColumn,
@@ -87,13 +87,11 @@ export
   position.rotatedLeft, position.rotateRight, position.rotateLeft,
   position.parsePosition, position.toUriQuery
 export
-  puyopuyo.PuyoPuyo, puyopuyo.reset, puyopuyo.initPuyoPuyo, puyopuyo.`==`,
-  puyopuyo.toTsuPuyoPuyo, puyopuyo.toWaterPuyoPuyo, puyopuyo.rule,
-  puyopuyo.operatingIndex, puyopuyo.incrementoperatingIndex,
-  puyopuyo.decrementoperatingIndex, puyopuyo.movingCompleted,
-  puyopuyo.operatingPairPosition, puyopuyo.puyoCount, puyopuyo.colorCount,
-  puyopuyo.garbageCount, puyopuyo.move, puyopuyo.move0, puyopuyo.move1, puyopuyo.move2,
-  puyopuyo.`$`, puyopuyo.parsePuyoPuyo, puyopuyo.toUriQuery
+  puyopuyo.PuyoPuyo, puyopuyo.initPuyoPuyo, puyopuyo.`==`, puyopuyo.toTsuPuyoPuyo,
+  puyopuyo.toWaterPuyoPuyo, puyopuyo.rule, puyopuyo.movingCompleted, puyopuyo.puyoCount,
+  puyopuyo.colorCount, puyopuyo.garbageCount, puyopuyo.move, puyopuyo.move0,
+  puyopuyo.move1, puyopuyo.move2, puyopuyo.`$`, puyopuyo.parsePuyoPuyo,
+  puyopuyo.toUriQuery
 export
   requirement.RequirementKind, requirement.RequirementColor,
   requirement.RequirementNumber, requirement.Requirement, requirement.NoColorKinds,

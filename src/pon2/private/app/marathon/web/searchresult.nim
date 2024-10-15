@@ -8,7 +8,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sugar]
+import std/[deques, sugar]
 import karax/[karax, karaxdsl, vdom]
 import ../[common]
 import ../../[misc]

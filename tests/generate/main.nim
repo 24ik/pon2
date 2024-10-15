@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, sequtils, unittest]
+import std/[deques, options, sequtils, unittest]
 import ../../src/pon2/app/[generate, solve]
 import
   ../../src/pon2/core/
@@ -41,21 +41,21 @@ proc main*() =
         horizontal: some 1.Natural,
         lShape: none Natural,
       )
-      nazo = generate[TsuField](
-        42,
-        initGenerateRequirement(kind, GenerateRequirementColor.All, num),
-        moveCount,
-        colorCount,
-        heights,
-        puyoCounts,
-        connect2Counts,
-        connect3Counts,
-        false,
-        false,
+      option = GenerateOption(
+        requirement: initGenerateRequirement(kind, GenerateRequirementColor.All, num),
+        moveCount: moveCount,
+        colorCount: colorCount,
+        heights: heights,
+        puyoCounts: puyoCounts,
+        connect2Counts: connect2Counts,
+        connect3Counts: connect3Counts,
+        allowDouble: false,
+        allowLastDouble: false,
       )
+      nazo = generate[TsuField](option, 42)
       fieldArr = nazo.puyoPuyo.field.toArray
 
-    check nazo.solve == @[nazo.puyoPuyo.pairsPositions]
+    check nazo.solve == @[nazo.puyoPuyo.pairsPositions.mapIt(it.position).toDeque]
     check nazo.mark == Accept
     check nazo.moveCount == moveCount
     check nazo.requirement == initRequirement(kind, RequirementColor.All, num)

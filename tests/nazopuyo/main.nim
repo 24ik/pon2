@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, unittest]
+import std/[deques, options, unittest]
 import
   ../../src/pon2/core/[field, fqdn, nazopuyo, pairposition, puyopuyo, requirement, rule]
 

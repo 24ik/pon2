@@ -7,44 +7,13 @@
 ##
 ## Outline of the processing flow:
 ##
-## 1. The main file launches the web worker by `initWorker()`.
-## 1. The main file assigns the handler that executed after the task is done.
-## 1. The main file makes the worker do the task. The task is implemented in the
-##   worker file by `assignToWorker()`.
+## 1. The main file launches the web worker by `newWorker()`.
+## 1. The main file assigns the handler that executed after the task is done by
+##     `Worker.completeHandler=()`.
+## 1. The main file makes the worker do the task by `Worker.run()`. The task is
+##     implemented in the worker file by `assignToWorker()`.
 ## 1. The handler is executed.
 ##
-## The following example shows the number-increment task.
-##
-
-runnableExamples:
-  # Main File
-  proc show(returnCode: WorkerReturnCode, messages: seq[string]) =
-    echo "returnCode: ", returnCode, " messages: ", messages
-
-  let worker = newWorker()
-  worker.completeHandler = show
-  worker.run $6
-
-runnableExamples:
-  # Worker File
-  # The name of the output file should be `worker.min.js`.
-  # To change this, specify the compile option
-  # `-d:pon2.workerfilename=<fileName>`.
-  import std/[strutils]
-  import ./pon2/private/[webworker] # change path if needed
-
-  proc succ2(
-      args: seq[string]
-  ): tuple[returnCode: WorkerReturnCode, messages: seq[string]] =
-    if args.len != 1:
-      return (Failure, @["Invalid number of arguments are given."])
-    try:
-      return (Success, @[$args[0].parseInt.succ])
-    except ValueError:
-      return (Failure, @["Could not parse as an integer: " & args[0]])
-
-  when isMainModule:
-    assignToWorker(myInc)
 
 {.experimental: "inferGenericTypes".}
 {.experimental: "notnil".}

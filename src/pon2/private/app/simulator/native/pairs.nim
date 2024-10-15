@@ -8,7 +8,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sugar]
+import std/[deques, sugar]
 import nigui
 import ./[assets]
 import ../[common]
@@ -17,7 +17,7 @@ import ../../../../app/[color, nazopuyo, simulator]
 import ../../../../core/[cell, pair, pairposition, position]
 
 type PairsControl* = ref object of LayoutContainer ## Pairs control.
-  simulator: ref Simulator
+  simulator: Simulator
   assets: Assets
 
 # ------------------------------------------------
@@ -30,12 +30,12 @@ proc cellDrawHandler(
   ## Draws the cell.
   let canvas = event.control.canvas
 
-  canvas.areaColor = control.simulator[].pairCellBackgroundColor(idx, axis).toNiguiColor
+  canvas.areaColor = control.simulator.pairCellBackgroundColor(idx, axis).toNiguiColor
   canvas.fill
 
   var cell = Cell.None
   let pairsPositions: PairsPositions
-  control.simulator[].nazoPuyoWrap.get:
+  control.simulator.nazoPuyoWrap.get:
     pairsPositions = wrappedNazoPuyo.puyoPuyo.pairsPositions
   if idx < pairsPositions.len:
     let pair = pairsPositions[idx].pair
@@ -85,7 +85,7 @@ proc indexDrawHandler(
   canvas.areaColor = DefaultColor.toNiguiColor
   canvas.fill
 
-  let nextArrow = if control.simulator[].needPairPointer(idx): "> " else: "  "
+  let nextArrow = if control.simulator.needPairPointer(idx): "> " else: "  "
   canvas.drawText nextArrow & $idx.succ
 
 func newIndexDrawHandler(
@@ -113,10 +113,10 @@ proc positionDrawHandler(
   canvas.areaColor = DefaultColor.toNiguiColor
   canvas.fill
 
-  control.simulator[].nazoPuyoWrap.get:
+  control.simulator.nazoPuyoWrap.get:
     let pos =
       if idx < wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
-        wrappedNazoPuyo.puyoPuyo.pairsPositions[idx].position
+        control.simulator.positions[idx]
       else:
         Position.None
     canvas.drawText $pos
@@ -159,9 +159,7 @@ proc newFullPairControl(
   positionControl.width = positionControl.getTextWidth $Position.low
   positionControl.height = pairControl.naturalHeight
 
-proc newPairsControl*(
-    simulator: ref Simulator, assets: Assets
-): PairsControl {.inline.} =
+proc newPairsControl*(simulator: Simulator, assets: Assets): PairsControl {.inline.} =
   ## Returns a pairs control.
   {.push warning[ProveInit]: off.}
   result.new
@@ -172,6 +170,6 @@ proc newPairsControl*(
   result.simulator = simulator
   result.assets = assets
 
-  simulator[].nazoPuyoWrap.get:
+  simulator.nazoPuyoWrapBeforeMoves.get:
     for idx in 0 .. wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
       result.add result.newFullPairControl(idx, assets)

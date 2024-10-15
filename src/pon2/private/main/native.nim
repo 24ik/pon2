@@ -13,7 +13,9 @@ import docopt
 import nigui
 import ../[misc]
 import ../../app/[generate, ide, nazopuyo, permute, simulator, solve]
-import ../../core/[field, fieldtype, nazopuyo, puyopuyo, requirement, rule]
+import ../../app/ide/[native]
+import
+  ../../core/[field, fieldtype, nazopuyo, pairposition, puyopuyo, requirement, rule]
 
 # ------------------------------------------------
 # Parse
@@ -83,17 +85,15 @@ proc runSolver*(args: Table[string, Value]) {.inline.} =
     questionUriStr.openDefaultBrowser
 
   let ide = questionUriStr.parseUri.parseIde
-  if ide.simulator[].kind != Nazo:
+  if ide.simulator.kind != Nazo:
     raise newException(ValueError, "The question should be a Nazo Puyo.")
 
-  ide.simulator[].nazoPuyoWrap.get:
+  ide.simulator.nazoPuyoWrap.get:
     for answerIdx, answer in wrappedNazoPuyo.solve(showProgress = true):
       var nazo = wrappedNazoPuyo
-      nazo.puyoPuyo.pairsPositions = answer
+      nazo.puyoPuyo.pairsPositions.positions = answer
 
-      let simulator = new Simulator
-      simulator[] = nazo.initSimulator(PlayEditor)
-      let answerUri = simulator.newIde.toUri(withPositions = true)
+      let answerUri = nazo.newSimulator(PlayEditor).newIde.toUri(withPositions = true)
       echo &"({answerIdx.succ}) {answerUri}"
 
       if args["-b"].to_bool:
@@ -139,38 +139,38 @@ proc runGenerator*(args: Table[string, Value]) {.inline.} =
       else:
         some parseSomeInt[Natural](c)
 
+  # option
+  let option = GenerateOption(
+    requirement: req,
+    moveCount: parseSomeInt[Positive](args["-m"]).get,
+    colorCount: parseSomeInt[int](args["-c"]).get,
+    heights: heights,
+    puyoCounts: (
+      color: parseSomeInt[Natural](args["--nc"], true),
+      garbage: parseSomeInt[Natural](args["--ng"]).get,
+    ),
+    connect2Counts: (
+      total: parseSomeInt[Natural](args["-2"], true),
+      vertical: parseSomeInt[Natural](args["--2v"], true),
+      horizontal: parseSomeInt[Natural](args["--2h"], true),
+    ),
+    connect3Counts: (
+      total: parseSomeInt[Natural](args["-3"], true),
+      vertical: parseSomeInt[Natural](args["--3v"], true),
+      horizontal: parseSomeInt[Natural](args["--3h"], true),
+      lShape: parseSomeInt[Natural](args["--3l"], true),
+    ),
+    allowDouble: not args["-D"].to_bool,
+    allowLastDouble: args["-d"].to_bool,
+  )
+
   # generate
   let rule = args["-r"].parseRule
   for nazoIdx in 0 ..< parseSomeInt[Natural](args["-n"]).get:
-    let simulator = new Simulator
-    simulator[] = generate(
-        (rng.rand int.low .. int.high),
-        rule,
-        req,
-        parseSomeInt[Natural](args["-m"]).get,
-        parseSomeInt[Natural](args["-c"]).get,
-        heights,
-        (
-          color: parseSomeInt[Natural](args["--nc"], true),
-          garbage: parseSomeInt[Natural](args["--ng"]).get,
-        ),
-        (
-          total: parseSomeInt[Natural](args["-2"], true),
-          vertical: parseSomeInt[Natural](args["--2v"], true),
-          horizontal: parseSomeInt[Natural](args["--2h"], true),
-        ),
-        (
-          total: parseSomeInt[Natural](args["-3"], true),
-          vertical: parseSomeInt[Natural](args["--3v"], true),
-          horizontal: parseSomeInt[Natural](args["--3h"], true),
-          lShape: parseSomeInt[Natural](args["--3l"], true),
-        ),
-        not args["-D"].to_bool,
-        args["-d"].to_bool,
-      )
-      .initSimulator(PlayEditor)
     let
-      ide = simulator.newIde
+      ide = option
+        .generate(rule, (rng.rand int.low .. int.high))
+        .newSimulator(PlayEditor).newIde
       questionUri = ide.toUri(withPositions = false)
       answerUri = ide.toUri(withPositions = true)
 
@@ -196,7 +196,7 @@ proc runPermuter*(args: Table[string, Value]) {.inline.} =
   var idx = 0
   {.push warning[UnsafeDefault]: off.}
   {.push warning[UnsafeSetLen]: off.}
-  ide.simulator[].nazoPuyoWrap.get:
+  ide.simulator.nazoPuyoWrap.get:
     for pairsPositions in wrappedNazoPuyo.permute(
       args["-f"].mapIt parseSomeInt[Positive](it),
       not args["-D"].to_bool,
@@ -206,10 +206,8 @@ proc runPermuter*(args: Table[string, Value]) {.inline.} =
       var nazo = wrappedNazoPuyo
       nazo.puyoPuyo.pairsPositions = pairsPositions
 
-      let simulator = new Simulator
-      simulator[] = nazo.initSimulator(PlayEditor)
       let
-        ide2 = simulator.newIde
+        ide2 = nazo.newSimulator(PlayEditor).newIde
         questionUri = ide2.toUri(withPositions = false)
         answerUri = ide2.toUri(withPositions = true)
       echo &"(Q{idx.succ}) {questionUri}"

@@ -1,5 +1,13 @@
 ## This module implements Puyo Puyo simulators.
 ##
+when defined(js):
+  ## See also the [backend-specific documentation](./simulator/web.html).
+  ##
+  discard
+else:
+  ## See also the [backend-specific documentation](./simulator/native.html).
+  ##
+  discard
 
 {.experimental: "inferGenericTypes".}
 {.experimental: "notnil".}
@@ -48,7 +56,7 @@ type
     focusField*: bool
     insert*: bool
 
-  Simulator* = object ## Puyo Puyo simulator.
+  Simulator* = ref object ## Puyo Puyo simulator.
     nazoPuyoWrap: NazoPuyoWrap
     moveResult: MoveResult
 
@@ -62,6 +70,8 @@ type
       tuple[nazoPuyoWrap: NazoPuyoWrap, state: SimulatorState, moveResult: MoveResult]
     ]
 
+    positions: seq[Position] # use this instead of the positions in the nazopuyoWrap
+    operatingIdx: Natural # used to draw
     operatingPos: Position
     editing: SimulatorEditing
 
@@ -74,7 +84,9 @@ const
   DefaultReq = initRequirement(Clear, All)
   DefaultMoveResult = initMoveResult(0, [0, 0, 0, 0, 0, 0, 0], @[], @[])
 
-func initSimulator*(nazoPuyoWrap: NazoPuyoWrap, mode = Play): Simulator {.inline.} =
+func newSimulator(
+    nazoPuyoWrap: NazoPuyoWrap, kind: SimulatorKind, mode: SimulatorMode
+): Simulator {.inline.} =
   ## Returns a new simulator.
   nazoPuyoWrap.get:
     {.push warning[Uninit]: off.}
@@ -82,11 +94,13 @@ func initSimulator*(nazoPuyoWrap: NazoPuyoWrap, mode = Play): Simulator {.inline
       nazoPuyoWrap: nazoPuyoWrap,
       moveResult: DefaultMoveResult,
       state: Stable,
-      kind: Nazo,
+      kind: kind,
       mode: mode,
-      undoDeque: initDeque(wrappedNazoPuyo.moveCount),
-      redoDeque: initDeque(wrappedNazoPuyo.moveCount),
-      moveDeque: initDeque(),
+      undoDeque: initDeque(),
+      redoDeque: initDeque(),
+      moveDeque: initDeque(wrappedNazoPuyo.moveCount),
+      positions: wrappedNazoPuyo.puyoPuyo.pairsPositions.mapIt it.position,
+      operatingIdx: 0,
       operatingPos: InitPos,
       editing: SimulatorEditing(
         cell: Cell.None,
@@ -98,18 +112,27 @@ func initSimulator*(nazoPuyoWrap: NazoPuyoWrap, mode = Play): Simulator {.inline
     )
     {.pop.}
 
-func initSimulator*[F: TsuField or WaterField](
+func newSimulator*(nazoPuyoWrap: NazoPuyoWrap, mode = Play): Simulator {.inline.} =
+  ## Returns a new simulator.
+  nazoPuyoWrap.newSimulator(Nazo, mode)
+
+func newSimulator*[F: TsuField or WaterField](
     nazo: NazoPuyo[F], mode = Play
 ): Simulator {.inline.} =
   ## Returns a new simulator.
-  initNazoPuyoWrap(nazo).initSimulator mode
+  initNazoPuyoWrap(nazo).newSimulator mode
 
-func initSimulator*[F: TsuField or WaterField](
+func newSimulator*[F: TsuField or WaterField](
     puyoPuyo: PuyoPuyo[F], mode = Play
 ): Simulator {.inline.} =
   ## Returns a new simulator.
-  result = NazoPuyo[F](puyoPuyo: puyoPuyo, requirement: DefaultReq).initSimulator mode
-  result.kind = Regular
+  NazoPuyo[F](puyoPuyo: puyoPuyo, requirement: DefaultReq).initNazoPuyoWrap.newSimulator(
+    Regular, mode
+  )
+
+func newSimulator*[F: TsuField or WaterField](mode = Play): Simulator {.inline.} =
+  ## Returns a new simulator.
+  initPuyoPuyo[F]().newSimulator mode
 
 # ------------------------------------------------
 # Copy
@@ -124,9 +147,11 @@ func copy*(self: Simulator): Simulator {.inline.} =
     state: self.state,
     kind: self.kind,
     mode: self.mode,
-    undoDeque: self.undoDeque.toSeq.toDeque,
-    redoDeque: self.redoDeque.toSeq.toDeque,
-    moveDeque: self.moveDeque.toSeq.toDeque,
+    undoDeque: self.undoDeque.copy,
+    redoDeque: self.redoDeque.copy,
+    moveDeque: self.moveDeque.copy,
+    positions: self.positions,
+    operatingIdx: self.operatingIdx,
     operatingPos: self.operatingPos,
     editing: self.editing,
   )
@@ -136,20 +161,19 @@ func copy*(self: Simulator): Simulator {.inline.} =
 # Property - Nazo Puyo
 # ------------------------------------------------
 
-func nazoPuyoWrap*(self: Simulator): NazoPuyoWrap {.inline.} =
-  ## Returns the wrapped Nazo Puyo.
-  self.nazoPuyoWrap
-
-func nazoPuyoWrap*(self: var Simulator): var NazoPuyoWrap {.inline.} =
+func nazoPuyoWrap*(self: Simulator): var NazoPuyoWrap {.inline.} =
   ## Returns the wrapped Nazo Puyo.
   self.nazoPuyoWrap
 
 func nazoPuyoWrapBeforeMoves*(self: Simulator): NazoPuyoWrap {.inline.} =
   ## Returns the wrapped Nazo Puyo before any moves.
+  ## Positions are not included.
   if self.moveDeque.len > 0:
-    self.moveDeque.peekFirst.nazoPuyoWrap
+    # HACK: `self.moveDeque.peekFirst.nazoPuyoWrap` does not work due to Nim's bug
+    let deque = self.moveDeque
+    result = deque.peekFirst.nazoPuyoWrap
   else:
-    self.nazoPuyoWrap
+    result = self.nazoPuyoWrap
 
 # ------------------------------------------------
 # Property - Rule / Kind / Mode
@@ -164,13 +188,13 @@ func kind*(self: Simulator): SimulatorKind {.inline.} =
 func mode*(self: Simulator): SimulatorMode {.inline.} =
   self.mode
 
-func `rule=`*(self: var Simulator, rule: Rule) {.inline.} =
+proc `rule=`*(self: Simulator, rule: Rule) {.inline.} =
   self.nazoPuyoWrap.rule = rule
 
-func `kind=`*(self: var Simulator, kind: SimulatorKind) {.inline.} =
+proc `kind=`*(self: Simulator, kind: SimulatorKind) {.inline.} =
   self.kind = kind
 
-func `mode=`*(self: var Simulator, mode: SimulatorMode) {.inline.} =
+proc `mode=`*(self: Simulator, mode: SimulatorMode) {.inline.} =
   if mode == self.mode:
     return
 
@@ -180,6 +204,7 @@ func `mode=`*(self: var Simulator, mode: SimulatorMode) {.inline.} =
   self.undoDeque.clear
   self.redoDeque.clear
   self.moveDeque.clear
+  self.operatingIdx = 0
 
 # ------------------------------------------------
 # Property - Editing
@@ -189,7 +214,7 @@ func editing*(self: Simulator): SimulatorEditing {.inline.} =
   ## Returns the editing information.
   self.editing
 
-func `editingCell=`*(self: var Simulator, cell: Cell) {.inline.} =
+proc `editingCell=`*(self: Simulator, cell: Cell) {.inline.} =
   self.editing.cell = cell
 
 # ------------------------------------------------
@@ -203,6 +228,14 @@ func state*(self: Simulator): SimulatorState {.inline.} =
 func score*(self: Simulator): int {.inline.} = ## Returns the score.
   self.moveResult.score
 
+func positions*(self: Simulator): seq[Position] {.inline.} =
+  ## Returns the positions.
+  self.positions
+
+func operatingIndex*(self: Simulator): int {.inline.} =
+  ## Returns the operating index.
+  self.operatingIdx
+
 func operatingPosition*(self: Simulator): Position {.inline.} =
   ## Returns the operating position.
   self.operatingPos
@@ -211,17 +244,17 @@ func operatingPosition*(self: Simulator): Position {.inline.} =
 # Edit - Other
 # ------------------------------------------------
 
-func toggleInserting*(self: var Simulator) {.inline.} = ## Toggles inserting or not.
+proc toggleInserting*(self: Simulator) {.inline.} = ## Toggles inserting or not.
   self.editing.insert.toggle
 
-func toggleFocus*(self: var Simulator) {.inline.} = ## Toggles focusing field or not.
+proc toggleFocus*(self: Simulator) {.inline.} = ## Toggles focusing field or not.
   self.editing.focusField.toggle
 
 # ------------------------------------------------
 # Edit - Cursor
 # ------------------------------------------------
 
-func moveCursorUp*(self: var Simulator) {.inline.} =
+proc moveCursorUp*(self: Simulator) {.inline.} =
   ## Moves the cursor upward.
   if self.editing.focusField:
     self.editing.field.row.decRot
@@ -233,7 +266,7 @@ func moveCursorUp*(self: var Simulator) {.inline.} =
     else:
       self.editing.pair.index.dec
 
-func moveCursorDown*(self: var Simulator) {.inline.} =
+proc moveCursorDown*(self: Simulator) {.inline.} =
   ## Moves the cursor downward.
   if self.editing.focusField:
     self.editing.field.row.incRot
@@ -246,14 +279,14 @@ func moveCursorDown*(self: var Simulator) {.inline.} =
     else:
       self.editing.pair.index.inc
 
-func moveCursorRight*(self: var Simulator) {.inline.} =
+proc moveCursorRight*(self: Simulator) {.inline.} =
   ## Moves the cursor rightward.
   if self.editing.focusField:
     self.editing.field.column.incRot
   else:
     self.editing.pair.axis.toggle
 
-func moveCursorLeft*(self: var Simulator) {.inline.} =
+proc moveCursorLeft*(self: Simulator) {.inline.} =
   ## Moves the cursor leftward.
   if self.editing.focusField:
     self.editing.field.column.decRot
@@ -264,17 +297,19 @@ func moveCursorLeft*(self: var Simulator) {.inline.} =
 # Edit - Delete
 # ------------------------------------------------
 
-func prepareChange(self: var Simulator) {.inline.} =
+proc prepareChange(self: Simulator) {.inline.} =
   ## Prepares for changing the simulator.
   self.undoDeque.addLast self.nazoPuyoWrap
   self.redoDeque.clear
 
-func deletePairPosition*(self: var Simulator, idx: Natural) {.inline.} =
+proc deletePairPosition*(self: Simulator, idx: Natural) {.inline.} =
   ## Deletes the pair&position.
   self.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.pairsPositions.delete idx
 
-func deletePairPosition*(self: var Simulator) {.inline.} =
+  self.positions.delete idx
+
+proc deletePairPosition*(self: Simulator) {.inline.} =
   ## Deletes the pair&position at selecting index.
   self.deletePairPosition self.editing.pair.index
 
@@ -282,7 +317,7 @@ func deletePairPosition*(self: var Simulator) {.inline.} =
 # Edit - Write
 # ------------------------------------------------
 
-func writeCell(self: var Simulator, row: Row, col: Column, cell: Cell) {.inline.} =
+proc writeCell(self: Simulator, row: Row, col: Column, cell: Cell) {.inline.} =
   ## Writes the cell to the field.
   self.prepareChange
 
@@ -295,11 +330,11 @@ func writeCell(self: var Simulator, row: Row, col: Column, cell: Cell) {.inline.
     else:
       wrappedNazoPuyo.puyoPuyo.field[row, col] = cell
 
-func writeCell*(self: var Simulator, row: Row, col: Column) {.inline.} =
+proc writeCell*(self: Simulator, row: Row, col: Column) {.inline.} =
   ## Writes the selecting cell to the field.
   self.writeCell row, col, self.editing.cell
 
-func writeCell(self: var Simulator, idx: Natural, axis: bool, cell: Cell) {.inline.} =
+proc writeCell(self: Simulator, idx: Natural, axis: bool, cell: Cell) {.inline.} =
   ## Writes the cell to the pairs.
   case cell
   of Cell.None:
@@ -313,25 +348,27 @@ func writeCell(self: var Simulator, idx: Natural, axis: bool, cell: Cell) {.inli
     let color = ColorPuyo cell
     self.nazoPuyoWrap.get:
       if idx == wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
-        wrappedNazoPuyo.puyoPuyo.pairsPositions.add PairPosition(
+        wrappedNazoPuyo.puyoPuyo.pairsPositions.addLast PairPosition(
           pair: initPair(color, color), position: Position.None
         )
+        self.positions.add Position.None
       else:
         if self.editing.insert:
           wrappedNazoPuyo.puyoPuyo.pairsPositions.insert PairPosition(
             pair: initPair(color, color), position: Position.None
           ), idx
+          self.positions.insert Position.None, idx
         else:
           if axis:
             wrappedNazoPuyo.puyoPuyo.pairsPositions[idx].pair.axis = color
           else:
             wrappedNazoPuyo.puyoPuyo.pairsPositions[idx].pair.child = color
 
-func writeCell*(self: var Simulator, idx: Natural, axis: bool) {.inline.} =
+proc writeCell*(self: Simulator, idx: Natural, axis: bool) {.inline.} =
   ## Writes the selecting cell to the pairs.
   self.writeCell idx, axis, self.editing.cell
 
-func writeCell*(self: var Simulator, cell: Cell) {.inline.} =
+proc writeCell*(self: Simulator, cell: Cell) {.inline.} =
   ## Writes the cell to the field or pairs.
   if self.editing.focusField:
     self.writeCell self.editing.field.row, self.editing.field.column, cell
@@ -342,25 +379,25 @@ func writeCell*(self: var Simulator, cell: Cell) {.inline.} =
 # Edit - Shift
 # ------------------------------------------------
 
-func shiftFieldUp*(self: var Simulator) {.inline.} =
+proc shiftFieldUp*(self: Simulator) {.inline.} =
   ## Shifts the field upward.
   self.prepareChange
   self.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.field.shiftUp
 
-func shiftFieldDown*(self: var Simulator) {.inline.} =
+proc shiftFieldDown*(self: Simulator) {.inline.} =
   ## Shifts the field downward.
   self.prepareChange
   self.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.field.shiftDown
 
-func shiftFieldRight*(self: var Simulator) {.inline.} =
+proc shiftFieldRight*(self: Simulator) {.inline.} =
   ## Shifts the field rightward.
   self.prepareChange
   self.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.field.shiftRight
 
-func shiftFieldLeft*(self: var Simulator) {.inline.} =
+proc shiftFieldLeft*(self: Simulator) {.inline.} =
   ## Shifts the field leftward.
   self.prepareChange
   self.nazoPuyoWrap.get:
@@ -370,19 +407,19 @@ func shiftFieldLeft*(self: var Simulator) {.inline.} =
 # Edit - Flip
 # ------------------------------------------------
 
-func flipFieldV*(self: var Simulator) {.inline.} =
+proc flipFieldV*(self: Simulator) {.inline.} =
   ## Flips the field vertically.
   self.prepareChange
   self.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.field.flipV
 
-func flipFieldH*(self: var Simulator) {.inline.} =
+proc flipFieldH*(self: Simulator) {.inline.} =
   ## Flips the field horizontally.
   self.prepareChange
   self.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.field.flipH
 
-func flip*(self: var Simulator) {.inline.} =
+proc flip*(self: Simulator) {.inline.} =
   ## Flips the field or pairs.
   self.nazoPuyoWrap.get:
     if self.editing.focusField:
@@ -394,7 +431,7 @@ func flip*(self: var Simulator) {.inline.} =
 # Edit - Requirement
 # ------------------------------------------------
 
-func `requirementKind=`*(self: var Simulator, kind: RequirementKind) {.inline.} =
+proc `requirementKind=`*(self: Simulator, kind: RequirementKind) {.inline.} =
   ## Sets the requirement kind.
   self.nazoPuyoWrap.get:
     if kind == wrappedNazoPuyo.requirement.kind:
@@ -403,7 +440,7 @@ func `requirementKind=`*(self: var Simulator, kind: RequirementKind) {.inline.} 
     self.prepareChange
     wrappedNazoPuyo.requirement.kind = kind
 
-func `requirementColor=`*(self: var Simulator, color: RequirementColor) {.inline.} =
+proc `requirementColor=`*(self: Simulator, color: RequirementColor) {.inline.} =
   ## Sets the requirement color.
   self.nazoPuyoWrap.get:
     if wrappedNazoPuyo.requirement.kind in NoColorKinds:
@@ -414,7 +451,7 @@ func `requirementColor=`*(self: var Simulator, color: RequirementColor) {.inline
     self.prepareChange
     wrappedNazoPuyo.requirement.color = color
 
-func `requirementNumber=`*(self: var Simulator, num: RequirementNumber) {.inline.} =
+proc `requirementNumber=`*(self: Simulator, num: RequirementNumber) {.inline.} =
   ## Sets the requirement number.
   self.nazoPuyoWrap.get:
     if wrappedNazoPuyo.requirement.kind in NoNumberKinds:
@@ -429,7 +466,7 @@ func `requirementNumber=`*(self: var Simulator, num: RequirementNumber) {.inline
 # Edit - Undo / Redo
 # ------------------------------------------------
 
-func undo*(self: var Simulator) {.inline.} =
+proc undo*(self: Simulator) {.inline.} =
   ## Performs undo.
   if self.undoDeque.len == 0:
     return
@@ -437,7 +474,7 @@ func undo*(self: var Simulator) {.inline.} =
   self.redoDeque.addLast self.nazoPuyoWrap
   self.nazoPuyoWrap = self.undoDeque.popLast
 
-func redo*(self: var Simulator) {.inline.} =
+proc redo*(self: Simulator) {.inline.} =
   ## Performs redo.
   if self.redoDeque.len == 0:
     return
@@ -449,19 +486,19 @@ func redo*(self: var Simulator) {.inline.} =
 # Play - Position
 # ------------------------------------------------
 
-func moveOperatingPositionRight*(self: var Simulator) {.inline.} =
+proc moveOperatingPositionRight*(self: Simulator) {.inline.} =
   ## Moves the operating position right.
   self.operatingPos.moveRight
 
-func moveOperatingPositionLeft*(self: var Simulator) {.inline.} =
+proc moveOperatingPositionLeft*(self: Simulator) {.inline.} =
   ## Moves the operating position left.
   self.operatingPos.moveLeft
 
-func rotateOperatingPositionRight*(self: var Simulator) {.inline.} =
+proc rotateOperatingPositionRight*(self: Simulator) {.inline.} =
   ## Rotates the operating position right.
   self.operatingPos.rotateRight
 
-func rotateOperatingPositionLeft*(self: var Simulator) {.inline.} =
+proc rotateOperatingPositionLeft*(self: Simulator) {.inline.} =
   ## Rotates the operating position left.
   self.operatingPos.rotateLeft
 
@@ -469,7 +506,7 @@ func rotateOperatingPositionLeft*(self: var Simulator) {.inline.} =
 # Forward / Backward
 # ------------------------------------------------
 
-func forward*(self: var Simulator, replay = false, skip = false) {.inline.} =
+proc forward*(self: Simulator, replay = false, skip = false) {.inline.} =
   ## Forwards the simulator.
   ## `replay` is prioritized over `skip`.
   self.nazoPuyoWrap.get:
@@ -479,25 +516,24 @@ func forward*(self: var Simulator, replay = false, skip = false) {.inline.} =
         return
 
       self.moveResult = DefaultMoveResult
+      self.moveDeque.addLast (self.nazoPuyoWrap, self.state, self.moveResult)
 
       # set position
       if not replay:
-        wrappedNazoPuyo.puyoPuyo.operatingPairPosition.position =
+        self.positions[self.operatingIdx] =
           if skip: Position.None else: self.operatingPos
 
-      # save to the deque
-      self.moveDeque.addLast (self.nazoPuyoWrap, self.state, self.moveResult)
-
       # put
-      wrappedNazoPuyo.puyoPuyo.field.put wrappedNazoPuyo.puyoPuyo.operatingPairPosition
+      wrappedNazoPuyo.puyoPuyo.field.put wrappedNazoPuyo.puyoPuyo.pairsPositions.popFirst.pair,
+        self.positions[self.operatingIdx]
 
       # check disappear
       if wrappedNazoPuyo.puyoPuyo.field.willDisappear:
         self.state = WillDisappear
       else:
         self.state = Stable
+        self.operatingIdx.inc
         self.operatingPos = InitPos
-        wrappedNazoPuyo.puyoPuyo.incrementOperatingIndex
     of WillDisappear:
       self.moveDeque.addLast (self.nazoPuyoWrap, self.state, self.moveResult)
 
@@ -516,8 +552,8 @@ func forward*(self: var Simulator, replay = false, skip = false) {.inline.} =
         self.state = WillDrop
       else:
         self.state = Stable
+        self.operatingIdx.inc
         self.operatingPos = InitPos
-        wrappedNazoPuyo.puyoPuyo.incrementOperatingIndex
     of WillDrop:
       self.moveDeque.addLast (self.nazoPuyoWrap, self.state, self.moveResult)
 
@@ -526,16 +562,16 @@ func forward*(self: var Simulator, replay = false, skip = false) {.inline.} =
         self.state = WillDisappear
       else:
         self.state = Stable
+        self.operatingIdx.inc
         self.operatingPos = InitPos
-        wrappedNazoPuyo.puyoPuyo.incrementOperatingIndex
 
-func backward*(self: var Simulator, toStable = true) {.inline.} =
+proc backward*(self: Simulator, toStable = true) {.inline.} =
   ## Backwards the simulator.
   if self.moveDeque.len == 0:
     return
 
-  let pairsPositions = self.nazoPuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions
+  if self.state == Stable:
+    self.operatingIdx.dec
 
   if toStable:
     while self.moveDeque.peekLast.state != Stable:
@@ -543,27 +579,20 @@ func backward*(self: var Simulator, toStable = true) {.inline.} =
 
   (self.nazoPuyoWrap, self.state, self.moveResult) = self.moveDeque.popLast
   self.operatingPos = InitPos
-  self.nazoPuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
 
-func reset*(self: var Simulator) {.inline.} =
+proc reset*(self: Simulator) {.inline.} =
   ## Backwards the simulator to the initial state.
   if self.moveDeque.len == 0:
     return
 
-  let pairsPositions = self.nazoPuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions
-
   self.nazoPuyoWrap = self.moveDeque.peekFirst.nazoPuyoWrap
-  self.nazoPuyoWrap.get:
-    wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsPositions
-
+  self.moveResult = DefaultMoveResult
   self.state = Stable
   self.undoDeque.clear
   self.redoDeque.clear
   self.moveDeque.clear
+  self.operatingIdx = 0
   self.operatingPos = InitPos
-  self.moveResult = DefaultMoveResult
 
 # ------------------------------------------------
 # Simulator <-> URI
@@ -585,18 +614,17 @@ func toUriQuery*(
 ): string {.inline.} =
   ## Returns the URI query converted from the simulator.
   ## Any moves are reset.
-
-  let
-    mainQuery: string
-    pairsPositions = self.nazoPuyoWrap.get:
-      wrappedNazoPuyo.puyoPuyo.pairsPositions
+  let mainQuery: string
   self.nazoPuyoWrapBeforeMoves.get:
+    assert wrappedNazoPuyo.puyoPuyo.pairsPositions.len == self.positions.len
+
     var nazo = wrappedNazoPuyo
-    if withPositions:
-      nazo.puyoPuyo.pairsPositions = pairsPositions
-    else:
-      for pairPos in nazo.puyoPuyo.pairsPositions.mitems:
-        pairPos.position = Position.None
+    for pairIdx in 0 ..< nazo.puyoPuyo.pairsPositions.len:
+      nazo.puyoPuyo.pairsPositions[pairIdx].position =
+        if withPositions:
+          self.positions[pairIdx]
+        else:
+          Position.None
 
     mainQuery =
       case self.kind
@@ -618,8 +646,6 @@ func parseSimulator*(query: string, fqdn: IdeFqdn): Simulator {.inline.} =
   ## If the URI is invalid, `ValueError` is raised.
   ## If the FQDN is not `Pon2`, the kind is set to `Regular`, and the mode is
   ## set to `Play`.
-  result = initPuyoPuyo[TsuField]().initSimulator # HACK: dummy to suppress warning
-
   case fqdn
   of Pon2:
     var
@@ -639,6 +665,7 @@ func parseSimulator*(query: string, fqdn: IdeFqdn): Simulator {.inline.} =
         mainQueries.add (key, val)
 
     if kindVal notin StrToKind or modeVal notin StrToMode:
+      result = newSimulator[TsuField]() # HACK: dummy to suppress warning
       raise newException(ValueError, "Invalid simulator: " & query)
 
     let
@@ -649,28 +676,30 @@ func parseSimulator*(query: string, fqdn: IdeFqdn): Simulator {.inline.} =
     case kind
     of Regular:
       try:
-        result = parsePuyoPuyo[TsuField](mainQuery, Pon2).initSimulator mode
+        result = parsePuyoPuyo[TsuField](mainQuery, Pon2).newSimulator mode
       except ValueError:
         try:
-          result = parsePuyoPuyo[WaterField](mainQuery, Pon2).initSimulator mode
+          result = parsePuyoPuyo[WaterField](mainQuery, Pon2).newSimulator mode
         except ValueError:
+          result = newSimulator[TsuField]() # HACK: dummy to suppress warning
           raise newException(ValueError, "Invalid simulator: " & query)
     of Nazo:
       try:
-        result = parseNazoPuyo[TsuField](mainQuery, Pon2).initSimulator mode
+        result = parseNazoPuyo[TsuField](mainQuery, Pon2).newSimulator mode
       except ValueError:
         try:
-          result = parseNazoPuyo[WaterField](mainQuery, Pon2).initSimulator mode
+          result = parseNazoPuyo[WaterField](mainQuery, Pon2).newSimulator mode
         except ValueError:
+          result = newSimulator[TsuField]() # HACK: dummy to suppress warning
           raise newException(ValueError, "Invalid simulator: " & query)
   of Ishikawa, Ips:
-    result = parsePuyoPuyo[TsuField](query, fqdn).initSimulator Play
+    result = parsePuyoPuyo[TsuField](query, fqdn).newSimulator Play
 
 # ------------------------------------------------
 # Keyboard Operation
 # ------------------------------------------------
 
-func operate*(self: var Simulator, event: KeyEvent): bool {.discardable.} =
+proc operate*(self: Simulator, event: KeyEvent): bool {.discardable.} =
   ## Does operation specified by the keyboard input.
   ## Returns `true` if any action is executed.
   result = true
@@ -771,132 +800,3 @@ func operate*(self: var Simulator, event: KeyEvent): bool {.discardable.} =
       self.reset
     else:
       result = false
-
-# ------------------------------------------------
-# Backend-specific Implementation
-# ------------------------------------------------
-
-when defined(js):
-  import karax/[karaxdsl, vdom]
-  import
-    ../private/app/simulator/web/[
-      controller,
-      field,
-      immediatepairs,
-      messages,
-      operating as operatingModule,
-      pairs as pairsModule,
-      palette,
-      requirement,
-      select,
-    ]
-
-  # ------------------------------------------------
-  # JS - Node
-  # ------------------------------------------------
-
-  const ReqIdPrefix = "pon2-simulator-req-"
-
-  proc newSimulatorNode(self: ref Simulator, id: string): VNode {.inline.} =
-    ## Returns the node without the external section.
-    buildHtml(tdiv):
-      tdiv(class = "block"):
-        self.newRequirementNode(id = &"{ReqIdPrefix}{id}")
-      tdiv(class = "block"):
-        tdiv(class = "columns is-mobile is-variable is-1"):
-          tdiv(class = "column is-narrow"):
-            if self.mode != Edit:
-              tdiv(class = "block"):
-                self.newOperatingNode
-            tdiv(class = "block"):
-              self.newFieldNode
-            if self.mode != Edit:
-              tdiv(class = "block"):
-                self.newMessagesNode
-            if self.mode in {PlayEditor, Edit}:
-              tdiv(class = "block"):
-                self.newSelectNode
-          if self.mode != Edit:
-            tdiv(class = "column is-narrow"):
-              tdiv(class = "block"):
-                self.newImmediatePairsNode
-          tdiv(class = "column is-narrow"):
-            tdiv(class = "block"):
-              self.newControllerNode
-            if self.mode == Edit:
-              tdiv(class = "block"):
-                self.newPaletteNode
-            tdiv(class = "block"):
-              self.newPairsNode
-
-  proc newSimulatorNode*(
-      self: ref Simulator, wrapSection = true, id = ""
-  ): VNode {.inline.} =
-    ## Returns the simulator node.
-    let node = self.newSimulatorNode id
-
-    if wrapSection:
-      result = buildHtml(section(class = "section")):
-        node
-    else:
-      result = node
-
-else:
-  import nigui
-  import
-    ../private/app/simulator/native/[
-      assets,
-      field,
-      immediatepairs,
-      messages,
-      operating as operatingModule,
-      pairs as pairsModule,
-      requirement,
-      select,
-    ]
-
-  type SimulatorControl* = ref object of LayoutContainer
-    ## Root control of the simulator.
-
-  # ------------------------------------------------
-  # Native - Control
-  # ------------------------------------------------
-
-  proc newSimulatorControl*(self: ref Simulator): SimulatorControl {.inline.} =
-    ## Returns the simulator control.
-    {.push warning[ProveInit]: off.}
-    result.new
-    {.pop.}
-    result.init
-    result.layout = Layout_Vertical
-
-    # row=0
-    let reqControl = self.newRequirementControl
-    result.add reqControl
-
-    # row=1
-    let secondRow = newLayoutContainer Layout_Horizontal
-    result.add secondRow
-
-    # row=1, left
-    let left = newLayoutContainer Layout_Vertical
-    secondRow.add left
-
-    let
-      assets = newAssets()
-      field = self.newFieldControl assets
-      messages = self.newMessagesControl assets
-    left.add self.newOperatingControl assets
-    left.add field
-    left.add messages
-    left.add self.newSelectControl reqControl
-
-    # row=1, center
-    secondRow.add self.newImmediatePairsControl assets
-
-    # row=1, right
-    secondRow.add self.newPairsControl assets
-
-    # set size
-    reqControl.setWidth secondRow.naturalWidth
-    messages.setWidth field.naturalWidth

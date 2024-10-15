@@ -34,7 +34,7 @@ export
   color.Color, color.SelectColor, color.GhostColor, color.WaterColor, color.DefaultColor
 export
   generate.GenerateError, generate.GenerateRequirementColor,
-  generate.GenerateRequirement, generate.generate
+  generate.GenerateRequirement, generate.GenerateOption, generate.generate
 export
   ide.AnswerData, ide.Ide, ide.newIde, ide.simulator, ide.answerSimulator,
   ide.answerData, ide.focusAnswer, ide.solving, ide.permuting, ide.progressBarData,
@@ -52,36 +52,45 @@ export
 export permute.permute
 export
   simulator.SimulatorKind, simulator.SimulatorMode, simulator.SimulatorState,
-  simulator.SimulatorEditing, simulator.Simulator, simulator.initSimulator,
+  simulator.SimulatorEditing, simulator.Simulator, simulator.newSimulator,
   simulator.copy, simulator.nazoPuyoWrap, simulator.nazoPuyoWrapBeforeMoves,
   simulator.rule, simulator.kind, simulator.mode, simulator.`rule=`, simulator.`kind=`,
   simulator.`mode=`, simulator.editing, simulator.`editingCell=`, simulator.state,
-  simulator.score, simulator.operatingPosition, simulator.toggleInserting,
-  simulator.toggleFocus, simulator.moveCursorUp, simulator.moveCursorDown,
-  simulator.moveCursorRight, simulator.moveCursorLeft, simulator.deletePairPosition,
-  simulator.writeCell, simulator.shiftFieldUp, simulator.shiftFieldDown,
-  simulator.shiftFieldRight, simulator.shiftFieldLeft, simulator.flipFieldV,
-  simulator.flipFieldH, simulator.flip, simulator.`requirementKind=`,
-  simulator.`requirementColor=`, simulator.`requirementNumber=`, simulator.undo,
-  simulator.redo, simulator.moveOperatingPositionRight,
-  simulator.moveOperatingPositionLeft, simulator.rotateOperatingPositionRight,
-  simulator.rotateOperatingPositionLeft, simulator.forward, simulator.backward,
-  simulator.reset, simulator.toUriQuery, simulator.parseSimulator, simulator.operate
-export solve.solve
+  simulator.score, simulator.positions, simulator.operatingIndex,
+  simulator.operatingPosition, simulator.toggleInserting, simulator.toggleFocus,
+  simulator.moveCursorUp, simulator.moveCursorDown, simulator.moveCursorRight,
+  simulator.moveCursorLeft, simulator.deletePairPosition, simulator.writeCell,
+  simulator.shiftFieldUp, simulator.shiftFieldDown, simulator.shiftFieldRight,
+  simulator.shiftFieldLeft, simulator.flipFieldV, simulator.flipFieldH, simulator.flip,
+  simulator.`requirementKind=`, simulator.`requirementColor=`,
+  simulator.`requirementNumber=`, simulator.undo, simulator.redo,
+  simulator.moveOperatingPositionRight, simulator.moveOperatingPositionLeft,
+  simulator.rotateOperatingPositionRight, simulator.rotateOperatingPositionLeft,
+  simulator.forward, simulator.backward, simulator.reset, simulator.toUriQuery,
+  simulator.parseSimulator, simulator.operate
+export solve.SolveAnswer, solve.solve
 
 when defined(js):
+  import ./app/ide/[web as ideWeb]
+  import ./app/marathon/[web as marathonWeb]
+  import ./app/simulator/[web as simulatorWeb]
+
   export color.toColorCode
-  export ide.runKeyboardEventHandler, ide.newKeyboardEventHandler, ide.newIdeNode
+  export
+    ideWeb.runKeyboardEventHandler, ideWeb.newKeyboardEventHandler, ideWeb.newIdeNode
   export key.toKeyEvent
   export
-    marathon.asyncLoadData, marathon.runKeyboardEventHandler,
-    marathon.newKeyboardEventHandler, marathon.newMarathonNode
-  export simulator.newSimulatorNode
+    marathon.asyncLoadData, marathonWeb.runKeyboardEventHandler,
+    marathonWeb.newKeyboardEventHandler, marathonWeb.newMarathonNode
+  export simulatorWeb.newSimulatorNode
 else:
+  import ./app/ide/[native as ideNative]
+  import ./app/simulator/[native as simulatorNative]
+
   export color.toNiguiColor
   export
-    ide.IdeControl, ide.IdeWindow, ide.runKeyboardEventHandler,
-    ide.newKeyboardEventHandler, ide.newIdeControl, ide.newIdeWindow
+    ideNative.IdeControl, ideNative.IdeWindow, ideNative.runKeyboardEventHandler,
+    ideNative.newKeyboardEventHandler, ideNative.newIdeControl, ideNative.newIdeWindow
   export marathon.loadData
   export key.toKeyEvent
-  export simulator.SimulatorControl, simulator.newSimulatorControl
+  export simulatorNative.SimulatorControl, simulatorNative.newSimulatorControl

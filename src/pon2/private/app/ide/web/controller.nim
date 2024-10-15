@@ -8,7 +8,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sugar]
+import std/[deques, sugar]
 import karax/[karax, karaxdsl, kbase, vdom]
 import ./[settings]
 import ../../[misc]
@@ -19,9 +19,9 @@ proc newEditorControllerNode*(ide: Ide, settingsId: string): VNode {.inline.} =
   ## Returns the editor controller node.
   let
     workerRunning = ide.solving or ide.permuting
-    noPair = ide.simulator[].nazoPuyoWrap.get:
+    noPair = ide.simulator.nazoPuyoWrap.get:
       wrappedNazoPuyo.puyoPuyo.pairsPositions.len == 0
-    workerDisable = workerRunning or noPair
+    btnDisable = workerRunning or noPair or ide.simulator.state != Stable
 
     focusButtonClass =
       if ide.focusAnswer:
@@ -40,20 +40,18 @@ proc newEditorControllerNode*(ide: Ide, settingsId: string): VNode {.inline.} =
         kstring"button"
 
   proc permuteHandler() =
-    let (_, fixMoves, allowDouble, allowLastDouble) = ide.simulator[].nazoPuyoWrap.get:
+    let (_, fixMoves, allowDouble, allowLastDouble) = ide.simulator.nazoPuyoWrap.get:
       getSettings(settingsId, wrappedNazoPuyo.moveCount)
     ide.permute fixMoves, allowDouble, allowLastDouble
 
   result = buildHtml(tdiv(class = "buttons")):
     button(
       class = solveButtonClass,
-      disabled = workerDisable,
+      disabled = btnDisable,
       onclick = () => (ide.solve getSettings(settingsId, 1).parallelCount),
     ):
       text "解探索"
-    button(
-      class = permuteButtonClass, disabled = workerDisable, onclick = permuteHandler
-    ):
+    button(class = permuteButtonClass, disabled = btnDisable, onclick = permuteHandler):
       text "ツモ並べ替え"
     if not isMobile():
       button(class = focusButtonClass, onclick = () => ide.toggleFocus):

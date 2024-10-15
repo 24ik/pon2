@@ -14,7 +14,7 @@ import ../../[misc]
 import ../../../../app/[simulator]
 import ../../../../core/[cell]
 
-proc newImmediatePairsNode*(simulator: ref Simulator): VNode {.inline.} =
+proc newImmediatePairsNode*(simulator: Simulator): VNode {.inline.} =
   ## Returns the immediate pairs node.
   buildHtml(table):
     tbody:
@@ -29,11 +29,11 @@ proc newImmediatePairsNode*(simulator: ref Simulator): VNode {.inline.} =
       tr:
         td:
           figure(class = "image is-24x24"):
-            img(src = simulator[].immediateNextPairCell(false).cellImageSrc)
+            img(src = simulator.immediateNextPairCell(false).cellImageSrc)
       tr:
         td:
           figure(class = "image is-24x24"):
-            img(src = simulator[].immediateNextPairCell(true).cellImageSrc)
+            img(src = simulator.immediateNextPairCell(true).cellImageSrc)
 
       # separator
       tr:
@@ -45,8 +45,8 @@ proc newImmediatePairsNode*(simulator: ref Simulator): VNode {.inline.} =
       tr:
         td:
           figure(class = "image is-24x24"):
-            img(src = simulator[].immediateDoubleNextPairCell(false).cellImageSrc)
+            img(src = simulator.immediateDoubleNextPairCell(false).cellImageSrc)
       tr:
         td:
           figure(class = "image is-24x24"):
-            img(src = simulator[].immediateDoubleNextPairCell(true).cellImageSrc)
+            img(src = simulator.immediateDoubleNextPairCell(true).cellImageSrc)

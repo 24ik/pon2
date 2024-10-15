@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, sets, sugar, unittest, uri]
+import std/[deques, sequtils, sets, sugar, unittest, uri]
 import ../../src/pon2/app/[solve]
 import ../../src/pon2/core/[field, fqdn, nazopuyo, pairposition, position, puyopuyo]
 
@@ -15,11 +15,8 @@ proc checkSolve(question: string, answers: varargs[string]) =
     answersSeq = collect:
       for answer in answers:
         (0 ..< answer.len div 2).toSeq.mapIt(
-          PairPosition(
-            pair: nazo.puyoPuyo.pairsPositions[it].pair,
-            position: answer[2 * it ..< 2 * it.succ].parsePosition,
-          )
-        )
+          answer[2 * it ..< 2 * it.succ].parsePosition
+        ).toDeque
     answersSet = answersSeq.toHashSet
 
   check nazo.solve.toHashSet == answersSet

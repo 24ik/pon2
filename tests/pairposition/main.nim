@@ -5,21 +5,38 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[unittest]
+import std/[deques, unittest]
 import ../../src/pon2/core/[cell, fqdn, pair, pairposition, position]
 
 proc main*() =
+  # ------------------------------------------------
+  # Property
+  # ------------------------------------------------
+
+  # `positions=`
+  block:
+    var pairsPositions = [
+      PairPosition(pair: RedGreen, position: Position.None),
+      PairPosition(pair: YellowYellow, position: Right3),
+      PairPosition(pair: BluePurple, position: Left2),
+    ].toDeque
+    pairsPositions.positions = [Up0, Position.None].toDeque
+    check pairsPositions == [
+      PairPosition(pair: RedGreen, position: Up0),
+      PairPosition(pair: YellowYellow, position: Position.None),
+      PairPosition(pair: BluePurple, position: Position.None),
+    ].toDeque
+
   # ------------------------------------------------
   # Count
   # ------------------------------------------------
 
   # puyoCount, colorCount, garbageCount
   block:
-    let pairsPositions =
-      @[
-        PairPosition(pair: RedGreen, position: Position.None),
-        PairPosition(pair: YellowYellow, position: Position.None),
-      ]
+    let pairsPositions = [
+      PairPosition(pair: RedGreen, position: Position.None),
+      PairPosition(pair: YellowYellow, position: Position.None),
+    ].toDeque
     check pairsPositions.puyoCount(Red) == 1
     check pairsPositions.puyoCount(Yellow) == 2
     check pairsPositions.puyoCount(Purple) == 0
@@ -52,11 +69,10 @@ proc main*() =
 
   # `$`, parsePairPosition, toUriQuery
   block:
-    let pairsPositions =
-      @[
-        PairPosition(pair: RedGreen, position: Position.None),
-        PairPosition(pair: YellowYellow, position: Up2),
-      ]
+    let pairsPositions = [
+      PairPosition(pair: RedGreen, position: Position.None),
+      PairPosition(pair: YellowYellow, position: Up2),
+    ].toDeque
 
     check $pairsPositions == "rg|\nyy|3N"
     check "rg|\nyy|3N".parsePairsPositions == pairsPositions

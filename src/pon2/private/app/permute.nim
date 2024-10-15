@@ -8,7 +8,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, sugar]
+import std/[deques, sequtils, sugar]
 import ../../core/[cell, field, nazopuyo, pair, pairposition, position]
 
 func allPairsPositionsSeq(
@@ -22,10 +22,10 @@ func allPairsPositionsSeq(
 ): seq[PairsPositions] {.inline.} =
   ## Returns all possible pairs (and positions) in ascending order that can be
   ## obtained by permuting puyos contained in the `originalPairsPositions`.
-  # NOTE: Swapped pair sometimes gives a different solution, but this function
+  # NOTE: Swapped pair may gives a different solution, but this function
   # does not consider it.
   if idx == moveCount:
-    return @[@[]]
+    return @[initDeque[PairPosition](originalPairsPositions.len)]
 
   result = @[]
   let nowLast = idx == moveCount.pred
@@ -60,7 +60,7 @@ func allPairsPositionsSeq(
       result &=
         originalPairsPositions.allPairsPositionsSeq(
           fixMoves, allowDouble, allowLastDouble, newColorCounts, idx.succ, moveCount
-        ).mapIt it.dup insert(PairPosition(pair: nowPair, position: Position.None), 0)
+        ).mapIt it.dup addFirst PairPosition(pair: nowPair, position: Position.None)
 
 func allPairsPositionsSeq*[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
@@ -70,7 +70,7 @@ func allPairsPositionsSeq*[F: TsuField or WaterField](
 ): seq[PairsPositions] {.inline.} =
   ## Returns all possible pairs (and positions) in ascending order that can be
   ## obtained by permuting puyos contained in the pairs.
-  # NOTE: Swapped pair sometimes gives a different solution, but this function
+  # NOTE: Swapped pair may gives a different solution, but this function
   # does not consider it.
   var colorCounts: array[ColorPuyo, Natural] = [0, 0, 0, 0, 0]
   for color in ColorPuyo:

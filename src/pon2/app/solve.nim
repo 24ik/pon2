@@ -8,17 +8,19 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, sequtils, setutils, tables]
+import std/[deques, options, sequtils, setutils, tables]
 import ./[nazopuyo]
-import ../core/[field, nazopuyo, pairposition, requirement]
-import ../private/app/[solve]
+import ../core/[field, nazopuyo, pairposition, position, requirement]
+import ../private/[misc]
+import ../private/app/[solve as solveModule]
 
 when not defined(js):
   {.push warning[Deprecated]: off.}
-  import std/[cpuinfo, os, threadpool]
+  import std/[os, threadpool]
   {.pop.}
   import suru
-  import ../private/[misc]
+
+export solveModule.SolveAnswer
 
 # ------------------------------------------------
 # Solve
@@ -31,7 +33,7 @@ proc solve[F: TsuField or WaterField](
     showProgress: static bool,
     earlyStopping: static bool,
     parallelCount: Positive,
-): seq[PairsPositions] {.inline.} =
+): seq[SolveAnswer] {.inline.} =
   ## Solves the nazo puyo.
   ## `showProgress` and `parallelCount` is ignored on JS backend.
   if not nazo.requirement.isSupported or nazo.moveCount == 0:
@@ -45,8 +47,12 @@ proc solve[F: TsuField or WaterField](
 
   when defined(js):
     result = @[]
-    for child in childNodes:
-      result &= child.solve(reqKind, reqColor, earlyStopping)
+    for (child, pos) in childNodes:
+      var childResults = child.solve(nazo.moveCount, reqKind, reqColor, earlyStopping)
+      for res in childResults.mitems:
+        res.addFirst pos
+
+      result &= childResults
 
       when earlyStopping:
         if result.len > 1:
@@ -69,14 +75,19 @@ proc solve[F: TsuField or WaterField](
     # spawn tasks
     var
       threadsRunning = false.repeat parallelCount
-      futures = newSeq[FlowVar[seq[PairsPositions]]](parallelCount)
-      results = newSeqOfCap[seq[PairsPositions]](childNodes.len)
-    for child in childNodes:
+      futures = newSeq[FlowVar[seq[Deque[Position]]]](parallelCount)
+      results = newSeqOfCap[seq[Deque[Position]]](childNodes.len)
+      positions = newSeq[Position](parallelCount)
+    for (child, pos) in childNodes:
       var spawned = false
       while not spawned:
         for threadIdx in 0 ..< parallelCount:
           if threadsRunning[threadIdx] and futures[threadIdx].isReady:
-            results.add ^futures[threadIdx]
+            var answers = ^futures[threadIdx]
+            for answer in answers.mitems:
+              answer.addFirst positions[threadIdx]
+            results.add answers
+
             threadsRunning[threadIdx] = false
 
             when showProgress:
@@ -91,9 +102,11 @@ proc solve[F: TsuField or WaterField](
                 return results.concat
 
           if not threadsRunning[threadIdx]:
-            futures[threadIdx] = spawn child.solve(reqKind, reqColor, earlyStopping)
+            futures[threadIdx] =
+              spawn child.solve(nazo.moveCount, reqKind, reqColor, earlyStopping)
             spawned = true
             threadsRunning[threadIdx] = true
+            positions[threadIdx] = pos
 
             break
 
@@ -105,7 +118,11 @@ proc solve[F: TsuField or WaterField](
     while runningThreadIdxes.card > 0:
       for threadIdx in runningThreadIdxes:
         if futures[threadIdx].isReady:
-          results.add ^futures[threadIdx]
+          var answers = ^futures[threadIdx]
+          for answer in answers.mitems:
+            answer.addFirst positions[threadIdx]
+          results.add answers
+
           runningThreadIdxes.excl threadIdx
 
           when showProgress:
@@ -132,7 +149,7 @@ proc solve[F: TsuField or WaterField](
     showProgress: static bool,
     earlyStopping: static bool,
     parallelCount: Positive,
-): seq[PairsPositions] {.inline.} =
+): seq[SolveAnswer] {.inline.} =
   ## Solves the nazo puyo.
   ## `showProgress` and `parallelCount` is ignored on JS backend.
   assert reqKind in {
@@ -180,13 +197,8 @@ proc solve*[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
     showProgress: static bool = false,
     earlyStopping: static bool = false,
-    parallelCount: Positive =
-      when defined(js):
-        1
-      else:
-        max(1, countProcessors())
-    ,
-): seq[PairsPositions] {.inline.} =
+    parallelCount: Positive = processorCount(),
+): seq[SolveAnswer] {.inline.} =
   ## Solves the nazo puyo.
   ## `showProgress` and `parallelCount` is ignored on JS backend.
   const DummyColor = RequirementColor.All

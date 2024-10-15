@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, strformat, strutils, unittest, uri]
+import std/[deques, sequtils, strformat, strutils, unittest, uri]
 import
   ../../src/pon2/core/
     [cell, field, fqdn, moveresult, pair, pairposition, position, puyopuyo, rule]
@@ -15,14 +15,11 @@ proc main*() =
   # Reset / Constructor
   # ------------------------------------------------
 
-  # reset, initPuyoPuyo
+  # initPuyoPuyo
   block:
-    var puyoPuyo = initPuyoPuyo[TsuField]()
-    puyoPuyo.field[0, 0] = Red
-    puyoPuyo.pairsPositions.add PairPosition(pair: RedGreen, position: Up1)
-
-    puyoPuyo.reset
-    check puyoPuyo == initPuyoPuyo[TsuField]()
+    let puyoPuyo = initPuyoPuyo[TsuField]()
+    check puyoPuyo.field == initField[TsuField]()
+    check puyoPuyo.pairsPositions.len == 0
 
   # ------------------------------------------------
   # Convert
@@ -32,7 +29,7 @@ proc main*() =
   block:
     var puyoPuyo = initPuyoPuyo[TsuField]()
     puyoPuyo.field[0, 0] = Red
-    puyoPuyo.pairsPositions.add PairPosition(pair: RedGreen, position: Up1)
+    puyoPuyo.pairsPositions.addLast PairPosition(pair: RedGreen, position: Up1)
 
     check puyoPuyo.toWaterPuyoPuyo.toWaterPuyoPuyo.toTsuPuyoPuyo.toTsuPuyoPuyo ==
       puyoPuyo
@@ -46,42 +43,18 @@ proc main*() =
     check initPuyoPuyo[TsuField]().rule == Tsu
     check initPuyoPuyo[WaterField]().rule == Water
 
-  # operatingIndex, incrementOperatingIndex, decrementOperatingIndex
+  # movingCompleted
   block:
     var puyoPuyo = initPuyoPuyo[TsuField]()
-    puyoPuyo.pairsPositions.add PairPosition(pair: RedGreen, position: Up1)
-    check puyoPuyo.operatingIndex == 0
-
-    puyoPuyo.decrementOperatingIndex
-    check puyoPuyo.operatingIndex == 0
-
-    puyoPuyo.incrementOperatingIndex
-    check puyoPuyo.operatingIndex == 1
-    puyoPuyo.incrementOperatingIndex
-    check puyoPuyo.operatingIndex == 1
-
-    puyoPuyo.decrementOperatingIndex
-    check puyoPuyo.operatingIndex == 0
-
-  # movingCompleted, operatingPairPosition
-  block:
-    var puyoPuyo = initPuyoPuyo[TsuField]()
-    puyoPuyo.pairsPositions.add PairPosition(pair: RedGreen, position: Up1)
-    puyoPuyo.pairsPositions.add PairPosition(pair: BlueYellow, position: Up2)
-
+    puyoPuyo.pairsPositions.addLast PairPosition(pair: RedGreen, position: Up1)
+    puyoPuyo.pairsPositions.addLast PairPosition(pair: BlueYellow, position: Up2)
     check not puyoPuyo.movingCompleted
-    check puyoPuyo.operatingPairPosition == PairPosition(pair: RedGreen, position: Up1)
 
     puyoPuyo.move
     check not puyoPuyo.movingCompleted
-    check puyoPuyo.operatingPairPosition == PairPosition(
-      pair: BlueYellow, position: Up2
-    )
 
     puyoPuyo.move
     check puyoPuyo.movingCompleted
-    expect IndexDefect:
-      discard puyoPuyo.operatingPairPosition
 
   # ------------------------------------------------
   # Count
@@ -129,7 +102,7 @@ rb|4F
 rg|"""
         )
         puyoPuyoAfter = parsePuyoPuyo[TsuField](
-          "......\n".repeat(10) & ".....r\n.....b\n...gbb\n------\nrb|4F\nrg|"
+          "......\n".repeat(10) & ".....r\n.....b\n...gbb\n------\nrg|"
         )
 
       block:
@@ -194,7 +167,6 @@ r.y...
 ......
 ......
 ------
-rb|34
 rg|"""
         )
 

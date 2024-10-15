@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, unittest, uri]
+import std/[deques, sequtils, unittest, uri]
 import ../../src/pon2/app/[permute]
 import ../../src/pon2/core/[field, fqdn, nazopuyo, pairposition]
 

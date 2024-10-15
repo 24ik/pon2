@@ -8,7 +8,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, sequtils, setutils, strutils, sugar, tables, uri]
+import std/[deques, options, sequtils, setutils, strutils, sugar, tables, uri]
 import ../[misc]
 import ../core/[mark]
 import
@@ -17,18 +17,21 @@ import
     requirement,
   ]
 
-type Node*[F: TsuField or WaterField] = object ## Node of solution search tree.
-  nazoPuyo: NazoPuyo[F]
-  moveResult: MoveResult
+type
+  SolveAnswer* = Deque[Position] ## Nazo Puyo answer.
 
-  # cumulative data
-  disappearedColors: set[ColorPuyo]
-  disappearedCount: int
+  Node*[F: TsuField or WaterField] = object ## Node of solution search tree.
+    nazoPuyo: NazoPuyo[F]
+    moveResult: MoveResult
 
-  # number of color puyos that do not disappear yet
-  fieldCounts: array[ColorPuyo, int]
-  pairsCounts: array[ColorPuyo, int]
-  garbageCount: int
+    # cumulative data
+    disappearedColors: set[ColorPuyo]
+    disappearedCount: int
+
+    # number of color puyos that do not disappear yet
+    fieldCounts: array[ColorPuyo, int]
+    pairsCounts: array[ColorPuyo, int]
+    garbageCount: int
 
 # ------------------------------------------------
 # Constructor
@@ -119,9 +122,9 @@ func child[F: TsuField or WaterField](
       let puyo = ReqColorToPuyo[reqColor]
       result.fieldCounts[puyo] = result.nazoPuyo.puyoPuyo.field.puyoCount puyo
 
-    let putPair = node.nazoPuyo.puyoPuyo.operatingPairPosition.pair
-    result.pairsCounts[putPair.axis].dec
-    result.pairsCounts[putPair.child].dec
+    let movePair = node.nazoPuyo.puyoPuyo.pairsPositions.peekFirst.pair
+    result.pairsCounts[movePair.axis].dec
+    result.pairsCounts[movePair.child].dec
 
   # update garbageCount
   when reqKind in {
@@ -133,15 +136,15 @@ func child[F: TsuField or WaterField](
 
 func children*[F: TsuField or WaterField](
     node: Node[F], reqKind: static RequirementKind, reqColor: static RequirementColor
-): seq[Node[F]] {.inline.} =
+): seq[tuple[node: Node[F], position: Position]] {.inline.} =
   ## Returns the children of the node.
   let positions =
-    if node.nazoPuyo.puyoPuyo.operatingPairPosition.pair.isDouble:
+    if node.nazoPuyo.puyoPuyo.pairsPositions.peekFirst.pair.isDouble:
       node.nazoPuyo.puyoPuyo.field.validDoublePositions
     else:
       node.nazoPuyo.puyoPuyo.field.validPositions
 
-  result = positions.mapIt node.child(it, reqKind, reqColor)
+  result = positions.mapIt (node: node.child(it, reqKind, reqColor), position: it)
 
 # ------------------------------------------------
 # Accept
@@ -321,97 +324,133 @@ func canPrune*[F: TsuField or WaterField](
 # Solve
 # ------------------------------------------------
 
-func solve*[F: TsuField or WaterField](
+func solve[F: TsuField or WaterField](
     node: Node[F],
+    results: var seq[SolveAnswer],
+    moveCount: Positive,
     reqKind: static RequirementKind,
     reqColor: static RequirementColor,
     earlyStopping: static bool,
-): seq[PairsPositions] {.inline.} =
+) {.inline.} =
   ## Solves the nazo puyo.
+  ## Results are stored in `results`.
   if node.isAccepted(reqKind, reqColor):
-    return @[node.nazoPuyo.puyoPuyo.pairsPositions]
+    {.push warning[Uninit]: off.}
+    results.add initDeque[Position](moveCount)
+    {.pop.}
+    return
   if node.isLeaf or node.canPrune(reqKind, reqColor):
-    return @[]
+    return
 
-  result = @[]
-  for child in node.children(reqKind, reqColor):
-    result &= child.solve(reqKind, reqColor, earlyStopping)
+  for (child, pos) in node.children(reqKind, reqColor):
+    var childResults = newSeq[Deque[Position]](0)
+    child.solve childResults, moveCount, reqKind, reqColor, earlyStopping
+
+    for res in childResults.mitems:
+      res.addFirst pos
+
+    results &= childResults
 
     when earlyStopping:
-      if result.len > 1:
+      if results.len > 1:
         return
 
-func solve[F: TsuField or WaterField](
-    node: Node[F], reqKind: static RequirementKind, earlyStopping: static bool
-): seq[PairsPositions] {.inline.} =
+func solve*[F: TsuField or WaterField](
+    node: Node[F],
+    moveCount: Positive,
+    reqKind: static RequirementKind,
+    reqColor: static RequirementColor,
+    earlyStopping: static bool,
+): seq[SolveAnswer] {.inline.} =
   ## Solves the nazo puyo.
+  result = newSeq[Deque[Position]](0)
+  node.solve result, moveCount, reqKind, reqColor, earlyStopping
+
+func solve[F: TsuField or WaterField](
+    node: Node[F],
+    results: var seq[SolveAnswer],
+    moveCount: Positive,
+    reqKind: static RequirementKind,
+    earlyStopping: static bool,
+) {.inline.} =
+  ## Solves the nazo puyo.
+  ## Results are stored in `results`.
   assert reqKind in {
     RequirementKind.Clear, DisappearCount, DisappearCountMore, ChainClear,
     ChainMoreClear, DisappearCountSametime, DisappearCountMoreSametime, DisappearPlace,
     DisappearPlaceMore, DisappearConnect, DisappearConnectMore,
   }
 
-  result =
-    case node.nazoPuyo.requirement.color
-    of RequirementColor.All:
-      node.solve(reqKind, RequirementColor.All, earlyStopping)
-    of RequirementColor.Red:
-      node.solve(reqKind, RequirementColor.Red, earlyStopping)
-    of RequirementColor.Green:
-      node.solve(reqKind, RequirementColor.Green, earlyStopping)
-    of RequirementColor.Blue:
-      node.solve(reqKind, RequirementColor.Blue, earlyStopping)
-    of RequirementColor.Yellow:
-      node.solve(reqKind, RequirementColor.Yellow, earlyStopping)
-    of RequirementColor.Purple:
-      node.solve(reqKind, RequirementColor.Purple, earlyStopping)
-    of RequirementColor.Garbage:
-      node.solve(reqKind, RequirementColor.Garbage, earlyStopping)
-    of RequirementColor.Color:
-      node.solve(reqKind, RequirementColor.Color, earlyStopping)
+  case node.nazoPuyo.requirement.color
+  of RequirementColor.All:
+    node.solve results, moveCount, reqKind, RequirementColor.All, earlyStopping
+  of RequirementColor.Red:
+    node.solve results, moveCount, reqKind, RequirementColor.Red, earlyStopping
+  of RequirementColor.Green:
+    node.solve results, moveCount, reqKind, RequirementColor.Green, earlyStopping
+  of RequirementColor.Blue:
+    node.solve results, moveCount, reqKind, RequirementColor.Blue, earlyStopping
+  of RequirementColor.Yellow:
+    node.solve results, moveCount, reqKind, RequirementColor.Yellow, earlyStopping
+  of RequirementColor.Purple:
+    node.solve results, moveCount, reqKind, RequirementColor.Purple, earlyStopping
+  of RequirementColor.Garbage:
+    node.solve results, moveCount, reqKind, RequirementColor.Garbage, earlyStopping
+  of RequirementColor.Color:
+    node.solve results, moveCount, reqKind, RequirementColor.Color, earlyStopping
 
-func solve*[F: TsuField or WaterField](
-    node: Node[F], earlyStopping: static bool = false
-): seq[PairsPositions] {.inline.} =
+func solve[F: TsuField or WaterField](
+    node: Node[F],
+    results: var seq[SolveAnswer],
+    moveCount: Positive,
+    earlyStopping: static bool = false,
+) {.inline.} =
   ## Solves the nazo puyo.
+  ## Results are stored in `results`.
   const DummyColor = RequirementColor.All
 
-  result =
-    case node.nazoPuyo.requirement.kind
-    of RequirementKind.Clear:
-      node.solve(RequirementKind.Clear, earlyStopping)
-    of DisappearColor:
-      node.solve(DisappearColor, DummyColor, earlyStopping)
-    of DisappearColorMore:
-      node.solve(DisappearColorMore, DummyColor, earlyStopping)
-    of DisappearCount:
-      node.solve(DisappearCount, earlyStopping)
-    of DisappearCountMore:
-      node.solve(DisappearCountMore, earlyStopping)
-    of Chain:
-      node.solve(Chain, DummyColor, earlyStopping)
-    of ChainMore:
-      node.solve(ChainMore, DummyColor, earlyStopping)
-    of ChainClear:
-      node.solve(ChainClear, earlyStopping)
-    of ChainMoreClear:
-      node.solve(ChainMoreClear, earlyStopping)
-    of DisappearColorSametime:
-      node.solve(DisappearColorSametime, DummyColor, earlyStopping)
-    of DisappearColorMoreSametime:
-      node.solve(DisappearColorMoreSametime, DummyColor, earlyStopping)
-    of DisappearCountSametime:
-      node.solve(DisappearCountSametime, earlyStopping)
-    of DisappearCountMoreSametime:
-      node.solve(DisappearCountMoreSametime, earlyStopping)
-    of DisappearPlace:
-      node.solve(DisappearPlace, earlyStopping)
-    of DisappearPlaceMore:
-      node.solve(DisappearPlaceMore, earlyStopping)
-    of DisappearConnect:
-      node.solve(DisappearConnect, earlyStopping)
-    of DisappearConnectMore:
-      node.solve(DisappearConnectMore, earlyStopping)
+  case node.nazoPuyo.requirement.kind
+  of RequirementKind.Clear:
+    node.solve results, moveCount, RequirementKind.Clear, earlyStopping
+  of DisappearColor:
+    node.solve results, moveCount, DisappearColor, DummyColor, earlyStopping
+  of DisappearColorMore:
+    node.solve results, moveCount, DisappearColorMore, DummyColor, earlyStopping
+  of DisappearCount:
+    node.solve results, moveCount, DisappearCount, earlyStopping
+  of DisappearCountMore:
+    node.solve results, moveCount, DisappearCountMore, earlyStopping
+  of Chain:
+    node.solve results, moveCount, Chain, DummyColor, earlyStopping
+  of ChainMore:
+    node.solve results, moveCount, ChainMore, DummyColor, earlyStopping
+  of ChainClear:
+    node.solve results, moveCount, ChainClear, earlyStopping
+  of ChainMoreClear:
+    node.solve results, moveCount, ChainMoreClear, earlyStopping
+  of DisappearColorSametime:
+    node.solve results, moveCount, DisappearColorSametime, DummyColor, earlyStopping
+  of DisappearColorMoreSametime:
+    node.solve results, moveCount, DisappearColorMoreSametime, DummyColor, earlyStopping
+  of DisappearCountSametime:
+    node.solve results, moveCount, DisappearCountSametime, earlyStopping
+  of DisappearCountMoreSametime:
+    node.solve results, moveCount, DisappearCountMoreSametime, earlyStopping
+  of DisappearPlace:
+    node.solve results, moveCount, DisappearPlace, earlyStopping
+  of DisappearPlaceMore:
+    node.solve results, moveCount, DisappearPlaceMore, earlyStopping
+  of DisappearConnect:
+    node.solve results, moveCount, DisappearConnect, earlyStopping
+  of DisappearConnectMore:
+    node.solve results, moveCount, DisappearConnectMore, earlyStopping
+
+func solve*[F: TsuField or WaterField](
+    node: Node[F], moveCount: Positive, earlyStopping: static bool = false
+): seq[SolveAnswer] {.inline.} =
+  ## Solves the nazo puyo.
+  result = newSeq[Deque[Position]](0)
+  node.solve result, moveCount, earlyStopping
 
 # ------------------------------------------------
 # Node <-> string
@@ -464,10 +503,9 @@ func toStr(moveResult: MoveResult): string {.inline.} =
 
 func toStr*[F: TsuField or WaterField](node: Node[F]): string {.inline.} =
   ## Returns the string representation of the node.
-  var strs = newSeqOfCap[string](16)
+  var strs = newSeqOfCap[string](15)
 
   strs.add $node.nazoPuyo.toUriQuery
-  strs.add $node.nazoPuyo.puyoPuyo.operatingIndex
   strs.add node.moveResult.toStr
 
   strs.add node.disappearedColors.toStr
@@ -542,18 +580,16 @@ func parseNode*[F: TsuField or WaterField](str: string): Node[F] {.inline.} =
   let strs = str.split NodeStrSep
 
   result = initNode[F](parseNazoPuyo[F](strs[0], Pon2))
-  for _ in 1 .. strs[1].parseInt:
-    result.nazoPuyo.puyoPuyo.incrementOperatingIndex
-  result.moveResult = strs[2].parseMoveResult
+  result.moveResult = strs[1].parseMoveResult
 
-  result.disappearedColors = strs[3].parseColors
-  result.disappearedCount = strs[4].parseInt
+  result.disappearedColors = strs[2].parseColors
+  result.disappearedCount = strs[3].parseInt
 
-  var idx = 5
+  var idx = 4
   for color in ColorPuyo.low .. ColorPuyo.high:
     result.fieldCounts[color] = strs[idx].parseInt
     idx.inc
   for color in ColorPuyo.low .. ColorPuyo.high:
     result.pairsCounts[color] = strs[idx].parseInt
     idx.inc
-  result.garbageCount = strs[15].parseInt
+  result.garbageCount = strs[idx].parseInt

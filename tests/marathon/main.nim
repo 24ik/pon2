@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strutils, unittest]
+import std/[deques, strutils, unittest]
 import ../../src/pon2/app/[marathon {.all.}, nazopuyo, simulator]
 import ../../src/pon2/core/[cell, pair, pairposition]
 import ../../src/pon2/private/app/marathon/[common]
@@ -94,7 +94,7 @@ proc main*() =
     let marathon = newMarathon()
     marathon.loadData
 
-    marathon.simulator[].nazoPuyoWrap.get:
+    marathon.simulator.nazoPuyoWrap.get:
       doAssert wrappedNazoPuyo.puyoPuyo.pairsPositions.len == 0
 
       marathon.play(onlyMatched = false)

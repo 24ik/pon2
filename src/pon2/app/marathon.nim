@@ -1,5 +1,9 @@
 ## This module implements marathon mode.
 ##
+when defined(js):
+  ## See also the [backend-specific documentation](./simulator/web.html).
+  ##
+  discard
 
 # NOTE: `std/critbits` is incompatible with `strictCaseObjects` in Nim-2.2.0
 {.experimental: "inferGenericTypes".}
@@ -24,8 +28,8 @@ type
     pageCount*: Natural
     pageIndex*: Natural
 
-  MarathonObj = object ## Marathon manager.
-    simulator: ref Simulator
+  Marathon* = ref object ## Marathon manager.
+    simulator: Simulator
 
     allPairsStrs: Option[tuple[`seq`: seq[string], tree: CritBitTree[void]]]
     matchResult: MarathonMatchResult
@@ -34,19 +38,14 @@ type
 
     rng: Rand
 
-  Marathon* = ref MarathonObj ## Marathon manager.
-
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
-proc newMarathon*(rng = initRand()): Marathon {.inline.} =
+func newMarathon*(rng = initRand()): Marathon {.inline.} =
   ## Returns a new marathon manager without pairs' data loaded.
-  let simulator = new Simulator
-  simulator[] = initPuyoPuyo[TsuField]().initSimulator Play
-
-  result = Marathon(
-    simulator: simulator,
+  Marathon(
+    simulator: newSimulator[TsuField](Play),
     allPairsStrs: none tuple[`seq`: seq[string], tree: CritBitTree[void]],
     matchResult: MarathonMatchResult(strings: @[], pageCount: 0, pageIndex: 0),
     focusSimulator: false,
@@ -91,7 +90,7 @@ else:
 # Property
 # ------------------------------------------------
 
-func simulator*(self: Marathon): ref Simulator {.inline.} =
+func simulator*(self: Marathon): Simulator {.inline.} =
   ## Returns the simulator.
   self.simulator
 
@@ -296,8 +295,8 @@ proc match*(self: Marathon, prefix: string) {.inline.} =
 
 proc play(self: Marathon, pairsStr: string) {.inline.} =
   ## Plays a marathon mode with the given pairs.
-  self.simulator[].reset
-  self.simulator[].nazoPuyoWrap.get:
+  self.simulator.reset
+  self.simulator.nazoPuyoWrap.get:
     wrappedNazoPuyo.puyoPuyo.pairsPositions = pairsStr.toPairsPositions
 
   self.focusSimulator = true
@@ -333,88 +332,6 @@ proc operate*(self: Marathon, event: KeyEvent): bool {.inline.} =
     return true
 
   if self.focusSimulator:
-    return self.simulator[].operate event
+    return self.simulator.operate event
 
   result = false
-
-# ------------------------------------------------
-# Backend-specific Implementation
-# ------------------------------------------------
-
-when defined(js):
-  import std/[strformat]
-  import karax/[karax, karaxdsl, kdom, vdom]
-  import
-    ../private/app/marathon/web/
-      [controller, pagination, searchbar, searchresult, simulator as simulatorModule]
-
-  # ------------------------------------------------
-  # JS - Keyboard Handler
-  # ------------------------------------------------
-
-  proc runKeyboardEventHandler*(
-      self: Marathon, event: KeyEvent
-  ): bool {.inline, discardable.} =
-    ## Runs the keyboard event handler.
-    ## Returns `true` if any action is executed.
-    result = self.operate event
-    if result and not kxi.surpressRedraws:
-      kxi.redraw
-
-  proc runKeyboardEventHandler*(
-      self: Marathon, event: Event
-  ): bool {.inline, discardable.} =
-    ## Runs the keyboard event handler.
-    # assert event of KeyboardEvent # HACK: somehow this fails
-
-    result = self.runKeyboardEventHandler cast[KeyboardEvent](event).toKeyEvent
-    if result:
-      event.preventDefault
-
-  func newKeyboardEventHandler*(self: Marathon): (event: Event) -> void {.inline.} =
-    ## Returns the keyboard event handler.
-    (event: Event) => (discard self.runKeyboardEventHandler event)
-
-  # ------------------------------------------------
-  # JS - Node
-  # ------------------------------------------------
-
-  const
-    SimulatorIdPrefix = "pon2-marathon-simulator-"
-    SearchBarIdPrefix = "pon2-marathon-searchbar-"
-
-  proc newMarathonNode(self: Marathon, id: string): VNode {.inline.} =
-    ## Returns the node of marathon manager.
-    buildHtml(tdiv(class = "columns is-mobile")):
-      tdiv(class = "column is-narrow"):
-        tdiv(class = "block"):
-          self.newMarathonPlayControllerNode
-        tdiv(class = "block"):
-          self.newMarathonSimulatorNode &"{SimulatorIdPrefix}{id}"
-      tdiv(class = "column is-narrow"):
-        tdiv(class = "block"):
-          self.newMarathonSearchBarNode &"{SearchBarIdPrefix}{id}"
-        if not isMobile():
-          tdiv(class = "block"):
-            self.newMarathonFocusControllerNode
-        tdiv(class = "block"):
-          self.newMarathonPaginationNode
-        if self.matchResult.strings.len > 0:
-          tdiv(class = "block"):
-            self.newMarathonSearchResultNode
-
-  proc newMarathonNode*(
-      self: Marathon, setKeyHandler = true, wrapSection = true, id = ""
-  ): VNode {.inline.} =
-    ## Returns the node of marathon manager.
-    ## `id` is shared with other node-creating procedures and need to be unique.
-    if setKeyHandler:
-      document.onkeydown = self.newKeyboardEventHandler
-
-    let node = self.newMarathonNode id
-
-    if wrapSection:
-      result = buildHtml(section(class = "section")):
-        node
-    else:
-      result = node
