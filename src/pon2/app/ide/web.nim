@@ -49,6 +49,7 @@ const
   AnswerSimulatorIdPrefix = "pon2-ide-answersimulator-"
   SettingsIdPrefix = "pon2-ide-settings-"
   ShareIdPrefix = "pon2-ide-share-"
+  AnswerShareIdPrefix = "pon2-ide-share-answer-"
 
 proc newIdeNode(self: Ide, id: string): VNode {.inline.} =
   ## Returns the IDE node without the external section.
@@ -63,7 +64,7 @@ proc newIdeNode(self: Ide, id: string): VNode {.inline.} =
       tdiv(class = "block"):
         simulatorNode
       tdiv(class = "block"):
-        self.newShareNode &"{ShareIdPrefix}{id}"
+        self.newShareNode(&"{ShareIdPrefix}{id}", false)
     if self.simulator.mode in {PlayEditor, Edit} and self.simulator.kind == Nazo:
       tdiv(class = "column is-narrow"):
         section(class = "section"):
@@ -79,6 +80,8 @@ proc newIdeNode(self: Ide, id: string): VNode {.inline.} =
             if self.answerData.pairsPositionsSeq.len > 0:
               tdiv(class = "block"):
                 self.newAnswerSimulatorNode &"{AnswerSimulatorIdPrefix}{id}"
+              tdiv(class = "block"):
+                self.newShareNode(&"{AnswerShareIdPrefix}{id}", true)
 
 proc newIdeNode*(
     self: Ide, setKeyHandler = true, wrapSection = true, id = ""

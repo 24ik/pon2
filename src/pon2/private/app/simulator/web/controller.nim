@@ -34,7 +34,7 @@ proc newControllerNode*(simulator: Simulator): VNode {.inline.} =
           class = "button is-light", onclick = () => simulator.forward(skip = true)
         ):
           span(class = "icon"):
-            italic(class = "fa-solid fa-square-caret-right")
+            italic(class = "fa-solid fa-angles-down")
       tdiv(class = "buttons is-centered mb-3"):
         button(class = "button is-light", onclick = () => simulator.reset):
           span(class = "icon"):
