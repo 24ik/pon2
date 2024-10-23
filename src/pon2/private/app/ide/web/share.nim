@@ -56,14 +56,16 @@ func newDownloadHandler(id: string, withPositions: bool): () -> void =
 
   result = handler
 
-proc toPlayUri(ide: Ide, withPositions: bool, editor = false): Uri {.inline.} =
+proc toPlayUri(
+    ide: Ide, useAnswer: bool, withPositions: bool, editor = false
+): Uri {.inline.} =
   ## Returns the IDE URI for playing.
-  let ide2 = ide.simulator.copy.newIde
+  let ide2 = (if useAnswer: ide.answerSimulator else: ide.simulator).copy.newIde
   ide2.simulator.mode = if editor: PlayEditor else: Play
 
   result = ide2.toUri withPositions
 
-proc newShareNode*(ide: Ide, id: string): VNode {.inline.} =
+proc newShareNode*(ide: Ide, id: string, useAnswer: bool): VNode {.inline.} =
   ## Returns the share node.
   let
     urlCopyButtonId = &"{UrlCopyButtonIdPrefix}{id}"
@@ -71,8 +73,10 @@ proc newShareNode*(ide: Ide, id: string): VNode {.inline.} =
     editorUrlCopyButtonId = &"{EditorUrlCopyButtonIdPrefix}{id}"
     editorPosUrlCopyButtonId = &"{EditorPosUrlCopyButtonIdPrefix}{id}"
 
+    sim = if useAnswer: ide.answerSimulator else: ide.simulator
+
   result = buildHtml(tdiv):
-    if ide.simulator.mode != View:
+    if sim.mode != View:
       tdiv(class = "block"):
         span(class = "icon"):
           italic(class = "fa-brands fa-x-twitter")
@@ -107,7 +111,8 @@ proc newShareNode*(ide: Ide, id: string): VNode {.inline.} =
             id = urlCopyButtonId.kstring,
             class = "button is-size-7",
             onclick = newCopyButtonHandler(
-              () => $ide.toPlayUri(withPositions = false), urlCopyButtonId
+              () => $ide.toPlayUri(useAnswer = useAnswer, withPositions = false),
+              urlCopyButtonId,
             ),
           ):
             text "操作無"
@@ -115,11 +120,12 @@ proc newShareNode*(ide: Ide, id: string): VNode {.inline.} =
             id = posUrlCopyButtonId.kstring,
             class = "button is-size-7",
             onclick = newCopyButtonHandler(
-              () => $ide.toPlayUri(withPositions = true), posUrlCopyButtonId
+              () => $ide.toPlayUri(useAnswer = useAnswer, withPositions = true),
+              posUrlCopyButtonId,
             ),
           ):
             text "操作有"
-    if ide.simulator.mode != SimulatorMode.Play:
+    if sim.mode != SimulatorMode.Play:
       tdiv(class = "block"):
         text "編集者URLコピー"
         tdiv(class = "buttons"):
@@ -127,7 +133,10 @@ proc newShareNode*(ide: Ide, id: string): VNode {.inline.} =
             id = editorUrlCopyButtonId.kstring,
             class = "button is-size-7",
             onclick = newCopyButtonHandler(
-              () => $ide.toPlayUri(withPositions = false, editor = true),
+              () =>
+                $ide.toPlayUri(
+                  useAnswer = useAnswer, withPositions = false, editor = true
+                ),
               editorUrlCopyButtonId,
             ),
           ):
@@ -136,7 +145,10 @@ proc newShareNode*(ide: Ide, id: string): VNode {.inline.} =
             id = editorPosUrlCopyButtonId.kstring,
             class = "button is-size-7",
             onclick = newCopyButtonHandler(
-              () => $ide.toPlayUri(withPositions = true, editor = true),
+              () =>
+                $ide.toPlayUri(
+                  useAnswer = useAnswer, withPositions = true, editor = true
+                ),
               editorPosUrlCopyButtonId,
             ),
           ):
@@ -146,19 +158,19 @@ proc newShareNode*(ide: Ide, id: string): VNode {.inline.} =
       style = style(StyleAttr.display, kstring"none"),
     ):
       tdiv(class = "block"):
-        ide.simulator.newRequirementNode(true, id)
+        sim.newRequirementNode(true, id)
       tdiv(class = "block"):
         tdiv(class = "columns is-mobile is-variable is-1"):
           tdiv(class = "column is-narrow"):
             tdiv(class = "block"):
-              ide.simulator.newFieldNode(true)
+              sim.newFieldNode(true)
             tdiv(class = "block"):
-              ide.simulator.newMessagesNode
+              sim.newMessagesNode
           tdiv(id = kstring &"{DisplayPairDivIdPrefix}{id}", class = "column is-narrow"):
             tdiv(class = "block"):
-              ide.simulator.newPairsNode(true, false)
+              sim.newPairsNode(true, false)
           tdiv(
             id = kstring &"{DisplayPairPosDivIdPrefix}{id}", class = "column is-narrow"
           ):
             tdiv(class = "block"):
-              ide.simulator.newPairsNode(true, true)
+              sim.newPairsNode(true, true)
