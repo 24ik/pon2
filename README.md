@@ -40,11 +40,7 @@ nimble install pon2 -p:-d:danger -p:-d:pon2.avx2=<bool> -p:-d:pon2.bmi2=<bool>
 
 ## Usage
 
-See the documentations:
-- [Solver](./docs/solve.md)
-- [Generator](./docs/generate.md)
-- [Permuter](./docs/permute.md)
-- [IDE](./docs/ide.md)
+Run `pon2 -h`.
 
 ## For Developers
 
