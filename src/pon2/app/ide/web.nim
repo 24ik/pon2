@@ -65,7 +65,7 @@ proc newIdeNode(self: Ide, id: string): VNode {.inline.} =
         simulatorNode
       tdiv(class = "block"):
         self.newShareNode(&"{ShareIdPrefix}{id}", false)
-    if self.simulator.mode in {PlayEditor, Edit} and self.simulator.kind == Nazo:
+    if self.simulator.mode != Play and self.simulator.kind == Nazo:
       tdiv(class = "column is-narrow"):
         section(class = "section"):
           tdiv(class = "block"):
@@ -82,6 +82,8 @@ proc newIdeNode(self: Ide, id: string): VNode {.inline.} =
                 self.newAnswerSimulatorNode &"{AnswerSimulatorIdPrefix}{id}"
               tdiv(class = "block"):
                 self.newShareNode(&"{AnswerShareIdPrefix}{id}", true)
+    tdiv(class = "column is-narrow"):
+      self.newDisplayNode &"{ShareIdPrefix}{id}"
 
 proc newIdeNode*(
     self: Ide, setKeyHandler = true, wrapSection = true, id = ""

@@ -32,7 +32,7 @@ proc downloadDisplayImage(
     &"""
 const div = document.getElementById('{DisplayDivIdPrefix}' + (#));
 div.style.display = 'block';
-html2canvas(div).then((canvas) => {{
+html2canvas(div, {{scale: 3}}).then((canvas) => {{
   div.style.display = 'none';
 
   const element = document.createElement('a');
@@ -76,7 +76,7 @@ proc newShareNode*(ide: Ide, id: string, useAnswer: bool): VNode {.inline.} =
     sim = if useAnswer: ide.answerSimulator else: ide.simulator
 
   result = buildHtml(tdiv):
-    if sim.mode != View:
+    if not useAnswer:
       tdiv(class = "block"):
         span(class = "icon"):
           italic(class = "fa-brands fa-x-twitter")
@@ -153,24 +153,30 @@ proc newShareNode*(ide: Ide, id: string, useAnswer: bool): VNode {.inline.} =
             ),
           ):
             text "操作有"
+
+proc newDisplayNode*(ide: Ide, id: string): VNode {.inline.} =
+  ## Returns the display node for image saving.
+  ## `id` should be the same as the one used in `newShareNode`.
+  buildHtml(
     tdiv(
       id = kstring &"{DisplayDivIdPrefix}{id}",
       style = style(StyleAttr.display, kstring"none"),
-    ):
-      tdiv(class = "block"):
-        sim.newRequirementNode(true, id)
-      tdiv(class = "block"):
-        tdiv(class = "columns is-mobile is-variable is-1"):
-          tdiv(class = "column is-narrow"):
-            tdiv(class = "block"):
-              sim.newFieldNode(true)
-            tdiv(class = "block"):
-              sim.newMessagesNode
-          tdiv(id = kstring &"{DisplayPairDivIdPrefix}{id}", class = "column is-narrow"):
-            tdiv(class = "block"):
-              sim.newPairsNode(true, false)
-          tdiv(
-            id = kstring &"{DisplayPairPosDivIdPrefix}{id}", class = "column is-narrow"
-          ):
-            tdiv(class = "block"):
-              sim.newPairsNode(true, true)
+    )
+  ):
+    tdiv(class = "block"):
+      ide.simulator.newRequirementNode(true, id)
+    tdiv(class = "block"):
+      tdiv(class = "columns is-mobile is-variable is-1"):
+        tdiv(class = "column is-narrow"):
+          tdiv(class = "block"):
+            ide.simulator.newFieldNode(true)
+          tdiv(class = "block"):
+            ide.simulator.newMessagesNode
+        tdiv(id = kstring &"{DisplayPairDivIdPrefix}{id}", class = "column is-narrow"):
+          tdiv(class = "block"):
+            ide.simulator.newPairsNode(true, false)
+        tdiv(
+          id = kstring &"{DisplayPairPosDivIdPrefix}{id}", class = "column is-narrow"
+        ):
+          tdiv(class = "block"):
+            ide.simulator.newPairsNode(true, true)

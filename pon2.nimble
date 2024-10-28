@@ -1,6 +1,6 @@
 # Package
 
-version = "0.23.2"
+version = "0.23.3"
 author = "Keisuke Izumiya"
 description = "Application for Puyo Puyo and Nazo Puyo"
 license = "Apache-2.0"
@@ -63,7 +63,7 @@ task web, "Make Web Pages":
     var cmds = @["nim", "js"] & options.toSeq
     if danger:
       cmds.add "-d:danger"
-    cmds &= [&"-o:{rawJs}", &"{src}"]
+    cmds &= [&"-o:{rawJs}", src]
 
     exec cmds.join " "
 
@@ -71,7 +71,7 @@ task web, "Make Web Pages":
       var cmds2 = @["npx", "--yes", "google-closure-compiler"]
       if not verbose:
         cmds2 &= ["-W", "QUIET"]
-      cmds2 &= ["--js", &"{rawJs}", "--js_output_file", &"{dst}"]
+      cmds2 &= ["--js", rawJs, "--js_output_file", dst]
 
       exec cmds2.join " "
     else:

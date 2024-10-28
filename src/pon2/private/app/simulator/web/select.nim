@@ -23,6 +23,7 @@ proc newSelectNode*(simulator: Simulator): VNode {.inline.} =
     playEditorButtonClass =
       if simulator.mode == PlayEditor: SelectedClass else: NotSelectedClass
     editButtonClass = if simulator.mode == Edit: SelectedClass else: NotSelectedClass
+    viewButtonClass = if simulator.mode == View: SelectedClass else: NotSelectedClass
 
     tsuButtonClass = if simulator.rule == Tsu: SelectedClass else: NotSelectedClass
     waterButtonClass = if simulator.rule == Water: SelectedClass else: NotSelectedClass
@@ -37,6 +38,9 @@ proc newSelectNode*(simulator: Simulator): VNode {.inline.} =
       button(class = editButtonClass, onclick = () => (simulator.mode = Edit)):
         span(class = "icon"):
           italic(class = "fa-solid fa-pen-to-square")
+      button(class = viewButtonClass, onclick = () => (simulator.mode = View)):
+        span(class = "icon"):
+          italic(class = "fa-solid fa-circle-play")
     if simulator.mode == Edit:
       tdiv(class = "buttons has-addons"):
         button(class = tsuButtonClass, onclick = () => (simulator.rule = Tsu)):
