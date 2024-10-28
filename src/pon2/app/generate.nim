@@ -347,7 +347,7 @@ proc generate*[F: TsuField or WaterField](
   ## If generation fails, `GenerateError` will be raised.
   ## `parallelCount` will be ignored on JS backend.
   var rng = initRand()
-  generate[F](rng.rand int, parallelCount)
+  result = generate[F](option, rng.rand int, parallelCount)
 
 # ------------------------------------------------
 # Generate - Wrap
@@ -375,4 +375,4 @@ proc generate*(
   ## If generation fails, `GenerateError` will be raised.
   ## `parallelCount` will be ignored on JS backend.
   var rng = initRand()
-  option.generate(rule, rng.rand int, parallelCount)
+  result = option.generate(rule, rng.rand int, parallelCount)
