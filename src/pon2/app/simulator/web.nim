@@ -30,7 +30,7 @@ import
 
 const ReqIdPrefix = "pon2-simulator-req-"
 
-proc newSimulatorNode(self: Simulator, id: string): VNode {.inline.} =
+proc newSimulatorNode(self: Simulator, id: string, hideSelect: bool): VNode {.inline.} =
   ## Returns the node without the external section.
   buildHtml(tdiv):
     tdiv(class = "block"):
@@ -46,7 +46,7 @@ proc newSimulatorNode(self: Simulator, id: string): VNode {.inline.} =
           if self.mode != Edit:
             tdiv(class = "block"):
               self.newMessagesNode
-          if self.mode in {PlayEditor, Edit}:
+          if not hideSelect and self.mode != Play:
             tdiv(class = "block"):
               self.newSelectNode
         if self.mode != Edit:
@@ -62,9 +62,11 @@ proc newSimulatorNode(self: Simulator, id: string): VNode {.inline.} =
           tdiv(class = "block"):
             self.newPairsNode
 
-proc newSimulatorNode*(self: Simulator, wrapSection = true, id = ""): VNode {.inline.} =
+proc newSimulatorNode*(
+    self: Simulator, wrapSection = true, id = "", hideSelect = false
+): VNode {.inline.} =
   ## Returns the simulator node.
-  let node = self.newSimulatorNode id
+  let node = self.newSimulatorNode(id, hideSelect)
 
   if wrapSection:
     result = buildHtml(section(class = "section")):

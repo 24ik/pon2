@@ -25,18 +25,12 @@ const
 # ------------------------------------------------
 
 when defined(js):
-  import std/[strutils]
+  import std/[strformat, strutils]
   import karax/[kbase]
 
   func toColorCode*(color: Color): kstring {.inline.} =
     ## Returns the color code (including '#') converted from the color.
-    kstring join [
-      "#",
-      color.red.toHex(2),
-      color.green.toHex(2),
-      color.blue.toHex(2),
-      color.alpha.toHex(2),
-    ]
+    kstring &"#{color.red.toHex 2}{color.green.toHex 2}{color.blue.toHex 2}{color.alpha.toHex 2}"
 else:
   import nigui
 

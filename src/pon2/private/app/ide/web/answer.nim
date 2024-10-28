@@ -14,4 +14,4 @@ import ../../../../app/simulator/[web]
 
 proc newAnswerSimulatorNode*(ide: Ide, id: string): VNode {.inline.} =
   ## Returns the answer simulator node.
-  ide.answerSimulator.newSimulatorNode(wrapSection = false, id = id)
+  ide.answerSimulator.newSimulatorNode(wrapSection = false, id = id, hideSelect = true)
