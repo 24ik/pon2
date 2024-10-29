@@ -432,7 +432,7 @@ func disappear*(
     yellowPurple = self.yellowPurple.disappeared
 
     color = sum(red, greenBlue, yellowPurple).exist
-    garbage = color.expanded * self.hardGarbage
+    garbage = color.expanded * self.hardGarbage.visible
 
   result = DisappearResult(
     red: red,

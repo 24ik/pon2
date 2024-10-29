@@ -251,6 +251,30 @@ r.....
   # Disappear
   # ------------------------------------------------
 
+  # disappear
+  block:
+    var field = initField[TsuField]()
+    field[0, 5] = Green
+    field[1, 5] = Green
+    field[2, 5] = Green
+    field[3, 5] = Green
+    field[0, 4] = Garbage
+    field[1, 4] = Garbage
+    check field.colorCount == 4
+    check field.garbageCount == 2
+
+    field.disappear
+    check field.colorCount == 4
+    check field.garbageCount == 2
+
+    field[4, 5] = Green
+    check field.colorCount == 5
+    check field.garbageCount == 2
+
+    field.disappear
+    check field.colorCount == 1
+    check field.garbageCount == 1
+
   # willDisappear
   block:
     var field = initField[TsuField]()
