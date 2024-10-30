@@ -10,6 +10,7 @@
 /src/htmldocs/
 
 /www/assets/
+/www/docs/simulator/index.min.js
 /www/docs/native/
 /www/docs/web/
 /www/marathon/index.min.js

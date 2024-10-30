@@ -13,7 +13,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-const Pon2Fqdn {.define: "pon2.fqdn".} = "24ik.github.io"
+const Pon2Fqdn* {.define: "pon2.fqdn".} = "24ik.github.io"
 
 type IdeFqdn* {.pure.} = enum
   ## FQDN of the web IDE.

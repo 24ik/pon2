@@ -79,8 +79,9 @@ when defined(pon2.worker):
 
 else:
   import std/[strformat]
-  import karax/[karaxdsl, vdom]
+  import karax/[kbase, karaxdsl, vdom]
   import ../[misc]
+  import ../../core/[fqdn]
 
   # ------------------------------------------------
   # Main
@@ -89,8 +90,12 @@ else:
   proc newFooterNode(): VNode {.inline.} =
     ## Returns the footer node.
     buildHtml(footer(class = "footer")):
-      tdiv(class = "content has-text-centered"):
-        text &"Pon!通 Version {Pon2Version}"
+      tdiv(class = "columns"):
+        tdiv(class = "column is-narrow"):
+          text &"Pon!通 Version {Pon2Version}"
+        tdiv(class = "column is-narrow"):
+          a(href = kstring &"https://{Pon2Fqdn}/pon2/docs/simulator/"):
+            text "操作方法"
 
   when defined(pon2.marathon):
     import std/[sugar]
@@ -121,7 +126,6 @@ else:
     import karax/[karax]
     import ../../app/[ide]
     import ../../app/ide/[web]
-    import ../../core/[fqdn]
 
     # ------------------------------------------------
     # Main - IDE
