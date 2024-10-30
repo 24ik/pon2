@@ -1,6 +1,6 @@
 # Package
 
-version = "0.23.8"
+version = "0.23.9"
 author = "Keisuke Izumiya"
 description = "Application for Puyo Puyo and Nazo Puyo"
 license = "Apache-2.0"
@@ -16,7 +16,7 @@ requires "nim ^= 2.2.0"
 requires "docopt ^= 0.7.1"
 requires "karax ^= 1.3.3"
 requires "nigui ^= 0.2.8"
-requires "nimsimd ^= 1.2.13"
+requires "nimsimd ^= 1.3.0"
 requires "puppy ^= 2.1.2"
 requires "suru ^= 0.3.2"
 
@@ -38,13 +38,6 @@ task benchmark, "Benchmarking":
     Bmi2 {.define: "pon2.bmi2".} = true
 
   exec &"nim c -r -d:pon2.avx2={Avx2} -d:pon2.bmi2={Bmi2} " & "benchmark/main.nim"
-
-task documentation, "Make Documentation":
-  rmDir "www/docs/native"
-  exec &"nim doc --project --outdir:www/docs/native src/pon2.nim"
-
-  rmDir "www/docs/web"
-  exec &"nim doc --project --outdir:www/docs/web --backend:js src/pon2.nim"
 
 task web, "Make Web Pages":
   const
@@ -85,7 +78,11 @@ task web, "Make Web Pages":
   "src/pon2.nim".compile "www/marathon/index.min.js", "-d:pon2.marathon", "-d:pon2.assets.web=../assets"
 
   # documentation
-  exec "nimble -y documentation"
+  rmDir "www/docs/native"
+  exec &"nim doc --project --outdir:www/docs/native src/pon2.nim"
+  rmDir "www/docs/web"
+  exec &"nim doc --project --outdir:www/docs/web --backend:js src/pon2.nim"
+  "www/docs/simulator/main.nim".compile "www/docs/simulator/index.min.js"
 
   # assets
   cpDir "assets", "www/assets"

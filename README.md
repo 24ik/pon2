@@ -40,7 +40,15 @@ nimble install pon2 -p:-d:danger -p:-d:pon2.avx2=<bool> -p:-d:pon2.bmi2=<bool>
 
 ## Usage
 
+### CLI or Native Application
+
 Run `pon2 -h`.
+
+### Web Application
+
+See the documentations:
+
+- [Simulator](https://24ik.github.io/pon2/docs/simulator/)
 
 ## For Developers
 
