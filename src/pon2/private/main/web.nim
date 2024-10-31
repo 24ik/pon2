@@ -94,7 +94,11 @@ else:
         tdiv(class = "column is-narrow"):
           text &"Pon!通 Version {Pon2Version}"
         tdiv(class = "column is-narrow"):
-          a(href = kstring &"https://{Pon2Fqdn}/pon2/docs/simulator/"):
+          a(
+            href = kstring &"https://{Pon2Fqdn}/pon2/docs/simulator/",
+            target = "_blank",
+            rel = "noopener noreferrer",
+          ):
             text "操作方法"
 
   when defined(pon2.marathon):
