@@ -257,40 +257,41 @@ const Document =
 * IDE
 
 Usage:
-  pon2 (solve | s) <question> [-bB] [-h | --help]
-  pon2 (generate | g) [-bBdD] [options] [-h | --help]
-  pon2 (permute | p) <question> [(-f <>)... -bBdD] [-h | --help]
-  pon2 [<uri>] [-h | --help]
+  pon2 (solve | s) <question> [-bB] [-h | --help] [-V | --version]
+  pon2 (generate | g) [-bBdD] [options] [-h | --help] [-V | --version]
+  pon2 (permute | p) <question> [(-f <>)... -bBdD] [-h | --help] [-V | --version]
+  pon2 [<uri>] [-h | --help] [-V | --version]
 
 Options:
-  -h --help   このヘルプ画面を表示する．
+  -h --help      このヘルプ画面を表示する．
+  -V --version   バージョン情報を表示する．
 
-  -b          解をブラウザで開く．
-  -B          問題をブラウザで開く．
+  -b             解をブラウザで開く．
+  -B             問題をブラウザで開く．
 
-  -d          最終手のゾロを許可．
-  -D          ゾロを許可．                [default: true]
+  -d             最終手のゾロを許可．
+  -D             ゾロを許可．                [default: true]
 
-  -n <>       生成数．                    [default: 5]
-  -r <>       ルール．                    [default: 0]
-  -m <>       手数．                      [default: 3]
-  --rk <>     クリア条件．                [default: 5]
-  --rc <>     クリア条件の色．            [default: 0]
-  --rn <>     クリア条件の数．            [default: 6]
-  -c <>       色数．                      [default: 3]
-  -H <>       各列の高さの割合．          [default: 0++++0]
-  --nc <>     色ぷよの数．
-  --ng <>     お邪魔ぷよの数．            [default: 2]
-  -2 <>       2連結の数．
-  --2v <>     縦2連結の数．
-  --2h <>     横2連結の数．
-  -3 <>       3連結の数．
-  --3v <>     縦3連結の数．
-  --3h <>     横3連結の数．
-  --3l <>     L字3連結の数．
-  -s <>       シード．
+  -n <>          生成数．                    [default: 5]
+  -r <>          ルール．                    [default: 0]
+  -m <>          手数．                      [default: 3]
+  --rk <>        クリア条件．                [default: 5]
+  --rc <>        クリア条件の色．            [default: 0]
+  --rn <>        クリア条件の数．            [default: 6]
+  -c <>          色数．                      [default: 3]
+  -H <>          各列の高さの割合．          [default: 0++++0]
+  --nc <>        色ぷよの数．
+  --ng <>        お邪魔ぷよの数．            [default: 2]
+  -2 <>          2連結の数．
+  --2v <>        縦2連結の数．
+  --2h <>        横2連結の数．
+  -3 <>          3連結の数．
+  --3v <>        縦3連結の数．
+  --3h <>        横3連結の数．
+  --3l <>        L字3連結の数．
+  -s <>          シード．
 
-  -f <>...    何手目を固定するか．
+  -f <>...       何手目を固定するか．
 
 非自明なオプションの指定方法は以下の通り．
 

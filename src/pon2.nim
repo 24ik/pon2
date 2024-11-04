@@ -44,11 +44,14 @@ when isMainModule:
       import karax/[karax]
       setRenderer ideRenderer
   else:
-    import std/[tables]
+    import std/[strformat, tables]
+    import ./pon2/private/[misc]
     import ./pon2/private/main/[native]
 
     let args = getCommandLineArguments()
-    if args["solve"] or args["s"]:
+    if args["-V"] or args["--version"]:
+      echo &"Pon! Tsu Version {Pon2Version}"
+    elif args["solve"] or args["s"]:
       args.runSolver
     elif args["generate"] or args["g"]:
       args.runGenerator
