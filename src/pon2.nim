@@ -49,7 +49,7 @@ when isMainModule:
     import ./pon2/private/main/[native]
 
     let args = getCommandLineArguments()
-    if args["-V"] or args["--version"]:
+    if args["--version"]:
       echo &"Pon! Tsu Version {Pon2Version}"
     elif args["solve"] or args["s"]:
       args.runSolver
