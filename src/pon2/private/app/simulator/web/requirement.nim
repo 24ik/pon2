@@ -53,14 +53,10 @@ func newNumberHandler(simulator: Simulator, id: string): () -> void =
     (simulator.requirementNumber = id.kstring.getSelectedNumberIndex.RequirementNumber)
 
 proc newRequirementNode*(
-    simulator: Simulator, displayMode = false, id: string
+    simulator: Simulator, id: string, displayMode = false
 ): VNode {.inline.} =
   ## Returns the requirement node.
   ## `id` is shared with other node-creating procedures and need to be unique.
-  if simulator.kind == Regular:
-    return buildHtml(tdiv):
-      discard
-
   let req = simulator.nazoPuyoWrap.get:
     wrappedNazoPuyo.requirement
 

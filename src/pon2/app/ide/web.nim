@@ -12,8 +12,7 @@ import std/[strformat, sugar]
 import karax/[karax, karaxdsl, kdom, vdom]
 import ../[ide, key, simulator]
 import ../simulator/[web]
-import
-  ../../private/app/ide/web/[answer, controller, pagination, settings, share, progress]
+import ../../private/app/ide/web/[answer, controller, pagination, settings, progress]
 
 # ------------------------------------------------
 # Keyboard Handler
@@ -48,23 +47,16 @@ const
   MainSimulatorIdPrefix = "pon2-ide-mainsimulator-"
   AnswerSimulatorIdPrefix = "pon2-ide-answersimulator-"
   SettingsIdPrefix = "pon2-ide-settings-"
-  ShareIdPrefix = "pon2-ide-share-"
-  AnswerShareIdPrefix = "pon2-ide-share-answer-"
 
 proc newIdeNode(self: Ide, id: string): VNode {.inline.} =
   ## Returns the IDE node without the external section.
-  let
-    simulatorNode = self.simulator.newSimulatorNode(
-      wrapSection = false, id = &"{MainSimulatorIdPrefix}{id}"
-    )
-    settingsId = &"{SettingsIdPrefix}{id}"
+  let settingsId = &"{SettingsIdPrefix}{id}"
 
   result = buildHtml(tdiv(class = "columns is-mobile is-variable is-1")):
     tdiv(class = "column is-narrow"):
-      tdiv(class = "block"):
-        simulatorNode
-      tdiv(class = "block"):
-        self.newShareNode(&"{ShareIdPrefix}{id}", false)
+      self.simulator.newSimulatorNode(
+        wrapSection = false, id = &"{MainSimulatorIdPrefix}{id}"
+      )
     if self.simulator.mode != Play and self.simulator.kind == Nazo:
       tdiv(class = "column is-narrow"):
         section(class = "section"):
@@ -80,10 +72,6 @@ proc newIdeNode(self: Ide, id: string): VNode {.inline.} =
             if self.answerData.pairsPositionsSeq.len > 0:
               tdiv(class = "block"):
                 self.newAnswerSimulatorNode &"{AnswerSimulatorIdPrefix}{id}"
-              tdiv(class = "block"):
-                self.newShareNode(&"{AnswerShareIdPrefix}{id}", true)
-    tdiv(class = "column is-narrow"):
-      self.newDisplayNode &"{ShareIdPrefix}{id}"
 
 proc newIdeNode*(
     self: Ide, setKeyHandler = true, wrapSection = true, id = ""

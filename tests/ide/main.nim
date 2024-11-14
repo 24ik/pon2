@@ -30,8 +30,8 @@ proc main*() =
       mainQuery = "field=t-rrb&pairs=rgby12&req-kind=0&req-color=7"
       mainQueryNoPos = "field=t-rrb&pairs=rgby&req-kind=0&req-color=7"
       kindModeQuery = "kind=n&mode=e"
-      uriStr = &"https://{Pon2}{IdeUriPath}?{kindModeQuery}&{mainQuery}"
-      uriStrNoPos = &"https://{Pon2}{IdeUriPath}?{kindModeQuery}&{mainQueryNoPos}"
+      uriStr = &"https://{Pon2}{SimulatorUriPath}?{kindModeQuery}&{mainQuery}"
+      uriStrNoPos = &"https://{Pon2}{SimulatorUriPath}?{kindModeQuery}&{mainQueryNoPos}"
       ide = uriStr.parseUri.parseIde
       nazo = parseNazoPuyo[TsuField](mainQuery, Pon2)
 

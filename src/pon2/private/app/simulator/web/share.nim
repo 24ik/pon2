@@ -10,20 +10,20 @@
 
 import std/[strformat, sugar, uri]
 import karax/[karax, karaxdsl, kbase, kdom, vdom, vstyles]
+import ./[field, messages, pairs, requirement]
 import ../[common]
 import ../../[misc]
-import ../../simulator/web/[field, messages, pairs, requirement]
-import ../../../../app/[ide, simulator]
+import ../../../../app/[simulator]
 
 const
-  UrlCopyButtonIdPrefix = "pon2-ide-share-url-"
-  PosUrlCopyButtonIdPrefix = "pon2-ide-share-pos-url-"
-  EditorUrlCopyButtonIdPrefix = "pon2-ide-share-editor-url-"
-  EditorPosUrlCopyButtonIdPrefix = "pon2-ide-share-editor-pos-url-"
+  UrlCopyButtonIdPrefix = "pon2-simulator-share-url-"
+  PosUrlCopyButtonIdPrefix = "pon2-simulator-share-pos-url-"
+  EditorUrlCopyButtonIdPrefix = "pon2-simulator-share-editor-url-"
+  EditorPosUrlCopyButtonIdPrefix = "pon2-simulator-share-editor-pos-url-"
 
-  DisplayDivIdPrefix = "pon2-ide-share-display-"
-  DisplayPairDivIdPrefix = "pon2-ide-share-display-pair-"
-  DisplayPairPosDivIdPrefix = "pon2-ide-share-display-pair-pos-"
+  DisplayDivIdPrefix = "pon2-simulator-share-display-"
+  DisplayPairDivIdPrefix = "pon2-simulator-share-display-pair-"
+  DisplayPairPosDivIdPrefix = "pon2-simulator-share-display-pair-pos-"
 
 proc downloadDisplayImage(
   id: kstring
@@ -57,15 +57,17 @@ func newDownloadHandler(id: string, withPositions: bool): () -> void =
   result = handler
 
 proc toPlayUri(
-    ide: Ide, useAnswer: bool, withPositions: bool, editor = false
+    simulator: Simulator, withPositions: bool, editor = false
 ): Uri {.inline.} =
   ## Returns the IDE URI for playing.
-  let ide2 = (if useAnswer: ide.answerSimulator else: ide.simulator).copy.newIde
-  ide2.simulator.mode = if editor: PlayEditor else: Play
+  let sim = simulator.copy
+  sim.mode = if editor: PlayEditor else: Play
 
-  result = ide2.toUri withPositions
+  result = sim.toUri withPositions
 
-proc newShareNode*(ide: Ide, id: string, useAnswer: bool): VNode {.inline.} =
+proc newShareNode*(
+    simulator: Simulator, id: string, onlyEditorButton: bool
+): VNode {.inline.} =
   ## Returns the share node.
   let
     urlCopyButtonId = &"{UrlCopyButtonIdPrefix}{id}"
@@ -73,10 +75,8 @@ proc newShareNode*(ide: Ide, id: string, useAnswer: bool): VNode {.inline.} =
     editorUrlCopyButtonId = &"{EditorUrlCopyButtonIdPrefix}{id}"
     editorPosUrlCopyButtonId = &"{EditorPosUrlCopyButtonIdPrefix}{id}"
 
-    sim = if useAnswer: ide.answerSimulator else: ide.simulator
-
   result = buildHtml(tdiv):
-    if not useAnswer:
+    if not onlyEditorButton:
       tdiv(class = "block"):
         span(class = "icon"):
           italic(class = "fa-brands fa-x-twitter")
@@ -87,14 +87,14 @@ proc newShareNode*(ide: Ide, id: string, useAnswer: bool): VNode {.inline.} =
             class = "button is-size-7",
             target = "_blank",
             rel = "noopener noreferrer",
-            href = kstring $ide.toXlink(withPositions = false),
+            href = kstring $simulator.toXlink(withPositions = false),
           ):
             text "操作無"
           a(
             class = "button is-size-7",
             target = "_blank",
             rel = "noopener noreferrer",
-            href = kstring $ide.toXlink(withPositions = true),
+            href = kstring $simulator.toXlink(withPositions = true),
           ):
             text "操作有"
       tdiv(class = "block"):
@@ -111,8 +111,7 @@ proc newShareNode*(ide: Ide, id: string, useAnswer: bool): VNode {.inline.} =
             id = urlCopyButtonId.kstring,
             class = "button is-size-7",
             onclick = newCopyButtonHandler(
-              () => $ide.toPlayUri(useAnswer = useAnswer, withPositions = false),
-              urlCopyButtonId,
+              () => $simulator.toPlayUri(withPositions = false), urlCopyButtonId
             ),
           ):
             text "操作無"
@@ -120,12 +119,11 @@ proc newShareNode*(ide: Ide, id: string, useAnswer: bool): VNode {.inline.} =
             id = posUrlCopyButtonId.kstring,
             class = "button is-size-7",
             onclick = newCopyButtonHandler(
-              () => $ide.toPlayUri(useAnswer = useAnswer, withPositions = true),
-              posUrlCopyButtonId,
+              () => $simulator.toPlayUri(withPositions = true), posUrlCopyButtonId
             ),
           ):
             text "操作有"
-    if sim.mode != SimulatorMode.Play:
+    if simulator.mode != SimulatorMode.Play:
       tdiv(class = "block"):
         text "編集者URLコピー"
         tdiv(class = "buttons"):
@@ -133,10 +131,7 @@ proc newShareNode*(ide: Ide, id: string, useAnswer: bool): VNode {.inline.} =
             id = editorUrlCopyButtonId.kstring,
             class = "button is-size-7",
             onclick = newCopyButtonHandler(
-              () =>
-                $ide.toPlayUri(
-                  useAnswer = useAnswer, withPositions = false, editor = true
-                ),
+              () => $simulator.toPlayUri(withPositions = false, editor = true),
               editorUrlCopyButtonId,
             ),
           ):
@@ -145,16 +140,13 @@ proc newShareNode*(ide: Ide, id: string, useAnswer: bool): VNode {.inline.} =
             id = editorPosUrlCopyButtonId.kstring,
             class = "button is-size-7",
             onclick = newCopyButtonHandler(
-              () =>
-                $ide.toPlayUri(
-                  useAnswer = useAnswer, withPositions = true, editor = true
-                ),
+              () => $simulator.toPlayUri(withPositions = true, editor = true),
               editorPosUrlCopyButtonId,
             ),
           ):
             text "操作有"
 
-proc newDisplayNode*(ide: Ide, id: string): VNode {.inline.} =
+proc newDisplayNode*(simulator: Simulator, id: string): VNode {.inline.} =
   ## Returns the display node for image saving.
   ## `id` should be the same as the one used in `newShareNode`.
   buildHtml(
@@ -163,20 +155,21 @@ proc newDisplayNode*(ide: Ide, id: string): VNode {.inline.} =
       style = style(StyleAttr.display, kstring"none"),
     )
   ):
-    tdiv(class = "block"):
-      ide.simulator.newRequirementNode(true, id)
+    if simulator.kind == Nazo:
+      tdiv(class = "block"):
+        simulator.newRequirementNode(id, true)
     tdiv(class = "block"):
       tdiv(class = "columns is-mobile is-variable is-1"):
         tdiv(class = "column is-narrow"):
           tdiv(class = "block"):
-            ide.simulator.newFieldNode(true)
+            simulator.newFieldNode(true)
           tdiv(class = "block"):
-            ide.simulator.newMessagesNode
+            simulator.newMessagesNode
         tdiv(id = kstring &"{DisplayPairDivIdPrefix}{id}", class = "column is-narrow"):
           tdiv(class = "block"):
-            ide.simulator.newPairsNode(true, false)
+            simulator.newPairsNode(true, false)
         tdiv(
           id = kstring &"{DisplayPairPosDivIdPrefix}{id}", class = "column is-narrow"
         ):
           tdiv(class = "block"):
-            ide.simulator.newPairsNode(true, true)
+            simulator.newPairsNode(true, true)

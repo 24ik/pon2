@@ -1,10 +1,5 @@
 ## This module implements the IDE.
 ##
-## Compile Options:
-## | Option               | Description              | Default  |
-## | -------------------- | ------------------------ | -------- |
-## | `-d:pon2.path=<str>` | URI path of the web IDE. | `/pon2/` |
-##
 when defined(js):
   ## See also the [backend-specific documentation](./ide/web.html).
   ##
@@ -21,7 +16,7 @@ else:
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[deques, sequtils, strformat, strutils, sugar, uri]
+import std/[deques, sequtils, sugar, uri]
 import ./[key, nazopuyo, simulator]
 import ../core/[field, fqdn, nazopuyo, pairposition, puyopuyo, requirement]
 import ../private/[misc]
@@ -57,11 +52,6 @@ type
     permuting: bool
 
     progressBarData: tuple[now: Natural, total: Natural]
-
-const IdeUriPath* {.define: "pon2.path".} = "/pon2/"
-
-static:
-  doAssert IdeUriPath.startsWith '/'
 
 # ------------------------------------------------
 # Constructor
@@ -312,85 +302,12 @@ proc prevAnswer*(self: Ide) {.inline.} =
 
 func toUri*(self: Ide, withPositions = true, fqdn = Pon2): Uri {.inline.} =
   ## Returns the URI converted from the IDE.
-  result = initUri()
-  result.scheme =
-    case fqdn
-    of Pon2, Ishikawa: "https"
-    of Ips: "http"
-  result.hostname = $fqdn
-  result.query = self.simulator.toUriQuery(withPositions, fqdn)
-
-  # path
-  case fqdn
-  of Pon2:
-    result.path = IdeUriPath
-  of Ishikawa, Ips:
-    let modeChar =
-      case self.simulator.kind
-      of Regular:
-        case self.simulator.mode
-        of Play, PlayEditor: 's'
-        of Edit: 'e'
-        of View: 'v'
-      of Nazo:
-        'n'
-    result.path = &"/simu/p{modeChar}.html"
-
-func allowedUriPaths(path: string): seq[string] {.inline.} =
-  ## Returns the allowed paths.
-  result = @[path]
-
-  if path.endsWith "/index.html":
-    result.add path.dup(removeSuffix("index.html"))
-  elif path.endsWith '/':
-    result.add &"{path}index.html"
-
-const AllowedSimulatorUriPaths = IdeUriPath.allowedUriPaths
+  self.simulator.toUri(withPositions, fqdn)
 
 proc parseIde*(uri: Uri): Ide {.inline.} =
   ## Returns the IDE converted from the URI.
   ## If the URI is invalid, `ValueError` is raised.
-  var
-    kind = SimulatorKind.low
-    mode = SimulatorMode.low
-  let fqdn: IdeFqdn
-  case uri.hostname
-  of $Pon2:
-    if uri.path notin AllowedSimulatorUriPaths:
-      raise newException(ValueError, "Invalid IDE: " & $uri)
-
-    fqdn = Pon2
-  of $Ishikawa, $Ips:
-    fqdn = if uri.hostname == $Ishikawa: Ishikawa else: Ips
-
-    # kind, mode
-    case uri.path
-    of "/simu/pe.html":
-      kind = Regular
-      mode = Edit
-    of "/simu/ps.html":
-      kind = Regular
-      mode = Play
-    of "/simu/pv.html":
-      kind = Regular
-      mode = View
-    of "/simu/pn.html":
-      kind = Nazo
-      mode = Play
-    else:
-      result = newIde() # HACK: dummy to suppress warning
-      raise newException(ValueError, "Invalid IDE: " & $uri)
-  else:
-    fqdn = Pon2 # HACK: dummy to compile
-    result = newIde() # HACK: dummy to suppress warning
-    raise newException(ValueError, "Invalid IDE: " & $uri)
-
-  let simulator = uri.query.parseSimulator fqdn
-  if fqdn in {Ishikawa, Ips}:
-    simulator.kind = kind
-    simulator.mode = mode
-
-  result = simulator.newIde
+  uri.parseSimulator.newIde
 
 # ------------------------------------------------
 # Keyboard Operation

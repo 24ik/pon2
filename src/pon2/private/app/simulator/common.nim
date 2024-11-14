@@ -8,7 +8,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[deques, sugar]
+import std/[deques, strformat, sugar, uri]
+import ../../[misc]
 import ../../../app/[color, nazopuyo, simulator]
 import
   ../../../core/[
@@ -187,3 +188,29 @@ func getMessages*(
       result.noticeGarbages[notice].dec count - ShownNoticeGarbageCount
     if count >= ShownNoticeGarbageCount:
       break
+
+# ------------------------------------------------
+# X
+# ------------------------------------------------
+
+const RuleDescriptions: array[Rule, string] = ["通", "すいちゅう"]
+
+func toXLink*(simulator: Simulator, withPositions: bool): Uri {.inline.} =
+  ## Returns the URI for posting to X.
+  let simUri = simulator.toUri withPositions
+
+  case simulator.kind
+  of Nazo:
+    simulator.nazoPuyoWrapBeforeMoves.get:
+      let
+        ruleStr =
+          if simulator.rule == Tsu:
+            ""
+          else:
+            RuleDescriptions[simulator.rule]
+        moveCount = wrappedNazoPuyo.moveCount
+        reqStr = $wrappedNazoPuyo.requirement
+
+      result = initXLink(&"{ruleStr}{moveCount}手・{reqStr}", "なぞぷよ", simUri)
+  of Regular:
+    result = initXLink(uri = simUri)

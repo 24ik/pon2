@@ -15,7 +15,7 @@
 ## Compile Options:
 ## | Option                         | Description                      | Default             |
 ## | ------------------------------ | -------------------------------- | ------------------- |
-## | `-d:pon2.path=<str>`           | URI path of the web IDE.         | `/pon2/`            |
+## | `-d:pon2.path=<str>`           | URI path of the web simulator.   | `/pon2/`            |
 ## | `-d:pon2.workerfilename=<str>` | File name of the web worker.     | `worker.min.js`     |
 ## | `-d:pon2.assets.native=<str>`  | Assets directory for native app. | `<Pon2Root>/assets` |
 ## | `-d:pon2.assets.web=<str>`     | Assets directory for web app.    | `./assets`          |
@@ -70,7 +70,7 @@ export
   simulator.moveOperatingPositionRight, simulator.moveOperatingPositionLeft,
   simulator.rotateOperatingPositionRight, simulator.rotateOperatingPositionLeft,
   simulator.forward, simulator.backward, simulator.reset, simulator.toUriQuery,
-  simulator.parseSimulator, simulator.operate
+  simulator.toUri, simulator.parseSimulator, simulator.operate
 export solve.SolveAnswer, solve.solve
 
 when defined(js):
