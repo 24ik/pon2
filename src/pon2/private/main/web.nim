@@ -128,7 +128,7 @@ else:
   else:
     import std/[uri]
     import karax/[karax]
-    import ../../app/[ide]
+    import ../../app/[ide, simulator]
     import ../../app/ide/[web]
 
     # ------------------------------------------------
@@ -164,7 +164,7 @@ else:
       var uri = initUri()
       uri.scheme = "https"
       uri.hostname = $Pon2
-      uri.path = IdeUriPath
+      uri.path = SimulatorUriPath
       uri.query = query
 
       try:

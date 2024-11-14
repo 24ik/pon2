@@ -22,19 +22,25 @@ import
     palette,
     requirement,
     select,
+    share,
   ]
 
 # ------------------------------------------------
 # Node
 # ------------------------------------------------
 
-const ReqIdPrefix = "pon2-simulator-req-"
+const
+  ReqIdPrefix = "pon2-simulator-req-"
+  ShareIdPrefix = "pon2-simulator-share-"
 
-proc newSimulatorNode(self: Simulator, id: string, hideSelect: bool): VNode {.inline.} =
+proc newSimulatorNode(self: Simulator, id: string, isAnswer: bool): VNode {.inline.} =
   ## Returns the node without the external section.
-  buildHtml(tdiv):
-    tdiv(class = "block"):
-      self.newRequirementNode(id = &"{ReqIdPrefix}{id}")
+  let shareId = &"{ShareIdPrefix}{id}"
+
+  result = buildHtml(tdiv):
+    if self.kind == Nazo:
+      tdiv(class = "block"):
+        self.newRequirementNode &"{ReqIdPrefix}{id}"
     tdiv(class = "block"):
       tdiv(class = "columns is-mobile is-variable is-1"):
         tdiv(class = "column is-narrow"):
@@ -46,9 +52,11 @@ proc newSimulatorNode(self: Simulator, id: string, hideSelect: bool): VNode {.in
           if self.mode != Edit:
             tdiv(class = "block"):
               self.newMessagesNode
-          if not hideSelect and self.mode != Play:
+          if not isAnswer and self.mode != Play:
             tdiv(class = "block"):
               self.newSelectNode
+          tdiv(class = "block"):
+            self.newShareNode(shareId, isAnswer)
         if self.mode != Edit:
           tdiv(class = "column is-narrow"):
             tdiv(class = "block"):
@@ -61,12 +69,13 @@ proc newSimulatorNode(self: Simulator, id: string, hideSelect: bool): VNode {.in
               self.newPaletteNode
           tdiv(class = "block"):
             self.newPairsNode
+    self.newDisplayNode shareId
 
 proc newSimulatorNode*(
-    self: Simulator, wrapSection = true, id = "", hideSelect = false
+    self: Simulator, wrapSection = true, id = "", isAnswer = false
 ): VNode {.inline.} =
   ## Returns the simulator node.
-  let node = self.newSimulatorNode(id, hideSelect)
+  let node = self.newSimulatorNode(id, isAnswer)
 
   if wrapSection:
     result = buildHtml(section(class = "section")):

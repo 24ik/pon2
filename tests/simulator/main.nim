@@ -5,7 +5,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[deques, importutils, options, sequtils, strformat, unittest]
+import std/[deques, importutils, options, sequtils, strformat, unittest, uri]
 import ../../src/pon2/app/[nazopuyo, simulator]
 import
   ../../src/pon2/core/[
@@ -583,7 +583,7 @@ rg|"""
   # Simulator <-> URI
   # ------------------------------------------------
 
-  # toUriQuery, parseSimulator
+  # toUriQuery, toUri, parseSimulator
   block:
     let
       mainQuery = "field=t-rrb&pairs=rgby12&req-kind=0&req-color=7"
@@ -602,3 +602,10 @@ rg|"""
     check simulator.toUriQuery(withPositions = false) == queryNoPos
 
     check simulator.toUriQuery(withPositions = true, fqdn = Ishikawa) == "1b_c1Ec__270"
+
+    let
+      simUri = parseUri &"https://{Pon2}{SimulatorUriPath}?{query}"
+      simUriNoPos = parseUri &"https://{Pon2}{SimulatorUriPath}?{queryNoPos}"
+
+    check simulator.toUri(withPositions = true) == simUri
+    check simulator.toUri(withPositions = false) == simUriNoPos

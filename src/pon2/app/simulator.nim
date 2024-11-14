@@ -1,5 +1,10 @@
 ## This module implements Puyo Puyo simulators.
 ##
+## Compile Options:
+## | Option               | Description                    | Default  |
+## | -------------------- | ------------------------------ | -------- |
+## | `-d:pon2.path=<str>` | URI path of the web simulator. | `/pon2/` |
+##
 when defined(js):
   ## See also the [backend-specific documentation](./simulator/web.html).
   ##
@@ -74,6 +79,11 @@ type
     operatingIdx: Natural # used to draw
     operatingPos: Position
     editing: SimulatorEditing
+
+const SimulatorUriPath* {.define: "pon2.path".} = "/pon2/"
+
+static:
+  doAssert SimulatorUriPath.startsWith '/'
 
 # ------------------------------------------------
 # Constructor
@@ -662,6 +672,29 @@ func toUriQuery*(
   of Ishikawa, Ips:
     result = mainQuery
 
+func toUri*(self: Simulator, withPositions = true, fqdn = Pon2): Uri {.inline.} =
+  ## Returns the URI converted from the simulator.
+  result = initUri()
+  result.scheme = "https"
+  result.hostname = $fqdn
+  result.query = self.toUriQuery(withPositions, fqdn)
+
+  # path
+  case fqdn
+  of Pon2:
+    result.path = SimulatorUriPath
+  of Ishikawa, Ips:
+    let modeChar =
+      case self.kind
+      of Regular:
+        case self.mode
+        of Play, PlayEditor: 's'
+        of Edit: 'e'
+        of View: 'v'
+      of Nazo:
+        'n'
+    result.path = &"/simu/p{modeChar}.html"
+
 func parseSimulator*(query: string, fqdn: IdeFqdn): Simulator {.inline.} =
   ## Returns the simulator converted from the URI query.
   ## If the URI is invalid, `ValueError` is raised.
@@ -715,6 +748,60 @@ func parseSimulator*(query: string, fqdn: IdeFqdn): Simulator {.inline.} =
           raise newException(ValueError, "Invalid simulator: " & query)
   of Ishikawa, Ips:
     result = parsePuyoPuyo[TsuField](query, fqdn).newSimulator Play
+
+func allowedUriPaths(path: string): seq[string] {.inline.} =
+  ## Returns the allowed paths.
+  result = @[path]
+
+  if path.endsWith "/index.html":
+    result.add path.dup(removeSuffix("index.html"))
+  elif path.endsWith '/':
+    result.add &"{path}index.html"
+
+const AllowedSimulatorUriPaths = SimulatorUriPath.allowedUriPaths
+
+proc parseSimulator*(uri: Uri): Simulator {.inline.} =
+  ## Returns the simulator converted from the URI.
+  ## If the URI is invalid, `ValueError` is raised.
+  var
+    kind = SimulatorKind.low
+    mode = SimulatorMode.low
+  let fqdn: IdeFqdn
+  case uri.hostname
+  of $Pon2:
+    if uri.path notin AllowedSimulatorUriPaths:
+      raise newException(ValueError, "Invalid simulator: " & $uri)
+
+    fqdn = Pon2
+  of $Ishikawa, $Ips:
+    fqdn = if uri.hostname == $Ishikawa: Ishikawa else: Ips
+
+    # kind, mode
+    case uri.path
+    of "/simu/pe.html":
+      kind = Regular
+      mode = Edit
+    of "/simu/ps.html":
+      kind = Regular
+      mode = Play
+    of "/simu/pv.html":
+      kind = Regular
+      mode = View
+    of "/simu/pn.html":
+      kind = Nazo
+      mode = Play
+    else:
+      result = newSimulator[TsuField]() # HACK: dummy to suppress warning
+      raise newException(ValueError, "Invalid simulator: " & $uri)
+  else:
+    fqdn = Pon2 # HACK: dummy to compile
+    result = newSimulator[TsuField]() # HACK: dummy to suppress warning
+    raise newException(ValueError, "Invalid simulator: " & $uri)
+
+  result = uri.query.parseSimulator fqdn
+  if fqdn in {Ishikawa, Ips}:
+    result.kind = kind
+    result.mode = mode
 
 # ------------------------------------------------
 # Keyboard Operation
