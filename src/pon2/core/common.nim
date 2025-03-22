@@ -1,4 +1,4 @@
-## This module implements types and constants related to fields.
+## This module implements common constants.
 ##
 ## Compile Options:
 ## | Option                      | Description          | Default |
@@ -6,9 +6,7 @@
 ## | `-d:pon2.waterheight=<int>` | Height of the water. | `8`     |
 ##
 
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
+{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -22,9 +20,3 @@ const
 static:
   doAssert WaterHeight >= 2
   doAssert AirHeight >= 3
-
-type
-  Row* = range[0 .. Height.pred]
-  Column* = range[0 .. Width.pred]
-  WaterRow* = range[AirHeight .. Height.pred]
-  AirRow* = range[0 .. AirHeight.pred]
