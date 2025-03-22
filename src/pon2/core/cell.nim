@@ -19,6 +19,10 @@ type Cell* {.pure.} = enum
   Yellow = "y"
   Purple = "p"
 
+const
+  Puyos* = {Hard .. Purple}
+  ColorPuyos* = {Red .. Purple}
+
 # ------------------------------------------------
 # Cell <-> string
 # ------------------------------------------------
@@ -29,7 +33,7 @@ const StrToCell = collect:
 
 func parseCell*(str: string): Res[Cell] {.inline.} =
   ## Returns the cell converted from the string representation.
-  if str notin StrToCell:
+  if str in StrToCell:
+    Res[Cell].ok StrToCell[str]
+  else:
     Res[Cell].err "Invalid cell: {str}".fmt
-
-  Res[Cell].ok StrToCell[str]

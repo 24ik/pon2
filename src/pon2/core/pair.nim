@@ -1,38 +1,41 @@
 ## This modules implements pairs.
 ##
 
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
+{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[setutils, sugar, tables]
-import ./[cell, fqdn]
+import std/[setutils, strformat, sugar, tables]
+import ./[cell, fqdn, res]
 
 type Pair* {.pure.} = enum
   ## The pair of two color puyos.
+  # axis == Red
   RedRed = $Red & $Red
   RedGreen = $Red & $Green
   RedBlue = $Red & $Blue
   RedYellow = $Red & $Yellow
   RedPurple = $Red & $Purple
+  # axis == Green
   GreenRed = $Green & $Red
   GreenGreen = $Green & $Green
   GreenBlue = $Green & $Blue
   GreenYellow = $Green & $Yellow
   GreenPurple = $Green & $Purple
+  # axis == Blue
   BlueRed = $Blue & $Red
   BlueGreen = $Blue & $Green
   BlueBlue = $Blue & $Blue
   BlueYellow = $Blue & $Yellow
   BluePurple = $Blue & $Purple
+  # axis == Yellow
   YellowRed = $Yellow & $Red
   YellowGreen = $Yellow & $Green
   YellowBlue = $Yellow & $Blue
   YellowYellow = $Yellow & $Yellow
   YellowPurple = $Yellow & $Purple
+  # axis == Purple
   PurpleRed = $Purple & $Red
   PurpleGreen = $Purple & $Green
   PurpleBlue = $Purple & $Blue
@@ -43,12 +46,13 @@ type Pair* {.pure.} = enum
 # Constructor
 # ------------------------------------------------
 
-const FirstPairs: array[ColorPuyo, Pair] =
-  [RedRed, GreenRed, BlueRed, YellowRed, PurpleRed]
+const
+  DummyPair = RedRed
+  FirstPairs: array[Cell, Pair] =
+    [DummyPair, DummyPair, DummyPair, RedRed, GreenRed, BlueRed, YellowRed, PurpleRed]
 
-func initPair*(axis, child: ColorPuyo): Pair {.inline.} =
-  ## Returns a new Pair.
-  FirstPairs[axis].succ child.ord - ColorPuyo.low.ord
+func init*(T: type Pair, axis, child: Cell): T {.inline.} =
+  FirstPairs[axis].succ child.ord - Red.ord
 
 # ------------------------------------------------
 # Property
@@ -56,15 +60,17 @@ func initPair*(axis, child: ColorPuyo): Pair {.inline.} =
 
 func initPairToAxis(): array[Pair, Cell] {.inline.} =
   ## Returns `PairToAxis`.
-  result[Pair.low] = Cell.low # HACK: dummy to suppress warning
+  var pairToAxis: array[Pair, Cell]
   for pair in Pair:
-    result[pair] = ColorPuyo.low.succ pair.ord div ColorPuyo.fullSet.card
+    pairToAxis[pair] = Red.succ pair.ord div ColorPuyos.card
+
+  pairToAxis
 
 func initPairToChild(): array[Pair, Cell] {.inline.} =
   ## Returns `PairToChild`.
-  result[Pair.low] = Cell.low # HACK: dummy to suppress warning
+  var pairToChild: array[Pair, Cell]
   for pair in Pair:
-    result[pair] = ColorPuyo.low.succ pair.ord mod ColorPuyo.fullSet.card
+    pairToChild[pair] = Red.succ pair.ord mod ColorPuyos.card
 
 const
   PairToAxis = initPairToAxis()
@@ -84,13 +90,23 @@ func isDouble*(self: Pair): bool {.inline.} =
 # Operator
 # ------------------------------------------------
 
-func `axis=`*(self: var Pair, color: ColorPuyo) {.inline.} =
+func `axis=`*(self: var Pair, colorPuyo: Cell): Res[void] {.inline.} =
   ## Sets the axis-puyo.
-  self.inc (color.ord - self.axis.ord) * ColorPuyo.fullSet.card
+  if colorPuyo notin ColorPuyos:
+    return Res[void].err "Invalid color puyo: {colorPuyo}".fmt
 
-func `child=`*(self: var Pair, color: ColorPuyo) {.inline.} =
+  self.inc (color.ord - self.axis.ord) * ColorPuyos.card
+
+  Res[void].ok
+
+func `child=`*(self: var Pair, colorPuyo: Cell): Res[void] {.inline.} =
   ## Sets the child-puyo.
-  self.inc color.ord - self.child.ord
+  if colorPuyo notin ColorPuyos:
+    return Res[void].err "Invalid color puyo: {colorPuyo}".fmt
+
+  self.inc color.ord - self.axis.ord
+
+  Res[void].ok
 
 # ------------------------------------------------
 # Swap
@@ -98,9 +114,9 @@ func `child=`*(self: var Pair, color: ColorPuyo) {.inline.} =
 
 func initPairToSwapPair(): array[Pair, Pair] {.inline.} =
   ## Returns `PairToSwapPair`.
-  result[Pair.low] = Pair.low # HACK: dummy to suppress warning
+  var pairToPair: array[Pair, Pair]
   for pair in Pair:
-    result[pair] = initPair(pair.child, pair.axis)
+    pairToPair[pair] = Pair.init(pair.child, pair.axis)
 
 const PairToSwapPair = initPairToSwapPair()
 
@@ -115,19 +131,19 @@ func swap*(self: var Pair) {.inline.} = ## Swaps the axis-puyo and child-puyo.
 # Count
 # ------------------------------------------------
 
-func puyoCount*(self: Pair, puyo: Puyo): int {.inline.} =
-  ## Returns the number of `puyo` in the pair.
-  (self.axis == puyo).int + (self.child == puyo).int
+func cellCnt*(self: Pair, cell: Cell): int {.inline.} =
+  ## Returns the number of `cell` in the pair.
+  (self.axis == cell).int + (self.child == cell).int
 
-func puyoCount*(self: Pair): int {.inline.} =
-  ## Returns the number of puyos in the pair.
+func cellCnt*(self: Pair): int {.inline.} =
+  ## Returns the number of cells in the pair.
   2
 
-func colorCount*(self: Pair): int {.inline.} =
+func colorCnt*(self: Pair): int {.inline.} =
   ## Returns the number of color puyos in the pair.
-  self.puyoCount
+  2
 
-func garbageCount*(self: Pair): int {.inline.} =
+func garbageCnt*(self: Pair): int {.inline.} =
   ## Returns the number of garbage puyos in the pair.
   0
 
@@ -139,14 +155,12 @@ const StrToPair = collect:
   for pair in Pair:
     {$pair: pair}
 
-func parsePair*(str: string): Pair {.inline.} =
+func parsePair*(str: string): Res[Pair] {.inline.} =
   ## Returns the pair converted from the string representation.
-  ## If the string is invalid, `ValueError` is raised.
-  try:
-    result = StrToPair[str]
-  except KeyError:
-    result = Pair.low # HACK: dummy to suppress warning
-    raise newException(ValueError, "Invalid pair: " & str)
+  if str in StrToPair:
+    Res[Pair].ok StrToPair[str]
+  else:
+    Res[Pair].err "Invalid pair: {str}".fmt
 
 # ------------------------------------------------
 # Pair <-> URI
@@ -166,15 +180,13 @@ func toUriQuery*(self: Pair, fqdn = Pon2): string {.inline.} =
   of Ishikawa, Ips:
     $PairToIshikawaUri[self.ord]
 
-func parsePair*(query: string, fqdn: IdeFqdn): Pair {.inline.} =
+func parsePair*(query: string, fqdn: IdeFqdn): Res[Pair] {.inline.} =
   ## Returns the pair converted from the URI query.
-  ## If the query is invalid, `ValueError` is raised.
   case fqdn
   of Pon2:
-    result = query.parsePair
+    query.parsePair
   of Ishikawa, Ips:
-    try:
-      result = IshikawaUriToPair[query]
-    except KeyError:
-      result = Pair.low # HACK: dummy to suppress warning
-      raise newException(ValueError, "Invalid pair: " & query)
+    if query in IshikawaUriToPair:
+      Res[Pair].ok IshikawaUriToPair[query]
+    else:
+      Res[Pair].ok "Invalid pair: {query}".fmt

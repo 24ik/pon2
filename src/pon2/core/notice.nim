@@ -43,9 +43,15 @@ func noticeGarbageCounts*(
     score: int, rule: Rule, useComet = false
 ): array[NoticeGarbage, int] {.inline.} =
   ## Returns the number of notice garbage puyos.
-  var counts: array[NoticeGarbage, int] = [0, 0, 0, 0, 0, 0, 0]
+  var counts: array[NoticeGarbage, int]
 
-  let highestNotice = if useComet: Comet else: Crown
+  let highestNotice: NoticeGarbage
+  if useComet:
+    highestNotice = Comet
+  else:
+    highestNotice = Crown
+    counts[Comet] = 0
+
   var score2 = score div GarbageRates[rule]
   for notice in countdown(highestNotice, NoticeGarbage.low):
     let
