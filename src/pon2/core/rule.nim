@@ -1,14 +1,13 @@
-## This module implements rules.
+## This module implements Puyo Puyo rules.
 ##
 
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
+{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sugar, tables]
+import std/[strformat, sugar, tables]
+import ./[res]
 
 type Rule* {.pure.} = enum
   ## Puyo Puyo rule.
@@ -23,11 +22,9 @@ const StrToRule = collect:
   for rule in Rule:
     {$rule: rule}
 
-func parseRule*(str: string): Rule {.inline.} =
+func parseRule*(str: string): Res[Rule] {.inline.} =
   ## Converts the string representation to the rule.
-  ## If the string is invalid, `ValueError` is raised.
-  try:
-    result = StrToRule[str]
-  except KeyError:
-    result = Rule.low # HACK: dummy to suppress warning
-    raise newException(ValueError, "Invalid rule: " & str)
+  if str notin StrToRule:
+    return Res[Rule].err "Invalid rule: {str}".fmt
+
+  Res[Rule].ok StrToRule[str]
