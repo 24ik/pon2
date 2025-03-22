@@ -23,7 +23,7 @@ const StrToRule = collect:
     {$rule: rule}
 
 func parseRule*(str: string): Res[Rule] {.inline.} =
-  ## Converts the string representation to the rule.
+  ## Returns the rule converted from the string representation.
   if str notin StrToRule:
     return Res[Rule].err "Invalid rule: {str}".fmt
 
