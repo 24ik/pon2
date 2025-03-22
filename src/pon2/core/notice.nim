@@ -12,7 +12,9 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./[rule]
+import std/[strformat]
+import ./[res, rule]
+import ../private/[misc]
 
 type NoticeGarbage* {.pure.} = enum
   ## Notice garbage puyo.
@@ -41,9 +43,12 @@ const NoticeUnits: array[NoticeGarbage, int] = [1, 6, 30, 180, 360, 720, 1440]
 
 func noticeGarbageCounts*(
     score: int, rule: Rule, useComet = false
-): array[NoticeGarbage, int] {.inline.} =
+): Res[array[NoticeGarbage, int]] {.inline.} =
   ## Returns the number of notice garbage puyos.
-  var counts: array[NoticeGarbage, int]
+  if score < 0:
+    return Res[array[NoticeGarbage, int]].err "`score` should be non-negative, but got {score}".fmt
+
+  var counts = initArrWith[NoticeGarbage, int](0)
 
   let highestNotice: NoticeGarbage
   if useComet:
@@ -61,4 +66,4 @@ func noticeGarbageCounts*(
     counts[notice] = count
     score2.dec unit * count
 
-  counts
+  Res[array[NoticeGarbage, int]].ok counts

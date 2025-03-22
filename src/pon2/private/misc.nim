@@ -189,3 +189,7 @@ proc processorCount*(): int {.inline.} =
     1
   else:
     max(countProcessors(), 1)
+
+func initArrWith*[E: enum, T](val: T): array[E, T] {.noinit, inline.} =
+  ## Returns the array with all elements `val`.
+  result.fill(val)
