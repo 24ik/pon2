@@ -6,9 +6,7 @@
 ## | `-d:pon2.fqdn=<str>` | FQDN of the web IDE. | `24ik.github.io` |
 ##
 
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
+{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
