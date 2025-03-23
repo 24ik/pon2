@@ -6,8 +6,9 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, sugar, tables]
+import std/[strformat, sugar]
 import results
+import stew/shims/[tables]
 
 type Rule* {.pure.} = enum
   ## Puyo Puyo rule.

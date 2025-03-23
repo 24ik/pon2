@@ -6,38 +6,39 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[setutils, strformat, sugar, tables]
+import std/[setutils, strformat, sugar]
 import results
+import stew/[assign2]
+import stew/shims/[tables]
 import ./[cell, fqdn]
-import ../private/[misc]
 
 type Pair* {.pure.} = enum
   ## The pair of two color puyos.
-  # axis: Red
+  # pivot: Red
   RedRed = $Red & $Red
   RedGreen = $Red & $Green
   RedBlue = $Red & $Blue
   RedYellow = $Red & $Yellow
   RedPurple = $Red & $Purple
-  # axis: Green
+  # pivot: Green
   GreenRed = $Green & $Red
   GreenGreen = $Green & $Green
   GreenBlue = $Green & $Blue
   GreenYellow = $Green & $Yellow
   GreenPurple = $Green & $Purple
-  # axis: Blue
+  # pivot: Blue
   BlueRed = $Blue & $Red
   BlueGreen = $Blue & $Green
   BlueBlue = $Blue & $Blue
   BlueYellow = $Blue & $Yellow
   BluePurple = $Blue & $Purple
-  # axis: Yellow
+  # pivot: Yellow
   YellowRed = $Yellow & $Red
   YellowGreen = $Yellow & $Green
   YellowBlue = $Yellow & $Blue
   YellowYellow = $Yellow & $Yellow
   YellowPurple = $Yellow & $Purple
-  # axis: Purple
+  # pivot: Purple
   PurpleRed = $Purple & $Red
   PurpleGreen = $Purple & $Green
   PurpleBlue = $Purple & $Blue
@@ -49,44 +50,44 @@ type Pair* {.pure.} = enum
 # ------------------------------------------------
 
 const
-  DummyPair = RedRed
+  DummyPair = Pair.low
   FirstPairs: array[Cell, Pair] =
     [DummyPair, DummyPair, DummyPair, RedRed, GreenRed, BlueRed, YellowRed, PurpleRed]
 
-func init*(T: type Pair, axis, child: Cell): T {.inline.} =
-  FirstPairs[axis].succ child.ord - Red.ord
+func init*(T: type Pair, pivot, rotor: Cell): T {.inline.} =
+  FirstPairs[pivot].succ rotor.ord - Red.ord
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-func initPairToAxis(): array[Pair, Cell] {.inline.} =
-  ## Returns `PairToAxis`.
-  var pairToAxis = initArrWith[Pair, Cell](Cell.low)
+func initPivots(): array[Pair, Cell] {.inline.} =
+  ## Returns `Pivots`.
+  var pivots {.noinit.}: array[Pair, Cell]
   for pair in Pair:
-    pairToAxis[pair] = Red.succ pair.ord div ColorPuyos.card
+    pivots[pair] = Red.succ pair.ord div ColorPuyos.card
 
-  pairToAxis
+  pivots
 
-func initPairToChild(): array[Pair, Cell] {.inline.} =
-  ## Returns `PairToChild`.
-  var pairToChild = initArrWith[Pair, Cell](Cell.low)
+func initRotors(): array[Pair, Cell] {.inline.} =
+  ## Returns `Rotors`.
+  var rotors {.noinit.}: array[Pair, Cell]
   for pair in Pair:
-    pairToChild[pair] = Red.succ pair.ord mod ColorPuyos.card
+    rotors[pair] = Red.succ pair.ord mod ColorPuyos.card
 
-  pairToChild
+  rotors
 
 const
-  PairToAxis = initPairToAxis()
-  PairToChild = initPairToChild()
+  Pivots = initPivots()
+  Rotors = initRotors()
 
-func axis*(self: Pair): Cell {.inline.} = ## Returns the axis-puyo.
-  PairToAxis[self]
+func pivot*(self: Pair): Cell {.inline.} = ## Returns the pivot-puyo.
+  Pivots[self]
 
-func child*(self: Pair): Cell {.inline.} = ## Returns the child-puyo.
-  PairToChild[self]
+func rotor*(self: Pair): Cell {.inline.} = ## Returns the rotor-puyo.
+  Rotors[self]
 
-func isDouble*(self: Pair): bool {.inline.} =
+func isDbl*(self: Pair): bool {.inline.} =
   ## Returns `true` if the pair is double (monochromatic).
   self in {RedRed, GreenGreen, BlueBlue, YellowYellow, PurplePurple}
 
@@ -94,21 +95,21 @@ func isDouble*(self: Pair): bool {.inline.} =
 # Operator
 # ------------------------------------------------
 
-func `axis=`*(self: var Pair, colorPuyo: Cell): Result[void, string] {.inline.} =
-  ## Sets the axis-puyo.
+func `pivot=`*(self: var Pair, colorPuyo: Cell): Result[void, string] {.inline.} =
+  ## Sets the pivot-puyo.
   if colorPuyo notin ColorPuyos:
     return Result[void, string].err "Invalid color puyo: {colorPuyo}".fmt
 
-  self.inc (colorPuyo.ord - self.axis.ord) * ColorPuyos.card
+  self.inc (colorPuyo.ord - self.pivot.ord) * ColorPuyos.card
 
   Result[void, string].ok
 
-func `child=`*(self: var Pair, colorPuyo: Cell): Result[void, string] {.inline.} =
-  ## Sets the child-puyo.
+func `rotor=`*(self: var Pair, colorPuyo: Cell): Result[void, string] {.inline.} =
+  ## Sets the rotor-puyo.
   if colorPuyo notin ColorPuyos:
     return Result[void, string].err "Invalid color puyo: {colorPuyo}".fmt
 
-  self.inc colorPuyo.ord - self.axis.ord
+  self.inc colorPuyo.ord - self.pivot.ord
 
   Result[void, string].ok
 
@@ -116,22 +117,22 @@ func `child=`*(self: var Pair, colorPuyo: Cell): Result[void, string] {.inline.}
 # Swap
 # ------------------------------------------------
 
-func initPairToSwapPair(): array[Pair, Pair] {.inline.} =
-  ## Returns `PairToSwapPair`.
-  var pairToPair = initArrWith[Pair, Pair](Pair.low)
+func initSwapPairs(): array[Pair, Pair] {.inline.} =
+  ## Returns `SwapPairs`.
+  var swapPairs {.noinit.}: array[Pair, Pair]
   for pair in Pair:
-    pairToPair[pair] = Pair.init(pair.child, pair.axis)
+    swapPairs[pair] = Pair.init(pair.rotor, pair.pivot)
 
-  pairToPair
+  swapPairs
 
-const PairToSwapPair = initPairToSwapPair()
+const SwapPairs = initSwapPairs()
 
 func swapped*(self: Pair): Pair {.inline.} =
-  ## Returns the pair with axis-puyo and child-puyo swapped.
-  PairToSwapPair[self]
+  ## Returns the pair with pivot-puyo and rotor-puyo swapped.
+  SwapPairs[self]
 
 func swap*(self: var Pair) {.inline.} = ## Swaps the axis-puyo and child-puyo.
-  self = self.swapped
+  self.assign self.swapped
 
 # ------------------------------------------------
 # Count

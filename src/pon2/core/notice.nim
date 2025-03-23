@@ -15,7 +15,6 @@
 import std/[strformat]
 import results
 import ./[rule]
-import ../private/[misc]
 
 type NoticeGarbage* {.pure.} = enum
   ## Notice garbage puyo.
@@ -51,7 +50,7 @@ func noticeGarbageCnts*(
       "`score` should be non-negative, but got {score}".fmt
     )
 
-  var cnts = initArrWith[NoticeGarbage, int](0)
+  var cnts {.noinit.}: array[NoticeGarbage, int]
 
   let highestNotice: NoticeGarbage
   if useComet:
