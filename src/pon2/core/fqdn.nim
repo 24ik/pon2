@@ -11,9 +11,9 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, sugar]
+import std/[strformat, sugar, tables]
+import ../private/[misc]
 import results
-import stew/shims/[tables]
 
 const Pon2Fqdn* {.define: "pon2.fqdn".} = "24ik.github.io"
 
@@ -33,7 +33,8 @@ const StrToFqdn = collect:
 
 func parseIdeFqdn*(str: string): Result[IdeFqdn, string] {.inline.} =
   ## Returns the FQDN converted from the string representation.
-  if str in StrToFqdn:
-    Result[IdeFqdn, string].ok StrToFqdn[str]
+  let fqdnRes = StrToFqdn.getRes str
+  if fqdnRes.isOk:
+    Result[IdeFqdn, string].ok fqdnRes.value
   else:
     Result[IdeFqdn, string].err "Invalid FQDN: {str}".fmt

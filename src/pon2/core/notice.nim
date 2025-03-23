@@ -15,6 +15,7 @@
 import std/[strformat]
 import results
 import ./[rule]
+import ../private/[assign2]
 
 type NoticeGarbage* {.pure.} = enum
   ## Notice garbage puyo.
@@ -57,7 +58,7 @@ func noticeGarbageCnts*(
     highestNotice = Comet
   else:
     highestNotice = Crown
-    cnts[Comet] = 0
+    cnts[Comet].assign 0
 
   var score2 = score div GarbageRates[rule]
   for notice in countdown(highestNotice, NoticeGarbage.low):
@@ -65,7 +66,7 @@ func noticeGarbageCnts*(
       unit = NoticeUnits[notice]
       cnt = score2 div unit
 
-    cnts[notice] = cnt
+    cnts[notice].assign cnt
     score2.dec unit * cnt
 
   Result[array[NoticeGarbage, int], string].ok cnts

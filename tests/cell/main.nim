@@ -1,11 +1,9 @@
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[unittest]
+import results
 import ../../src/pon2/core/[cell]
 
 proc main*() =
@@ -16,9 +14,8 @@ proc main*() =
   # parseCell
   block:
     for cell in Cell:
-      check ($cell).parseCell == cell
+      let cellRes = parseCell $cell
+      check cellRes.isOk and cellRes.value == cell
 
-    expect ValueError:
-      discard "".parseCell
-    expect ValueError:
-      discard "H".parseCell
+    check "".parseCell.isErr
+    check "H".parseCell.isErr

@@ -4,18 +4,17 @@
 
 import std/[unittest]
 import results
-import ../../src/pon2/core/[rule]
+import ../../src/pon2/core/[fqdn]
 
 proc main*() =
   # ------------------------------------------------
-  # Rule <-> string
+  # FQDN <-> string
   # ------------------------------------------------
 
-  # parseRule
+  # parseIdeFqdn
   block:
-    for rule in Rule:
-      let ruleRes = parseRule $rule
-      check ruleRes.isOk and ruleRes.value == rule
+    for fqdn in IdeFqdn:
+      let fqdnRes = parseIdeFqdn $fqdn
+      check fqdnRes.isOk and fqdnRes.value == fqdn
 
-    check "".parseRule.isErr
-    check "T".parseRule.isErr
+    check "".parseIdeFqdn.isErr

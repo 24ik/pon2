@@ -6,9 +6,9 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, sugar]
+import std/[strformat, sugar, tables]
 import results
-import stew/shims/[tables]
+import ../private/[misc]
 
 type Cell* {.pure.} = enum
   None = "."
@@ -34,7 +34,8 @@ const StrToCell = collect:
 
 func parseCell*(str: string): Result[Cell, string] {.inline.} =
   ## Returns the cell converted from the string representation.
-  if str in StrToCell:
-    Result[Cell, string].ok StrToCell[str]
+  let cellRes = StrToCell.getRes str
+  if cellRes.isOk:
+    Result[Cell, string].ok cellRes.value
   else:
     Result[Cell, string].err "Invalid cell: {str}".fmt

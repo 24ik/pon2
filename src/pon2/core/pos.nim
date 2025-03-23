@@ -6,11 +6,10 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, sugar]
+import std/[strformat, sugar, tables]
 import results
-import stew/[assign2]
-import stew/shims/[tables]
 import ./[common, fqdn]
+import ../private/[assign2, misc]
 
 type
   Dir* {.pure.} = enum
@@ -70,13 +69,13 @@ func initPivotCols(): array[Pos, Col] {.inline.} =
   ## Returns `PivotCols`.
   var pivotCols {.noinit.}: array[Pos, Col]
   for pos in Up0 .. Up5:
-    pivotCols[pos] = StartCols[Up].succ pos.ord - StartPoses[Up].ord
+    pivotCols[pos].assign StartCols[Up].succ pos.ord - StartPoses[Up].ord
   for pos in Right0 .. Right4:
-    pivotCols[pos] = StartCols[Right].succ pos.ord - StartPoses[Right].ord
+    pivotCols[pos].assign StartCols[Right].succ pos.ord - StartPoses[Right].ord
   for pos in Down0 .. Down5:
-    pivotCols[pos] = StartCols[Down].succ pos.ord - StartPoses[Down].ord
+    pivotCols[pos].assign StartCols[Down].succ pos.ord - StartPoses[Down].ord
   for pos in Left1 .. Left5:
-    pivotCols[pos] = StartCols[Left].succ pos.ord - StartPoses[Left].ord
+    pivotCols[pos].assign StartCols[Left].succ pos.ord - StartPoses[Left].ord
 
   pivotCols
 
@@ -86,13 +85,13 @@ func initRotorCols(): array[Pos, Col] {.inline.} =
   ## Returns `RotorCols`.
   var rotorCols {.noinit.}: array[Pos, Col]
   for pos in Up0 .. Up5:
-    rotorCols[pos] = PivotCols[pos]
+    rotorCols[pos].assign PivotCols[pos]
   for pos in Right0 .. Right4:
-    rotorCols[pos] = PivotCols[pos].succ
+    rotorCols[pos].assign PivotCols[pos].succ
   for pos in Down0 .. Down5:
-    rotorCols[pos] = PivotCols[pos]
+    rotorCols[pos].assign PivotCols[pos]
   for pos in Left1 .. Left5:
-    rotorCols[pos] = PivotCols[pos].pred
+    rotorCols[pos].assign PivotCols[pos].pred
 
   rotorCols
 
@@ -100,13 +99,13 @@ func initRotorDirs(): array[Pos, Dir] {.inline.} =
   ## Returns `RotorDirs`.
   var rotorDirs {.noinit.}: array[Pos, Dir]
   for pos in Up0 .. Up5:
-    rotorDirs[pos] = Up
+    rotorDirs[pos].assign Up
   for pos in Right0 .. Right4:
-    rotorDirs[pos] = Right
+    rotorDirs[pos].assign Right
   for pos in Down0 .. Down5:
-    rotorDirs[pos] = Down
+    rotorDirs[pos].assign Down
   for pos in Left1 .. Left5:
-    rotorDirs[pos] = Left
+    rotorDirs[pos].assign Left
 
   rotorDirs
 
@@ -137,7 +136,7 @@ func initRightPoses(): array[Pos, Pos] {.inline.} =
       pivotCol = pos.pivotCol
       newPivotCol = if pivotCol == Col.high: Col.high else: pivotCol.succ
 
-    rightPoses[pos] = Pos.init(newPivotCol, pos.rotorDir)
+    rightPoses[pos].assign Pos.init(newPivotCol, pos.rotorDir)
 
   rightPoses
 
@@ -149,7 +148,7 @@ func initLeftPoses(): array[Pos, Pos] {.inline.} =
       pivotCol = pos.pivotCol
       newPivotCol = if pivotCol == Col.low: Col.low else: pivotCol.pred
 
-    leftPoses[pos] = Pos.init(newPivotCol, pos.rotorDir)
+    leftPoses[pos].assign Pos.init(newPivotCol, pos.rotorDir)
 
   leftPoses
 
@@ -191,7 +190,7 @@ func initRightRotatePoses(): array[Pos, Pos] {.inline.} =
           pivotCol
       newRotorDir = if rotorDir == Dir.high: Dir.low else: rotorDir.succ
 
-    rightRotatePoses[pos] = Pos.init(newPivotCol, newRotorDir)
+    rightRotatePoses[pos].assign Pos.init(newPivotCol, newRotorDir)
 
   rightRotatePoses
 
@@ -211,7 +210,7 @@ func initLeftRotatePoses(): array[Pos, Pos] {.inline.} =
           pivotCol
       newRotorDir = if rotorDir == Dir.low: Dir.high else: rotorDir.pred
 
-    leftRotatePoses[pos] = Pos.init(newPivotCol, newRotorDir)
+    leftRotatePoses[pos].assign Pos.init(newPivotCol, newRotorDir)
 
   leftRotatePoses
 
@@ -253,8 +252,9 @@ func `$`*(self: OptPos): string {.inline.} =
 
 func parsePos*(str: string): Result[Pos, string] {.inline.} =
   ## Returns the position converted from the string representation.
-  if str in StrToPos:
-    Result[Pos, string].ok StrToPos[str]
+  let posRes = StrToPos.getRes str
+  if posRes.isOk:
+    Result[Pos, string].ok posRes.value
   else:
     Result[Pos, string].err "Invalid pos: {str}".fmt
 
@@ -301,8 +301,9 @@ func parsePos*(query: string, fqdn: IdeFqdn): Result[Pos, string] {.inline.} =
   of Pon2:
     query.parsePos
   of Ishikawa, Ips:
-    if query in IshikawaUriToPos:
-      Result[Pos, string].ok IshikawaUriToPos[query]
+    let posRes = IshikawaUriToPos.getRes query
+    if posRes.isOk:
+      Result[Pos, string].ok posRes.value
     else:
       Result[Pos, string].err "Invalid pos: {query}".fmt
 
@@ -315,4 +316,4 @@ func parseOptPos*(query: string, fqdn: IdeFqdn): Result[OptPos, string] {.inline
     if query == NonePosIshikawaUri:
       Result[OptPos, string].ok NonePos
     else:
-      Result[OptPos, string].ok ?query.parsePos fqdn
+      Result[OptPos, string].ok OptPos.ok ?query.parsePos fqdn

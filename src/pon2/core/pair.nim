@@ -6,11 +6,10 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[setutils, strformat, sugar]
+import std/[strformat, sugar, tables]
 import results
-import stew/[assign2]
-import stew/shims/[tables]
 import ./[cell, fqdn]
+import ../private/[assign2, misc]
 
 type Pair* {.pure.} = enum
   ## The pair of two color puyos.
@@ -65,7 +64,7 @@ func initPivots(): array[Pair, Cell] {.inline.} =
   ## Returns `Pivots`.
   var pivots {.noinit.}: array[Pair, Cell]
   for pair in Pair:
-    pivots[pair] = Red.succ pair.ord div ColorPuyos.card
+    pivots[pair].assign Red.succ pair.ord div ColorPuyos.card
 
   pivots
 
@@ -73,7 +72,7 @@ func initRotors(): array[Pair, Cell] {.inline.} =
   ## Returns `Rotors`.
   var rotors {.noinit.}: array[Pair, Cell]
   for pair in Pair:
-    rotors[pair] = Red.succ pair.ord mod ColorPuyos.card
+    rotors[pair].assign Red.succ pair.ord mod ColorPuyos.card
 
   rotors
 
@@ -109,7 +108,7 @@ func `rotor=`*(self: var Pair, colorPuyo: Cell): Result[void, string] {.inline.}
   if colorPuyo notin ColorPuyos:
     return Result[void, string].err "Invalid color puyo: {colorPuyo}".fmt
 
-  self.inc colorPuyo.ord - self.pivot.ord
+  self.inc colorPuyo.ord - self.rotor.ord
 
   Result[void, string].ok
 
@@ -121,7 +120,7 @@ func initSwapPairs(): array[Pair, Pair] {.inline.} =
   ## Returns `SwapPairs`.
   var swapPairs {.noinit.}: array[Pair, Pair]
   for pair in Pair:
-    swapPairs[pair] = Pair.init(pair.rotor, pair.pivot)
+    swapPairs[pair].assign Pair.init(pair.rotor, pair.pivot)
 
   swapPairs
 
@@ -140,7 +139,7 @@ func swap*(self: var Pair) {.inline.} = ## Swaps the axis-puyo and child-puyo.
 
 func cellCnt*(self: Pair, cell: Cell): int {.inline.} =
   ## Returns the number of `cell` in the pair.
-  (self.axis == cell).int + (self.child == cell).int
+  (self.pivot == cell).int + (self.rotor == cell).int
 
 func cellCnt*(self: Pair): int {.inline.} =
   ## Returns the number of cells in the pair.
@@ -164,8 +163,9 @@ const StrToPair = collect:
 
 func parsePair*(str: string): Result[Pair, string] {.inline.} =
   ## Returns the pair converted from the string representation.
-  if str in StrToPair:
-    Result[Pair, string].ok StrToPair[str]
+  let pairRes = StrToPair.getRes str
+  if pairRes.isOk:
+    Result[Pair, string].ok pairRes.value
   else:
     Result[Pair, string].err "Invalid pair: {str}".fmt
 
@@ -193,7 +193,8 @@ func parsePair*(query: string, fqdn: IdeFqdn): Result[Pair, string] {.inline.} =
   of Pon2:
     query.parsePair
   of Ishikawa, Ips:
-    if query in IshikawaUriToPair:
-      Result[Pair, string].ok IshikawaUriToPair[query]
+    let pairRes = IshikawaUriToPair.getRes query
+    if pairRes.isOk:
+      Result[Pair, string].ok pairRes.value
     else:
-      Result[Pair, string].ok "Invalid pair: {query}".fmt
+      Result[Pair, string].err "Invalid pair: {query}".fmt

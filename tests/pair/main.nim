@@ -1,11 +1,9 @@
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[unittest]
+import results
 import ../../src/pon2/core/[cell, fqdn, pair]
 
 proc main*() =
@@ -13,35 +11,40 @@ proc main*() =
   # Constructor
   # ------------------------------------------------
 
-  # initPair
+  # init
   block:
-    check initPair(Yellow, Green) == YellowGreen
-    check initPair(Purple, Purple) == PurplePurple
+    check Pair.init(Yellow, Green) == YellowGreen
+    check Pair.init(Purple, Purple) == PurplePurple
 
   # ------------------------------------------------
   # Property
   # ------------------------------------------------
 
-  # axis, child
+  # pivot, rotor
   block:
-    check BlueRed.axis == Blue
-    check BlueRed.child == Red
+    check BlueRed.pivot == Blue
+    check BlueRed.rotor == Red
 
-  # isDouble
+  # isDbl
   block:
-    check not PurpleRed.isDouble
-    check YellowYellow.isDouble
+    check not PurpleRed.isDbl
+    check YellowYellow.isDbl
 
   # ------------------------------------------------
   # Operator
   # ------------------------------------------------
 
-  # axis=, child=
+  # pivot=, rotor=
   block:
     var pair = RedRed
-    pair.axis = Blue
+    check (pair.pivot = Blue).isOk
     check pair == BlueRed
-    pair.child = Green
+    check (pair.rotor = Green).isOk
+    check pair == BlueGreen
+
+    check (pair.pivot = None).isErr
+    check pair == BlueGreen
+    check (pair.rotor = Garbage).isErr
     check pair == BlueGreen
 
   # ------------------------------------------------
@@ -61,28 +64,41 @@ proc main*() =
   # Count
   # ------------------------------------------------
 
-  # puyoCount, colorCount, garbageCount
+  # cellCnt, colorCnt, garbageCnt
   block:
-    check YellowGreen.puyoCount(Yellow) == 1
-    check YellowGreen.puyoCount(Green) == 1
-    check YellowGreen.puyoCount(Purple) == 0
-    check YellowGreen.puyoCount == 2
-    check YellowGreen.colorCount == 2
-    check YellowGreen.garbageCount == 0
+    check YellowGreen.cellCnt(Yellow) == 1
+    check YellowGreen.cellCnt(Green) == 1
+    check YellowGreen.cellCnt(Purple) == 0
+    check YellowGreen.cellCnt == 2
+    check YellowGreen.colorCnt == 2
+    check YellowGreen.garbageCnt == 0
 
   # ------------------------------------------------
   # Pair <-> string / URI
   # ------------------------------------------------
 
-  # parsePair, toUriQuery
+  # Pair <-> string
   block:
     check $RedGreen == "rg"
-    check "rg".parsePair == RedGreen
 
+    let pairRes = "rg".parsePair
+    check pairRes.isOk and pairRes.value == RedGreen
+
+    check "RG".parsePair.isErr
+
+  # Pair <-> URI
+  block:
     check RedGreen.toUriQuery(Pon2) == "rg"
-    check RedGreen.toUriQuery(Ishikawa) == "c"
-    check RedGreen.toUriQuery(Ips) == "c"
+    for fqdn in [Ishikawa, Ips]:
+      check RedGreen.toUriQuery(fqdn) == "c"
 
-    check "rg".parsePair(Pon2) == RedGreen
-    check "c".parsePair(Ishikawa) == RedGreen
-    check "c".parsePair(Ips) == RedGreen
+    let pairRes = "rg".parsePair(Pon2)
+    check pairRes.isOk and pairRes.value == RedGreen
+
+    for fqdn in [Ishikawa, Ips]:
+      let pairRes2 = "c".parsePair(fqdn)
+      check pairRes2.isOk and pairRes2.value == RedGreen
+
+    check "c".parsePair(Pon2).isErr
+    check "rg".parsePair(Ishikawa).isErr
+    check "rg".parsePair(Ips).isErr

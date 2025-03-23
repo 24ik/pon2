@@ -10,9 +10,10 @@
 
 import
   std/[
-    algorithm, deques, os, parsecfg, random, sequtils, streams, strutils, typetraits,
-    uri,
+    algorithm, deques, os, parsecfg, random, sequtils, streams, strformat, strutils,
+    tables, typetraits, uri,
   ]
+import results
 
 when not defined(js):
   import std/[cpuinfo]
@@ -101,6 +102,20 @@ func parseSomeInt*[T: SomeNumber or Natural or Positive](val: char): T {.inline.
   ## Converts the char to the given type `T`.
   ## If the conversion fails, `ValueError` will be raised.
   parseSomeInt[T] $val
+
+# ------------------------------------------------
+# Table
+# ------------------------------------------------
+
+func getRes*[K, V](
+    tbl: Table[K, V] or TableRef[K, V] or OrderedTable[K, V] or OrderedTableRef[K, V],
+    key: K,
+): Result[V, string] {.inline.} =
+  ## Returns the value corresponding to the key.
+  if key in tbl:
+    Result[V, string].ok tbl.getOrDefault(key, V.default)
+  else:
+    Result[V, string].err "Key not found: {key}".fmt
 
 # ------------------------------------------------
 # Deque
