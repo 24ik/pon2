@@ -13,7 +13,8 @@
 {.experimental: "views".}
 
 import std/[strformat]
-import ./[res, rule]
+import results
+import ./[rule]
 import ../private/[misc]
 
 type NoticeGarbage* {.pure.} = enum
@@ -41,29 +42,31 @@ static:
 
 const NoticeUnits: array[NoticeGarbage, int] = [1, 6, 30, 180, 360, 720, 1440]
 
-func noticeGarbageCounts*(
+func noticeGarbageCnts*(
     score: int, rule: Rule, useComet = false
-): Res[array[NoticeGarbage, int]] {.inline.} =
+): Result[array[NoticeGarbage, int], string] {.inline.} =
   ## Returns the number of notice garbage puyos.
   if score < 0:
-    return Res[array[NoticeGarbage, int]].err "`score` should be non-negative, but got {score}".fmt
+    return Result[array[NoticeGarbage, int], string].err(
+      "`score` should be non-negative, but got {score}".fmt
+    )
 
-  var counts = initArrWith[NoticeGarbage, int](0)
+  var cnts = initArrWith[NoticeGarbage, int](0)
 
   let highestNotice: NoticeGarbage
   if useComet:
     highestNotice = Comet
   else:
     highestNotice = Crown
-    counts[Comet] = 0
+    cnts[Comet] = 0
 
   var score2 = score div GarbageRates[rule]
   for notice in countdown(highestNotice, NoticeGarbage.low):
     let
       unit = NoticeUnits[notice]
-      count = score2 div unit
+      cnt = score2 div unit
 
-    counts[notice] = count
-    score2.dec unit * count
+    cnts[notice] = cnt
+    score2.dec unit * cnt
 
-  Res[array[NoticeGarbage, int]].ok counts
+  Result[array[NoticeGarbage, int], string].ok cnts

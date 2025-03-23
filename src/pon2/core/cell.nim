@@ -7,7 +7,7 @@
 {.experimental: "views".}
 
 import std/[strformat, sugar, tables]
-import ./[res]
+import results
 
 type Cell* {.pure.} = enum
   None = "."
@@ -31,9 +31,9 @@ const StrToCell = collect:
   for cell in Cell:
     {$cell: cell}
 
-func parseCell*(str: string): Res[Cell] {.inline.} =
+func parseCell*(str: string): Result[Cell, string] {.inline.} =
   ## Returns the cell converted from the string representation.
   if str in StrToCell:
-    Res[Cell].ok StrToCell[str]
+    Result[Cell, string].ok StrToCell[str]
   else:
-    Res[Cell].err "Invalid cell: {str}".fmt
+    Result[Cell, string].err "Invalid cell: {str}".fmt

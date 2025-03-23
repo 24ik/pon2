@@ -7,7 +7,9 @@
 {.experimental: "views".}
 
 import std/[setutils, strformat, sugar, tables]
-import ./[cell, fqdn, res]
+import results
+import ./[cell, fqdn]
+import ../private/[misc]
 
 type Pair* {.pure.} = enum
   ## The pair of two color puyos.
@@ -60,7 +62,7 @@ func init*(T: type Pair, axis, child: Cell): T {.inline.} =
 
 func initPairToAxis(): array[Pair, Cell] {.inline.} =
   ## Returns `PairToAxis`.
-  var pairToAxis: array[Pair, Cell]
+  var pairToAxis = initArrWith[Pair, Cell](Cell.low)
   for pair in Pair:
     pairToAxis[pair] = Red.succ pair.ord div ColorPuyos.card
 
@@ -68,9 +70,11 @@ func initPairToAxis(): array[Pair, Cell] {.inline.} =
 
 func initPairToChild(): array[Pair, Cell] {.inline.} =
   ## Returns `PairToChild`.
-  var pairToChild: array[Pair, Cell]
+  var pairToChild = initArrWith[Pair, Cell](Cell.low)
   for pair in Pair:
     pairToChild[pair] = Red.succ pair.ord mod ColorPuyos.card
+
+  pairToChild
 
 const
   PairToAxis = initPairToAxis()
@@ -90,23 +94,23 @@ func isDouble*(self: Pair): bool {.inline.} =
 # Operator
 # ------------------------------------------------
 
-func `axis=`*(self: var Pair, colorPuyo: Cell): Res[void] {.inline.} =
+func `axis=`*(self: var Pair, colorPuyo: Cell): Result[void, string] {.inline.} =
   ## Sets the axis-puyo.
   if colorPuyo notin ColorPuyos:
-    return Res[void].err "Invalid color puyo: {colorPuyo}".fmt
+    return Result[void, string].err "Invalid color puyo: {colorPuyo}".fmt
 
-  self.inc (color.ord - self.axis.ord) * ColorPuyos.card
+  self.inc (colorPuyo.ord - self.axis.ord) * ColorPuyos.card
 
-  Res[void].ok
+  Result[void, string].ok
 
-func `child=`*(self: var Pair, colorPuyo: Cell): Res[void] {.inline.} =
+func `child=`*(self: var Pair, colorPuyo: Cell): Result[void, string] {.inline.} =
   ## Sets the child-puyo.
   if colorPuyo notin ColorPuyos:
-    return Res[void].err "Invalid color puyo: {colorPuyo}".fmt
+    return Result[void, string].err "Invalid color puyo: {colorPuyo}".fmt
 
-  self.inc color.ord - self.axis.ord
+  self.inc colorPuyo.ord - self.axis.ord
 
-  Res[void].ok
+  Result[void, string].ok
 
 # ------------------------------------------------
 # Swap
@@ -114,9 +118,11 @@ func `child=`*(self: var Pair, colorPuyo: Cell): Res[void] {.inline.} =
 
 func initPairToSwapPair(): array[Pair, Pair] {.inline.} =
   ## Returns `PairToSwapPair`.
-  var pairToPair: array[Pair, Pair]
+  var pairToPair = initArrWith[Pair, Pair](Pair.low)
   for pair in Pair:
     pairToPair[pair] = Pair.init(pair.child, pair.axis)
+
+  pairToPair
 
 const PairToSwapPair = initPairToSwapPair()
 
@@ -155,12 +161,12 @@ const StrToPair = collect:
   for pair in Pair:
     {$pair: pair}
 
-func parsePair*(str: string): Res[Pair] {.inline.} =
+func parsePair*(str: string): Result[Pair, string] {.inline.} =
   ## Returns the pair converted from the string representation.
   if str in StrToPair:
-    Res[Pair].ok StrToPair[str]
+    Result[Pair, string].ok StrToPair[str]
   else:
-    Res[Pair].err "Invalid pair: {str}".fmt
+    Result[Pair, string].err "Invalid pair: {str}".fmt
 
 # ------------------------------------------------
 # Pair <-> URI
@@ -180,13 +186,13 @@ func toUriQuery*(self: Pair, fqdn = Pon2): string {.inline.} =
   of Ishikawa, Ips:
     $PairToIshikawaUri[self.ord]
 
-func parsePair*(query: string, fqdn: IdeFqdn): Res[Pair] {.inline.} =
+func parsePair*(query: string, fqdn: IdeFqdn): Result[Pair, string] {.inline.} =
   ## Returns the pair converted from the URI query.
   case fqdn
   of Pon2:
     query.parsePair
   of Ishikawa, Ips:
     if query in IshikawaUriToPair:
-      Res[Pair].ok IshikawaUriToPair[query]
+      Result[Pair, string].ok IshikawaUriToPair[query]
     else:
-      Res[Pair].ok "Invalid pair: {query}".fmt
+      Result[Pair, string].ok "Invalid pair: {query}".fmt
