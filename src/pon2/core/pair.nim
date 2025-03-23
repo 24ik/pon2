@@ -11,31 +11,31 @@ import ./[cell, fqdn, res]
 
 type Pair* {.pure.} = enum
   ## The pair of two color puyos.
-  # axis == Red
+  # axis: Red
   RedRed = $Red & $Red
   RedGreen = $Red & $Green
   RedBlue = $Red & $Blue
   RedYellow = $Red & $Yellow
   RedPurple = $Red & $Purple
-  # axis == Green
+  # axis: Green
   GreenRed = $Green & $Red
   GreenGreen = $Green & $Green
   GreenBlue = $Green & $Blue
   GreenYellow = $Green & $Yellow
   GreenPurple = $Green & $Purple
-  # axis == Blue
+  # axis: Blue
   BlueRed = $Blue & $Red
   BlueGreen = $Blue & $Green
   BlueBlue = $Blue & $Blue
   BlueYellow = $Blue & $Yellow
   BluePurple = $Blue & $Purple
-  # axis == Yellow
+  # axis: Yellow
   YellowRed = $Yellow & $Red
   YellowGreen = $Yellow & $Green
   YellowBlue = $Yellow & $Blue
   YellowYellow = $Yellow & $Yellow
   YellowPurple = $Yellow & $Purple
-  # axis == Purple
+  # axis: Purple
   PurpleRed = $Purple & $Red
   PurpleGreen = $Purple & $Green
   PurpleBlue = $Purple & $Blue
