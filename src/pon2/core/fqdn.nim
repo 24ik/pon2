@@ -1,4 +1,4 @@
-## This module implements IDE's FQDN.
+## This module implements IDE's FQDNs.
 ##
 ## Compile Options:
 ## | Option               | Description          | Default          |
