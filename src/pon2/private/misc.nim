@@ -103,6 +103,13 @@ func parseSomeInt*[T: SomeNumber or Natural or Positive](val: char): T {.inline.
   ## If the conversion fails, `ValueError` will be raised.
   parseSomeInt[T] $val
 
+func parseIntRes*(str: string): Result[int, string] {.inline.} =
+  ## Returns the integer converted from the string.
+  try:
+    Result[int, string].ok str.parseInt
+  except ValueError:
+    Result[int, string].err "Invalid integer: {str}".fmt
+
 # ------------------------------------------------
 # Table
 # ------------------------------------------------

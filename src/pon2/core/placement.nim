@@ -47,7 +47,7 @@ type
   OptPlacement* = Opt[Placement]
 
 const
-  NonePlacement* = OptPlacement.err()
+  NonePlacement* = OptPlacement.err
   AllDblPlacements* = {Up0 .. Right4}
 
 # ------------------------------------------------
