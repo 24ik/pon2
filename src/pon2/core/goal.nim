@@ -190,7 +190,6 @@ const
   KindToIshikawaUri = "2abcduvwxEFGHIJQR"
   ColorToIshikawaUri = "01234567"
   ValToIshikawaUri = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-"
-  InvalidValIshikawaUri = '_'
   EmptyIshikawaUri = '0'
 
   IshikawaUriToKind = collect:
