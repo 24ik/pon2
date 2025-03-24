@@ -44,10 +44,8 @@ type
     Left4 = "54"
     Left5 = "65"
 
-  OptPlacement* = Opt[Placement]
-
 const
-  NonePlacement* = OptPlacement.err
+  NonePlacement* = Opt[Placement].err
   AllDblPlacements* = {Up0 .. Right4}
 
 # ------------------------------------------------
@@ -244,7 +242,7 @@ const
     for plcmt in Placement:
       {$plcmt: plcmt}
 
-func `$`*(self: OptPlacement): string {.inline.} =
+func `$`*(self: Opt[Placement]): string {.inline.} =
   if self.isOk:
     $self.value
   else:
@@ -258,12 +256,12 @@ func parsePlacement*(str: string): Result[Placement, string] {.inline.} =
   else:
     Result[Placement, string].err "Invalid placement: {str}".fmt
 
-func parseOptPlacement*(str: string): Result[OptPlacement, string] {.inline.} =
+func parseOptPlacement*(str: string): Result[Opt[Placement], string] {.inline.} =
   ## Returns the optional placement converted from the string representation.
   if str == NonePlcmtStr:
-    Result[OptPlacement, string].ok NonePlacement
+    Result[Opt[Placement], string].ok NonePlacement
   else:
-    Result[OptPlacement, string].ok OptPlacement.ok ?str.parsePlacement
+    Result[Opt[Placement], string].ok Opt[Placement].ok ?str.parsePlacement
 
 # ------------------------------------------------
 # Placement <-> URI
@@ -284,7 +282,7 @@ func toUriQuery*(self: Placement, fqdn = Pon2): string {.inline.} =
   of Ishikawa, Ips:
     $PlcmtToIshikawaUri[self.ord]
 
-func toUriQuery*(self: OptPlacement, fqdn = Pon2): string {.inline.} =
+func toUriQuery*(self: Opt[Placement], fqdn = Pon2): string {.inline.} =
   ## Returns the URI query converted from the optional placement.
   case fqdn
   of Pon2:
@@ -311,13 +309,13 @@ func parsePlacement*(
 
 func parseOptPlacement*(
     query: string, fqdn: IdeFqdn
-): Result[OptPlacement, string] {.inline.} =
+): Result[Opt[Placement], string] {.inline.} =
   ## Returns the optional placement converted from the URI query.
   case fqdn
   of Pon2:
     query.parseOptPlacement
   of Ishikawa, Ips:
     if query == NonePlcmtIshikawaUri:
-      Result[OptPlacement, string].ok NonePlacement
+      Result[Opt[Placement], string].ok NonePlacement
     else:
-      Result[OptPlacement, string].ok OptPlacement.ok ?query.parsePlacement fqdn
+      Result[Opt[Placement], string].ok Opt[Placement].ok ?query.parsePlacement fqdn

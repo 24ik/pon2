@@ -67,13 +67,13 @@ proc main*() =
     check "".parsePlacement.isErr
     check "33".parsePlacement.isErr
 
-  # OptPlacement <-> string
+  # Opt[Placement] <-> string
   block:
-    check $OptPlacement.ok(Down5) == "6S"
+    check $Opt[Placement].ok(Down5) == "6S"
     check $NonePlacement == ""
 
     let optPlcmtRes = "6S".parseOptPlacement
-    check optPlcmtRes.isOk and optPlcmtRes.value == OptPlacement.ok(Down5)
+    check optPlcmtRes.isOk and optPlcmtRes.value == Opt[Placement].ok(Down5)
 
     let optPlcmtRes2 = "".parseOptPlacement
     check optPlcmtRes2.isOk and optPlcmtRes2.value == NonePlacement
@@ -96,24 +96,24 @@ proc main*() =
     check "34".parsePlacement(Ishikawa).isErr
     check "34".parsePlacement(Ips).isErr
 
-  # OptPlacement <-> URI
+  # Opt[Placement] <-> URI
   block:
-    check OptPlacement.ok(Right2).toUriQuery(Pon2) == "34"
+    check Opt[Placement].ok(Right2).toUriQuery(Pon2) == "34"
     check NonePlacement.toUriQuery(Pon2) == ""
     for fqdn in [Ishikawa, Ips]:
-      check OptPlacement.ok(Right2).toUriQuery(fqdn) == "g"
+      check Opt[Placement].ok(Right2).toUriQuery(fqdn) == "g"
       check NonePlacement.toUriQuery(fqdn) == "1"
 
     let
       optPlcmtRes = "34".parseOptPlacement(Pon2)
       optPlcmtRes2 = "".parseOptPlacement(Pon2)
-    check optPlcmtRes.isOk and optPlcmtRes.value == OptPlacement.ok(Right2)
+    check optPlcmtRes.isOk and optPlcmtRes.value == Opt[Placement].ok(Right2)
     check optPlcmtRes2.isOk and optPlcmtRes2.value == NonePlacement
     for fqdn in [Ishikawa, Ips]:
       let
         optPlcmtRes3 = "g".parseOptPlacement(fqdn)
         optPlcmtRes4 = "1".parseOptPlacement(fqdn)
-      check optPlcmtRes3.isOk and optPlcmtRes3.value == OptPlacement.ok(Right2)
+      check optPlcmtRes3.isOk and optPlcmtRes3.value == Opt[Placement].ok(Right2)
       check optPlcmtRes4.isOk and optPlcmtRes4.value == NonePlacement
 
     check "1".parseOptPlacement(Pon2).isErr
