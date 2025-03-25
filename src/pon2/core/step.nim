@@ -249,7 +249,7 @@ func parseStep*(query: string, fqdn: IdeFqdn): Result[Step, string] {.inline.} =
         ]
       )
     elif query.len == 2:
-      Result[Step, string].ok Step.init(?query.parsePair fqdn)
+      Result[Step, string].ok Step.init ?query.parsePair fqdn
     elif query.len == 4:
       Result[Step, string].ok Step.init(
         ?query[0 ..< 2].parsePair fqdn, ?query[2 ..< 4].parseOptPlacement fqdn
@@ -297,7 +297,7 @@ func `$`*(self: Steps): string {.inline.} =
 
 func parseSteps*(str: string): Result[Steps, string] {.inline.} =
   ## Returns the steps converted from the string representation.
-  let stepReses = str.split(StepsSep).mapIt(it.parseStep)
+  let stepReses = str.split(StepsSep).mapIt it.parseStep
   if stepReses.allIt it.isOk:
     # NOTE: `it.value` raises compile error due to results' bug
     Result[Steps, string].ok stepReses.mapIt it.unsafeValue

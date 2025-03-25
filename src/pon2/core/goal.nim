@@ -127,7 +127,7 @@ func normalize*(self: var Goal) {.inline.} =
 
 func normalized*(self: Goal): Goal {.inline.} =
   ## Returns the normalized goal.
-  self.dup(normalize)
+  self.dup normalize
 
 # ------------------------------------------------
 # Goal <-> string

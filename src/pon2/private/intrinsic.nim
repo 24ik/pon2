@@ -21,6 +21,7 @@ const
   UseBmi2* = Bmi2 and (defined(i386) or defined(amd64))
 
 when not UseBmi2:
+  import stew/[staticfor]
   import ./[assign2]
 
 # ------------------------------------------------
@@ -100,9 +101,9 @@ else:
     )
 
     var lastMask = not mask
-    for i in 0 ..< BitCnt.pred:
+    staticFor(i, 0 ..< BitCnt.pred):
       var bit = lastMask shl 1
-      for j in 0 ..< BitCnt:
+      staticFor(j, 0 ..< BitCnt):
         bit.assign bit xor (bit shl (1 shl j))
 
       pextMask.bits[i].assign bit
@@ -125,7 +126,7 @@ else:
 
     var res = a and mask.mask
 
-    for i in 0 ..< BitCnt:
+    staticFor(i, 0 ..< BitCnt):
       let bit = mask.bits[i]
       res.assign (res and not bit) or ((res and bit) shr (1 shl i))
 
