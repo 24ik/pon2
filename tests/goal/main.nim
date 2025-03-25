@@ -78,19 +78,22 @@ proc main*() =
 
   # normalize, normalized
   block:
-    var goal = Goal.init(ClearChainMore, Opt[GoalColor].err, Opt[GoalVal].err)
-    let goal2 = Goal.init(ClearChainMore, All, 0)
-    check goal.normalized == goal2
-    goal.normalize
-    check goal == goal2
+    block:
+      var goal = Goal.init(ClearChainMore, Opt[GoalColor].err, Opt[GoalVal].err)
+      let goal2 = Goal.init(ClearChainMore, All, 0)
+      check goal.normalized == goal2
+      goal.normalize
+      check goal == goal2
 
-    check goal2.normalized == goal2
+      check goal2.normalized == goal2
 
-    let goal3 = Goal.init(Clear, Purple, 3)
-    check goal3.normalized == Goal.init(Clear, Purple)
+    block:
+      let goal = Goal.init(Clear, Purple, 3)
+      check goal.normalized == Goal.init(Clear, Purple)
 
-    let goal4 = Goal.init(Chain, Garbage, 2)
-    check goal4.normalized == Goal.init(Chain, 2)
+    block:
+      let goal = Goal.init(Chain, Garbage, 2)
+      check goal.normalized == Goal.init(Chain, 2)
 
   # ------------------------------------------------
   # Goal <-> string / URI
