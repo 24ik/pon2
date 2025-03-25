@@ -103,7 +103,7 @@ proc main*() =
       let
         goal = Goal.init(Clear, Garbage)
         str = "おじゃまぷよ全て消すべし"
-        pon2Uri = "goalkind=0&goalcolor=6"
+        pon2Uri = "0_6_"
         ishikawaUri = "260"
 
       check $goal == str
@@ -119,7 +119,7 @@ proc main*() =
       let
         goal = Goal.init(Chain, 5)
         str = "5連鎖するべし"
-        pon2Uri = "goalkind=5&goalval=5"
+        pon2Uri = "5__5"
         ishikawaUri = "u05"
 
       check $goal == str
@@ -135,7 +135,7 @@ proc main*() =
       let
         goal = Goal.init(ClearChainMore, Red, 3)
         str = "3連鎖以上&赤ぷよ全て消すべし"
-        pon2Uri = "goalkind=8&goalcolor=1&goalval=3"
+        pon2Uri = "8_1_3"
         ishikawaUri = "x13"
 
       check $goal == str
@@ -148,8 +148,7 @@ proc main*() =
 
     # invalid with Ishikawa/Ips
     block:
-      let goal = Goal.init(Conn, Yellow, 64)
-      check goal.toUriQuery(Pon2) ==
-        Result[string, string].ok "goalkind=15&goalcolor=4&goalval=64"
+      let goal = Goal.init(Conn, Yellow, -1)
+      check goal.toUriQuery(Pon2) == Result[string, string].ok "15_4_-1"
       check goal.toUriQuery(Ishikawa).isErr
       check goal.toUriQuery(Ips).isErr

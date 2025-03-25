@@ -6,7 +6,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, setutils, strformat, strutils, sugar, tables, uri]
+import std/[options, setutils, strformat, strutils, sugar, tables]
 import results
 import ./[fqdn]
 import ../private/[assign2, misc]
@@ -187,6 +187,9 @@ func parseGoal*(str: string): Result[Goal, string] {.inline.} =
 # ------------------------------------------------
 
 const
+  QuerySep = "_"
+  EmptyColor = ""
+  EmptyVal = ""
   KindToIshikawaUri = "2abcduvwxEFGHIJQR"
   ColorToIshikawaUri = "01234567"
   ValToIshikawaUri = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-"
@@ -202,23 +205,22 @@ const
     for i, uri in ValToIshikawaUri:
       {uri: i.GoalVal}
 
-  KindKey = "goalkind"
-  ColorKey = "goalcolor"
-  ValKey = "goalval"
-
-  GoalUriQueryKeys* = [KindKey, ColorKey, ValKey]
-
 func toUriQuery*(self: Goal, fqdn = Pon2): Result[string, string] {.inline.} =
   ## Returns the URI query converted from the requirement.
   case fqdn
   of Pon2:
-    var queries = @[(KindKey, $self.kind.ord)]
-    if self.color.isOk:
-      queries.add (ColorKey, $self.color.value.ord)
-    if self.val.isOk:
-      queries.add (ValKey, $self.val.value)
-
-    Result[string, string].ok queries.encodeQuery
+    let queries = [
+      $self.kind.ord,
+      if self.color.isOk:
+        $self.color.value.ord
+      else:
+        EmptyColor,
+      if self.val.isOk:
+        $self.val.value
+      else:
+        EmptyVal,
+    ]
+    Result[string, string].ok queries.join QuerySep
   of Ishikawa, Ips:
     if self.val.isOk and self.val.get notin 0 ..< ValToIshikawaUri.len:
       Result[string, string].err(
@@ -242,50 +244,30 @@ func toUriQuery*(self: Goal, fqdn = Pon2): Result[string, string] {.inline.} =
 
 func parseGoal*(query: string, fqdn: IdeFqdn): Result[Goal, string] {.inline.} =
   ## Returns the goal converted from the URI query.
-  var
-    goal = Goal.init(GoalKind.low, Opt[GoalColor].err, Opt[GoalVal].err)
-    kindSet = false
-    colorSet = false
-    valSet = false
-
+  var goal = Goal.init(GoalKind.low, Opt[GoalColor].err, Opt[GoalVal].err)
   case fqdn
   of Pon2:
-    for (key, val) in query.decodeQuery:
-      case key
-      of KindKey:
-        if kindSet:
-          return Result[Goal, string].err "Invalid goal (kind): {query}".fmt
+    let strs = query.split QuerySep
+    if strs.len != 3:
+      return Result[Goal, string].err "Invalid goal: {query}".fmt
 
-        let kindIntRes = val.parseIntRes
-        if kindIntRes.isErr or
-            kindIntRes.value notin GoalKind.low.ord .. GoalKind.high.ord:
-          return Result[Goal, string].err "Invalid goal (kind): {query}".fmt
+    let kindIntRes = strs[0].parseIntRes
+    if kindIntRes.isErr or kindIntRes.value notin GoalKind.low.ord .. GoalKind.high.ord:
+      return Result[Goal, string].err "Invalid goal (kind): {query}".fmt
+    goal.kind.assign kindIntRes.value.GoalKind
 
-        goal.kind.assign kindIntRes.value.GoalKind
-        kindSet.assign true
-      of ColorKey:
-        if colorSet:
-          return Result[Goal, string].err "Invalid goal (color): {query}".fmt
+    if strs[1] != EmptyColor:
+      let colorIntRes = strs[1].parseIntRes
+      if colorIntRes.isErr or
+          colorIntRes.value notin GoalColor.low.ord .. GoalColor.high.ord:
+        return Result[Goal, string].err "Invalid goal (color): {query}".fmt
+      goal.color.assign Opt[GoalColor].ok colorIntRes.value.GoalColor
 
-        let colorIntRes = val.parseIntRes
-        if colorIntRes.isErr or
-            colorIntRes.value notin GoalColor.low.ord .. GoalColor.high.ord:
-          return Result[Goal, string].err "Invalid goal (color): {query}".fmt
-
-        goal.color.assign Opt[GoalColor].ok colorIntRes.value.GoalColor
-        colorSet.assign true
-      of ValKey:
-        if valSet:
-          return Result[Goal, string].err "Invalid goal (val): {query}".fmt
-
-        let valIntRes = val.parseIntRes
-        if valIntRes.isErr:
-          return Result[Goal, string].err "Invalid goal (val): {query}".fmt
-
-        goal.val.assign Opt[GoalVal].ok valIntRes.value
-        valSet.assign true
-      else:
-        return Result[Goal, string].err "Invalid goal: {query}".fmt
+    if strs[2] != EmptyVal:
+      let valIntRes = strs[2].parseIntRes
+      if valIntRes.isErr:
+        return Result[Goal, string].err "Invalid goal (val): {query}".fmt
+      goal.val.assign Opt[GoalVal].ok valIntRes.value.GoalVal
   of Ishikawa, Ips:
     if query.len != 3:
       return Result[Goal, string].err "Invalid goal: {query}".fmt
