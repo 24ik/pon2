@@ -1,5 +1,5 @@
 ## This module implements intrinsic functions.
-## Note that now AVX2 is disabled on Windows due to some bugs.
+## Note that AVX2 is disabled on Windows due to alignment bug.
 ##
 ## Compile Options:
 ## | Option                | Description            | Default |
@@ -20,6 +20,9 @@ const
   UseAvx2* = Avx2 and (defined(i386) or defined(amd64)) and not defined(windows)
   UseBmi2* = Bmi2 and (defined(i386) or defined(amd64))
 
+when not UseBmi2:
+  import ./[assign2]
+
 # ------------------------------------------------
 # AVX2
 # ------------------------------------------------
@@ -38,13 +41,22 @@ when UseBmi2:
     {.passc: "-mbmi2".}
     {.passl: "-mbmi2".}
 
-  func pext*(a, mask: uint64): uint64 {.header: "<immintrin.h>", importc: "_pext_u64".}
-    ## Parallel bits extract.
+  type PextMask*[U: uint64 or uint32 or uint16] = U ## Mask used in `pext`.
 
-  func pext*(a, mask: uint32): uint32 {.header: "<immintrin.h>", importc: "_pext_u32".}
-    ## Parallel bits extract.
+  func init*[U: uint64 or uint32 or uint16](
+      T: type PextMask[U], mask: U
+  ): T {.inline.} =
+    mask
 
-  func pext*(a, mask: uint16): uint16 {.inline.} =
+  func pext*(
+    a: uint64, mask: uint64 or PextMask[uint64]
+  ): uint64 {.header: "<immintrin.h>", importc: "_pext_u64".} ## Parallel bits extract.
+
+  func pext*(
+    a: uint32, mask: uint32 or PextMask[uint32]
+  ): uint32 {.header: "<immintrin.h>", importc: "_pext_u32".} ## Parallel bits extract.
+
+  func pext*(a: uint16, mask: uint16 or PextMask[uint16]): uint16 {.inline.} =
     ## Parallel bits extract.
     uint16 a.uint32.pext mask.uint32
 else:
@@ -65,9 +77,10 @@ else:
       U,
     ]
 
-  func toPextMask*[U: uint64 or uint32 or uint16](mask: U): PextMask[U] {.inline.} =
-    ## Converts `mask` to the pext mask.
-    const BitNum =
+  func init*[U: uint64 or uint32 or uint16](
+      T: type PextMask[U], mask: U
+  ): PextMask[U] {.inline.} =
+    const BitCnt =
       when U is uint64:
         BitCnt64
       elif U is uint32:
@@ -75,7 +88,7 @@ else:
       else:
         BitCnt16
 
-    var pextMask = PextMask[U](
+    var pextMask = T(
       mask: mask,
       bits:
         when U is uint64:
@@ -87,20 +100,22 @@ else:
     )
 
     var lastMask = not mask
-    for i in 0 ..< BitNum.pred:
+    for i in 0 ..< BitCnt.pred:
       var bit = lastMask shl 1
-      for j in 0 ..< BitNum:
-        bit = bit xor (bit shl (1 shl j))
+      for j in 0 ..< BitCnt:
+        bit.assign bit xor (bit shl (1 shl j))
 
-      pextMask.bits[i] = bit
-      lastMask = lastMask and bit
+      pextMask.bits[i].assign bit
+      lastMask.assign lastMask and bit
 
-    pextMask.bits[^1] = (U.high - lastMask + 1) shl 1
+    pextMask.bits[^1].assign (U.high - lastMask + 1) shl 1
+
+    pextMask
 
   func pext*[U: uint64 or uint32 or uint16](a: U, mask: PextMask[U]): U {.inline.} =
     ## Parallel bits extract.
     ## This function is suitable for multiple `pext` callings with the same `mask`.
-    const BitNum =
+    const BitCnt =
       when U is uint64:
         BitCnt64
       elif U is uint32:
@@ -110,10 +125,12 @@ else:
 
     var res = a and mask.mask
 
-    for i in 0 ..< BitNum:
+    for i in 0 ..< BitCnt:
       let bit = mask.bits[i]
-      res = (res and not bit) or ((res and bit) shr (1 shl i))
+      res.assign (res and not bit) or ((res and bit) shr (1 shl i))
+
+    res
 
   func pext*[U: uint64 or uint32 or uint16](a, mask: U): U {.inline.} =
     ## Parallel bits extract.
-    a.pext mask.toPextMask
+    a.pext PextMask[U].init mask
