@@ -107,9 +107,9 @@ proc main*() =
         ishikawaUri = "260"
 
       check $goal == str
-      check goal.toUriQuery(Pon2) == pon2Uri
-      check goal.toUriQuery(Ishikawa) == ishikawaUri
-      check goal.toUriQuery(Ips) == ishikawaUri
+      check goal.toUriQuery(Pon2) == Result[string, string].ok pon2Uri
+      check goal.toUriQuery(Ishikawa) == Result[string, string].ok ishikawaUri
+      check goal.toUriQuery(Ips) == Result[string, string].ok ishikawaUri
       check str.parseGoal == Result[Goal, string].ok goal
       check pon2Uri.parseGoal(Pon2) == Result[Goal, string].ok goal
       check ishikawaUri.parseGoal(Ishikawa) == Result[Goal, string].ok goal
@@ -123,9 +123,9 @@ proc main*() =
         ishikawaUri = "u05"
 
       check $goal == str
-      check goal.toUriQuery(Pon2) == pon2Uri
-      check goal.toUriQuery(Ishikawa) == ishikawaUri
-      check goal.toUriQuery(Ips) == ishikawaUri
+      check goal.toUriQuery(Pon2) == Result[string, string].ok pon2Uri
+      check goal.toUriQuery(Ishikawa) == Result[string, string].ok ishikawaUri
+      check goal.toUriQuery(Ips) == Result[string, string].ok ishikawaUri
       check str.parseGoal == Result[Goal, string].ok goal
       check pon2Uri.parseGoal(Pon2) == Result[Goal, string].ok goal
       check ishikawaUri.parseGoal(Ishikawa) == Result[Goal, string].ok goal
@@ -139,9 +139,17 @@ proc main*() =
         ishikawaUri = "x13"
 
       check $goal == str
-      check goal.toUriQuery(Pon2) == pon2Uri
-      check goal.toUriQuery(Ishikawa) == ishikawaUri
-      check goal.toUriQuery(Ips) == ishikawaUri
+      check goal.toUriQuery(Pon2) == Result[string, string].ok pon2Uri
+      check goal.toUriQuery(Ishikawa) == Result[string, string].ok ishikawaUri
+      check goal.toUriQuery(Ips) == Result[string, string].ok ishikawaUri
       check str.parseGoal == Result[Goal, string].ok goal
       check pon2Uri.parseGoal(Pon2) == Result[Goal, string].ok goal
       check ishikawaUri.parseGoal(Ishikawa) == Result[Goal, string].ok goal
+
+    # invalid with Ishikawa/Ips
+    block:
+      let goal = Goal.init(Conn, Yellow, 64)
+      check goal.toUriQuery(Pon2) ==
+        Result[string, string].ok "goalkind=15&goalcolor=4&goalval=64"
+      check goal.toUriQuery(Ishikawa).isErr
+      check goal.toUriQuery(Ips).isErr

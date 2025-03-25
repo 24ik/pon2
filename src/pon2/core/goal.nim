@@ -208,10 +208,8 @@ const
 
   GoalUriQueryKeys* = [KindKey, ColorKey, ValKey]
 
-func toUriQuery*(self: Goal, fqdn = Pon2): string {.inline.} =
+func toUriQuery*(self: Goal, fqdn = Pon2): Result[string, string] {.inline.} =
   ## Returns the URI query converted from the requirement.
-  ## Note that the FQDN is not Pon2 and the goal value is not in 0..<64,
-  ## the result is empty.
   case fqdn
   of Pon2:
     var queries = @[(KindKey, $self.kind.ord)]
@@ -220,10 +218,12 @@ func toUriQuery*(self: Goal, fqdn = Pon2): string {.inline.} =
     if self.val.isOk:
       queries.add (ValKey, $self.val.value)
 
-    queries.encodeQuery
+    Result[string, string].ok queries.encodeQuery
   of Ishikawa, Ips:
     if self.val.isOk and self.val.get notin 0 ..< ValToIshikawaUri.len:
-      ""
+      Result[string, string].err(
+        "Goal value not in [0, 63] does not support with Ishikawa/Ips format."
+      )
     else:
       let
         kindChar = KindToIshikawaUri[self.kind.ord]
@@ -238,7 +238,7 @@ func toUriQuery*(self: Goal, fqdn = Pon2): string {.inline.} =
           else:
             EmptyIshikawaUri
 
-      "{kindChar}{colorChar}{valChar}".fmt
+      Result[string, string].ok "{kindChar}{colorChar}{valChar}".fmt
 
 func parseGoal*(query: string, fqdn: IdeFqdn): Result[Goal, string] {.inline.} =
   ## Returns the goal converted from the URI query.
