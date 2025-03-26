@@ -14,6 +14,7 @@ import
     tables, typetraits, uri,
   ]
 import results
+import ./[results2]
 
 when not defined(js):
   import std/[cpuinfo]
@@ -103,12 +104,12 @@ func parseSomeInt*[T: SomeNumber or Natural or Positive](val: char): T {.inline.
   ## If the conversion fails, `ValueError` will be raised.
   parseSomeInt[T] $val
 
-func parseIntRes*(str: string): Result[int, string] {.inline.} =
+func parseIntRes*(str: string): Res[int] {.inline.} =
   ## Returns the integer converted from the string.
   try:
-    Result[int, string].ok str.parseInt
-  except ValueError:
-    Result[int, string].err "Invalid integer: {str}".fmt
+    ok str.parseInt
+  except ValueError as ex:
+    err ex.msg
 
 # ------------------------------------------------
 # Table
@@ -117,12 +118,12 @@ func parseIntRes*(str: string): Result[int, string] {.inline.} =
 func getRes*[K, V](
     tbl: Table[K, V] or TableRef[K, V] or OrderedTable[K, V] or OrderedTableRef[K, V],
     key: K,
-): Result[V, string] {.inline.} =
+): Res[V] {.inline.} =
   ## Returns the value corresponding to the key.
   if key in tbl:
-    Result[V, string].ok tbl.getOrDefault(key, V.default)
+    ok tbl.getOrDefault key
   else:
-    Result[V, string].err "Key not found: {key}".fmt
+    err "key not found: {key}".fmt
 
 # ------------------------------------------------
 # Deque

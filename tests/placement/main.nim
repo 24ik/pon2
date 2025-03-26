@@ -3,8 +3,8 @@
 {.experimental: "views".}
 
 import std/[sugar, unittest]
-import results
 import ../../src/pon2/core/[common, fqdn, placement]
+import ../../src/pon2/private/[results2]
 
 proc main*() =
   # ------------------------------------------------
@@ -62,21 +62,21 @@ proc main*() =
     check $Right2 == "34"
 
     let plcmtRes = "34".parsePlacement
-    check plcmtRes.isOk and plcmtRes.value == Right2
+    check plcmtRes == Res[Placement].ok Right2
 
     check "".parsePlacement.isErr
     check "33".parsePlacement.isErr
 
-  # Opt[Placement] <-> string
+  # OptPlacement <-> string
   block:
-    check $Opt[Placement].ok(Down5) == "6S"
+    check $OptPlacement.ok(Down5) == "6S"
     check $NonePlacement == ""
 
     let optPlcmtRes = "6S".parseOptPlacement
-    check optPlcmtRes.isOk and optPlcmtRes.value == Opt[Placement].ok(Down5)
+    check optPlcmtRes == Res[OptPlacement].ok OptPlacement.ok Down5
 
     let optPlcmtRes2 = "".parseOptPlacement
-    check optPlcmtRes2.isOk and optPlcmtRes2.value == NonePlacement
+    check optPlcmtRes2 == Res[OptPlacement].ok NonePlacement
 
     check "6s".parseOptPlacement.isErr
 
@@ -86,35 +86,35 @@ proc main*() =
     for fqdn in [Ishikawa, Ips]:
       check Right2.toUriQuery(fqdn) == "g"
 
-    let plcmtRes = "34".parsePlacement(Pon2)
-    check plcmtRes.isOk and plcmtRes.value == Right2
+    let plcmtRes = "34".parsePlacement Pon2
+    check plcmtRes == Res[Placement].ok Right2
     for fqdn in [Ishikawa, Ips]:
       let plcmtRes2 = "g".parsePlacement(fqdn)
-      check plcmtRes2.isOk and plcmtRes2.value == Right2
+      check plcmtRes2 == Res[Placement].ok Right2
 
     check "g".parsePlacement(Pon2).isErr
     check "34".parsePlacement(Ishikawa).isErr
     check "34".parsePlacement(Ips).isErr
 
-  # Opt[Placement] <-> URI
+  # OptPlacement <-> URI
   block:
-    check Opt[Placement].ok(Right2).toUriQuery(Pon2) == "34"
+    check OptPlacement.ok(Right2).toUriQuery(Pon2) == "34"
     check NonePlacement.toUriQuery(Pon2) == ""
     for fqdn in [Ishikawa, Ips]:
-      check Opt[Placement].ok(Right2).toUriQuery(fqdn) == "g"
+      check OptPlacement.ok(Right2).toUriQuery(fqdn) == "g"
       check NonePlacement.toUriQuery(fqdn) == "1"
 
     let
-      optPlcmtRes = "34".parseOptPlacement(Pon2)
-      optPlcmtRes2 = "".parseOptPlacement(Pon2)
-    check optPlcmtRes.isOk and optPlcmtRes.value == Opt[Placement].ok(Right2)
-    check optPlcmtRes2.isOk and optPlcmtRes2.value == NonePlacement
+      optPlcmtRes = "34".parseOptPlacement Pon2
+      optPlcmtRes2 = "".parseOptPlacement Pon2
+    check optPlcmtRes == Res[OptPlacement].ok OptPlacement.ok Right2
+    check optPlcmtRes2 == Res[OptPlacement].ok NonePlacement
     for fqdn in [Ishikawa, Ips]:
       let
-        optPlcmtRes3 = "g".parseOptPlacement(fqdn)
-        optPlcmtRes4 = "1".parseOptPlacement(fqdn)
-      check optPlcmtRes3.isOk and optPlcmtRes3.value == Opt[Placement].ok(Right2)
-      check optPlcmtRes4.isOk and optPlcmtRes4.value == NonePlacement
+        optPlcmtRes3 = "g".parseOptPlacement fqdn
+        optPlcmtRes4 = "1".parseOptPlacement fqdn
+      check optPlcmtRes3 == Res[OptPlacement].ok OptPlacement.ok Right2
+      check optPlcmtRes4 == Res[OptPlacement].ok NonePlacement
 
     check "1".parseOptPlacement(Pon2).isErr
     check "".parseOptPlacement(Ishikawa).isErr

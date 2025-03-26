@@ -7,8 +7,7 @@
 {.experimental: "views".}
 
 import std/[strformat, sugar, tables]
-import results
-import ../private/[misc]
+import ../private/[misc, results2]
 
 type Rule* {.pure.} = enum
   ## Puyo Puyo rule.
@@ -23,10 +22,6 @@ const StrToRule = collect:
   for rule in Rule:
     {$rule: rule}
 
-func parseRule*(str: string): Result[Rule, string] {.inline.} =
+func parseRule*(str: string): Res[Rule] {.inline.} =
   ## Returns the rule converted from the string representation.
-  let ruleRes = StrToRule.getRes str
-  if ruleRes.isOk:
-    Result[Rule, string].ok ruleRes.value
-  else:
-    Result[Rule, string].err "Invalid rule: {str}".fmt
+  StrToRule.getRes(str).context "Invalid rule: {str}".fmt

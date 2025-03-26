@@ -3,8 +3,8 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import results
 import ../../src/pon2/core/[fqdn]
+import ../../src/pon2/private/[results2]
 
 proc main*() =
   # ------------------------------------------------
@@ -15,6 +15,6 @@ proc main*() =
   block:
     for fqdn in IdeFqdn:
       let fqdnRes = parseIdeFqdn $fqdn
-      check fqdnRes.isOk and fqdnRes.value == fqdn
+      check fqdnRes == Res[IdeFqdn].ok fqdn
 
     check "".parseIdeFqdn.isErr

@@ -12,8 +12,7 @@
 {.experimental: "views".}
 
 import std/[strformat, sugar, tables]
-import ../private/[misc]
-import results
+import ../private/[misc, results2]
 
 const Pon2Fqdn* {.define: "pon2.fqdn".} = "24ik.github.io"
 
@@ -31,10 +30,6 @@ const StrToFqdn = collect:
   for fqdn in IdeFqdn:
     {$fqdn: fqdn}
 
-func parseIdeFqdn*(str: string): Result[IdeFqdn, string] {.inline.} =
+func parseIdeFqdn*(str: string): Res[IdeFqdn] {.inline.} =
   ## Returns the FQDN converted from the string representation.
-  let fqdnRes = StrToFqdn.getRes str
-  if fqdnRes.isOk:
-    Result[IdeFqdn, string].ok fqdnRes.value
-  else:
-    Result[IdeFqdn, string].err "Invalid FQDN: {str}".fmt
+  StrToFqdn.getRes(str).context "Invalid FQDN: {str}".fmt

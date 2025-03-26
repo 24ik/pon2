@@ -3,8 +3,8 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import results
 import ../../src/pon2/core/[fqdn, goal]
+import ../../src/pon2/private/[results2]
 
 proc main*() =
   # ------------------------------------------------
@@ -13,11 +13,10 @@ proc main*() =
 
   # init
   block:
-    check Goal.init(Clear, Opt[GoalColor].ok Red, Opt[GoalVal].err) ==
-      Goal.init(Clear, Red)
-    check Goal.init(ChainMore, Opt[GoalColor].err, Opt[GoalVal].ok 5) ==
+    check Goal.init(Clear, OptGoalColor.ok Red, OptGoalVal.err) == Goal.init(Clear, Red)
+    check Goal.init(ChainMore, OptGoalColor.err, OptGoalVal.ok 5) ==
       Goal.init(ChainMore, 5)
-    check Goal.init(Conn, Opt[GoalColor].ok Color, Opt[GoalVal].ok 10) ==
+    check Goal.init(Conn, OptGoalColor.ok Color, OptGoalVal.ok 10) ==
       Goal.init(Conn, Color, 10)
 
   # ------------------------------------------------
@@ -27,17 +26,17 @@ proc main*() =
   # isNormalForm, isSupported
   block:
     let
-      goal1 = Goal.init(Clear, Opt[GoalColor].err, Opt[GoalVal].err)
+      goal1 = Goal.init(Clear, OptGoalColor.err, OptGoalVal.err)
       goal2 = Goal.init(Clear, Green)
       goal3 = Goal.init(Clear, 3)
       goal4 = Goal.init(Clear, Green, 3)
 
-      goal5 = Goal.init(Chain, Opt[GoalColor].err, Opt[GoalVal].err)
+      goal5 = Goal.init(Chain, OptGoalColor.err, OptGoalVal.err)
       goal6 = Goal.init(Chain, Green)
       goal7 = Goal.init(Chain, 4)
       goal8 = Goal.init(Chain, Green, 4)
 
-      goal9 = Goal.init(PlaceMore, Opt[GoalColor].err, Opt[GoalVal].err)
+      goal9 = Goal.init(PlaceMore, OptGoalColor.err, OptGoalVal.err)
       goal10 = Goal.init(PlaceMore, Green)
       goal11 = Goal.init(PlaceMore, 5)
       goal12 = Goal.init(PlaceMore, Green, 5)
@@ -79,7 +78,7 @@ proc main*() =
   # normalize, normalized
   block:
     block:
-      var goal = Goal.init(ClearChainMore, Opt[GoalColor].err, Opt[GoalVal].err)
+      var goal = Goal.init(ClearChainMore, OptGoalColor.err, OptGoalVal.err)
       let goal2 = Goal.init(ClearChainMore, All, 0)
       check goal.normalized == goal2
       goal.normalize
@@ -110,12 +109,12 @@ proc main*() =
         ishikawaUri = "260"
 
       check $goal == str
-      check goal.toUriQuery(Pon2) == Result[string, string].ok pon2Uri
-      check goal.toUriQuery(Ishikawa) == Result[string, string].ok ishikawaUri
-      check goal.toUriQuery(Ips) == Result[string, string].ok ishikawaUri
-      check str.parseGoal == Result[Goal, string].ok goal
-      check pon2Uri.parseGoal(Pon2) == Result[Goal, string].ok goal
-      check ishikawaUri.parseGoal(Ishikawa) == Result[Goal, string].ok goal
+      check goal.toUriQuery(Pon2) == Res[string].ok pon2Uri
+      check goal.toUriQuery(Ishikawa) == Res[string].ok ishikawaUri
+      check goal.toUriQuery(Ips) == Res[string].ok ishikawaUri
+      check str.parseGoal == Res[Goal].ok goal
+      check pon2Uri.parseGoal(Pon2) == Res[Goal].ok goal
+      check ishikawaUri.parseGoal(Ishikawa) == Res[Goal].ok goal
 
     # w/ val
     block:
@@ -126,12 +125,12 @@ proc main*() =
         ishikawaUri = "u05"
 
       check $goal == str
-      check goal.toUriQuery(Pon2) == Result[string, string].ok pon2Uri
-      check goal.toUriQuery(Ishikawa) == Result[string, string].ok ishikawaUri
-      check goal.toUriQuery(Ips) == Result[string, string].ok ishikawaUri
-      check str.parseGoal == Result[Goal, string].ok goal
-      check pon2Uri.parseGoal(Pon2) == Result[Goal, string].ok goal
-      check ishikawaUri.parseGoal(Ishikawa) == Result[Goal, string].ok goal
+      check goal.toUriQuery(Pon2) == Res[string].ok pon2Uri
+      check goal.toUriQuery(Ishikawa) == Res[string].ok ishikawaUri
+      check goal.toUriQuery(Ips) == Res[string].ok ishikawaUri
+      check str.parseGoal == Res[Goal].ok goal
+      check pon2Uri.parseGoal(Pon2) == Res[Goal].ok goal
+      check ishikawaUri.parseGoal(Ishikawa) == Res[Goal].ok goal
 
     # w/ color and val
     block:
@@ -142,16 +141,16 @@ proc main*() =
         ishikawaUri = "x13"
 
       check $goal == str
-      check goal.toUriQuery(Pon2) == Result[string, string].ok pon2Uri
-      check goal.toUriQuery(Ishikawa) == Result[string, string].ok ishikawaUri
-      check goal.toUriQuery(Ips) == Result[string, string].ok ishikawaUri
-      check str.parseGoal == Result[Goal, string].ok goal
-      check pon2Uri.parseGoal(Pon2) == Result[Goal, string].ok goal
-      check ishikawaUri.parseGoal(Ishikawa) == Result[Goal, string].ok goal
+      check goal.toUriQuery(Pon2) == Res[string].ok pon2Uri
+      check goal.toUriQuery(Ishikawa) == Res[string].ok ishikawaUri
+      check goal.toUriQuery(Ips) == Res[string].ok ishikawaUri
+      check str.parseGoal == Res[Goal].ok goal
+      check pon2Uri.parseGoal(Pon2) == Res[Goal].ok goal
+      check ishikawaUri.parseGoal(Ishikawa) == Res[Goal].ok goal
 
     # invalid with Ishikawa/Ips
     block:
       let goal = Goal.init(Conn, Yellow, -1)
-      check goal.toUriQuery(Pon2) == Result[string, string].ok "15_4_-1"
+      check goal.toUriQuery(Pon2) == Res[string].ok "15_4_-1"
       check goal.toUriQuery(Ishikawa).isErr
       check goal.toUriQuery(Ips).isErr

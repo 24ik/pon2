@@ -13,9 +13,8 @@
 {.experimental: "views".}
 
 import std/[strformat]
-import results
 import ./[rule]
-import ../private/[assign2]
+import ../private/[assign3, results2]
 
 type NoticeGarbage* {.pure.} = enum
   ## Notice garbage puyo.
@@ -44,12 +43,10 @@ const NoticeUnits: array[NoticeGarbage, int] = [1, 6, 30, 180, 360, 720, 1440]
 
 func noticeGarbageCnts*(
     score: int, rule: Rule, useComet = false
-): Result[array[NoticeGarbage, int], string] {.inline.} =
+): Res[array[NoticeGarbage, int]] {.inline.} =
   ## Returns the number of notice garbage puyos.
   if score < 0:
-    return Result[array[NoticeGarbage, int], string].err(
-      "`score` should be non-negative, but got {score}".fmt
-    )
+    return err "`score` should be non-negative, but got {score}".fmt
 
   var cnts {.noinit.}: array[NoticeGarbage, int]
 
@@ -69,4 +66,4 @@ func noticeGarbageCnts*(
     cnts[notice].assign cnt
     score2.dec unit * cnt
 
-  Result[array[NoticeGarbage, int], string].ok cnts
+  ok cnts

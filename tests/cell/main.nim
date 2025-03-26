@@ -3,8 +3,8 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import results
 import ../../src/pon2/core/[cell]
+import ../../src/pon2/private/[results2]
 
 proc main*() =
   # ------------------------------------------------
@@ -15,7 +15,7 @@ proc main*() =
   block:
     for cell in Cell:
       let cellRes = parseCell $cell
-      check cellRes.isOk and cellRes.value == cell
+      check cellRes == Res[Cell].ok cell
 
     check "".parseCell.isErr
     check "H".parseCell.isErr

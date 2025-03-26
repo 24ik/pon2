@@ -3,8 +3,8 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import results
 import ../../src/pon2/core/[rule]
+import ../../src/pon2/private/[results2]
 
 proc main*() =
   # ------------------------------------------------
@@ -15,7 +15,7 @@ proc main*() =
   block:
     for rule in Rule:
       let ruleRes = parseRule $rule
-      check ruleRes.isOk and ruleRes.value == rule
+      check ruleRes == Res[Rule].ok rule
 
     check "".parseRule.isErr
     check "T".parseRule.isErr

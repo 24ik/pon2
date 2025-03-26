@@ -1,4 +1,4 @@
-## This modules implements assignment.
+## This modules implements assignments.
 ##
 
 {.push raises: [].}

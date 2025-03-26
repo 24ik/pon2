@@ -6,10 +6,9 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, setutils, strformat, strutils, sugar, tables]
-import results
+import std/[setutils, strformat, strutils, sugar, tables]
 import ./[fqdn]
-import ../private/[assign2, misc]
+import ../private/[assign3, misc, results2]
 
 type
   GoalKind* {.pure.} = enum
@@ -45,10 +44,13 @@ type
 
   GoalVal* = int ## 'n' in the `GoalKind`.
 
+  OptGoalColor* = Opt[GoalColor]
+  OptGoalVal* = Opt[GoalVal]
+
   Goal* = object ## Nazo Puyo goal to clear.
     kind*: GoalKind
-    color*: Opt[GoalColor]
-    val*: Opt[GoalVal]
+    optColor*: OptGoalColor
+    optVal*: OptGoalVal
 
 const
   NoColorKinds* = {AccColor, AccColorMore, Chain, ChainMore, Color, ColorMore}
@@ -63,18 +65,18 @@ const
 # ------------------------------------------------
 
 func init*(
-    T: type Goal, kind: GoalKind, color: Opt[GoalColor], val: Opt[GoalVal]
+    T: type Goal, kind: GoalKind, optColor: OptGoalColor, optVal: OptGoalVal
 ): T {.inline.} =
-  T(kind: kind, color: color, val: val)
+  T(kind: kind, optColor: optColor, optVal: optVal)
 
 func init*(T: type Goal, kind: GoalKind, color: GoalColor, val: GoalVal): T {.inline.} =
-  T(kind: kind, color: Opt[GoalColor].ok color, val: Opt[GoalVal].ok val)
+  T.init(kind, OptGoalColor.ok color, OptGoalVal.ok val)
 
 func init*(T: type Goal, kind: GoalKind, color: GoalColor): T {.inline.} =
-  T(kind: kind, color: Opt[GoalColor].ok color, val: Opt[GoalVal].err)
+  T.init(kind, OptGoalColor.ok color, OptGoalVal.err)
 
 func init*(T: type Goal, kind: GoalKind, val: GoalVal): T {.inline.} =
-  T(kind: kind, color: Opt[GoalColor].err, val: Opt[GoalVal].ok val)
+  T.init(kind, OptGoalColor.err, OptGoalVal.ok val)
 
 # ------------------------------------------------
 # Property
@@ -83,22 +85,19 @@ func init*(T: type Goal, kind: GoalKind, val: GoalVal): T {.inline.} =
 func isNormalForm*(self: Goal): bool {.inline.} =
   ## Returns `true` if the goal is normal form; color and value are set
   ## appropriately.
-  if self.kind in ColorKinds != self.color.isOk:
-    return false
-  if self.kind in ValKinds != self.val.isOk:
-    return false
-
-  true
+  (self.kind in ColorKinds == self.optColor.isOk) and
+    (self.kind in ValKinds == self.optVal.isOk)
 
 func isSupported*(self: Goal): bool {.inline.} =
   ## Returns `true` if the goal is supported.
-  if self.kind in ColorKinds and self.color.isErr:
+  if self.kind in ColorKinds and self.optColor.isErr:
     return false
-  if self.kind in ValKinds and self.val.isErr:
+  if self.kind in ValKinds and self.optVal.isErr:
     return false
 
-  self.kind notin {Place, PlaceMore, Conn, ConnMore} or
-    self.color != Opt[GoalColor].ok Garbage
+  not (
+    self.kind in {Place, PlaceMore, Conn, ConnMore} and self.optColor.expect == Garbage
+  )
 
 # ------------------------------------------------
 # Normalize
@@ -112,18 +111,18 @@ func normalize*(self: var Goal) {.inline.} =
   ## Normalizes the goal; removes unnecessary color and value and compensates
   ## for missing color and value.
   if self.kind in ColorKinds:
-    if self.color.isErr:
-      self.color.assign Opt[GoalColor].ok DefColor
+    self.optColor.isOkOr:
+      self.optColor.ok DefColor
   else:
-    if self.color.isOk:
-      self.color.assign Opt[GoalColor].err
+    self.optColor.isErrOr:
+      self.optColor.err
 
   if self.kind in ValKinds:
-    if self.val.isNone:
-      self.val.assign Opt[GoalVal].ok DefVal
+    self.optVal.isOkOr:
+      self.optVal.ok DefVal
   else:
-    if self.val.isOk:
-      self.val.assign Opt[GoalVal].err
+    self.optVal.isErrOr:
+      self.optVal.err
 
 func normalized*(self: Goal): Goal {.inline.} =
   ## Returns the normalized goal.
@@ -139,24 +138,26 @@ const StrToKind = collect:
 
 func `$`*(self: Goal): string {.inline.} =
   var replacements = newSeqOfCap[(string, string)](2)
-  if self.color.isOk:
-    replacements.add ("c", $self.color.value)
-  if self.val.isOk:
-    replacements.add ("n", $self.val.value)
+  if self.optColor.isOk:
+    replacements.add ("c", $self.optColor.expect)
+  if self.optVal.isOk:
+    replacements.add ("n", $self.optVal.expect)
 
   ($self.kind).multiReplace replacements
 
-func parseGoal*(str: string): Result[Goal, string] {.inline.} =
+func parseGoal*(str: string): Res[Goal] {.inline.} =
   ## Returns the goal converted from the string representation.
   var
-    goalColor = Opt[GoalColor].err
-    goalVal = Opt[GoalVal].err
+    goal = Goal.init(GoalKind.low, Opt[GoalColor].err, Opt[GoalVal].err)
     str2 = str
 
   for color in GoalColor:
-    if color != All and $color in str2:
+    if color == All:
+      continue
+
+    if $color in str2:
       str2.assign str2.replace($color, "c")
-      goalColor.assign Opt[GoalColor].ok color
+      goal.optColor.ok color
       break
 
   var
@@ -171,16 +172,18 @@ func parseGoal*(str: string): Result[Goal, string] {.inline.} =
       for d in digits:
         valStr.add d
 
-      let valRes = valStr.parseIntRes
-      if valRes.isOk:
-        goalVal.assign Opt[GoalVal].ok valRes.value
-        str2.assign str2.replace($valRes.value, "n")
+      goal.optVal.ok GoalVal ?valStr.parseIntRes.context "Invalid goal (val): {str}".fmt
+      str2.assign str2.replace(valStr, "n")
+      break
 
-  let kindRes = StrToKind.getRes str2
-  if kindRes.isOk:
-    Result[Goal, string].ok Goal.init(kindRes.value, goalColor, goalVal)
-  else:
-    Result[Goal, string].err "Invalid goal: {str}".fmt
+  goal.kind.assign ?StrToKind.getRes(str2).context "Invalid goal: {str}".fmt
+
+  # we cannot distinguish empty string between Kind.All and no-color kind,
+  # so postprocesses here just like a normalization
+  if goal.optColor.isErr and goal.kind in ColorKinds:
+    goal.optColor.ok All
+
+  ok goal
 
 # ------------------------------------------------
 # Goal <-> URI
@@ -205,94 +208,78 @@ const
     for i, uri in ValToIshikawaUri:
       {uri: i.GoalVal}
 
-func toUriQuery*(self: Goal, fqdn = Pon2): Result[string, string] {.inline.} =
+func toUriQuery*(self: Goal, fqdn = Pon2): Res[string] {.inline.} =
   ## Returns the URI query converted from the requirement.
   case fqdn
   of Pon2:
     let queries = [
       $self.kind.ord,
-      if self.color.isOk:
-        $self.color.value.ord
+      if self.optColor.isOk:
+        $self.optColor.expect.ord
       else:
         EmptyColor,
-      if self.val.isOk:
-        $self.val.value
+      if self.optVal.isOk:
+        $self.optVal.expect
       else:
         EmptyVal,
     ]
-    Result[string, string].ok queries.join QuerySep
+    ok queries.join QuerySep
   of Ishikawa, Ips:
-    if self.val.isOk and self.val.get notin 0 ..< ValToIshikawaUri.len:
-      Result[string, string].err(
-        "Goal value not in [0, 63] does not support with Ishikawa/Ips format."
-      )
+    if self.optVal.isOk and self.optVal.expect notin 0 ..< ValToIshikawaUri.len:
+      err "Ishikawa/Ips format only supports the val in [0, 63], but got {self.optVal.expect}".fmt
     else:
       let
         kindChar = KindToIshikawaUri[self.kind.ord]
         colorChar =
-          if self.color.isOk:
-            ColorToIshikawaUri[self.color.value.ord]
+          if self.optColor.isOk:
+            ColorToIshikawaUri[self.optColor.expect.ord]
           else:
             EmptyIshikawaUri
         valChar =
-          if self.val.isOk:
-            ValToIshikawaUri[self.val.get]
+          if self.optVal.isOk:
+            ValToIshikawaUri[self.optVal.expect]
           else:
             EmptyIshikawaUri
 
-      Result[string, string].ok "{kindChar}{colorChar}{valChar}".fmt
+      ok "{kindChar}{colorChar}{valChar}".fmt
 
-func parseGoal*(query: string, fqdn: IdeFqdn): Result[Goal, string] {.inline.} =
+func parseGoal*(query: string, fqdn: IdeFqdn): Res[Goal] {.inline.} =
   ## Returns the goal converted from the URI query.
   var goal = Goal.init(GoalKind.low, Opt[GoalColor].err, Opt[GoalVal].err)
+
   case fqdn
   of Pon2:
     let strs = query.split QuerySep
     if strs.len != 3:
-      return Result[Goal, string].err "Invalid goal: {query}".fmt
+      return err "Invalid goal: {query}".fmt
 
-    let kindIntRes = strs[0].parseIntRes
-    if kindIntRes.isErr or kindIntRes.value notin GoalKind.low.ord .. GoalKind.high.ord:
-      return Result[Goal, string].err "Invalid goal (kind): {query}".fmt
-    goal.kind.assign kindIntRes.value.GoalKind
+    let kindInt = ?strs[0].parseIntRes.context "Invalid goal (kind): {query}".fmt
+    if kindInt notin GoalKind.low.ord .. GoalKind.high.ord:
+      return err "Invalid goal (kind): {query}".fmt
+    goal.kind.assign kindInt.GoalKind
 
     if strs[1] != EmptyColor:
-      let colorIntRes = strs[1].parseIntRes
-      if colorIntRes.isErr or
-          colorIntRes.value notin GoalColor.low.ord .. GoalColor.high.ord:
-        return Result[Goal, string].err "Invalid goal (color): {query}".fmt
-      goal.color.assign Opt[GoalColor].ok colorIntRes.value.GoalColor
+      let colorInt = ?strs[1].parseIntRes.context "Invalid goal (color): {query}".fmt
+      if colorInt notin GoalColor.low.ord .. GoalColor.high.ord:
+        return err "Invalid goal (color): {query}".fmt
+      goal.optColor.ok colorInt.GoalColor
 
     if strs[2] != EmptyVal:
-      let valIntRes = strs[2].parseIntRes
-      if valIntRes.isErr:
-        return Result[Goal, string].err "Invalid goal (val): {query}".fmt
-      goal.val.assign Opt[GoalVal].ok valIntRes.value.GoalVal
+      let valInt = ?strs[2].parseIntRes.context "Invalid goal (val): {query}".fmt
+      goal.optVal.ok valInt.GoalVal
   of Ishikawa, Ips:
     if query.len != 3:
-      return Result[Goal, string].err "Invalid goal: {query}".fmt
+      return err "Invalid goal: {query}".fmt
 
-    let
-      kindRes = IshikawaUriToKind.getRes query[0]
-      colorRes = IshikawaUriToColor.getRes query[1]
-      valRes = IshikawaUriToVal.getRes query[2]
-
-    if kindRes.isErr:
-      return Result[Goal, string].err "Invalid goal (kind): {query}".fmt
-    if colorRes.isErr and query[1] != EmptyIshikawaUri:
-      return Result[Goal, string].err "Invalid goal (color): {query}".fmt
-    if valRes.isErr and query[2] != EmptyIshikawaUri:
-      return Result[Goal, string].err "Invalid goal (val): {query}".fmt
-
-    goal.kind.assign kindRes.value
-    goal.color.assign colorRes.optValue
-    goal.val.assign valRes.optValue
+    goal.kind.assign ?IshikawaUriToKind.getRes(query[0]).context "Invalid goal (kind): {query}".fmt
+    goal.optColor.ok ?IshikawaUriToColor.getRes(query[1]).context "Invalid goal (color): {query}".fmt
+    goal.optVal.ok ?IshikawaUriToVal.getRes(query[2]).context "Invalid goal (val): {query}".fmt
 
     # we cannot distinguish '0' between the valid color/val and the empty,
     # so postprocesses here just like a normalization
-    if kindRes.value in NoColorKinds and query[1] == EmptyIshikawaUri:
-      goal.color.assign Opt[GoalColor].err
-    if kindRes.value in NoValKinds and query[2] == EmptyIshikawaUri:
-      goal.val.assign Opt[GoalVal].err
+    if goal.kind in NoColorKinds and query[1] == EmptyIshikawaUri:
+      goal.optColor.err
+    if goal.kind in NoValKinds and query[2] == EmptyIshikawaUri:
+      goal.optVal.err
 
-  Result[Goal, string].ok goal
+  ok goal

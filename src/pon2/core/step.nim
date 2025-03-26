@@ -7,9 +7,8 @@
 {.experimental: "views".}
 
 import std/[bitops, math, sequtils, strformat, strutils, sugar, tables]
-import results
 import ./[cell, common, fqdn, pair, placement]
-import ../private/[misc]
+import ../private/[assign3, misc, results2]
 
 type
   StepKind* {.pure.} = enum
@@ -18,7 +17,7 @@ type
     GarbageDrop
 
   Step* = object ## Game step.
-    case kind: StepKind
+    case kind*: StepKind
     of PutPair:
       pair*: Pair
       optPlacement*: Opt[Placement]
@@ -31,14 +30,14 @@ type
 # Constructor
 # ------------------------------------------------
 
-func init*(T: type Step, pair: Pair, optPlacement: Opt[Placement]): T {.inline.} =
-  T(kind: PutPair, pair: pair, optPlacement: optPlacement)
+func init*(T: type Step, pair: Pair, optPlcmt: OptPlacement): T {.inline.} =
+  T(kind: PutPair, pair: pair, optPlacement: optPlcmt)
 
 func init*(T: type Step, pair: Pair): T {.inline.} =
   T.init(pair, NonePlacement)
 
-func init*(T: type Step, pair: Pair, placement: Placement): T {.inline.} =
-  T.init(pair, Opt[Placement].ok placement)
+func init*(T: type Step, pair: Pair, plcmt: Placement): T {.inline.} =
+  T.init(pair, Opt[Placement].ok plcmt)
 
 func init*(T: type Step, garbageCnts: array[Col, int]): T {.inline.} =
   T(kind: GarbageDrop, garbageCnts: garbageCnts)
@@ -138,41 +137,27 @@ func `$`*(self: Step): string {.inline.} =
     let joined = self.garbageCnts.mapIt($it).join GarbageSep
     "{GarbagePrefix}{joined}{GarbageSuffix}".fmt
 
-func parseStep*(str: string): Result[Step, string] {.inline.} =
+func parseStep*(str: string): Res[Step] {.inline.} =
   ## Returns the step converted from the string representation.
   if str.startsWith(GarbagePrefix) and str.endsWith(GarbageSuffix):
     let strs = str[1 ..^ 2].split GarbageSep
     if strs.len != Width:
-      return Result[Step, string].err "Invalid step (garbage): {str}".fmt
+      return err "Invalid step (garbage): {str}".fmt
 
-    let cntReses = strs.mapIt it.parseIntRes
-    if cntReses.anyIt it.isErr:
-      return Result[Step, string].err "Invalid step (garbage): {str}".fmt
-
-    return Result[Step, string].ok Step.init(
-      [
-        Col0: cntReses[0].value,
-        cntReses[1].value,
-        cntReses[2].value,
-        cntReses[3].value,
-        cntReses[4].value,
-        cntReses[5].value,
-      ]
-    )
+    let cnts = collect:
+      for s in strs:
+        ?s.parseIntRes.context "Invalid step (garbage): {str}".fmt
+    return ok Step.init([Col0: cnts[0], cnts[1], cnts[2], cnts[3], cnts[4], cnts[5]])
 
   let strs = str.split PairPlcmtSep
   if strs.len != 2:
-    return Result[Step, string].err "Invalid step: {str}".fmt
+    return err "Invalid step: {str}".fmt
 
-  let pairRes = strs[0].parsePair
-  if pairRes.isErr:
-    return Result[Step, string].err "Invalid step (pair): {str}".fmt
+  let
+    pair = ?strs[0].parsePair.context "Invalid step: {str}".fmt
+    optPlcmt = ?strs[1].parseOptPlacement.context "Invalid step: {str}".fmt
 
-  let plcmtRes = strs[1].parseOptPlacement
-  if plcmtRes.isErr:
-    return Result[Step, string].err "Invalid step (placement): {str}".fmt
-
-  Result[Step, string].ok Step.init(pairRes.value, plcmtRes.value)
+  ok Step.init(pair, optPlcmt)
 
 # ------------------------------------------------
 # Step <-> URI
@@ -192,95 +177,83 @@ const
     for i, uri in IshikawaUriNumbers:
       {uri: i}
 
-func toUriQuery*(self: Step, fqdn = Pon2): Result[string, string] {.inline.} =
+func toUriQuery*(self: Step, fqdn = Pon2): Res[string] {.inline.} =
   ## Returns the URI query converted from the step.
   case self.kind
   of PutPair:
-    Result[string, string].ok(
-      "{self.pair.toUriQuery fqdn}{self.optPlacement.toUriQuery fqdn}".fmt
-    )
+    ok "{self.pair.toUriQuery fqdn}{self.optPlacement.toUriQuery fqdn}".fmt
   of GarbageDrop:
     case fqdn
     of Pon2:
       let joined = self.garbageCnts.mapIt($it).join GarbageSepUri
-      Result[string, string].ok "{GarbageWrapUri}{joined}{GarbageWrapUri}".fmt
+      ok "{GarbageWrapUri}{joined}{GarbageWrapUri}".fmt
     of Ishikawa, Ips:
       if not self.isValid(originalCompatible = true):
-        return Result[string, string].err(
-          "Not supported step with Ishikawa/Ips format: {self}".fmt
-        )
+        return err "Not supported step with Ishikawa/Ips format: {self}".fmt
 
       let maxGarbageCnt = self.garbageCnts.max
       if maxGarbageCnt == 0:
-        return Result[string, string].ok "a0"
+        return ok "a0"
 
       let
         diffs = self.garbageCnts.mapIt it - maxGarbageCnt + 1
         diffVal =
           sum2 (0 ..< Width).toSeq.mapIt diffs[it] * 2 ^ (Width - it - 1).Natural
 
-      Result[string, string].ok MaxGarbageToIshikawaUri[maxGarbageCnt] &
-        IshikawaUriNumbers[diffVal]
+      ok MaxGarbageToIshikawaUri[maxGarbageCnt] & IshikawaUriNumbers[diffVal]
 
-func parseStep*(query: string, fqdn: IdeFqdn): Result[Step, string] {.inline.} =
+func parseStep*(query: string, fqdn: IdeFqdn): Res[Step] {.inline.} =
   ## Returns the step converted from the URI query.
   case fqdn
   of Pon2:
     if query.len <= 1:
-      return Result[Step, string].err "Invalid step: {query}".fmt
+      return err "Invalid step: {query}".fmt
 
     if query.startsWith(GarbageWrapUri) and query.endsWith(GarbageWrapUri):
       let strs = query[1 ..^ 2].split GarbageSepUri
       if strs.len != Width:
-        return Result[Step, string].err "Invalid step (garbage): {query}".fmt
+        return err "Invalid step (garbage): {query}".fmt
 
-      let valReses = strs.mapIt it.parseIntRes
-      if valReses.anyIt it.isErr:
-        return Result[Step, string].err "Invalid step (garbage): {query}".fmt
-
-      Result[Step, string].ok Step.init(
-        [
-          Col0: valReses[0].value,
-          valReses[1].value,
-          valReses[2].value,
-          valReses[3].value,
-          valReses[4].value,
-          valReses[5].value,
-        ]
-      )
+      let cnts = collect:
+        for s in strs:
+          ?s.parseIntRes.context "Invalid step (garbage): {query}".fmt
+      ok Step.init([Col0: cnts[0], cnts[1], cnts[2], cnts[3], cnts[4], cnts[5]])
     elif query.len == 2:
-      Result[Step, string].ok Step.init ?query.parsePair fqdn
+      ok Step.init ?query.parsePair(fqdn).context "Invalid step (pair): {query}".fmt
     elif query.len == 4:
-      Result[Step, string].ok Step.init(
-        ?query[0 ..< 2].parsePair fqdn, ?query[2 ..< 4].parseOptPlacement fqdn
+      ok Step.init(
+        ?query[0 ..< 2].parsePair(fqdn).context "Invalid step (pair): {query}".fmt,
+        ?query[2 ..< 4].parseOptPlacement(fqdn).context(
+          "Invalid step (placement): {query}".fmt
+        ),
       )
     else:
-      Result[Step, string].err "Invalid step: {query}".fmt
+      err "Invalid step: {query}".fmt
   of Ishikawa, Ips:
     if query.len != 2:
-      return Result[Step, string].err "Invalid step: {query}".fmt
+      return err "Invalid step: {query}".fmt
 
     let maxGarbageCntRes = IshikawaUriToMaxGarbage.getRes query[0]
     if maxGarbageCntRes.isOk:
-      let numRes = IshikawaUriToNum.getRes query[1]
-      if numRes.isErr:
-        return Result[Step, string].err "Invalid step (garbage count): {query}".fmt
+      let num =
+        ?IshikawaUriToNum.getRes(query[1]).context(
+          "Invalid step (garbage count): {query}".fmt
+        )
 
       var garbageCnts = initArrWith[Col, int](maxGarbageCntRes.value.pred)
       for col in Col:
-        garbageCnts[col].inc numRes.value.testBit(Width - col.ord - 1).int
+        garbageCnts[col].inc num.testBit(Width - col.ord - 1).int
 
-      return Result[Step, string].ok Step.init garbageCnts
+      return ok Step.init garbageCnts
 
-    let pairRes = query[0 .. 0].parsePair fqdn
-    if pairRes.isErr:
-      return Result[Step, string].err "Invalid step (pair): {query}".fmt
+    let
+      pair = ?query[0 .. 0].parsePair(fqdn).context "Invalid step (pair): {query}".fmt
+      optPlcmt =
+        ?query[1 .. 1].parseOptPlacement(fqdn).context(
+          "Invalid step (placement): {query}".fmt
+        )
 
-    let optPlcmtRes = query[1 .. 1].parseOptPlacement fqdn
-    if optPlcmtRes.isErr:
-      return Result[Step, string].err "Invalid step (placement): {query}".fmt
-
-    Result[Step, string].ok Step.init(pairRes.value, optPlcmtRes.value)
+    ok Step.init(pair, optPlcmt)
 
 # ------------------------------------------------
 # Steps <-> string
@@ -295,34 +268,27 @@ func `$`*(self: Steps): string {.inline.} =
 
   strs.join StepsSep
 
-func parseSteps*(str: string): Result[Steps, string] {.inline.} =
+func parseSteps*(str: string): Res[Steps] {.inline.} =
   ## Returns the steps converted from the string representation.
-  let stepReses = str.split(StepsSep).mapIt it.parseStep
-  if stepReses.allIt it.isOk:
-    # NOTE: `it.value` raises compile error due to results' bug
-    Result[Steps, string].ok stepReses.mapIt it.unsafeValue
-  else:
-    Result[Steps, string].err "Invalid step detected.\n[Arg]\n{str}\n[Errors]\n".fmt &
-      stepReses.filterIt(it.isErr).mapIt(it.error).join "\n"
+  let steps = collect:
+    for s in str.split StepsSep:
+      ?s.parseStep.context "Invalid steps: {str}".fmt
+
+  ok steps
 
 # ------------------------------------------------
 # Steps <-> URI
 # ------------------------------------------------
 
-func toUriQuery*(self: Steps, fqdn = Pon2): Result[string, string] {.inline.} =
+func toUriQuery*(self: Steps, fqdn = Pon2): Res[string] {.inline.} =
   ## Returns the URI query converted from the steps.
-  let strReses = collect:
+  let strs = collect:
     for step in self:
-      step.toUriQuery fqdn
+      ?step.toUriQuery(fqdn).context "Invalid steps: {self}".fmt
 
-  if strReses.allIt it.isOk:
-    # NOTE: `it.value` raises compile error due to results' bug
-    Result[string, string].ok strReses.mapIt(it.unsafeValue).join
-  else:
-    Result[string, string].err "Invalid step detected.\n[Arg]\n{self}\n[Errors]\n".fmt &
-      strReses.filterIt(it.isErr).mapIt(it.error).join "\n"
+  ok strs.join
 
-func parseSteps*(query: string, fqdn: IdeFqdn): Result[Steps, string] {.inline.} =
+func parseSteps*(query: string, fqdn: IdeFqdn): Res[Steps] {.inline.} =
   ## Returns the steps converted from the URI query.
   case fqdn
   of Pon2:
@@ -333,40 +299,35 @@ func parseSteps*(query: string, fqdn: IdeFqdn): Result[Steps, string] {.inline.}
       if query[idx] == GarbageWrapUri:
         let garbageLastIdx = query.find(GarbageWrapUri, start = idx.succ)
         if garbageLastIdx == -1:
-          return Result[Steps, string].err(
-            "Invalid steps (gabrage area does not close): {query}".fmt
-          )
+          return err "Invalid steps (gabrage area does not close): {query}".fmt
 
-        steps.add ?query[idx .. garbageLastIdx].parseStep fqdn
-        idx = garbageLastIdx.succ
+        steps.add ?query[idx .. garbageLastIdx].parseStep(fqdn).context(
+          "Invalid steps: {query}".fmt
+        )
+        idx.assign garbageLastIdx.succ
       else:
         if idx.succ(4) <= query.len:
           let stepRes = query[idx ..< idx.succ 4].parseStep fqdn
           if stepRes.isOk:
-            steps.add stepRes.value
+            steps.add stepRes.expect
             idx.inc 4
             continue
 
         if idx.succ(2) > query.len:
-          return Result[Steps, string].err "Invalid steps: {query}".fmt
+          return err "Invalid steps: {query}".fmt
 
-        steps.add ?query[idx ..< idx.succ 2].parseStep fqdn
+        steps.add ?query[idx ..< idx.succ 2].parseStep(fqdn).context(
+          "Invalid steps: {query}".fmt
+        )
         idx.inc 2
 
-    Result[Steps, string].ok steps
+    ok steps
   of Ishikawa, Ips:
     if query.len mod 2 != 0:
-      Result[Steps, string].err "Invalid steps: {query}".fmt
-    else:
-      let stepReses = collect:
-        for i in countup(0, query.len.pred, 2):
-          query[i .. i.succ].parseStep fqdn
+      return err "Invalid steps: {query}".fmt
 
-      if stepReses.allIt it.isOk:
-        # NOTE: `it.value` raises compile error due to results' bug
-        Result[Steps, string].ok stepReses.mapIt it.unsafeValue
-      else:
-        Result[Steps, string].err(
-          "Invalid step detected.\n[Arg]\n{query}\n[Errors]\n".fmt &
-            stepReses.filterIt(it.isErr).mapIt(it.error).join "\n"
-        )
+    let steps = collect:
+      for i in countup(0, query.len.pred, 2):
+        ?query[i .. i.succ].parseStep(fqdn).context "Invalid steps: {query}".fmt
+
+    ok steps

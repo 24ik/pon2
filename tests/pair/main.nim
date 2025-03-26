@@ -3,8 +3,8 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import results
 import ../../src/pon2/core/[cell, fqdn, pair]
+import ../../src/pon2/private/[results2]
 
 proc main*() =
   # ------------------------------------------------
@@ -37,14 +37,14 @@ proc main*() =
   # pivot=, rotor=
   block:
     var pair = RedRed
-    check (pair.pivot = Blue).isOk
+    pair.pivot = Blue
     check pair == BlueRed
-    check (pair.rotor = Green).isOk
+    pair.rotor = Green
     check pair == BlueGreen
 
-    check (pair.pivot = None).isErr
+    pair.pivot = None
     check pair == BlueGreen
-    check (pair.rotor = Garbage).isErr
+    pair.rotor = Garbage
     check pair == BlueGreen
 
   # ------------------------------------------------
@@ -82,7 +82,7 @@ proc main*() =
     check $RedGreen == "rg"
 
     let pairRes = "rg".parsePair
-    check pairRes.isOk and pairRes.value == RedGreen
+    check pairRes == Res[Pair].ok RedGreen
 
     check "RG".parsePair.isErr
 
@@ -93,11 +93,11 @@ proc main*() =
       check RedGreen.toUriQuery(fqdn) == "c"
 
     let pairRes = "rg".parsePair(Pon2)
-    check pairRes.isOk and pairRes.value == RedGreen
+    check pairRes == Res[Pair].ok RedGreen
 
     for fqdn in [Ishikawa, Ips]:
       let pairRes2 = "c".parsePair(fqdn)
-      check pairRes2.isOk and pairRes2.value == RedGreen
+      check pairRes2 == Res[Pair].ok RedGreen
 
     check "c".parsePair(Pon2).isErr
     check "rg".parsePair(Ishikawa).isErr

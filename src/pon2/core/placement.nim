@@ -7,9 +7,8 @@
 {.experimental: "views".}
 
 import std/[strformat, sugar, tables]
-import results
 import ./[common, fqdn]
-import ../private/[assign2, misc]
+import ../private/[misc, results2]
 
 type
   Dir* {.pure.} = enum
@@ -44,193 +43,115 @@ type
     Left4 = "54"
     Left5 = "65"
 
+  OptPlacement* = Opt[Placement]
+
 const
-  NonePlacement* = Opt[Placement].err
+  NonePlacement* = OptPlacement.err
   AllDblPlacements* = {Up0 .. Right4}
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
-const
-  StartPlacements: array[Dir, Placement] = [Up0, Right0, Down0, Left1]
-  StartCols: array[Dir, Col] = [Col0, Col0, Col0, Col1]
-
 func init*(T: type Placement, pivotCol: Col, rotorDir: Dir): T {.inline.} =
-  StartPlacements[rotorDir].succ pivotCol.ord - StartCols[rotorDir].ord
+  case rotorDir
+  of Up:
+    Up0.succ pivotCol.ord
+  of Right:
+    Right0.succ pivotCol.ord
+  of Down:
+    Down0.succ pivotCol.ord
+  of Left:
+    Down5.succ pivotCol.ord
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-func initPivotCols(): array[Placement, Col] {.inline.} =
-  ## Returns `PivotCols`.
-  var pivotCols {.noinit.}: array[Placement, Col]
-  for plcmt in Up0 .. Up5:
-    pivotCols[plcmt].assign StartCols[Up].succ plcmt.ord - StartPlacements[Up].ord
-  for plcmt in Right0 .. Right4:
-    pivotCols[plcmt].assign StartCols[Right].succ plcmt.ord - StartPlacements[Right].ord
-  for plcmt in Down0 .. Down5:
-    pivotCols[plcmt].assign StartCols[Down].succ plcmt.ord - StartPlacements[Down].ord
-  for plcmt in Left1 .. Left5:
-    pivotCols[plcmt].assign StartCols[Left].succ plcmt.ord - StartPlacements[Left].ord
-
-  pivotCols
-
-const PivotCols = initPivotCols()
-
-func initRotorCols(): array[Placement, Col] {.inline.} =
-  ## Returns `RotorCols`.
-  var rotorCols {.noinit.}: array[Placement, Col]
-  for plcmt in Up0 .. Up5:
-    rotorCols[plcmt].assign PivotCols[plcmt]
-  for plcmt in Right0 .. Right4:
-    rotorCols[plcmt].assign PivotCols[plcmt].succ
-  for plcmt in Down0 .. Down5:
-    rotorCols[plcmt].assign PivotCols[plcmt]
-  for plcmt in Left1 .. Left5:
-    rotorCols[plcmt].assign PivotCols[plcmt].pred
-
-  rotorCols
-
-func initRotorDirs(): array[Placement, Dir] {.inline.} =
-  ## Returns `RotorDirs`.
-  var rotorDirs {.noinit.}: array[Placement, Dir]
-  for plcmt in Up0 .. Up5:
-    rotorDirs[plcmt].assign Up
-  for plcmt in Right0 .. Right4:
-    rotorDirs[plcmt].assign Right
-  for plcmt in Down0 .. Down5:
-    rotorDirs[plcmt].assign Down
-  for plcmt in Left1 .. Left5:
-    rotorDirs[plcmt].assign Left
-
-  rotorDirs
-
-const
-  RotorCols = initRotorCols()
-  RotorDirs = initRotorDirs()
-
 func pivotCol*(self: Placement): Col {.inline.} = ## Returns the pivot-puyo's column.
-  PivotCols[self]
+  case self
+  of Up0, Right0, Down0: Col0
+  of Up1, Right1, Down1, Left1: Col1
+  of Up2, Right2, Down2, Left2: Col2
+  of Up3, Right3, Down3, Left3: Col3
+  of Up4, Right4, Down4, Left4: Col4
+  of Up5, Down5, Left5: Col5
 
 func rotorCol*(self: Placement): Col {.inline.} =
   ## Returns the rotor-puyo's column.
-  RotorCols[self]
+  case self
+  of Up0, Down0, Left1: Col0
+  of Up1, Right0, Down1, Left2: Col1
+  of Up2, Right1, Down2, Left3: Col2
+  of Up3, Right2, Down3, Left4: Col3
+  of Up4, Right3, Down4, Left5: Col4
+  of Up5, Right4, Down5: Col5
 
 func rotorDir*(self: Placement): Dir {.inline.} =
   ## Returns the rotor-puyo's direction.
-  RotorDirs[self]
+  case self
+  of Up0 .. Up5: Up
+  of Right0 .. Right4: Right
+  of Down0 .. Down5: Down
+  of Left1 .. Left5: Left
 
 # ------------------------------------------------
 # Move
 # ------------------------------------------------
 
-func initRightPlacements(): array[Placement, Placement] {.inline.} =
-  ## Returns `RightPlacements`.
-  var rightPlacements {.noinit.}: array[Placement, Placement]
-  for plcmt in Placement:
-    let
-      pivotCol = plcmt.pivotCol
-      newPivotCol = if pivotCol == Col.high: Col.high else: pivotCol.succ
+func moveRight*(self: var Placement) {.inline.} =
+  ## Moves the placement rightward.
+  case self
+  of Up5, Right4, Down5, Left5: discard
+  else: self.inc
 
-    rightPlacements[plcmt].assign Placement.init(newPivotCol, plcmt.rotorDir)
-
-  rightPlacements
-
-func initLeftPlacements(): array[Placement, Placement] {.inline.} =
-  ## Returns `LeftPlacements`.
-  var leftPlacements {.noinit.}: array[Placement, Placement]
-  for plcmt in Placement:
-    let
-      pivotCol = plcmt.pivotCol
-      newPivotCol = if pivotCol == Col.low: Col.low else: pivotCol.pred
-
-    leftPlacements[plcmt].assign Placement.init(newPivotCol, plcmt.rotorDir)
-
-  leftPlacements
-
-const
-  RightPlacements = initRightPlacements()
-  LeftPlacements = initLeftPlacements()
+func moveLeft*(self: var Placement) {.inline.} =
+  ## Moves the placement leftward.
+  case self
+  of Up0, Right0, Down0, Left1: discard
+  else: self.dec
 
 func movedRight*(self: Placement): Placement {.inline.} =
   ## Returns the placement moved rightward.
-  RightPlacements[self]
+  self.dup moveRight
 
 func movedLeft*(self: Placement): Placement {.inline.} =
   ## Returns the placement moved leftward.
-  LeftPlacements[self]
-
-func moveRight*(self: var Placement) {.inline.} = ## Moves the placement rightward.
-  self.assign self.movedRight
-
-func moveLeft*(self: var Placement) {.inline.} = ## Moves the placement leftward.
-  self.assign self.movedLeft
+  self.dup moveLeft
 
 # ------------------------------------------------
 # Rotate
 # ------------------------------------------------
 
-func initRightRotatePlacements(): array[Placement, Placement] {.inline.} =
-  ## Returns `RightRotatePlacements`.
-  var rightRotatePlacements {.noinit.}: array[Placement, Placement]
-  for plcmt in Placement:
-    let
-      pivotCol = plcmt.pivotCol
-      rotorDir = plcmt.rotorDir
-      newPivotCol =
-        if pivotCol == Col.high and rotorDir == Up:
-          pivotCol.pred
-        elif pivotCol == Col.low and rotorDir == Down:
-          pivotCol.succ
-        else:
-          pivotCol
-      newRotorDir = if rotorDir == Dir.high: Dir.low else: rotorDir.succ
-
-    rightRotatePlacements[plcmt].assign Placement.init(newPivotCol, newRotorDir)
-
-  rightRotatePlacements
-
-func initLeftRotatePlacements(): array[Placement, Placement] {.inline.} =
-  ## Returns `LeftRotatePlacements`.
-  var leftRotatePlacements {.noinit.}: array[Placement, Placement]
-  for plcmt in Placement:
-    let
-      pivotCol = plcmt.pivotCol
-      rotorDir = plcmt.rotorDir
-      newPivotCol =
-        if pivotCol == Col.high and rotorDir == Down:
-          pivotCol.pred
-        elif pivotCol == Col.low and rotorDir == Up:
-          pivotCol.succ
-        else:
-          pivotCol
-      newRotorDir = if rotorDir == Dir.low: Dir.high else: rotorDir.pred
-
-    leftRotatePlacements[plcmt].assign Placement.init(newPivotCol, newRotorDir)
-
-  leftRotatePlacements
-
-const
-  RightRotatePlacements = initRightRotatePlacements()
-  LeftRotatePlacements = initLeftRotatePlacements()
-
-func rotatedRight*(self: Placement): Placement {.inline.} =
-  ## Returns the placement rotated right (clockwise).
-  RightRotatePlacements[self]
-
-func rotatedLeft*(self: Placement): Placement {.inline.} =
-  ## Returns the placement rotated left (counterclockwise).
-  LeftRotatePlacements[self]
-
 func rotateRight*(self: var Placement) {.inline.} =
   ## Rotates the placement right (clockwise).
-  self.assign self.rotatedRight
+  case self
+  of Up0 .. Up4, Down0:
+    self.inc 6
+  of Up5, Right0 .. Right4, Down1 .. Down5:
+    self.inc 5
+  of Left1 .. Left5:
+    self.dec 16
 
 func rotateLeft*(self: var Placement) {.inline.} =
   ## Rotates the placement left (counterclockwise).
-  self.assign self.rotatedLeft
+  case self
+  of Up0:
+    self.inc 17
+  of Up1 .. Up5:
+    self.inc 16
+  of Right0 .. Right4, Down5:
+    self.dec 6
+  of Down0 .. Down4, Left1 .. Left5:
+    self.dec 5
+
+func rotatedRight*(self: Placement): Placement {.inline.} =
+  ## Returns the placement rotated right (clockwise).
+  self.dup rotateRight
+
+func rotatedLeft*(self: Placement): Placement {.inline.} =
+  ## Returns the placement rotated left (counterclockwise).
+  self.dup rotateLeft
 
 # ------------------------------------------------
 # Placement <-> string
@@ -242,26 +163,22 @@ const
     for plcmt in Placement:
       {$plcmt: plcmt}
 
-func `$`*(self: Opt[Placement]): string {.inline.} =
+func `$`*(self: OptPlacement): string {.inline.} =
   if self.isOk:
-    $self.value
+    $self.expect
   else:
     NonePlcmtStr
 
-func parsePlacement*(str: string): Result[Placement, string] {.inline.} =
+func parsePlacement*(str: string): Res[Placement] {.inline.} =
   ## Returns the placement converted from the string representation.
-  let plcmtRes = StrToPlcmt.getRes str
-  if plcmtRes.isOk:
-    Result[Placement, string].ok plcmtRes.value
-  else:
-    Result[Placement, string].err "Invalid placement: {str}".fmt
+  StrToPlcmt.getRes(str).context "Invalid placement: {str}".fmt
 
-func parseOptPlacement*(str: string): Result[Opt[Placement], string] {.inline.} =
+func parseOptPlacement*(str: string): Res[OptPlacement] {.inline.} =
   ## Returns the optional placement converted from the string representation.
   if str == NonePlcmtStr:
-    Result[Opt[Placement], string].ok NonePlacement
+    ok NonePlacement
   else:
-    Result[Opt[Placement], string].ok Opt[Placement].ok ?str.parsePlacement
+    ok Opt[Placement].ok ?str.parsePlacement
 
 # ------------------------------------------------
 # Placement <-> URI
@@ -282,7 +199,7 @@ func toUriQuery*(self: Placement, fqdn = Pon2): string {.inline.} =
   of Ishikawa, Ips:
     $PlcmtToIshikawaUri[self.ord]
 
-func toUriQuery*(self: Opt[Placement], fqdn = Pon2): string {.inline.} =
+func toUriQuery*(self: OptPlacement, fqdn = Pon2): string {.inline.} =
   ## Returns the URI query converted from the optional placement.
   case fqdn
   of Pon2:
@@ -293,29 +210,21 @@ func toUriQuery*(self: Opt[Placement], fqdn = Pon2): string {.inline.} =
     else:
       NonePlcmtIshikawaUri
 
-func parsePlacement*(
-    query: string, fqdn: IdeFqdn
-): Result[Placement, string] {.inline.} =
+func parsePlacement*(query: string, fqdn: IdeFqdn): Res[Placement] {.inline.} =
   ## Returns the placement converted from the URI query.
   case fqdn
   of Pon2:
     query.parsePlacement
   of Ishikawa, Ips:
-    let plcmtRes = IshikawaUriToPlcmt.getRes query
-    if plcmtRes.isOk:
-      Result[Placement, string].ok plcmtRes.value
-    else:
-      Result[Placement, string].err "Invalid placement: {query}".fmt
+    IshikawaUriToPlcmt.getRes(query).context "Invalid placement: {query}".fmt
 
-func parseOptPlacement*(
-    query: string, fqdn: IdeFqdn
-): Result[Opt[Placement], string] {.inline.} =
+func parseOptPlacement*(query: string, fqdn: IdeFqdn): Res[OptPlacement] {.inline.} =
   ## Returns the optional placement converted from the URI query.
   case fqdn
   of Pon2:
     query.parseOptPlacement
   of Ishikawa, Ips:
     if query == NonePlcmtIshikawaUri:
-      Result[Opt[Placement], string].ok NonePlacement
+      ok NonePlacement
     else:
-      Result[Opt[Placement], string].ok Opt[Placement].ok ?query.parsePlacement fqdn
+      ok Opt[Placement].ok ?query.parsePlacement fqdn
