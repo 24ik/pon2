@@ -47,11 +47,21 @@ type
 
 const
   NonePlacement* = OptPlacement.err
-  AllDblPlacements* = {Up0 .. Right4}
+  DblPlacements* = {Up0 .. Right4}
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
+
+func init*(T: type Placement, pivotCol: Col, rotorDir: static Dir): T {.inline.} =
+  when rotorDir == Up:
+    Up0.succ pivotCol.ord
+  elif rotorDir == Up:
+    Right0.succ pivotCol.ord
+  elif rotorDir == Down:
+    Down0.succ pivotCol.ord
+  else:
+    Down5.succ pivotCol.ord
 
 func init*(T: type Placement, pivotCol: Col, rotorDir: Dir): T {.inline.} =
   case rotorDir

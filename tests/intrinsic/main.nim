@@ -5,7 +5,27 @@
 import std/[unittest]
 import ../../src/pon2/private/[intrinsic]
 
+when UseSse42:
+  import std/[bitops]
+  import nimsimd/[sse42]
+
 proc main*() =
+  # ------------------------------------------------
+  # SSE4.2
+  # ------------------------------------------------
+
+  # reverseBits
+  when UseSse42:
+    block:
+      let
+        a = 12345'u64
+        b = 67890'u64
+        xmm = mm_set_epi64x(a, b)
+        rev = xmm.reverseBits
+
+      let diff = mm_xor_si128(rev, mm_set_epi64x(b.reverseBits, a.reverseBits))
+      check mm_testz_si128(diff, diff).bool
+
   # ------------------------------------------------
   # BMI2
   # ------------------------------------------------

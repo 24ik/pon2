@@ -14,15 +14,69 @@
 {.experimental: "views".}
 
 const
+  Sse42 {.define: "pon2.sse42".} = true
   Avx2 {.define: "pon2.avx2".} = true
   Bmi2 {.define: "pon2.bmi2".} = true
 
+  UseSse42* = Sse42 and (defined(i386) or defined(amd64))
   UseAvx2* = Avx2 and (defined(i386) or defined(amd64)) and not defined(windows)
   UseBmi2* = Bmi2 and (defined(i386) or defined(amd64))
 
+when UseSse42:
+  import nimsimd/[sse42]
 when not UseBmi2:
   import stew/[staticfor]
-  import ./[assign2]
+  import ./[assign3]
+
+# ------------------------------------------------
+# SSE4.2
+# ------------------------------------------------
+
+when UseSse42:
+  when defined(gcc):
+    {.passc: "-msse2".}
+    {.passl: "-msse2".}
+    {.passc: "-msse3".}
+    {.passl: "-msse3".}
+    {.passc: "-mssse3".}
+    {.passl: "-mssse3".}
+    {.passc: "-msse4.1".}
+    {.passl: "-msse4.1".}
+    {.passc: "-msse4.2".}
+    {.passl: "-msse4.2".}
+
+  func mm_set_epi16*(
+    a, b, c, d, e, f, g, h: uint16
+  ): M128i {.header: "<emmintrin.h>", importc: "_mm_set_epi16".}
+
+  func reverseBits*(x: M128i): M128i {.inline.} =
+    ## Returns the bit reversal of x.
+    var y = mm_or_si128(
+      mm_and_si128(mm_set1_epi8 0x55'u8, x).mm_slli_epi64 1,
+      mm_and_si128(mm_set1_epi8 0xaa'u8, x).mm_srli_epi64 1,
+    )
+    y = mm_or_si128(
+      mm_and_si128(mm_set1_epi8 0x33'u8, y).mm_slli_epi64 2,
+      mm_and_si128(mm_set1_epi8 0xcc'u8, y).mm_srli_epi64 2,
+    )
+    y = mm_or_si128(
+      mm_and_si128(mm_set1_epi8 0x0f'u8, y).mm_slli_epi64 4,
+      mm_and_si128(mm_set1_epi8 0xf0'u8, y).mm_srli_epi64 4,
+    )
+    y = mm_or_si128(
+      mm_and_si128(mm_set1_epi16 0x00ff'u16, y).mm_slli_si128 1,
+      mm_and_si128(mm_set1_epi16 0xff00'u16, y).mm_srli_si128 1,
+    )
+    y = mm_or_si128(
+      mm_and_si128(mm_set1_epi32 0x0000ffff'u32, y).mm_slli_si128 2,
+      mm_and_si128(mm_set1_epi32 0xffff0000'u32, y).mm_srli_si128 2,
+    )
+    y = mm_or_si128(
+      mm_and_si128(mm_set1_epi64x 0x0000_0000_ffff_ffff'u64, y).mm_slli_si128 4,
+      mm_and_si128(mm_set1_epi64x 0xffff_ffff_0000_0000'u64, y).mm_srli_si128 4,
+    )
+
+    mm_or_si128(y.mm_slli_si128 8, y.mm_srli_si128 8)
 
 # ------------------------------------------------
 # AVX2
