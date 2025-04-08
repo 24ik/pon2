@@ -19,13 +19,15 @@ requires "nigui ^= 0.2.8"
 requires "nimsimd ^= 1.3.2"
 requires "puppy ^= 2.1.2"
 requires "results ^= 0.5.1"
-requires "stew ^= 0.2.0"
+requires "stew ^= 0.3.0"
 requires "suru ^= 0.3.2"
+requires "unittest2 ^= 0.2.3"
 
 # Tasks
 
 import std/[os, sequtils, strformat, strutils]
 
+#[
 task test, "Run Tests":
   const
     Avx2 {.define: "pon2.avx2".} = 2
@@ -33,6 +35,7 @@ task test, "Run Tests":
 
   exec &"nim c -r -d:pon2.avx2={Avx2} -d:pon2.bmi2={Bmi2} " & "tests/makeTest.nim"
   exec "testament all"
+]#
 
 task benchmark, "Benchmarking":
   const

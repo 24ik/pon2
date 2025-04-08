@@ -6,7 +6,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, strformat, sugar]
+import std/[strformat, sugar]
 import results
 
 export results

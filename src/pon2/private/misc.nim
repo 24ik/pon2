@@ -19,6 +19,19 @@ import ./[results2]
 when not defined(js):
   import std/[cpuinfo]
 
+func is_x86_64(): bool {.inline.} =
+  ## Returns `true` if the machine is x86_64.
+  ## If on JS-backend or at compile-time, returns false.
+  let res: bool
+  when nimvm:
+    res = false
+  else:
+    res = defined(amd64) or defined(i386) # this becomes false on JS-backend
+
+  res
+
+const X86_64* = is_x86_64()
+
 func splitPath2(path: string): tuple[head: string, tail: string] {.inline.} =
   ## Returns the parent directory.
   when not defined(js):

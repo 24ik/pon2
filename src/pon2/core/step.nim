@@ -8,7 +8,7 @@
 
 import std/[bitops, math, sequtils, strformat, strutils, sugar, tables]
 import ./[cell, common, fqdn, pair, placement]
-import ../private/[assign3, misc, results2]
+import ../private/[arrayops2, assign3, results2, utils]
 
 type
   StepKind* {.pure.} = enum
@@ -242,7 +242,7 @@ func parseStep*(query: string, fqdn: IdeFqdn): Res[Step] {.inline.} =
 
       var garbageCnts = initArrWith[Col, int](maxGarbageCntRes.value.pred)
       for col in Col:
-        garbageCnts[col].inc num.testBit(Width - col.ord - 1).int
+        garbageCnts[col].inc num.testBit(Width.pred - col.ord).int
 
       return ok Step.init garbageCnts
 

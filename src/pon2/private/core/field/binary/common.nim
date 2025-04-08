@@ -345,7 +345,7 @@ func toArr*(self: BinField): array[Row, array[Col, bool]] {.inline.} =
 
   arr
 
-func parseBinField*(arr: array[Row, array[Col, bool]]): BinField {.inline.} =
+func toBinField*(arr: array[Row, array[Col, bool]]): BinField {.inline.} =
   ## Returns the binary field converted from the array.
   var binField = BinField.initZero
   staticFor(row, Row):

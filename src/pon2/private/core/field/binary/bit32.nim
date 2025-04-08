@@ -472,7 +472,7 @@ func colVal(self: Bit32BinField, col: static Col): uint32 {.inline.} =
 
 func toDropMask*(existField: Bit32BinField): Bit32DropMask {.inline.} =
   ## Returns a drop mask converted from the exist field.
-  var dropMask {.noinit.}: Bit32DropMask
+  var dropMask: Bit32DropMask
   staticFor(col, Col):
     dropMask[col].assign PextMask[uint32].init existField.colVal col
 

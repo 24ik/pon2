@@ -1,0 +1,98 @@
+{.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
+
+import std/[bitops, unittest]
+import ../../src/pon2/private/[bitops3]
+
+# ------------------------------------------------
+# Bitwise-and
+# ------------------------------------------------
+
+block: # bitand2
+  let
+    a = 0xffff_ffff_ffff_ffff'u64
+    b = 0xffef_fbfb_feff_feff'u64
+    c = 0xf7ff_fffb_fffd_fbff'u64
+    d = 0xfffd_ffef_ff7f_feff'u64
+    e = 0xff7f_dfff_ffef_fdff'u64
+    f = 0xfdff_ff7f_bfff_ff7f'u64
+    g = 0xffbf_feff_fffb_dfff'u64
+    h = 0xef7f_fdff_ef7f_f7ff'u64
+
+  check bitand2(a, b) == bitand(a, b)
+  check bitand2(a, b, c) == bitand(a, b, c)
+  check bitand2(a, b, c, d) == bitand(a, b, c, d)
+  check bitand2(a, b, c, d, e) == bitand(a, b, c, d, e)
+  check bitand2(a, b, c, d, e, f) == bitand(a, b, c, d, e, f)
+  check bitand2(a, b, c, d, e, f, g) == bitand(a, b, c, d, e, f, g)
+  check bitand2(a, b, c, d, e, f, g, h) == bitand(a, b, c, d, e, f, g, h)
+
+# ------------------------------------------------
+# Bitwise-or
+# ------------------------------------------------
+
+block: # bitor2
+  let
+    a = 0x0000_0000_0000_0000'u64
+    b = 0x0102_4020_8000_0400'u64
+    c = 0x4200_0100_0020_8008'u64
+    d = 0x0010_0402_0400_0010'u64
+    e = 0x2000_8080_0010_0240'u64
+    f = 0x0400_1000_0200_2001'u64
+    g = 0x8020_0040_0001_0000'u64
+    h = 0x0200_4001_8400_0810'u64
+
+  check bitor2(a, b) == bitor(a, b)
+  check bitor2(a, b, c) == bitor(a, b, c)
+  check bitor2(a, b, c, d) == bitor(a, b, c, d)
+  check bitor2(a, b, c, d, e) == bitor(a, b, c, d, e)
+  check bitor2(a, b, c, d, e, f) == bitor(a, b, c, d, e, f)
+  check bitor2(a, b, c, d, e, f, g) == bitor(a, b, c, d, e, f, g)
+  check bitor2(a, b, c, d, e, f, g, h) == bitor(a, b, c, d, e, f, g, h)
+
+# ------------------------------------------------
+# Bitwise-andnot
+# ------------------------------------------------
+
+block: # `*~`
+  let
+    a = 0b1111_0000'u8
+    b = 0b1010_0110'u8
+
+  check a *~ b == 0b0101_0000'u8
+
+# ------------------------------------------------
+# Mask
+# ------------------------------------------------
+
+block: # toMask2
+  let slice = 1 .. 5
+  check toMask2[uint](slice) == toMask[uint](slice)
+  check toMask2[uint8](slice) == toMask[uint8](slice)
+  check toMask2[uint16](slice) == toMask[uint16](slice)
+  check toMask2[uint32](slice) == toMask[uint32](slice)
+  check toMask2[uint64](slice) == toMask[uint64](slice)
+
+# ------------------------------------------------
+# PEXT
+# ------------------------------------------------
+
+block: # pext
+  let
+    val = 0b0100_1011
+    mask = 0b1101_0010
+    res = 0b0000_0101
+
+  check val.uint16.pext(mask.uint16) == res.uint16
+  check val.uint32.pext(mask.uint32) == res.uint32
+  check val.uint64.pext(mask.uint64) == res.uint64
+
+  let
+    pextMask16 = PextMask[uint16].init mask.uint16
+    pextMask32 = PextMask[uint32].init mask.uint32
+    pextMask64 = PextMask[uint64].init mask.uint64
+
+  check val.uint16.pext(pextMask16) == res.uint16
+  check val.uint32.pext(pextMask32) == res.uint32
+  check val.uint64.pext(pextMask64) == res.uint64

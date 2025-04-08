@@ -1,0 +1,19 @@
+{.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
+
+import std/[unittest]
+import ../../src/pon2/core/[cell]
+import ../../src/pon2/private/[results2]
+
+# ------------------------------------------------
+# Cell <-> string
+# ------------------------------------------------
+
+block: # parseCell
+  for cell in Cell:
+    let cellRes = parseCell $cell
+    check cellRes == Res[Cell].ok cell
+
+  check "".parseCell.isErr
+  check "H".parseCell.isErr
