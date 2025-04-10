@@ -21,6 +21,7 @@ const
   Bmi1Available* = BmiLvl >= 1 and X86_64
   Bmi2Available* = BmiLvl >= 2 and X86_64
 
+import std/[typetraits]
 import ./[arrayops2, assign3, staticfor2]
 
 when Bmi1Available:
@@ -40,34 +41,78 @@ when Bmi2Available:
     {.passl: "-mbmi2".}
 
 # ------------------------------------------------
+# Cast
+# ------------------------------------------------
+
+func asUnsigned(x: int8): uint8 {.inline.} =
+  ## Returns the unsigned integer casted from the argument.
+  cast[uint8](x)
+
+func asUnsigned(x: int16): uint16 {.inline.} =
+  ## Returns the unsigned integer casted from the argument.
+  cast[uint16](x)
+
+func asUnsigned(x: int32): uint32 {.inline.} =
+  ## Returns the unsigned integer casted from the argument.
+  cast[uint32](x)
+
+func asUnsigned(x: int64): uint64 {.inline.} =
+  ## Returns the unsigned integer casted from the argument.
+  cast[uint64](x)
+
+func asUnsigned(x: int): uint {.inline.} =
+  ## Returns the unsigned integer casted from the argument.
+  cast[uint](x)
+
+func asSigned(x: uint8): int8 {.inline.} =
+  ## Returns the signed integer casted from the argument.
+  cast[int8](x)
+
+func asSigned(x: uint16): int16 {.inline.} =
+  ## Returns the signed integer casted from the argument.
+  cast[int16](x)
+
+func asSigned(x: uint32): int32 {.inline.} =
+  ## Returns the signed integer casted from the argument.
+  cast[int32](x)
+
+func asSigned(x: uint64): int64 {.inline.} =
+  ## Returns the signed integer casted from the argument.
+  cast[int64](x)
+
+func asSigned(x: uint): int {.inline.} =
+  ## Returns the signed integer casted from the argument.
+  cast[int](x)
+
+# ------------------------------------------------
 # Bitwise-and
 # ------------------------------------------------
 
-func bitand2*[T: SomeUnsignedInt](x1, x2: T): T {.inline.} =
+func bitand2*[T: SomeInteger](x1, x2: T): T {.inline.} =
   ## Bitwise-and operation.
   x1 and x2
 
-func bitand2*[T: SomeUnsignedInt](x1, x2, x3: T): T {.inline.} =
+func bitand2*[T: SomeInteger](x1, x2, x3: T): T {.inline.} =
   ## Bitwise-and operation.
   x1 and x2 and x3
 
-func bitand2*[T: SomeUnsignedInt](x1, x2, x3, x4: T): T {.inline.} =
+func bitand2*[T: SomeInteger](x1, x2, x3, x4: T): T {.inline.} =
   ## Bitwise-and operation.
   (x1 and x2) and (x3 and x4)
 
-func bitand2*[T: SomeUnsignedInt](x1, x2, x3, x4, x5: T): T {.inline.} =
+func bitand2*[T: SomeInteger](x1, x2, x3, x4, x5: T): T {.inline.} =
   ## Bitwise-and operation.
   (x1 and x2 and x3) and (x4 and x5)
 
-func bitand2*[T: SomeUnsignedInt](x1, x2, x3, x4, x5, x6: T): T {.inline.} =
+func bitand2*[T: SomeInteger](x1, x2, x3, x4, x5, x6: T): T {.inline.} =
   ## Bitwise-and operation.
   (x1 and x2) and (x3 and x4) and (x5 and x6)
 
-func bitand2*[T: SomeUnsignedInt](x1, x2, x3, x4, x5, x6, x7: T): T {.inline.} =
+func bitand2*[T: SomeInteger](x1, x2, x3, x4, x5, x6, x7: T): T {.inline.} =
   ## Bitwise-and operation.
   (x1 and x2) and (x3 and x4) and (x5 and x6 and x7)
 
-func bitand2*[T: SomeUnsignedInt](x1, x2, x3, x4, x5, x6, x7, x8: T): T {.inline.} =
+func bitand2*[T: SomeInteger](x1, x2, x3, x4, x5, x6, x7, x8: T): T {.inline.} =
   ## Bitwise-and operation.
   ((x1 and x2) and (x3 and x4)) and ((x5 and x6) and (x7 and x8))
 
@@ -75,31 +120,31 @@ func bitand2*[T: SomeUnsignedInt](x1, x2, x3, x4, x5, x6, x7, x8: T): T {.inline
 # Bitwise-or
 # ------------------------------------------------
 
-func bitor2*[T: SomeUnsignedInt](x1, x2: T): T {.inline.} =
+func bitor2*[T: SomeInteger](x1, x2: T): T {.inline.} =
   ## Bitwise-or operation.
   x1 or x2
 
-func bitor2*[T: SomeUnsignedInt](x1, x2, x3: T): T {.inline.} =
+func bitor2*[T: SomeInteger](x1, x2, x3: T): T {.inline.} =
   ## Bitwise-or operation.
   x1 or x2 or x3
 
-func bitor2*[T: SomeUnsignedInt](x1, x2, x3, x4: T): T {.inline.} =
+func bitor2*[T: SomeInteger](x1, x2, x3, x4: T): T {.inline.} =
   ## Bitwise-or operation.
   (x1 or x2) or (x3 or x4)
 
-func bitor2*[T: SomeUnsignedInt](x1, x2, x3, x4, x5: T): T {.inline.} =
+func bitor2*[T: SomeInteger](x1, x2, x3, x4, x5: T): T {.inline.} =
   ## Bitwise-or operation.
   (x1 or x2 or x3) or (x4 or x5)
 
-func bitor2*[T: SomeUnsignedInt](x1, x2, x3, x4, x5, x6: T): T {.inline.} =
+func bitor2*[T: SomeInteger](x1, x2, x3, x4, x5, x6: T): T {.inline.} =
   ## Bitwise-or operation.
   (x1 or x2) or (x3 or x4) or (x5 or x6)
 
-func bitor2*[T: SomeUnsignedInt](x1, x2, x3, x4, x5, x6, x7: T): T {.inline.} =
+func bitor2*[T: SomeInteger](x1, x2, x3, x4, x5, x6, x7: T): T {.inline.} =
   ## Bitwise-or operation.
   (x1 or x2) or (x3 or x4) or (x5 or x6 or x7)
 
-func bitor2*[T: SomeUnsignedInt](x1, x2, x3, x4, x5, x6, x7, x8: T): T {.inline.} =
+func bitor2*[T: SomeInteger](x1, x2, x3, x4, x5, x6, x7, x8: T): T {.inline.} =
   ## Bitwise-or operation.
   ((x1 or x2) or (x3 or x4)) or ((x5 or x6) or (x7 or x8))
 
@@ -140,6 +185,10 @@ else:
     ## Bitwise-andnot operation; returns `x1 and (not x2)`.
     x1.andnotNim x2
 
+func `*~`*[T: SomeSignedInt](x1, x2: T): T {.inline.} =
+  ## Bitwise-andnot operation; returns `x1 and (not x2)`.
+  (x1.asUnsigned *~ x2.asUnsigned).asSigned
+
 # ------------------------------------------------
 # Mask
 # ------------------------------------------------
@@ -167,7 +216,7 @@ when Bmi2Available:
 
     base *~ subtracter
 
-  func toMask2*[T: SomeUnsignedInt](slice: Slice[int]): T {.inline.} =
+  func toMask2Unsigned[T: SomeUnsignedInt](slice: Slice[int]): T {.inline.} =
     ## Returns the mask converted from the slice.
     when nimvm:
       toMaskNim[T](slice)
@@ -189,7 +238,7 @@ elif Bmi1Available:
     ## Returns the mask converted from the slice.
     (1'u32 shl (slice.b - slice.a)).blsmsk_u32 shl slice.a
 
-  func toMask2*[T: SomeUnsignedInt](slice: Slice[int]): T {.inline.} =
+  func toMask2Unsigned[T: SomeUnsignedInt](slice: Slice[int]): T {.inline.} =
     ## Returns the mask converted from the slice.
     when nimvm:
       toMaskNim[T](slice)
@@ -203,9 +252,60 @@ elif Bmi1Available:
       else:
         slice.toMaskImpl32.T
 else:
-  func toMask2*[T: SomeUnsignedInt](slice: Slice[int]): T {.inline.} =
+  func toMask2Unsigned[T: SomeUnsignedInt](slice: Slice[int]): T {.inline.} =
     ## Returns the mask converted from the slice.
     toMaskNim[T](slice)
+
+func toMask2Signed[T: SomeSignedInt](slice: Slice[int]): T {.inline.} =
+  ## Returns the mask converted from the slice.
+  toMask2Unsigned[T.toUnsigned](slice).asSigned
+
+func toMask2*[T: SomeInteger](slice: Slice[int]): T {.inline.} =
+  ## Returns the mask converted from the slice.
+  when T is SomeSignedInt:
+    toMask2Signed[T](slice)
+  else:
+    toMask2Unsigned[T](slice)
+
+# ------------------------------------------------
+# BEXTR
+# ------------------------------------------------
+
+func bextrNim[T: SomeInteger](val: T, start, length: uint32): T {.inline.} =
+  (val shr start) and (1.T shl length).pred
+
+when Bmi1Available:
+  func bextr*(val: uint64, start, length: uint32): uint64 {.inline.} =
+    ## Bit field extract.
+    when nimvm:
+      val.bextrNim(start, length)
+    else:
+      val.bextr_u64(start, length)
+
+  func bextr*(val: uint32, start, length: uint32): uint32 {.inline.} =
+    ## Bit field extract.
+    when nimvm:
+      val.bextrNim(start, length)
+    else:
+      val.bextr_u32(start, length)
+
+  func bextr*[T: uint or uint16 or uint8](val: T, start, length: uint32): T {.inline.} =
+    ## Bit field extract.
+    when nimvm:
+      val.bextrNim(start, length)
+    else:
+      when T.sizeof > 4:
+        val.uint64.bextr(start, length).T
+      else:
+        val.uint32.bextr(start, length).T
+else:
+  func bextr*[T: SomeUnsignedInt](val: T, start, length: uint32): T {.inline.} =
+    ## Bit field extract.
+    val.bextrNim(start, length)
+
+func bextr*[T: SomeSignedInt](val: T, start, length: uint32): T {.inline.} =
+  ## Bit field extract.
+  val.asUnsigned.bextrNim(start, length).asSigned
 
 # ------------------------------------------------
 # PEXT
@@ -271,7 +371,7 @@ func pextNim[T: uint64 or uint32 or uint16](a: T, mask: PextMaskNim[T]): T {.inl
 
   staticFor(i, 0 ..< BitCnt):
     let bit = mask.bits[i]
-    res.assign (res and not bit) or ((res and bit) shr (1 shl i))
+    res.assign (res *~ bit) or ((res and bit) shr (1 shl i))
 
   res
 
@@ -299,7 +399,7 @@ when Bmi2Available:
     ## Parallel bits extract.
     uint16 a.uint32.pext mask.uint32
 else:
-  type PextMask* = PextMaskNim
+  type PextMask*[T: uint64 or uint32 or uint16] = PextMaskNim[T]
 
   func init*[T: uint64 or uint32 or uint16](
       M: type PextMask[T], mask: T

@@ -20,8 +20,8 @@ when Sse42Available:
       d = 56
       e = 7
       f = 890
-      g = 1234
-      h = 56789
+      g = 12345
+      h = 6789
 
     check mm_set_epi16(
       a.uint16, b.uint16, c.uint16, d.uint16, e.uint16, f.uint16, g.uint16, h.uint16
@@ -35,8 +35,15 @@ when Sse42Available:
   # ------------------------------------------------
 
   block: # `$`
-    check $mm_set_epi16(1, 2, 3, 45, 67, 890, 1234, 56789) ==
-      "M128i([56789, 1234, 890, 67, 45, 1, 2, 3])"
+    check $mm_set_epi16(1'u16, 2, 3, 45, 67, 890, 12345, 6789) ==
+      "M128i([6789, 12345, 890, 67, 45, 3, 2, 1])"
+
+  block: # assign
+    var x = mm_setzero_si128()
+    let y = mm_set1_epi64x(123)
+    x.assign y
+
+    check x == y
 
   # ------------------------------------------------
   # XMM - reverse

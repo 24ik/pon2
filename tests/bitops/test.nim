@@ -34,14 +34,14 @@ block: # bitand2
 
 block: # bitor2
   let
-    a = 0x0000_0000_0000_0000'u64
-    b = 0x0102_4020_8000_0400'u64
-    c = 0x4200_0100_0020_8008'u64
-    d = 0x0010_0402_0400_0010'u64
-    e = 0x2000_8080_0010_0240'u64
-    f = 0x0400_1000_0200_2001'u64
-    g = 0x8020_0040_0001_0000'u64
-    h = 0x0200_4001_8400_0810'u64
+    a = 0x0000_0000_0000_0000'i64
+    b = 0x0102_4020_8000_0400'i64
+    c = 0x4200_0100_0020_8008'i64
+    d = 0x0010_0402_0400_0010'i64
+    e = 0x2000_8080_0010_0240'i64
+    f = 0x0400_1000_0200_2001'i64
+    g = 0x8020_0040_0001_0000'i64
+    h = 0x0200_4001_8400_0810'i64
 
   check bitor2(a, b) == bitor(a, b)
   check bitor2(a, b, c) == bitor(a, b, c)
@@ -57,10 +57,12 @@ block: # bitor2
 
 block: # `*~`
   let
-    a = 0b1111_0000'u8
-    b = 0b1010_0110'u8
+    a = 987654321
+    b = 12345678
+    res = a and not b
 
-  check a *~ b == 0b0101_0000'u8
+  check a *~ b == res
+  check a.uint *~ b.uint == res.uint
 
 # ------------------------------------------------
 # Mask
@@ -73,6 +75,35 @@ block: # toMask2
   check toMask2[uint16](slice) == toMask[uint16](slice)
   check toMask2[uint32](slice) == toMask[uint32](slice)
   check toMask2[uint64](slice) == toMask[uint64](slice)
+
+  check toMask2[int](slice) == toMask[int](slice)
+  check toMask2[int8](slice) == toMask[int8](slice)
+  check toMask2[int16](slice) == toMask[int16](slice)
+  check toMask2[int32](slice) == toMask[int32](slice)
+  check toMask2[int64](slice) == toMask[int64](slice)
+
+# ------------------------------------------------
+# BEXTR
+# ------------------------------------------------
+
+block: # bextr
+  let
+    val = 0b0101_1001
+    start = 2'u32
+    length = 5'u32
+    res = 0b10110
+
+  check val.uint.bextr(start, length) == res.uint
+  check val.uint8.bextr(start, length) == res.uint8
+  check val.uint16.bextr(start, length) == res.uint16
+  check val.uint32.bextr(start, length) == res.uint32
+  check val.uint64.bextr(start, length) == res.uint64
+
+  check val.int.bextr(start, length) == res.int
+  check val.int8.bextr(start, length) == res.int8
+  check val.int16.bextr(start, length) == res.int16
+  check val.int32.bextr(start, length) == res.int32
+  check val.int64.bextr(start, length) == res.int64
 
 # ------------------------------------------------
 # PEXT
