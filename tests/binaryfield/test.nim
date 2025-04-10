@@ -3,7 +3,7 @@
 {.experimental: "views".}
 
 import std/[sequtils, strutils, sugar, unittest]
-import ../../src/pon2/private/core/field/binary/[common]
+import ../../src/pon2/private/core/field/binary/[main]
 import ../../src/pon2/core/[common, rule]
 
 proc toBinField(str: string): BinField =
