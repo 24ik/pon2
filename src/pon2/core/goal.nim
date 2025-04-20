@@ -6,9 +6,9 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[setutils, strformat, strutils, sugar, tables]
+import std/[setutils, strformat, sugar]
 import ./[fqdn]
-import ../private/[assign3, misc, results2]
+import ../private/[assign3, results2, strutils2, tables2]
 
 type
   GoalKind* {.pure.} = enum

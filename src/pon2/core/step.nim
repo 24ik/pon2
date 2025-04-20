@@ -6,23 +6,24 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[bitops, math, sequtils, strformat, strutils, sugar, tables]
+import std/[bitops, sequtils, strformat, sugar]
 import ./[cell, common, fqdn, pair, placement]
-import ../private/[arrayops2, assign3, results2, utils]
+import ../private/[arrayops2, assign3, math2, results2, strutils2, tables2]
 
 type
   StepKind* {.pure.} = enum
     ## Discriminator for `Step`.
-    PutPair
-    GarbageDrop
+    PairPlacement
+    Garbages
 
   Step* = object ## Game step.
     case kind*: StepKind
-    of PutPair:
+    of PairPlacement:
       pair*: Pair
       optPlacement*: Opt[Placement]
-    of GarbageDrop:
-      garbageCnts*: array[Col, int]
+    of Garbages:
+      cnts*: array[Col, int]
+      dropHard*: bool
 
   Steps* = seq[Step] ## Sequence of steps.
 
@@ -31,7 +32,7 @@ type
 # ------------------------------------------------
 
 func init*(T: type Step, pair: Pair, optPlcmt: OptPlacement): T {.inline.} =
-  T(kind: PutPair, pair: pair, optPlacement: optPlcmt)
+  T(kind: PairPlacement, pair: pair, optPlacement: optPlcmt)
 
 func init*(T: type Step, pair: Pair): T {.inline.} =
   T.init(pair, NonePlacement)
@@ -39,8 +40,8 @@ func init*(T: type Step, pair: Pair): T {.inline.} =
 func init*(T: type Step, pair: Pair, plcmt: Placement): T {.inline.} =
   T.init(pair, Opt[Placement].ok plcmt)
 
-func init*(T: type Step, garbageCnts: array[Col, int]): T {.inline.} =
-  T(kind: GarbageDrop, garbageCnts: garbageCnts)
+func init*(T: type Step, cnts: array[Col, int], dropHard: bool): T {.inline.} =
+  T(kind: Garbages, cnts: cnts, dropHard: dropHard)
 
 # ------------------------------------------------
 # Operator
@@ -48,11 +49,12 @@ func init*(T: type Step, garbageCnts: array[Col, int]): T {.inline.} =
 
 func `==`*(step1, step2: Step): bool {.inline.} =
   case step1.kind
-  of PutPair:
-    step2.kind == PutPair and step1.pair == step2.pair and
+  of PairPlacement:
+    step2.kind == PairPlacement and step1.pair == step2.pair and
       step1.optPlacement == step2.optPlacement
-  of GarbageDrop:
-    step2.kind == GarbageDrop and step1.garbageCnts == step2.garbageCnts
+  of Garbages:
+    step2.kind == Garbages and step1.cnts == step2.cnts and
+      step1.dropHard == step2.dropHard
 
 # ------------------------------------------------
 # Property
@@ -61,17 +63,17 @@ func `==`*(step1, step2: Step): bool {.inline.} =
 func isValid*(self: Step, originalCompatible = false): bool {.inline.} =
   ## Returns `true` if the step is valid.
   case self.kind
-  of PutPair:
+  of PairPlacement:
     true
-  of GarbageDrop:
+  of Garbages:
     if originalCompatible:
       let
-        maxCnt = self.garbageCnts.max
-        minCnt = self.garbageCnts.min
+        maxCnt = self.cnts.max
+        minCnt = self.cnts.min
 
       0 <= minCnt and maxCnt <= 5 and maxCnt - minCnt <= 1
     else:
-      self.garbageCnts.min >= 0
+      self.cnts.min >= 0
 
 # ------------------------------------------------
 # Count
@@ -80,44 +82,47 @@ func isValid*(self: Step, originalCompatible = false): bool {.inline.} =
 func cellCnt*(self: Step, cell: Cell): int {.inline.} =
   ## Returns the number of `cell` in the step.
   case self.kind
-  of PutPair:
+  of PairPlacement:
     self.pair.cellCnt cell
-  of GarbageDrop:
-    if cell == Garbage: self.garbageCnts.sum2 else: 0
+  of Garbages:
+    if (cell == Hard and self.dropHard) or (cell == Garbage and not self.dropHard):
+      self.cnts.sum2
+    else:
+      0
 
-func cellCnt*(self: Step): int {.inline.} =
-  ## Returns the number of `cell` in the step.
+func puyoCnt*(self: Step): int {.inline.} =
+  ## Returns the number of puyos in the step.
   case self.kind
-  of PutPair: 2
-  of GarbageDrop: self.garbageCnts.sum2
+  of PairPlacement: 2
+  of Garbages: self.cnts.sum2
 
-func colorCnt*(self: Step): int {.inline.} =
+func colorPuyoCnt*(self: Step): int {.inline.} =
   ## Returns the number of color puyos in the step.
   case self.kind
-  of PutPair: 2
-  of GarbageDrop: 0
+  of PairPlacement: 2
+  of Garbages: 0
 
-func garbageCnt*(self: Step): int {.inline.} =
-  ## Returns the number of garbage puyos in the step.
+func garbagesCnt*(self: Step): int {.inline.} =
+  ## Returns the number of hard and garbage puyos in the step.
   case self.kind
-  of PutPair: 0
-  of GarbageDrop: self.garbageCnts.sum2
+  of PairPlacement: 0
+  of Garbages: self.cnts.sum2
 
 func cellCnt*(steps: Steps, cell: Cell): int {.inline.} =
   ## Returns the number of `cell` in the steps.
   sum2 steps.mapIt it.cellCnt cell
 
-func cellCnt*(steps: Steps): int {.inline.} =
-  ## Returns the number of cells in the steps.
-  sum2 steps.mapIt it.cellCnt
+func puyoCnt*(steps: Steps): int {.inline.} =
+  ## Returns the number of puyos in the steps.
+  sum2 steps.mapIt it.puyoCnt
 
-func colorCnt*(steps: Steps): int {.inline.} =
+func colorPuyoCnt*(steps: Steps): int {.inline.} =
   ## Returns the number of color puyos in the steps.
-  sum2 steps.mapIt it.colorCnt
+  sum2 steps.mapIt it.colorPuyoCnt
 
-func garbageCnt*(steps: Steps): int {.inline.} =
-  ## Returns the number of garbage puyos in the steps.
-  sum2 steps.mapIt it.garbageCnt
+func garbagesCnt*(steps: Steps): int {.inline.} =
+  ## Returns the number of hard and garbage puyos in the steps.
+  sum2 steps.mapIt it.garbagesCnt
 
 # ------------------------------------------------
 # Step <-> string
@@ -127,27 +132,43 @@ const
   PairPlcmtSep = '|'
   GarbagePrefix = '('
   GarbageSuffix = ')'
-  GarbageSep = ","
+  HardPrefix = '['
+  HardSuffix = ']'
+  GarbagesSep = ","
 
 func `$`*(self: Step): string {.inline.} =
   case self.kind
-  of PutPair:
+  of PairPlacement:
     "{self.pair}{PairPlcmtSep}{self.optPlacement}".fmt
-  of GarbageDrop:
-    let joined = self.garbageCnts.mapIt($it).join GarbageSep
-    "{GarbagePrefix}{joined}{GarbageSuffix}".fmt
+  of Garbages:
+    let
+      joined = self.cnts.mapIt($it).join GarbagesSep
+      prefix, suffix: char
+    if self.dropHard:
+      prefix = HardPrefix
+      suffix = HardSuffix
+    else:
+      prefix = GarbagePrefix
+      suffix = GarbageSuffix
+
+    "{prefix}{joined}{suffix}".fmt
 
 func parseStep*(str: string): Res[Step] {.inline.} =
   ## Returns the step converted from the string representation.
-  if str.startsWith(GarbagePrefix) and str.endsWith(GarbageSuffix):
-    let strs = str[1 ..^ 2].split GarbageSep
+  let
+    dropGarbage = str.startsWith(GarbagePrefix) and str.endsWith(GarbageSuffix)
+    dropHard = str.startsWith(HardPrefix) and str.endsWith(HardSuffix)
+  if dropGarbage or dropHard:
+    let strs = str[1 ..^ 2].split GarbagesSep
     if strs.len != Width:
-      return err "Invalid step (garbage): {str}".fmt
+      return err "Invalid step (garbages): {str}".fmt
 
     let cnts = collect:
       for s in strs:
-        ?s.parseIntRes.context "Invalid step (garbage): {str}".fmt
-    return ok Step.init([Col0: cnts[0], cnts[1], cnts[2], cnts[3], cnts[4], cnts[5]])
+        ?s.parseIntRes.context "Invalid step (garbages): {str}".fmt
+    return ok Step.init(
+      [Col0: cnts[0], cnts[1], cnts[2], cnts[3], cnts[4], cnts[5]], dropHard
+    )
 
   let strs = str.split PairPlcmtSep
   if strs.len != 2:
@@ -165,7 +186,8 @@ func parseStep*(str: string): Res[Step] {.inline.} =
 
 const
   GarbageWrapUri = ($Garbage)[0]
-  GarbageSepUri = "_"
+  HardWrapUri = ($Hard)[0]
+  GarbagesSepUri = "_"
   MaxGarbageToIshikawaUri = "aamyKW"
   IshikawaUriNumbers =
     "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-"
@@ -180,23 +202,25 @@ const
 func toUriQuery*(self: Step, fqdn = Pon2): Res[string] {.inline.} =
   ## Returns the URI query converted from the step.
   case self.kind
-  of PutPair:
+  of PairPlacement:
     ok "{self.pair.toUriQuery fqdn}{self.optPlacement.toUriQuery fqdn}".fmt
-  of GarbageDrop:
+  of Garbages:
     case fqdn
     of Pon2:
-      let joined = self.garbageCnts.mapIt($it).join GarbageSepUri
-      ok "{GarbageWrapUri}{joined}{GarbageWrapUri}".fmt
+      let
+        wrapper = if self.dropHard: HardWrapUri else: GarbageWrapUri
+        joined = self.cnts.mapIt($it).join GarbagesSepUri
+      ok "{wrapper}{joined}{wrapper}".fmt
     of Ishikawa, Ips:
-      if not self.isValid(originalCompatible = true):
+      if not self.isValid(originalCompatible = true) or self.dropHard:
         return err "Not supported step with Ishikawa/Ips format: {self}".fmt
 
-      let maxGarbageCnt = self.garbageCnts.max
+      let maxGarbageCnt = self.cnts.max
       if maxGarbageCnt == 0:
         return ok "a0"
 
       let
-        diffs = self.garbageCnts.mapIt it - maxGarbageCnt + 1
+        diffs = self.cnts.mapIt it - maxGarbageCnt + 1
         diffVal =
           sum2 (0 ..< Width).toSeq.mapIt diffs[it] * 2 ^ (Width - it - 1).Natural
 
@@ -209,15 +233,20 @@ func parseStep*(query: string, fqdn: IdeFqdn): Res[Step] {.inline.} =
     if query.len <= 1:
       return err "Invalid step: {query}".fmt
 
-    if query.startsWith(GarbageWrapUri) and query.endsWith(GarbageWrapUri):
-      let strs = query[1 ..^ 2].split GarbageSepUri
+    let
+      dropGarbage = query.startsWith(GarbageWrapUri) and query.endsWith(GarbageWrapUri)
+      dropHard = query.startsWith(HardWrapUri) and query.endsWith(HardWrapUri)
+    if dropGarbage or dropHard:
+      let strs = query[1 ..^ 2].split GarbagesSepUri
       if strs.len != Width:
-        return err "Invalid step (garbage): {query}".fmt
+        return err "Invalid step (garbages): {query}".fmt
 
       let cnts = collect:
         for s in strs:
-          ?s.parseIntRes.context "Invalid step (garbage): {query}".fmt
-      ok Step.init([Col0: cnts[0], cnts[1], cnts[2], cnts[3], cnts[4], cnts[5]])
+          ?s.parseIntRes.context "Invalid step (garbages): {query}".fmt
+      ok Step.init(
+        [Col0: cnts[0], cnts[1], cnts[2], cnts[3], cnts[4], cnts[5]], dropHard
+      )
     elif query.len == 2:
       ok Step.init ?query.parsePair(fqdn).context "Invalid step (pair): {query}".fmt
     elif query.len == 4:
@@ -244,7 +273,7 @@ func parseStep*(query: string, fqdn: IdeFqdn): Res[Step] {.inline.} =
       for col in Col:
         garbageCnts[col].inc num.testBit(Width.pred - col.ord).int
 
-      return ok Step.init garbageCnts
+      return ok Step.init(garbageCnts, false)
 
     let
       pair = ?query[0 .. 0].parsePair(fqdn).context "Invalid step (pair): {query}".fmt
@@ -296,10 +325,10 @@ func parseSteps*(query: string, fqdn: IdeFqdn): Res[Steps] {.inline.} =
       idx = 0
       steps = newSeq[Step]()
     while idx < query.len:
-      if query[idx] == GarbageWrapUri:
-        let garbageLastIdx = query.find(GarbageWrapUri, start = idx.succ)
+      if query[idx] in {HardWrapUri, GarbageWrapUri}:
+        let garbageLastIdx = query.find(query[idx], start = idx.succ)
         if garbageLastIdx == -1:
-          return err "Invalid steps (gabrage area does not close): {query}".fmt
+          return err "Invalid steps (gabrages area does not close): {query}".fmt
 
         steps.add ?query[idx .. garbageLastIdx].parseStep(fqdn).context(
           "Invalid steps: {query}".fmt

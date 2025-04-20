@@ -1,175 +1,172 @@
-## This module implements moving results.
+## This module implements move results.
 ##
 
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
+{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[math, options, sequtils, setutils, sugar]
-import ./[cell, fieldtype, notice, rule]
-import ../private/[misc]
+import std/[sequtils, strformat, sugar]
+import ./[cell, common, notice, rule]
+import ../private/[math2, results2, staticfor2]
 
-type MoveResult* = object ## Moving result.
-  chainCount*: Natural
-  disappearCounts*: array[Puyo, int]
-  detailDisappearCounts*: Option[seq[array[Puyo, int]]]
-  fullDisappearCounts*: Option[seq[array[ColorPuyo, seq[int]]]]
+type MoveResult* = object ## Move result.
+  chainCnt*: int
+  popCnts*: array[Cell, int]
+  hardToGarbageCnt*: int
+  detailPopCnts*: seq[array[Cell, int]]
+  detailHardToGarbageCnt*: seq[int]
+  fullPopCnts*: Opt[seq[array[Cell, seq[int]]]]
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
-func initMoveResult*(
-    chainCount: Natural, disappearCounts: array[Puyo, int]
-): MoveResult {.inline.} =
-  ## Returns a new move result.
-  MoveResult(
-    chainCount: chainCount,
-    disappearCounts: disappearCounts,
-    detailDisappearCounts: none seq[array[Puyo, int]],
-    fullDisappearCounts: none seq[array[ColorPuyo, seq[int]]],
+func init*(
+    T: type MoveResult,
+    chainCnt: int,
+    popCnts: array[Cell, int],
+    hardToGarbageCnt: int,
+    detailPopCnts: seq[array[Cell, int]],
+    detailHardToGarbageCnt: seq[int],
+): T {.inline.} =
+  T(
+    chainCnt: chainCnt,
+    popCnts: popCnts,
+    hardToGarbageCnt: hardToGarbageCnt,
+    detailPopCnts: detailPopCnts,
+    detailHardToGarbageCnt: detailHardToGarbageCnt,
+    fullPopCnts: Opt[seq[array[Cell, seq[int]]]].err,
   )
 
-func initMoveResult*(
-    chainCount: Natural,
-    disappearCounts: array[Puyo, int],
-    detailDisappearCounts: seq[array[Puyo, int]],
-): MoveResult {.inline.} =
-  ## Returns a new move result.
-  MoveResult(
-    chainCount: chainCount,
-    disappearCounts: disappearCounts,
-    detailDisappearCounts: some detailDisappearCounts,
-    fullDisappearCounts: none seq[array[ColorPuyo, seq[int]]],
-  )
-
-func initMoveResult*(
-    chainCount: Natural,
-    disappearCounts: array[Puyo, int],
-    detailDisappearCounts: seq[array[Puyo, int]],
-    fullDisappearCounts: seq[array[ColorPuyo, seq[int]]],
-): MoveResult {.inline.} =
-  ## Returns a new move result.
-  MoveResult(
-    chainCount: chainCount,
-    disappearCounts: disappearCounts,
-    detailDisappearCounts: some detailDisappearCounts,
-    fullDisappearCounts: some fullDisappearCounts,
+func init*(
+    T: type MoveResult,
+    chainCnt: int,
+    popCnts: array[Cell, int],
+    hardToGarbageCnt: int,
+    detailPopCnts: seq[array[Cell, int]],
+    detailHardToGarbageCnt: seq[int],
+    fullPopCnts: seq[array[Cell, seq[int]]],
+): T {.inline.} =
+  T(
+    chainCnt: chainCnt,
+    popCnts: popCnts,
+    hardToGarbageCnt: hardToGarbageCnt,
+    detailPopCnts: detailPopCnts,
+    detailHardToGarbageCnt: detailHardToGarbageCnt,
+    fullPopCnts: Opt[seq[array[Cell, seq[int]]]].ok fullPopCnts,
   )
 
 # ------------------------------------------------
 # Count
 # ------------------------------------------------
 
-func puyoCount*(self: MoveResult, puyo: Puyo): int {.inline.} =
-  ## Returns the number of `puyo` that disappeared.
-  self.disappearCounts[puyo]
+func sumColor(arr: array[Cell, int]): int {.inline.} =
+  ## Returns the total number of color puyos.
+  (arr[Red] + arr[Green] + arr[Blue]) + (arr[Yellow] + arr[Purple])
 
-func puyoCount*(self: MoveResult): int {.inline.} =
-  ## Returns the number of puyos that disappeared.
-  self.disappearCounts.sum2
+func cellCnt*(self: MoveResult, cell: Cell): int {.inline.} =
+  ## Returns the number of `cell` that popped.
+  self.popCnts[cell]
 
-func colorCount*(self: MoveResult): int {.inline.} =
-  ## Returns the number of color puyos that disappeared.
-  self.disappearCounts[ColorPuyo.low .. ColorPuyo.high].sum2
+func puyoCnt*(self: MoveResult): int {.inline.} =
+  ## Returns the number of cells that popped.
+  self.popCnts.sum2
 
-func garbageCount*(self: MoveResult): int {.inline.} =
-  ## Returns the number of garbage puyos that disappeared.
-  self.disappearCounts[Hard] + self.disappearCounts[Garbage]
+func colorPuyoCnt*(self: MoveResult): int {.inline.} =
+  ## Returns the number of color puyos that popped.
+  self.popCnts.sumColor
 
-# ------------------------------------------------
-# Counts
-# ------------------------------------------------
+func garbagesCnt*(self: MoveResult): int {.inline.} =
+  ## Returns the number of hard and garbage puyos that popped.
+  self.popCnts[Hard] + self.popCnts[Garbage]
 
-func puyoCounts*(self: MoveResult, puyo: Puyo): seq[int] {.inline.} =
-  ## Returns the number of `puyo` that disappeared in each chain.
-  ## `UnpackDefect` is raised if not supported.
-  self.detailDisappearCounts.get.mapIt it[puyo]
+func cellCnts*(self: MoveResult, cell: Cell): seq[int] {.inline.} =
+  ## Returns a sequence of the number of `cell` that popped in each chain.
+  self.detailPopCnts.mapIt it[cell]
 
-func puyoCounts*(self: MoveResult): seq[int] {.inline.} =
-  ## Returns the number of puyos that disappeared in each chain.
-  ## `UnpackDefect` is raised if not supported.
-  self.detailDisappearCounts.get.mapIt it.sum2
+func puyoCnts*(self: MoveResult): seq[int] {.inline.} =
+  ## Returns a sequence of the number of puyos that popped in each chain.
+  self.detailPopCnts.mapIt it.sum2
 
-func colorCounts*(self: MoveResult): seq[int] {.inline.} =
-  ## Returns the number of color puyos that disappeared in each chain.
-  ## `UnpackDefect` is raised if not supported.
-  self.detailDisappearCounts.get.mapIt it[ColorPuyo.low .. ColorPuyo.high].sum2
+func colorPuyoCnts*(self: MoveResult): seq[int] {.inline.} =
+  ## Returns a sequence of the number of color puyos that popped in each chain.
+  self.detailPopCnts.mapIt it.sumColor
 
-func garbageCounts*(self: MoveResult): seq[int] {.inline.} =
-  ## Returns the number of garbage puyos that disappeared in each chain.
-  ## `UnpackDefect` is raised if not supported.
-  self.detailDisappearCounts.get.mapIt it[Hard] + it[Garbage]
+func garbagesCnts*(self: MoveResult): seq[int] {.inline.} =
+  ## Returns a sequence of the number of hard and garbage puyos that popped in
+  ## each chain.
+  self.detailPopCnts.mapIt it[Hard] + it[Garbage]
 
 # ------------------------------------------------
-# Colors
+# Color
 # ------------------------------------------------
 
-func colors*(self: MoveResult): set[ColorPuyo] {.inline.} =
-  ## Returns the set of color puyos that disappeared.
-  result = {}
+func colors(arr: array[Cell, int]): set[Cell] {.inline.} =
+  ## Returns the set of colors that popped.
+  var cells = set[Cell]({})
+  for cell in Red .. Purple:
+    if arr[cell] > 0:
+      cells.incl cell
 
-  for color in ColorPuyo:
-    if self.disappearCounts[color] > 0:
-      result.incl color
+  cells
 
-func colorsSeq*(self: MoveResult): seq[set[ColorPuyo]] {.inline.} =
-  ## Returns the sequence of the set of color puyos that disappeared.
-  ## `UnpackDefect` is raised if not supported.
-  collect:
-    for arr in self.detailDisappearCounts.get:
-      var colors = set[ColorPuyo]({})
+func colors*(self: MoveResult): set[Cell] {.inline.} =
+  ## Returns the set of colors that popped.
+  self.popCnts.colors
 
-      for color in ColorPuyo:
-        if arr[color] > 0:
-          colors.incl color
-
-      colors
+func colorsSeq*(self: MoveResult): seq[set[Cell]] {.inline.} =
+  ## Returns a sequence of the set of colors that popped in each chain.
+  self.detailPopCnts.mapIt it.colors
 
 # ------------------------------------------------
 # Place
 # ------------------------------------------------
 
-func colorPlaces*(self: MoveResult, color: ColorPuyo): seq[int] {.inline.} =
-  ## Returns the number of places where `color` disappeared in each chain.
-  ## `UnpackDefect` is raised if not supported.
-  self.fullDisappearCounts.get.mapIt it[color].len
+func placeCnts*(self: MoveResult, cell: Cell): Res[seq[int]] {.inline.} =
+  ## Returns a sequence of the number of places where `cell` popped in each chain.
+  if self.fullPopCnts.isOk:
+    ok self.fullPopCnts.expect.mapIt it[cell].len
+  else:
+    err "`placeCnts` not supported: {self}".fmt
 
-func colorPlaces*(self: MoveResult): seq[int] {.inline.} =
-  ## Returns the number of places where color puyos disappeared in each chain.
-  ## `UnpackDefect` is raised if not supported.
-  collect:
-    for countsArr in self.fullDisappearCounts.get:
-      sum2 (ColorPuyo.low .. ColorPuyo.high).mapIt countsArr[it].len
+func placeCnts*(self: MoveResult): Res[seq[int]] {.inline.} =
+  ## Returns a sequence of the number of places where color puyos popped in each chain.
+  if self.fullPopCnts.isOk:
+    ok self.fullPopCnts.expect.mapIt (it[Red].len + it[Green].len + it[Blue].len) +
+      (it[Yellow].len + it[Purple].len)
+  else:
+    err "`placeCnts` not supported: {self}".fmt
 
 # ------------------------------------------------
 # Connect
 # ------------------------------------------------
 
-func colorConnects*(self: MoveResult, color: ColorPuyo): seq[int] {.inline.} =
-  ## Returns the number of connections of `color` that disappeared.
-  ## `UnpackDefect` is raised if not supported.
-  concat self.fullDisappearCounts.get.mapIt it[color]
+func connCnts*(self: MoveResult, cell: Cell): Res[seq[int]] {.inline.} =
+  ## Returns a sequence of the number of connections of `cell` that popped.
+  if self.fullPopCnts.isOk:
+    ok concat self.fullPopCnts.expect.mapIt it[cell]
+  else:
+    err "`conns` not supported: {self}".fmt
 
-func colorConnects*(self: MoveResult): seq[int] {.inline.} =
-  ## Returns the number of connections of color puyos that disappeared.
-  ## `UnpackDefect` is raised if not supported.
-  concat self.fullDisappearCounts.get.mapIt it[ColorPuyo.low .. ColorPuyo.high].concat
+func connCnts*(self: MoveResult): Res[seq[int]] {.inline.} =
+  ## Returns a sequence of the number of connections of color puyos that popped.
+  if self.fullPopCnts.isOk:
+    ok concat self.fullPopCnts.expect.mapIt it[Red .. Purple].concat
+  else:
+    err "`conns` not supported: {self}".fmt
 
 # ------------------------------------------------
 # Score
 # ------------------------------------------------
 
 const
-  ConnectBonuses = collect:
-    for connect in 0 .. Height.pred * Width:
-      if connect <= 4:
+  ConnBonuses = collect:
+    for conn in 0 .. Height.pred * Width:
+      if conn <= 4:
         0
-      elif connect in 5 .. 10:
-        connect - 3
+      elif conn in 5 .. 10:
+        conn - 3
       else:
         10
   ChainBonuses = collect:
@@ -181,50 +178,55 @@ const
       else:
         64 + 32 * (chain - 5)
   ColorBonuses = collect:
-    for color in 0 .. ColorPuyo.fullSet.card:
+    for color in 0 .. 5:
       if color <= 1:
         0
       else:
         3 * 2 ^ (color - 2)
 
-func connectBonus(puyoCounts: seq[int]): int {.inline.} =
+func connBonus(cnts: seq[int]): int {.inline.} =
   ## Returns the connect bonus.
-  result = 0
+  sum2 cnts.mapIt ConnBonuses[it]
 
-  for count in puyoCounts:
-    result.inc ConnectBonuses[count]
-
-func score*(self: MoveResult): int {.inline.} =
+func score*(self: MoveResult): Res[int] {.inline.} =
   ## Returns the score.
-  ## `UnpackDefect` is raised if not supported.
-  result = 0
+  if self.fullPopCnts.isErr:
+    return err "`score` not supported: {self}".fmt
 
-  for chainIdx, countsArray in self.fullDisappearCounts.get:
+  var totalScore = 0
+  for chainIdx, cntsArr in self.fullPopCnts.expect:
     var
-      connectBonus = 0
-      puyoCount = 0
-      colorCount = 0
-    for color in ColorPuyo.low .. ColorPuyo.high:
-      let counts = countsArray[color]
-      connectBonus.inc counts.connectBonus
+      connBonus = 0
+      totalPuyoCnt = 0
+      colorCnt = 0
 
-      let count = counts.sum2
-      puyoCount.inc count
+    staticFor(cell, Red .. Purple):
+      connBonus.inc cntsArr[cell].connBonus
 
-      if count > 0:
-        colorCount.inc
+      let puyoCnt = self.detailPopCnts[chainIdx][cell]
+      totalPuyoCnt.inc puyoCnt
 
-    let colorBonus = ColorBonuses[colorCount]
-    result.inc 10 * puyoCount *
-      max(ChainBonuses[chainIdx.succ] + connectBonus + colorBonus, 1)
+      if puyoCnt > 0:
+        colorCnt.inc
+
+    let
+      hardCnt = self.detailPopCnts[chainIdx][Hard]
+      hardToGarbageCnt = self.detailHardToGarbageCnt[chainIdx]
+      colorBonus = ColorBonuses[colorCnt]
+
+    totalScore.inc ((totalPuyoCnt + hardToGarbageCnt) * 10 + hardCnt * 80) *
+      max(ChainBonuses[chainIdx.succ] + connBonus + colorBonus, 1)
+
+  ok totalScore
 
 # ------------------------------------------------
 # Notice Garbage
 # ------------------------------------------------
 
-func noticeGarbageCounts*(
-    self: MoveResult, rule: Rule
-): array[NoticeGarbage, int] {.inline.} =
+func noticeGarbageCnts*(
+    self: MoveResult, rule: Rule, useComet = false
+): Res[array[NoticeGarbage, int]] {.inline.} =
   ## Returns the number of notice garbages.
-  ## Note that this function calls `score()`.
-  self.score.noticeGarbageCounts rule
+  (?self.score.context "`noticeGarbageCnts` not supported: {self}".fmt).noticeGarbageCnts(
+    rule, useComet
+  )

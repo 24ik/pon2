@@ -7,8 +7,10 @@
 {.experimental: "views".}
 
 import stew/[bitops2]
-import ../../../[assign3, bitops3, simd, staticfor2]
-import ../../../../core/[common, rule]
+import ../../[assign3, bitops3, simd, staticfor2]
+import ../../../core/[common, rule]
+
+export simd
 
 type
   XmmBinField* = M128i
@@ -29,13 +31,13 @@ func init(
 func init(T: type XmmBinField, val: uint16): T {.inline.} =
   T.init(val, val, val, val, val, val)
 
-func initZero*(T: type XmmBinField): XmmBinField {.inline.} =
+func init*(T: type XmmBinField): XmmBinField {.inline.} =
   ## Returns the binary field with all elements zero.
   mm_setzero_si128()
 
 func initOne*(T: type XmmBinField): XmmBinField {.inline.} =
   ## Returns the binary field with all elements one.
-  mm_cmpeq_epi16(T.initZero, T.initZero)
+  mm_cmpeq_epi16(T.init, T.init)
 
 func initFloor*(T: type XmmBinField): XmmBinField {.inline.} =
   ## Returns the binary field with floor bits one.
@@ -60,10 +62,10 @@ func `-`*(f1, f2: XmmBinField): XmmBinField {.inline.} =
   mm_andnot_si128(f2, f1)
 
 func `*`*(f1, f2: XmmBinField): XmmBinField {.inline.} =
-  mm_and_si128(f2, f1)
+  mm_and_si128(f1, f2)
 
 func `xor`*(f1, f2: XmmBinField): XmmBinField {.inline.} =
-  mm_xor_si128(f2, f1)
+  mm_xor_si128(f1, f2)
 
 func `+=`*(f1: var XmmBinField, f2: XmmBinField) {.inline.} =
   f1.assign f1 + f2
@@ -152,21 +154,22 @@ func keepValid*(self: var XmmBinField) {.inline.} =
   ## Keeps only the valid area.
   self *= initValidMask()
 
-func keptValid(self: uint64): uint64 {.inline.} =
-  ## Keeps only the valid area.
-  self and 0x3ffe_3ffe_3ffe_0000'u64
-
 # ------------------------------------------------
 # Clear
 # ------------------------------------------------
 
 func clear*(self: var XmmBinField) {.inline.} =
   ## Clears the binary field.
-  self.assign XmmBinField.initZero
+  self.assign XmmBinField.init
 
-func clear*(self: var XmmBinField, col: Col) {.inline.} =
-  ## Clears the binary field only at the given column.
-  self -= col.colMask
+# ------------------------------------------------
+# Replace
+# ------------------------------------------------
+
+func replace*(self: var XmmBinField, col: Col, after: XmmBinField) {.inline.} =
+  ## Replaces the column of the binary field by `after`.
+  let mask = col.colMask
+  self.assign (self - mask) + (after * mask)
 
 # ------------------------------------------------
 # Population Count
@@ -174,7 +177,7 @@ func clear*(self: var XmmBinField, col: Col) {.inline.} =
 
 func popcnt*(self: XmmBinField): int {.inline.} =
   ## Returns the population count.
-  var arr {.align(16).}: array[2, uint64]
+  var arr {.noinit, align(16).}: array[2, uint64]
   arr.addr.mm_store_si128 self
 
   {.push warning[Uninit]: off.}
@@ -287,28 +290,28 @@ func idxFromMsb(row: Row, col: Col): int {.inline.} =
   col.ord shl 4 + (row.ord + 2)
 
 func `[]`*(self: XmmBinField, row: static Row, col: static Col): bool {.inline.} =
-  when col in {Col0, Col1, Col2}:
+  when col in {Col0, Col1, Col2, Col3}:
     self.mm_extract_epi64(1).getBitBE static(idxFromMsb(row, col))
   else:
-    self.mm_extract_epi64(0).getBitBE static(idxFromMsb(row, col.pred 3))
+    self.mm_extract_epi64(0).getBitBE static(idxFromMsb(row, col.pred 4))
 
 func `[]`*(self: XmmBinField, row: Row, col: Col): bool {.inline.} =
   case col
-  of Col0, Col1, Col2:
+  of Col0, Col1, Col2, Col3:
     self.mm_extract_epi64(1).getBitBE idxFromMsb(row, col)
-  else:
-    self.mm_extract_epi64(0).getBitBE idxFromMsb(row, col.pred 3)
+  of Col4, Col5:
+    self.mm_extract_epi64(0).getBitBE idxFromMsb(row, col.pred 4)
 
 func `[]=`*(self: var XmmBinField, row: Row, col: Col, val: bool) {.inline.} =
-  var arr {.align(16).}: array[2, uint64]
+  var arr {.noinit, align(16).}: array[2, uint64]
   arr.addr.mm_store_si128 self
 
   {.push warning[Uninit]: off.}
   case col
-  of Col0, Col1, Col2:
+  of Col0, Col1, Col2, Col3:
     arr[1].changeBitBE idxFromMsb(row, col), val
-  of Col3, Col4, Col5:
-    arr[0].changeBitBE idxFromMsb(row, col.pred 3), val
+  of Col4, Col5:
+    arr[0].changeBitBE idxFromMsb(row, col.pred 4), val
   {.pop.}
 
   self.assign arr.addr.mm_load_si128
@@ -322,13 +325,21 @@ func isInWater(row: Row, rule: static Rule): bool {.inline.} =
   (static rule == Water) and row.ord + WaterHeight >= Height
 
 func insert(
-    self: var uint64, col: Col, row: Row, val: bool, rule: static Rule
+    self: var uint64,
+    col: Col,
+    row: Row,
+    val: bool,
+    rule: static Rule,
+    col0123: static bool,
 ) {.inline.} =
   ## Inserts the value and shifts the binary field's element.
   ## If (row, col) is in the air, shifts the binary field's element upward above where
   ## inserted.
   ## If it is in the water, shifts the binary field's element downward below where
   ## inserted.
+  const ValidMask =
+    when col0123: 0x3ffe_3ffe_3ffe_3ffe'u64 else: 0x3ffe_3ffe_0000_0000'u64
+
   let
     colShift = col.ord shl 4
     rowColShift = colShift + row.ord
@@ -339,12 +350,12 @@ func insert(
     above: uint64
   if row.isInWater rule:
     let belowMask = 0x3fff_0000_0000_0000'u64 shr rowColShift
-    below = ((self and belowMask) shr 1).keptValid
+    below = ((self and belowMask) shr 1) and ValidMask
     above = self *~ belowMask
   else:
     let belowMask = 0x1fff_0000_0000_0000'u64 shr rowColShift
     below = self and belowMask
-    above = ((self *~ belowMask) shl 1).keptValid
+    above = ((self *~ belowMask) shl 1) and ValidMask
 
   self.assign ((below or above) and colMask) or (self *~ colMask)
   self.changeBitBE rowColShift + 2, val
@@ -355,25 +366,30 @@ func insert*(
   ## Inserts the value and shifts the binary field.
   ## If (row, col) is in the air, shifts the binary field upward above where inserted.
   ## If it is in the water, shifts the binary field downward below where inserted.
-  var arr {.align(16).}: array[2, uint64]
+  var arr {.noinit, align(16).}: array[2, uint64]
   arr.addr.mm_store_si128 self
 
   {.push warning[Uninit]: off.}
   case col
-  of Col0, Col1, Col2:
-    arr[1].insert col, row, val, rule
-  of Col3, Col4, Col5:
-    arr[0].insert col.pred 3, row, val, rule
+  of Col0, Col1, Col2, Col3:
+    arr[1].insert col, row, val, rule, true
+  of Col4, Col5:
+    arr[0].insert col.pred 4, row, val, rule, false
   {.pop.}
 
   self.assign arr.addr.mm_load_si128
 
-func delete(self: var uint64, col: Col, row: Row, rule: static Rule) {.inline.} =
+func delete(
+    self: var uint64, col: Col, row: Row, rule: static Rule, col0123: static bool
+) {.inline.} =
   ## Deletes the value and shifts the binary field's element.
   ## If (row, col) is in the air, shifts the binary field's element downward above
   ## where deleted.
   ## If it is in the water, shifts the binary field's element upward below where
   ## deleted.
+  const ValidMask =
+    when col0123: 0x3ffe_3ffe_3ffe_3ffe'u64 else: 0x3ffe_3ffe_0000_0000'u64
+
   let
     colShift = col.ord shl 4
     rowColShift = colShift + row.ord
@@ -385,11 +401,11 @@ func delete(self: var uint64, col: Col, row: Row, rule: static Rule) {.inline.} 
     below: uint64
     above: uint64
   if row.isInWater rule:
-    below = ((self and belowMask) shl 1).keptValid
+    below = ((self and belowMask) shl 1) and ValidMask
     above = self and aboveMask
   else:
     below = self and belowMask
-    above = ((self and aboveMask) shr 1).keptValid
+    above = ((self and aboveMask) shr 1) and ValidMask
 
   self.assign ((below or above) and colMask) or (self *~ colMask)
 
@@ -397,15 +413,15 @@ func delete*(self: var XmmBinField, row: Row, col: Col, rule: static Rule) {.inl
   ## Deletes the value and shifts the binary field.
   ## If (row, col) is in the air, shifts the binary field downward above where deleted.
   ## If it is in the water, shifts the binary field upward below where deleted.
-  var arr {.align(16).}: array[2, uint64]
+  var arr {.noinit, align(16).}: array[2, uint64]
   arr.addr.mm_store_si128 self
 
   {.push warning[Uninit]: off.}
   case col
-  of Col0, Col1, Col2:
-    arr[1].delete col, row, rule
-  of Col3, Col4, Col5:
-    arr[0].delete col.pred 3, row, rule
+  of Col0, Col1, Col2, Col3:
+    arr[1].delete col, row, rule, true
+  of Col4, Col5:
+    arr[0].delete col.pred 4, row, rule, false
   {.pop.}
 
   self.assign arr.addr.mm_load_si128
@@ -416,7 +432,7 @@ func delete*(self: var XmmBinField, row: Row, col: Col, rule: static Rule) {.inl
 
 func toDropMask*(existField: XmmBinField): XmmDropMask {.inline.} =
   ## Returns a drop mask converted from the exist field.
-  var arr {.align(16).}: array[8, uint16]
+  var arr {.noinit, align(16).}: array[8, uint16]
   arr.addr.mm_store_si128 existField
 
   {.push warning[Uninit]: off.}
@@ -427,9 +443,9 @@ func toDropMask*(existField: XmmBinField): XmmDropMask {.inline.} =
   return dropMask
   {.pop.}
 
-func drop*(self: var XmmBinField, mask: XmmDropMask) {.inline.} =
-  ## Floating cells drop.
-  var arr {.align(16).}: array[8, uint16]
+func dropTsu(self: var XmmBinField, mask: XmmDropMask) {.inline.} =
+  ## Falling floating cells.
+  var arr {.noinit, align(16).}: array[8, uint16]
   arr.addr.mm_store_si128 self
 
   {.push warning[Uninit]: off.}
@@ -442,3 +458,26 @@ func drop*(self: var XmmBinField, mask: XmmDropMask) {.inline.} =
     arr[2].pext(mask[Col5]),
   ).shiftedUpRaw
   {.pop.}
+
+func dropWater(self: var XmmBinField, mask: XmmDropMask) {.inline.} =
+  ## Falling floating cells.
+  var arr {.noinit, align(16).}: array[8, uint16]
+  arr.addr.mm_store_si128 self
+
+  {.push warning[Uninit]: off.}
+  self.assign XmmBinField.init(
+    arr[7].pext(mask[Col0]) shl max(1, 1 + WaterHeight - mask[Col0].popcnt),
+    arr[6].pext(mask[Col1]) shl max(1, 1 + WaterHeight - mask[Col1].popcnt),
+    arr[5].pext(mask[Col2]) shl max(1, 1 + WaterHeight - mask[Col2].popcnt),
+    arr[4].pext(mask[Col3]) shl max(1, 1 + WaterHeight - mask[Col3].popcnt),
+    arr[3].pext(mask[Col4]) shl max(1, 1 + WaterHeight - mask[Col4].popcnt),
+    arr[2].pext(mask[Col5]) shl max(1, 1 + WaterHeight - mask[Col5].popcnt),
+  )
+  {.pop.}
+
+func drop*(self: var XmmBinField, mask: XmmDropMask, rule: static Rule) {.inline.} =
+  ## Falling floating cells.
+  when rule == Tsu:
+    self.dropTsu mask
+  else:
+    self.dropWater mask

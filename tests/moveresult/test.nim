@@ -1,183 +1,177 @@
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[options, unittest]
-import ../../src/pon2/core/[cell, field, moveresult, position, puyopuyo]
+import std/[unittest]
+import ../../src/pon2/core/[cell, moveresult, notice, rule]
+import ../../src/pon2/private/[results2]
 
-proc main*() =
-  # ------------------------------------------------
-  # Count, Score
-  # ------------------------------------------------
+let
+  chainCnt = 3
+  popCnts: array[Cell, int] = [0, 1, 12, 12, 4, 13, 0, 15]
+  hardToGarbageCnt = 3
+  detailHardToGarbageCnt = @[1, 2, 0]
 
-  # chainCount, puyoCount[s], colorCount[s], garbageCount[s], colors[Seq],
-  # colorPlaces, colorConnects, score
-  block:
-    let puyoPuyo = parsePuyoPuyo[TsuField](
-      """
-....g.
-....g.
-....pg
-....rg
-....gr
-....go
-....gp
-....bg
-....bp
-...bgp
-...bgr
-...orb
-...gbb
-------
-rb|4F
-rg|"""
+# NOTE: somehow direct initialization does not work
+var detailPopCnts = newSeq[array[Cell, int]]()
+block:
+  let
+    arr1: array[Cell, int] = [0, 1, 0, 4, 0, 5, 0, 9]
+    arr2: array[Cell, int] = [0, 0, 0, 4, 4, 0, 0, 0]
+    arr3: array[Cell, int] = [0, 0, 12, 4, 0, 8, 0, 6]
+
+  detailPopCnts.add arr1
+  detailPopCnts.add arr2
+  detailPopCnts.add arr3
+
+# NOTE: somehow direct initialization does not work
+var fullPopCnts = newSeq[array[Cell, seq[int]]]()
+block:
+  let
+    arr1: array[Cell, seq[int]] = [@[], @[1], @[], @[4], @[], @[5], @[], @[4, 5]]
+    arr2: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[4], @[], @[], @[]]
+    arr3: array[Cell, seq[int]] = [@[], @[], @[4, 4, 4], @[4], @[], @[5], @[], @[6]]
+
+  fullPopCnts.add arr1
+  fullPopCnts.add arr2
+  fullPopCnts.add arr3
+
+let
+  moveRes1 = MoveResult.init(
+    chainCnt, popCnts, hardToGarbageCnt, detailPopCnts, detailHardToGarbageCnt
+  )
+  moveRes2 = MoveResult.init(
+    chainCnt, popCnts, hardToGarbageCnt, detailPopCnts, detailHardToGarbageCnt,
+    fullPopCnts,
+  )
+
+# ------------------------------------------------
+# Constructor
+# ------------------------------------------------
+
+block: # init
+  check moveRes1 ==
+    MoveResult(
+      chainCnt: chainCnt,
+      popCnts: popCnts,
+      hardToGarbageCnt: hardToGarbageCnt,
+      detailPopCnts: detailPopCnts,
+      detailHardToGarbageCnt: detailHardToGarbageCnt,
+      fullPopCnts: Opt[seq[array[Cell, seq[int]]]].err,
+    )
+  check moveRes2 ==
+    MoveResult(
+      chainCnt: chainCnt,
+      popCnts: popCnts,
+      hardToGarbageCnt: hardToGarbageCnt,
+      detailPopCnts: detailPopCnts,
+      detailHardToGarbageCnt: detailHardToGarbageCnt,
+      fullPopCnts: Opt[seq[array[Cell, seq[int]]]].ok fullPopCnts,
     )
 
-    let res0, res1, res2: MoveResult
-    block:
-      var puyoPuyo2 = puyoPuyo
-      res0 = puyoPuyo2.move0
-    block:
-      var puyoPuyo2 = puyoPuyo
-      res1 = puyoPuyo2.move1
-    block:
-      var puyoPuyo2 = puyoPuyo
-      res2 = puyoPuyo2.move2
+# ------------------------------------------------
+# Count
+# ------------------------------------------------
 
-    # chainCount
-    block:
-      let chain = 3
+block:
+  # cellCnt, puyoCnt, colorPuyoCnt, garbagesCnt,
+  # cellCnts, puyoCnts, colorPuyoCnts, garbagesCnts
+  let
+    cntP = 15
+    cntY = 0
+  check moveRes1.cellCnt(Purple) == cntP
+  check moveRes2.cellCnt(Purple) == cntP
+  check moveRes1.cellCnt(Yellow) == cntY
+  check moveRes2.cellCnt(Yellow) == cntY
 
-      check res0.chainCount == chain
-      check res1.chainCount == chain
-      check res2.chainCount == chain
+  let cntPuyo = 57
+  check moveRes1.puyoCnt == cntPuyo
+  check moveRes2.puyoCnt == cntPuyo
 
-    # puyoCount
-    block:
-      let
-        red = 4
-        puyo = 25
+  let cntColor = 44
+  check moveRes1.colorPuyoCnt == cntColor
+  check moveRes2.colorPuyoCnt == cntColor
 
-      check res0.puyoCount(Red) == red
-      check res1.puyoCount(Red) == red
-      check res2.puyoCount(Red) == red
+  let cntGarbages = 13
+  check moveRes1.garbagesCnt == cntGarbages
+  check moveRes2.garbagesCnt == cntGarbages
 
-      check res0.puyoCount == puyo
-      check res1.puyoCount == puyo
-      check res2.puyoCount == puyo
+  let
+    cntsB = @[5, 0, 8]
+    cntsY = @[0, 0, 0]
+  check moveRes1.cellCnts(Blue) == cntsB
+  check moveRes2.cellCnts(Blue) == cntsB
+  check moveRes1.cellCnts(Yellow) == cntsY
+  check moveRes2.cellCnts(Yellow) == cntsY
 
-    # colorCount
-    block:
-      let color = 23
+  let cntsPuyo = @[19, 8, 30]
+  check moveRes1.puyoCnts == cntsPuyo
+  check moveRes2.puyoCnts == cntsPuyo
 
-      check res0.colorCount == color
-      check res1.colorCount == color
-      check res2.colorCount == color
+  let cntsColor = @[18, 8, 18]
+  check moveRes1.colorPuyoCnts == cntsColor
+  check moveRes2.colorPuyoCnts == cntsColor
 
-    # garbageCount
-    block:
-      let garbage = 2
+  let cntsGarbages = @[1, 0, 12]
+  check moveRes1.garbagesCnts == cntsGarbages
+  check moveRes2.garbagesCnts == cntsGarbages
 
-      check res0.garbageCount == garbage
-      check res1.garbageCount == garbage
-      check res2.garbageCount == garbage
+# ------------------------------------------------
+# Color
+# ------------------------------------------------
 
-    # puyoCounts
-    block:
-      let
-        red = @[0, 0, 4]
-        puyo = @[6, 10, 9]
+block: # colors, colorsSeq
+  let colors2 = {Red, Green, Blue, Purple}
+  check moveRes1.colors == colors2
+  check moveRes2.colors == colors2
 
-      expect UnpackDefect:
-        discard res0.puyoCounts(Red)
-      check res1.puyoCounts(Red) == red
-      check res2.puyoCounts(Red) == red
+  let colorsSeq2 = @[{Red, Blue, Purple}, {Red, Green}, {Red, Blue, Purple}]
+  check moveRes1.colorsSeq == colorsSeq2
+  check moveRes2.colorsSeq == colorsSeq2
 
-      expect UnpackDefect:
-        discard res0.puyoCounts
-      check res1.puyoCounts == puyo
-      check res2.puyoCounts == puyo
+# ------------------------------------------------
+# Place
+# ------------------------------------------------
 
-    # colorCounts
-    block:
-      let color = @[5, 10, 8]
+block: # placeCnts
+  check moveRes1.placeCnts(Purple).isErr
+  check moveRes2.placeCnts(Purple) == Res[seq[int]].ok @[2, 0, 1]
+  check moveRes1.placeCnts(Yellow).isErr
+  check moveRes2.placeCnts(Yellow) == Res[seq[int]].ok @[0, 0, 0]
 
-      expect UnpackDefect:
-        discard res0.colorCounts
-      check res1.colorCounts == color
-      check res2.colorCounts == color
+  check moveRes1.placeCnts.isErr
+  check moveRes2.placeCnts == Res[seq[int]].ok @[4, 2, 3]
 
-    # garbageCounts
-    block:
-      let garbage = @[1, 0, 1]
+# ------------------------------------------------
+# Connect
+# ------------------------------------------------
 
-      expect UnpackDefect:
-        discard res0.garbageCounts
-      check res1.garbageCounts == garbage
-      check res2.garbageCounts == garbage
+block: # connCnts
+  check moveRes1.connCnts(Purple).isErr
+  check moveRes2.connCnts(Purple) == Res[seq[int]].ok @[4, 5, 6]
+  check moveRes1.connCnts(Yellow).isErr
+  check moveRes2.connCnts(Yellow) == Res[seq[int]].ok @[]
 
-    # colors
-    block:
-      let colors = {Red.ColorPuyo, Green, Blue, Purple}
+  check moveRes1.connCnts.isErr
+  check moveRes2.connCnts == Res[seq[int]].ok @[4, 5, 4, 5, 4, 4, 4, 5, 6]
 
-      check res0.colors == colors
-      check res1.colors == colors
-      check res2.colors == colors
+# ------------------------------------------------
+# Score
+# ------------------------------------------------
 
-    # colorsSeq
-    block:
-      let colorsSeq = @[{Blue.ColorPuyo}, {Green}, {Red, Purple}]
+let scoreAns = 8660
 
-      expect UnpackDefect:
-        discard res0.colorsSeq
-      check res1.colorsSeq == colorsSeq
-      check res2.colorsSeq == colorsSeq
+block: # score
+  check moveRes1.score.isErr
+  check moveRes2.score == Res[int].ok scoreAns
 
-    # colorPlaces
-    block:
-      let
-        red = @[0, 0, 1]
-        color = @[1, 2, 2]
+# ------------------------------------------------
+# Notice Garbage
+# ------------------------------------------------
 
-      expect UnpackDefect:
-        discard res0.colorPlaces(Red)
-      expect UnpackDefect:
-        discard res1.colorPlaces(Red)
-      check res2.colorPlaces(Red) == red
+block: # noticeGarbageCnts
+  check moveRes1.noticeGarbageCnts(Tsu).isErr
+  check moveRes2.noticeGarbageCnts(Tsu) == scoreAns.noticeGarbageCnts Tsu
 
-      expect UnpackDefect:
-        discard res0.colorPlaces
-      expect UnpackDefect:
-        discard res1.colorPlaces
-      check res2.colorPlaces == color
-
-    # colorConnects
-    block:
-      let
-        red = @[4]
-        color = @[5, 4, 6, 4, 4]
-
-      expect UnpackDefect:
-        discard res0.colorConnects(Red)
-      expect UnpackDefect:
-        discard res1.colorConnects(Red)
-      check res2.colorConnects(Red) == red
-
-      expect UnpackDefect:
-        discard res0.colorConnects
-      expect UnpackDefect:
-        discard res1.colorConnects
-      check res2.colorConnects == color
-
-    # score
-    block:
-      let score = 2720
-
-      expect UnpackDefect:
-        discard res0.score
-      expect UnpackDefect:
-        discard res1.score
-      check res2.score == score
+  check moveRes1.noticeGarbageCnts(Water).isErr
+  check moveRes2.noticeGarbageCnts(Water) == scoreAns.noticeGarbageCnts Water

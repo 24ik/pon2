@@ -6,9 +6,9 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, sugar, tables]
+import std/[strformat, sugar]
 import ./[common, fqdn]
-import ../private/[misc, results2]
+import ../private/[results2, tables2]
 
 type
   Dir* {.pure.} = enum

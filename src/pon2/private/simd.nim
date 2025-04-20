@@ -1,9 +1,9 @@
 ## This module implements SIMD operations.
 ##
 ## Compile Options:
-## | Option               | Description                               | Default |
-## | -------------------- | ----------------------------------------- | ------- |
-## | `-d:pon2.simd=<int>` | SIMD level. (2: AVX2, 1: SSE4.2, 0: None) | 2       |
+## | Option               | Description                      | Default |
+## | -------------------- | -------------------------------- | ------- |
+## | `-d:pon2.simd=<int>` | SIMD level. (1: SSE4.2, 0: None) | 1       |
 ##
 
 {.push raises: [].}
@@ -11,15 +11,14 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-const SimdLvl {.define: "pon2.simd".} = 2
+const SimdLvl {.define: "pon2.simd".} = 1
 
 static:
-  doAssert SimdLvl in 0 .. 2
+  doAssert SimdLvl in 0 .. 1
 
 const
   X86_64 = defined(amd64) or defined(i386)
   Sse42Available* = SimdLvl >= 1 and X86_64
-  Avx2Available* = SimdLvl >= 2 and X86_64
 
 when Sse42Available:
   import nimsimd/[sse42]
@@ -28,14 +27,6 @@ when Sse42Available:
   when defined(gcc) or defined(clang):
     {.passc: "-msse4.2".}
     {.passl: "-msse4.2".}
-
-when Avx2Available:
-  import nimsimd/[avx2]
-  export avx2
-
-  when defined(gcc) or defined(clang):
-    {.passc: "-mavx2".}
-    {.passl: "-mavx2".}
 
 when Sse42Available:
   import std/[strformat]
@@ -55,11 +46,11 @@ when Sse42Available:
   # ------------------------------------------------
 
   func `$`*(self: M128i): string {.inline.} =
-    var arr {.align(16).}: array[8, uint16]
+    var arr {.noinit, align(16).}: array[8, uint16]
     arr.addr.mm_store_si128 self
 
     {.push warning[Uninit]: off.}
-    return "M128i({arr})".fmt
+    return "M128i{arr}".fmt
     {.pop.}
 
   func `==`*(x1, x2: M128i): bool {.inline.} =

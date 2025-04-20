@@ -6,9 +6,9 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, sugar, tables]
+import std/[strformat, sugar]
 import ./[cell, fqdn]
-import ../private/[assign3, misc, results2]
+import ../private/[assign3, results2, tables2]
 
 type Pair* {.pure.} = enum
   ## The pair of two color puyos.
@@ -105,16 +105,16 @@ func cellCnt*(self: Pair, cell: Cell): int {.inline.} =
   ## Returns the number of `cell` in the pair.
   (self.pivot == cell).int + (self.rotor == cell).int
 
-func cellCnt*(self: Pair): int {.inline.} =
-  ## Returns the number of cells in the pair.
+func puyoCnt*(self: Pair): int {.inline.} =
+  ## Returns the number of puyos in the pair.
   2
 
-func colorCnt*(self: Pair): int {.inline.} =
+func colorPuyoCnt*(self: Pair): int {.inline.} =
   ## Returns the number of color puyos in the pair.
   2
 
-func garbageCnt*(self: Pair): int {.inline.} =
-  ## Returns the number of garbage puyos in the pair.
+func garbagesCnt*(self: Pair): int {.inline.} =
+  ## Returns the number of hard and garbage puyos in the pair.
   0
 
 # ------------------------------------------------

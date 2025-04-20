@@ -11,8 +11,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, sugar, tables]
-import ../private/[misc, results2]
+import std/[strformat, sugar]
+import ../private/[results2, tables2]
 
 const Pon2Fqdn* {.define: "pon2.fqdn".} = "24ik.github.io"
 

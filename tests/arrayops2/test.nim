@@ -14,4 +14,4 @@ block: # static size
   check initArrWith(0, 'd') == []
 
 block: # enum
-  check initArrWith[EnumType, int](1) == [1, 1]
+  check initArrWith[EnumType, seq[int]](@[2, 3]) == [@[2, 3], @[2, 3]]

@@ -1,9 +1,10 @@
 ## This module implements bit operations.
 ##
 ## Compile Options:
-## | Option              | Description                            | Default |
-## | ------------------- | -------------------------------------- | ------- |
-## | `-d:pon2.bmi=<int>` | BMI level. (2: BMI2, 1: BMI1, 0: None) | 2       |
+## | Option                 | Description                            | Default |
+## | ---------------------- | -------------------------------------- | ------- |
+## | `-d:pon2.bmi=<int>`    | BMI level. (2: BMI2, 1: BMI1, 0: None) | 2       |
+## | `-d:pon2.clmul=<bool>` | Uses CLMUL.                            | true    |
 ##
 
 {.push raises: [].}
@@ -11,7 +12,9 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-const BmiLvl {.define: "pon2.bmi".} = 2
+const
+  BmiLvl {.define: "pon2.bmi".} = 2
+  ClmulUse {.define: "pon2.clmul".} = true
 
 static:
   doAssert BmiLvl in 0 .. 2
@@ -20,8 +23,10 @@ const
   X86_64 = defined(amd64) or defined(i386)
   Bmi1Available* = BmiLvl >= 1 and X86_64
   Bmi2Available* = BmiLvl >= 2 and X86_64
+  ClmulAvailable* = ClmulUse and X86_64
 
 import std/[typetraits]
+import stew/[bitops2]
 import ./[arrayops2, assign3, staticfor2]
 
 when Bmi1Available:
@@ -39,6 +44,14 @@ when Bmi2Available:
   when defined(gcc) or defined(clang):
     {.passc: "-mbmi2".}
     {.passl: "-mbmi2".}
+
+when ClmulAvailable:
+  import nimsimd/[pclmulqdq, sse2]
+  export pclmulqdq
+
+  when defined(gcc) or defined(clang):
+    {.passc: "-mpclmul".}
+    {.passl: "-mpclmul".}
 
 # ------------------------------------------------
 # Cast
@@ -83,6 +96,13 @@ func asSigned(x: uint64): int64 {.inline.} =
 func asSigned(x: uint): int {.inline.} =
   ## Returns the signed integer casted from the argument.
   cast[int](x)
+
+# ------------------------------------------------
+# Operator
+# ------------------------------------------------
+
+func `-`[T: SomeUnsignedInt](x: T): T {.inline.} =
+  (not x).succ
 
 # ------------------------------------------------
 # Bitwise-and
@@ -272,6 +292,7 @@ func toMask2*[T: SomeInteger](slice: Slice[int]): T {.inline.} =
 # ------------------------------------------------
 
 func bextrNim[T: SomeInteger](val: T, start, length: uint32): T {.inline.} =
+  ## Bit field extract.
   (val shr start) and (1.T shl length).pred
 
 when Bmi1Available:
@@ -309,6 +330,7 @@ func bextr*[T: SomeSignedInt](val: T, start, length: uint32): T {.inline.} =
 
 # ------------------------------------------------
 # PEXT
+# ref: https://github.com/zwegner/zp7/blob/master/zp7.c
 # ------------------------------------------------
 
 const
@@ -316,7 +338,7 @@ const
   BitCnt32 = 5
   BitCnt16 = 4
 
-type PextMaskNim[T: uint64 or uint32 or uint16] = object ## Mask used in `pext`.
+type PextMaskNim[T: uint64 or uint32 or uint16] = object ## Mask used by PEXT.
   mask: T
   bits: array[
     when T is uint64:
@@ -328,9 +350,11 @@ type PextMaskNim[T: uint64 or uint32 or uint16] = object ## Mask used in `pext`.
     T,
   ]
 
-func initNim[T: uint64 or uint32 or uint16](
+func initPureNim[T: uint64 or uint32 or uint16](
     M: type PextMaskNim[T], mask: T
 ): M {.inline.} =
+  ## Returns the PEXT mask.
+  ## This function works on any context.
   const
     BitCnt =
       when T is uint64:
@@ -352,9 +376,72 @@ func initNim[T: uint64 or uint32 or uint16](
     pextMask.bits[i].assign bit
     lastMask.assign lastMask and bit
 
-  pextMask.bits[^1].assign (T.high - lastMask + 1) shl 1
+  pextMask.bits[^1].assign -lastMask shl 1
 
   pextMask
+
+when ClmulAvailable:
+  func initIntrinNim[T: uint64 or uint32 or uint16](
+      M: type PextMaskNim[T], mask: T
+  ): M {.inline.} =
+    ## Returns the PEXT mask.
+    ## This function uses SSE2 and CLMUL.
+    const
+      BitCnt =
+        when T is uint64:
+          BitCnt64
+        elif T is uint32:
+          BitCnt32
+        else:
+          BitCnt16
+      ZeroArr = BitCnt.initArrWith 0.T
+
+    var pextMask = M(mask: mask, bits: ZeroArr)
+    when T is uint64:
+      var mask2 = (not mask).mm_cvtsi64_si128
+      let neg2 = (-2).mm_cvtsi64_si128
+    elif T is uint32:
+      var mask2 = (not mask).mm_cvtsi32_si128
+      let neg2 = (-2).mm_cvtsi32_si128
+    else:
+      var mask2 = (not mask).uint32.mm_cvtsi32_si128
+      let neg2 = (-2).mm_cvtsi32_si128
+
+    staticFor(i, 0 ..< BitCnt.pred):
+      let bit = mm_clmulepi64_si128(mask2, neg2, 0)
+      pextMask.bits[i].assign(
+        when T is uint64:
+          bit.mm_cvtsi128_si64.asUnsigned
+        elif T is uint32:
+          bit.mm_cvtsi128_si32.asUnsigned
+        else:
+          bit.mm_cvtsi128_si32.asUnsigned.uint16
+      )
+
+      mask2 = mm_and_si128(mask2, bit)
+
+    pextMask.bits[^1].assign(
+      when T is uint64:
+        (-mask2.mm_cvtsi128_si64 shl 1).asUnsigned
+      elif T is uint32:
+        (-mask2.mm_cvtsi128_si32 shl 1).asUnsigned
+      else:
+        (-mask2.mm_cvtsi128_si32 shl 1).asUnsigned.uint16
+    )
+
+    pextMask
+
+func initNim[T: uint64 or uint32 or uint16](
+    M: type PextMaskNim[T], mask: T
+): M {.inline.} =
+  ## Returns the PEXT mask.
+  when nimvm:
+    M.initPureNim mask
+  else:
+    when ClmulAvailable:
+      M.initIntrinNim mask
+    else:
+      M.initPureNim mask
 
 func pextNim[T: uint64 or uint32 or uint16](a: T, mask: PextMaskNim[T]): T {.inline.} =
   ## Parallel bits extract.
@@ -389,17 +476,30 @@ when Bmi2Available:
 
   func pext*(a: uint64, mask: uint64 or PextMask[uint64]): uint64 {.inline.} =
     ## Parallel bits extract.
-    a.pext_u64 mask
+    when nimvm:
+      a.pextNim mask
+    else:
+      a.pext_u64 mask
 
   func pext*(a: uint32, mask: uint32 or PextMask[uint32]): uint32 {.inline.} =
     ## Parallel bits extract.
-    a.pext_u32 mask
+    when nimvm:
+      a.pextNim mask
+    else:
+      a.pext_u32 mask
 
   func pext*(a: uint16, mask: uint16 or PextMask[uint16]): uint16 {.inline.} =
     ## Parallel bits extract.
-    uint16 a.uint32.pext mask.uint32
+    when nimvm:
+      a.pextNim mask
+    else:
+      uint16 a.uint32.pext mask.uint32
+
+  func popcnt*[T: uint64 or uint32 or uint16](self: PextMask[T]): int {.inline.} =
+    ## Population counts.
+    self.countOnes
 else:
-  type PextMask*[T: uint64 or uint32 or uint16] = PextMaskNim[T]
+  type PextMask*[T: uint64 or uint32 or uint16] = PextMaskNim[T] ## Mask used in `pext`.
 
   func init*[T: uint64 or uint32 or uint16](
       M: type PextMask[T], mask: T
@@ -414,3 +514,7 @@ else:
   func pext*[T: uint64 or uint32 or uint16](a, mask: T): T {.inline.} =
     ## Parallel bits extract.
     a.pextNim mask
+
+  func popcnt*[T: uint64 or uint32 or uint16](self: PextMask[T]): int {.inline.} =
+    ## Population counts.
+    self.mask.countOnes

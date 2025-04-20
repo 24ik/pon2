@@ -13,24 +13,29 @@ import ../../src/pon2/private/[results2]
 block: # init
   block:
     let step = Step.init(RedGreen, NonePlacement)
+    check step.kind == PairPlacement
     check step.pair == RedGreen
     check step.optPlacement == NonePlacement
 
   block:
     let step = Step.init BlueYellow
+    check step.kind == PairPlacement
     check step.pair == BlueYellow
     check step.optPlacement == NonePlacement
 
   block:
     let step = Step.init(PurplePurple, Down3)
+    check step.kind == PairPlacement
     check step.pair == PurplePurple
     check step.optPlacement == OptPlacement.ok Down3
 
   block:
     let
-      garbageCnts = [Col0: 1, 0, 1, 1, 0, 0]
-      step = Step.init garbageCnts
-    check step.garbageCnts == garbageCnts
+      cnts = [Col0: 1, 0, 1, 1, 0, 0]
+      step = Step.init(cnts, true)
+    check step.kind == Garbages
+    check step.cnts == cnts
+    check step.dropHard
 
 # ------------------------------------------------
 # Property
@@ -43,12 +48,12 @@ block: # isValid
     check step.isValid(originalCompatible = false)
 
   block:
-    let step = Step.init [Col0: 3, 2, 2, 2, 2, 1]
+    let step = Step.init([Col0: 3, 2, 2, 2, 2, 1], true)
     check not step.isValid(originalCompatible = true)
     check step.isValid(originalCompatible = false)
 
   block:
-    let step = Step.init [Col0: -1, 0, 0, 0, 0, 0]
+    let step = Step.init([Col0: -1, 0, 0, 0, 0, 0], false)
     check not step.isValid(originalCompatible = true)
     check not step.isValid(originalCompatible = false)
 
@@ -56,33 +61,35 @@ block: # isValid
 # Count
 # ------------------------------------------------
 
-block: # cellCnt, colorCnt, garbageCnt
+block: # cellCnt, puyoCnt, colorPuyoCnt, garbagesCnt
   block:
     let step = Step.init YellowPurple
     check step.cellCnt(Red) == 0
     check step.cellCnt(Yellow) == 1
     check step.cellCnt(Garbage) == 0
-    check step.cellCnt == 2
-    check step.colorCnt == 2
-    check step.garbageCnt == 0
+    check step.puyoCnt == 2
+    check step.colorPuyoCnt == 2
+    check step.garbagesCnt == 0
 
   block:
-    let step = Step.init [Col0: 2, 1, 0, 1, 0, 1]
+    let step = Step.init([Col0: 2, 1, 0, 1, 0, 1], true)
     check step.cellCnt(Red) == 0
     check step.cellCnt(Yellow) == 0
-    check step.cellCnt(Garbage) == 5
-    check step.cellCnt == 5
-    check step.colorCnt == 0
-    check step.garbageCnt == 5
+    check step.cellCnt(Hard) == 5
+    check step.cellCnt(Garbage) == 0
+    check step.puyoCnt == 5
+    check step.colorPuyoCnt == 0
+    check step.garbagesCnt == 5
 
   block:
-    let steps = @[Step.init RedGreen, Step.init [Col0: 5, 4, 5, 5, 5, 4]]
+    let steps = @[Step.init RedGreen, Step.init([Col0: 5, 4, 5, 5, 5, 4], false)]
     check steps.cellCnt(Red) == 1
     check steps.cellCnt(Yellow) == 0
     check steps.cellCnt(Garbage) == 28
-    check steps.cellCnt == 30
-    check steps.colorCnt == 2
-    check steps.garbageCnt == 28
+    check steps.cellCnt(Hard) == 0
+    check steps.puyoCnt == 30
+    check steps.colorPuyoCnt == 2
+    check steps.garbagesCnt == 28
 
 # ------------------------------------------------
 # Step <-> string / URI
@@ -102,9 +109,9 @@ block: # `$`, parseStep, toUriQuery
   check "QG".parseStep(Ishikawa) == Res[Step].ok step
   check "QG".parseStep(Ips) == Res[Step].ok step
 
-block: # garbage
-  block:
-    let step = Step.init [Col0: 2, 3, 3, 2, 2, 3]
+block: # garbages
+  block: # Garbage
+    let step = Step.init([Col0: 2, 3, 3, 2, 2, 3], false)
     check $step == "(2,3,3,2,2,3)"
     check "(2,3,3,2,2,3)".parseStep == Res[Step].ok step
 
@@ -116,9 +123,12 @@ block: # garbage
     check "yp".parseStep(Ishikawa) == Res[Step].ok step
     check "yp".parseStep(Ips) == Res[Step].ok step
 
-  block:
-    let step = Step.init [Col0: 0, 0, 0, -1, 0, 0]
-    check step.toUriQuery(Pon2) == Res[string].ok "o0_0_0_-1_0_0o"
+  block: # Hard
+    let step = Step.init([Col0: 0, 0, 0, -1, 0, 0], true)
+    check $step == "[0,0,0,-1,0,0]"
+    check "[0,0,0,-1,0,0]".parseStep == Res[Step].ok step
+
+    check step.toUriQuery(Pon2) == Res[string].ok "h0_0_0_-1_0_0h"
     check step.toUriQuery(Ishikawa).isErr
     check step.toUriQuery(Ips).isErr
 
@@ -127,20 +137,37 @@ block: # garbage
 # ------------------------------------------------
 
 block: # `$`, parseSteps, toUriQuery
-  let steps =
-    @[
-      Step.init RedGreen,
-      Step.init [Col0: 1, 0, 0, 0, 0, 1],
-      Step.init(YellowYellow, Up2),
-    ]
+  block: # Garbage
+    let steps =
+      @[
+        Step.init RedGreen,
+        Step.init([Col0: 1, 0, 0, 0, 0, 1], false),
+        Step.init(YellowYellow, Up2),
+      ]
 
-  check $steps == "rg|\n(1,0,0,0,0,1)\nyy|3N"
-  check "rg|\n(1,0,0,0,0,1)\nyy|3N".parseSteps == Res[Steps].ok steps
+    let str = "rg|\n(1,0,0,0,0,1)\nyy|3N"
+    check $steps == str
+    check str.parseSteps == Res[Steps].ok steps
 
-  check steps.toUriQuery(Pon2) == Res[string].ok "rgo1_0_0_0_0_1oyy3N"
-  check steps.toUriQuery(Ishikawa) == Res[string].ok "c1axG4"
-  check steps.toUriQuery(Ips) == Res[string].ok "c1axG4"
+    let query = "rgo1_0_0_0_0_1oyy3N"
+    check steps.toUriQuery(Pon2) == Res[string].ok query
+    check steps.toUriQuery(Ishikawa) == Res[string].ok "c1axG4"
+    check steps.toUriQuery(Ips) == Res[string].ok "c1axG4"
 
-  check "rgo1_0_0_0_0_1oyy3N".parseSteps(Pon2) == Res[Steps].ok steps
-  check "c1axG4".parseSteps(Ishikawa) == Res[Steps].ok steps
-  check "c1axG4".parseSteps(Ips) == Res[Steps].ok steps
+    check query.parseSteps(Pon2) == Res[Steps].ok steps
+    check "c1axG4".parseSteps(Ishikawa) == Res[Steps].ok steps
+    check "c1axG4".parseSteps(Ips) == Res[Steps].ok steps
+
+  block: # Hard
+    let steps = @[Step.init([Col0: 0, 0, 2, 0, 1, 3], true), Step.init PurpleBlue]
+
+    let str = "[0,0,2,0,1,3]\npb|"
+    check $steps == str
+    check str.parseSteps == Res[Steps].ok steps
+
+    let query = "h0_0_2_0_1_3hpb"
+    check steps.toUriQuery(Pon2) == Res[string].ok query
+    check steps.toUriQuery(Ishikawa).isErr
+    check steps.toUriQuery(Ips).isErr
+
+    check query.parseSteps(Pon2) == Res[Steps].ok steps

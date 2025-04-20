@@ -3,6 +3,7 @@
 {.experimental: "views".}
 
 import std/[bitops, unittest]
+import stew/[bitops2]
 import ../../src/pon2/private/[bitops3]
 
 # ------------------------------------------------
@@ -127,3 +128,10 @@ block: # pext
   check val.uint16.pext(pextMask16) == res.uint16
   check val.uint32.pext(pextMask32) == res.uint32
   check val.uint64.pext(pextMask64) == res.uint64
+
+block: # popcnt
+  let val = 0b1100_0110_0100_1101'u16
+
+  check PextMask[uint16].init(val).popcnt == val.countOnes
+  check PextMask[uint32].init(val.uint32).popcnt == val.countOnes
+  check PextMask[uint64].init(val.uint64).popcnt == val.countOnes

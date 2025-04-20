@@ -7,32 +7,32 @@
 {.experimental: "views".}
 
 import std/[setutils]
-import ../../../[assign3, simd, staticfor2]
-import ../../../../core/[common, placement, rule]
+import ../[assign3, simd, staticfor2]
+import ../../core/[common, placement, rule]
 
 when Sse42Available:
-  import ./[xmm]
+  import ./binfield/[xmm]
   export xmm
 
   type
-    BinField* = XmmBinField
-    DropMask* = XmmDropMask
+    BinField* = XmmBinField ## Binary field.
+    DropMask* = XmmDropMask ## Mask used in dropping.
 
 elif defined(cpu32):
-  import ./[bit32]
+  import ./binfield/[bit32]
   export bit32
 
   type
-    BinField* = Bit32BinField
-    DropMask* = Bit32DropMask
+    BinField* = Bit32BinField ## Binary field.
+    DropMask* = Bit32DropMask ## Mask used in dropping.
 
 else:
-  import ./[bit64]
+  import ./binfield/[bit64]
   export bit64
 
   type
-    BinField* = Bit64BinField
-    DropMask* = Bit64DropMask
+    BinField* = Bit64BinField ## Binary field.
+    DropMask* = Bit64DropMask ## Mask used in dropping.
 
 # ------------------------------------------------
 # Property
@@ -43,7 +43,7 @@ func isDead*(self: BinField, rule: static Rule): bool {.inline.} =
   when rule == Tsu:
     self[Row1, Col2]
   else:
-    self * BinField.initLowerAir != BinField.initZero
+    self * BinField.initLowerAir != BinField.init
 
 # ------------------------------------------------
 # Placement
@@ -52,7 +52,7 @@ func isDead*(self: BinField, rule: static Rule): bool {.inline.} =
 const
   AllCols = {Col.low .. Col.high}
   OuterCols: array[Col, set[Col]] =
-    [{Col0}, {Col0, Col1}, {}, {Col3, Col4, Col5}, {Col4, Col5}, {Col5}]
+    [{Col0}, {Col0, Col1}, AllCols, {Col3, Col4, Col5}, {Col4, Col5}, {Col5}]
   InvalidPlcmts: array[Col, set[Placement]] = [
     {Up0, Right0, Down0, Left1},
     {Up1, Right1, Down1, Left1, Right0, Left2},
@@ -79,9 +79,9 @@ func invalidPlacements*(self: BinField): set[Placement] {.inline.} =
   # 4th columns are both 12, all columns are available.
   var canMawashi = self[Row1, Col1] and self[Row1, Col3]
   for col in availableCols:
-    canMawashi = canMawashi and self[Row2, col]
+    canMawashi.assign canMawashi or self[Row2, col]
   if canMawashi:
-    availableCols = AllCols
+    availableCols.assign AllCols
 
   # If puyo exists at 13th row, that column and outer ones are unavailable.
   staticFor(col, Col):
@@ -124,55 +124,48 @@ func expandedHorizontal(self: BinField): BinField {.inline.} =
 # Pop
 # ------------------------------------------------
 
-template calcConnAnd(self: BinField, calcPopped: static bool, body: untyped): untyped =
-  ## Calculates the connection data and rus the body.
+template withConn(self: BinField, body: untyped): untyped =
+  ## Calculates the connection data and runs the body with `connVisible`,
+  ## `connHas3`, and `connHas2` exposed.
   ## This function ignores ghost puyos.
-  ## Injects `connVisible`, `connHasUpDown`, `connHasRightLeft`, `connHas3`, and
-  ## `connHas2`.
-  ## If `calcPopped` is true, `connPopped` is also injected. 
-  let
-    connVisible {.inject.} = self.keptVisible
+  block:
+    let
+      connVisible {.inject.} = self.keptVisible
 
-    hasU = connVisible * connVisible.shiftedDownRaw
-    hasD = connVisible * self.shiftedUpRaw
-    hasR = connVisible * self.shiftedLeftRaw
-    hasL = connVisible * self.shiftedRightRaw
+      hasU = connVisible * connVisible.shiftedDownRaw
+      hasD = connVisible * self.shiftedUpRaw
+      hasR = connVisible * self.shiftedLeftRaw
+      hasL = connVisible * self.shiftedRightRaw
 
-    connHasUpDown {.inject.} = hasU * hasD
-    connHasRightLeft {.inject.} = hasR * hasL
-    hasUorD = hasU + hasD
-    hasRorL = hasR + hasL
+      hasUD = hasU * hasD
+      hasRL = hasR * hasL
+      hasUorD = hasU + hasD
+      hasRorL = hasR + hasL
 
-    connHas3 {.inject.} = connHasUpDown * hasRorL + connHasRightLeft * hasUorD
-    connHas2 {.inject.} = sum(connHasUpDown, connHasRightLeft, hasUorD * hasRorL)
+      connHas3 {.inject.} = hasUD * hasRorL + hasRL * hasUorD
+      connHas2 {.inject.} = sum(hasUD, hasRL, hasUorD * hasRorL)
 
-  when calcPopped:
+    body
+
+func extractedPop*(self: BinField): BinField {.inline.} =
+  ## Returns the binary field with cells that will pop.
+  self.withConn:
     let
       hasHas2U = connHas2 * connHas2.shiftedDownRaw
       hasHas2D = connHas2 * connHas2.shiftedUpRaw
       hasHas2R = connHas2 * connHas2.shiftedLeftRaw
       hasHas2L = connHas2 * connHas2.shiftedRightRaw
 
-      connPopped {.inject.} =
-        connVisible * sum(connHas3, hasHas2U, hasHas2D, hasHas2R, hasHas2L).expanded
-
-  body
-
-func popped*(self: BinField): BinField {.inline.} =
-  ## Returns the binary field where four or more cells are connected.
-  ## This function ignores ghost puyos.
-  self.calcConnAnd(calcPopped = true):
-    connPopped
+    connVisible * sum(connHas3, hasHas2U, hasHas2D, hasHas2R, hasHas2L).expanded
 
 func willPop*(self: BinField): bool {.inline.} =
-  ## Returns `true` if four or more cells are connected.
-  ## This function ignores ghost puyos.
-  self.calcConnAnd(calcPopped = false):
+  ## Returns `true` if any puyo pop.
+  self.withConn:
     let
       hasHas2U = connHas2 * connHas2.shiftedDownRaw
       hasHas2R = connHas2 * connHas2.shiftedLeftRaw
 
-    sum(connHas3, hasHas2U, hasHas2R) != BinField.initZero
+    sum(connHas3, hasHas2U, hasHas2R) != BinField.init
 
 # ------------------------------------------------
 # Connect - 2
@@ -180,20 +173,18 @@ func willPop*(self: BinField): bool {.inline.} =
 
 func conn2(self: BinField, inclV, inclH: static bool): BinField {.inline.} =
   ## Returns the binary field where exactly two cells are connected.
-  ## This function ignores ghost puyos.
   let
     existU = self.shiftedDownRaw
     existD = self.shiftedUpRaw
     existR = self.shiftedLeftRaw
     existL = self.shiftedRightRaw
     existDR = existD.shiftedLeftRaw
-    visible = self.keptVisible
 
   when inclV:
     let
       existDD = existD.shiftedUpRaw
       existDL = existD.shiftedRightRaw
-      hasD = visible * existD
+      hasD = self * existD
       hasExactD = hasD - sum(existU, existR, existL, existDD, existDR, existDL)
       conn2V = hasExactD + hasExactD.shiftedDownRaw
 
@@ -201,7 +192,7 @@ func conn2(self: BinField, inclV, inclH: static bool): BinField {.inline.} =
     let
       existRR = existR.shiftedLeftRaw
       existRU = existR.shiftedDownRaw
-      hasR = visible * existR
+      hasR = self * existR
       hasExactR = hasR - sum(existL, existU, existD, existRR, existRU, existDR)
       conn2H = hasExactR + hasExactR.shiftedRightRaw
 
@@ -212,40 +203,62 @@ func conn2(self: BinField, inclV, inclH: static bool): BinField {.inline.} =
   elif inclH:
     conn2H
   else:
-    BinField.initZero # dummy
+    BinField.init # dummy
 
 func conn2*(self: BinField): BinField {.inline.} =
   ## Returns the binary field where exactly two cells are connected.
-  ## This function ignores ghost puyos.
   self.conn2(inclV = true, inclH = true)
 
 func conn2Vertical*(self: BinField): BinField {.inline.} =
   ## Returns the binary field where exactly two cells are connected vertically.
-  ## This function ignores ghost puyos.
   self.conn2(inclV = true, inclH = false)
 
-func connect2Horizontal*(self: BinField): BinField {.inline.} =
+func conn2Horizontal*(self: BinField): BinField {.inline.} =
   ## Returns the binary field where exactly two cells are connected horizontally.
-  ## This function ignores ghost puyos.
   self.conn2(inclV = false, inclH = true)
 
 # ------------------------------------------------
 # Connect - 3
 # ------------------------------------------------
 
-func connect3*(self: BinField): BinField {.inline.} =
+func conn3Impl(self: BinField, onlyL: static bool): BinField {.inline.} =
   ## Returns the binary field where exactly three cells are connected.
-  ## This function ignores ghost puyos.
-  self.calcConnAnd(calcPopped = true):
-    connHas3.expanded * connVisible - connPopped
-
-func connect3Vertical*(self: BinField): BinField {.inline.} =
-  ## Returns the binary field where exactly three cells are connected vertically.
-  ## This function ignores ghost puyos.
   let
-    visible = self.keptVisible
+    hasU = self * self.shiftedDownRaw
+    hasD = self * self.shiftedUpRaw
+    hasR = self * self.shiftedLeftRaw
+    hasL = self * self.shiftedRightRaw
 
-    existU = visible.shiftedDownRaw
+    hasUD = hasU * hasD
+    hasRL = hasR * hasL
+    hasUorD = hasU + hasD
+    hasRorL = hasR + hasL
+
+    has3 = hasUD * hasRorL + hasRL * hasUorD
+    has2 = sum(hasUD, hasRL, hasUorD * hasRorL)
+
+    hasHas2U = has2 * has2.shiftedDownRaw
+    hasHas2D = has2 * has2.shiftedUpRaw
+    hasHas2R = has2 * has2.shiftedLeftRaw
+    hasHas2L = has2 * has2.shiftedRightRaw
+
+    canPop = sum(has3, hasHas2U, hasHas2D, hasHas2R, hasHas2L).expanded
+    exclude =
+      when onlyL:
+        sum(hasUD.expandedVertical, hasRL.expandedHorizontal, canPop)
+      else:
+        canPop
+
+  has2.expanded * self - exclude
+
+func conn3*(self: BinField): BinField {.inline.} =
+  ## Returns the binary field where exactly three cells are connected.
+  self.conn3Impl false
+
+func conn3Vertical*(self: BinField): BinField {.inline.} =
+  ## Returns the binary field where exactly three cells are connected vertically.
+  let
+    existU = self.shiftedDownRaw
     existD = self.shiftedUpRaw
     existR = self.shiftedLeftRaw
     existL = self.shiftedRightRaw
@@ -266,13 +279,10 @@ func connect3Vertical*(self: BinField): BinField {.inline.} =
 
   hasExactUD.expandedVertical
 
-func connect3Horizontal*(self: BinField): BinField {.inline.} =
+func conn3Horizontal*(self: BinField): BinField {.inline.} =
   ## Returns the binary field where exactly three cells are connected horizontally.
-  ## This function ignores ghost puyos.
   let
-    visible = self.keptVisible
-
-    existU = visible.shiftedDownRaw
+    existU = self.shiftedDownRaw
     existD = self.shiftedUpRaw
     existR = self.shiftedLeftRaw
     existL = self.shiftedRightRaw
@@ -293,14 +303,9 @@ func connect3Horizontal*(self: BinField): BinField {.inline.} =
 
   hasExactRL.expandedHorizontal
 
-func connect3LShape*(self: BinField): BinField {.inline.} =
+func conn3LShape*(self: BinField): BinField {.inline.} =
   ## Returns the binary field where exactly three cells are connected by L-shape.
-  ## This function ignores ghost puyos.
-  self.calcConnAnd(calcPopped = true):
-    connHas3.expanded * connVisible -
-      sum(
-        connPopped, connHasUpDown.expandedVertical, connHasRightLeft.expandedHorizontal
-      )
+  self.conn3Impl true
 
 # ------------------------------------------------
 # BinaryField <-> array
@@ -308,7 +313,7 @@ func connect3LShape*(self: BinField): BinField {.inline.} =
 
 func toArr*(self: BinField): array[Row, array[Col, bool]] {.inline.} =
   ## Returns the array converted from the binary field.
-  var arr: array[Row, array[Col, bool]]
+  var arr {.noinit.}: array[Row, array[Col, bool]]
   staticFor(row, Row):
     staticFor(col, Col):
       {.push warning[Uninit]: off.}
@@ -319,7 +324,7 @@ func toArr*(self: BinField): array[Row, array[Col, bool]] {.inline.} =
 
 func toBinField*(arr: array[Row, array[Col, bool]]): BinField {.inline.} =
   ## Returns the binary field converted from the array.
-  var binField = BinField.initZero
+  var binField = BinField.init
   staticFor(row, Row):
     staticFor(col, Col):
       binField[row, col] = arr[row][col]
