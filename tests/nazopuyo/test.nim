@@ -1,76 +1,75 @@
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[deques, options, unittest]
-import
-  ../../src/pon2/core/[field, fqdn, nazopuyo, pairposition, puyopuyo, requirement, rule]
+import std/[sugar, unittest]
+import ../../src/pon2/core/[common, field, fqdn, goal, nazopuyo, puyopuyo, rule, step]
+import ../../src/pon2/private/[results2, strutils2]
 
-proc moveCount(uriStr: string): int =
-  parseNazoPuyo[TsuField](uriStr, Ishikawa).moveCount
+# ------------------------------------------------
+# Constructor
+# ------------------------------------------------
 
-proc main*() =
-  # ------------------------------------------------
-  # Constructor
-  # ------------------------------------------------
+block: # init
+  let
+    puyoPuyoT = PuyoPuyo[TsuField].init
+    puyoPuyoW = PuyoPuyo[WaterField].init
+    goal = Goal.init(Cnt, Color, 10)
 
-  # initNazoPuyo
-  block:
-    let
-      tsu = initNazoPuyo[TsuField]()
-      water = initNazoPuyo[WaterField]()
-      req = initRequirement(Clear, RequirementColor.All)
+  check NazoPuyo[TsuField].init(puyoPuyoT, goal) ==
+    NazoPuyo[TsuField](puyoPuyo: puyoPuyoT, goal: goal)
+  check NazoPuyo[WaterField].init(puyoPuyoW, goal) ==
+    NazoPuyo[WaterField](puyoPuyo: puyoPuyoW, goal: goal)
 
-    check tsu.puyoPuyo.field == initField[TsuField]()
-    check tsu.puyoPuyo.pairsPositions.len == 0
-    check tsu.requirement == req
+  let defaultGoal = Goal.init(Clear, All)
+  check NazoPuyo[TsuField].init ==
+    NazoPuyo[TsuField](puyoPuyo: PuyoPuyo[TsuField].init, goal: defaultGoal)
+  check NazoPuyo[WaterField].init ==
+    NazoPuyo[WaterField](puyoPuyo: PuyoPuyo[WaterField].init, goal: defaultGoal)
 
-    check tsu.puyoPuyo.field == initField[TsuField]()
-    check tsu.puyoPuyo.pairsPositions.len == 0
-    check tsu.requirement == req
+# ------------------------------------------------
+# Nazo Puyo <-> string
+# ------------------------------------------------
 
-    check water.puyoPuyo.field == initField[WaterField]()
-    check water.puyoPuyo.pairsPositions.len == 0
-    check water.requirement == req
+block: # `$`, parseNazoPuyo
+  let
+    str =
+      """
+色ぷよ2連結以上で消すべし
+======
+r.....
+.g....
+..b...
+...y..
+....p.
+.....o
+....h.
+......
+......
+......
+......
+......
+......
+------
+by|
+(0,1,0,0,0,2)
+rg|23
+[3,0,0,0,4,0]
+pp|4N"""
 
-  # ------------------------------------------------
-  # Convert
-  # ------------------------------------------------
+    nazoPuyo = parseNazoPuyo[TsuField](str).expect
 
-  # toTsuNazoPuyo, toWaterNazoPuyo
-  block:
-    let nazo = initNazoPuyo[TsuField]()
-    check nazo.toWaterNazoPuyo.toWaterNazoPuyo.toTsuNazoPuyo.toTsuNazoPuyo == nazo
+  check $nazoPuyo == str
 
-  # ------------------------------------------------
-  # Property
-  # ------------------------------------------------
+# ------------------------------------------------
+# Nazo Puyo <-> URI
+# ------------------------------------------------
 
-  # rule
-  block:
-    check initNazoPuyo[TsuField]().rule == Tsu
-    check initNazoPuyo[WaterField]().rule == Water
-
-  # moveCount
-  block:
-    check initNazoPuyo[TsuField]().moveCount == 0
-    check "109e9_01__200".moveCount == 1
-    check "5004ABA_S1S1__u03".moveCount == 2
-    check "3ww3so4zM_s1G1u1__u04".moveCount == 3
-
-  # ------------------------------------------------
-  # NazoPuyo <-> string / URI
-  # ------------------------------------------------
-
-  # $, parseNazoPuyo, toUriQuery
-  block:
-    let
-      str =
-        """
-4連鎖するべし
+block: # toUriQuery, parseNazoPuyo
+  let
+    str =
+      """
+2連鎖するべし
 ======
 ......
 ......
@@ -80,28 +79,26 @@ proc main*() =
 ......
 ......
 ......
-..oo..
-.bbb..
-.ooo..
-.bbbyy
-yyyooy
+......
+......
+.op...
+...yg.
+...b.r
 ------
-yb|23
-yb|"""
-      nazo = parseNazoPuyo[TsuField](str)
+by|
+(0,1,0,0,0,1)
+rg|23"""
+    nazoPuyo = parseNazoPuyo[TsuField](str).expect
 
-    check $nazo == str
+    queryPon2 = "field=t-op......yg....b.r&steps=byo0_1_0_0_0_1org23&goal=5__2"
+    queryIshikawa = "6E004g031_E1ahce__u02"
 
-    let
-      pon2Query =
-        "field=t-oo...bbb...ooo...bbbyyyyyooy&pairs=yb23yb&req-kind=5&req-number=4"
-      ishikawaQuery = "S03r06S03rAACQ_ueu1__u04"
-      ipsQuery = "S03r06S03rAACQ_ueu1__u04"
+  check nazoPuyo.toUriQuery(Pon2) == Res[string].ok queryPon2
+  check nazoPuyo.toUriQuery(Ishikawa) == Res[string].ok queryIshikawa
+  check nazoPuyo.toUriQuery(Ips) == Res[string].ok queryIshikawa
 
-    check nazo.toUriQuery(Pon2) == pon2Query
-    check nazo.toUriQuery(Ishikawa) == ishikawaQuery
-    check nazo.toUriQuery(Ips) == ipsQuery
-
-    check parseNazoPuyo[TsuField](pon2Query, Pon2) == nazo
-    check parseNazoPuyo[TsuField](ishikawaQuery, Ishikawa) == nazo
-    check parseNazoPuyo[TsuField](ipsQuery, Ips) == nazo
+  check parseNazoPuyo[TsuField](queryPon2, Pon2) == Res[NazoPuyo[TsuField]].ok nazoPuyo
+  check parseNazoPuyo[TsuField](queryIshikawa, Ishikawa) ==
+    Res[NazoPuyo[TsuField]].ok nazoPuyo
+  check parseNazoPuyo[TsuField](queryIshikawa, Ips) ==
+    Res[NazoPuyo[TsuField]].ok nazoPuyo

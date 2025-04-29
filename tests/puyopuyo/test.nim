@@ -26,6 +26,10 @@ block: # init
   check PuyoPuyo[WaterField].init(fieldW, steps) ==
     PuyoPuyo[WaterField](field: fieldW, steps: steps)
 
+  check PuyoPuyo[TsuField].init == PuyoPuyo[TsuField].init(TsuField.init, Steps.init)
+  check PuyoPuyo[WaterField].init ==
+    PuyoPuyo[WaterField].init(WaterField.init, Steps.init)
+
 # ------------------------------------------------
 # Count
 # ------------------------------------------------

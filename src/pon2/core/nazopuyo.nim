@@ -1,135 +1,134 @@
-## This module implements Nazo Puyos.
+## This module implements Nazo Puyo.
 ##
 
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
+{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[deques, options, strformat, strutils, tables, uri]
-import ./[field, fqdn, puyopuyo, requirement, rule]
+import std/[strformat, typetraits, uri]
+import ./[field, fqdn, goal, moveresult, pair, placement, popresult, puyopuyo, step]
+import ../private/[bitops3, macros2, results2, strutils2, tables2]
 
 type NazoPuyo*[F: TsuField or WaterField] = object ## Nazo Puyo.
   puyoPuyo*: PuyoPuyo[F]
-  requirement*: Requirement
+  goal*: Goal
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
-const DefaultRequirement = initRequirement(Clear, All)
+const DefaultGoal = Goal.init(Clear, All)
 
-func initNazoPuyo*[F: TsuField or WaterField](): NazoPuyo[F] {.inline.} =
-  ## Returns the initial nazo puyo.
-  NazoPuyo[F](puyoPuyo: initPuyoPuyo[F](), requirement: DefaultRequirement)
+func init*[F: TsuField or WaterField](T: type NazoPuyo[F]): T {.inline.} =
+  T(puyoPuyo: PuyoPuyo[F].init, goal: DefaultGoal)
 
-# ------------------------------------------------
-# Operator
-# ------------------------------------------------
-
-func `==`*(nazo1: NazoPuyo[TsuField], nazo2: NazoPuyo[WaterField]): bool {.inline.} =
-  false
-
-func `==`*(nazo1: NazoPuyo[WaterField], nazo2: NazoPuyo[TsuField]): bool {.inline.} =
-  false
-
-# ------------------------------------------------
-# Convert
-# ------------------------------------------------
-
-func toTsuNazoPuyo*[F: TsuField or WaterField](
-    self: NazoPuyo[F]
-): NazoPuyo[TsuField] {.inline.} =
-  ## Returns the Tsu Nazo Puyo converted from the given Nazo Puyo.
-  NazoPuyo[TsuField](
-    puyoPuyo: self.puyoPuyo.toTsuPuyoPuyo, requirement: self.requirement
-  )
-
-func toWaterNazoPuyo*[F: TsuField or WaterField](
-    self: NazoPuyo[F]
-): NazoPuyo[WaterField] {.inline.} =
-  ## Returns the Water Nazo Puyo converted from the given Nazo Puyo.
-  NazoPuyo[WaterField](
-    puyoPuyo: self.puyoPuyo.toWaterPuyoPuyo, requirement: self.requirement
-  )
-
-# ------------------------------------------------
-# Property
-# ------------------------------------------------
-
-func rule*[F: TsuField or WaterField](self: NazoPuyo[F]): Rule {.inline.} =
-  ## Returns the rule.
-  self.puyoPuyo.rule
-
-func moveCount*[F: TsuField or WaterField](self: NazoPuyo[F]): int {.inline.} =
-  ## Returns the number of moves of the nazo puyo.
-  self.puyoPuyo.pairsPositions.len
+func init*[F: TsuField or WaterField](
+    T: type NazoPuyo[F], puyoPuyo: PuyoPuyo[F], goal: Goal
+): T {.inline.} =
+  T(puyoPuyo: puyoPuyo, goal: goal)
 
 # ------------------------------------------------
 # Nazo Puyo <-> string
 # ------------------------------------------------
 
-const ReqPuyoPuyoSep = "\n======\n"
+const GoalPuyoPuyoSep = "\n======\n"
 
 func `$`*[F: TsuField or WaterField](self: NazoPuyo[F]): string {.inline.} =
-  # HACK: cannot `strformat` here due to inlining error
-  $self.requirement & ReqPuyoPuyoSep & $self.puyoPuyo
+  $self.goal & GoalPuyoPuyoSep & $self.puyoPuyo
 
-func parseNazoPuyo*[F: TsuField or WaterField](str: string): NazoPuyo[F] {.inline.} =
+func parseNazoPuyo*[F: TsuField or WaterField](
+    str: string
+): Res[NazoPuyo[F]] {.inline.} =
   ## Returns the Nazo Puyo converted from the string representation.
-  ## If the string is invalid, `ValueError` is raised.
-  let strs = str.split ReqPuyoPuyoSep
+  let strs = str.split GoalPuyoPuyoSep
   if strs.len != 2:
-    raise newException(ValueError, "Invalid Nazo Puyo: " & str)
+    return err "Invalid Nazo Puyo: {str}".fmt
 
-  result = NazoPuyo[F](
-    puyoPuyo: parsePuyoPuyo[F](strs[1]), requirement: strs[0].parseRequirement
-  )
+  let
+    errMsg = "Invalid Nazo Puyo: {str}".fmt
+    goal = ?strs[0].parseGoal.context errMsg
+    puyoPuyo = ?parsePuyoPuyo[F](strs[1]).context errMsg
+
+  ok NazoPuyo[F].init(puyoPuyo, goal)
 
 # ------------------------------------------------
 # Nazo Puyo <-> URI
 # ------------------------------------------------
 
+const
+  GoalKey = "goal"
+  PuyoPuyoGoalIshikawaSep = "__"
+
+func toUriQueryPon2[F: TsuField or WaterField](
+    self: NazoPuyo[F]
+): Res[string] {.inline.} =
+  ## Returns the URI query converted from the Nazo Puyo.
+  ok (?self.puyoPuyo.toUriQuery Pon2) & '&' &
+    [(GoalKey, ?self.goal.toUriQuery Pon2)].encodeQuery
+
+func toUriQueryIshikawa[F: TsuField or WaterField](
+    self: NazoPuyo[F]
+): Res[string] {.inline.} =
+  ## Returns the URI query converted from the Nazo Puyo.
+  ok (?self.puyoPuyo.toUriQuery Ishikawa) & PuyoPuyoGoalIshikawaSep &
+    (?self.goal.toUriQuery Ishikawa)
+
 func toUriQuery*[F: TsuField or WaterField](
     self: NazoPuyo[F], fqdn = Pon2
-): string {.inline.} =
+): Res[string] {.inline.} =
   ## Returns the URI query converted from the Nazo Puyo.
-  let sep =
-    case fqdn
-    of Pon2: "&"
-    of Ishikawa, Ips: "__"
+  case fqdn
+  of Pon2: self.toUriQueryPon2
+  of Ishikawa, Ips: self.toUriQueryIshikawa
 
-  result = &"{self.puyoPuyo.toUriQuery fqdn}{sep}{self.requirement.toUriQuery fqdn}"
+func parseNazoPuyoPon2[F: TsuField or WaterField](
+    query: string
+): Res[NazoPuyo[F]] {.inline.} =
+  ## Returns the Nazo Puyo converted from the URI query.
+  var
+    nazoPuyo = NazoPuyo[F].init
+    goalSet = false
+    keyVals = newSeq[(string, string)](0)
+
+  for (key, val) in query.decodeQuery:
+    case key
+    of GoalKey:
+      if goalSet:
+        return err "Invalid Nazo Puyo (multiple `key`): {query}".fmt
+
+      goalSet = true
+      nazoPuyo.goal = ?val.parseGoal(Pon2).context "Invalid Nazo Puyo: {query}".fmt
+    else:
+      keyVals.add (key, val)
+
+  if not goalSet:
+    const GoalKey2 = GoalKey # strformat needs this
+    return err "Invalid Nazo Puyo (missing `{GoalKey2}`): {query}".fmt
+
+  nazoPuyo.puyoPuyo =
+    ?parsePuyoPuyo[F](keyVals.encodeQuery, Pon2).context "Invalid Nazo Puyo: {query}".fmt
+
+  ok nazoPuyo
+
+func parseNazoPuyoIshikawa[F: TsuField or WaterField](
+    query: string
+): Res[NazoPuyo[F]] {.inline.} =
+  ## Returns the Nazo Puyo converted from the URI query.
+  let strs = query.split PuyoPuyoGoalIshikawaSep
+  if strs.len != 2:
+    return err "Invalid Nazo Puyo: {query}".fmt
+
+  ok NazoPuyo[F].init(
+    ?parsePuyoPuyo[F](strs[0], Ishikawa), ?strs[1].parseGoal(Ishikawa)
+  )
 
 func parseNazoPuyo*[F: TsuField or WaterField](
     query: string, fqdn: IdeFqdn
-): NazoPuyo[F] {.inline.} =
+): Res[NazoPuyo[F]] {.inline.} =
   ## Returns the Nazo Puyo converted from the URI query.
-  ## If the query is invalid, `ValueError` is raised.
   case fqdn
   of Pon2:
-    var
-      puyoPuyoKeyVals = newSeq[(string, string)](0)
-      reqKeyVals = newSeq[(string, string)](0)
-    for (key, val) in query.decodeQuery:
-      if key in RequirementQueryKeys:
-        reqKeyVals.add (key, val)
-      else:
-        puyoPuyoKeyVals.add (key, val)
-
-    result = NazoPuyo[F](
-      puyoPuyo: parsePuyoPuyo[F](puyoPuyoKeyVals.encodeQuery, fqdn),
-      requirement: reqKeyVals.encodeQuery.parseRequirement fqdn,
-    )
+    parseNazoPuyoPon2[F](query)
   of Ishikawa, Ips:
-    let queries = query.split "__"
-    case queries.len
-    of 2:
-      result = NazoPuyo[F](
-        puyoPuyo: parsePuyoPuyo[F](queries[0], fqdn),
-        requirement: queries[1].parseRequirement fqdn,
-      )
-    else:
-      raise newException(ValueError, "Invalid Nazo Puyo: " & query)
+    parseNazoPuyoIshikawa[F](query)

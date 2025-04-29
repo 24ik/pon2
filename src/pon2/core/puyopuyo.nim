@@ -19,7 +19,7 @@ type PuyoPuyo*[F: TsuField or WaterField] = object ## Puyo Puyo game.
 # ------------------------------------------------
 
 func init*[F: TsuField or WaterField](T: type PuyoPuyo[F]): T {.inline.} =
-  T(field: F.init, steps: initDeque[Step]())
+  T(field: F.init, steps: Steps.init)
 
 func init*[F: TsuField or WaterField](
     T: type PuyoPuyo[F], field: F, steps: Steps
@@ -166,7 +166,7 @@ func parsePuyoPuyoIshikawa[F: TsuField or WaterField](
   ## Returns the game converted from the URI query.
   let strs = query.split FieldStepsSepIshikawaUri
 
-  var steps = initDeque[Step]()
+  var steps = Steps.init
   case strs.len
   of 1:
     discard
