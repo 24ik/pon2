@@ -25,9 +25,11 @@ const
   Bmi2Available* = BmiLvl >= 2 and X86_64
   ClmulAvailable* = ClmulUse and X86_64
 
-import std/[typetraits]
+import std/[bitops, typetraits]
 import stew/[bitops2]
 import ./[arrayops2, assign3, staticfor2]
+
+export bitops, bitops2
 
 when Bmi1Available:
   import nimsimd/[bmi1]
@@ -197,9 +199,9 @@ when Bmi1Available:
       x1.andnotNim x2
     else:
       when T.sizeof > 4:
-        T x2.uint64.andn_u64 x1.uint64
+        x2.uint64.andn_u64(x1.uint64).T
       else:
-        T x2.uint32.andn_u32 x1.uint32
+        x2.uint32.andn_u32(x1.uint32).T
 else:
   func `*~`*[T: SomeUnsignedInt](x1, x2: T): T {.inline.} =
     ## Bitwise-andnot operation; returns `x1 and (not x2)`.
@@ -327,6 +329,81 @@ else:
 func bextr*[T: SomeSignedInt](val: T, start, length: uint32): T {.inline.} =
   ## Bit field extract.
   val.asUnsigned.bextrNim(start, length).asSigned
+
+# ------------------------------------------------
+# BLSMSK
+# ------------------------------------------------
+
+func blsmskNim[T: SomeSignedInt](val: T): T {.inline.} =
+  ## Returns the mask up to the lowest set bit.
+  ## If `val` is zero, all bits of the result are one.
+  val.pred xor val
+
+func blsmskNim[T: SomeUnSignedInt](val: T): T {.inline.} =
+  ## Returns the mask up to the lowest set bit.
+  ## If `val` is zero, all bits of the result are one.
+  val.asSigned.blsmskNim.asUnsigned
+
+when Bmi1Available:
+  func blsmsk*(val: uint64): uint64 {.inline.} =
+    ## Returns the mask up to the lowest set bit.
+    ## If `val` is zero, all bits of the result are one.
+    when nimvm: val.blsmskNim else: val.blsmsk_u64
+
+  func blsmsk*(val: uint32): uint32 {.inline.} =
+    ## Returns the mask up to the lowest set bit.
+    ## If `val` is zero, all bits of the result are one.
+    when nimvm: val.blsmskNim else: val.blsmsk_u32
+
+  func blsmsk*[T: uint or uint16 or uint8](val: T): T {.inline.} =
+    ## Returns the mask up to the lowest set bit.
+    ## If `val` is zero, all bits of the result are one.
+    when nimvm:
+      val.blsmskNim
+    else:
+      when T.sizeof > 4: val.uint64.blsmsk.T else: val.uint32.blsmsk.T
+
+  func blsmsk*[T: SomeSignedInt](val: T): T {.inline.} =
+    ## Returns the mask up to the lowest set bit.
+    ## If `val` is zero, all bits of the result are one.
+    val.asUnsigned.blsmsk.asSigned
+else:
+  func blsmsk*[T: SomeInteger](val: T): T {.inline.} =
+    ## Returns the mask up to the lowest set bit.
+    ## If `val` is zero, all bits of the result are one.
+    val.blsmskNim
+
+# ------------------------------------------------
+# TZCNT
+# ------------------------------------------------
+
+when Bmi1Available:
+  func tzcnt_u16(a: uint16): uint16 {.header: "immintrin.h", importc: "_tzcnt_u16".}
+  func tzcnt_u32(a: uint32): uint32 {.header: "immintrin.h", importc: "_tzcnt_u32".}
+  func tzcnt_u64(a: uint64): uint64 {.header: "immintrin.h", importc: "_tzcnt_u64".}
+
+func tzcnt*[T: SomeUnsignedInt](val: T): int {.inline.} =
+  ## Returns the number of trailing zeros.
+  ## If `val` is zero, returns the number of bits of `T`.
+  when nimvm:
+    val.trailingZeros
+  else:
+    when Bmi1Available:
+      when T.sizeof > 4:
+        val.tzcnt_u64.int
+      elif T.sizeof == 4:
+        val.tzcnt_u32.int
+      elif T.sizeof == 2:
+        val.tzcnt_u16.int
+      else:
+        if val == 0: T.bitsof else: val.uint16.tzcnt_u16.int
+    else:
+      val.trailingZeros
+
+func tzcnt*[T: SomeSignedInt](val: T): int {.inline.} =
+  ## Returns the number of trailing zeros.
+  ## If `val` is zero, returns the number of bits of `T`.
+  val.asUnsigned.tzcnt
 
 # ------------------------------------------------
 # PEXT

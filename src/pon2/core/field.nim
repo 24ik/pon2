@@ -6,62 +6,36 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[bitops, sequtils, strformat, sugar, typetraits]
-import ./[cell, common, fqdn, moveresult, pair, placement, popresult, rule]
+import std/[sequtils, strformat, sugar, typetraits]
+import ./[cell, common, fqdn, moveresult, pair, placement, popresult, rule, step]
 import
-  ../private/
-    [arrayops2, assign3, macros2, math2, results2, staticfor2, strutils2, tables2]
+  ../private/[
+    arrayops2, assign3, bitops3, macros2, math2, results2, staticfor2, strutils2,
+    tables2,
+  ]
 import ../private/core/[binfield]
 
 type
   TsuField* = object ## Puyo Puyo field for Tsu rule.
-    bit2: BinField
-    bit1: BinField
     bit0: BinField
+    bit1: BinField
+    bit2: BinField
 
   WaterField* = object ## Puyo Puyo field for Water rule.
-    bit2: BinField
-    bit1: BinField
     bit0: BinField
+    bit1: BinField
+    bit2: BinField
 
-# ------------------------------------------------
-# Macro
-# ------------------------------------------------
-
-macro expand(identsAndBody: varargs[untyped]): untyped =
-  ## Runs the body (the last argument) three times with specified identifiers
-  ## (the rest arguments) replaced by `{ident}2`, `{ident}1`, and `{ident}0`.
-  ## Underscore in the body is replaced by the integer literal 2, 1, and 0.
-  let
-    body = identsAndBody[^1]
-    idents = identsAndBody[0 ..^ 2]
-    stmts = nnkStmtList.newNimNode body
-
-  var body2 = body.replaced("_".ident, 2.newLit)
-  for id in idents:
-    body2 = body2.replaced(id, (id.strVal & '2').ident)
-  stmts.add body2
-
-  var body1 = body.replaced("_".ident, 1.newLit)
-  for id in idents:
-    body1 = body1.replaced(id, (id.strVal & '1').ident)
-  stmts.add body1
-
-  var body0 = body.replaced("_".ident, 0.newLit)
-  for id in idents:
-    body0 = body0.replaced(id, (id.strVal & '0').ident)
-  stmts.add body0
-
-  stmts
+defineExpand "", "0", "1", "2"
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
 func init[F: TsuField or WaterField](
-    T: type F, bit2, bit1, bit0: BinField
+    T: type F, bit0, bit1, bit2: BinField
 ): F {.inline.} =
-  F(bit2: bit2, bit1: bit1, bit0: bit0)
+  F(bit0: bit0, bit1: bit1, bit2: bit2)
 
 func init*[F: TsuField or WaterField](T: type F): F {.inline.} =
   T.init(BinField.init, BinField.init, BinField.init)
@@ -76,11 +50,11 @@ func toTsuField*(self: TsuField): TsuField {.inline.} =
 
 func toTsuField*(self: WaterField): TsuField {.inline.} =
   ## Returns the Tsu field converted from the field.
-  TsuField.init(self.bit2, self.bit1, self.bit0)
+  TsuField.init(self.bit0, self.bit1, self.bit2)
 
 func toWaterField*(self: TsuField): WaterField {.inline.} =
   ## Returns the Water field converted from the field.
-  WaterField.init(self.bit2, self.bit1, self.bit0)
+  WaterField.init(self.bit0, self.bit1, self.bit2)
 
 func toWaterField*(self: WaterField): WaterField {.inline.} =
   ## Returns the copy of the field.
@@ -91,7 +65,7 @@ func toWaterField*(self: WaterField): WaterField {.inline.} =
 # ------------------------------------------------
 
 func `*`[F: TsuField or WaterField](self: F, binField: BinField): F {.inline.} =
-  F.init(self.bit2 * binField, self.bit1 * binField, self.bit0 * binField)
+  F.init(self.bit0 * binField, self.bit1 * binField, self.bit2 * binField)
 
 # ------------------------------------------------
 # Property
@@ -107,7 +81,7 @@ func rule*(self: WaterField): Rule {.inline.} =
 
 func exist[F: TsuField or WaterField](self: F): BinField {.inline.} =
   ## Returns the binary field where puyos exist.
-  sum(self.bit2, self.bit1, self.bit0)
+  sum(self.bit0, self.bit1, self.bit2)
 
 func isDead*[F: TsuField or WaterField](self: F): bool {.inline.} =
   ## Returns `true` if the field is in a defeated state.
@@ -137,15 +111,15 @@ func validDblPlacements*[F: TsuField or WaterField](
 # Indexer
 # ------------------------------------------------
 
-func toCell(bit2, bit1, bit0: bool): Cell {.inline.} =
+func toCell(bit0, bit1, bit2: bool): Cell {.inline.} =
   ## Returns the cell converted from the bits.
-  (bit2.int shl 2 + (bit1.int shl 1 + bit0.int)).Cell
+  (bit0.int + (bit1.int shl 1) + (bit2.int shl 2)).Cell
 
 func `[]`*[F: TsuField or WaterField](self: F, row: Row, col: Col): Cell {.inline.} =
-  toCell(self.bit2[row, col], self.bit1[row, col], self.bit0[row, col])
+  toCell(self.bit0[row, col], self.bit1[row, col], self.bit2[row, col])
 
 template withBits(cell: Cell, body: untyped): untyped =
-  ## Runs `body` with `bit2`, `bit1`, and `bit0` exposed.
+  ## Runs `body` with `bit0`, `bit1`, and `bit2` exposed.
   block:
     let c = cell.ord
 
@@ -226,7 +200,7 @@ func cellCnt*[F: TsuField or WaterField](self: F, cell: Cell): int {.inline.} =
   ## Returns the number of `cell` in the field.
   case cell
   of None:
-    Height * Width - sum(self.bit2, self.bit1, self.bit0).popcnt
+    Height * Width - sum(self.bit0, self.bit1, self.bit2).popcnt
   of Hard:
     self.hard.popcnt
   of Garbage:
@@ -252,7 +226,7 @@ func colorPuyoCnt*[F: TsuField or WaterField](self: F): int {.inline.} =
 
 func garbagesCnt*[F: TsuField or WaterField](self: F): int {.inline.} =
   ## Returns the number of hard and garbage puyos in the field.
-  (self.bit0 xor self.bit1 - self.bit2).popcnt
+  ((self.bit0 xor self.bit1) - self.bit2).popcnt
 
 # ------------------------------------------------
 # Connect - 2
@@ -403,17 +377,18 @@ func pop*[F: TsuField or WaterField](self: var F): PopResult {.inline.} =
     poppedGarbage, poppedColor,
   )
 
-func willPop*[F: TsuField or WaterField](self: F): bool {.inline.} =
-  ## Returns `true` if any puyos will pop.
-  self.red.willPop or self.green.willPop or self.blue.willPop or self.yellow.willPop or
-    self.purple.willPop
+func canPop*[F: TsuField or WaterField](self: F): bool {.inline.} =
+  ## Returns `true` if any puyos can pop.
+  ## Note that this function is only slightly lighter than `pop`.
+  self.red.canPop or self.green.canPop or self.blue.canPop or self.yellow.canPop or
+    self.purple.canPop
 
 # ------------------------------------------------
-# Put
+# Place
 # ------------------------------------------------
 
 template withFills(cell: Cell, body: untyped): untyped =
-  ## Runs `body` with `fill2`, `fill1`, and `fill0` exposed.
+  ## Runs `body` with `fill0`, `fill1`, and `fill2` exposed.
   block:
     let c = cell.ord
 
@@ -422,20 +397,22 @@ template withFills(cell: Cell, body: untyped): untyped =
 
     body
 
-func put*(self: var TsuField, pair: Pair, plcmt: Placement) {.inline.} =
-  ## Puts the pair.
+func place*(self: var TsuField, pair: Pair, plcmt: Placement) {.inline.} =
+  ## Places the pair.
+  ## This function requires that the field is settled.
   let
     existField = self.exist
-    nextPutMask = existField xor (existField + BinField.initFloor).shiftedUp
-    pivotMask = (if plcmt in Down0 .. Down5: nextPutMask.shiftedUp else: nextPutMask).kept plcmt.pivotCol
-    rotorMask = (if plcmt in Up0 .. Up5: nextPutMask.shiftedUp else: nextPutMask).kept plcmt.rotorCol
+    placeMask = existField xor (existField + BinField.initFloor).shiftedUp
+    pivotMask = (if plcmt in Down0 .. Down5: placeMask.shiftedUp else: placeMask).kept plcmt.pivotCol
+    rotorMask =
+      (if plcmt in Up0 .. Up5: placeMask.shiftedUp else: placeMask).kept plcmt.rotorCol
 
-  let pivot2, pivot1, pivot0: BinField
+  let pivot0, pivot1, pivot2: BinField
   pair.pivot.withFills:
     expand pivot, fill:
       pivot = fill * pivotMask
 
-  let rotor2, rotor1, rotor0: BinField
+  let rotor0, rotor1, rotor2: BinField
   pair.rotor.withFills:
     expand rotor, fill:
       rotor = fill * rotorMask
@@ -443,26 +420,26 @@ func put*(self: var TsuField, pair: Pair, plcmt: Placement) {.inline.} =
   expand bit, pivot, rotor:
     self.bit += pivot + rotor
 
-func put*(self: var WaterField, pair: Pair, plcmt: Placement) {.inline.} =
-  ## Puts the pair.
+func place*(self: var WaterField, pair: Pair, plcmt: Placement) {.inline.} =
+  ## Places the pair.
+  ## This function requires that the field is settled.
   let
     pCol = plcmt.pivotCol
     rCol = plcmt.rotorCol
 
     existField = self.exist
-    nextPutMask =
+    placeMask =
       (existField xor (existField + BinField.initUpperWater).shiftedUpRaw).keptAir
     pivotMask =
-      (if plcmt in Down0 .. Down5: nextPutMask.shiftedUp else: nextPutMask).kept pCol
-    rotorMask =
-      (if plcmt in Up0 .. Up5: nextPutMask.shiftedUp else: nextPutMask).kept rCol
+      (if plcmt in Down0 .. Down5: placeMask.shiftedUp else: placeMask).kept pCol
+    rotorMask = (if plcmt in Up0 .. Up5: placeMask.shiftedUp else: placeMask).kept rCol
 
-  let pivot2, pivot1, pivot0: BinField
+  let pivot0, pivot1, pivot2: BinField
   pair.pivot.withFills:
     expand pivot, fill:
       pivot = fill * pivotMask
 
-  let rotor2, rotor1, rotor0: BinField
+  let rotor0, rotor1, rotor2: BinField
   pair.rotor.withFills:
     expand rotor, fill:
       rotor = fill * rotorMask
@@ -478,31 +455,77 @@ func put*(self: var WaterField, pair: Pair, plcmt: Placement) {.inline.} =
     expand bit:
       self.bit.replace rCol, self.bit.shiftedDownRaw
 
+func place*[F: TsuField or WaterField](
+    self: var F, pair: Pair, plcmt: OptPlacement
+) {.inline.} =
+  ## Places the pair.
+  ## This function requires that the field is settled.
+  if plcmt.isOk:
+    self.place pair, plcmt.expect
+
 # ------------------------------------------------
-# Drop
+# Drop Garbages
 # ------------------------------------------------
 
-func drop*[F: TsuField or WaterField](self: var F) {.inline.} =
-  ## Falling floating cells.
-  const FieldRule = when F is TsuField: Tsu else: Water
+func dropGarbages*[F: TsuField or WaterField](
+    self: var F, cnts: array[Col, int], dropHard: bool
+) {.inline.} =
+  ## Drops hard or garbage puyos.
+  ## This function requires that the mask is settled and the counts are non-negative.
+  let existField = self.exist
 
-  let dropMask = self.exist.toDropMask
+  when F is TsuField:
+    if dropHard:
+      self.bit0.dropGarbagesTsu cnts, existField
+    else:
+      self.bit1.dropGarbagesTsu cnts, existField
+  else:
+    if dropHard:
+      self.bit0.dropGarbagesWater self.bit1, self.bit2, cnts, existField
+    else:
+      self.bit1.dropGarbagesWater self.bit0, self.bit2, cnts, existField
 
-  expand bit:
-    self.bit.drop dropMask, FieldRule
+# ------------------------------------------------
+# Apply
+# ------------------------------------------------
 
-func willDrop*[F: TsuField or WaterField](self: F): bool {.inline.} =
-  ## Returns `true` if any cell will drop.
-  self != self.dup(drop)
+func apply*[F: TsuField or WaterField](self: var F, step: Step) {.inline.} =
+  ## Applies the step.
+  ## This function requires that the field is settled.
+  case step.kind
+  of PairPlacement:
+    self.place step.pair, step.optPlacement
+  of Garbages:
+    self.dropGarbages step.cnts, step.dropHard
+
+# ------------------------------------------------
+# Settle
+# ------------------------------------------------
+
+func settle*[F: TsuField or WaterField](self: var F) {.inline.} =
+  ## Settles the field.
+  when F is TsuField:
+    settleTsu(self.bit0, self.bit1, self.bit2, self.exist)
+  else:
+    settleWater(self.bit0, self.bit1, self.bit2, self.exist)
+
+func isSettled*[F: TsuField or WaterField](self: F): bool {.inline.} =
+  ## Returns `true` if the field is settled.
+  ## Note that this function is only slightly lighter than `settle`
+  when F is TsuField:
+    areSettledTsu(self.bit0, self.bit1, self.bit2, self.exist)
+  else:
+    areSettledWater(self.bit0, self.bit1, self.bit2, self.exist)
 
 # ------------------------------------------------
 # Move
 # ------------------------------------------------
 
 func move*[F: TsuField or WaterField](
-    self: var F, pair: Pair, plcmt: Placement, calcConn: static bool
+    self: var F, step: Step, calcConn: static bool
 ): MoveResult {.inline.} =
-  ## Puts the pair and advance the field until chains end.
+  ## Applies the step and advances the field until chains end.
+  ## This function requires that the field is settled.
   const MaxChainCnt = Height * Width div 4
 
   var
@@ -515,7 +538,7 @@ func move*[F: TsuField or WaterField](
   when calcConn:
     var fullPopCnts = newSeqOfCap[array[Cell, seq[int]]](MaxChainCnt)
 
-  self.put pair, plcmt
+  self.apply step
 
   while true:
     let popRes = self.pop
@@ -531,8 +554,7 @@ func move*[F: TsuField or WaterField](
         )
 
     chainCnt.inc
-
-    self.drop
+    self.settle
 
     var cellCnts {.noinit.}: array[Cell, int]
     cellCnts[None].assign 0
@@ -549,7 +571,7 @@ func move*[F: TsuField or WaterField](
     when calcConn:
       fullPopCnts.add popRes.connCnts
 
-  # NOTE: dummy to suppress warning
+  # NOTE: dummy to suppress warning (not reached here)
   MoveResult.init(0, initArrWith[Cell, int](0), 0, @[], @[])
 
 # ------------------------------------------------
@@ -567,7 +589,7 @@ func toArr*[F: TsuField or WaterField](
   staticFor(row, Row):
     staticFor(col, Col):
       {.push warning[Uninit]: off.}
-      arr[row][col].assign toCell(arr2[row][col], arr1[row][col], arr0[row][col])
+      arr[row][col].assign toCell(arr0[row][col], arr1[row][col], arr2[row][col])
       {.pop.}
 
   arr
@@ -576,7 +598,7 @@ func toField[F: TsuField or WaterField](
     arr: array[Row, array[Col, Cell]]
 ): F {.inline.} =
   ## Returns the field converted from the array.
-  var arr2 {.noinit.}, arr1 {.noinit.}, arr0 {.noinit.}: array[Row, array[Col, bool]]
+  var arr0 {.noinit.}, arr1 {.noinit.}, arr2 {.noinit.}: array[Row, array[Col, bool]]
 
   staticFor(row, Row):
     staticFor(col, Col):
@@ -586,7 +608,7 @@ func toField[F: TsuField or WaterField](
           arr[row][col].assign bit
         {.pop.}
 
-  F.init(arr2.toBinField, arr1.toBinField, arr0.toBinField)
+  F.init(arr0.toBinField, arr1.toBinField, arr2.toBinField)
 
 func toTsuField*(arr: array[Row, array[Col, Cell]]): TsuField {.inline.} =
   ## Returns the Tsu field converted from the array.

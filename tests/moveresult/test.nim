@@ -12,31 +12,16 @@ let
   hardToGarbageCnt = 3
   detailHardToGarbageCnt = @[1, 2, 0]
 
-# NOTE: somehow direct initialization does not work
-var detailPopCnts = newSeq[array[Cell, int]]()
-block:
-  let
-    arr1: array[Cell, int] = [0, 1, 0, 4, 0, 5, 0, 9]
-    arr2: array[Cell, int] = [0, 0, 0, 4, 4, 0, 0, 0]
-    arr3: array[Cell, int] = [0, 0, 12, 4, 0, 8, 0, 6]
+  detailArr1: array[Cell, int] = [0, 1, 0, 4, 0, 5, 0, 9]
+  detailArr2: array[Cell, int] = [0, 0, 0, 4, 4, 0, 0, 0]
+  detailArr3: array[Cell, int] = [0, 0, 12, 4, 0, 8, 0, 6]
+  detailPopCnts = @[detailArr1, detailArr2, detailArr3]
 
-  detailPopCnts.add arr1
-  detailPopCnts.add arr2
-  detailPopCnts.add arr3
+  fullArr1: array[Cell, seq[int]] = [@[], @[1], @[], @[4], @[], @[5], @[], @[4, 5]]
+  fullArr2: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[4], @[], @[], @[]]
+  fullArr3: array[Cell, seq[int]] = [@[], @[], @[4, 4, 4], @[4], @[], @[5], @[], @[6]]
+  fullPopCnts = @[fullArr1, fullArr2, fullArr3]
 
-# NOTE: somehow direct initialization does not work
-var fullPopCnts = newSeq[array[Cell, seq[int]]]()
-block:
-  let
-    arr1: array[Cell, seq[int]] = [@[], @[1], @[], @[4], @[], @[5], @[], @[4, 5]]
-    arr2: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[4], @[], @[], @[]]
-    arr3: array[Cell, seq[int]] = [@[], @[], @[4, 4, 4], @[4], @[], @[5], @[], @[6]]
-
-  fullPopCnts.add arr1
-  fullPopCnts.add arr2
-  fullPopCnts.add arr3
-
-let
   moveRes1 = MoveResult.init(
     chainCnt, popCnts, hardToGarbageCnt, detailPopCnts, detailHardToGarbageCnt
   )

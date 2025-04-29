@@ -6,45 +6,22 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[bitops, sugar]
-import stew/[bitops2]
+import std/[sugar]
 import ../../[assign3, bitops3, macros2, staticfor2]
 import ../../../core/[common, rule]
 
-type
-  Bit64BinField* = object ## Binary field with 64bit operations.
-    col012: uint64 # use higher 16*3 bits
-    col345: uint64 # use higher 16*3 bits
+type Bit64BinField* = object ## Binary field with 64bit operations.
+  col012: uint64 # use higher 16*3 bits
+  col345: uint64 # use higher 16*3 bits
 
-  Bit64DropMask* = array[Col, PextMask[uint64]] ## Mask used in dropping.
-
-# ------------------------------------------------
-# Macro
-# ------------------------------------------------
-
-macro expand(identsAndBody: varargs[untyped]): untyped =
-  ## Runs the body (the last argument) three times with specified identifiers
-  ## (the rest arguments) replaced by `{ident}012` and `{ident}345`.
-  let
-    body = identsAndBody[^1]
-    idents = identsAndBody[0 ..^ 2]
-    stmts = nnkStmtList.newNimNode body
-
-  var body012 = body
-  for id in idents:
-    body012 = body012.replaced(id, (id.strVal & "012").ident)
-  stmts.add body012
-
-  var body345 = body
-  for id in idents:
-    body345 = body345.replaced(id, (id.strVal & "345").ident)
-  stmts.add body345
-
-  stmts
+defineExpand "", "012", "345"
+defineExpand "6", "0", "1", "2", "3", "4", "5"
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
+
+const ValidMask = 0x3ffe_3ffe_3ffe_0000'u64
 
 func init(T: type Bit64BinField, col012: uint64, col345: uint64): T {.inline.} =
   T(col012: col012, col345: col345)
@@ -54,9 +31,8 @@ func init*(T: type Bit64BinField): Bit64BinField {.inline.} =
   T.init(0, 0)
 
 func initOne*(T: type Bit64BinField): Bit64BinField {.inline.} =
-  ## Returns the binary field with all elements one.
-  const Initializer = 0xffff_ffff_ffff_ffff'u64
-  T.init(Initializer, Initializer)
+  ## Returns the binary field with all valid elements one.
+  T.init(ValidMask, ValidMask)
 
 func initFloor*(T: type Bit64BinField): Bit64BinField {.inline.} =
   ## Returns the binary field with floor bits one.
@@ -162,19 +138,18 @@ func initAirMask(): uint64 {.inline.} =
   ## Returns `AirMask`.
   var mask = 0'u64
   for i in 0 ..< AirHeight:
-    mask.setBitBE i.succ 2
-    mask.setBitBE i.succ 18
-    mask.setBitBE i.succ 34
+    mask.setBitBE 2.succ i
+    mask.setBitBE 18.succ i
+    mask.setBitBE 34.succ i
 
   mask
 
 const
-  ValidMask = 0x3ffe_3ffe_3ffe_0000'u64
   AirMask = initAirMask()
   ColMaskBase = 0xffff_0000_0000_0000'u64
 
 template withColMasks(col: Col, body: untyped): untyped =
-  ## Runs `body` with `mask01`, `mask23`, and `mask45` exposed.
+  ## Runs `body` with `mask012` and `mask345` exposed.
   case col
   of Col0, Col1, Col2:
     let
@@ -489,73 +464,209 @@ func delete*(
     self.col345.delete col.pred 3, row, rule
 
 # ------------------------------------------------
-# Drop
+# Drop Garbages
 # ------------------------------------------------
 
-func colVal(self: Bit64BinField, col: static Col): uint64 {.inline.} =
+const
+  MaskL = 0x3ffe_0000_0000_0000'u64
+  MaskC = 0x0000_3ffe_0000_0000'u64
+  MaskR = 0x0000_0000_3ffe_0000'u64
+
+func extracted(self: Bit64BinField, col: static Col): uint64 {.inline.} =
   ## Returns the value corresponding to the column.
   when col == Col0:
-    self.col012.bextr(48, 16)
+    self.col012 and MaskL
   elif col == Col1:
-    self.col012.bextr(32, 16)
+    self.col012 and MaskC
   elif col == Col2:
-    self.col012.bextr(16, 16)
+    self.col012 and MaskR
   elif col == Col3:
-    self.col345.bextr(48, 16)
+    self.col345 and MaskL
   elif col == Col4:
-    self.col345.bextr(32, 16)
+    self.col345 and MaskC
   else:
-    self.col345.bextr(16, 16)
+    self.col345 and MaskR
 
-func toDropMask*(existField: Bit64BinField): Bit64DropMask {.inline.} =
-  ## Returns a drop mask converted from the exist field.
-  {.push warning[Uninit]: off.}
-  var dropMask: Bit64DropMask
-  staticFor(col, Col):
-    dropMask[col].assign PextMask[uint64].init existField.colVal col
+func dropGarbagesTsu*(
+    self: var Bit64BinField, cnts: array[Col, int], existField: Bit64BinField
+) {.inline.} =
+  ## Drops cells by Tsu rule.
+  ## This function requires that the mask is settled and the counts are non-negative.
+  expand notExist, col:
+    let notExist = (not existField.col).keptValid
 
-  return dropMask
-  {.pop.}
-
-func dropTsu(self: var Bit64BinField, mask: Bit64DropMask) {.inline.} =
-  ## Falling floating cells.
-  self.col012.assign bitor2(
-    self.colVal(Col0).pext(mask[Col0]) shl 49,
-    self.colVal(Col1).pext(mask[Col1]) shl 33,
-    self.colVal(Col2).pext(mask[Col2]) shl 17,
-  )
-
-  self.col345.assign bitor2(
-    self.colVal(Col3).pext(mask[Col3]) shl 49,
-    self.colVal(Col4).pext(mask[Col4]) shl 33,
-    self.colVal(Col5).pext(mask[Col5]) shl 17,
-  )
-
-func dropWater(self: var Bit64BinField, mask: Bit64DropMask) {.inline.} =
-  ## Falling floating cells.
   let
-    col0 = self.colVal Col0
-    col1 = self.colVal Col1
-    col2 = self.colVal Col2
-    col3 = self.colVal Col3
-    col4 = self.colVal Col4
-    col5 = self.colVal Col5
+    notExist0 = notExist012 and MaskL
+    notExist1 = notExist012 and MaskC
+    notExist2 = notExist012 and MaskR
+    notExist3 = notExist345 and MaskL
+    notExist4 = notExist345 and MaskC
+    notExist5 = notExist345 and MaskR
 
-  self.col012.assign bitor2(
-    col0.pext(mask[Col0]) shl max(49, 49 + WaterHeight - mask[Col0].popcnt),
-    col1.pext(mask[Col1]) shl max(33, 33 + WaterHeight - mask[Col1].popcnt),
-    col2.pext(mask[Col2]) shl max(17, 17 + WaterHeight - mask[Col2].popcnt),
-  )
+  expand6 garbages, notExist, Col:
+    let garbages = notExist *~ (notExist shl cnts[Col])
 
-  self.col345.assign bitor2(
-    col3.pext(mask[Col3]) shl max(49, 49 + WaterHeight - mask[Col3].popcnt),
-    col4.pext(mask[Col4]) shl max(33, 33 + WaterHeight - mask[Col4].popcnt),
-    col5.pext(mask[Col5]) shl max(17, 17 + WaterHeight - mask[Col5].popcnt),
-  )
+  self.col012.assign bitor2(self.col012, garbages0, garbages1, garbages2)
+  self.col345.assign bitor2(self.col345, garbages3, garbages4, garbages5)
 
-func drop*(self: var Bit64BinField, mask: Bit64DropMask, rule: static Rule) {.inline.} =
-  ## Falling floating cells.
-  when rule == Tsu:
-    self.dropTsu mask
-  else:
-    self.dropWater mask
+func dropGarbagesWater*(
+    self, other1, other2: var Bit64BinField,
+    cnts: array[Col, int],
+    existField: Bit64BinField,
+) {.inline.} =
+  ## Drops cells by Water rule.
+  ## `self` is shifted and is dropped garbages; `other1` and `other2` are only shifted.
+  ## This function requires that the mask is settled and the counts are non-negative.
+  const WaterMask = ValidMask *~ AirMask
+
+  expand6 afterSelf, afterOther1, afterOther2, Col:
+    let afterSelf, afterOther1, afterOther2: uint64
+
+    block:
+      when Col in {Col0, Col3}:
+        const
+          TrailingInvalid = 49
+          Mask = MaskL
+      elif Col in {Col1, Col4}:
+        const
+          TrailingInvalid = 33
+          Mask = MaskC
+      else:
+        const
+          TrailingInvalid = 17
+          Mask = MaskR
+
+      const
+        MaskA = AirMask and Mask
+        MaskW = WaterMask and Mask
+
+      let
+        cnt = cnts[Col]
+        exist = existField.extracted Col
+
+      if exist == 0:
+        if cnt <= WaterHeight:
+          afterSelf = MaskW *~ (MaskW shr cnt)
+        else:
+          afterSelf = MaskW or (MaskA *~ (MaskA shl (cnt - WaterHeight)))
+
+        afterOther1 = 0
+        afterOther2 = 0
+      else:
+        let
+          shift = min(cnt, exist.tzcnt - TrailingInvalid)
+          shiftExist = exist shr shift
+          emptySpace = Mask *~ (shiftExist or shiftExist.blsmsk)
+          garbages = emptySpace *~ (emptySpace shl cnt)
+
+          colSelf = self.extracted Col
+          colOther1 = other1.extracted Col
+          colOther2 = other2.extracted Col
+
+        afterSelf = (colSelf shr shift) or garbages
+        afterOther1 = colOther1 shr shift
+        afterOther2 = colOther2 shr shift
+
+  self.col012.assign bitor2(afterSelf0, afterSelf1, afterSelf2)
+  self.col345.assign bitor2(afterSelf3, afterSelf4, afterSelf5)
+
+  other1.col012.assign bitor2(afterOther10, afterOther11, afterOther12)
+  other1.col345.assign bitor2(afterOther13, afterOther14, afterOther15)
+
+  other2.col012.assign bitor2(afterOther20, afterOther21, afterOther22)
+  other2.col345.assign bitor2(afterOther23, afterOther24, afterOther25)
+
+# ------------------------------------------------
+# Settle
+# ------------------------------------------------
+
+func write(
+    self: out array[Col, PextMask[uint64]], existField: Bit64BinField
+) {.inline.} =
+  ## Initializes the masks.
+  staticFor(col, Col):
+    {.push warning[ProveInit]: off.}
+    self[col].assign PextMask[uint64].init existField.extracted col
+    {.pop.}
+
+func shiftAmt(col: Col): int {.inline.} =
+  ## Returns the shift amount.
+  case col
+  of Col0, Col3: 49
+  of Col1, Col4: 33
+  of Col2, Col5: 17
+
+func settleTsu(
+    self: var Bit64BinField, masks: array[Col, PextMask[uint64]]
+) {.inline.} =
+  ## Settles the binary field by Tsu rule.
+  expand6 after, Col:
+    let after: uint64
+
+    block:
+      const ShiftAmt = Col.shiftAmt
+      after = self.extracted(Col).pext(masks[Col]) shl ShiftAmt
+
+  self.col012.assign bitor2(after0, after1, after2)
+  self.col345.assign bitor2(after3, after4, after5)
+
+func settleTsu*(
+    field1, field2, field3: var Bit64BinField, existField: Bit64BinField
+) {.inline.} =
+  ## Settles the binary field by Tsu rule.
+  var masks: array[Col, PextMask[uint64]]
+  masks.write existField
+
+  field1.settleTsu masks
+  field2.settleTsu masks
+  field3.settleTsu masks
+
+func settleWater(
+    self: var Bit64BinField, masks: array[Col, PextMask[uint64]]
+) {.inline.} =
+  ## Settles the binary field by Water rule.
+  expand6 after, Col:
+    let after: uint64
+
+    block:
+      const ShiftAmt = Col.shiftAmt
+      after =
+        self.extracted(Col).pext(masks[Col]) shl
+        max(ShiftAmt, ShiftAmt + WaterHeight - masks[Col].popcnt)
+
+  self.col012.assign bitor2(after0, after1, after2)
+  self.col345.assign bitor2(after3, after4, after5)
+
+func settleWater*(
+    field1, field2, field3: var Bit64BinField, existField: Bit64BinField
+) {.inline.} =
+  ## Settles the binary field by Water rule.
+  var masks: array[Col, PextMask[uint64]]
+  masks.write existField
+
+  field1.settleWater masks
+  field2.settleWater masks
+  field3.settleWater masks
+
+func areSettledTsu*(
+    field1, field2, field3, existField: Bit64BinField
+): bool {.inline.} =
+  ## Returns `true` if all binary fields are settled by Tsu rule.
+  ## Note that this function is only slightly lighter than `settleTsu`.
+  var masks: array[Col, PextMask[uint64]]
+  masks.write existField
+
+  field1.dup(settleTsu(_, masks)) == field1 and field2.dup(settleTsu(_, masks)) == field2 and
+    field3.dup(settleTsu(_, masks)) == field3
+
+func areSettledWater*(
+    field1, field2, field3, existField: Bit64BinField
+): bool {.inline.} =
+  ## Returns `true` if all binary fields are settled by Water rule.
+  ## Note that this function is only slightly lighter than `settleWater`.
+  var masks: array[Col, PextMask[uint64]]
+  masks.write existField
+
+  field1.dup(settleWater(_, masks)) == field1 and
+    field2.dup(settleWater(_, masks)) == field2 and
+    field3.dup(settleWater(_, masks)) == field3

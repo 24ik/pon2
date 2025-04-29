@@ -5,8 +5,8 @@
 import std/[sequtils, sugar, unittest]
 import
   ../../src/pon2/core/
-    [cell, common, field, fqdn, moveresult, pair, placement, popresult, rule]
-import ../../src/pon2/private/[assign3, results2, strutils2]
+    [cell, common, field, fqdn, moveresult, pair, placement, popresult, rule, step]
+import ../../src/pon2/private/[assign3, arrayops2, results2, strutils2]
 import ../../src/pon2/private/core/[binfield]
 
 proc toBinField(str: string): BinField =
@@ -714,8 +714,8 @@ h..o..
       """
 ......
 ......
-rr....
-.r..gg
+pp....
+.p..gg
 ....gg
 ~~~~~~
 ......
@@ -730,7 +730,7 @@ h..o..
   check fieldT.cellCnt(Red) == 3
   check fieldT.cellCnt(Blue) == 0
   check fieldW.cellCnt(Garbage) == 5
-  check fieldW.cellCnt(Purple) == 0
+  check fieldW.cellCnt(Red) == 0
 
   check fieldT.puyoCnt == 13
   check fieldW.puyoCnt == 13
@@ -1313,7 +1313,7 @@ p.....""".toWaterField
 # Pop
 # ------------------------------------------------
 
-block: # pop, willPop
+block: # pop, canPop
   var
     fieldT =
       """
@@ -1346,6 +1346,9 @@ pp..h.
 ..phh.
 .hhh..
 ......""".toWaterField
+
+  check fieldT.canPop
+  check fieldW.canPop
 
   let
     resT = fieldT.pop
@@ -1466,11 +1469,14 @@ pp..h.
 .hoh..
 ......""".toWaterField
 
+  check not fieldT.canPop
+  check not fieldW.canPop
+
 # ------------------------------------------------
-# Put
+# Place
 # ------------------------------------------------
 
-block: # put
+block: # place
   block: # Tsu
     var field =
       """
@@ -1488,7 +1494,9 @@ block: # put
 ....oo
 ...hoo""".toTsuField
 
-    field.put RedGreen, Right0
+    check field.dup(place(_, PurplePurple, NonePlacement)) == field
+
+    field.place RedGreen, Right0
     check field ==
       """
 .....o
@@ -1505,7 +1513,7 @@ block: # put
 ....oo
 rg.hoo""".toTsuField
 
-    field.put BlueYellow, Down1
+    field.place BlueYellow, Down1
     check field ==
       """
 .....o
@@ -1522,7 +1530,7 @@ rg.hoo""".toTsuField
 .y..oo
 rg.hoo""".toTsuField
 
-    field.put PurpleRed, Left3
+    field.place PurpleRed, Left3
     check field ==
       """
 .....o
@@ -1539,7 +1547,7 @@ rg.hoo""".toTsuField
 .y.poo
 rgrhoo""".toTsuField
 
-    field.put GreenBlue, Up4
+    field.place GreenBlue, Up4
     check field ==
       """
 ....go
@@ -1556,7 +1564,7 @@ rgrhoo""".toTsuField
 .y.poo
 rgrhoo""".toTsuField
 
-    field.put YellowPurple, Down5
+    field.place YellowPurple, OptPlacement.ok Down5
     check field ==
       """
 ....go
@@ -1591,7 +1599,9 @@ rgrhoo""".toTsuField
 ......
 ......""".toWaterField
 
-    field.put BlueYellow, Left4
+    check field.dup(place(_, PurplePurple, NonePlacement)) == field
+
+    field.place BlueYellow, Left4
     check field ==
       """
 ......
@@ -1609,7 +1619,7 @@ rgrhoo""".toTsuField
 ....o.
 ......""".toWaterField
 
-    field.put PurpleRed, Down4
+    field.place PurpleRed, OptPlacement.ok Down4
     check field ==
       """
 ......
@@ -1628,10 +1638,136 @@ rgrhoo""".toTsuField
 ....o.""".toWaterField
 
 # ------------------------------------------------
-# Drop
+# Drop Garbages
 # ------------------------------------------------
 
-block: # drop
+block: # dropGarbages
+  block: # Tsu, garbage
+    let field =
+      """
+....by
+....by
+..rgby
+..rgby
+..rgby
+..rgby
+..rgby
+..rgby
+..rgby
+..rgby
+..rgby
+..rgby
+..rgby""".toTsuField
+
+    check field.dup(dropGarbages(_, [Col0: 0, 2, 0, 3, 0, 4], false)) ==
+      """
+...oby
+...oby
+..rgby
+..rgby
+..rgby
+..rgby
+..rgby
+..rgby
+..rgby
+..rgby
+..rgby
+.orgby
+.orgby""".toTsuField
+
+  block: # Water, hard
+    let field =
+      """
+......
+......
+......
+......
+......
+~~~~~~
+..pybg
+..pybg
+....bg
+....bg
+......
+......
+......
+......""".toWaterField
+
+    check field.dup(dropGarbages(_, [Col0: 0, 2, 0, 3, 5, 20], true)) ==
+      """
+.....h
+.....h
+.....h
+.....h
+....hh
+~~~~~~
+.hphhh
+.hphhh
+...hhh
+...yhh
+...ybg
+....bg
+....bg
+....bg""".toWaterField
+
+  block: # Water (full-water), garbage
+    let field =
+      """
+....pr
+....pr
+....pr
+..bypr
+..bypr
+~~~~~~
+rgbypr
+rgbypr
+rgbypr
+rgbypr
+hhhhhh
+rgbypr
+oooooo
+rgbypr""".toWaterField
+
+    check field.dup(dropGarbages(_, [Col0: 0, 1, 0, 1, 0, 10], false)) ==
+      """
+....pr
+....pr
+...opr
+..bypr
+.obypr
+~~~~~~
+rgbypr
+rgbypr
+rgbypr
+rgbypr
+hhhhhh
+rgbypr
+oooooo
+rgbypr""".toWaterField
+
+# ------------------------------------------------
+# Apply
+# ------------------------------------------------
+
+block: # apply
+  let
+    pair = RedGreen
+    plcmt = Left3
+    cnts = [Col0: 1, 2, 3, 4, 5, 6]
+    dropHard = false
+
+    step1 = Step.init(pair, plcmt)
+    step2 = Step.init(cnts, dropHard)
+
+  check TsuField.init.dup(apply(_, step1)) == TsuField.init.dup(place(_, pair, plcmt))
+  check WaterField.init.dup(apply(_, step2)) ==
+    WaterField.init.dup(dropGarbages(cnts, dropHard))
+
+# ------------------------------------------------
+# Settle
+# ------------------------------------------------
+
+block: # settle, isSettled
   block: # Tsu
     var field =
       """
@@ -1649,7 +1785,9 @@ ooo...
 ooo...
 o.oo..""".toTsuField
 
-    field.drop
+    check not field.isSettled
+
+    field.settle
 
     check field ==
       """
@@ -1666,6 +1804,8 @@ ooo...
 ooo...
 oooh..
 ooooo.""".toTsuField
+
+    check field.isSettled
 
   block: # Water
     var field =
@@ -1685,7 +1825,9 @@ oh.oo.
 ......
 ....o.""".toWaterField
 
-    field.drop
+    check not field.isSettled
+
+    field.settle
 
     check field ==
       """
@@ -1703,6 +1845,8 @@ oo.oo.
 ....o.
 ....o.
 ....o.""".toWaterField
+
+    check field.isSettled
 
 # ------------------------------------------------
 # Move
@@ -1750,6 +1894,8 @@ block: # move
       hardToGarbageCnt = 0
       detailHardToGarbageCnt = @[0, 0, 0]
 
+      garbagesCnt = [Col0: 0, 1, 2, 0, 2, 1]
+
     # somehow direct initialization does not work
     var detailPopCnts = newSeq[array[Cell, int]]()
     block:
@@ -1773,22 +1919,62 @@ block: # move
       fullPopCnts.add arr2
       fullPopCnts.add arr3
 
-    block: # full
+    block: # calc conn
       var field2 = fieldBefore
-      check field2.move(pair, plcmt, true) ==
+      check field2.move(Step.init(pair, plcmt), true) ==
         MoveResult.init(
           chainCnt, popCnts, hardToGarbageCnt, detailPopCnts, detailHardToGarbageCnt,
           fullPopCnts,
         )
       check field2 == fieldAfter
 
-    block: # not full
+    block: # not calc conn
       var field2 = fieldBefore
-      check field2.move(pair, plcmt, false) ==
+      check field2.move(Step.init(pair, plcmt), false) ==
         MoveResult.init(
           chainCnt, popCnts, hardToGarbageCnt, detailPopCnts, detailHardToGarbageCnt
         )
       check field2 == fieldAfter
+
+    block: # drop garbage
+      var field2 = fieldBefore
+      check field2.move(Step.init(garbagesCnt, false), false) ==
+        MoveResult.init(0, initArrWith[Cell, int](0), 0, @[], @[])
+      check field2 ==
+        """
+....g.
+....go
+....pg
+....rg
+....gr
+....go
+....gp
+....bg
+....bp
+...bgp
+...bgr
+..oorb
+.oogbb""".toTsuField
+
+    block: # drop hard
+      var field2 = fieldBefore
+      check field2.move(Step.init(garbagesCnt, true), false) ==
+        MoveResult.init(0, initArrWith[Cell, int](0), 0, @[], @[])
+      check field2 ==
+        """
+....g.
+....gh
+....pg
+....rg
+....gr
+....go
+....gp
+....bg
+....bp
+...bgp
+...bgr
+..horb
+.hhgbb""".toTsuField
 
 # ------------------------------------------------
 # Field <-> array

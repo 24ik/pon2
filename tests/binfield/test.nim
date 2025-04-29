@@ -41,6 +41,23 @@ block: # init
 ......
 ......""".toBinField
 
+block: # initOne
+  check BinField.initOne ==
+    """
+xxxxxx
+xxxxxx
+xxxxxx
+xxxxxx
+xxxxxx
+xxxxxx
+xxxxxx
+xxxxxx
+xxxxxx
+xxxxxx
+xxxxxx
+xxxxxx
+xxxxxx""".toBinField
+
 block: # initFloor
   check BinField.initFloor ==
     """
@@ -726,12 +743,206 @@ x.....
 ......""".toBinField
 
 # ------------------------------------------------
-# Drop
+# Drop Garbages
 # ------------------------------------------------
 
-block: # drop
+block: # dropGarbagesTsu
   let
     field =
+      """
+......
+......
+......
+......
+......
+......
+......
+......
+....x.
+......
+.x..x.
+.....x
+.xx.xx""".toBinField
+    existField =
+      """
+......
+......
+......
+......
+......
+......
+......
+......
+....xx
+....xx
+.x..xx
+.x..xx
+.xx.xx""".toBinField
+
+  check field.dup(dropGarbagesTsu(_, [Col0: 0, 0, 1, 1, 8, 24], existField)) ==
+    """
+....xx
+....xx
+....xx
+....xx
+....xx
+....xx
+....xx
+....xx
+....x.
+......
+.x..x.
+..x..x
+.xxxxx""".toBinField
+
+block: # dropGarbagesWater
+  block: # test1
+    var
+      field =
+        """
+......
+......
+......
+......
+......
+.x.xx.
+.....x
+.x.xx.
+.....x
+....x.
+......
+......
+......""".toBinField
+      other1 =
+        """
+......
+......
+......
+......
+......
+.....x
+.x.xx.
+.....x
+....x.
+.....x
+......
+......
+......""".toBinField
+      other2 = BinField.init
+
+    dropGarbagesWater(
+      field, other1, other2, [Col0: 0, 0, 1, 1, 5, 24], field + other1 + other2
+    )
+
+    check field ==
+      """
+.....x
+.....x
+.....x
+....xx
+....xx
+.xxxxx
+...xxx
+.x..xx
+...xx.
+.....x
+....x.
+.....x
+....x.""".toBinField
+    check other1 ==
+      """
+......
+......
+......
+......
+......
+......
+.x....
+...x..
+.....x
+....x.
+.....x
+....x.
+.....x""".toBinField
+    check other2 == BinField.init
+
+  block: # test2 (full water)
+    var
+      field =
+        """
+....x.
+.....x
+....x.
+..x..x
+...xx.
+x.x..x
+.x.xx.
+x.x..x
+.x.xx.
+x.x..x
+.x.xx.
+x.x..x
+.x.xx.""".toBinField
+      other1 =
+        """
+.....x
+....x.
+.....x
+...xx.
+..x..x
+.x.xx.
+x.x..x
+.x.xx.
+x.x..x
+.x.xx.
+x.x..x
+.x.xx.
+x.x..x""".toBinField
+      other2 = BinField.init
+
+    dropGarbagesWater(
+      field, other1, other2, [Col0: 0, 1, 0, 2, 0, 24], field + other1 + other2
+    )
+
+    check field ==
+      """
+....x.
+...x.x
+...xx.
+..x..x
+.x.xx.
+x.x..x
+.x.xx.
+x.x..x
+.x.xx.
+x.x..x
+.x.xx.
+x.x..x
+.x.xx.""".toBinField
+    check other1 ==
+      """
+.....x
+....x.
+.....x
+...xx.
+..x..x
+.x.xx.
+x.x..x
+.x.xx.
+x.x..x
+.x.xx.
+x.x..x
+.x.xx.
+x.x..x""".toBinField
+    check other2 == BinField.init
+
+# ------------------------------------------------
+# Settle
+# ------------------------------------------------
+
+block: # settleTsu, settleWater, areSettledTsu, areSettledWater
+  let
+    field1 =
       """
 xx....
 .xx...
@@ -746,24 +957,35 @@ xx..x.
 ...x..
 .x.x..
 .x.xx.""".toBinField
-    mask =
+    field2 =
       """
-xx....
-.xx...
-.x.xx.
-xx.xx.
-xxx...
-.xxx..
-.x.xx.
-xx.xx.
-xxxxx.
-.x.xx.
-.x.xx.
-.x.xx.
-xx.xx.""".toBinField.toDropMask
+......
+......
+.x....
+x..x..
+......
+......
+......
+.x....
+..xx..
+......
+.x..x.
+....x.
+x.....""".toBinField
+    field3 = BinField.init
 
-  check field.dup(drop(_, mask, Tsu)) ==
-    """
+  block: # Tsu
+    var
+      f1 = field1
+      f2 = field2
+      f3 = field3
+
+    check not areSettledTsu(f1, f2, f3, f1 + f2 + f3)
+    settleTsu(f1, f2, f3, f1 + f2 + f3)
+    check areSettledTsu(f1, f2, f3, f1 + f2 + f3)
+
+    check f1 ==
+      """
 .x....
 .x....
 ......
@@ -778,8 +1000,36 @@ x.xx..
 xxxx..
 .x.xx.""".toBinField
 
-  check field.dup(drop(_, mask, Water)) ==
-    """
+    check f2 ==
+      """
+......
+......
+.x....
+......
+...x..
+......
+......
+.x....
+x..x..
+......
+.x..x.
+....x.
+x.x...""".toBinField
+
+    check f3 == BinField.init
+
+  block: # Water
+    var
+      f1 = field1
+      f2 = field2
+      f3 = field3
+
+    check not areSettledWater(f1, f2, f3, f1 + f2 + f3)
+    settleWater(f1, f2, f3, f1 + f2 + f3)
+    check areSettledWater(f1, f2, f3, f1 + f2 + f3)
+
+    check f1 ==
+      """
 .x....
 .x....
 ......
@@ -793,6 +1043,24 @@ xx.xx.
 ...x..
 .x.x..
 .x.xx.""".toBinField
+
+    check f2 ==
+      """
+......
+......
+.x....
+......
+...x..
+......
+x.....
+.x....
+..xx..
+......
+xx..x.
+....x.
+......""".toBinField
+
+    check f3 == BinField.init
 
 # ------------------------------------------------
 # Property
@@ -958,7 +1226,7 @@ xxx...""".toBinField
 # Pop
 # ------------------------------------------------
 
-block: # extractedPop, willPop
+block: # extractedPop, canPop
   let field =
     """
 x.....
@@ -990,8 +1258,8 @@ xx..x.
 xxx.x.
 xx....
 ..xxxx""".toBinField
-  check field.willPop
-  check not BinField.init.willPop
+  check field.canPop
+  check not BinField.init.canPop
 
 # ------------------------------------------------
 # Connect - 2

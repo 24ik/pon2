@@ -3,7 +3,6 @@
 {.experimental: "views".}
 
 import std/[bitops, unittest]
-import stew/[bitops2]
 import ../../src/pon2/private/[bitops3]
 
 # ------------------------------------------------
@@ -105,6 +104,84 @@ block: # bextr
   check val.int16.bextr(start, length) == res.int16
   check val.int32.bextr(start, length) == res.int32
   check val.int64.bextr(start, length) == res.int64
+
+  check val.uint.bextr(start, 0) == 0.uint
+  check val.uint8.bextr(start, 0) == 0.uint8
+  check val.uint16.bextr(start, 0) == 0.uint16
+  check val.uint32.bextr(start, 0) == 0.uint32
+  check val.uint64.bextr(start, 0) == 0.uint64
+
+  check val.int.bextr(start, 0) == 0.int
+  check val.int8.bextr(start, 0) == 0.int8
+  check val.int16.bextr(start, 0) == 0.int16
+  check val.int32.bextr(start, 0) == 0.int32
+  check val.int64.bextr(start, 0) == 0.int64
+
+# ------------------------------------------------
+# BLSMSK
+# ------------------------------------------------
+
+block: # blsmsk
+  let
+    val = 0b0010_1000
+    res = 0b0000_1111
+
+  check val.uint.blsmsk == res.uint
+  check val.uint8.blsmsk == res.uint8
+  check val.uint16.blsmsk == res.uint16
+  check val.uint32.blsmsk == res.uint32
+  check val.uint64.blsmsk == res.uint64
+
+  check val.int.blsmsk == res.int
+  check val.int8.blsmsk == res.int8
+  check val.int16.blsmsk == res.int16
+  check val.int32.blsmsk == res.int32
+  check val.int64.blsmsk == res.int64
+
+  check 0.uint.blsmsk == uint.high
+  check 0.uint8.blsmsk == uint8.high
+  check 0.uint16.blsmsk == uint16.high
+  check 0.uint32.blsmsk == uint32.high
+  check 0.uint64.blsmsk == uint64.high
+
+  check 0.int.blsmsk == -1
+  check 0.int8.blsmsk == -1'i8
+  check 0.int16.blsmsk == -1'i16
+  check 0.int32.blsmsk == -1'i32
+  check 0.int64.blsmsk == -1'i64
+
+# ------------------------------------------------
+# TZCNT
+# ------------------------------------------------
+
+block: # tzcnt
+  let
+    val = 0b0100_1000
+    res = 3
+
+  check val.uint.tzcnt == res
+  check val.uint8.tzcnt == res
+  check val.uint16.tzcnt == res
+  check val.uint32.tzcnt == res
+  check val.uint64.tzcnt == res
+
+  check val.int.tzcnt == res
+  check val.int8.tzcnt == res
+  check val.int16.tzcnt == res
+  check val.int32.tzcnt == res
+  check val.int64.tzcnt == res
+
+  check 0.uint.tzcnt == bitsof uint
+  check 0.uint8.tzcnt == bitsof uint8
+  check 0.uint16.tzcnt == bitsof uint16
+  check 0.uint32.tzcnt == bitsof uint32
+  check 0.uint64.tzcnt == bitsof uint64
+
+  check 0.int.tzcnt == bitsof int
+  check 0.int8.tzcnt == bitsof int8
+  check 0.int16.tzcnt == bitsof int16
+  check 0.int32.tzcnt == bitsof int32
+  check 0.int64.tzcnt == bitsof int64
 
 # ------------------------------------------------
 # PEXT

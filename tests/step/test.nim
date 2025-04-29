@@ -82,7 +82,8 @@ block: # cellCnt, puyoCnt, colorPuyoCnt, garbagesCnt
     check step.garbagesCnt == 5
 
   block:
-    let steps = @[Step.init RedGreen, Step.init([Col0: 5, 4, 5, 5, 5, 4], false)]
+    let steps =
+      [Step.init RedGreen, Step.init([Col0: 5, 4, 5, 5, 5, 4], false)].toDeque2
     check steps.cellCnt(Red) == 1
     check steps.cellCnt(Yellow) == 0
     check steps.cellCnt(Garbage) == 28
@@ -138,12 +139,11 @@ block: # garbages
 
 block: # `$`, parseSteps, toUriQuery
   block: # Garbage
-    let steps =
-      @[
-        Step.init RedGreen,
-        Step.init([Col0: 1, 0, 0, 0, 0, 1], false),
-        Step.init(YellowYellow, Up2),
-      ]
+    let steps = [
+      Step.init RedGreen,
+      Step.init([Col0: 1, 0, 0, 0, 0, 1], false),
+      Step.init(YellowYellow, Up2),
+    ].toDeque2
 
     let str = "rg|\n(1,0,0,0,0,1)\nyy|3N"
     check $steps == str
@@ -159,7 +159,8 @@ block: # `$`, parseSteps, toUriQuery
     check "c1axG4".parseSteps(Ips) == Res[Steps].ok steps
 
   block: # Hard
-    let steps = @[Step.init([Col0: 0, 0, 2, 0, 1, 3], true), Step.init PurpleBlue]
+    let steps =
+      [Step.init([Col0: 0, 0, 2, 0, 1, 3], true), Step.init PurpleBlue].toDeque2
 
     let str = "[0,0,2,0,1,3]\npb|"
     check $steps == str

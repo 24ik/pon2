@@ -14,25 +14,17 @@ when Sse42Available:
   import ./binfield/[xmm]
   export xmm
 
-  type
-    BinField* = XmmBinField ## Binary field.
-    DropMask* = XmmDropMask ## Mask used in dropping.
-
+  type BinField* = XmmBinField ## Binary field.
 elif defined(cpu32):
   import ./binfield/[bit32]
   export bit32
 
-  type
-    BinField* = Bit32BinField ## Binary field.
-    DropMask* = Bit32DropMask ## Mask used in dropping.
-
+  type BinField* = Bit32BinField ## Binary field.
 else:
   import ./binfield/[bit64]
   export bit64
 
-  type
-    BinField* = Bit64BinField ## Binary field.
-    DropMask* = Bit64DropMask ## Mask used in dropping.
+  type BinField* = Bit64BinField ## Binary field.
 
 # ------------------------------------------------
 # Property
@@ -158,8 +150,9 @@ func extractedPop*(self: BinField): BinField {.inline.} =
 
     connVisible * sum(connHas3, hasHas2U, hasHas2D, hasHas2R, hasHas2L).expanded
 
-func willPop*(self: BinField): bool {.inline.} =
-  ## Returns `true` if any puyo pop.
+func canPop*(self: BinField): bool {.inline.} =
+  ## Returns `true` if any cell can pop.
+  ## Note that this function is only slightly lighter than `extractedPop`.
   self.withConn:
     let
       hasHas2U = connHas2 * connHas2.shiftedDownRaw

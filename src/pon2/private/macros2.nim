@@ -6,7 +6,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[macros]
+import std/[macros, sugar]
+import ./[strutils2]
 
 export macros
 
@@ -15,7 +16,7 @@ export macros
 # ref: https://github.com/status-im/nim-stew/blob/master/stew/staticfor.nim
 # ------------------------------------------------
 # 
-proc replaced*(node, before, after: NimNode): NimNode {.inline.} =
+func replaced*(node, before, after: NimNode): NimNode {.inline.} =
   ## Returns the nim node with `before` replaced by `after`.
   case node.kind
   of nnkIdent, nnkSym:
@@ -28,3 +29,75 @@ proc replaced*(node, before, after: NimNode): NimNode {.inline.} =
       rTree.add child.replaced(before, after)
 
     rTree
+
+func replace*(node: var NimNode, before, after: NimNode) {.inline.} =
+  ## Replaces `before` by `after` in the node.
+  node = node.replaced(before, after)
+
+# ------------------------------------------------
+# Expand
+# ------------------------------------------------
+
+macro defineExpand*(
+    macroIdentSuffix: untyped, expandSuffixes: varargs[untyped]
+): untyped =
+  ## Defines expand macro.
+  # identifiers
+  let
+    identsAndBodyIdent = "identsAndBody".ident
+    bodyIdent = "body".ident
+    identsIdent = "idents".ident
+    stmtsIdent = "stmts".ident
+
+  # macro parameters
+  let formalParams = nnkFormalParams.newNimNode
+  formalParams.add "untyped".ident
+  formalParams.add nnkIdentDefs.newTree(
+    identsAndBodyIdent,
+    nnkBracketExpr.newTree("varargs".ident, "untyped".ident),
+    newEmptyNode(),
+  )
+
+  # macro body
+  let
+    suffixes = collect:
+      for suffix in expandSuffixes:
+        suffix.strVal
+    cmnt =
+      """
+Runs in sequence with the body (the last argument) changed to the specified
+identifiers (the rest arguments) with the suffix """ &
+      suffixes.join(", ") &
+      ".\nUnderscore in the body is replaced by the index of the suffix."
+    macroBody = newStmtList cmnt.newCommentStmtNode
+  macroBody.add quote do:
+    let
+      `bodyIdent` = `identsAndBodyIdent`[^1]
+      `identsIdent` = `identsAndBodyIdent`[0 ..^ 2]
+      `stmtsIdent` = nnkStmtList.newNimNode `bodyIdent`
+  for suffixIdx, suffix in suffixes:
+    let expandedBodyIdent = ("body" & suffix).ident
+
+    macroBody.add quote do:
+      var `expandedBodyIdent` = `bodyIdent`.replaced("_".ident, `suffixIdx`.newLit)
+
+    let idIdent = "id".ident
+    macroBody.add nnkForStmt.newTree(
+      idIdent,
+      identsIdent,
+      quote do:
+        `expandedBodyIdent`.replace `idIdent`, (`idIdent`.strVal & `suffix`).ident
+      ,
+    )
+
+    macroBody.add "add".newCall(stmtsIdent, expandedBodyIdent)
+
+  nnkMacroDef.newTree(
+    ("expand" & macroIdentSuffix.strVal).ident,
+    newEmptyNode(),
+    newEmptyNode(),
+    formalParams,
+    newEmptyNode(),
+    newEmptyNode(),
+    macroBody,
+  )

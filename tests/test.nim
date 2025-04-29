@@ -6,13 +6,13 @@ import std/[appdirs, dirs, os, osproc, paths, random, sequtils, strformat, strut
 import unittest2
 
 const
-  SimdLvl {.define: "pon2.testsimd".} = 2
+  SimdLvl {.define: "pon2.testsimd".} = 1
   BmiLvl {.define: "pon2.testbmi".} = 2
   ClmulUse {.define: "pon2.testclmul".} = true
   TestLower {.define: "pon2.testlower".} = true # Tests lower levels
 
 static:
-  doAssert SimdLvl in 0 .. 2
+  doAssert SimdLvl in 0 .. 1
   doAssert BmiLvl in 0 .. 2
 
 type Backend {.pure.} = enum

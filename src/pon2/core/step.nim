@@ -8,7 +8,9 @@
 
 import std/[bitops, sequtils, strformat, sugar]
 import ./[cell, common, fqdn, pair, placement]
-import ../private/[arrayops2, assign3, math2, results2, strutils2, tables2]
+import ../private/[arrayops2, assign3, deques2, math2, results2, strutils2, tables2]
+
+export deques2
 
 type
   StepKind* {.pure.} = enum
@@ -25,7 +27,7 @@ type
       cnts*: array[Col, int]
       dropHard*: bool
 
-  Steps* = seq[Step] ## Sequence of steps.
+  Steps* = Deque[Step] ## Sequence of steps.
 
 # ------------------------------------------------
 # Constructor
@@ -303,7 +305,7 @@ func parseSteps*(str: string): Res[Steps] {.inline.} =
     for s in str.split StepsSep:
       ?s.parseStep.context "Invalid steps: {str}".fmt
 
-  ok steps
+  return ok steps.toDeque2
 
 # ------------------------------------------------
 # Steps <-> URI
@@ -323,14 +325,14 @@ func parseSteps*(query: string, fqdn: IdeFqdn): Res[Steps] {.inline.} =
   of Pon2:
     var
       idx = 0
-      steps = newSeq[Step]()
+      steps = Deque[Step].init
     while idx < query.len:
       if query[idx] in {HardWrapUri, GarbageWrapUri}:
         let garbageLastIdx = query.find(query[idx], start = idx.succ)
         if garbageLastIdx == -1:
           return err "Invalid steps (gabrages area does not close): {query}".fmt
 
-        steps.add ?query[idx .. garbageLastIdx].parseStep(fqdn).context(
+        steps.addLast ?query[idx .. garbageLastIdx].parseStep(fqdn).context(
           "Invalid steps: {query}".fmt
         )
         idx.assign garbageLastIdx.succ
@@ -338,14 +340,14 @@ func parseSteps*(query: string, fqdn: IdeFqdn): Res[Steps] {.inline.} =
         if idx.succ(4) <= query.len:
           let stepRes = query[idx ..< idx.succ 4].parseStep fqdn
           if stepRes.isOk:
-            steps.add stepRes.expect
+            steps.addLast stepRes.expect
             idx.inc 4
             continue
 
         if idx.succ(2) > query.len:
           return err "Invalid steps: {query}".fmt
 
-        steps.add ?query[idx ..< idx.succ 2].parseStep(fqdn).context(
+        steps.addLast ?query[idx ..< idx.succ 2].parseStep(fqdn).context(
           "Invalid steps: {query}".fmt
         )
         idx.inc 2
@@ -359,4 +361,4 @@ func parseSteps*(query: string, fqdn: IdeFqdn): Res[Steps] {.inline.} =
       for i in countup(0, query.len.pred, 2):
         ?query[i .. i.succ].parseStep(fqdn).context "Invalid steps: {query}".fmt
 
-    ok steps
+    ok steps.toDeque2

@@ -6,22 +6,23 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import stew/[bitops2]
-import ../../[assign3, bitops3, simd, staticfor2]
+import std/[sugar]
+import ../../[assign3, bitops3, macros2, simd, staticfor2]
 import ../../../core/[common, rule]
 
 export simd
 
-type
-  XmmBinField* = M128i
-    ## Binary field with XMM register.
-    # use higher 16*6 bits
+type XmmBinField* = M128i
+  ## Binary field with XMM register.
+  # use higher 16*6 bits
 
-  XmmDropMask* = array[Col, PextMask[uint16]] ## Mask used in dropping.
+defineExpand "6", "0", "1", "2", "3", "4", "5"
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
+
+const ValidMaskElem = 0x3ffe'u16
 
 func init(
     T: type XmmBinField, val0, val1, val2, val3, val4, val5: uint16
@@ -36,8 +37,8 @@ func init*(T: type XmmBinField): XmmBinField {.inline.} =
   mm_setzero_si128()
 
 func initOne*(T: type XmmBinField): XmmBinField {.inline.} =
-  ## Returns the binary field with all elements one.
-  mm_cmpeq_epi16(T.init, T.init)
+  ## Returns the binary field with all valid elements one.
+  T.init ValidMaskElem
 
 func initFloor*(T: type XmmBinField): XmmBinField {.inline.} =
   ## Returns the binary field with floor bits one.
@@ -45,11 +46,13 @@ func initFloor*(T: type XmmBinField): XmmBinField {.inline.} =
 
 func initLowerAir*(T: type XmmBinField): XmmBinField {.inline.} =
   ## Returns the binary field with lower air bits one.
-  T.init static(1'u16 shl WaterHeight.succ)
+  const LowerAirMaskElem = 1'u16 shl WaterHeight.succ
+  T.init LowerAirMaskElem
 
 func initUpperWater*(T: type XmmBinField): XmmBinField {.inline.} =
   ## Returns the binary field with upper underwater bits one.
-  T.init static(1'u16 shl WaterHeight)
+  const UpperWaterMaskElem = 1'u16 shl WaterHeight
+  T.init UpperWaterMaskElem
 
 # ------------------------------------------------
 # Operator
@@ -103,15 +106,17 @@ func prod*(f1, f2, f3: XmmBinField): XmmBinField {.inline.} =
 
 func initValidMask(): XmmBinField {.inline.} =
   ## Returns the valid mask.
-  XmmBinField.init 0x3ffe'u16
+  XmmBinField.init ValidMaskElem
 
 func initAirMaskElem(): uint16 {.inline.} =
-  ## Returns the air mask's element.
+  ## Returns `AirMaskElem`.
   var mask = 0'u16
   for i in 0 ..< AirHeight:
-    mask.setBitBE i.succ 2
+    mask.setBitBE 2.succ i
 
   mask
+
+const AirMaskElem = initAirMaskElem()
 
 func colMask(col: Col): XmmBinField {.inline.} =
   ## Returns the mask corresponding to the column.
@@ -139,7 +144,7 @@ func kept*(self: XmmBinField, col: Col): XmmBinField {.inline.} =
 
 func keptValid*(self: XmmBinField): XmmBinField {.inline.} =
   ## Returns the binary field with only the valid area.
-  self * initValidMask()
+  self * XmmBinField.initOne
 
 func keptVisible*(self: XmmBinField): XmmBinField {.inline.} =
   ## Returns the binary field with only the visible area.
@@ -147,7 +152,6 @@ func keptVisible*(self: XmmBinField): XmmBinField {.inline.} =
 
 func keptAir*(self: XmmBinField): XmmBinField {.inline.} =
   ## Returns the binary field with only the air area.
-  const AirMaskElem = initAirMaskElem()
   self * XmmBinField.init AirMaskElem
 
 func keepValid*(self: var XmmBinField) {.inline.} =
@@ -427,57 +431,157 @@ func delete*(self: var XmmBinField, row: Row, col: Col, rule: static Rule) {.inl
   self.assign arr.addr.mm_load_si128
 
 # ------------------------------------------------
-# Drop
+# Drop Garbages
 # ------------------------------------------------
 
-func toDropMask*(existField: XmmBinField): XmmDropMask {.inline.} =
-  ## Returns a drop mask converted from the exist field.
+func dropGarbagesTsu*(
+    self: var XmmBinField, cnts: array[Col, int], existField: XmmBinField
+) {.inline.} =
+  ## Drops cells by Tsu rule.
+  ## This function requires that the mask is settled and the counts are non-negative.
+  let notExist = XmmBinField.initOne - existField
+  var arr {.noinit, align(16).}: array[8, uint16]
+  arr.addr.mm_store_si128 notExist
+
+  expand6 Col:
+    block:
+      const ArrIdx = 7 - _
+      let notExistElem = arr[ArrIdx]
+      arr[ArrIdx].assign notExistElem *~ (notExistElem shl cnts[Col])
+
+  self += arr.addr.mm_load_si128
+
+func dropGarbagesWater*(
+    self, other1, other2: var XmmBinField,
+    cnts: array[Col, int],
+    existField: XmmBinField,
+) {.inline.} =
+  ## Drops cells by Water rule.
+  ## `self` is shifted and is dropped garbages; `other1` and `other2` are only shifted.
+  ## This function requires that the mask is settled and the counts are non-negative.
+  const WaterMaskElem = ValidMaskElem *~ AirMaskElem
+
+  var
+    arrSelf {.noinit, align(16).}: array[8, uint16]
+    arrOther1 {.noinit, align(16).}: array[8, uint16]
+    arrOther2 {.noinit, align(16).}: array[8, uint16]
+    arrExist {.noinit, align(16).}: array[8, uint16]
+  arrSelf.addr.mm_store_si128 self
+  arrOther1.addr.mm_store_si128 other1
+  arrOther2.addr.mm_store_si128 other2
+  arrExist.addr.mm_store_si128 existField
+
+  expand6 Col:
+    block:
+      const ArrIdx = 7 - _
+
+      let
+        cnt = cnts[Col]
+        exist = arrExist[ArrIdx]
+
+      if exist == 0:
+        if cnt <= WaterHeight:
+          arrSelf[ArrIdx].assign WaterMaskElem *~ (WaterMaskElem shr cnt)
+        else:
+          arrSelf[ArrIdx].assign WaterMaskElem or
+            (AirMaskElem *~ (AirMaskElem shl (cnt - WaterHeight)))
+      else:
+        let
+          shift = min(cnt, exist.tzcnt - 1)
+          shiftExist = exist shr shift
+          emptySpace = ValidMaskElem *~ (shiftExist or shiftExist.blsmsk)
+          garbages = emptySpace *~ (emptySpace shl cnt)
+
+        arrSelf[ArrIdx].assign (arrSelf[ArrIdx] shr shift) or garbages
+        arrOther1[ArrIdx].assign arrOther1[ArrIdx] shr shift
+        arrOther2[ArrIdx].assign arrOther2[ArrIdx] shr shift
+
+  self.assign arrSelf.addr.mm_load_si128
+  other1.assign arrOther1.addr.mm_load_si128
+  other2.assign arrOther2.addr.mm_load_si128
+
+# ------------------------------------------------
+# Settle
+# ------------------------------------------------
+
+func write(self: out array[Col, PextMask[uint16]], existField: XmmBinField) {.inline.} =
+  ## Initializes the masks.
   var arr {.noinit, align(16).}: array[8, uint16]
   arr.addr.mm_store_si128 existField
 
-  {.push warning[Uninit]: off.}
-  var dropMask: XmmDropMask
   staticFor(col, Col):
-    dropMask[col].assign PextMask[uint16].init arr[7 - col.ord]
+    {.push warning[ProveInit]: off.}
+    self[col].assign PextMask[uint16].init arr[7 - col.ord]
+    {.pop.}
 
-  return dropMask
-  {.pop.}
-
-func dropTsu(self: var XmmBinField, mask: XmmDropMask) {.inline.} =
-  ## Falling floating cells.
+func settleTsu(self: var XmmBinField, masks: array[Col, PextMask[uint16]]) {.inline.} =
+  ## Settles the binary field by Tsu rule.
   var arr {.noinit, align(16).}: array[8, uint16]
   arr.addr.mm_store_si128 self
 
-  {.push warning[Uninit]: off.}
-  self.assign XmmBinField.init(
-    arr[7].pext(mask[Col0]),
-    arr[6].pext(mask[Col1]),
-    arr[5].pext(mask[Col2]),
-    arr[4].pext(mask[Col3]),
-    arr[3].pext(mask[Col4]),
-    arr[2].pext(mask[Col5]),
-  ).shiftedUpRaw
-  {.pop.}
+  expand6 Col:
+    block:
+      const ArrIdx = 7 - Col.ord
+      arr[ArrIdx].assign arr[ArrIdx].pext masks[Col]
 
-func dropWater(self: var XmmBinField, mask: XmmDropMask) {.inline.} =
-  ## Falling floating cells.
+  self.assign arr.addr.mm_load_si128.shiftedUpRaw
+
+func settleTsu*(
+    field1, field2, field3: var XmmBinField, existField: XmmBinField
+) {.inline.} =
+  ## Settles the binary fields by Tsu rule.
+  var masks: array[Col, PextMask[uint16]]
+  masks.write existField
+
+  field1.settleTsu masks
+  field2.settleTsu masks
+  field3.settleTsu masks
+
+func settleWater(
+    self: var XmmBinField, masks: array[Col, PextMask[uint16]]
+) {.inline.} =
+  ## Settles the binary field by Water rule.
   var arr {.noinit, align(16).}: array[8, uint16]
   arr.addr.mm_store_si128 self
 
-  {.push warning[Uninit]: off.}
-  self.assign XmmBinField.init(
-    arr[7].pext(mask[Col0]) shl max(1, 1 + WaterHeight - mask[Col0].popcnt),
-    arr[6].pext(mask[Col1]) shl max(1, 1 + WaterHeight - mask[Col1].popcnt),
-    arr[5].pext(mask[Col2]) shl max(1, 1 + WaterHeight - mask[Col2].popcnt),
-    arr[4].pext(mask[Col3]) shl max(1, 1 + WaterHeight - mask[Col3].popcnt),
-    arr[3].pext(mask[Col4]) shl max(1, 1 + WaterHeight - mask[Col4].popcnt),
-    arr[2].pext(mask[Col5]) shl max(1, 1 + WaterHeight - mask[Col5].popcnt),
-  )
-  {.pop.}
+  expand6 Col:
+    block:
+      const ArrIdx = 7 - Col.ord
+      let mask = masks[Col]
+      arr[ArrIdx].assign arr[ArrIdx].pext(mask) shl max(
+        1, 1 + WaterHeight - mask.popcnt
+      )
 
-func drop*(self: var XmmBinField, mask: XmmDropMask, rule: static Rule) {.inline.} =
-  ## Falling floating cells.
-  when rule == Tsu:
-    self.dropTsu mask
-  else:
-    self.dropWater mask
+  self.assign arr.addr.mm_load_si128
+
+func settleWater*(
+    field1, field2, field3: var XmmBinField, existField: XmmBinField
+) {.inline.} =
+  ## Settles the binary fields by Water rule.
+  var masks: array[Col, PextMask[uint16]]
+  masks.write existField
+
+  field1.settleWater masks
+  field2.settleWater masks
+  field3.settleWater masks
+
+func areSettledTsu*(field1, field2, field3, existField: XmmBinField): bool {.inline.} =
+  ## Returns `true` if all binary fields are settled by Tsu rule.
+  ## Note that this function is only slightly lighter than `settleTsu`.
+  var masks: array[Col, PextMask[uint16]]
+  masks.write existField
+
+  field1.dup(settleTsu(_, masks)) == field1 and field2.dup(settleTsu(_, masks)) == field2 and
+    field3.dup(settleTsu(_, masks)) == field3
+
+func areSettledWater*(
+    field1, field2, field3, existField: XmmBinField
+): bool {.inline.} =
+  ## Returns `true` if all binary fields are settled by Water rule.
+  ## Note that this function is only slightly lighter than `settleWater`.
+  var masks: array[Col, PextMask[uint16]]
+  masks.write existField
+
+  field1.dup(settleWater(_, masks)) == field1 and
+    field2.dup(settleWater(_, masks)) == field2 and
+    field3.dup(settleWater(_, masks)) == field3
