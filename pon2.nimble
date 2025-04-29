@@ -11,17 +11,17 @@ bin = @["pon2"]
 
 # Dependencies
 
-requires "nim ^= 2.2.2"
+requires "nim ^= 2.2.4"
 
 requires "docopt ^= 0.7.1"
-requires "karax ^= 1.3.3"
+requires "karax ^= 1.5.0"
 requires "nigui ^= 0.2.8"
 requires "nimsimd ^= 1.3.2"
 requires "puppy ^= 2.1.2"
 requires "results ^= 0.5.1"
 requires "stew ^= 0.3.0"
 requires "suru ^= 0.3.2"
-requires "unittest2 ^= 0.2.3"
+requires "unittest2 ^= 0.2.4"
 
 # Tasks
 
