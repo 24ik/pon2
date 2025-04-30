@@ -14,7 +14,7 @@ block: # init
   let
     puyoPuyoT = PuyoPuyo[TsuField].init
     puyoPuyoW = PuyoPuyo[WaterField].init
-    goal = Goal.init(Cnt, Color, 10)
+    goal = Goal.init(Cnt, Colors, 10)
 
   check NazoPuyo[TsuField].init(puyoPuyoT, goal) ==
     NazoPuyo[TsuField](puyoPuyo: puyoPuyoT, goal: goal)

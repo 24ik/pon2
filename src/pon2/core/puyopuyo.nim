@@ -62,6 +62,16 @@ func move*[F: TsuField or WaterField](
 
   self.field.move(self.steps.popFirst, calcConn)
 
+func move*[F: TsuField or WaterField](
+    self: var PuyoPuyo[F], calcConn: bool
+): MoveResult {.inline.} =
+  ## Applies the step and advances the field until chains end.
+  ## This function requires that the field is settled.
+  if calcConn:
+    self.move(true)
+  else:
+    self.move(false)
+
 # ------------------------------------------------
 # Puyo Puyo <-> string
 # ------------------------------------------------

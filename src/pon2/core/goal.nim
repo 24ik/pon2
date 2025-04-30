@@ -8,7 +8,7 @@
 
 import std/[setutils, strformat, sugar]
 import ./[fqdn]
-import ../private/[assign3, results2, strutils2, tables2]
+import ../private/[assign3, results2, staticfor2, strutils2, tables2]
 
 type
   GoalKind* {.pure.} = enum
@@ -39,8 +39,8 @@ type
     Blue = "青"
     Yellow = "黄"
     Purple = "紫"
-    Garbage = "おじゃま"
-    Color = "色"
+    Garbages = "おじゃま"
+    Colors = "色"
 
   GoalVal* = int ## 'n' in the `GoalKind`.
 
@@ -96,7 +96,7 @@ func isSupported*(self: Goal): bool {.inline.} =
     return false
 
   not (
-    self.kind in {Place, PlaceMore, Conn, ConnMore} and self.optColor.expect == Garbage
+    self.kind in {Place, PlaceMore, Conn, ConnMore} and self.optColor.expect == Garbages
   )
 
 # ------------------------------------------------
@@ -132,9 +132,20 @@ func normalized*(self: Goal): Goal {.inline.} =
 # Goal <-> string
 # ------------------------------------------------
 
-const StrToKind = collect:
-  for kind in GoalKind:
-    {$kind: kind}
+func initStrToKinds(): array[GoalColor, Table[string, GoalKind]] {.inline.} =
+  ## Returns `StrToKinds`.
+  var strToKinds: array[GoalColor, Table[string, GoalKind]]
+  staticFor(color, GoalColor):
+    let strToKind = collect:
+      for kind in GoalKind:
+        {($kind).replace("c", $color): kind}
+    {.push warning[Uninit]: off.}
+    strToKinds[color].assign strToKind
+    {.pop.}
+
+  strToKinds
+
+const StrToKinds = initStrToKinds()
 
 func `$`*(self: Goal): string {.inline.} =
   var replacements = newSeqOfCap[(string, string)](2)
@@ -148,40 +159,42 @@ func `$`*(self: Goal): string {.inline.} =
 func parseGoal*(str: string): Res[Goal] {.inline.} =
   ## Returns the goal converted from the string representation.
   var
-    goal = Goal.init(GoalKind.low, Opt[GoalColor].err, Opt[GoalVal].err)
+    goal = Goal.init(GoalKind.low, OptGoalColor.err, OptGoalVal.err)
     str2 = str
 
-  for color in GoalColor:
-    if color == All:
+  # value
+  for charIdx, c in str2:
+    if not (
+      c.isDigit or (c == '-' and charIdx.succ < str2.len and str2[charIdx.succ].isDigit)
+    ):
       continue
 
-    if $color in str2:
-      str2.assign str2.replace($color, "c")
-      goal.optColor.ok color
+    var i = charIdx.succ
+    while i < str2.len and str2[i].isDigit:
+      i.inc
+
+    let valStr = str2[charIdx ..< i]
+    goal.optVal.ok ?valStr.parseIntRes.context "Invalid goal (val): {str}".fmt
+    str2.assign str2.replace(valStr, "n")
+    break
+
+  # kind, color
+  # NOTE: no-color kind is captured by All-color kinds
+  var kindFound = false
+  for c, strToKind in StrToKinds:
+    if str2 in strToKind:
+      kindFound = true
+      goal.optColor.ok c
+      goal.kind.assign strToKind.getRes(str2).expect
+
       break
+  if not kindFound:
+    return err "Invalid goal: {str}".fmt
 
-  var
-    inDigit = false
-    digits = newSeq[char]()
-  for c in str2:
-    if c.isDigit:
-      inDigit.assign true
-      digits.add c
-    elif inDigit:
-      var valStr = newStringOfCap digits.len
-      for d in digits:
-        valStr.add d
-
-      goal.optVal.ok GoalVal ?valStr.parseIntRes.context "Invalid goal (val): {str}".fmt
-      str2.assign str2.replace(valStr, "n")
-      break
-
-  goal.kind.assign ?StrToKind.getRes(str2).context "Invalid goal: {str}".fmt
-
-  # we cannot distinguish empty string between Kind.All and no-color kind,
+  # we cannot distinguish '' between the All-color and the empty,
   # so postprocesses here just like a normalization
-  if goal.optColor.isErr and goal.kind in ColorKinds:
-    goal.optColor.ok All
+  if goal.kind in NoColorKinds and goal.optColor.isOk:
+    goal.optColor.err
 
   ok goal
 
@@ -245,7 +258,7 @@ func toUriQuery*(self: Goal, fqdn = Pon2): Res[string] {.inline.} =
 
 func parseGoal*(query: string, fqdn: IdeFqdn): Res[Goal] {.inline.} =
   ## Returns the goal converted from the URI query.
-  var goal = Goal.init(GoalKind.low, Opt[GoalColor].err, Opt[GoalVal].err)
+  var goal = Goal.init(GoalKind.low, OptGoalColor.err, OptGoalVal.err)
 
   case fqdn
   of Pon2:

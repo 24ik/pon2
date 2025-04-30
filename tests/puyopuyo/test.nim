@@ -130,7 +130,8 @@ o..ro.""".parseTsuField.expect
   var puyoPuyo = PuyoPuyo[TsuField].init(fieldBefore, stepsBefore)
 
   let
-    moveRes = puyoPuyo.move false
+    calcConn = false
+    moveRes = puyoPuyo.move calcConn
     popCnts: array[Cell, int] = [0, 0, 1, 0, 4, 4, 0, 0]
 
   check puyoPuyo.field == fieldAfter

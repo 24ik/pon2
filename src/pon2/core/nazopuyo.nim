@@ -41,12 +41,13 @@ func parseNazoPuyo*[F: TsuField or WaterField](
     str: string
 ): Res[NazoPuyo[F]] {.inline.} =
   ## Returns the Nazo Puyo converted from the string representation.
-  let strs = str.split GoalPuyoPuyoSep
+  let
+    errMsg = "Invalid Nazo Puyo: {str}".fmt
+    strs = str.split GoalPuyoPuyoSep
   if strs.len != 2:
     return err "Invalid Nazo Puyo: {str}".fmt
 
   let
-    errMsg = "Invalid Nazo Puyo: {str}".fmt
     goal = ?strs[0].parseGoal.context errMsg
     puyoPuyo = ?parsePuyoPuyo[F](strs[1]).context errMsg
 
@@ -115,12 +116,15 @@ func parseNazoPuyoIshikawa[F: TsuField or WaterField](
     query: string
 ): Res[NazoPuyo[F]] {.inline.} =
   ## Returns the Nazo Puyo converted from the URI query.
-  let strs = query.split PuyoPuyoGoalIshikawaSep
+  let
+    errMsg = "Invalid Nazo Puyo: {query}".fmt
+    strs = query.split PuyoPuyoGoalIshikawaSep
   if strs.len != 2:
-    return err "Invalid Nazo Puyo: {query}".fmt
+    return err errMsg
 
   ok NazoPuyo[F].init(
-    ?parsePuyoPuyo[F](strs[0], Ishikawa), ?strs[1].parseGoal(Ishikawa)
+    ?parsePuyoPuyo[F](strs[0], Ishikawa).context errMsg,
+    ?strs[1].parseGoal(Ishikawa).context errMsg,
   )
 
 func parseNazoPuyo*[F: TsuField or WaterField](

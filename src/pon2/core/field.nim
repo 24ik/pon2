@@ -574,6 +574,16 @@ func move*[F: TsuField or WaterField](
   # NOTE: dummy to suppress warning (not reached here)
   MoveResult.init(0, initArrWith[Cell, int](0), 0, @[], @[])
 
+func move*[F: TsuField or WaterField](
+    self: var F, step: Step, calcConn: bool
+): MoveResult {.inline.} =
+  ## Applies the step and advances the field until chains end.
+  ## This function requires that the field is settled.
+  if calcConn:
+    self.move(step, true)
+  else:
+    self.move(step, false)
+
 # ------------------------------------------------
 # Field <-> array
 # ------------------------------------------------
@@ -712,7 +722,7 @@ func toUriQueryPon2[F: TsuField or WaterField](self: F): Res[string] {.inline.} 
   const
     AirLowerRow = when F is TsuField: Row.high else: AirHeight.pred.Row
     NoneChars = {($None)[0]}
-    RuleFieldSep = Pon2UriRuleFieldSep # NOTE: somehow needed
+    RuleFieldSep = Pon2UriRuleFieldSep # NOTE: strformat needs this
 
   let
     arr = self.toArr
@@ -726,7 +736,7 @@ func toUriQueryPon2[F: TsuField or WaterField](self: F): Res[string] {.inline.} 
   when F is TsuField:
     ok "{Tsu}{RuleFieldSep}{airStr}".fmt
   else:
-    const AirWaterSep = Pon2UriAirWaterSep # NOTE: somehow needed
+    const AirWaterSep = Pon2UriAirWaterSep # NOTE: strformat needs this
 
     let
       waterStrs = collect:

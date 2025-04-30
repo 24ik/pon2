@@ -1896,32 +1896,20 @@ block: # move
 
       garbagesCnt = [Col0: 0, 1, 2, 0, 2, 1]
 
-    # somehow direct initialization does not work
-    var detailPopCnts = newSeq[array[Cell, int]]()
-    block:
-      let
-        arr1: array[Cell, int] = [0, 0, 1, 0, 0, 5, 0, 0]
-        arr2: array[Cell, int] = [0, 0, 0, 0, 10, 0, 0, 0]
-        arr3: array[Cell, int] = [0, 0, 1, 4, 0, 0, 0, 4]
+      detailArr1: array[Cell, int] = [0, 0, 1, 0, 0, 5, 0, 0]
+      detailArr2: array[Cell, int] = [0, 0, 0, 0, 10, 0, 0, 0]
+      detailArr3: array[Cell, int] = [0, 0, 1, 4, 0, 0, 0, 4]
+      detailPopCnts = @[detailArr1, detailArr2, detailArr3]
 
-      detailPopCnts.add arr1
-      detailPopCnts.add arr2
-      detailPopCnts.add arr3
-
-    var fullPopCnts = newSeq[array[Cell, seq[int]]]()
-    block:
-      let
-        arr1: array[Cell, seq[int]] = [@[], @[], @[], @[], @[], @[5], @[], @[]]
-        arr2: array[Cell, seq[int]] = [@[], @[], @[], @[], @[4, 6], @[], @[], @[]]
-        arr3: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[], @[], @[], @[4]]
-
-      fullPopCnts.add arr1
-      fullPopCnts.add arr2
-      fullPopCnts.add arr3
+      fullArr1: array[Cell, seq[int]] = [@[], @[], @[], @[], @[], @[5], @[], @[]]
+      fullArr2: array[Cell, seq[int]] = [@[], @[], @[], @[], @[4, 6], @[], @[], @[]]
+      fullArr3: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[], @[], @[], @[4]]
+      fullPopCnts = @[fullArr1, fullArr2, fullArr3]
 
     block: # calc conn
       var field2 = fieldBefore
-      check field2.move(Step.init(pair, plcmt), true) ==
+      let calcConn = true
+      check field2.move(Step.init(pair, plcmt), calcConn) ==
         MoveResult.init(
           chainCnt, popCnts, hardToGarbageCnt, detailPopCnts, detailHardToGarbageCnt,
           fullPopCnts,
@@ -1930,7 +1918,8 @@ block: # move
 
     block: # not calc conn
       var field2 = fieldBefore
-      check field2.move(Step.init(pair, plcmt), false) ==
+      let calcConn = false
+      check field2.move(Step.init(pair, plcmt), calcConn) ==
         MoveResult.init(
           chainCnt, popCnts, hardToGarbageCnt, detailPopCnts, detailHardToGarbageCnt
         )
