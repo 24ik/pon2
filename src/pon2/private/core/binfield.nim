@@ -94,21 +94,21 @@ func validDblPlacements*(self: BinField): set[Placement] {.inline.} =
   DblPlacements - self.invalidPlacements
 
 # ------------------------------------------------
-# Expand
+# Dilate
 # ------------------------------------------------
 
-func expanded*(self: BinField): BinField {.inline.} =
+func dilated(self: BinField): BinField {.inline.} =
   ## Dilates the binary field.
   sum(
     self, self.shiftedUpRaw, self.shiftedDownRaw, self.shiftedRightRaw,
     self.shiftedLeftRaw,
   )
 
-func expandedVertical(self: BinField): BinField {.inline.} =
+func dilatedVertical(self: BinField): BinField {.inline.} =
   ## Dilates the binary field vertically.
   sum(self, self.shiftedUpRaw, self.shiftedDownRaw)
 
-func expandedHorizontal(self: BinField): BinField {.inline.} =
+func dilatedHorizontal(self: BinField): BinField {.inline.} =
   ## Dilates the binary field horizontally.
   sum(self, self.shiftedRightRaw, self.shiftedLeftRaw)
 
@@ -148,7 +148,7 @@ func extractedPop*(self: BinField): BinField {.inline.} =
       hasHas2R = connHas2 * connHas2.shiftedLeftRaw
       hasHas2L = connHas2 * connHas2.shiftedRightRaw
 
-    connVisible * sum(connHas3, hasHas2U, hasHas2D, hasHas2R, hasHas2L).expanded
+    connVisible * sum(connHas3, hasHas2U, hasHas2D, hasHas2R, hasHas2L).dilated
 
 func canPop*(self: BinField): bool {.inline.} =
   ## Returns `true` if any cell can pop.
@@ -235,14 +235,14 @@ func conn3Impl(self: BinField, onlyL: static bool): BinField {.inline.} =
     hasHas2R = has2 * has2.shiftedLeftRaw
     hasHas2L = has2 * has2.shiftedRightRaw
 
-    canPop = sum(has3, hasHas2U, hasHas2D, hasHas2R, hasHas2L).expanded
+    canPop = sum(has3, hasHas2U, hasHas2D, hasHas2R, hasHas2L).dilated
     exclude =
       when onlyL:
-        sum(hasUD.expandedVertical, hasRL.expandedHorizontal, canPop)
+        sum(hasUD.dilatedVertical, hasRL.dilatedHorizontal, canPop)
       else:
         canPop
 
-  has2.expanded * self - exclude
+  has2.dilated * self - exclude
 
 func conn3*(self: BinField): BinField {.inline.} =
   ## Returns the binary field where exactly three cells are connected.
@@ -270,7 +270,7 @@ func conn3Vertical*(self: BinField): BinField {.inline.} =
       hasU * hasD -
       sum(existR, existL, existUU, existUR, existUL, existDD, existDR, existDL)
 
-  hasExactUD.expandedVertical
+  hasExactUD.dilatedVertical
 
 func conn3Horizontal*(self: BinField): BinField {.inline.} =
   ## Returns the binary field where exactly three cells are connected horizontally.
@@ -294,7 +294,7 @@ func conn3Horizontal*(self: BinField): BinField {.inline.} =
       hasR * hasL -
       sum(existU, existD, existRR, existRU, existRD, existLL, existLU, existLD)
 
-  hasExactRL.expandedHorizontal
+  hasExactRL.dilatedHorizontal
 
 func conn3LShape*(self: BinField): BinField {.inline.} =
   ## Returns the binary field where exactly three cells are connected by L-shape.

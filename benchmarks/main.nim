@@ -3,7 +3,8 @@
 {.experimental: "views".}
 
 import std/[algorithm, math, monotimes, sequtils, stats, strformat, sugar, times]
-import ../src/pon2/core/[field, pair, placement]
+import ../src/pon2/core/[common, field, pair, placement, step]
+import ../src/pon2/private/[results2]
 
 func select(list: seq[Duration], n: int): Duration =
   ## Returns the n-th smallest value in the sequence.
@@ -67,7 +68,7 @@ func execResStr(desc: string, mean, sd, med: Duration): string =
   "[{desc}] {mean.toStr} +/- {sd.toStr} (Med: {med.toStr})".fmt
 
 template measureExecTime(desc: string, setup: untyped, body: untyped): untyped =
-  ## Runs the `setup` and `body` repeatedly and shows the execution time.
+  ## Runs the `setup` and `body` repeatedly and shows the execution time of `body`.
   var
     durSum = DurationZero
     durs = newSeq[Duration]()
@@ -93,13 +94,126 @@ template measureExecTime(desc: string, setup: untyped, body: untyped): untyped =
     durs.median,
   )
 
+template measureExecTime(desc: string, body: untyped): untyped =
+  ## Runs the `body` repeatedly and shows the execution time of `body`.
+  desc.measureExecTime:
+    discard
+  do:
+    body
+
 when isMainModule:
-  "put (Tsu)".measureExecTime:
+  block:
+    let field =
+      """
+.o....
+.o..o.
+.o.oo.
+.o.oo.
+.o.oo.
+.o.oo.
+.o.oo.
+.o.oo.
+.o.oo.
+.o.oo.
+.o.oo.
+.o.oo.
+.o.oo.""".parseTsuField.expect
+
+    "invalidPlacements".measureExecTime:
+      discard field.invalidPlacements
+
+  "place (Tsu)".measureExecTime:
     var field = TsuField.init
   do:
-    field.put RedGreen, Right2
+    field.place RedGreen, Right2
 
-  "put (Water)".measureExecTime:
+  "place (Water)".measureExecTime:
     var field = WaterField.init
   do:
-    field.put RedGreen, Right2
+    field.place RedGreen, Right2
+
+  "pop".measureExecTime:
+    var field = TsuField.init
+  do:
+    discard field.pop
+
+  "dropGarbages (Tsu)".measureExecTime:
+    var field = TsuField.init
+  do:
+    field.dropGarbages [Col0: 0, 1, 2, 3, 4, 5], false
+
+  "dropGarbages (Water)".measureExecTime:
+    var field = WaterField.init
+  do:
+    field.dropGarbages [Col0: 0, 1, 2, 3, 4, 5], false
+
+  "settle (Tsu)".measureExecTime:
+    var field = TsuField.init
+  do:
+    field.settle
+
+  "settle (Water)".measureExecTime:
+    var field = WaterField.init
+  do:
+    field.settle
+
+  block:
+    let
+      field19 = parseTsuField(
+        """
+by.yrr
+gb.gry
+rbgyyr
+gbgyry
+ryrgby
+yrgbry
+ryrgbr
+ryrgbr
+rggbyb
+gybgbb
+rgybgy
+rgybgy
+rgybgy"""
+      ).expect
+      step = Step.init(BlueGreen, Up2)
+
+    "move (Tsu, not calcConn)".measureExecTime:
+      var field = field19
+    do:
+      discard field.move(step, false)
+
+    "move (Tsu, calcConn)".measureExecTime:
+      var field = field19
+    do:
+      discard field.move(step, true)
+
+  block:
+    let
+      field18 = parseWaterField(
+        """
+.....g
+.rbrbr
+gbrbrb
+gbrbrb
+gbrbrb
+~~~~~~
+rpypyr
+rpypyr
+rpypyr
+bypygg
+bgrbrg
+bgrbrp
+rgrbrp
+pbgrbr"""
+      ).expect
+      step = Step.init(GreenBlue, Up0)
+
+    "move (Water, not calcConn)".measureExecTime:
+      var field = field18
+    do:
+      discard field.move(step, false)
+
+    "move (Water, calcConn)".measureExecTime:
+      var field = field18
+    do:
+      discard field.move(step, true)

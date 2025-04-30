@@ -23,7 +23,7 @@ type Backend {.pure.} = enum
 
 proc nimCacheDir(): Path =
   ## Returns a cache directory used by running.
-  appdirs.getCacheDir() / "nim".Path / "pon2-test".Path / ($rand(uint64)).Path
+  appdirs.getCacheDir() / "nim".Path / "pon2".Path / "test".Path / ($rand(uint64)).Path
 
 proc outDir(file: Path, backend: Backend, simdLvl, bmiLvl: int, clmulUse: bool): Path =
   ## Returns the output directory used by running.

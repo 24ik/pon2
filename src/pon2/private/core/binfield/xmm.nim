@@ -264,26 +264,17 @@ func shiftLeft*(self: var XmmBinField) {.inline.} =
 # Flip
 # ------------------------------------------------
 
-func flippedVertical*(self: XmmBinField): XmmBinField {.inline.} =
-  ## Returns the binary field flipped vertically.
-
-  self.reverseBits.mm_shuffle_epi8(
+func flipVertical*(self: var XmmBinField) {.inline.} =
+  ## Flips the binary field vertically.
+  self.assign self.reverseBits.mm_shuffle_epi8(
     mm_set_epi8(1, 0, 3, 2, 5, 4, 7, 6, 9, 8, 11, 10, -1, -1, -1, -1)
   ).shiftedDownRaw
 
-func flippedHorizontal*(self: XmmBinField): XmmBinField {.inline.} =
-  ## Returns the binary field flipped horizontally.
-  self.mm_shuffle_epi8(
-    mm_set_epi8(5, 4, 7, 6, 9, 8, 11, 10, 13, 12, 15, 14, -1, -1, -1, -1)
-  )
-
-func flipVertical*(self: var XmmBinField) {.inline.} =
-  ## Flips the binary field vertically.
-  self.assign self.flippedVertical
-
 func flipHorizontal*(self: var XmmBinField) {.inline.} =
   ## Flips the binary field horizontally.
-  self.assign self.flippedHorizontal
+  self.assign self.mm_shuffle_epi8(
+    mm_set_epi8(5, 4, 7, 6, 9, 8, 11, 10, 13, 12, 15, 14, -1, -1, -1, -1)
+  )
 
 # ------------------------------------------------
 # Indexer

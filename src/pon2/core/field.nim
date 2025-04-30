@@ -15,6 +15,10 @@ import
   ]
 import ../private/core/[binfield]
 
+# NOTE: We want to use array instead of object, but then `TsuField` and `WaterField`
+# will have the same type, causing ambiguous procedure calls.
+# Distinct array cannot be used since it has known issues related to `borrow`;
+# especially it cannot have `[]` procedure that returns `var`-element.
 type
   TsuField* = object ## Puyo Puyo field for Tsu rule.
     bit0: BinField
@@ -331,59 +335,6 @@ func flipHorizontal*[F: TsuField or WaterField](self: var F) {.inline.} =
     self.bit.flipHorizontal
 
 # ------------------------------------------------
-# Pop
-# ------------------------------------------------
-
-func pop*[F: TsuField or WaterField](self: var F): PopResult {.inline.} =
-  ## Removes puyos that should pop.
-  let
-    poppedR = self.red.extractedPop
-    poppedG = self.green.extractedPop
-    poppedB = self.blue.extractedPop
-    poppedY = self.yellow.extractedPop
-    poppedP = self.purple.extractedPop
-    poppedColor = sum(poppedR, poppedG, poppedB, poppedY, poppedP)
-
-    colorU = poppedColor.shiftedUpRaw
-    colorD = poppedColor.shiftedDownRaw
-    colorR = poppedColor.shiftedRightRaw
-    colorL = poppedColor.shiftedLeftRaw
-
-    colorUorD = colorU + colorD
-    colorRorL = colorR + colorL
-    onlyU = colorU - (colorD + colorRorL)
-    onlyD = colorD - (colorU + colorRorL)
-    onlyR = colorR - (colorL + colorUorD)
-    onlyL = colorL - (colorR + colorUorD)
-
-    touch1 = sum(onlyU, onlyD, onlyR, onlyL)
-    touch1More = sum(colorU, colorD, colorR, colorL)
-    touch2More = touch1More - touch1
-
-    visibleHard = self.hard.keptVisible
-    hardToGarbage = visibleHard * touch1
-    poppedHard = visibleHard * touch2More
-
-    poppedGarbage = self.garbage.keptVisible * touch1More
-
-    popped = poppedColor + poppedHard + poppedGarbage
-
-  self.bit2 -= popped
-  self.bit1.assign self.bit1 - popped + hardToGarbage
-  self.bit0 -= popped + hardToGarbage
-
-  PopResult.init(
-    poppedR, poppedG, poppedB, poppedY, poppedP, poppedHard, hardToGarbage,
-    poppedGarbage, poppedColor,
-  )
-
-func canPop*[F: TsuField or WaterField](self: F): bool {.inline.} =
-  ## Returns `true` if any puyos can pop.
-  ## Note that this function is only slightly lighter than `pop`.
-  self.red.canPop or self.green.canPop or self.blue.canPop or self.yellow.canPop or
-    self.purple.canPop
-
-# ------------------------------------------------
 # Place
 # ------------------------------------------------
 
@@ -462,6 +413,59 @@ func place*[F: TsuField or WaterField](
   ## This function requires that the field is settled.
   if plcmt.isOk:
     self.place pair, plcmt.expect
+
+# ------------------------------------------------
+# Pop
+# ------------------------------------------------
+
+func pop*[F: TsuField or WaterField](self: var F): PopResult {.inline.} =
+  ## Removes puyos that should pop and returns the pop result.
+  # NOTE: `ignoreHard` option can be introduced, but (somehow) the performance
+  # was almost the same.
+  let
+    poppedR = self.red.extractedPop
+    poppedG = self.green.extractedPop
+    poppedB = self.blue.extractedPop
+    poppedY = self.yellow.extractedPop
+    poppedP = self.purple.extractedPop
+    poppedColor = sum(poppedR, poppedG, poppedB, poppedY, poppedP)
+
+    colorU = poppedColor.shiftedUpRaw
+    colorD = poppedColor.shiftedDownRaw
+    colorR = poppedColor.shiftedRightRaw
+    colorL = poppedColor.shiftedLeftRaw
+
+    touch1More = sum(colorU, colorD, colorR, colorL)
+    poppedGarbage = self.garbage.keptVisible * touch1More
+
+    colorUorD = colorU + colorD
+    colorRorL = colorR + colorL
+    onlyU = colorU - (colorD + colorRorL)
+    onlyD = colorD - (colorU + colorRorL)
+    onlyR = colorR - (colorL + colorUorD)
+    onlyL = colorL - (colorR + colorUorD)
+
+    touch1 = sum(onlyU, onlyD, onlyR, onlyL)
+    touch2More = touch1More - touch1
+
+    visibleHard = self.hard.keptVisible
+    hardToGarbage = visibleHard * touch1
+    poppedHard = visibleHard * touch2More
+
+  self.bit0.assign self.bit0 - poppedColor - (poppedHard + hardToGarbage)
+  self.bit1.assign self.bit1 + hardToGarbage - (poppedColor + poppedGarbage)
+  self.bit2 -= poppedColor
+
+  PopResult.init(
+    poppedR, poppedG, poppedB, poppedY, poppedP, poppedHard, hardToGarbage,
+    poppedGarbage, poppedColor,
+  )
+
+func canPop*[F: TsuField or WaterField](self: F): bool {.inline.} =
+  ## Returns `true` if any puyos can pop.
+  ## Note that this function is only slightly lighter than `pop`.
+  self.red.canPop or self.green.canPop or self.blue.canPop or self.yellow.canPop or
+    self.purple.canPop
 
 # ------------------------------------------------
 # Drop Garbages

@@ -513,7 +513,7 @@ x..x..""".toBinField
 # Flip
 # ------------------------------------------------
 
-block: # flippedVertical, flippedHorizontal, flipVertical, flipHorizontal
+block: # flipVertical, flipHorizontal
   let
     field =
       """
@@ -560,9 +560,6 @@ block: # flippedVertical, flippedHorizontal, flipVertical, flipHorizontal
 ......
 ......
 ......""".toBinField
-
-  check field.flippedVertical == fieldV
-  check field.flippedHorizontal == fieldH
 
   check field.dup(flipVertical) == fieldV
   check field.dup(flipHorizontal) == fieldH
@@ -1184,43 +1181,6 @@ block: # invalidPlacements, validPlacements, validDblPlacements
 ......""".toBinField
     check field.invalidPlacements ==
       {Down1, Right3, Down3, Up4, Right4, Down4, Left4, Up5, Down5, Left5}
-
-# ------------------------------------------------
-# Expand
-# ------------------------------------------------
-
-block: # expand
-  let field =
-    """
-x..x..
-......
-...xx.
-.x....
-.x..x.
-......
-xxx...
-....x.
-...xx.
-....x.
-......
-xx....
-.x....""".toBinField
-
-  check field.expanded.keptValid ==
-    """
-xxxxx.
-x..xx.
-.xxxxx
-xxxxx.
-xxxxxx
-xxx.x.
-xxxxx.
-xxxxxx
-..xxxx
-...xxx
-xx..x.
-xxx...
-xxx...""".toBinField
 
 # ------------------------------------------------
 # Pop

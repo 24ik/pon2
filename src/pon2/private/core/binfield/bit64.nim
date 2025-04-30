@@ -10,12 +10,12 @@ import std/[sugar]
 import ../../[assign3, bitops3, macros2, staticfor2]
 import ../../../core/[common, rule]
 
-type Bit64BinField* = object ## Binary field with 64bit operations.
-  col012: uint64 # use higher 16*3 bits
-  col345: uint64 # use higher 16*3 bits
+type Bit64BinField* = array[2, uint64]
+  ## Binary field with 64bit operations.
+  # NOTE: each element (higher 16*3 bits) corresponds to three columns
 
-defineExpand "", "012", "345"
 defineExpand "6", "0", "1", "2", "3", "4", "5"
+defineExpand "2", "0", "1"
 
 # ------------------------------------------------
 # Constructor
@@ -23,112 +23,93 @@ defineExpand "6", "0", "1", "2", "3", "4", "5"
 
 const ValidMask = 0x3ffe_3ffe_3ffe_0000'u64
 
-func init(T: type Bit64BinField, col012: uint64, col345: uint64): T {.inline.} =
-  T(col012: col012, col345: col345)
-
 func init*(T: type Bit64BinField): Bit64BinField {.inline.} =
   ## Returns the binary field with all elements zero.
-  T.init(0, 0)
+  [0, 0]
 
 func initOne*(T: type Bit64BinField): Bit64BinField {.inline.} =
   ## Returns the binary field with all valid elements one.
-  T.init(ValidMask, ValidMask)
+  [ValidMask, ValidMask]
 
 func initFloor*(T: type Bit64BinField): Bit64BinField {.inline.} =
   ## Returns the binary field with floor bits one.
   const Initializer = 0x0001_0001_0001_0000'u64
-  T.init(Initializer, Initializer)
+  [Initializer, Initializer]
 
 func initLowerAir*(T: type Bit64BinField): Bit64BinField {.inline.} =
   ## Returns the binary field with lower air bits one.
   const Initializer = 0x0001_0001_0001_0000'u64 shl WaterHeight.succ
-  T.init(Initializer, Initializer)
+  [Initializer, Initializer]
 
 func initUpperWater*(T: type Bit64BinField): Bit64BinField {.inline.} =
   ## Returns the binary field with upper underwater bits one.
   const Initializer = 0x0001_0001_0001_0000'u64 shl WaterHeight
-  T.init(Initializer, Initializer)
+  [Initializer, Initializer]
 
 # ------------------------------------------------
 # Operator
 # ------------------------------------------------
 
 func `+`*(f1, f2: Bit64BinField): Bit64BinField {.inline.} =
-  Bit64BinField.init(f1.col012 or f2.col012, f1.col345 or f2.col345)
+  [f1[0] or f2[0], f1[1] or f2[1]]
 
 func `-`*(f1, f2: Bit64BinField): Bit64BinField {.inline.} =
-  Bit64BinField.init(f1.col012 *~ f2.col012, f1.col345 *~ f2.col345)
+  [f1[0] *~ f2[0], f1[1] *~ f2[1]]
 
 func `*`*(f1, f2: Bit64BinField): Bit64BinField {.inline.} =
-  Bit64BinField.init(f1.col012 and f2.col012, f1.col345 and f2.col345)
+  [f1[0] and f2[0], f1[1] and f2[1]]
 
 func `*`(self: Bit64BinField, val: uint64): Bit64BinField {.inline.} =
-  Bit64BinField.init(self.col012 and val, self.col345 and val)
+  [self[0] and val, self[1] and val]
 
 func `xor`*(f1, f2: Bit64BinField): Bit64BinField {.inline.} =
-  Bit64BinField.init(f1.col012 xor f2.col012, f1.col345 xor f2.col345)
+  [f1[0] xor f2[0], f1[1] xor f2[1]]
 
 func `+=`*(f1: var Bit64BinField, f2: Bit64BinField) {.inline.} =
-  expand col:
-    f1.col.assign f1.col or f2.col
+  staticFor(i, 0 ..< 2):
+    f1[i].assign f1[i] or f2[i]
 
 func `-=`*(f1: var Bit64BinField, f2: Bit64BinField) {.inline.} =
-  expand col:
-    f1.col.assign f1.col *~ f2.col
+  staticFor(i, 0 ..< 2):
+    f1[i].assign f1[i] *~ f2[i]
 
 func `*=`*(f1: var Bit64BinField, f2: Bit64BinField) {.inline.} =
-  expand col:
-    f1.col.assign f1.col and f2.col
+  staticFor(i, 0 ..< 2):
+    f1[i].assign f1[i] and f2[i]
 
 func `*=`(self: var Bit64BinField, val: uint64) {.inline.} =
-  expand col:
-    self.col.assign self.col and val
+  staticFor(i, 0 ..< 2):
+    self[i].assign self[i] and val
 
 func sum*(f1, f2, f3: Bit64BinField): Bit64BinField {.inline.} =
-  Bit64BinField.init(
-    bitor2(f1.col012, f2.col012, f3.col012), bitor2(f1.col345, f2.col345, f3.col345)
-  )
+  [bitor2(f1[0], f2[0], f3[0]), bitor2(f1[1], f2[1], f3[1])]
 
 func sum*(f1, f2, f3, f4: Bit64BinField): Bit64BinField {.inline.} =
-  Bit64BinField.init(
-    bitor2(f1.col012, f2.col012, f3.col012, f4.col012),
-    bitor2(f1.col345, f2.col345, f3.col345, f4.col345),
-  )
+  [bitor2(f1[0], f2[0], f3[0], f4[0]), bitor2(f1[1], f2[1], f3[1], f4[1])]
 
 func sum*(f1, f2, f3, f4, f5: Bit64BinField): Bit64BinField {.inline.} =
-  Bit64BinField.init(
-    bitor2(f1.col012, f2.col012, f3.col012, f4.col012, f5.col012),
-    bitor2(f1.col345, f2.col345, f3.col345, f4.col345, f5.col345),
-  )
+  [bitor2(f1[0], f2[0], f3[0], f4[0], f5[0]), bitor2(f1[1], f2[1], f3[1], f4[1], f5[1])]
 
 func sum*(f1, f2, f3, f4, f5, f6: Bit64BinField): Bit64BinField {.inline.} =
-  Bit64BinField.init(
-    bitor2(f1.col012, f2.col012, f3.col012, f4.col012, f5.col012, f6.col012),
-    bitor2(f1.col345, f2.col345, f3.col345, f4.col345, f5.col345, f6.col345),
-  )
+  [
+    bitor2(f1[0], f2[0], f3[0], f4[0], f5[0], f6[0]),
+    bitor2(f1[1], f2[1], f3[1], f4[1], f5[1], f6[1]),
+  ]
 
 func sum*(f1, f2, f3, f4, f5, f6, f7: Bit64BinField): Bit64BinField {.inline.} =
-  Bit64BinField.init(
-    bitor2(f1.col012, f2.col012, f3.col012, f4.col012, f5.col012, f6.col012, f7.col012),
-    bitor2(f1.col345, f2.col345, f3.col345, f4.col345, f5.col345, f6.col345, f7.col345),
-  )
+  [
+    bitor2(f1[0], f2[0], f3[0], f4[0], f5[0], f6[0], f7[0]),
+    bitor2(f1[1], f2[1], f3[1], f4[1], f5[1], f6[1], f7[1]),
+  ]
 
 func sum*(f1, f2, f3, f4, f5, f6, f7, f8: Bit64BinField): Bit64BinField {.inline.} =
-  Bit64BinField.init(
-    bitor2(
-      f1.col012, f2.col012, f3.col012, f4.col012, f5.col012, f6.col012, f7.col012,
-      f8.col012,
-    ),
-    bitor2(
-      f1.col345, f2.col345, f3.col345, f4.col345, f5.col345, f6.col345, f7.col345,
-      f8.col345,
-    ),
-  )
+  [
+    bitor2(f1[0], f2[0], f3[0], f4[0], f5[0], f6[0], f7[0], f8[0]),
+    bitor2(f1[1], f2[1], f3[1], f4[1], f5[1], f6[1], f7[1], f8[1]),
+  ]
 
 func prod*(f1, f2, f3: Bit64BinField): Bit64BinField {.inline.} =
-  Bit64BinField.init(
-    bitand2(f1.col012, f2.col012, f3.col012), bitand2(f1.col345, f2.col345, f3.col345)
-  )
+  [bitand2(f1[0], f2[0], f3[0]), bitand2(f1[1], f2[1], f3[1])]
 
 # ------------------------------------------------
 # Keep
@@ -149,18 +130,18 @@ const
   ColMaskBase = 0xffff_0000_0000_0000'u64
 
 template withColMasks(col: Col, body: untyped): untyped =
-  ## Runs `body` with `mask012` and `mask345` exposed.
+  ## Runs `body` with `mask0` and `mask1` exposed.
   case col
   of Col0, Col1, Col2:
     let
-      mask012 {.inject.} = ColMaskBase shr (col.ord shl 4)
-      mask345 {.inject.} = 0'u64
+      mask0 {.inject.} = ColMaskBase shr (col.ord shl 4)
+      mask1 {.inject.} = 0'u64
 
     body
   of Col3, Col4, Col5:
     let
-      mask012 {.inject.} = 0'u64
-      mask345 {.inject.} = ColMaskBase shr (col.pred(3).ord shl 4)
+      mask0 {.inject.} = 0'u64
+      mask1 {.inject.} = ColMaskBase shr (col.pred(3).ord shl 4)
 
     body
 
@@ -171,7 +152,7 @@ func kept*(self: Bit64BinField, row: Row): Bit64BinField {.inline.} =
 func kept*(self: Bit64BinField, col: Col): Bit64BinField {.inline.} =
   ## Returns the binary field with only the given column.
   col.withColMasks:
-    Bit64BinField.init(self.col012 and mask012, self.col345 and mask345)
+    [self[0] and mask0, self[1] and mask1]
 
 func keptValid*(self: Bit64BinField): Bit64BinField {.inline.} =
   ## Returns the binary field with only the valid area.
@@ -199,8 +180,8 @@ func keptValid(self: uint64): uint64 {.inline.} =
 
 func clear*(self: var Bit64BinField) {.inline.} =
   ## Clears the binary field.
-  expand col:
-    self.col.assign 0
+  staticFor(i, 0 ..< 2):
+    self[i].assign 0
 
 # ------------------------------------------------
 # Replace
@@ -209,8 +190,8 @@ func clear*(self: var Bit64BinField) {.inline.} =
 func replace*(self: var Bit64BinField, col: Col, after: Bit64BinField) {.inline.} =
   ## Replaces the column of the binary field by `after`.
   col.withColMasks:
-    expand col, mask:
-      self.col.assign (self.col *~ mask) or (after.col and mask)
+    expand2 mask:
+      self[_].assign (self[_] *~ mask) or (after[_] and mask)
 
 # ------------------------------------------------
 # Population Count
@@ -218,7 +199,116 @@ func replace*(self: var Bit64BinField, col: Col, after: Bit64BinField) {.inline.
 
 func popcnt*(self: Bit64BinField): int {.inline.} =
   ## Returns the population count.
-  self.col012.countOnes + self.col345.countOnes
+  self[0].countOnes + self[1].countOnes
+
+# ------------------------------------------------
+# Shift - Out-place
+# NOTE: `sugar.dup` decreases the performance.
+# ------------------------------------------------
+
+template shiftedUpRawImpl(self: Bit64BinField, body: untyped): untyped =
+  ## Runs `body` with `after0` and `after1` exposed.
+  let
+    after0 {.inject.} = self[0] shl 1
+    after1 {.inject.} = self[1] shl 1
+
+  body
+
+template shiftedUpImpl(self: Bit64BinField, body: untyped): untyped =
+  ## Runs `body` with `after0` and `after1` exposed.
+  let
+    after0 {.inject.} = (self[0] shl 1).keptValid
+    after1 {.inject.} = (self[1] shl 1).keptValid
+
+  body
+
+template shiftedDownRawImpl(self: Bit64BinField, body: untyped): untyped =
+  ## Runs `body` with `after0` and `after1` exposed.
+  let
+    after0 {.inject.} = self[0] shr 1
+    after1 {.inject.} = self[1] shr 1
+
+  body
+
+template shiftedDownImpl(self: Bit64BinField, body: untyped): untyped =
+  ## Runs `body` with `after0` and `after1` exposed.
+  let
+    after0 {.inject.} = (self[0] shr 1).keptValid
+    after1 {.inject.} = (self[1] shr 1).keptValid
+
+  body
+
+template shiftedRightRawImpl(self: Bit64BinField, body: untyped): untyped =
+  ## Runs `body` with `after0` and `after1` exposed.
+  let
+    after0 {.inject.} = self[0] shr 16
+    after1 {.inject.} = (self[0] shl 32) or (self[1] shr 16)
+
+  body
+
+template shiftedRightImpl(self: Bit64BinField, body: untyped): untyped =
+  ## Runs `body` with `after0` and `after1` exposed.
+  let
+    after0 {.inject.} = (self[0] shr 16).keptValid
+    after1 {.inject.} = ((self[0] shl 32) or (self[1] shr 16)).keptValid
+
+  body
+
+template shiftedLeftRawImpl(self: Bit64BinField, body: untyped): untyped =
+  ## Runs `body` with `after0` and `after1` exposed.
+  let
+    after0 {.inject.} = (self[0] shl 16) or (self[1] shr 32)
+    after1 {.inject.} = self[1] shl 16
+
+  body
+
+template shiftedLeftImpl(self: Bit64BinField, body: untyped): untyped =
+  ## Runs `body` with `after0` and `after1` exposed.
+  let
+    after0 {.inject.} = ((self[0] shl 16) or (self[1] shr 32)).keptValid
+    after1 {.inject.} = (self[1] shl 16).keptValid
+
+  body
+
+func shiftedUpRaw*(self: Bit64BinField): Bit64BinField {.inline.} =
+  ## Returns the binary field shifted upward.
+  self.shiftedUpRawImpl:
+    [after0, after1]
+
+func shiftedUp*(self: Bit64BinField): Bit64BinField {.inline.} =
+  ## Returns the binary field shifted upward and extracted the valid area.
+  self.shiftedUpImpl:
+    [after0, after1]
+
+func shiftedDownRaw*(self: Bit64BinField): Bit64BinField {.inline.} =
+  ## Returns the binary field shifted downward.
+  self.shiftedDownRawImpl:
+    [after0, after1]
+
+func shiftedDown*(self: Bit64BinField): Bit64BinField {.inline.} =
+  ## Returns the binary field shifted downward and extracted the valid area.
+  self.shiftedDownImpl:
+    [after0, after1]
+
+func shiftedRightRaw*(self: Bit64BinField): Bit64BinField {.inline.} =
+  ## Returns the binary field shifted rightward.
+  self.shiftedRightRawImpl:
+    [after0, after1]
+
+func shiftedRight*(self: Bit64BinField): Bit64BinField {.inline.} =
+  ## Returns the binary field shifted rightward and extracted the valid area.
+  self.shiftedRightImpl:
+    [after0, after1]
+
+func shiftedLeftRaw*(self: Bit64BinField): Bit64BinField {.inline.} =
+  ## Returns the binary field shifted leftward.
+  self.shiftedLeftRawImpl:
+    [after0, after1]
+
+func shiftedLeft*(self: Bit64BinField): Bit64BinField {.inline.} =
+  ## Returns the binary field shifted leftward and extracted the valid area.
+  self.shiftedLeftImpl:
+    [after0, after1]
 
 # ------------------------------------------------
 # Shift - In-place
@@ -226,95 +316,51 @@ func popcnt*(self: Bit64BinField): int {.inline.} =
 
 func shiftUpRaw*(self: var Bit64BinField) {.inline.} =
   ## Shifts the binary field upward.
-  expand col:
-    self.col.assign self.col shl 1
+  self.shiftedUpRawImpl:
+    expand2 after:
+      self[_].assign after
 
 func shiftUp*(self: var Bit64BinField) {.inline.} =
   ## Shifts the binary field upward and extracts the valid area.
-  expand col:
-    self.col.assign (self.col shl 1).keptValid
+  self.shiftedUpImpl:
+    expand2 after:
+      self[_].assign after
 
 func shiftDownRaw*(self: var Bit64BinField) {.inline.} =
   ## Shifts the binary field downward.
-  expand col:
-    self.col.assign self.col shr 1
+  self.shiftedDownRawImpl:
+    expand2 after:
+      self[_].assign after
 
 func shiftDown*(self: var Bit64BinField) {.inline.} =
   ## Shifts the binary field downward and extracts the valid area.
-  expand col:
-    self.col.assign (self.col shr 1).keptValid
+  self.shiftedDownImpl:
+    expand2 after:
+      self[_].assign after
 
 func shiftRightRaw*(self: var Bit64BinField) {.inline.} =
   ## Shifts the binary field rightward.
-  let
-    after012 = self.col012 shr 16
-    after345 = (self.col012 shl 32) or (self.col345 shr 16)
-
-  expand col, after:
-    self.col.assign after
+  self.shiftedRightRawImpl:
+    expand2 after:
+      self[_].assign after
 
 func shiftRight*(self: var Bit64BinField) {.inline.} =
   ## Shifts the binary field rightward and extracts the valid area.
-  let
-    after012 = (self.col012 shr 16).keptValid
-    after345 = (self.col012 shl 32) or (self.col345 shr 16).keptValid
-
-  expand col, after:
-    self.col.assign after
+  self.shiftedRightImpl:
+    expand2 after:
+      self[_].assign after
 
 func shiftLeftRaw*(self: var Bit64BinField) {.inline.} =
   ## Shifts the binary field leftward.
-  let
-    after012 = (self.col012 shl 16) or (self.col345 shr 32)
-    after345 = self.col345 shl 16
-
-  expand col, after:
-    self.col.assign after
+  self.shiftedLeftRawImpl:
+    expand2 after:
+      self[_].assign after
 
 func shiftLeft*(self: var Bit64BinField) {.inline.} =
   ## Shifts the binary field leftward and extracts the valid area.
-  let
-    after012 = (self.col012 shl 16) or (self.col345 shr 32).keptValid
-    after345 = self.col345 shl 16
-
-  expand col, after:
-    self.col.assign after
-
-# ------------------------------------------------
-# Shift - Out-place
-# ------------------------------------------------
-
-func shiftedUpRaw*(self: Bit64BinField): Bit64BinField {.inline.} =
-  ## Returns the binary field shifted upward.
-  self.dup shiftUpRaw
-
-func shiftedUp*(self: Bit64BinField): Bit64BinField {.inline.} =
-  ## Returns the binary field shifted upward and extracted the valid area.
-  self.dup shiftUp
-
-func shiftedDownRaw*(self: Bit64BinField): Bit64BinField {.inline.} =
-  ## Returns the binary field shifted downward.
-  self.dup shiftDownRaw
-
-func shiftedDown*(self: Bit64BinField): Bit64BinField {.inline.} =
-  ## Returns the binary field shifted downward and extracted the valid area.
-  self.dup shiftDown
-
-func shiftedRightRaw*(self: Bit64BinField): Bit64BinField {.inline.} =
-  ## Returns the binary field shifted rightward.
-  self.dup shiftRightRaw
-
-func shiftedRight*(self: Bit64BinField): Bit64BinField {.inline.} =
-  ## Returns the binary field shifted rightward and extracted the valid area.
-  self.dup shiftRight
-
-func shiftedLeftRaw*(self: Bit64BinField): Bit64BinField {.inline.} =
-  ## Returns the binary field shifted leftward.
-  self.dup shiftLeftRaw
-
-func shiftedLeft*(self: Bit64BinField): Bit64BinField {.inline.} =
-  ## Returns the binary field shifted leftward and extracted the valid area.
-  self.dup shiftLeft
+  self.shiftedLeftImpl:
+    expand2 after:
+      self[_].assign after
 
 # ------------------------------------------------
 # Flip
@@ -330,25 +376,17 @@ func flipped(val: uint64): uint64 {.inline.} =
 
 func flipVertical*(self: var Bit64BinField) {.inline.} =
   ## Flips the binary field vertically.
-  expand col:
-    self.col.assign (self.col.reverseBits shl 15).flipped
+  staticFor(i, 0 ..< 2):
+    self[i].assign (self[i].reverseBits shl 15).flipped
 
 func flipHorizontal*(self: var Bit64BinField) {.inline.} =
   ## Flips the binary field horizontally.
   let
-    after012 = self.col345.flipped
-    after345 = self.col012.flipped
+    after0 = self[1].flipped
+    after1 = self[0].flipped
 
-  expand col, after:
-    self.col.assign after
-
-func flippedVertical*(self: Bit64BinField): Bit64BinField {.inline.} =
-  ## Returns the binary field flipped vertically.
-  self.dup flipVertical
-
-func flippedHorizontal*(self: Bit64BinField): Bit64BinField {.inline.} =
-  ## Returns the binary field flipped horizontally.
-  self.dup flipHorizontal
+  expand2 after:
+    self[_].assign after
 
 # ------------------------------------------------
 # Indexer
@@ -360,23 +398,23 @@ func idxFromMsb(row: Row, col: Col): int {.inline.} =
 
 func `[]`*(self: Bit64BinField, row: static Row, col: static Col): bool {.inline.} =
   when col in {Col0, Col1, Col2}:
-    self.col012.getBitBE static(idxFromMsb(row, col))
+    self[0].getBitBE static(idxFromMsb(row, col))
   else:
-    self.col345.getBitBE static(idxFromMsb(row, col.pred 3))
+    self[1].getBitBE static(idxFromMsb(row, col.pred 3))
 
 func `[]`*(self: Bit64BinField, row: Row, col: Col): bool {.inline.} =
   case col
   of Col0, Col1, Col2:
-    self.col012.getBitBE idxFromMsb(row, col)
+    self[0].getBitBE idxFromMsb(row, col)
   of Col3, Col4, Col5:
-    self.col345.getBitBE idxFromMsb(row, col.pred 3)
+    self[1].getBitBE idxFromMsb(row, col.pred 3)
 
 func `[]=`*(self: var Bit64BinField, row: Row, col: Col, val: bool) {.inline.} =
   case col
   of Col0, Col1, Col2:
-    self.col012.changeBitBE idxFromMsb(row, col), val
+    self[0].changeBitBE idxFromMsb(row, col), val
   of Col3, Col4, Col5:
-    self.col345.changeBitBE idxFromMsb(row, col.pred 3), val
+    self[1].changeBitBE idxFromMsb(row, col.pred 3), val
 
 # ------------------------------------------------
 # Insert / Delete
@@ -422,9 +460,9 @@ func insert*(
   ## If it is in the water, shifts the binary field downward below where inserted.
   case col
   of Col0, Col1, Col2:
-    self.col012.insert col, row, val, rule
+    self[0].insert col, row, val, rule
   of Col3, Col4, Col5:
-    self.col345.insert col.pred 3, row, val, rule
+    self[1].insert col.pred 3, row, val, rule
 
 func delete(self: var uint64, col: Col, row: Row, rule: static Rule) {.inline.} =
   ## Deletes the value and shifts the binary field's element.
@@ -459,9 +497,9 @@ func delete*(
   ## If it is in the water, shifts the binary field upward below where deleted.
   case col
   of Col0, Col1, Col2:
-    self.col012.delete col, row, rule
+    self[0].delete col, row, rule
   of Col3, Col4, Col5:
-    self.col345.delete col.pred 3, row, rule
+    self[1].delete col.pred 3, row, rule
 
 # ------------------------------------------------
 # Drop Garbages
@@ -475,27 +513,27 @@ const
 func extracted(self: Bit64BinField, col: static Col): uint64 {.inline.} =
   ## Returns the value corresponding to the column.
   when col == Col0:
-    self.col012 and MaskL
+    self[0] and MaskL
   elif col == Col1:
-    self.col012 and MaskC
+    self[0] and MaskC
   elif col == Col2:
-    self.col012 and MaskR
+    self[0] and MaskR
   elif col == Col3:
-    self.col345 and MaskL
+    self[1] and MaskL
   elif col == Col4:
-    self.col345 and MaskC
+    self[1] and MaskC
   else:
-    self.col345 and MaskR
+    self[1] and MaskR
 
 func dropGarbagesTsu*(
     self: var Bit64BinField, cnts: array[Col, int], existField: Bit64BinField
 ) {.inline.} =
   ## Drops cells by Tsu rule.
   ## This function requires that the mask is settled and the counts are non-negative.
-  expand notExist, col:
-    let notExist = (not existField.col).keptValid
-
   let
+    notExist012 = (not existField[0]).keptValid
+    notExist345 = (not existField[1]).keptValid
+
     notExist0 = notExist012 and MaskL
     notExist1 = notExist012 and MaskC
     notExist2 = notExist012 and MaskR
@@ -506,8 +544,8 @@ func dropGarbagesTsu*(
   expand6 garbages, notExist, Col:
     let garbages = notExist *~ (notExist shl cnts[Col])
 
-  self.col012.assign bitor2(self.col012, garbages0, garbages1, garbages2)
-  self.col345.assign bitor2(self.col345, garbages3, garbages4, garbages5)
+  self[0].assign bitor2(self[0], garbages0, garbages1, garbages2)
+  self[1].assign bitor2(self[1], garbages3, garbages4, garbages5)
 
 func dropGarbagesWater*(
     self, other1, other2: var Bit64BinField,
@@ -567,14 +605,14 @@ func dropGarbagesWater*(
         afterOther1 = colOther1 shr shift
         afterOther2 = colOther2 shr shift
 
-  self.col012.assign bitor2(afterSelf0, afterSelf1, afterSelf2)
-  self.col345.assign bitor2(afterSelf3, afterSelf4, afterSelf5)
+  self[0].assign bitor2(afterSelf0, afterSelf1, afterSelf2)
+  self[1].assign bitor2(afterSelf3, afterSelf4, afterSelf5)
 
-  other1.col012.assign bitor2(afterOther10, afterOther11, afterOther12)
-  other1.col345.assign bitor2(afterOther13, afterOther14, afterOther15)
+  other1[0].assign bitor2(afterOther10, afterOther11, afterOther12)
+  other1[1].assign bitor2(afterOther13, afterOther14, afterOther15)
 
-  other2.col012.assign bitor2(afterOther20, afterOther21, afterOther22)
-  other2.col345.assign bitor2(afterOther23, afterOther24, afterOther25)
+  other2[0].assign bitor2(afterOther20, afterOther21, afterOther22)
+  other2[1].assign bitor2(afterOther23, afterOther24, afterOther25)
 
 # ------------------------------------------------
 # Settle
@@ -607,8 +645,8 @@ func settleTsu(
       const ShiftAmt = Col.shiftAmt
       after = self.extracted(Col).pext(masks[Col]) shl ShiftAmt
 
-  self.col012.assign bitor2(after0, after1, after2)
-  self.col345.assign bitor2(after3, after4, after5)
+  self[0].assign bitor2(after0, after1, after2)
+  self[1].assign bitor2(after3, after4, after5)
 
 func settleTsu*(
     field1, field2, field3: var Bit64BinField, existField: Bit64BinField
@@ -634,8 +672,8 @@ func settleWater(
         self.extracted(Col).pext(masks[Col]) shl
         max(ShiftAmt, ShiftAmt + WaterHeight - masks[Col].popcnt)
 
-  self.col012.assign bitor2(after0, after1, after2)
-  self.col345.assign bitor2(after3, after4, after5)
+  self[0].assign bitor2(after0, after1, after2)
+  self[1].assign bitor2(after3, after4, after5)
 
 func settleWater*(
     field1, field2, field3: var Bit64BinField, existField: Bit64BinField

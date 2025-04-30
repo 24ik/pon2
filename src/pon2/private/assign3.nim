@@ -26,13 +26,14 @@ else:
 
     repr(t)
 
-  func assign*[T](tgt: var seq[T], src: openArray[T]) {.gcsafe.}
+  func assign*[T](tgt: var seq[T], src: openArray[T]) {.gcsafe, inline.}
     ## Assigns the source to the target.
-  func assign*[T](tgt: var openArray[T], src: openArray[T]) {.gcsafe.}
+  func assign*[T](tgt: var openArray[T], src: openArray[T]) {.gcsafe, inline.}
     ## Assigns the source to the target.
-  func assign*[T](tgt: var T, src: T) {.gcsafe.} ## Assigns the source to the target.
+  func assign*[T](tgt: var T, src: T) {.gcsafe, inline.}
+    ## Assigns the source to the target.
 
-  func assignImpl[T](tgt: var openArray[T], src: openArray[T]) =
+  func assignImpl[T](tgt: var openArray[T], src: openArray[T]) {.inline.} =
     ## Assigns the source to the target.
     mixin assign
     when supportsCopyMem(T):
@@ -42,7 +43,7 @@ else:
       for i in 0 ..< tgt.len:
         assign(tgt[i], src[i])
 
-  func assign*[T](tgt: var openArray[T], src: openArray[T]) =
+  func assign*[T](tgt: var openArray[T], src: openArray[T]) {.inline.} =
     ## Assigns the source to the target.
     mixin assign
 
@@ -56,7 +57,7 @@ else:
     else:
       assignImpl(tgt, src)
 
-  func assign*[T](tgt: var seq[T], src: openArray[T]) =
+  func assign*[T](tgt: var seq[T], src: openArray[T]) {.inline.} =
     ## Assigns the source to the target.
     mixin assign
 
@@ -68,7 +69,7 @@ else:
     else:
       assignImpl(tgt.toOpenArray(0, tgt.high), src)
 
-  func assign*(tgt: var string, src: string) =
+  func assign*(tgt: var string, src: string) {.inline.} =
     ## Assigns the source to the target.
     tgt.setLen(src.len)
     when nimvm:
@@ -77,7 +78,7 @@ else:
     else:
       assignImpl(tgt.toOpenArrayByte(0, tgt.high), src.toOpenArrayByte(0, tgt.high))
 
-  func assign*[T](tgt: var T, src: T) =
+  func assign*[T](tgt: var T, src: T) {.inline.} =
     ## Assigns the source to the target.
     mixin assign
     when nimvm:
