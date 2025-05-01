@@ -21,25 +21,25 @@ defineExpand "3", "0", "1", "2"
 
 const ValidMask = 0x3ffe_3ffe'u32
 
-func init*(T: type Bit32BinField): Bit32BinField {.inline.} =
+func init*(T: type Bit32BinField): T {.inline.} =
   ## Returns the binary field with all elements zero.
   [0, 0, 0]
 
-func initOne*(T: type Bit32BinField): Bit32BinField {.inline.} =
+func initOne*(T: type Bit32BinField): T {.inline.} =
   ## Returns the binary field with all valid elements one.
   [ValidMask, ValidMask, ValidMask]
 
-func initFloor*(T: type Bit32BinField): Bit32BinField {.inline.} =
+func initFloor*(T: type Bit32BinField): T {.inline.} =
   ## Returns the binary field with floor bits one.
   const Initializer = 0x0001_0001'u32
   [Initializer, Initializer, Initializer]
 
-func initLowerAir*(T: type Bit32BinField): Bit32BinField {.inline.} =
+func initLowerAir*(T: type Bit32BinField): T {.inline.} =
   ## Returns the binary field with lower air bits one.
   const Initializer = 0x0001_0001'u32 shl WaterHeight.succ
   [Initializer, Initializer, Initializer]
 
-func initUpperWater*(T: type Bit32BinField): Bit32BinField {.inline.} =
+func initUpperWater*(T: type Bit32BinField): T {.inline.} =
   ## Returns the binary field with upper underwater bits one.
   const Initializer = 0x0001_0001'u32 shl WaterHeight
   [Initializer, Initializer, Initializer]

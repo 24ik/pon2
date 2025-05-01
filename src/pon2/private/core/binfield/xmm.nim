@@ -32,24 +32,24 @@ func init(
 func init(T: type XmmBinField, val: uint16): T {.inline.} =
   T.init(val, val, val, val, val, val)
 
-func init*(T: type XmmBinField): XmmBinField {.inline.} =
+func init*(T: type XmmBinField): T {.inline.} =
   ## Returns the binary field with all elements zero.
   mm_setzero_si128()
 
-func initOne*(T: type XmmBinField): XmmBinField {.inline.} =
+func initOne*(T: type XmmBinField): T {.inline.} =
   ## Returns the binary field with all valid elements one.
   T.init ValidMaskElem
 
-func initFloor*(T: type XmmBinField): XmmBinField {.inline.} =
+func initFloor*(T: type XmmBinField): T {.inline.} =
   ## Returns the binary field with floor bits one.
   T.init 1
 
-func initLowerAir*(T: type XmmBinField): XmmBinField {.inline.} =
+func initLowerAir*(T: type XmmBinField): T {.inline.} =
   ## Returns the binary field with lower air bits one.
   const LowerAirMaskElem = 1'u16 shl WaterHeight.succ
   T.init LowerAirMaskElem
 
-func initUpperWater*(T: type XmmBinField): XmmBinField {.inline.} =
+func initUpperWater*(T: type XmmBinField): T {.inline.} =
   ## Returns the binary field with upper underwater bits one.
   const UpperWaterMaskElem = 1'u16 shl WaterHeight
   T.init UpperWaterMaskElem
