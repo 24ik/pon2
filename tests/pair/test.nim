@@ -14,6 +14,8 @@ block: # init
   check Pair.init(Yellow, Green) == YellowGreen
   check Pair.init(Purple, Purple) == PurplePurple
 
+  check Pair.init == Pair.low
+
 # ------------------------------------------------
 # Property
 # ------------------------------------------------

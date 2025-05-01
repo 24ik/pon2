@@ -534,7 +534,7 @@ func move*[F: TsuField or WaterField](
 
   var
     chainCnt = 0
-    popCnts = initArrWith[Cell, int](0)
+    popCnts = static(initArrWith[Cell, int](0))
     hardToGarbageCnt = 0
     detailPopCnts = newSeqOfCap[array[Cell, int]](MaxChainCnt)
     detailHardToGarbageCnt = newSeqOfCap[int](MaxChainCnt)
@@ -576,7 +576,7 @@ func move*[F: TsuField or WaterField](
       fullPopCnts.add popRes.connCnts
 
   # NOTE: dummy to suppress warning (not reached here)
-  MoveResult.init(0, initArrWith[Cell, int](0), 0, @[], @[])
+  MoveResult.init
 
 func move*[F: TsuField or WaterField](
     self: var F, step: Step, calcConn: bool
@@ -879,7 +879,7 @@ func parseTsuFieldIshikawa(query: string): Res[TsuField] {.inline.} =
       return err "Invalid field: {query}".fmt
 
     let firstRow = (Height - strs.len).Row
-    var arr = initArrWith[Row, array[Col, Cell]](initArrWith[Col, Cell](None))
+    var arr = static(initArrWith[Row, array[Col, Cell]](initArrWith[Col, Cell](None)))
     for rowIdx, str in strs:
       for colIdx, c in str:
         arr[firstRow.succ rowIdx][Col.low.succ colIdx].assign ?TildeIshikawaCharToCell

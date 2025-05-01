@@ -78,6 +78,9 @@ func init*(T: type Goal, kind: GoalKind, color: GoalColor): T {.inline.} =
 func init*(T: type Goal, kind: GoalKind, val: GoalVal): T {.inline.} =
   T.init(kind, OptGoalColor.err, OptGoalVal.ok val)
 
+func init*(T: type Goal): T {.inline.} =
+  T.init(Clear, All)
+
 # ------------------------------------------------
 # Property
 # ------------------------------------------------

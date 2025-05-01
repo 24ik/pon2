@@ -22,7 +22,7 @@ type
     case kind*: StepKind
     of PairPlacement:
       pair*: Pair
-      optPlacement*: Opt[Placement]
+      optPlacement*: OptPlacement
     of Garbages:
       cnts*: array[Col, int]
       dropHard*: bool
@@ -40,10 +40,13 @@ func init*(T: type Step, pair: Pair): T {.inline.} =
   T.init(pair, NonePlacement)
 
 func init*(T: type Step, pair: Pair, plcmt: Placement): T {.inline.} =
-  T.init(pair, Opt[Placement].ok plcmt)
+  T.init(pair, OptPlacement.ok plcmt)
 
 func init*(T: type Step, cnts: array[Col, int], dropHard: bool): T {.inline.} =
   T(kind: Garbages, cnts: cnts, dropHard: dropHard)
+
+func init*(T: type Step): T {.inline.} =
+  T.init Pair.init
 
 # ------------------------------------------------
 # Operator

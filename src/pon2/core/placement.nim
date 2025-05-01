@@ -74,6 +74,9 @@ func init*(T: type Placement, pivotCol: Col, rotorDir: Dir): T {.inline.} =
   of Left:
     Down5.succ pivotCol.ord
 
+func init*(T: type Placement): T {.inline.} =
+  T.low
+
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
@@ -188,7 +191,7 @@ func parseOptPlacement*(str: string): Res[OptPlacement] {.inline.} =
   if str == NonePlcmtStr:
     ok NonePlacement
   else:
-    ok Opt[Placement].ok ?str.parsePlacement
+    ok OptPlacement.ok ?str.parsePlacement
 
 # ------------------------------------------------
 # Placement <-> URI
@@ -237,4 +240,4 @@ func parseOptPlacement*(query: string, fqdn: IdeFqdn): Res[OptPlacement] {.inlin
     if query == NonePlcmtIshikawaUri:
       ok NonePlacement
     else:
-      ok Opt[Placement].ok ?query.parsePlacement fqdn
+      ok OptPlacement.ok ?query.parsePlacement fqdn

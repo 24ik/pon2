@@ -21,6 +21,15 @@ proc toBinField(str: string): BinField =
   return arr.toBinField
 
 # ------------------------------------------------
+# Constructor
+# ------------------------------------------------
+
+block: # init
+  let zero = BinField.init
+  check PopResult.init(zero, zero, zero, zero, zero, zero, zero, zero, zero) ==
+    PopResult.init
+
+# ------------------------------------------------
 # Property
 # ------------------------------------------------
 

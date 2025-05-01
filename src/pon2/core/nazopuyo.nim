@@ -18,15 +18,13 @@ type NazoPuyo*[F: TsuField or WaterField] = object ## Nazo Puyo.
 # Constructor
 # ------------------------------------------------
 
-const DefaultGoal = Goal.init(Clear, All)
-
-func init*[F: TsuField or WaterField](T: type NazoPuyo[F]): T {.inline.} =
-  T(puyoPuyo: PuyoPuyo[F].init, goal: DefaultGoal)
-
 func init*[F: TsuField or WaterField](
     T: type NazoPuyo[F], puyoPuyo: PuyoPuyo[F], goal: Goal
 ): T {.inline.} =
   T(puyoPuyo: puyoPuyo, goal: goal)
+
+func init*[F: TsuField or WaterField](T: type NazoPuyo[F]): T {.inline.} =
+  T.init(PuyoPuyo[F].init, Goal.init)
 
 # ------------------------------------------------
 # Nazo Puyo <-> string

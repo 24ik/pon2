@@ -4,7 +4,7 @@
 
 import std/[unittest]
 import ../../src/pon2/core/[cell, moveresult, notice, rule]
-import ../../src/pon2/private/[results2]
+import ../../src/pon2/private/[arrayops2, results2]
 
 let
   chainCnt = 3
@@ -53,6 +53,8 @@ block: # init
       detailHardToGarbageCnt: detailHardToGarbageCnt,
       fullPopCnts: Opt[seq[array[Cell, seq[int]]]].ok fullPopCnts,
     )
+
+  check MoveResult.init == MoveResult.init(0, initArrWith[Cell, int](0), 0, @[], @[])
 
 # ------------------------------------------------
 # Count

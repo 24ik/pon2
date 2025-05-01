@@ -42,6 +42,10 @@ func init*(
     color: color,
   )
 
+func init*(T: type PopResult): T {.inline.} =
+  let zero = BinField.init
+  T.init(zero, zero, zero, zero, zero, zero, zero, zero, zero)
+
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
@@ -93,8 +97,8 @@ func connCnts(self: BinField): seq[int] {.inline.} =
   let arr = self.toArr
 
   var
-    ccIdxArr = initArrWith(Height + 2, initArrWith(Width + 2, DefaultCcIdx))
-    uf = UnionFind.init(Height * Width)
+    ccIdxArr = static(initArrWith(Height + 2, initArrWith(Width + 2, DefaultCcIdx)))
+    uf = static(UnionFind.init Height * Width)
     nextCcIdx = DefaultCcIdx.succ
 
   staticFor(row, Row):

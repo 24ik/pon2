@@ -8,7 +8,7 @@
 
 import std/[strformat, typetraits, uri]
 import ./[cell, field, fqdn, moveresult, pair, placement, popresult, step]
-import ../private/[arrayops2, bitops3, macros2, results2, strutils2, tables2]
+import ../private/[bitops3, macros2, results2, strutils2, tables2]
 
 type PuyoPuyo*[F: TsuField or WaterField] = object ## Puyo Puyo game.
   field*: F
@@ -18,13 +18,13 @@ type PuyoPuyo*[F: TsuField or WaterField] = object ## Puyo Puyo game.
 # Constructor
 # ------------------------------------------------
 
-func init*[F: TsuField or WaterField](T: type PuyoPuyo[F]): T {.inline.} =
-  T(field: F.init, steps: Steps.init)
-
 func init*[F: TsuField or WaterField](
     T: type PuyoPuyo[F], field: F, steps: Steps
 ): T {.inline.} =
   T(field: field, steps: steps)
+
+func init*[F: TsuField or WaterField](T: type PuyoPuyo[F]): T {.inline.} =
+  T.init(F.init, Steps.init)
 
 # ------------------------------------------------
 # Count
@@ -58,7 +58,7 @@ func move*[F: TsuField or WaterField](
   ## Applies the step and advances the field until chains end.
   ## This function requires that the field is settled.
   if self.steps.len == 0:
-    return MoveResult.init(0, initArrWith[Cell, int](0), 0, @[], @[])
+    return MoveResult.init
 
   self.field.move(self.steps.popFirst, calcConn)
 

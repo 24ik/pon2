@@ -13,6 +13,8 @@ import ../../src/pon2/private/[results2]
 block: # init
   check Placement.init(Col5, Left) == Left5
 
+  check Placement.init == Placement.low
+
 # ------------------------------------------------
 # Property
 # ------------------------------------------------

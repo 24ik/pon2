@@ -21,11 +21,10 @@ block: # init
   check NazoPuyo[WaterField].init(puyoPuyoW, goal) ==
     NazoPuyo[WaterField](puyoPuyo: puyoPuyoW, goal: goal)
 
-  let defaultGoal = Goal.init(Clear, All)
   check NazoPuyo[TsuField].init ==
-    NazoPuyo[TsuField](puyoPuyo: PuyoPuyo[TsuField].init, goal: defaultGoal)
+    NazoPuyo[TsuField](puyoPuyo: PuyoPuyo[TsuField].init, goal: Goal.init)
   check NazoPuyo[WaterField].init ==
-    NazoPuyo[WaterField](puyoPuyo: PuyoPuyo[WaterField].init, goal: defaultGoal)
+    NazoPuyo[WaterField](puyoPuyo: PuyoPuyo[WaterField].init, goal: Goal.init)
 
 # ------------------------------------------------
 # Nazo Puyo <-> string

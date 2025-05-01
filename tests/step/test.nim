@@ -37,6 +37,8 @@ block: # init
     check step.cnts == cnts
     check step.dropHard
 
+  check Step.init == Step.init(Pair.init)
+
 # ------------------------------------------------
 # Property
 # ------------------------------------------------

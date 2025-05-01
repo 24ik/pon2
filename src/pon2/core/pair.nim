@@ -56,6 +56,9 @@ func init*(T: type Pair, pivot, rotor: Cell): T {.inline.} =
 
   T pivotVal * ColorPuyos.card + rotorVal
 
+func init*(T: type Pair): T {.inline.} =
+  T.low
+
 # ------------------------------------------------
 # Property
 # ------------------------------------------------

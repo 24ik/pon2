@@ -16,6 +16,7 @@ block: # init
     Goal.init(ChainMore, 5)
   check Goal.init(Conn, OptGoalColor.ok Colors, OptGoalVal.ok 10) ==
     Goal.init(Conn, Colors, 10)
+  check Goal.init == Goal.init(Clear, All)
 
 # ------------------------------------------------
 # Property

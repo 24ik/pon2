@@ -8,7 +8,7 @@
 
 import std/[sequtils, strformat, sugar]
 import ./[cell, common, notice, rule]
-import ../private/[math2, results2, staticfor2]
+import ../private/[arrayops2, math2, results2, staticfor2]
 
 type MoveResult* = object ## Move result.
   chainCnt*: int
@@ -56,6 +56,9 @@ func init*(
     detailHardToGarbageCnt: detailHardToGarbageCnt,
     fullPopCnts: Opt[seq[array[Cell, seq[int]]]].ok fullPopCnts,
   )
+
+func init*(T: type MoveResult): T {.inline.} =
+  T.init(0, static(initArrWith[Cell, int](0)), 0, @[], @[])
 
 # ------------------------------------------------
 # Count
