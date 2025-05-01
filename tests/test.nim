@@ -3,17 +3,26 @@
 {.experimental: "views".}
 
 import std/[appdirs, dirs, os, osproc, paths, random, sequtils, strformat, strutils]
+import ../src/pon2/private/[bitops3, math2]
 import unittest2
 
 const
-  SimdLvl {.define: "pon2.testsimd".} = 1
-  BmiLvl {.define: "pon2.testbmi".} = 2
-  ClmulUse {.define: "pon2.testclmul".} = true
-  TestLower {.define: "pon2.testlower".} = true # Tests lower levels
+  SimdLvlMax = 1
+  BmiLvlMax = 2
+  ClmulLvlMax = 1
+
+  SimdLvlValMax = 2 ^ SimdLvlMax.succ - 1
+  BmiLvlValMax = 2 ^ BmiLvlMax.succ - 1
+  ClmulLvlValMax = 2 ^ ClmulLvlMax.succ - 1
+
+  SimdLvl {.define: "pon2.testsimd".} = SimdLvlValMax
+  BmiLvl {.define: "pon2.testbmi".} = BmiLvlValMax
+  ClmulLvl {.define: "pon2.testclmul".} = ClmulLvlValMax
 
 static:
-  doAssert SimdLvl in 0 .. 1
-  doAssert BmiLvl in 0 .. 2
+  doAssert SimdLvl in 1 .. SimdLvlValMax
+  doAssert BmiLvl in 1 .. BmiLvlValMax
+  doAssert ClmulLvl in 1 .. ClmulLvlValMax
 
 type Backend {.pure.} = enum
   ## Compile backend.
@@ -65,13 +74,17 @@ template suites(backend: Backend): untyped =
     testDirs = currentSourcePath().Path.parentDir.walkDir.toSeq
     .filterIt(it.kind in {pcDir, pcLinkToDir}).mapIt it.path
 
-    simdLvlMax = if backend == Js: 0 else: SimdLvl
-    bmiLvlMax = if backend == Js: 0 else: BmiLvl
-    clmulUseMax = if backend == Js: false else: ClmulUse
-
-    simdLvls = (if TestLower: 0 else: simdLvlMax) .. simdLvlMax
-    bmiLvls = (if TestLower: 0 else: bmiLvlMax) .. bmiLvlMax
-    clmulUses = (if TestLower: false else: clmulUseMax) .. clmulUseMax
+    simdLvls, bmiLvls: seq[int]
+    clmulUses: seq[bool]
+  case backend
+  of C, Cpp:
+    simdLvls = (0 .. SimdLvlMax).toSeq.filterIt SimdLvl.testBit it
+    bmiLvls = (0 .. BmiLvlMax).toSeq.filterIt BmiLvl.testBit it
+    clmulUses = (0 .. ClmulLvlValMax).toSeq.filterIt(ClmulLvl.testBit it).mapIt it.bool
+  of Js:
+    simdLvls = @[0]
+    bmiLvls = @[0]
+    clmulUses = @[false]
 
   for simdLvl in simdLvls:
     for bmiLvl in bmiLvls:
@@ -79,7 +92,11 @@ template suites(backend: Backend): untyped =
         suite suiteName(backend, simdLvl, bmiLvl, clmulUse):
           tests testDirs, backend, simdLvl, bmiLvl, clmulUse
 
-randomize()
-suites C
-suites Cpp
-suites Js
+proc main() =
+  randomize()
+  suites C
+  suites Cpp
+  suites Js
+
+when isMainModule:
+  main()

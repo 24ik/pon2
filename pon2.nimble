@@ -27,23 +27,6 @@ requires "unittest2 ^= 0.2.4"
 
 import std/[os, sequtils, strformat, strutils]
 
-#[
-task test, "Run Tests":
-  const
-    Avx2 {.define: "pon2.avx2".} = 2
-    Bmi2 {.define: "pon2.bmi2".} = 2
-
-  exec &"nim c -r -d:pon2.avx2={Avx2} -d:pon2.bmi2={Bmi2} " & "tests/makeTest.nim"
-  exec "testament all"
-]#
-
-task benchmark, "Benchmarking":
-  const
-    Avx2 {.define: "pon2.avx2".} = true
-    Bmi2 {.define: "pon2.bmi2".} = true
-
-  exec &"nim c -r -d:pon2.avx2={Avx2} -d:pon2.bmi2={Bmi2} " & "benchmark/main.nim"
-
 task web, "Make Web Pages":
   const
     danger {.booldefine.} = true
