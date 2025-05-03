@@ -2,7 +2,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[bitops, unittest]
+import std/[unittest]
 import ../../src/pon2/private/[bitops3]
 
 # ------------------------------------------------
@@ -56,20 +56,21 @@ block: # bitor2
 # ------------------------------------------------
 
 block: # `*~`
-  let
+  const
     a = 987654321
     b = 12345678
     res = a and not b
 
-  check a *~ b == res
+  check a.int *~ b.int == res
   check a.uint *~ b.uint == res.uint
+  check static(a.int *~ b.int) == res
 
 # ------------------------------------------------
 # Mask
 # ------------------------------------------------
 
 block: # toMask2
-  let slice = 1 .. 5
+  const slice = 1 .. 5
   check toMask2[uint](slice) == toMask[uint](slice)
   check toMask2[uint8](slice) == toMask[uint8](slice)
   check toMask2[uint16](slice) == toMask[uint16](slice)
@@ -82,12 +83,14 @@ block: # toMask2
   check toMask2[int32](slice) == toMask[int32](slice)
   check toMask2[int64](slice) == toMask[int64](slice)
 
+  check static(toMask2[uint](slice)) == toMask[uint](slice)
+
 # ------------------------------------------------
 # BEXTR
 # ------------------------------------------------
 
 block: # bextr
-  let
+  const
     val = 0b0101_1001
     start = 2'u32
     length = 5'u32
@@ -117,12 +120,14 @@ block: # bextr
   check val.int32.bextr(start, 0) == 0.int32
   check val.int64.bextr(start, 0) == 0.int64
 
+  check static(val.uint.bextr(start, length)) == res.uint
+
 # ------------------------------------------------
 # BLSMSK
 # ------------------------------------------------
 
 block: # blsmsk
-  let
+  const
     val = 0b0010_1000
     res = 0b0000_1111
 
@@ -150,12 +155,14 @@ block: # blsmsk
   check 0.int32.blsmsk == -1'i32
   check 0.int64.blsmsk == -1'i64
 
+  check static(val.uint.blsmsk) == res.uint
+
 # ------------------------------------------------
 # TZCNT
 # ------------------------------------------------
 
 block: # tzcnt
-  let
+  const
     val = 0b0100_1000
     res = 3
 
@@ -183,12 +190,14 @@ block: # tzcnt
   check 0.int32.tzcnt == bitsof int32
   check 0.int64.tzcnt == bitsof int64
 
+  check static(val.uint.tzcnt) == res
+
 # ------------------------------------------------
 # PEXT
 # ------------------------------------------------
 
 block: # pext
-  let
+  const
     val = 0b0100_1011
     mask = 0b1101_0010
     res = 0b0000_0101
@@ -196,6 +205,8 @@ block: # pext
   check val.uint16.pext(mask.uint16) == res.uint16
   check val.uint32.pext(mask.uint32) == res.uint32
   check val.uint64.pext(mask.uint64) == res.uint64
+
+  check static(val.uint64.pext(mask.uint64)) == res.uint64
 
   let
     pextMask16 = PextMask[uint16].init mask.uint16
@@ -206,9 +217,13 @@ block: # pext
   check val.uint32.pext(pextMask32) == res.uint32
   check val.uint64.pext(pextMask64) == res.uint64
 
+  check static(val.uint64.pext(PextMask[uint64].init mask.uint64)) == res.uint64
+
 block: # popcnt
-  let val = 0b1100_0110_0100_1101'u16
+  const val = 0b1100_0110_0100_1101'u16
 
   check PextMask[uint16].init(val).popcnt == val.countOnes
   check PextMask[uint32].init(val.uint32).popcnt == val.countOnes
   check PextMask[uint64].init(val.uint64).popcnt == val.countOnes
+
+  check static(PextMask[uint64].init(val.uint64)).popcnt == val.countOnes

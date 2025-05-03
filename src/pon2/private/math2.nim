@@ -18,3 +18,5 @@ func sum2*[T: SomeNumber](arr: openArray[T]): T {.inline.} =
     res.assign res + elem
 
   res
+
+# TODO: sum2 with slice

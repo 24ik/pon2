@@ -6,7 +6,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[macros, sugar]
+import std/[macros, strformat, sugar]
 import ./[strutils2]
 
 export macros
@@ -24,7 +24,7 @@ func replaced*(node, before, after: NimNode): NimNode {.inline.} =
   of nnkEmpty, nnkLiterals:
     node
   else:
-    let rTree = newNimNode(node.kind, lineInfoFrom = node)
+    let rTree = node.kind.newNimNode node
     for child in node:
       rTree.add child.replaced(before, after)
 
@@ -101,3 +101,45 @@ identifiers (the rest arguments) with the suffix """ &
     newEmptyNode(),
     macroBody,
   )
+
+# ------------------------------------------------
+# Case
+# ------------------------------------------------
+
+macro staticCase*(caseStmt: typed): untyped =
+  ## Converts the `case` statement to compile-time branching.
+  caseStmt.expectKind nnkCaseStmt
+  let caseExpr = caseStmt[0]
+
+  let whenStmt = nnkWhenStmt.newNimNode
+  for caseChild in caseStmt[1 ..^ 1]:
+    case caseChild.kind
+    of nnkOfBranch:
+      let caseBody = caseChild.last.newBlockStmt
+
+      for ofChild in caseChild[0 ..^ 2]:
+        let newCond =
+          if ofChild.kind == nnkRange:
+            # NOTE: `a..b` is evaluated as `range` instead of `slice`,
+            # so we cannot use `contains`.
+            infix(
+              infix(ofChild[0], "<=", caseExpr),
+              "and",
+              infix(caseExpr, "<=", ofChild[1]),
+            )
+          else:
+            # NOTE: `set`, `array`, and `seq` are expanded, so we can handle them here.
+            infix(caseExpr, "==", ofChild)
+
+        whenStmt.add nnkElifBranch.newTree(newCond, caseBody)
+    of nnkElifBranch, nnkElse:
+      let newChild = caseChild.kind.newNimNode
+      for caseChildChild in caseChild[0 ..^ 2]:
+        newChild.add caseChildChild
+      newChild.add caseChild.last.newBlockStmt
+
+      whenStmt.add newChild
+    else:
+      error "Invalid child of `case` detected: {caseChild.kind}".fmt, caseChild
+
+  whenStmt
