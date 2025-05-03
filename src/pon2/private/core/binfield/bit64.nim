@@ -132,13 +132,13 @@ const
 template withColMasks(col: Col, body: untyped): untyped =
   ## Runs `body` with `mask0` and `mask1` exposed.
   case col
-  of Col0, Col1, Col2:
+  of Col0 .. Col2:
     let
       mask0 {.inject.} = ColMaskBase shr (col.ord shl 4)
       mask1 {.inject.} = 0'u64
 
     body
-  of Col3, Col4, Col5:
+  of Col3 .. Col5:
     let
       mask0 {.inject.} = 0'u64
       mask1 {.inject.} = ColMaskBase shr (col.pred(3).ord shl 4)
@@ -397,23 +397,25 @@ func idxFromMsb(row: Row, col: Col): int {.inline.} =
   col.ord shl 4 + (row.ord + 2)
 
 func `[]`*(self: Bit64BinField, row: static Row, col: static Col): bool {.inline.} =
-  when col in {Col0, Col1, Col2}:
-    self[0].getBitBE static(idxFromMsb(row, col))
-  else:
-    self[1].getBitBE static(idxFromMsb(row, col.pred 3))
+  staticCase:
+    case col
+    of Col0 .. Col2:
+      self[0].getBitBE static(idxFromMsb(row, col))
+    of Col3 .. Col5:
+      self[1].getBitBE static(idxFromMsb(row, col.pred 3))
 
 func `[]`*(self: Bit64BinField, row: Row, col: Col): bool {.inline.} =
   case col
-  of Col0, Col1, Col2:
+  of Col0 .. Col2:
     self[0].getBitBE idxFromMsb(row, col)
-  of Col3, Col4, Col5:
+  of Col3 .. Col5:
     self[1].getBitBE idxFromMsb(row, col.pred 3)
 
 func `[]=`*(self: var Bit64BinField, row: Row, col: Col, val: bool) {.inline.} =
   case col
-  of Col0, Col1, Col2:
+  of Col0 .. Col2:
     self[0].changeBitBE idxFromMsb(row, col), val
-  of Col3, Col4, Col5:
+  of Col3 .. Col5:
     self[1].changeBitBE idxFromMsb(row, col.pred 3), val
 
 # ------------------------------------------------
@@ -459,9 +461,9 @@ func insert*(
   ## If (row, col) is in the air, shifts the binary field upward above where inserted.
   ## If it is in the water, shifts the binary field downward below where inserted.
   case col
-  of Col0, Col1, Col2:
+  of Col0 .. Col2:
     self[0].insert col, row, val, rule
-  of Col3, Col4, Col5:
+  of Col3 .. Col5:
     self[1].insert col.pred 3, row, val, rule
 
 func delete(self: var uint64, col: Col, row: Row, rule: static Rule) {.inline.} =
@@ -496,9 +498,9 @@ func delete*(
   ## If (row, col) is in the air, shifts the binary field downward above where deleted.
   ## If it is in the water, shifts the binary field upward below where deleted.
   case col
-  of Col0, Col1, Col2:
+  of Col0 .. Col2:
     self[0].delete col, row, rule
-  of Col3, Col4, Col5:
+  of Col3 .. Col5:
     self[1].delete col.pred 3, row, rule
 
 # ------------------------------------------------
@@ -512,18 +514,20 @@ const
 
 func extracted(self: Bit64BinField, col: static Col): uint64 {.inline.} =
   ## Returns the value corresponding to the column.
-  when col == Col0:
-    self[0] and MaskL
-  elif col == Col1:
-    self[0] and MaskC
-  elif col == Col2:
-    self[0] and MaskR
-  elif col == Col3:
-    self[1] and MaskL
-  elif col == Col4:
-    self[1] and MaskC
-  else:
-    self[1] and MaskR
+  staticCase:
+    case col
+    of Col0:
+      self[0] and MaskL
+    of Col1:
+      self[0] and MaskC
+    of Col2:
+      self[0] and MaskR
+    of Col3:
+      self[1] and MaskL
+    of Col4:
+      self[1] and MaskC
+    of Col5:
+      self[1] and MaskR
 
 func dropGarbagesTsu*(
     self: var Bit64BinField, cnts: array[Col, int], existField: Bit64BinField

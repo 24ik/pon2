@@ -8,7 +8,7 @@
 
 import std/[strformat, sugar]
 import ./[common, fqdn]
-import ../private/[results2, tables2]
+import ../private/[macros2, results2, tables2]
 
 type
   Dir* {.pure.} = enum
@@ -54,14 +54,16 @@ const
 # ------------------------------------------------
 
 func init*(T: type Placement, pivotCol: Col, rotorDir: static Dir): T {.inline.} =
-  when rotorDir == Up:
-    Up0.succ pivotCol.ord
-  elif rotorDir == Up:
-    Right0.succ pivotCol.ord
-  elif rotorDir == Down:
-    Down0.succ pivotCol.ord
-  else:
-    Down5.succ pivotCol.ord
+  staticCase:
+    case rotorDir
+    of Up:
+      Up0.succ pivotCol.ord
+    of Right:
+      Right0.succ pivotCol.ord
+    of Down:
+      Down0.succ pivotCol.ord
+    of Left:
+      Down5.succ pivotCol.ord
 
 func init*(T: type Placement, pivotCol: Col, rotorDir: Dir): T {.inline.} =
   case rotorDir

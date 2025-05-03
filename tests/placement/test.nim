@@ -13,6 +13,9 @@ import ../../src/pon2/private/[results2]
 block: # init
   check Placement.init(Col5, Left) == Left5
 
+  let dir = Down
+  check Placement.init(Col2, dir) == Down2
+
   check Placement.init == Placement.low
 
 # ------------------------------------------------

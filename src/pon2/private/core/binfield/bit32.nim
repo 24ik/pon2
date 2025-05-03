@@ -409,12 +409,14 @@ func idxFromMsb(row: Row, col: Col): int {.inline.} =
   col.ord shl 4 + (row.ord + 2)
 
 func `[]`*(self: Bit32BinField, row: static Row, col: static Col): bool {.inline.} =
-  when col in {Col0, Col1}:
-    self[0].getBitBE static(idxFromMsb(row, col))
-  elif col in {Col2, Col3}:
-    self[1].getBitBE static(idxFromMsb(row, col.pred 2))
-  else:
-    self[2].getBitBE static(idxFromMsb(row, col.pred 4))
+  staticCase:
+    case col
+    of Col0, Col1:
+      self[0].getBitBE static(idxFromMsb(row, col))
+    of Col2, Col3:
+      self[1].getBitBE static(idxFromMsb(row, col.pred 2))
+    of Col4, Col5:
+      self[2].getBitBE static(idxFromMsb(row, col.pred 4))
 
 func `[]`*(self: Bit32BinField, row: Row, col: Col): bool {.inline.} =
   case col
@@ -533,18 +535,20 @@ const
 
 func extracted(self: Bit32BinField, col: static Col): uint32 {.inline.} =
   ## Returns the value corresponding to the column.
-  when col == Col0:
-    self[0] and MaskL
-  elif col == Col1:
-    self[0] and MaskR
-  elif col == Col2:
-    self[1] and MaskL
-  elif col == Col3:
-    self[1] and MaskR
-  elif col == Col4:
-    self[2] and MaskL
-  else:
-    self[2] and MaskR
+  staticCase:
+    case col
+    of Col0:
+      self[0] and MaskL
+    of Col1:
+      self[0] and MaskR
+    of Col2:
+      self[1] and MaskL
+    of Col3:
+      self[1] and MaskR
+    of Col4:
+      self[2] and MaskL
+    of Col5:
+      self[2] and MaskR
 
 func dropGarbagesTsu*(
     self: var Bit32BinField, cnts: array[Col, int], existField: Bit32BinField

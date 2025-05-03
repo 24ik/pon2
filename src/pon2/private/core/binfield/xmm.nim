@@ -285,14 +285,16 @@ func idxFromMsb(row: Row, col: Col): int {.inline.} =
   col.ord shl 4 + (row.ord + 2)
 
 func `[]`*(self: XmmBinField, row: static Row, col: static Col): bool {.inline.} =
-  when col in {Col0, Col1, Col2, Col3}:
-    self.mm_extract_epi64(1).getBitBE static(idxFromMsb(row, col))
-  else:
-    self.mm_extract_epi64(0).getBitBE static(idxFromMsb(row, col.pred 4))
+  staticCase:
+    case col
+    of Col0 .. Col3:
+      self.mm_extract_epi64(1).getBitBE static(idxFromMsb(row, col))
+    of Col4, Col5:
+      self.mm_extract_epi64(0).getBitBE static(idxFromMsb(row, col.pred 4))
 
 func `[]`*(self: XmmBinField, row: Row, col: Col): bool {.inline.} =
   case col
-  of Col0, Col1, Col2, Col3:
+  of Col0 .. Col3:
     self.mm_extract_epi64(1).getBitBE idxFromMsb(row, col)
   of Col4, Col5:
     self.mm_extract_epi64(0).getBitBE idxFromMsb(row, col.pred 4)
@@ -303,7 +305,7 @@ func `[]=`*(self: var XmmBinField, row: Row, col: Col, val: bool) {.inline.} =
 
   {.push warning[Uninit]: off.}
   case col
-  of Col0, Col1, Col2, Col3:
+  of Col0 .. Col3:
     arr[1].changeBitBE idxFromMsb(row, col), val
   of Col4, Col5:
     arr[0].changeBitBE idxFromMsb(row, col.pred 4), val
@@ -366,7 +368,7 @@ func insert*(
 
   {.push warning[Uninit]: off.}
   case col
-  of Col0, Col1, Col2, Col3:
+  of Col0 .. Col3:
     arr[1].insert col, row, val, rule, true
   of Col4, Col5:
     arr[0].insert col.pred 4, row, val, rule, false
@@ -413,7 +415,7 @@ func delete*(self: var XmmBinField, row: Row, col: Col, rule: static Rule) {.inl
 
   {.push warning[Uninit]: off.}
   case col
-  of Col0, Col1, Col2, Col3:
+  of Col0 .. Col3:
     arr[1].delete col, row, rule, true
   of Col4, Col5:
     arr[0].delete col.pred 4, row, rule, false

@@ -106,12 +106,13 @@ func isSatisfiedCnt*(
     goal: Goal, moveRes: MoveResult, kind: static GoalKind, color: static GoalColor
 ): bool {.inline.} =
   ## Returns `true` if the goal is satisfied.
-  let cnts =
-    when color == All:
+  let cnts = staticCase:
+    case color
+    of All:
       moveRes.puyoCnts
-    elif color == Garbages:
+    of Garbages:
       moveRes.garbagesCnts
-    elif color == Colors:
+    of Colors:
       moveRes.colorPuyoCnts
     else:
       moveRes.cellCnts GoalColorToCell[color]
@@ -132,8 +133,9 @@ func isSatisfiedPlace*(
     goal: Goal, moveRes: MoveResult, kind: static GoalKind, color: static GoalColor
 ): bool {.inline.} =
   ## Returns `true` if the goal is satisfied.
-  let places =
-    when color in {All, Colors}:
+  let places = staticCase:
+    case color
+    of All, Colors:
       moveRes.placeCnts
     else:
       moveRes.placeCnts GoalColorToCell[color]
@@ -154,8 +156,9 @@ func isSatisfiedConn*(
     goal: Goal, moveRes: MoveResult, kind: static GoalKind, color: static GoalColor
 ): bool {.inline.} =
   ## Returns `true` if the goal is satisfied.
-  let conns =
-    if color in {All, Colors}:
+  let conns = staticCase:
+    case color
+    of All, Colors:
       moveRes.connCnts
     else:
       moveRes.connCnts GoalColorToCell[color]

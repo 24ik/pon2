@@ -7,7 +7,7 @@
 {.experimental: "views".}
 
 import std/[setutils]
-import ../[assign3, simd, staticfor2]
+import ../[assign3, macros2, simd, staticfor2]
 import ../../core/[common, placement, rule]
 
 when Sse42Available:
@@ -32,10 +32,12 @@ else:
 
 func isDead*(self: BinField, rule: static Rule): bool {.inline.} =
   ## Returns `true` if the binary field is in a defeated state.
-  when rule == Tsu:
-    self[Row1, Col2]
-  else:
-    self * BinField.initLowerAir != BinField.init
+  staticCase:
+    case rule
+    of Tsu:
+      self[Row1, Col2]
+    of Water:
+      self * BinField.initLowerAir != BinField.init
 
 # ------------------------------------------------
 # Placement
