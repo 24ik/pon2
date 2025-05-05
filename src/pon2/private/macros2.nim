@@ -106,10 +106,25 @@ identifiers (the rest arguments) with the suffix """ &
 # Case
 # ------------------------------------------------
 
-macro staticCase*(caseStmt: typed): untyped =
+macro staticCase*(caseStmtOrExpr: typed): untyped =
   ## Converts the `case` statement to compile-time branching.
-  caseStmt.expectKind nnkCaseStmt
-  let caseExpr = caseStmt[0]
+  ## Each `case` branch opens a new scope.
+  let
+    caseStmt =
+      case caseStmtOrExpr.kind
+      of nnkCaseStmt:
+        caseStmtOrExpr
+      of nnkStmtList:
+        if caseStmtOrExpr.len == 1:
+          caseStmtOrExpr[0].expectKind nnkCaseStmt
+          caseStmtOrExpr[0]
+        else:
+          error "`caseStmtOrExpr` should have single statement, but got {caseStmtOrExpr.len} statements".fmt,
+            caseStmtOrExpr
+      else:
+        error "`caseStmtOrExpr` should be `nnkCaseStmt` or `nnkStmtList`, but got {caseStmtOrExpr.kind}".fmt,
+          caseStmtOrExpr
+    caseExpr = caseStmt[0]
 
   let whenStmt = nnkWhenStmt.newNimNode
   for caseChild in caseStmt[1 ..^ 1]:

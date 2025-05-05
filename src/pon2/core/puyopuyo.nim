@@ -53,7 +53,7 @@ func garbagesCnt*[F: TsuField or WaterField](self: PuyoPuyo[F]): int {.inline.} 
 # ------------------------------------------------
 
 func move*[F: TsuField or WaterField](
-    self: var PuyoPuyo[F], calcConn: static bool
+    self: var PuyoPuyo[F], calcConn = true
 ): MoveResult {.inline.} =
   ## Applies the step and advances the field until chains end.
   ## This function requires that the field is settled.
@@ -61,16 +61,6 @@ func move*[F: TsuField or WaterField](
     return MoveResult.init
 
   self.field.move(self.steps.popFirst, calcConn)
-
-func move*[F: TsuField or WaterField](
-    self: var PuyoPuyo[F], calcConn: bool
-): MoveResult {.inline.} =
-  ## Applies the step and advances the field until chains end.
-  ## This function requires that the field is settled.
-  if calcConn:
-    self.move(true)
-  else:
-    self.move(false)
 
 # ------------------------------------------------
 # Puyo Puyo <-> string

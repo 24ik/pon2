@@ -130,15 +130,14 @@ o..ro.""".parseTsuField.expect
   var puyoPuyo = PuyoPuyo[TsuField].init(fieldBefore, stepsBefore)
 
   let
-    calcConn = false
-    moveRes = puyoPuyo.move calcConn
+    moveRes = puyoPuyo.move false
     popCnts: array[Cell, int] = [0, 0, 1, 0, 4, 4, 0, 0]
 
   check puyoPuyo.field == fieldAfter
   check puyoPuyo.steps == stepsAfter
   check moveRes == MoveResult.init(1, popCnts, 1, @[popCnts], @[1])
 
-  let moveRes2 = puyoPuyo.move true
+  let moveRes2 = puyoPuyo.move
   check puyoPuyo.field == fieldAfter
   check puyoPuyo.steps == stepsAfter
   check moveRes2 == MoveResult.init(0, initArrWith[Cell, int](0), 0, @[], @[])

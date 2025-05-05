@@ -72,7 +72,7 @@ block: # staticCase
         2
       of 3, 4:
         4
-      of 5..8:
+      of 5 .. 8:
         8
       elif 9 <= x and x < 17:
         16

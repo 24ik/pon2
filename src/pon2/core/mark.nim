@@ -31,7 +31,7 @@ const
 
 func mark*[F: TsuField or WaterField](nazo: NazoPuyo[F]): MarkResult {.inline.} =
   ## Marks the steps in the Nazo Puyo.
-  ## Note that this function requires that the field is settled.
+  ## This function requires that the field is settled.
   if not nazo.goal.isSupported:
     return NotSupport
 

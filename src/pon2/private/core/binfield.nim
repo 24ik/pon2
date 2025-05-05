@@ -1,5 +1,10 @@
 ## This module implements binary fields.
 ##
+## Low-level Implementation Documentations:
+## - [xmm](./binfield/xmm.html)
+## - [bit64](./binfield/bit64.html)
+## - [bit32](./binfield/bit32.html)
+##
 
 {.push raises: [].}
 {.experimental: "strictDefs".}

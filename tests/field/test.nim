@@ -1908,18 +1908,16 @@ block: # move
 
     block: # calc conn
       var field2 = fieldBefore
-      let calcConn = true
-      check field2.move(Step.init(pair, plcmt), calcConn) ==
+      check field2.move(Step.init(pair, plcmt)) ==
         MoveResult.init(
           chainCnt, popCnts, hardToGarbageCnt, detailPopCnts, detailHardToGarbageCnt,
           fullPopCnts,
         )
       check field2 == fieldAfter
 
-    block: # not calc conn
+    block: # not calcConn
       var field2 = fieldBefore
-      let calcConn = false
-      check field2.move(Step.init(pair, plcmt), calcConn) ==
+      check field2.move(pair, plcmt, false) ==
         MoveResult.init(
           chainCnt, popCnts, hardToGarbageCnt, detailPopCnts, detailHardToGarbageCnt
         )
@@ -1927,7 +1925,7 @@ block: # move
 
     block: # drop garbage
       var field2 = fieldBefore
-      check field2.move(Step.init(garbagesCnt, false), false) ==
+      check field2.move(garbagesCnt, false, false) ==
         MoveResult.init(0, initArrWith[Cell, int](0), 0, @[], @[])
       check field2 ==
         """
