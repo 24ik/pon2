@@ -3,7 +3,7 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2/core/[cell, field, mark, nazopuyo, placement, step]
+import ../../src/pon2/core/[cell, field, mark, nazopuyo, placement, popresult, step]
 import ../../src/pon2/private/[results2]
 
 func mark2[F: TsuField or WaterField](
