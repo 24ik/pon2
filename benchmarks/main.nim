@@ -2,9 +2,9 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[algorithm, math, monotimes, sequtils, stats, strformat, sugar, times]
-import ../src/pon2/core/[common, field, pair, placement, step]
-import ../src/pon2/private/[results2]
+import std/[algorithm, monotimes, sequtils, stats, strformat, sugar, times]
+import ../src/pon2/[core]
+import ../src/pon2/private/[math2, results2]
 
 func select(list: seq[Duration], n: int): Duration =
   ## Returns the n-th smallest value in the sequence.
@@ -175,17 +175,18 @@ rgybgy
 rgybgy
 rgybgy"""
       ).expect
-      step = Step.init(BlueGreen, Up2)
+      pair = BlueGreen
+      plcmt = Up2
 
     "move (Tsu, not calcConn)".measureExecTime:
       var field = field19
     do:
-      discard field.move(step, false)
+      discard field.move(pair, plcmt, false)
 
     "move (Tsu, calcConn)".measureExecTime:
       var field = field19
     do:
-      discard field.move(step, true)
+      discard field.move(pair, plcmt, true)
 
   block:
     let
@@ -206,14 +207,15 @@ bgrbrp
 rgrbrp
 pbgrbr"""
       ).expect
-      step = Step.init(GreenBlue, Up0)
+      pair = GreenBlue
+      plcmt = Up0
 
     "move (Water, not calcConn)".measureExecTime:
       var field = field18
     do:
-      discard field.move(step, false)
+      discard field.move(pair, plcmt, false)
 
     "move (Water, calcConn)".measureExecTime:
       var field = field18
     do:
-      discard field.move(step, true)
+      discard field.move(pair, plcmt, true)
