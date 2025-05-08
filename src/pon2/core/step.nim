@@ -304,6 +304,9 @@ func `$`*(self: Steps): string {.inline.} =
 
 func parseSteps*(str: string): Res[Steps] {.inline.} =
   ## Returns the steps converted from the string representation.
+  if str == "":
+    return ok Steps.init
+
   let steps = collect:
     for s in str.split StepsSep:
       ?s.parseStep.context "Invalid steps: {str}".fmt
@@ -328,7 +331,7 @@ func parseSteps*(query: string, fqdn: IdeFqdn): Res[Steps] {.inline.} =
   of Pon2:
     var
       idx = 0
-      steps = Deque[Step].init
+      steps = Steps.init
     while idx < query.len:
       if query[idx] in {HardWrapUri, GarbageWrapUri}:
         let garbageLastIdx = query.find(query[idx], start = idx.succ)

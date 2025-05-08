@@ -104,14 +104,27 @@ func toUriQueryPon2[F: TsuField or WaterField](
     self: PuyoPuyo[F]
 ): Res[string] {.inline.} =
   ## Returns the URI query converted from the game.
-  ok [(FieldKey, ?self.field.toUriQuery Pon2), (StepsKey, ?self.steps.toUriQuery Pon2)].encodeQuery
+  let errMsg = "Puyo Puyo that does not support URI conversion: {self}".fmt
+
+  ok [
+    (FieldKey, ?self.field.toUriQuery(Pon2).context errMsg),
+    (StepsKey, ?self.steps.toUriQuery(Pon2).context errMsg),
+  ].encodeQuery
 
 func toUriQueryIshikawa[F: TsuField or WaterField](
     self: PuyoPuyo[F]
 ): Res[string] {.inline.} =
   ## Returns the URI query converted from the game.
-  ok (?self.field.toUriQuery Ishikawa) & FieldStepsSepIshikawaUri &
-    ?self.steps.toUriQuery Ishikawa
+  let
+    errMsg = "Puyo Puyo that does not support URI conversion: {self}".fmt
+
+    fieldQuery = ?self.field.toUriQuery(Ishikawa).context errMsg
+    stepsQuery = ?self.steps.toUriQuery(Ishikawa).context errMsg
+
+  ok (
+    if stepsQuery == "": fieldQuery
+    else: fieldQuery & FieldStepsSepIshikawaUri & stepsQuery
+  )
 
 func toUriQuery*[F: TsuField or WaterField](
     self: PuyoPuyo[F], fqdn = Pon2

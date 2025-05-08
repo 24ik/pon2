@@ -147,9 +147,10 @@ o..ro.""".parseTsuField.expect
 # ------------------------------------------------
 
 block: # `$`, parsePuyoPuyo
-  let
-    str =
-      """
+  block:
+    let
+      str =
+        """
 r.....
 .g....
 ..b...
@@ -169,19 +170,42 @@ by|
 rg|23
 [3,0,0,0,4,0]
 pp|4N"""
+      puyoPuyo = parsePuyoPuyo[TsuField](str).expect
 
-    puyoPuyo = parsePuyoPuyo[TsuField](str).expect
+    check $puyoPuyo == str
 
-  check $puyoPuyo == str
+  block: # empty steps
+    let
+      str =
+        """
+r.....
+.g....
+..b...
+...y..
+....p.
+.....o
+....h.
+......
+......
+......
+......
+......
+......
+------
+"""
+      puyoPuyo = parsePuyoPuyo[TsuField](str).expect
+
+    check $puyoPuyo == str
 
 # ------------------------------------------------
 # Puyo Puyo <-> URI
 # ------------------------------------------------
 
 block: # toUriQuery, parsePuyoPuyo
-  let
-    str =
-      """
+  block:
+    let
+      str =
+        """
 ......
 ......
 ......
@@ -199,17 +223,85 @@ block: # toUriQuery, parsePuyoPuyo
 by|
 (0,1,0,0,0,1)
 rg|23"""
-    puyoPuyo = parsePuyoPuyo[TsuField](str).expect
+      puyoPuyo = parsePuyoPuyo[TsuField](str).expect
 
-    queryPon2 = "field=t-op......yg....b.r&steps=byo0_1_0_0_0_1org23"
-    queryIshikawa = "6E004g031_E1ahce"
+      queryPon2 = "field=t-op......yg....b.r&steps=byo0_1_0_0_0_1org23"
+      queryIshikawa = "6E004g031_E1ahce"
 
-  check puyoPuyo.toUriQuery(Pon2) == Res[string].ok queryPon2
-  check puyoPuyo.toUriQuery(Ishikawa) == Res[string].ok queryIshikawa
-  check puyoPuyo.toUriQuery(Ips) == Res[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Pon2) == Res[string].ok queryPon2
+    check puyoPuyo.toUriQuery(Ishikawa) == Res[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Ips) == Res[string].ok queryIshikawa
 
-  check parsePuyoPuyo[TsuField](queryPon2, Pon2) == Res[PuyoPuyo[TsuField]].ok puyoPuyo
-  check parsePuyoPuyo[TsuField](queryIshikawa, Ishikawa) ==
-    Res[PuyoPuyo[TsuField]].ok puyoPuyo
-  check parsePuyoPuyo[TsuField](queryIshikawa, Ips) ==
-    Res[PuyoPuyo[TsuField]].ok puyoPuyo
+    check parsePuyoPuyo[TsuField](queryPon2, Pon2) == Res[PuyoPuyo[TsuField]].ok puyoPuyo
+    check parsePuyoPuyo[TsuField](queryIshikawa, Ishikawa) ==
+      Res[PuyoPuyo[TsuField]].ok puyoPuyo
+    check parsePuyoPuyo[TsuField](queryIshikawa, Ips) ==
+      Res[PuyoPuyo[TsuField]].ok puyoPuyo
+
+  block: # empty steps
+    let
+      str =
+        """
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+.....r
+------
+"""
+      puyoPuyo = parsePuyoPuyo[TsuField](str).expect
+
+      queryPon2 = "field=t-r&steps"
+      queryIshikawa = "1"
+
+    check puyoPuyo.toUriQuery(Pon2) == Res[string].ok queryPon2
+    check puyoPuyo.toUriQuery(Ishikawa) == Res[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Ips) == Res[string].ok queryIshikawa
+
+    check parsePuyoPuyo[TsuField](queryPon2, Pon2) == Res[PuyoPuyo[TsuField]].ok puyoPuyo
+    check parsePuyoPuyo[TsuField](queryIshikawa, Ishikawa) ==
+      Res[PuyoPuyo[TsuField]].ok puyoPuyo
+    check parsePuyoPuyo[TsuField](queryIshikawa, Ips) ==
+      Res[PuyoPuyo[TsuField]].ok puyoPuyo
+
+  block: # empty field
+    let
+      puyoPuyo = PuyoPuyo[TsuField].init(TsuField.init, [Step.init GreenBlue].toDeque2)
+
+      queryPon2 = "field=t-&steps=gb"
+      queryIshikawa = "_q1"
+
+    check puyoPuyo.toUriQuery(Pon2) == Res[string].ok queryPon2
+    check puyoPuyo.toUriQuery(Ishikawa) == Res[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Ips) == Res[string].ok queryIshikawa
+
+    check parsePuyoPuyo[TsuField](queryPon2, Pon2) == Res[PuyoPuyo[TsuField]].ok puyoPuyo
+    check parsePuyoPuyo[TsuField](queryIshikawa, Ishikawa) ==
+      Res[PuyoPuyo[TsuField]].ok puyoPuyo
+    check parsePuyoPuyo[TsuField](queryIshikawa, Ips) ==
+      Res[PuyoPuyo[TsuField]].ok puyoPuyo
+
+  block: # empty field and steps
+    let
+      puyoPuyo = PuyoPuyo[TsuField].init
+
+      queryPon2 = "field=t-&steps"
+      queryIshikawa = ""
+
+    check puyoPuyo.toUriQuery(Pon2) == Res[string].ok queryPon2
+    check puyoPuyo.toUriQuery(Ishikawa) == Res[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Ips) == Res[string].ok queryIshikawa
+
+    check parsePuyoPuyo[TsuField](queryPon2, Pon2) == Res[PuyoPuyo[TsuField]].ok puyoPuyo
+    check parsePuyoPuyo[TsuField](queryIshikawa, Ishikawa) ==
+      Res[PuyoPuyo[TsuField]].ok puyoPuyo
+    check parsePuyoPuyo[TsuField](queryIshikawa, Ips) ==
+      Res[PuyoPuyo[TsuField]].ok puyoPuyo

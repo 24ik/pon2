@@ -2169,3 +2169,9 @@ r.....
       let queryRes = field.toUriQuery(fqdn)
       check queryRes == Res[string].ok "10g"
       check queryRes.expect.parseTsuField(fqdn) == Res[TsuField].ok field
+
+  block: # empty field
+    check TsuField.init.toUriQuery(Pon2) == Res[string].ok "t-"
+    check TsuField.init.toUriQuery(Ishikawa) == Res[string].ok ""
+    check TsuField.init.toUriQuery(Ips) == Res[string].ok ""
+    check WaterField.init.toUriQuery(Pon2) == Res[string].ok "w-~"

@@ -174,3 +174,13 @@ block: # `$`, parseSteps, toUriQuery
     check steps.toUriQuery(Ips).isErr
 
     check query.parseSteps(Pon2) == Res[Steps].ok steps
+
+  block: # empty steps
+    let steps = Steps.init
+
+    check $steps == ""
+    check "".parseSteps == Res[Steps].ok steps
+
+    for fqdn in IdeFqdn:
+      check steps.toUriQuery(fqdn) == Res[string].ok ""
+      check "".parseSteps(fqdn) == Res[Steps].ok steps
