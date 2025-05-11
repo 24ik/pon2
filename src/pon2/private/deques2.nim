@@ -22,3 +22,10 @@ func toDeque2*[T](arr: openArray[T]): Deque[T] {.inline.} =
     deque.addLast elem
 
   deque
+
+iterator mpairs*[T](self: var Deque[T]): tuple[key: int, val: var T] {.inline.} =
+  ## Yields and index-value pair in the deque.
+  var idx = 0
+  for val in self.mitems:
+    yield (idx, val)
+    idx.inc

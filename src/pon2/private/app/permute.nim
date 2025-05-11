@@ -1,81 +1,87 @@
-## This module implements helper procedures used in permutation.
-##
+## This module implements steps permuters.
+## 
 
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
+{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[deques, sequtils, sugar]
-import ../../core/[cell, field, nazopuyo, pair, pairposition, position]
+import std/[sequtils, sugar]
+import ../../[core]
+import ../../private/[assign3, staticfor2]
 
-func allPairsPositionsSeq(
-    originalPairsPositions: PairsPositions,
-    fixMoves: openArray[Positive],
-    allowDouble: bool,
-    allowLastDouble: bool,
-    colorCounts: array[ColorPuyo, Natural],
-    idx: Natural,
-    moveCount: Positive,
-): seq[PairsPositions] {.inline.} =
-  ## Returns all possible pairs (and positions) in ascending order that can be
-  ## obtained by permuting puyos contained in the `originalPairsPositions`.
-  # NOTE: Swapped pair may gives a different solution, but this function
-  # does not consider it.
-  if idx == moveCount:
-    return @[initDeque[PairPosition](originalPairsPositions.len)]
+func allStepsSeq(
+    steps: Steps,
+    stepIdx: int,
+    fixIndices: openArray[int],
+    allowDblNotLast, allowDblLast: bool,
+    cellCnts: array[Cell, int],
+): seq[Steps] {.inline.} =
+  ## Returns all possible steps in ascending order that can be obtained by permuting
+  ## puyos contained in the steps.
+  ## Non-`PairPlacement` steps are left as they are.
+  ## Note that Swapped pair may give a different answer but this function does not
+  ## consider it.
+  if stepIdx == steps.len:
+    return @[Steps.init(steps.len)]
 
-  result = @[]
-  let nowLast = idx == moveCount.pred
+  let step = steps[stepIdx]
+  if step.kind != PairPlacement:
+    return steps.allStepsSeq(
+      stepIdx.succ, fixIndices, allowDblNotLast, allowDblLast, cellCnts
+    ).mapIt it.dup(addFirst(_, step))
 
-  for axis in ColorPuyo:
-    if colorCounts[axis] == 0:
+  var stepsSeq = newSeq[Steps]()
+  for pivotCell in Cell.Red .. Cell.Purple:
+    if cellCnts[pivotCell] == 0:
       continue
 
-    var newColorCountsMid = colorCounts
-    newColorCountsMid[axis].dec
+    var newCellCntsMid = cellCnts
+    newCellCntsMid[pivotCell].dec
 
-    for child in axis .. ColorPuyo.high:
-      if axis == child and (not allowDouble or (nowLast and not allowLastDouble)):
-        continue
-      if newColorCountsMid[child] == 0:
+    for rotorCell in pivotCell .. Cell.Purple:
+      if newCellCntsMid[rotorCell] == 0:
         continue
 
-      var newColorCounts = newColorCountsMid
-      newColorCounts[child].dec
+      if pivotCell == rotorCell:
+        if stepIdx == steps.len.pred:
+          if not allowDblLast:
+            continue
+        else:
+          if not allowDblNotLast:
+            continue
+
+      var newCellCnts = newCellCntsMid
+      newCellCnts[rotorCell].dec
 
       let
-        nowPairTmp = initPair(axis, child)
-        nowPair: Pair
-      if idx.succ in fixMoves:
-        if originalPairsPositions[idx].pair notin {nowPairTmp, nowPairTmp.swapped}:
+        newPairMid = Pair.init(pivotCell, rotorCell)
+        newPair: Pair
+      if stepIdx in fixIndices:
+        if step.pair notin {newPairMid, newPairMid.swapped}:
           continue
 
-        nowPair = originalPairsPositions[idx].pair
+        newPair = step.pair
       else:
-        nowPair = nowPairTmp
+        newPair = newPairMid
 
-      result &=
-        originalPairsPositions.allPairsPositionsSeq(
-          fixMoves, allowDouble, allowLastDouble, newColorCounts, idx.succ, moveCount
-        ).mapIt it.dup addFirst PairPosition(pair: nowPair, position: Position.None)
+      stepsSeq &=
+        steps.allStepsSeq(
+          stepIdx.succ, fixIndices, allowDblNotLast, allowDblLast, newCellCnts
+        ).mapIt it.dup(addFirst(_, Step.init newPair))
 
-func allPairsPositionsSeq*[F: TsuField or WaterField](
-    nazo: NazoPuyo[F],
-    fixMoves: openArray[Positive],
-    allowDouble: bool,
-    allowLastDouble: bool,
-): seq[PairsPositions] {.inline.} =
-  ## Returns all possible pairs (and positions) in ascending order that can be
-  ## obtained by permuting puyos contained in the pairs.
-  # NOTE: Swapped pair may gives a different solution, but this function
-  # does not consider it.
-  var colorCounts: array[ColorPuyo, Natural] = [0, 0, 0, 0, 0]
-  for color in ColorPuyo:
-    colorCounts[color] = nazo.puyoPuyo.pairsPositions.puyoCount color
+  stepsSeq
 
-  result = nazo.puyoPuyo.pairsPositions.allPairsPositionsSeq(
-    fixMoves.deduplicate, allowDouble, allowLastDouble, colorCounts, 0, nazo.moveCount
-  )
+func allStepsSeq*(
+    steps: Steps, fixIndices: openArray[int], allowDblNotLast, allowDblLast: bool
+): seq[Steps] {.inline.} =
+  ## Returns all possible steps in ascending order that can be obtained by permuting
+  ## puyos contained in the steps.
+  ## Non-`PairPlacement` steps are left as they are.
+  ## Note that Swapped pair may give a different answer but this function does not
+  ## consider it.
+  var cellCnts {.noinit.}: array[Cell, int]
+  staticFor(cell2, Cell.Red .. Cell.Purple):
+    cellCnts[cell2].assign steps.cellCnt cell2
+
+  steps.allStepsSeq(0, fixIndices, allowDblNotLast, allowDblLast, cellCnts)

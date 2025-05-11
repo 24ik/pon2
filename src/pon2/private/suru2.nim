@@ -35,13 +35,10 @@ proc fill*(pBar: var SingleSuruBar) {.inline.} =
   ## Fills the progress bar.
   pBar.inc pBar.total - pBar.progress
 
-proc shutdown*(pBar: var SuruBar, idx = -1) {.inline.} =
+proc shutdown*(pBar: var SuruBar) {.inline.} =
   ## Completes the progress bar.
-  if idx < 0:
-    for singleBar in pBar.mitems:
-      singleBar.fill
-  else:
-    pBar[idx].fill
+  for singleBar in pBar.mitems:
+    singleBar.fill
 
   pBar.update2
   pBar.finish2

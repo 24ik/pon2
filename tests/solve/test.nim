@@ -2,7 +2,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, sets, sugar, unittest, uri, isolation]
+import std/[sequtils, sets, sugar, unittest]
 import ../../src/pon2/[core]
 import ../../src/pon2/app/[solve]
 import ../../src/pon2/private/[results2]

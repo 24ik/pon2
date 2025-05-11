@@ -1,62 +1,52 @@
 ## This module implements Nazo Puyo permuters.
 ##
 
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
+{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import ./[solve]
-import ../core/[field, nazopuyo, pairposition]
+import ../[core]
+import ../private/[assign3]
 import ../private/app/[permute]
 
 when not defined(js):
-  import std/[cpuinfo]
-  import suru
-
-# ------------------------------------------------
-# Permute
-# ------------------------------------------------
+  import ../private/[suru2]
 
 iterator permute*[F: TsuField or WaterField](
     nazo: NazoPuyo[F],
-    fixMoves: seq[Positive],
-    allowDouble: bool,
-    allowLastDouble: bool,
-    showProgress: static bool = false,
-    parallelCount: Positive =
-      when defined(js):
-        1
-      else:
-        max(1, countProcessors())
-    ,
-): PairsPositions {.inline.} =
-  ## Yields pairs&positions of the nazo puyo that is obtained by permuting
-  ## pairs and has a unique solution.
-  ## `showProgress` and `parallelCount` is ignored on JS backend.
-  let pairsPositionsSeq =
-    nazo.allPairsPositionsSeq(fixMoves, allowDouble, allowLastDouble)
+    fixIndices: openArray[int],
+    allowDblNotLast, allowDblLast: bool,
+    showProgressBar: static bool = false,
+): NazoPuyo[F] {.inline.} =
+  ## Yields Nazo Puyo that is obtained by permuting steps and has a unique answer.
+  ## `showProgressBar` is ignored on JS backend.
+  const ShowSuruBar = showProgressBar and not defined(js)
 
-  when not defined(js) and showProgress:
-    var progressBar = initSuruBar()
-    progressBar[0].total = pairsPositionsSeq.len
-    progressBar.setup
+  let stepsSeq =
+    nazo.puyoPuyo.steps.allStepsSeq(fixIndices, allowDblNotLast, allowDblLast)
 
-  for pairsPositions in pairsPositionsSeq:
+  when ShowSuruBar:
+    var suruBar = initSuruBar()
+    suruBar[0].total = stepsSeq.len
+    suruBar.setup2
+
+  for steps in stepsSeq:
     var nazo2 = nazo
-    nazo2.puyoPuyo.pairsPositions = pairsPositions
+    nazo2.puyoPuyo.steps.assign steps
 
-    let answers = nazo2.solve(earlyStopping = true, parallelCount = parallelCount)
-
-    when not defined(js) and showProgress:
-      progressBar.inc
-      progressBar.update
-
+    let answers = nazo2.solve(calcAllAnswers = false)
     if answers.len == 1:
-      nazo2.puyoPuyo.pairsPositions.positions = answers[0]
-      yield nazo2.puyoPuyo.pairsPositions
+      for stepIdx, step in nazo2.puyoPuyo.steps.mpairs:
+        if step.kind == PairPlacement:
+          step.optPlacement = answers[0][stepIdx]
 
-  when not defined(js) and showProgress:
-    progressBar.finish
+      yield nazo2
+
+    when ShowSuruBar:
+      suruBar.inc
+      suruBar.update2
+
+  when ShowSuruBar:
+    suruBar.finish2

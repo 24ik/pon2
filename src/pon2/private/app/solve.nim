@@ -617,8 +617,7 @@ when not defined(js):
       self: SolveNode[F],
       answers: var seq[SolveAnswer],
       moveCnt: int,
-      calcAllAnswers: static bool,
-      showProgressBar: static bool,
+      calcAllAnswers, showProgressBar: static bool,
       goal: Goal,
       kind: static GoalKind,
       color: static GoalColor,
@@ -627,7 +626,6 @@ when not defined(js):
   ) {.inline.} =
     ## Solves the nazo puyo.
     ## This function requires that the field is settled and `answers` is empty.
-    ## `showProgressBar` is ignored on JS backend.
     const
       SpawnWaitMs = 25
       SolveWaitMs = 50
@@ -700,8 +698,7 @@ proc solve[F: TsuField or WaterField](
     self: SolveNode[F],
     answers: var seq[SolveAnswer],
     moveCnt: int,
-    calcAllAnswers: static bool,
-    showProgressBar: static bool,
+    calcAllAnswers, showProgressBar: static bool,
     goal: Goal,
     kind: static GoalKind,
     color: static GoalColor,
@@ -728,8 +725,7 @@ proc solve[F: TsuField or WaterField](
     self: SolveNode[F],
     answers: var seq[SolveAnswer],
     moveCnt: int,
-    calcAllAnswers: static bool,
-    showProgressBar: static bool,
+    calcAllAnswers, showProgressBar: static bool,
     goal: Goal,
     kind: static GoalKind,
     steps: Steps,
@@ -784,8 +780,7 @@ proc solve[F: TsuField or WaterField](
     self: SolveNode[F],
     answers: var seq[SolveAnswer],
     moveCnt: int,
-    calcAllAnswers: static bool,
-    showProgressBar: static bool,
+    calcAllAnswers, showProgressBar: static bool,
     goal: Goal,
     steps: Steps,
     isZeroDepth: static bool,
@@ -880,8 +875,7 @@ proc solve[F: TsuField or WaterField](
 
 proc solve*[F: TsuField or WaterField](
     self: SolveNode[F],
-    calcAllAnswers: static bool,
-    showProgressBar: static bool,
+    calcAllAnswers, showProgressBar: static bool,
     goal: Goal,
     steps: Steps,
 ): seq[SolveAnswer] {.inline.} =
