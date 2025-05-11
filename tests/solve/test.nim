@@ -2,7 +2,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, sets, sugar, unittest, uri]
+import std/[sequtils, sets, sugar, unittest, uri, isolation]
 import ../../src/pon2/[core]
 import ../../src/pon2/app/[solve]
 import ../../src/pon2/private/[results2]
@@ -27,13 +27,13 @@ func toAnswers(strs: varargs[string]): HashSet[SolveAnswer] =
 
   answers
 
-func tsuSolve(str: string): HashSet[SolveAnswer] =
+proc tsuSolve(str: string, calcAllAnswers: static bool = true): HashSet[SolveAnswer] =
   ## Returns the answers of Tsu Nazo Puyo.
-  parseNazoPuyo[TsuField](str).expect.solve.toHashSet
+  parseNazoPuyo[TsuField](str).expect.solve(calcAllAnswers).toHashSet
 
-func waterSolve(str: string): HashSet[SolveAnswer] =
+proc waterSolve(str: string, calcAllAnswers: static bool = true): HashSet[SolveAnswer] =
   ## Returns the answers of Water Nazo Puyo.
-  parseNazoPuyo[WaterField](str).expect.solve.toHashSet
+  parseNazoPuyo[WaterField](str).expect.solve(calcAllAnswers).toHashSet
 
 block: # solve
   block: # Clear
@@ -520,3 +520,48 @@ yyryy.
 ry|
 ry|""".tsuSolve ==
       toAnswers()
+
+  block: # early satisfy
+    check """
+ぷよ全て消すべし
+======
+......
+......
+......
+......
+......
+......
+......
+......
+......
+.r....
+.rr...
+.bbr..
+.rrbb.
+------
+rr|
+rb|""".tsuSolve ==
+      toAnswers("1N", "5N54", "6N54")
+
+  block: # not calcAllAnswers
+    check """
+ぷよ全て消すべし
+======
+......
+......
+......
+......
+......
+......
+......
+......
+......
+.r....
+.rr...
+.bbr..
+.rrbb.
+------
+rr|
+rb|""".tsuSolve(
+      false
+    ) <= toAnswers("1N", "5N54", "6N54")

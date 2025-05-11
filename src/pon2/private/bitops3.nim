@@ -339,7 +339,7 @@ func blsmskNim[T: SomeSignedInt](val: T): T {.inline.} =
   ## If `val` is zero, all bits of the result are one.
   val.pred xor val
 
-func blsmskNim[T: SomeUnSignedInt](val: T): T {.inline.} =
+func blsmskNim[T: SomeUnsignedInt](val: T): T {.inline.} =
   ## Returns the mask up to the lowest set bit.
   ## If `val` is zero, all bits of the result are one.
   val.asSigned.blsmskNim.asUnsigned

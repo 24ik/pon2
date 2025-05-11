@@ -5,6 +5,7 @@
 import std/[algorithm, monotimes, sequtils, stats, strformat, sugar, times]
 import ../src/pon2/[core]
 import ../src/pon2/private/[math2, results2]
+import ../src/pon2/app/[solve]
 
 func select(list: seq[Duration], n: int): Duration =
   ## Returns the n-th smallest value in the sequence.
@@ -62,10 +63,10 @@ func toStr(dur: Duration): string =
   else:
     "Negative duration is not supported, but got: {dur}".fmt
 
-func execResStr(desc: string, mean, sd, med: Duration): string =
+func execResStr(desc: string, mean, sd, med: Duration, durCnt: int): string =
   ## Returns the string representation of execution result.
   # NOTE: format-string does not work in templates
-  "[{desc}] {mean.toStr} +/- {sd.toStr} (Med: {med.toStr})".fmt
+  "[{desc}] {mean.toStr} +/- {sd.toStr} (Med: {med.toStr}), #Run: {durCnt}".fmt
 
 template measureExecTime(desc: string, setup: untyped, body: untyped): untyped =
   ## Runs the `setup` and `body` repeatedly and shows the execution time of `body`.
@@ -92,6 +93,7 @@ template measureExecTime(desc: string, setup: untyped, body: untyped): untyped =
     initDuration(nanoseconds = stat.mean.int64),
     initDuration(nanoseconds = stat.standardDeviationS.int64),
     durs.median,
+    durs.len,
   )
 
 template measureExecTime(desc: string, body: untyped): untyped =
@@ -219,3 +221,63 @@ pbgrbr"""
       var field = field18
     do:
       discard field.move(pair, plcmt, true)
+
+  "solve (Rashomon)".measureExecTime:
+    let nazo = parseNazoPuyo[TsuField](
+      """
+ぷよ全て消すべし
+======
+......
+......
+......
+..ry..
+.rryy.
+.ggbb.
+rrgbyy
+rbrygy
+yybgrr
+ybbggr
+rgryby
+rrgbyy
+ggoobb
+------
+rg|
+bg|
+by|
+by|
+rg|
+ry|"""
+    ).expect
+  do:
+    discard nazo.solve
+
+  "solve (Galaxy)".measureExecTime:
+    let nazo = parseNazoPuyo[TsuField](
+      """
+12連鎖以上するべし
+======
+......
+....ob
+....ob
+....ob
+bbyyog
+bgryog
+ggrrog
+bbggoy
+brrgoy
+yryyoy
+ybbyor
+ybggor
+rrrgor
+------
+bg|
+rg|
+ry|
+by|
+yb|
+yr|
+gr|
+gb|"""
+    ).expect
+  do:
+    discard nazo.solve

@@ -49,7 +49,7 @@ proc run(file: Path, backend: Backend, simdLvl, bmiLvl: int, clmulUse: bool): st
   let
     cacheDir = nimCacheDir()
     output =
-      "nim {backend} --nimcache:{cacheDir} -w:off --hints:off -d:pon2.simd={simdLvl} -d:pon2.bmi={bmiLvl} -d:pon2.clmul={clmulUse} -r --outdir:{outDir(file, backend, simdLvl, bmiLvl, clmulUse)} {file}".fmt.execCmdEx.output
+      "nim {backend} --nimcache:{cacheDir} -w:off --hints:off --styleCheck:error -d:pon2.simd={simdLvl} -d:pon2.bmi={bmiLvl} -d:pon2.clmul={clmulUse} -r --outdir:{outDir(file, backend, simdLvl, bmiLvl, clmulUse)} {file}".fmt.execCmdEx.output
 
   cacheDir.removeDir
 

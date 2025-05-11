@@ -11,9 +11,14 @@ import ../private/app/[solve]
 
 export SolveAnswer
 
-func solve*[F: TsuField or WaterField](
-    nazo: NazoPuyo[F], earlyStopping: static bool = false
+proc solve*[F: TsuField or WaterField](
+    nazo: NazoPuyo[F],
+    calcAllAnswers: static bool = true,
+    showProgressBar: static bool = false,
 ): seq[SolveAnswer] {.inline.} =
   ## Solves the nazo puyo.
   ## This function requires that the field is settled.
-  SolveNode[F].init(nazo.puyoPuyo).solve(earlyStopping, nazo.goal, nazo.puyoPuyo.steps)
+  ## `showProgressBar` is ignored on JS backend.
+  SolveNode[F].init(nazo.puyoPuyo).solve(
+    calcAllAnswers, showProgressBar, nazo.goal, nazo.puyoPuyo.steps
+  )

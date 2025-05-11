@@ -1,5 +1,6 @@
 ## This module implements nodes of solution search tree.
 ##
+# NOTE: this is deprecated; removed after new implementation is completed.
 
 {.experimental: "inferGenericTypes".}
 {.experimental: "notnil".}

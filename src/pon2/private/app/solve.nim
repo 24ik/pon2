@@ -8,7 +8,15 @@
 
 import std/[algorithm, sequtils]
 import ../../[core]
-import ../../private/[assign3, core, macros2, math2, staticfor2]
+import ../../private/[assign3, core, macros2, math2, results2, staticfor2]
+
+when not defined(js):
+  import std/[os, sugar]
+  import ../../private/[suru2]
+
+  {.push warning[Deprecated]: off.}
+  import std/[threadpool]
+  {.pop.}
 
 type
   SolveAnswer* = seq[OptPlacement]
@@ -173,7 +181,6 @@ func childGarbages[F: TsuField or WaterField](
       step.cnts, step.dropHard, static(kind in {Place, PlaceMore, Conn, ConnMore})
     )
 
-# TODO: iterator?
 func children[F: TsuField or WaterField](
     self: SolveNode[F], kind: static GoalKind, color: static GoalColor, step: Step
 ): seq[tuple[node: SolveNode[F], optPlacement: OptPlacement]] {.inline.} =
@@ -263,6 +270,7 @@ func filter4[T: SomeNumber](x: T): T {.inline.} =
     result = x.filter4Nim
   else:
     when defined(gcc) or defined(clang):
+      {.push warning[Uninit]: off.}
       var zero {.noinit.}: int
       asm """
 xor %2, %2
@@ -270,6 +278,7 @@ cmp $4, %1
 cmovl %2, %0
 : "=&r"(`result`)
 : "0"(`x`), "r"(`zero`)"""
+      {.pop.}
     else:
       result = x.filter4Nim
 
@@ -404,11 +413,295 @@ func canPrune[F: TsuField or WaterField](
 # Solve
 # ------------------------------------------------
 
-func solve[F: TsuField or WaterField](
+func solveSingleThread[F: TsuField or WaterField](
     self: SolveNode[F],
-    answers: out seq[SolveAnswer],
+    answers: var seq[SolveAnswer],
     moveCnt: int,
-    earlyStopping: static bool,
+    calcAllAnswers: static bool,
+    goal: Goal,
+    kind: static GoalKind,
+    color: static GoalColor,
+    steps: Steps,
+    isZeroDepth: static bool,
+) {.inline.} =
+  ## Solves the nazo puyo with a single thread.
+  ## This function requires that the field is settled and `answers` is empty.
+  ## `answers` is set in reverse order.
+  when isZeroDepth:
+    if self.canPrune(goal, kind, color, true):
+      return
+
+  let
+    step = steps[self.depth]
+    childDepth = self.depth.succ
+    childIsLeaf = childDepth == moveCnt
+    children = self.children(kind, color, step)
+
+  var childAnswersSeq = newSeqOfCap[seq[SolveAnswer]](children.len)
+  for _ in 1 .. children.len:
+    childAnswersSeq.add newSeqOfCap[SolveAnswer](22)
+
+  for childIdx, (child, optPlcmt) in children.pairs:
+    if child.isAccepted(goal, kind, color):
+      var ans = newSeqOfCap[OptPlacement](childDepth)
+      ans.add optPlcmt
+
+      answers.add ans
+
+      when not calcAllAnswers:
+        if answers.len > 1:
+          return
+
+      continue
+
+    if childIsLeaf or child.canPrune(goal, kind, color, false):
+      continue
+
+    child.solveSingleThread childAnswersSeq[childIdx],
+      moveCnt, calcAllAnswers, goal, kind, color, steps, false
+
+    for ans in childAnswersSeq[childIdx].mitems:
+      ans.add optPlcmt
+
+    when not calcAllAnswers:
+      if answers.len + childAnswersSeq[childIdx].len > 1:
+        answers &= childAnswersSeq[childIdx]
+        return
+
+  answers &= childAnswersSeq.concat
+
+when not defined(js):
+  proc solveSingleThread[F: TsuField or WaterField](
+      self: SolveNode[F],
+      answers: ptr seq[SolveAnswer],
+      moveCnt: int,
+      goal: Goal,
+      steps: Steps,
+      calcAllAnswers: static bool,
+      kind: static GoalKind,
+      color: static GoalColor,
+      isZeroDepth: static bool,
+  ): bool {.inline.} =
+    ## Solves the nazo puyo with a single thread.
+    ## This function requires that the field is settled and `answers` is empty.
+    ## `answers` is set in reverse order.
+    ## `result` has no meanings; only used to get FlowVar.
+    # NOTE: non-static arguments should be placed before static ones due to `spawn` bug.
+    self.solveSingleThread answers[],
+      moveCnt, calcAllAnswers, goal, kind, color, steps, isZeroDepth
+    true
+
+  proc calcSpawnNodes[F: TsuField or WaterField](
+      self: SolveNode[F],
+      nodes: var seq[SolveNode[F]],
+      optPlcmtsSeq: var seq[seq[OptPlacement]],
+      answers: var seq[SolveAnswer],
+      moveCnt: int,
+      calcAllAnswers: static bool,
+      goal: Goal,
+      kind: static GoalKind,
+      color: static GoalColor,
+      steps: Steps,
+  ) {.inline.} =
+    ## Calculates nodes to be spawned.
+    ## `answers` is set in reverse order.
+    # NOTE: 3 shows good performance; see https://github.com/24ik/pon2/issues/198
+    # NOTE: now `SpawnDepth` max is 3 since the limitations of Nim's built-in sets,
+    # that is used by node indices (22^3 < int16.high < 22^4)
+    const SpawnDepth = 3
+
+    let
+      step = steps[self.depth]
+      childDepth = self.depth.succ
+      childIsSpawned = childDepth == SpawnDepth
+      childIsLeaf = childDepth == moveCnt
+      children = self.children(kind, color, step)
+
+    var
+      nodesSeq = newSeqOfCap[seq[SolveNode[F]]](children.len)
+      optPlcmtsSeqSeq = newSeqOfCap[seq[seq[OptPlacement]]](children.len)
+      answersSeq = newSeqOfCap[seq[SolveAnswer]](children.len)
+    for _ in 1 .. children.len:
+      nodesSeq.add newSeqOfCap[SolveNode[F]](22)
+      optPlcmtsSeqSeq.add newSeqOfCap[seq[OptPlacement]](22)
+      answersSeq.add newSeqOfCap[SolveAnswer](22)
+
+    for childIdx, (child, optPlcmt) in children.pairs:
+      if child.isAccepted(goal, kind, color):
+        var ans = newSeqOfCap[OptPlacement](childDepth)
+        ans.add optPlcmt
+
+        answers.add ans
+
+        when not calcAllAnswers:
+          if answers.len > 1:
+            return
+
+        continue
+
+      if childIsLeaf or child.canPrune(goal, kind, color, false):
+        continue
+
+      if childIsSpawned:
+        nodesSeq[childIdx].add child
+
+        var optPlcmts = newSeqOfCap[OptPlacement](childDepth)
+        optPlcmts.add optPlcmt
+        optPlcmtsSeqSeq[childIdx].add optPlcmts
+      else:
+        child.calcSpawnNodes nodesSeq[childIdx],
+          optPlcmtsSeqSeq[childIdx],
+          answersSeq[childIdx],
+          moveCnt,
+          calcAllAnswers,
+          goal,
+          kind,
+          color,
+          steps
+
+        for optPlcmts in optPlcmtsSeqSeq[childIdx].mitems:
+          optPlcmts.add optPlcmt
+
+      for ans in answersSeq[childIdx].mitems:
+        ans.add optPlcmt
+
+      when not calcAllAnswers:
+        if answers.len + answersSeq[childIdx].len > 1:
+          answers &= answersSeq[childIdx]
+          return
+
+    nodes &= nodesSeq.concat
+    optPlcmtsSeq &= optPlcmtsSeqSeq.concat
+    answers &= answersSeq.concat
+
+  template checkSpawnFinished(
+      futures: seq[FlowVar[bool]],
+      answers: var seq[SolveAnswer],
+      answersSeq: var seq[seq[SolveAnswer]],
+      runningNodeIndices: var set[int16],
+      optPlcmtsSeq: seq[seq[OptPlacement]],
+      suruBar: typed,
+      calcAllAnswers: static bool,
+      showProgressBar: static bool,
+  ) =
+    ## Check all the spawned threads and reflects results if they have finished.
+    var finishNodeIndices = set[int16]({})
+
+    for runningNodeIdx in runningNodeIndices:
+      if not futures[runningNodeIdx].isReady:
+        continue
+
+      finishNodeIndices.incl runningNodeIdx
+
+      let optPlcmts = optPlcmtsSeq[runningNodeIdx]
+      for ans in answersSeq[runningNodeIdx].mitems:
+        ans &= optPlcmts
+        ans.reverse
+
+      when not calcAllAnswers:
+        if answers.len + answersSeq[runningNodeIdx].len > 1:
+          answers &= answersSeq[runningNodeIdx]
+
+          when showProgressBar:
+            suruBar.shutdown
+
+          return
+
+      when showProgressBar:
+        suruBar.inc
+        suruBar.update2
+
+    runningNodeIndices.excl finishNodeIndices
+
+  proc solveMultiThread[F: TsuField or WaterField](
+      self: SolveNode[F],
+      answers: var seq[SolveAnswer],
+      moveCnt: int,
+      calcAllAnswers: static bool,
+      showProgressBar: static bool,
+      goal: Goal,
+      kind: static GoalKind,
+      color: static GoalColor,
+      steps: Steps,
+      isZeroDepth: static bool,
+  ) {.inline.} =
+    ## Solves the nazo puyo.
+    ## This function requires that the field is settled and `answers` is empty.
+    ## `showProgressBar` is ignored on JS backend.
+    const
+      SpawnWaitMs = 25
+      SolveWaitMs = 50
+
+    var
+      nodes = newSeq[SolveNode[F]]()
+      optPlcmtsSeq = newSeq[seq[OptPlacement]]()
+    self.calcSpawnNodes nodes,
+      optPlcmtsSeq, answers, moveCnt, calcAllAnswers, goal, kind, color, steps
+
+    for ans in answers.mitems:
+      ans.reverse
+
+    when not calcAllAnswers:
+      if answers.len > 1:
+        return
+
+    let nodeCnt = nodes.len
+
+    when showProgressBar:
+      var suruBar = initSuruBar()
+      suruBar[0].total = nodeCnt
+      suruBar.setup2
+    else:
+      let suruBar = false # dummy
+
+    var
+      answersSeq = collect:
+        for _ in 1 .. nodes.len:
+          newSeq[SolveAnswer]()
+      futures = newSeqOfCap[FlowVar[bool]](nodeCnt)
+      runningNodeIndices = set[int16]({})
+
+    var nodeIdx = 0'i16
+    while nodeIdx < nodeCnt:
+      if preferSpawn():
+        futures.add spawn nodes[nodeIdx].solveSingleThread(
+          answersSeq[nodeIdx].addr,
+          moveCnt,
+          goal,
+          steps,
+          calcAllAnswers,
+          kind,
+          color,
+          isZeroDepth,
+        )
+
+        runningNodeIndices.incl nodeIdx
+        nodeIdx.inc
+
+        continue
+
+      futures.checkSpawnFinished answers,
+        answersSeq, runningNodeIndices, optPlcmtsSeq, suruBar, calcAllAnswers,
+        showProgressBar
+      sleep SpawnWaitMs
+
+    while runningNodeIndices.card > 0:
+      futures.checkSpawnFinished answers,
+        answersSeq, runningNodeIndices, optPlcmtsSeq, suruBar, calcAllAnswers,
+        showProgressBar
+      sleep SolveWaitMs
+
+    answers &= answersSeq.concat
+
+    when showProgressBar:
+      suruBar.finish2
+
+proc solve[F: TsuField or WaterField](
+    self: SolveNode[F],
+    answers: var seq[SolveAnswer],
+    moveCnt: int,
+    calcAllAnswers: static bool,
+    showProgressBar: static bool,
     goal: Goal,
     kind: static GoalKind,
     color: static GoalColor,
@@ -417,40 +710,26 @@ func solve[F: TsuField or WaterField](
 ) {.inline.} =
   ## Solves the nazo puyo.
   ## This function requires that the field is settled and `answers` is empty.
-  when isZeroDepth:
-    if self.canPrune(goal, kind, color, true):
-      return
+  ## `showProgressBar` is ignored on JS backend.
+  when defined(js):
+    self.solveSingleThread(
+      answers, moveCnt, calcAllAnswers, goal, kind, color, steps, isZeroDepth
+    )
 
-  let step = steps[self.depth]
+    for ans in answers.mitems:
+      ans.reverse
+  else:
+    self.solveMultiThread(
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, kind, color, steps,
+      isZeroDepth,
+    )
 
-  for (child, optPlcmt) in self.children(kind, color, step):
-    if child.isAccepted(goal, kind, color):
-      answers.add @[optPlcmt]
-      continue
-
-    if self.depth == moveCnt.pred:
-      continue
-
-    if child.canPrune(goal, kind, color, false):
-      continue
-
-    var childAnswers = newSeq[SolveAnswer]()
-    child.solve(childAnswers, moveCnt, earlyStopping, goal, kind, color, steps, false)
-
-    for ans in childAnswers.mitems:
-      ans.add optPlcmt
-
-    answers &= childAnswers
-
-    when earlyStopping:
-      if answers.len > 1:
-        return
-
-func solve[F: TsuField or WaterField](
+proc solve[F: TsuField or WaterField](
     self: SolveNode[F],
-    answers: out seq[SolveAnswer],
+    answers: var seq[SolveAnswer],
     moveCnt: int,
-    earlyStopping: static bool,
+    calcAllAnswers: static bool,
+    showProgressBar: static bool,
     goal: Goal,
     kind: static GoalKind,
     steps: Steps,
@@ -458,114 +737,161 @@ func solve[F: TsuField or WaterField](
 ) {.inline.} =
   ## Solves the nazo puyo.
   ## This function requires that the field is settled and `answers` is empty.
+  ## `showProgressBar` is ignored on JS backend.
   case goal.optColor.expect
   of All:
-    self.solve(answers, moveCnt, earlyStopping, goal, kind, All, steps, isZeroDepth)
+    self.solve(
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, kind, All, steps,
+      isZeroDepth,
+    )
   of GoalColor.Red:
     self.solve(
-      answers, moveCnt, earlyStopping, goal, kind, GoalColor.Red, steps, isZeroDepth
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, kind, GoalColor.Red,
+      steps, isZeroDepth,
     )
   of GoalColor.Green:
     self.solve(
-      answers, moveCnt, earlyStopping, goal, kind, GoalColor.Green, steps, isZeroDepth
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, kind, GoalColor.Green,
+      steps, isZeroDepth,
     )
   of GoalColor.Blue:
     self.solve(
-      answers, moveCnt, earlyStopping, goal, kind, GoalColor.Blue, steps, isZeroDepth
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, kind, GoalColor.Blue,
+      steps, isZeroDepth,
     )
   of GoalColor.Yellow:
     self.solve(
-      answers, moveCnt, earlyStopping, goal, kind, GoalColor.Yellow, steps, isZeroDepth
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, kind, GoalColor.Yellow,
+      steps, isZeroDepth,
     )
   of GoalColor.Purple:
     self.solve(
-      answers, moveCnt, earlyStopping, goal, kind, GoalColor.Purple, steps, isZeroDepth
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, kind, GoalColor.Purple,
+      steps, isZeroDepth,
     )
   of GoalColor.Garbages:
     self.solve(
-      answers, moveCnt, earlyStopping, goal, kind, GoalColor.Garbages, steps,
-      isZeroDepth,
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, kind, GoalColor.Garbages,
+      steps, isZeroDepth,
     )
   of Colors:
-    self.solve(answers, moveCnt, earlyStopping, goal, kind, Colors, steps, isZeroDepth)
+    self.solve(
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, kind, Colors, steps,
+      isZeroDepth,
+    )
 
-func solve[F: TsuField or WaterField](
+proc solve[F: TsuField or WaterField](
     self: SolveNode[F],
-    answers: out seq[SolveAnswer],
+    answers: var seq[SolveAnswer],
     moveCnt: int,
-    earlyStopping: static bool,
+    calcAllAnswers: static bool,
+    showProgressBar: static bool,
     goal: Goal,
     steps: Steps,
     isZeroDepth: static bool,
 ) {.inline.} =
   ## Solves the nazo puyo.
   ## This function requires that the field is settled and `answers` is empty.
+  ## `showProgressBar` is ignored on JS backend.
   const DummyColor = All
 
   case goal.kind
   of Clear:
-    self.solve(answers, moveCnt, earlyStopping, goal, Clear, steps, isZeroDepth)
+    self.solve(
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, Clear, steps, isZeroDepth
+    )
   of AccColor:
     self.solve(
-      answers, moveCnt, earlyStopping, goal, AccColor, DummyColor, steps, isZeroDepth
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, AccColor, DummyColor,
+      steps, isZeroDepth,
     )
   of AccColorMore:
     self.solve(
-      answers, moveCnt, earlyStopping, goal, AccColorMore, DummyColor, steps,
-      isZeroDepth,
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, AccColorMore, DummyColor,
+      steps, isZeroDepth,
     )
   of AccCnt:
-    self.solve(answers, moveCnt, earlyStopping, goal, AccCnt, steps, isZeroDepth)
+    self.solve(
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, AccCnt, steps,
+      isZeroDepth,
+    )
   of AccCntMore:
-    self.solve(answers, moveCnt, earlyStopping, goal, AccCntMore, steps, isZeroDepth)
+    self.solve(
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, AccCntMore, steps,
+      isZeroDepth,
+    )
   of Chain:
     self.solve(
-      answers, moveCnt, earlyStopping, goal, Chain, DummyColor, steps, isZeroDepth
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, Chain, DummyColor, steps,
+      isZeroDepth,
     )
   of ChainMore:
     self.solve(
-      answers, moveCnt, earlyStopping, goal, ChainMore, DummyColor, steps, isZeroDepth
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, ChainMore, DummyColor,
+      steps, isZeroDepth,
     )
   of ClearChain:
-    self.solve(answers, moveCnt, earlyStopping, goal, ClearChain, steps, isZeroDepth)
+    self.solve(
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, ClearChain, steps,
+      isZeroDepth,
+    )
   of ClearChainMore:
     self.solve(
-      answers, moveCnt, earlyStopping, goal, ClearChainMore, steps, isZeroDepth
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, ClearChainMore, steps,
+      isZeroDepth,
     )
   of Color:
     self.solve(
-      answers, moveCnt, earlyStopping, goal, Color, DummyColor, steps, isZeroDepth
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, Color, DummyColor, steps,
+      isZeroDepth,
     )
   of ColorMore:
     self.solve(
-      answers, moveCnt, earlyStopping, goal, ColorMore, DummyColor, steps, isZeroDepth
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, ColorMore, DummyColor,
+      steps, isZeroDepth,
     )
   of Cnt:
-    self.solve(answers, moveCnt, earlyStopping, goal, Cnt, steps, isZeroDepth)
+    self.solve(
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, Cnt, steps, isZeroDepth
+    )
   of CntMore:
-    self.solve(answers, moveCnt, earlyStopping, goal, CntMore, steps, isZeroDepth)
+    self.solve(
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, CntMore, steps,
+      isZeroDepth,
+    )
   of Place:
-    self.solve(answers, moveCnt, earlyStopping, goal, Place, steps, isZeroDepth)
+    self.solve(
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, Place, steps, isZeroDepth
+    )
   of PlaceMore:
-    self.solve(answers, moveCnt, earlyStopping, goal, PlaceMore, steps, isZeroDepth)
+    self.solve(
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, PlaceMore, steps,
+      isZeroDepth,
+    )
   of Conn:
-    self.solve(answers, moveCnt, earlyStopping, goal, Conn, steps, isZeroDepth)
+    self.solve(
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, Conn, steps, isZeroDepth
+    )
   of ConnMore:
-    self.solve(answers, moveCnt, earlyStopping, goal, ConnMore, steps, isZeroDepth)
+    self.solve(
+      answers, moveCnt, calcAllAnswers, showProgressBar, goal, ConnMore, steps,
+      isZeroDepth,
+    )
 
-func solve*[F: TsuField or WaterField](
-    self: SolveNode[F], earlyStopping: static bool, goal: Goal, steps: Steps
+proc solve*[F: TsuField or WaterField](
+    self: SolveNode[F],
+    calcAllAnswers: static bool,
+    showProgressBar: static bool,
+    goal: Goal,
+    steps: Steps,
 ): seq[SolveAnswer] {.inline.} =
   ## Solves the nazo puyo.
   ## This function requires that the field is settled.
+  ## `showProgressBar` is ignored on JS backend.
   if not goal.isSupported or steps.len == 0:
     return @[]
 
   var answers = newSeq[SolveAnswer]()
-  self.solve(answers, steps.len, earlyStopping, goal, steps, true)
-
-  # NOTE: somehow `applyIt` does not work (maybe Nim's bug)
-  for answer in answers.mitems:
-    answer.reverse
+  self.solve(answers, steps.len, calcAllAnswers, showProgressBar, goal, steps, true)
 
   answers
