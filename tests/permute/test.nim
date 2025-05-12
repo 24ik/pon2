@@ -28,12 +28,12 @@ ggoggg
 ------
 bg|
 bg|"""
-    ).unsafeValue
+    ).expect "Invalid NazoPuyo"
 
-    step1gbgb = "gb|12\ngb|12".parseSteps.unsafeValue
-    step1gbbg = "gb|12\nbg|21".parseSteps.unsafeValue
-    step1bgbg = "bg|21\nbg|21".parseSteps.unsafeValue
-    step2 = "gg|1N\nbb|2N".parseSteps.unsafeValue
+    step1gbgb = "gb|12\ngb|12".parseSteps.expect "Invalid steps"
+    step1gbbg = "gb|12\nbg|21".parseSteps.expect "Invalid steps"
+    step1bgbg = "bg|21\nbg|21".parseSteps.expect "Invalid steps"
+    step2 = "gg|1N\nbb|2N".parseSteps.expect "Invalid steps"
 
   # no limitations
   check nazo.permute(@[], allowDblNotLast = true, allowDblLast = true).toSeq.mapIt(
