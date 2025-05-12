@@ -10,6 +10,8 @@ import std/[setutils, strformat, sugar]
 import ./[fqdn]
 import ../private/[assign3, results2, staticfor2, strutils2, tables2]
 
+export results2
+
 type
   GoalKind* {.pure.} = enum
     ## Kind of the goal to clear the nazo puyo.
@@ -99,7 +101,8 @@ func isSupported*(self: Goal): bool {.inline.} =
     return false
 
   not (
-    self.kind in {Place, PlaceMore, Conn, ConnMore} and self.optColor.expect == Garbages
+    self.kind in {Place, PlaceMore, Conn, ConnMore} and
+    self.optColor.unsafeValue == Garbages
   )
 
 # ------------------------------------------------
@@ -153,9 +156,9 @@ const StrToKinds = initStrToKinds()
 func `$`*(self: Goal): string {.inline.} =
   var replacements = newSeqOfCap[(string, string)](2)
   if self.optColor.isOk:
-    replacements.add ("c", $self.optColor.expect)
+    replacements.add ("c", $self.optColor.unsafeValue)
   if self.optVal.isOk:
-    replacements.add ("n", $self.optVal.expect)
+    replacements.add ("n", $self.optVal.unsafeValue)
 
   ($self.kind).multiReplace replacements
 
@@ -188,7 +191,7 @@ func parseGoal*(str: string): Res[Goal] {.inline.} =
     if str2 in strToKind:
       kindFound = true
       goal.optColor.ok c
-      goal.kind.assign strToKind.getRes(str2).expect
+      goal.kind.assign strToKind.getRes(str2).unsafeValue
 
       break
   if not kindFound:
@@ -231,29 +234,29 @@ func toUriQuery*(self: Goal, fqdn = Pon2): Res[string] {.inline.} =
     let queries = [
       $self.kind.ord,
       if self.optColor.isOk:
-        $self.optColor.expect.ord
+        $self.optColor.unsafeValue.ord
       else:
         EmptyColor,
       if self.optVal.isOk:
-        $self.optVal.expect
+        $self.optVal.unsafeValue
       else:
         EmptyVal,
     ]
     ok queries.join QuerySep
   of Ishikawa, Ips:
-    if self.optVal.isOk and self.optVal.expect notin 0 ..< ValToIshikawaUri.len:
-      err "Ishikawa/Ips format only supports the val in [0, 63], but got {self.optVal.expect}".fmt
+    if self.optVal.isOk and self.optVal.unsafeValue notin 0 ..< ValToIshikawaUri.len:
+      err "Ishikawa/Ips format only supports the val in [0, 63], but got {self.optVal.unsafeValue}".fmt
     else:
       let
         kindChar = KindToIshikawaUri[self.kind.ord]
         colorChar =
           if self.optColor.isOk:
-            ColorToIshikawaUri[self.optColor.expect.ord]
+            ColorToIshikawaUri[self.optColor.unsafeValue.ord]
           else:
             EmptyIshikawaUri
         valChar =
           if self.optVal.isOk:
-            ValToIshikawaUri[self.optVal.expect]
+            ValToIshikawaUri[self.optVal.unsafeValue]
           else:
             EmptyIshikawaUri
 

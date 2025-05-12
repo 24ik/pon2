@@ -31,6 +31,8 @@ func allStepsSeq(
       stepIdx.succ, fixIndices, allowDblNotLast, allowDblLast, cellCnts
     ).mapIt it.dup(addFirst(_, step))
 
+  # NOTE: `staticFor` is preferable but we use normal `for` since
+  # we want to use `continue` for easy implementation
   var stepsSeq = newSeq[Steps]()
   for pivotCell in Cell.Red .. Cell.Purple:
     if cellCnts[pivotCell] == 0:

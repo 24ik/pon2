@@ -16,6 +16,3 @@ type Res*[T] = Result[T, string]
 func context*[T](self: Res[T], ctx: string): Res[T] {.inline.} =
   ## Returns the result with the context error message added to the `self`.
   self.mapErr (error: string) => "{ctx}\n{error}".fmt
-
-template expect*[T, E](self: Result[T, E]): untyped =
-  self.expect "This is unexpected behaviour."

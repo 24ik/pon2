@@ -2,7 +2,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[macros, sugar, unittest]
+import std/[sugar, unittest]
 import ../../src/pon2/private/[macros2]
 
 # ------------------------------------------------

@@ -19,23 +19,23 @@ const ExactKinds = {AccColor, AccCnt, Chain, ClearChain, Color, Cnt, Place, Conn
 func isSatisfied(goal: Goal, val: int, kind: static GoalKind): bool {.inline.} =
   ## Returns `true` if the goal is satisfied.
   when kind in ExactKinds:
-    val == goal.optVal.expect
+    val == goal.optVal.unsafeValue
   else:
-    val >= goal.optVal.expect
+    val >= goal.optVal.unsafeValue
 
 func isSatisfied(
     goal: Goal, vals: openArray[int], kind: static GoalKind
 ): bool {.inline.} =
   ## Returns `true` if the goal is satisfied.
   when kind in ExactKinds:
-    goal.optVal.expect in vals
+    goal.optVal.unsafeValue in vals
   else:
-    vals.anyIt it >= goal.optVal.expect
+    vals.anyIt it >= goal.optVal.unsafeValue
 
 template expandColor(
     isSatisfiedIdent: untyped, goal: Goal, moveRes: MoveResult, kind: static GoalKind
 ): untyped =
-  case goal.optColor.expect
+  case goal.optColor.unsafeValue
   of All:
     goal.isSatisfiedIdent(moveRes, kind, All)
   of GoalColor.Red:
@@ -140,7 +140,7 @@ func isSatisfiedPlace*(
     else:
       moveRes.placeCnts GoalColorToCell[color]
 
-  goal.isSatisfied(places.expect, kind)
+  goal.isSatisfied(places.unsafeValue, kind)
 
 func isSatisfiedPlace*(
     goal: Goal, moveRes: MoveResult, kind: static GoalKind
@@ -163,7 +163,7 @@ func isSatisfiedConn*(
     else:
       moveRes.connCnts GoalColorToCell[color]
 
-  goal.isSatisfied(conns.expect, kind)
+  goal.isSatisfied(conns.unsafeValue, kind)
 
 func isSatisfiedConn*(
     goal: Goal, moveRes: MoveResult, kind: static GoalKind

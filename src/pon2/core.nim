@@ -7,7 +7,6 @@
 ## - [field](./core/field.html)
 ## - [fqdn](./core/fqdn.html)
 ## - [goal](./core/goal.html)
-## - [mark](./core/mark.html)
 ## - [moveresult](./core/moveresult.html)
 ## - [nazopuyo](./core/nazopuyo.html)
 ## - [notice](./core/notice.html)
@@ -37,10 +36,10 @@
 
 import
   ./core/[
-    cell, common, field, fqdn, goal, mark, moveresult, nazopuyo, notice, pair,
-    placement, popresult, puyopuyo, rule, step,
+    cell, common, field, fqdn, goal, moveresult, nazopuyo, notice, pair, placement,
+    popresult, puyopuyo, rule, step,
   ]
 
 export
-  cell, common, field, fqdn, goal, mark, moveresult, nazopuyo, notice, pair, placement,
+  cell, common, field, fqdn, goal, moveresult, nazopuyo, notice, pair, placement,
   popresult, puyopuyo, rule, step

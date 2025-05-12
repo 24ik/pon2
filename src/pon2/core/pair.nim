@@ -10,6 +10,8 @@ import std/[strformat, sugar]
 import ./[cell, fqdn]
 import ../private/[assign3, results2, tables2]
 
+export results2
+
 type Pair* {.pure.} = enum
   ## The pair of two color puyos.
   # pivot: Red
@@ -54,7 +56,7 @@ func init*(T: type Pair, pivot, rotor: Cell): T {.inline.} =
     pivotVal = max(pivot.ord - Red.ord, 0)
     rotorVal = max(rotor.ord - Red.ord, 0)
 
-  T pivotVal * ColorPuyos.card + rotorVal
+  (pivotVal * ColorPuyos.card + rotorVal).T
 
 func init*(T: type Pair): T {.inline.} =
   T.low

@@ -15,6 +15,8 @@ import
   ]
 import ../private/core/[binfield]
 
+export results2
+
 type
   TsuField* = distinct array[3, BinField] ## Puyo Puyo field for Tsu rule.
   WaterField* = distinct array[3, BinField] ## Puyo Puyo field for Water rule.
@@ -417,7 +419,7 @@ func place*[F: TsuField or WaterField](
   ## Places the pair.
   ## This function requires that the field is settled.
   if optPlcmt.isOk:
-    self.place pair, optPlcmt.expect
+    self.place pair, optPlcmt.unsafeValue
 
 # ------------------------------------------------
 # Pop

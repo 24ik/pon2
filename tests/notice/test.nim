@@ -4,7 +4,6 @@
 
 import std/[unittest]
 import ../../src/pon2/core/[notice, rule]
-import ../../src/pon2/private/[results2]
 
 # ------------------------------------------------
 # Notice Garbage

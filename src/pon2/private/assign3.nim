@@ -43,6 +43,16 @@ else:
       for i in 0 ..< tgt.len:
         assign(tgt[i], src[i])
 
+  func assignImpl[T: object or tuple](tgt: var T, src: T) {.inline.} =
+    ## Assigns the source to the target.
+    mixin assign
+
+    for t, s in fields(tgt, src):
+      when supportsCopyMem(type s) and sizeof(s) <= sizeof(int) * 2:
+        t = s # Shortcut
+      else:
+        assign(t, s)
+
   func assign*[T](tgt: var openArray[T], src: openArray[T]) {.inline.} =
     ## Assigns the source to the target.
     mixin assign
@@ -90,11 +100,10 @@ else:
         else:
           moveMem(addr tgt, unsafeAddr src, sizeof(tgt))
       elif T is object | tuple:
-        for t, s in fields(tgt, src):
-          when supportsCopyMem(type s) and sizeof(s) <= sizeof(int) * 2:
-            t = s # Shortcut
-          else:
-            assign(t, s)
+        when compiles(tgt.assignImpl src):
+          tgt.assignImpl src
+        else:
+          tgt = src
       elif T is seq:
         assign(tgt, src.toOpenArray(0, src.high))
       elif T is ref:

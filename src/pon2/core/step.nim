@@ -10,7 +10,7 @@ import std/[bitops, sequtils, strformat, sugar]
 import ./[cell, common, fqdn, pair, placement]
 import ../private/[arrayops2, assign3, deques2, math2, results2, strutils2, tables2]
 
-export deques2
+export deques2, results2
 
 type
   StepKind* {.pure.} = enum
@@ -346,7 +346,7 @@ func parseSteps*(query: string, fqdn: IdeFqdn): Res[Steps] {.inline.} =
         if idx.succ(4) <= query.len:
           let stepRes = query[idx ..< idx.succ 4].parseStep fqdn
           if stepRes.isOk:
-            steps.addLast stepRes.expect
+            steps.addLast stepRes.unsafeValue
             idx.inc 4
             continue
 

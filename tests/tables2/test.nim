@@ -3,7 +3,7 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2/private/[results2, tables2]
+import ../../src/pon2/private/[tables2]
 
 block: # getRes
   block: # Table

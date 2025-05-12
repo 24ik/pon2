@@ -9,6 +9,8 @@
 import std/[strformat, sugar]
 import ../private/[results2, tables2]
 
+export results2
+
 type Cell* {.pure.} = enum
   None = "."
   Hard = "h"

@@ -5,7 +5,6 @@
 import std/[sequtils, unittest]
 import ../../src/pon2/[core]
 import ../../src/pon2/app/[permute]
-import ../../src/pon2/private/[results2]
 
 block: # permute
   let

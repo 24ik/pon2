@@ -14,6 +14,8 @@
 import std/[strformat, sugar]
 import ../private/[results2, tables2]
 
+export results2
+
 const Pon2Fqdn* {.define: "pon2.fqdn".} = "24ik.github.io"
 
 type IdeFqdn* {.pure.} = enum

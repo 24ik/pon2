@@ -9,6 +9,8 @@
 import std/[strformat, sugar]
 import ../private/[results2, tables2]
 
+export results2
+
 type Rule* {.pure.} = enum
   ## Puyo Puyo rule.
   Tsu = "t"

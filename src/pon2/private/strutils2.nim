@@ -9,7 +9,7 @@
 import std/[strutils]
 import ./[results2]
 
-export strutils
+export results2, strutils
 
 func parseIntRes*(str: string): Res[int] {.inline.} =
   ## Returns the integer converted from the string.

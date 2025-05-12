@@ -4,7 +4,6 @@
 
 import std/[unittest]
 import ../../src/pon2/core/[cell, common, fqdn, pair, placement, step]
-import ../../src/pon2/private/[results2]
 
 # ------------------------------------------------
 # Constructor

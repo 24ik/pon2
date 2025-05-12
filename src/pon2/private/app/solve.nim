@@ -8,7 +8,7 @@
 
 import std/[algorithm, sequtils]
 import ../../[core]
-import ../../private/[assign3, core, macros2, math2, results2, staticfor2]
+import ../../private/[assign3, core, macros2, math2, staticfor2]
 
 when not defined(js):
   import std/[os, sugar]
@@ -259,11 +259,11 @@ func isAccepted[F: TsuField or WaterField](
 # Prune
 # ------------------------------------------------
 
-func filter4Nim[T: SomeNumber](x: T): T {.inline.} =
+func filter4Nim[T: SomeInteger](x: T): T {.inline.} =
   ## Returns `x` if `x >= 4`; otherwise 0.
   x * (x >= 4).T
 
-func filter4[T: SomeNumber](x: T): T {.inline.} =
+func filter4[T: SomeInteger](x: T): T {.inline.} =
   ## Returns `x` if `x >= 4`; otherwise 0.
   # NOTE: asm uses `result`, so "expression return" is unavailable
   when nimvm:
@@ -356,7 +356,7 @@ func canPrune[F: TsuField or WaterField](
       when isZeroDepth:
         let possibleVal = sum2It[Cell, int](Cell.Red .. Cell.Purple):
           (self.cellCnt(it) >= 4).int
-        possibleVal < goal.optVal.expect
+        possibleVal < goal.optVal.unsafeValue
       else:
         false
     of AccCnt, AccCntMore, Cnt, CntMore, Conn, ConnMore:
@@ -387,15 +387,15 @@ func canPrune[F: TsuField or WaterField](
         else:
           0 # dummy
 
-      possibleCnt < goal.optVal.expect
+      possibleCnt < goal.optVal.unsafeValue
     of Chain, ChainMore, ClearChain, ClearChainMore:
       let possibleChain = sum2It[Cell, int](Cell.Red .. Cell.Purple):
         self.cellCnt(it) div 4
-      possibleChain < goal.optVal.expect
+      possibleChain < goal.optVal.unsafeValue
     of Color, ColorMore:
       let possibleColorCnt = sum2It[Cell, int](Cell.Red .. Cell.Purple):
         (self.cellCnt(it) >= 4).int
-      possibleColorCnt < goal.optVal.expect
+      possibleColorCnt < goal.optVal.unsafeValue
     of Place, PlaceMore:
       let possiblePlace = staticCase:
         case color
@@ -407,7 +407,7 @@ func canPrune[F: TsuField or WaterField](
         else:
           self.cellCnt(static(GoalColorToCell[color])) div 4
 
-      possiblePlace < goal.optVal.expect
+      possiblePlace < goal.optVal.unsafeValue
 
 # ------------------------------------------------
 # Solve
@@ -734,7 +734,7 @@ proc solve[F: TsuField or WaterField](
   ## Solves the nazo puyo.
   ## This function requires that the field is settled and `answers` is empty.
   ## `showProgressBar` is ignored on JS backend.
-  case goal.optColor.expect
+  case goal.optColor.unsafeValue
   of All:
     self.solve(
       answers, moveCnt, calcAllAnswers, showProgressBar, goal, kind, All, steps,

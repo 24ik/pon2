@@ -10,6 +10,8 @@ import std/[sequtils, strformat, sugar]
 import ./[cell, common, notice, rule]
 import ../private/[arrayops2, math2, results2, staticfor2]
 
+export results2
+
 type MoveResult* = object ## Move result.
   chainCnt*: int
   popCnts*: array[Cell, int]
@@ -129,14 +131,14 @@ func colorsSeq*(self: MoveResult): seq[set[Cell]] {.inline.} =
 func placeCnts*(self: MoveResult, cell: Cell): Res[seq[int]] {.inline.} =
   ## Returns a sequence of the number of places where `cell` popped in each chain.
   if self.fullPopCnts.isOk:
-    ok self.fullPopCnts.expect.mapIt it[cell].len
+    ok self.fullPopCnts.unsafeValue.mapIt it[cell].len
   else:
     err "`placeCnts` not supported: {self}".fmt
 
 func placeCnts*(self: MoveResult): Res[seq[int]] {.inline.} =
   ## Returns a sequence of the number of places where color puyos popped in each chain.
   if self.fullPopCnts.isOk:
-    ok self.fullPopCnts.expect.mapIt (it[Red].len + it[Green].len + it[Blue].len) +
+    ok self.fullPopCnts.unsafeValue.mapIt (it[Red].len + it[Green].len + it[Blue].len) +
       (it[Yellow].len + it[Purple].len)
   else:
     err "`placeCnts` not supported: {self}".fmt
@@ -148,14 +150,14 @@ func placeCnts*(self: MoveResult): Res[seq[int]] {.inline.} =
 func connCnts*(self: MoveResult, cell: Cell): Res[seq[int]] {.inline.} =
   ## Returns a sequence of the number of connections of `cell` that popped.
   if self.fullPopCnts.isOk:
-    ok concat self.fullPopCnts.expect.mapIt it[cell]
+    ok concat self.fullPopCnts.unsafeValue.mapIt it[cell]
   else:
     err "`conns` not supported: {self}".fmt
 
 func connCnts*(self: MoveResult): Res[seq[int]] {.inline.} =
   ## Returns a sequence of the number of connections of color puyos that popped.
   if self.fullPopCnts.isOk:
-    ok concat self.fullPopCnts.expect.mapIt it[Red .. Purple].concat
+    ok concat self.fullPopCnts.unsafeValue.mapIt it[Red .. Purple].concat
   else:
     err "`conns` not supported: {self}".fmt
 
@@ -197,7 +199,7 @@ func score*(self: MoveResult): Res[int] {.inline.} =
     return err "`score` not supported: {self}".fmt
 
   var totalScore = 0
-  for chainIdx, cntsArr in self.fullPopCnts.expect:
+  for chainIdx, cntsArr in self.fullPopCnts.unsafeValue:
     var
       connBonus = 0
       totalPuyoCnt = 0

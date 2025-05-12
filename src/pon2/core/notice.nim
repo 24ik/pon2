@@ -16,6 +16,8 @@ import std/[strformat]
 import ./[rule]
 import ../private/[assign3, results2]
 
+export results2
+
 type NoticeGarbage* {.pure.} = enum
   ## Notice garbage puyo.
   Small

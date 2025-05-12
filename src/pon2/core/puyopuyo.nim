@@ -1,4 +1,4 @@
-## This module implements Puyo Puyo game.
+## This module implements Puyo Puyo.
 ##
 
 {.push raises: [].}
@@ -8,7 +8,9 @@
 
 import std/[strformat, typetraits, uri]
 import ./[cell, field, fqdn, moveresult, pair, placement, popresult, step]
-import ../private/[bitops3, macros2, results2, strutils2, tables2]
+import ../private/[bitops3, macros2, strutils2, tables2]
+
+export results2
 
 type PuyoPuyo*[F: TsuField or WaterField] = object ## Puyo Puyo game.
   field*: F

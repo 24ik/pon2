@@ -2,7 +2,7 @@
 ##
 ## Submodule Documentations:
 ## - [binfield](./core/binfield.html)
-## - [mark](./core/mark.html)
+## - [nazopuyo](./core/nazopuyo.html)
 ##
 
 {.push raises: [].}
@@ -10,6 +10,6 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./core/[binfield, mark]
+import ./core/[binfield, nazopuyo]
 
-export binfield, mark
+export binfield, nazopuyo

@@ -4,7 +4,6 @@
 
 import std/[sugar, unittest]
 import ../../src/pon2/core/[fqdn, goal]
-import ../../src/pon2/private/[results2]
 
 # ------------------------------------------------
 # Constructor

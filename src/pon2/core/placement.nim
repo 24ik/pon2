@@ -10,6 +10,8 @@ import std/[strformat, sugar]
 import ./[common, fqdn]
 import ../private/[macros2, results2, tables2]
 
+export results2
+
 type
   Dir* {.pure.} = enum
     ## Rotor-puyo's direction seen from the pivot-puyo.
@@ -180,7 +182,7 @@ const
 
 func `$`*(self: OptPlacement): string {.inline.} =
   if self.isOk:
-    $self.expect
+    $self.unsafeValue
   else:
     NonePlcmtStr
 
