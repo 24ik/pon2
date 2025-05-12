@@ -50,7 +50,7 @@ rgo...
 ......
 ......
 ......
-......""".parseTsuField.expect
+......""".parseTsuField.unsafeValue
     fieldW =
       """
 ......
@@ -66,7 +66,7 @@ rgo...
 ....hh
 .....p
 .....p
-.....p""".parseWaterField.expect
+.....p""".parseWaterField.unsafeValue
     steps = [
       Step.init(RedGreen),
       Step.init(BlueBlue, Down3),
@@ -111,7 +111,7 @@ block: # move
 .b....
 .b....
 .bgrr.
-hggoo.""".parseTsuField.expect
+hggoo.""".parseTsuField.unsafeValue
     fieldAfter =
       """
 ......
@@ -126,7 +126,7 @@ hggoo.""".parseTsuField.expect
 ......
 ......
 ....r.
-o..ro.""".parseTsuField.expect
+o..ro.""".parseTsuField.unsafeValue
   var puyoPuyo = PuyoPuyo[TsuField].init(fieldBefore, stepsBefore)
 
   let
@@ -170,7 +170,7 @@ by|
 rg|23
 [3,0,0,0,4,0]
 pp|4N"""
-      puyoPuyo = parsePuyoPuyo[TsuField](str).expect
+      puyoPuyo = parsePuyoPuyo[TsuField](str).unsafeValue
 
     check $puyoPuyo == str
 
@@ -193,7 +193,7 @@ r.....
 ......
 ------
 """
-      puyoPuyo = parsePuyoPuyo[TsuField](str).expect
+      puyoPuyo = parsePuyoPuyo[TsuField](str).unsafeValue
 
     check $puyoPuyo == str
 
@@ -223,7 +223,7 @@ block: # toUriQuery, parsePuyoPuyo
 by|
 (0,1,0,0,0,1)
 rg|23"""
-      puyoPuyo = parsePuyoPuyo[TsuField](str).expect
+      puyoPuyo = parsePuyoPuyo[TsuField](str).unsafeValue
 
       queryPon2 = "field=t-op......yg....b.r&steps=byo0_1_0_0_0_1org23"
       queryIshikawa = "6E004g031_E1ahce"
@@ -257,7 +257,7 @@ rg|23"""
 .....r
 ------
 """
-      puyoPuyo = parsePuyoPuyo[TsuField](str).expect
+      puyoPuyo = parsePuyoPuyo[TsuField](str).unsafeValue
 
       queryPon2 = "field=t-r&steps"
       queryIshikawa = "1"
