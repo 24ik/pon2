@@ -8,6 +8,9 @@
 
 import ../private/[strutils2]
 
+when defined(js):
+  import std/[dom]
+
 type KeyEvent* = object ## Keyboard Event.
   code: string
   shift: bool
@@ -42,3 +45,14 @@ func init*(
     T.init("Key" & c, true, ctrl, alt, meta)
   else:
     T.init($c, shift, ctrl, alt, meta)
+
+# ------------------------------------------------
+# JS backend
+# ------------------------------------------------
+
+when defined(js):
+  func toKeyEvent*(event: KeyboardEvent): KeyEvent {.inline.} =
+    ## Returns the keyboard event converted from the `KeyboardEvent`.
+    KeyEvent.init(
+      $event.code, event.shiftKey, event.ctrlKey, event.altKey, event.metaKey
+    )

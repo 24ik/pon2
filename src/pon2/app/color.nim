@@ -6,6 +6,10 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
+when defined(js):
+  import std/[strformat]
+  import ../private/[strutils2]
+
 type Color* = object ## Color.
   red*: int
   green*: int
@@ -24,3 +28,12 @@ const
   GhostColor* = Color.init(200, 200, 200)
   WaterColor* = Color.init(135, 248, 255)
   DefaultColor* = Color.init(225, 225, 225)
+
+# ------------------------------------------------
+# JS backend
+# ------------------------------------------------
+
+when defined(js):
+  func code*(color: Color): cstring {.inline.} =
+    ## Returns the color code (including '#') converted from the color.
+    "#{color.red.toHex 2}{color.green.toHex 2}{color.blue.toHex 2}{color.alpha.toHex 2}".fmt.toLowerAscii.cstring
