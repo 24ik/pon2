@@ -55,6 +55,8 @@ block: # init
     )
 
   check MoveResult.init == MoveResult.init(0, initArrWith[Cell, int](0), 0, @[], @[])
+  check MoveResult.init(true) ==
+    MoveResult.init(0, initArrWith[Cell, int](0), 0, @[], @[], @[])
 
 # ------------------------------------------------
 # Count

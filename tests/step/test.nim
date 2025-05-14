@@ -180,6 +180,6 @@ block: # `$`, parseSteps, toUriQuery
     check $steps == ""
     check "".parseSteps == Res[Steps].ok steps
 
-    for fqdn in IdeFqdn:
+    for fqdn in SimulatorFqdn:
       check steps.toUriQuery(fqdn) == Res[string].ok ""
       check "".parseSteps(fqdn) == Res[Steps].ok steps

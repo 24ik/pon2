@@ -2120,8 +2120,8 @@ r.....
       queryWRes = fieldW.toUriQuery Pon2
 
     check queryTRes ==
-      Res[string].ok "t-r......g......b......y......p......o....h......."
-    check queryWRes == Res[string].ok "w-r.....~.g......b......y......p......o....h"
+      Res[string].ok "t_r......g......b......y......p......o....h......."
+    check queryWRes == Res[string].ok "w_r.....~.g......b......y......p......o....h"
 
     let
       queryT = queryTRes.expect "Invalid query"
@@ -2172,7 +2172,7 @@ r.....
         Res[TsuField].ok field
 
   block: # empty field
-    check TsuField.init.toUriQuery(Pon2) == Res[string].ok "t-"
+    check TsuField.init.toUriQuery(Pon2) == Res[string].ok "t_"
     check TsuField.init.toUriQuery(Ishikawa) == Res[string].ok ""
     check TsuField.init.toUriQuery(Ips) == Res[string].ok ""
-    check WaterField.init.toUriQuery(Pon2) == Res[string].ok "w-~"
+    check WaterField.init.toUriQuery(Pon2) == Res[string].ok "w_~"

@@ -628,9 +628,10 @@ pp|4N"""
 # ------------------------------------------------
 
 block: # toUriQuery, parseNazoPuyo
-  let
-    str =
-      """
+  block:
+    let
+      str =
+        """
 2連鎖するべし
 ======
 ......
@@ -650,17 +651,89 @@ block: # toUriQuery, parseNazoPuyo
 by|
 (0,1,0,0,0,1)
 rg|23"""
-    nazoPuyo = parseNazoPuyo[TsuField](str).expect "Invalid NazoPuyo"
+      nazoPuyo = parseNazoPuyo[TsuField](str).expect "Invalid NazoPuyo"
 
-    queryPon2 = "field=t-op......yg....b.r&steps=byo0_1_0_0_0_1org23&goal=5__2"
-    queryIshikawa = "6E004g031_E1ahce__u02"
+      queryPon2 = "field=t_op......yg....b.r&steps=byo0_1_0_0_0_1org23&goal=5__2"
+      queryIshikawa = "6E004g031_E1ahce__u02"
 
-  check nazoPuyo.toUriQuery(Pon2) == Res[string].ok queryPon2
-  check nazoPuyo.toUriQuery(Ishikawa) == Res[string].ok queryIshikawa
-  check nazoPuyo.toUriQuery(Ips) == Res[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Pon2) == Res[string].ok queryPon2
+    check nazoPuyo.toUriQuery(Ishikawa) == Res[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Ips) == Res[string].ok queryIshikawa
 
-  check parseNazoPuyo[TsuField](queryPon2, Pon2) == Res[NazoPuyo[TsuField]].ok nazoPuyo
-  check parseNazoPuyo[TsuField](queryIshikawa, Ishikawa) ==
-    Res[NazoPuyo[TsuField]].ok nazoPuyo
-  check parseNazoPuyo[TsuField](queryIshikawa, Ips) ==
-    Res[NazoPuyo[TsuField]].ok nazoPuyo
+    check parseNazoPuyo[TsuField](queryPon2, Pon2) == Res[NazoPuyo[TsuField]].ok nazoPuyo
+    check parseNazoPuyo[TsuField](queryIshikawa, Ishikawa) ==
+      Res[NazoPuyo[TsuField]].ok nazoPuyo
+    check parseNazoPuyo[TsuField](queryIshikawa, Ips) ==
+      Res[NazoPuyo[TsuField]].ok nazoPuyo
+
+  block: # empty steps
+    let
+      str =
+        """
+赤ぷよ全て消すべし
+======
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+g.....
+------
+"""
+      nazoPuyo = parseNazoPuyo[TsuField](str).expect "Invalid NazoPuyo"
+
+      queryPon2 = "field=t_g.....&steps&goal=0_1_"
+      queryIshikawa = "g00___210"
+
+    check nazoPuyo.toUriQuery(Pon2) == Res[string].ok queryPon2
+    check nazoPuyo.toUriQuery(Ishikawa) == Res[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Ips) == Res[string].ok queryIshikawa
+
+    check parseNazoPuyo[TsuField](queryPon2, Pon2) == Res[NazoPuyo[TsuField]].ok nazoPuyo
+    check parseNazoPuyo[TsuField](queryIshikawa, Ishikawa) ==
+      Res[NazoPuyo[TsuField]].ok nazoPuyo
+    check parseNazoPuyo[TsuField](queryIshikawa, Ips) ==
+      Res[NazoPuyo[TsuField]].ok nazoPuyo
+
+  block: # empty field and steps
+    let
+      str =
+        """
+3色同時に消すべし
+======
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+------
+"""
+      nazoPuyo = parseNazoPuyo[TsuField](str).expect "Invalid NazoPuyo"
+
+      queryPon2 = "field=t_&steps&goal=9__3"
+      queryIshikawa = "___E03"
+
+    check nazoPuyo.toUriQuery(Pon2) == Res[string].ok queryPon2
+    check nazoPuyo.toUriQuery(Ishikawa) == Res[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Ips) == Res[string].ok queryIshikawa
+
+    check parseNazoPuyo[TsuField](queryPon2, Pon2) == Res[NazoPuyo[TsuField]].ok nazoPuyo
+    check parseNazoPuyo[TsuField](queryIshikawa, Ishikawa) ==
+      Res[NazoPuyo[TsuField]].ok nazoPuyo
+    check parseNazoPuyo[TsuField](queryIshikawa, Ips) ==
+      Res[NazoPuyo[TsuField]].ok nazoPuyo

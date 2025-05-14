@@ -231,7 +231,7 @@ func toUriQuery*(self: Step, fqdn = Pon2): Res[string] {.inline.} =
 
       ok MaxGarbageToIshikawaUri[maxGarbageCnt] & IshikawaUriNumbers[diffVal]
 
-func parseStep*(query: string, fqdn: IdeFqdn): Res[Step] {.inline.} =
+func parseStep*(query: string, fqdn: SimulatorFqdn): Res[Step] {.inline.} =
   ## Returns the step converted from the URI query.
   case fqdn
   of Pon2:
@@ -325,7 +325,7 @@ func toUriQuery*(self: Steps, fqdn = Pon2): Res[string] {.inline.} =
 
   ok strs.join
 
-func parseSteps*(query: string, fqdn: IdeFqdn): Res[Steps] {.inline.} =
+func parseSteps*(query: string, fqdn: SimulatorFqdn): Res[Steps] {.inline.} =
   ## Returns the steps converted from the URI query.
   case fqdn
   of Pon2:

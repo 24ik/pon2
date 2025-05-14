@@ -1,9 +1,9 @@
-## This module implements IDE's FQDNs.
+## This module implements simulator's FQDNs.
 ##
 ## Compile Options:
-## | Option               | Description          | Default          |
-## | -------------------- | -------------------- | ---------------- |
-## | `-d:pon2.fqdn=<str>` | FQDN of the web IDE. | `24ik.github.io` |
+## | Option               | Description                | Default          |
+## | -------------------- | -------------------------- | ---------------- |
+## | `-d:pon2.fqdn=<str>` | FQDN of the web simulator. | `24ik.github.io` |
 ##
 
 {.push raises: [].}
@@ -18,8 +18,8 @@ export results2
 
 const Pon2Fqdn* {.define: "pon2.fqdn".} = "24ik.github.io"
 
-type IdeFqdn* {.pure.} = enum
-  ## FQDN of the web IDE.
+type SimulatorFqdn* {.pure.} = enum
+  ## FQDN of the web simulator.
   Pon2 = Pon2Fqdn
   Ishikawa = "ishikawapuyo.net"
   Ips = "ips.karou.jp"
@@ -29,9 +29,9 @@ type IdeFqdn* {.pure.} = enum
 # ------------------------------------------------
 
 const StrToFqdn = collect:
-  for fqdn in IdeFqdn:
+  for fqdn in SimulatorFqdn:
     {$fqdn: fqdn}
 
-func parseIdeFqdn*(str: string): Res[IdeFqdn] {.inline.} =
+func parseSimulatorFqdn*(str: string): Res[SimulatorFqdn] {.inline.} =
   ## Returns the FQDN converted from the string representation.
   StrToFqdn.getRes(str).context "Invalid FQDN: {str}".fmt

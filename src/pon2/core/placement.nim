@@ -227,7 +227,7 @@ func toUriQuery*(self: OptPlacement, fqdn = Pon2): string {.inline.} =
     else:
       NonePlcmtIshikawaUri
 
-func parsePlacement*(query: string, fqdn: IdeFqdn): Res[Placement] {.inline.} =
+func parsePlacement*(query: string, fqdn: SimulatorFqdn): Res[Placement] {.inline.} =
   ## Returns the placement converted from the URI query.
   case fqdn
   of Pon2:
@@ -235,7 +235,9 @@ func parsePlacement*(query: string, fqdn: IdeFqdn): Res[Placement] {.inline.} =
   of Ishikawa, Ips:
     IshikawaUriToPlcmt.getRes(query).context "Invalid placement: {query}".fmt
 
-func parseOptPlacement*(query: string, fqdn: IdeFqdn): Res[OptPlacement] {.inline.} =
+func parseOptPlacement*(
+    query: string, fqdn: SimulatorFqdn
+): Res[OptPlacement] {.inline.} =
   ## Returns the optional placement converted from the URI query.
   case fqdn
   of Pon2:

@@ -721,7 +721,7 @@ func parseWaterField*(str: string): Res[WaterField] {.inline.} =
 # ------------------------------------------------
 
 const
-  Pon2UriRuleFieldSep = "-"
+  Pon2UriRuleFieldSep = "_"
   Pon2UriAirWaterSep = "~"
 
   Pon2UriToRule = collect:
@@ -934,7 +934,7 @@ func parseTsuFieldIshikawa(query: string): Res[TsuField] {.inline.} =
 
     ok arr.toTsuField
 
-func parseTsuField*(query: string, fqdn: IdeFqdn): Res[TsuField] {.inline.} =
+func parseTsuField*(query: string, fqdn: SimulatorFqdn): Res[TsuField] {.inline.} =
   ## Returns the Tsu field converted from the URI query.
   case fqdn
   of Pon2:
@@ -942,7 +942,7 @@ func parseTsuField*(query: string, fqdn: IdeFqdn): Res[TsuField] {.inline.} =
   of Ishikawa, Ips:
     query.parseTsuFieldIshikawa
 
-func parseWaterField*(query: string, fqdn: IdeFqdn): Res[WaterField] {.inline.} =
+func parseWaterField*(query: string, fqdn: SimulatorFqdn): Res[WaterField] {.inline.} =
   ## Returns the Water field converted from the URI query.
   case fqdn
   of Pon2:

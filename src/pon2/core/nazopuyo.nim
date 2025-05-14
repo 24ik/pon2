@@ -205,15 +205,26 @@ func toUriQueryPon2[F: TsuField or WaterField](
     self: NazoPuyo[F]
 ): Res[string] {.inline.} =
   ## Returns the URI query converted from the Nazo Puyo.
-  ok (?self.puyoPuyo.toUriQuery Pon2) & '&' &
-    [(GoalKey, ?self.goal.toUriQuery Pon2)].encodeQuery
+  let errMsg = "Nazo Puyo that does not support URI conversion: {self}".fmt
+
+  ok (?self.puyoPuyo.toUriQuery(Pon2).context errMsg) & '&' &
+    [(GoalKey, ?self.goal.toUriQuery(Pon2).context errMsg)].encodeQuery
 
 func toUriQueryIshikawa[F: TsuField or WaterField](
     self: NazoPuyo[F]
 ): Res[string] {.inline.} =
   ## Returns the URI query converted from the Nazo Puyo.
-  ok (?self.puyoPuyo.toUriQuery Ishikawa) & PuyoPuyoGoalIshikawaSep &
-    (?self.goal.toUriQuery Ishikawa)
+  let
+    errMsg = "Nazo Puyo that does not support URI conversion: {self}".fmt
+    puyoPuyoQueryRaw = ?self.puyoPuyo.toUriQuery(Ishikawa).context errMsg
+    puyoPuyoQuery =
+      if '_' in puyoPuyoQueryRaw:
+        puyoPuyoQueryRaw
+      else:
+        puyoPuyoQueryRaw & '_'
+
+  ok puyoPuyoQuery & PuyoPuyoGoalIshikawaSep &
+    ?self.goal.toUriQuery(Ishikawa).context errMsg
 
 func toUriQuery*[F: TsuField or WaterField](
     self: NazoPuyo[F], fqdn = Pon2
@@ -258,7 +269,7 @@ func parseNazoPuyoIshikawa[F: TsuField or WaterField](
   ## Returns the Nazo Puyo converted from the URI query.
   let
     errMsg = "Invalid Nazo Puyo: {query}".fmt
-    strs = query.split PuyoPuyoGoalIshikawaSep
+    strs = query.rsplit(PuyoPuyoGoalIshikawaSep, 1)
   if strs.len != 2:
     return err errMsg
 
@@ -268,7 +279,7 @@ func parseNazoPuyoIshikawa[F: TsuField or WaterField](
   )
 
 func parseNazoPuyo*[F: TsuField or WaterField](
-    query: string, fqdn: IdeFqdn
+    query: string, fqdn: SimulatorFqdn
 ): Res[NazoPuyo[F]] {.inline.} =
   ## Returns the Nazo Puyo converted from the URI query.
   case fqdn

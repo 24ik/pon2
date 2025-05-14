@@ -262,7 +262,7 @@ func toUriQuery*(self: Goal, fqdn = Pon2): Res[string] {.inline.} =
 
       ok "{kindChar}{colorChar}{valChar}".fmt
 
-func parseGoal*(query: string, fqdn: IdeFqdn): Res[Goal] {.inline.} =
+func parseGoal*(query: string, fqdn: SimulatorFqdn): Res[Goal] {.inline.} =
   ## Returns the goal converted from the URI query.
   var goal = Goal.init(GoalKind.low, OptGoalColor.err, OptGoalVal.err)
 

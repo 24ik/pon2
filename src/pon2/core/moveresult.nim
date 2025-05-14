@@ -59,8 +59,11 @@ func init*(
     fullPopCnts: Opt[seq[array[Cell, seq[int]]]].ok fullPopCnts,
   )
 
-func init*(T: type MoveResult): T {.inline.} =
-  T.init(0, static(initArrWith[Cell, int](0)), 0, @[], @[])
+func init*(T: type MoveResult, includeFullPopCnts: static bool = false): T {.inline.} =
+  when includeFullPopCnts:
+    T.init(0, static(initArrWith[Cell, int](0)), 0, @[], @[], @[])
+  else:
+    T.init(0, static(initArrWith[Cell, int](0)), 0, @[], @[])
 
 # ------------------------------------------------
 # Count

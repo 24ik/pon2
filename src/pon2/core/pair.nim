@@ -152,7 +152,7 @@ func toUriQuery*(self: Pair, fqdn = Pon2): string {.inline.} =
   of Ishikawa, Ips:
     $PairToIshikawaUri[self.ord]
 
-func parsePair*(query: string, fqdn: IdeFqdn): Res[Pair] {.inline.} =
+func parsePair*(query: string, fqdn: SimulatorFqdn): Res[Pair] {.inline.} =
   ## Returns the pair converted from the URI query.
   case fqdn
   of Pon2:

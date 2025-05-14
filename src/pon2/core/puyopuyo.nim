@@ -199,7 +199,7 @@ func parsePuyoPuyoIshikawa[F: TsuField or WaterField](
   ok PuyoPuyo[F].init(field, steps)
 
 func parsePuyoPuyo*[F: TsuField or WaterField](
-    query: string, fqdn: IdeFqdn
+    query: string, fqdn: SimulatorFqdn
 ): Res[PuyoPuyo[F]] {.inline.} =
   ## Returns the game converted from the URI query.
   case fqdn
