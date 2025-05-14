@@ -1,6 +1,3 @@
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -8,26 +5,10 @@
 import std/[unittest]
 import ../../src/pon2/app/[color]
 
-when defined(js):
-  import std/[strformat, strutils]
-  import karax/[kbase]
-else:
-  import nigui
+# ------------------------------------------------
+# Constructor
+# ------------------------------------------------
 
-proc main*() =
-  # ------------------------------------------------
-  # Backend-specific
-  # ------------------------------------------------
-
-  when defined(js):
-    # toColorCode
-    block:
-      let c = WaterColor
-      check c.toColorCode ==
-        kstring &"#{c.red.toHex 2}{c.green.toHex 2}{c.blue.toHex 2}{c.alpha.toHex 2}"
-  else:
-    # toNiguiColor
-    block:
-      let c = WaterColor
-      check c.toNiguiColor ==
-        nigui.Color(red: c.red, green: c.green, blue: c.blue, alpha: c.alpha)
+block: # init
+  check Color.init(12, 34, 56) == Color(red: 12, green: 34, blue: 56, alpha: 255)
+  check Color.init(1, 2, 3, 4) == Color(red: 1, green: 2, blue: 3, alpha: 4)
