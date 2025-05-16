@@ -11,18 +11,15 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
+when defined(js) or defined(nimsuggest):
+  import std/[dom, jsffi, jsre, strformat, sugar]
+  import karax/[karax]
+  import ../../[assign3]
+  import ../../../[core]
+
 const AssetsDir* {.define: "pon2.assets".} = "./assets"
 
-# ------------------------------------------------
-# JS backend
-# ------------------------------------------------
-
-when defined(js):
-  import std/[dom, jsffi, strformat, sugar]
-  import karax/[karax]
-  import ../[assign3]
-  import ../../[core]
-
+when defined(js) or defined(nimsuggest):
   # ------------------------------------------------
   # JS - Copy Button
   # ------------------------------------------------
@@ -94,5 +91,4 @@ when defined(js):
 
   proc isMobile*(): bool {.inline.} =
     ## Returns `true` if a mobile device is detected.
-    const MobileRegex = "iPhone|Android.+Mobile".newRegExp
-    MobileRegex in navigator.userAgent
+    r"iPhone|Android.+Mobile".newRegExp in navigator.userAgent

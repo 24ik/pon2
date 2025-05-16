@@ -74,33 +74,16 @@ func `==`*(wrap1, wrap2: NazoPuyoWrap): bool {.inline.} =
 # ------------------------------------------------
 
 template runIt*(self: NazoPuyoWrap, body: untyped): untyped =
-  ## Runs `body` with `it` (internal `PuyoPuyo`) and `itNazo` exposed.
-  ## `itNazo` is constructor calling.
+  ## Runs `body` with `it` (internal `PuyoPuyo`) exposed.
   case self.rule
   of Tsu:
     template it(): auto =
       self.tsu
 
-    template itNazo(): Opt[NazoPuyo[TsuField]] =
-      if self.optGoal.isOk:
-        Opt[NazoPuyo[TsuField]].ok NazoPuyo[TsuField].init(
-          self.tsu, self.optGoal.unsafeValue
-        )
-      else:
-        Opt[NazoPuyo[TsuField]].err
-
     body
   of Water:
     template it(): auto =
       self.water
-
-    template itNazo(): Opt[NazoPuyo[WaterField]] =
-      if self.optGoal.isOk:
-        Opt[NazoPuyo[WaterField]].ok NazoPuyo[WaterField].init(
-          self.water, self.optGoal.unsafeValue
-        )
-      else:
-        Opt[NazoPuyo[WaterField]].err
 
     body
 
@@ -136,10 +119,18 @@ func toUriQuery*(self: NazoPuyoWrap, fqdn: SimulatorFqdn): Res[string] {.inline.
   ## Returns the URI query converted from the Nazo Puyo wrapper.
   const ErrMsg = "Invalid Nazo Puyo wrapper"
 
-  self.runIt:
-    if self.optGoal.isOk:
-      itNazo.unsafeValue.toUriQuery(fqdn).context ErrMsg
-    else:
+  if self.optGoal.isOk:
+    case self.rule
+    of Tsu:
+      NazoPuyo[TsuField]
+      .init(self.tsu, self.optGoal.unsafeValue)
+      .toUriQuery(fqdn).context ErrMsg
+    of Water:
+      NazoPuyo[WaterField]
+      .init(self.water, self.optGoal.unsafeValue)
+      .toUriQuery(fqdn).context ErrMsg
+  else:
+    self.runIt:
       it.toUriQuery(fqdn).context ErrMsg
 
 func parseNazoPuyoWrap*(

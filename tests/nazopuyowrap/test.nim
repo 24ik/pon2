@@ -25,18 +25,13 @@ block: # init, `==`
 # Internal Access
 # ------------------------------------------------
 
-block: # runIt
+block: # runIt, runNazoIt
   var nazoWrap = NazoPuyoWrap.init
   nazoWrap.runIt:
     check it.field.rule == Tsu
 
     it.field[Row1, Col3] = Hard
     check it.garbagesCnt == 1
-
-    check itNazo.expect("Invalid Nazo Puyo").goal == Goal.init
-
-  NazoPuyoWrap.init(PuyoPuyo[TsuField].init).runIt:
-    check itNazo.isErr
 
 # ------------------------------------------------
 # Property
