@@ -1,4 +1,4 @@
-## This module implements operating view.
+## This module implements operating views.
 ##
 
 {.push raises: [].}
@@ -60,7 +60,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toVNode*(self: OperatingView): VNode {.inline.} =
     ## Returns the operating node.
-    buildHtml(table):
+    buildHtml table:
       tbody:
         for idx in 0 ..< 3:
           tr:

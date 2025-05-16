@@ -1,4 +1,4 @@
-## This module implements next view.
+## This module implements next views.
 ##
 
 {.push raises: [].}
@@ -54,7 +54,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toVNode*(self: NextView): VNode {.inline.} =
     ## Returns the next node.
-    buildHtml(table):
+    buildHtml table:
       tbody:
         # indent
         for _ in 1 .. 4:

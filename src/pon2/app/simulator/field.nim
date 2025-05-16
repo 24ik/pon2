@@ -59,7 +59,7 @@ when defined(js) or defined(nimsuggest):
     let arr = self.simulator[].nazoPuyoWrap.runIt:
       it.field.toArr
 
-    buildHtml(table(style = style(StyleAttr.border, "1px black solid"))):
+    buildHtml table(style = style(StyleAttr.border, "1px black solid")):
       tbody:
         for row in Row:
           tr:
