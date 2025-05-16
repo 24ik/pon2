@@ -13,8 +13,6 @@ import ../../src/pon2/private/core/[binfield]
 proc toBinField(str: string): BinField =
   ## Returns the binary field converted from the string representation.
   let strs = str.split "\n"
-  require strs.len == Height
-  require strs.allIt it.len == Width
 
   var arr {.noinit.}: array[Row, array[Col, bool]]
   for row in Row:
