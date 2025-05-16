@@ -51,6 +51,14 @@ func init*(T: type NazoPuyoWrap): T {.inline.} =
 # Operator
 # ------------------------------------------------
 
+func `==`*(field1: TsuField, field2: WaterField): bool {.inline.} =
+  # NOTE: this may be used in `runIt`.
+  false
+
+func `==`*(field1: WaterField, field2: TsuField): bool {.inline.} =
+  # NOTE: this may be used in `runIt`.
+  false
+
 func `==`*(wrap1, wrap2: NazoPuyoWrap): bool {.inline.} =
   if wrap1.optGoal != wrap2.optGoal or wrap1.rule != wrap2.rule:
     return false

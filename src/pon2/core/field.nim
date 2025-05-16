@@ -805,7 +805,7 @@ func toUriQueryIshikawa(self: TsuField): Res[string] {.inline.} =
           cell2 = arr[row][col.succ]
 
         chars.add IshikawaUriChars[
-          CellToIshikawaIdx[cell1] * Cell.enumLen + CellToIshikawaIdx[cell2]
+          CellToIshikawaIdx[cell1] * static(Cell.enumLen) + CellToIshikawaIdx[cell2]
         ]
 
       lines.add chars.join
@@ -919,11 +919,11 @@ func parseTsuFieldIshikawa(query: string): Res[TsuField] {.inline.} =
       let
         idx = ?IshikawaUriCharToIdx.getRes(c).context("Invalid field: {query}".fmt)
         cell1 =
-          ?IshikawaIdxToCell.getRes(idx div Cell.enumLen).context(
+          ?IshikawaIdxToCell.getRes(idx div static(Cell.enumLen)).context(
             "Invalid field: {query}".fmt
           )
         cell2 =
-          ?IshikawaIdxToCell.getRes(idx mod Cell.enumLen).context(
+          ?IshikawaIdxToCell.getRes(idx mod static(Cell.enumLen)).context(
             "Invalid field: {query}".fmt
           )
         row = (i div (Width div 2)).Row

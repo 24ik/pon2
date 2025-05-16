@@ -1,216 +1,98 @@
-## This module implements helper functions for the simulator.
+## This module implements common functions.
+##
+## Compile Options:
+## | Option                 | Description       | Default    |
+## | ---------------------- | ----------------- | ---------- |
+## | `-d:pon2.assets=<str>` | Assets directory. | `./assets` |
 ##
 
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
+{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[deques, strformat, sugar, uri]
-import ../../[misc]
-import ../../../app/[color, nazopuyo, simulator]
-import
-  ../../../core/[
-    cell, field, fieldtype, mark, moveresult, nazopuyo, notice, pair, pairposition,
-    position, puyopuyo, rule,
-  ]
+const AssetsDir* {.define: "pon2.assets".} = "./assets"
+
+# ------------------------------------------------
+# JS backend
+# ------------------------------------------------
 
 when defined(js):
-  import ../[misc]
+  import std/[dom, jsffi, strformat, sugar]
+  import karax/[karax]
+  import ../[assign3]
+  import ../../[core]
 
-const ShownNoticeGarbageCount* = 6
+  # ------------------------------------------------
+  # JS - Copy Button
+  # ------------------------------------------------
 
-# ------------------------------------------------
-# Field
-# ------------------------------------------------
+  proc getNavigator(): JsObject {.importjs: "(navigator)".} ## Returns the navigator.
 
-proc fieldCellBackgroundColor*(
-    simulator: Simulator, row: Row, col: Column, displayMode = false
-): Color {.inline.} =
-  ## Returns the cell's background color in the field.
-  let hideCursor =
-    when defined(js):
-      isMobile()
-    else:
-      false
+  proc storeToClipboard(text: string) {.inline.} =
+    ## Writes the text to the clipboard.
+    getNavigator().clipboard.writeText text.cstring
 
-  result =
-    if (
-      not hideCursor and not displayMode and simulator.mode == Edit and
-      simulator.editing.focusField and (row, col) == simulator.editing.field
-    ):
-      SelectColor
-    elif row == Row.low:
-      GhostColor
-    elif simulator.rule == Water and row in WaterRow.low .. WaterRow.high:
-      WaterColor
-    else:
-      DefaultColor
+  proc showFlashMsg(elem: Element, html: cstring, showMs = 500) {.inline.} =
+    ## Shows the flash message `html` at `elem` for `showMs` milliseconds.
+    let oldHtml = elem.innerHTML
+    elem.innerHTML.assign html
+    runLater () => (elem.innerHTML.assign oldHtml), showMs
 
-# ------------------------------------------------
-# Pairs
-# ------------------------------------------------
+  func initCopyButtonHandler*(
+      copyStr: () -> string, btnId: cstring, showFlashMsgMs = 500
+  ): () -> void {.inline.} =
+    ## Returns the handler for copy buttons.
+    proc handler() =
+      let btn = btnId.getElementById
+      btn.disabled = true
 
-func needPairPointer*(simulator: Simulator, idx: Natural): bool {.inline.} =
-  ## Returns `true` if it is need to show the pointer to the pair.
-  simulator.mode != Edit and simulator.state == Stable and
-    simulator.operatingIndex == idx
+      copyStr().storeToClipboard
+      btn.showFlashMsg "<span class='icon'><i class='fa-solid fa-check'></i></span><span>コピー</span>",
+        showFlashMsgMs
 
-proc pairCellBackgroundColor*(
-    simulator: Simulator, idx: Natural, axis: bool
-): Color {.inline.} =
-  ## Returns the cell's background color in the pairs.
-  let hideCursor =
-    when defined(js):
-      isMobile()
-    else:
-      false
+      runLater () => (btn.disabled = false), showFlashMsgMs
 
-  result =
-    if (
-      not hideCursor and simulator.mode == Edit and not simulator.editing.focusField and
-      (idx, axis) == simulator.editing.pair
-    ): SelectColor else: DefaultColor
+    handler
 
-# ------------------------------------------------
-# Operating
-# ------------------------------------------------
+  # ------------------------------------------------
+  # JS - Image
+  # ------------------------------------------------
 
-func operatingPairCell*(
-    simulator: Simulator, idx: range[-1 .. 1], col: Column
-): Cell {.inline.} =
-  ## Returns the cell in the pairs being operated.
-  let
-    pos = simulator.operatingPosition
-    noPosLeft = simulator.nazoPuyoWrap.get:
-      wrappedNazoPuyo.puyoPuyo.movingCompleted
-    nextPair: Pair
-  simulator.nazoPuyoWrapBeforeMoves.get:
-    nextPair =
-      if noPosLeft:
-        Pair.low
-      else:
-        wrappedNazoPuyo.puyoPuyo.pairsPositions[simulator.operatingIndex].pair
+  func cellImgSrc*(cell: Cell): cstring {.inline.} =
+    ## Returns the image source of cells.
+    let stem =
+      case cell
+      of Cell.None: "none"
+      of Hard: "hard"
+      of Garbage: "garbage"
+      of Cell.Red: "red"
+      of Cell.Green: "green"
+      of Cell.Blue: "blue"
+      of Cell.Yellow: "yellow"
+      of Cell.Purple: "purple"
 
-  result =
-    if simulator.state != Stable:
-      Cell.None
-    elif noPosLeft:
-      Cell.None
-    elif idx == 0 and col == pos.axisColumn:
-      nextPair.axis
-    elif (
-      # Up, Down
-      (
-        col == pos.axisColumn and (
-          (idx == -1 and pos.childDirection == Up) or
-          (idx == 1 and pos.childDirection == Down)
-        )
-      ) or
-      # Right, Left
-      (
-        idx == 0 and (
-          (col == pos.axisColumn.succ and pos.childDirection == Right) or
-          (col == pos.axisColumn.pred and pos.childDirection == Left)
-        )
-      )
-    ):
-      nextPair.child
-    else:
-      Cell.None
+    "{AssetsDir}/puyo/{stem}.png".fmt.cstring
 
-# ------------------------------------------------
-# Immediate Pairs
-# ------------------------------------------------
+  func noticeGarbageImgSrc*(notice: NoticeGarbage): cstring {.inline.} =
+    ## Returns the image source of notice garbages.
+    let stem =
+      case notice
+      of Small: "small"
+      of Big: "big"
+      of Rock: "rock"
+      of Star: "star"
+      of Moon: "moon"
+      of Crown: "crown"
+      of Comet: "comet"
 
-func immediateNextPairCell*(simulator: Simulator, axis: bool): Cell {.inline.} =
-  ## Returns the next-pair's cell in the immediate pairs.
-  simulator.nazoPuyoWrapBeforeMoves.get:
-    let nextIdx = simulator.operatingIndex.succ
-    if nextIdx >= wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
-      return Cell.None
+    "{AssetsDir}/notice/{stem}.png".fmt.cstring
 
-    let pair = wrappedNazoPuyo.puyoPuyo.pairsPositions[nextIdx].pair
-    result = if axis: pair.axis else: pair.child
+  # ------------------------------------------------
+  # JS - Others
+  # ------------------------------------------------
 
-func immediateDoubleNextPairCell*(simulator: Simulator, axis: bool): Cell {.inline.} =
-  ## Returns the double-next-pair's cell in the immediate pairs.
-  simulator.nazoPuyoWrapBeforeMoves.get:
-    let doubleNextIdx = simulator.operatingIndex.succ 2
-    if doubleNextIdx >= wrappedNazoPuyo.puyoPuyo.pairsPositions.len:
-      return Cell.None
-
-    let pair = wrappedNazoPuyo.puyoPuyo.pairsPositions[doubleNextIdx].pair
-    result = if axis: pair.axis else: pair.child
-
-# ------------------------------------------------
-# Message
-# ------------------------------------------------
-
-func getMessages*(
-    simulator: Simulator
-): tuple[state: string, score: int, noticeGarbages: array[NoticeGarbage, int]] {.
-    inline
-.} =
-  ## Returns the messages.
-  ## Note that `noticeGarbages` in the result should be used only in rendering.
-  result = ("", 0, [0, 0, 0, 0, 0, 0, 0]) # HACK: dummy to suppress warning
-
-  if simulator.state == Stable:
-    case simulator.kind
-    of Regular:
-      simulator.nazoPuyoWrap.get:
-        result.state =
-          if wrappedNazoPuyo.puyoPuyo.field.isDead:
-            $Dead
-          else:
-            "　"
-    of Nazo:
-      let positions = collect:
-        for pairIdx in 0 ..< simulator.operatingIndex:
-          simulator.positions[pairIdx]
-      simulator.nazoPuyoWrapBeforeMoves.get:
-        result.state = $wrappedNazoPuyo.mark positions
-  else:
-    result.state = "　"
-
-  result.score = simulator.score
-
-  result.noticeGarbages = [0, 0, 0, 0, 0, 0, 0]
-  let originalNoticeGarbages = result.score.noticeGarbageCounts simulator.rule
-  var count = 0
-  for notice in countdown(Comet, Small):
-    result.noticeGarbages[notice] = originalNoticeGarbages[notice]
-    count.inc originalNoticeGarbages[notice]
-    if count > ShownNoticeGarbageCount:
-      result.noticeGarbages[notice].dec count - ShownNoticeGarbageCount
-    if count >= ShownNoticeGarbageCount:
-      break
-
-# ------------------------------------------------
-# X
-# ------------------------------------------------
-
-const RuleDescriptions: array[Rule, string] = ["通", "すいちゅう"]
-
-func toXLink*(simulator: Simulator, withPositions: bool): Uri {.inline.} =
-  ## Returns the URI for posting to X.
-  let simUri = simulator.toUri withPositions
-
-  case simulator.kind
-  of Nazo:
-    simulator.nazoPuyoWrapBeforeMoves.get:
-      let
-        ruleStr =
-          if simulator.rule == Tsu:
-            ""
-          else:
-            RuleDescriptions[simulator.rule]
-        moveCount = wrappedNazoPuyo.moveCount
-        reqStr = $wrappedNazoPuyo.requirement
-
-      result = initXLink(&"{ruleStr}{moveCount}手・{reqStr}", "なぞぷよ", simUri)
-  of Regular:
-    result = initXLink(uri = simUri)
+  proc isMobile*(): bool {.inline.} =
+    ## Returns `true` if a mobile device is detected.
+    const MobileRegex = "iPhone|Android.+Mobile".newRegExp
+    MobileRegex in navigator.userAgent

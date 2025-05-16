@@ -1,3 +1,4 @@
+{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
@@ -28,12 +29,14 @@ func toAnswers(strs: varargs[string]): HashSet[SolveAnswer] =
 
 proc tsuSolve(str: string, calcAllAnswers: static bool = true): HashSet[SolveAnswer] =
   ## Returns the answers of Tsu Nazo Puyo.
+
   parseNazoPuyo[TsuField](str)
   .expect("Invalid NazoPuyo")
   .solve(calcAllAnswers).toHashSet
 
 proc waterSolve(str: string, calcAllAnswers: static bool = true): HashSet[SolveAnswer] =
   ## Returns the answers of Water Nazo Puyo.
+
   parseNazoPuyo[WaterField](str)
   .expect("Invalid NazoPuyo")
   .solve(calcAllAnswers).toHashSet
