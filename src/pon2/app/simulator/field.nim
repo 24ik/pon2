@@ -52,6 +52,7 @@ when defined(js) or defined(nimsuggest):
 
   func initBtnHandler(self: FieldView, row: Row, col: Col): () -> void =
     ## Returns the handler for clicking button.
+    # NOTE: cannot inline due to karax's limitation
     () => self.simulator[].writeCell(row, col)
 
   proc toVNode*(self: FieldView): VNode {.inline.} =
