@@ -3,7 +3,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[algorithm, unittest]
+import std/[algorithm, unittest, uri]
 import ../../src/pon2/[core]
 import ../../src/pon2/app/[key, nazopuyowrap, simulator]
 import ../../src/pon2/private/[assign3]
@@ -1001,38 +1001,50 @@ pp|23"""
 # Simulator <-> URI
 # ------------------------------------------------
 
-block: # toUriQuery, parseSimulator
+block: # toUri, parseSimulator
   block: # Nazo Puyo
     let
       sim = Simulator.init
-      queryPon2 = "field=t_&steps&goal=0_0_"
-      queryIshikawa = "___200"
-      queryPon22 = "mode=vp&field=t_&steps&goal=0_0_"
+      uriPon2 = "https://24ik.github.io/pon2/?field=t_&steps&goal=0_0_".parseUri
+      uriIshikawa = "https://ishikawapuyo.net/simu/pn.html?___200".parseUri
+      uriIps = "https://ips.karou.jp/simu/pn.html?___200".parseUri
+      uriPon22 =
+        "https://24ik.github.io/pon2/?mode=vp&field=t_&steps&goal=0_0_".parseUri
+      uriPon23 = "http://24ik.github.io/pon2/?field=t_&steps&goal=0_0_".parseUri
+      uriPon24 =
+        "https://24ik.github.io/pon2/index.html?field=t_&steps&goal=0_0_".parseUri
+      uriIshikawa2 = "http://ishikawapuyo.net/simu/pn.html?___200".parseUri
+      uriIps2 = "http://ishikawapuyo.net/simu/pn.html?___200".parseUri
 
-    check sim.toUriQuery(fqdn = Pon2) == Res[string].ok queryPon2
-    check sim.toUriQuery(fqdn = Ishikawa) == Res[string].ok queryIshikawa
-    check sim.toUriQuery(fqdn = Ips) == Res[string].ok queryIshikawa
+    check sim.toUri(fqdn = Pon2) == Res[Uri].ok uriPon2
+    check sim.toUri(fqdn = Ishikawa) == Res[Uri].ok uriIshikawa
+    check sim.toUri(fqdn = Ips) == Res[Uri].ok uriIps
 
-    check queryPon2.parseSimulator(Pon2) == Res[Simulator].ok sim
-    check queryIshikawa.parseSimulator(Ishikawa) == Res[Simulator].ok sim
-    check queryIshikawa.parseSimulator(Ips) == Res[Simulator].ok sim
-    check queryPon22.parseSimulator(Pon2) == Res[Simulator].ok sim
+    check uriPon2.parseSimulator == Res[Simulator].ok sim
+    check uriIshikawa.parseSimulator == Res[Simulator].ok sim
+    check uriIps.parseSimulator == Res[Simulator].ok sim
+    check uriPon22.parseSimulator == Res[Simulator].ok sim
+    check uriPon23.parseSimulator == Res[Simulator].ok sim
+    check uriPon24.parseSimulator == Res[Simulator].ok sim
+    check uriIshikawa2.parseSimulator == Res[Simulator].ok sim
+    check uriIps2.parseSimulator == Res[Simulator].ok sim
 
   block: # Puyo Puyo
     let
       sim = Simulator.init PuyoPuyo[TsuField].init
-      queryPon2 = "field=t_&steps"
-      queryIshikawa = ""
-      queryPon22 = "mode=vp&field=t_&steps"
+      uriPon2 = "https://24ik.github.io/pon2/?field=t_&steps".parseUri
+      uriIshikawa = "https://ishikawapuyo.net/simu/ps.html".parseUri
+      uriIps = "https://ips.karou.jp/simu/ps.html".parseUri
+      uriIshikawa2 = "https://ishikawapuyo.net/simu/ps.html?".parseUri
 
-    check sim.toUriQuery(fqdn = Pon2) == Res[string].ok queryPon2
-    check sim.toUriQuery(fqdn = Ishikawa) == Res[string].ok queryIshikawa
-    check sim.toUriQuery(fqdn = Ips) == Res[string].ok queryIshikawa
+    check sim.toUri(fqdn = Pon2) == Res[Uri].ok uriPon2
+    check sim.toUri(fqdn = Ishikawa) == Res[Uri].ok uriIshikawa
+    check sim.toUri(fqdn = Ips) == Res[Uri].ok uriIps
 
-    check queryPon2.parseSimulator(Pon2) == Res[Simulator].ok sim
-    check queryIshikawa.parseSimulator(Ishikawa) == Res[Simulator].ok sim
-    check queryIshikawa.parseSimulator(Ips) == Res[Simulator].ok sim
-    check queryPon22.parseSimulator(Pon2) == Res[Simulator].ok sim
+    check uriPon2.parseSimulator == Res[Simulator].ok sim
+    check uriIshikawa.parseSimulator == Res[Simulator].ok sim
+    check uriIps.parseSimulator == Res[Simulator].ok sim
+    check uriIshikawa2.parseSimulator == Res[Simulator].ok sim
 
   block: # clearPlacements
     let nazo = parseNazoPuyo[TsuField](
@@ -1058,5 +1070,5 @@ pp|
 gy|23"""
     ).expect "Invalid Nazo Puyo"
 
-    check Simulator.init(nazo).toUriQuery(clearPlacements = true) ==
-      Res[string].ok "field=t_b..&steps=rbppgy&goal=5__6"
+    check Simulator.init(nazo).toUri(clearPlacements = true) ==
+      Res[Uri].ok "https://24ik.github.io/pon2/?field=t_b..&steps=rbppgy&goal=5__6".parseUri

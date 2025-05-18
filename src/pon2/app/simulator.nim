@@ -1,5 +1,10 @@
 ## This module implements simulators.
 ##
+## Compile Options:
+## | Option               | Description                | Default  |
+## | -------------------- | -------------------------- | -------- |
+## | `-d:pon2.path=<str>` | Path of the web simulator. | `/pon2/` |
+##
 
 {.push raises: [].}
 {.experimental: "strictDefs".}
@@ -13,7 +18,7 @@ import
   ../private/
     [arrayops2, assign3, deques2, results2, staticfor2, strutils2, tables2, utils]
 
-export deques2, results2
+export deques2, results2, uri
 
 type
   SimulatorMode* {.pure.} = enum
@@ -62,6 +67,11 @@ const
   EditorModes* = {EditorPlay, EditorEdit}
   PlayModes* = {ViewerPlay, EditorPlay}
   EditModes* = {ViewerEdit, EditorEdit}
+
+  Pon2Path* {.define: "pon2.path".} = "/pon2/"
+
+static:
+  doAssert Pon2Path.startsWith '/'
 
 # ------------------------------------------------
 # Constructor
@@ -759,7 +769,7 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.inline, discardable.} 
   var catched = true
 
   case self.mode
-  of ViewerPlay, EditorPlay:
+  of PlayModes:
     # mode
     if key == static(KeyEvent.init 'm'):
       if self.mode == ViewerPlay:
@@ -791,7 +801,7 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.inline, discardable.} 
       self.forward(replay = true)
     else:
       catched.assign false
-  of ViewerEdit, EditorEdit:
+  of EditModes:
     # mode
     if key == static(KeyEvent.init 'm'):
       if self.mode == ViewerEdit:
@@ -882,41 +892,88 @@ const
     for mode in SimulatorMode:
       {$mode: mode}
 
-func toUriQuery*(
+func initPon2Paths(): seq[string] {.inline.} =
+  ## Returns `Pon2Paths`.
+  var paths = @[Pon2Path]
+
+  if Pon2Path.endsWith '/':
+    paths.add "{Pon2Path}index.html".fmt
+
+  if Pon2Path.endsWith "/index.html":
+    paths.add Pon2Path.dup(removeSuffix(_, "/index.html"))
+
+  paths
+
+const Pon2Paths = initPon2Paths()
+
+func toUri*(
     self: Simulator, clearPlacements = false, fqdn = Pon2
-): Res[string] {.inline.} =
-  ## Returns the URI query converted from the simulator.
+): Res[Uri] {.inline.} =
+  ## Returns the URI converted from the simulator.
+  var uri = initUri()
+  uri.scheme = "https"
+  uri.hostname = $fqdn
+
+  uri.path =
+    case fqdn
+    of Pon2:
+      Pon2Path
+    of Ishikawa, Ips:
+      if self.nazoPuyoWrap.optGoal.isOk:
+        "/simu/pn.html"
+      else:
+        case self.mode
+        of PlayModes: "/simu/ps.html"
+        of EditModes: "/simu/pe.html"
+        of Replay: "/simu/pv.html"
+
   var wrap = self.nazoPuyoWrap
   if clearPlacements:
     wrap.runIt:
       for step in it.steps.mitems:
         if step.kind == PairPlacement:
           step.optPlacement.err
-
   let wrapQuery =
     ?wrap.toUriQuery(fqdn).context "Simulator that does not support URI conversion"
-  case fqdn
-  of Pon2:
-    ok if self.mode == DefaultMode:
-      wrapQuery
-    else:
+  uri.query =
+    if fqdn == Pon2 and self.mode != DefaultMode:
       "{ModeKey}={self.mode}&{wrapQuery}".fmt
-  else:
-    ok wrapQuery
+    else:
+      wrapQuery
 
-func parseSimulator*(query: string, fqdn: SimulatorFqdn): Res[Simulator] {.inline.} =
+  ok uri
+
+func parseSimulator*(uri: Uri): Res[Simulator] {.inline.} =
   ## Returns the simulator converted from the URI.
-  ## If `fqdn` is `Ishikawa` or `Ips`, the mode of result simulator is set to
-  ## `ViewerPlay`.
+  ## Viewer modes and play modes are set to the result simulator preferentially
+  ## if the FQDN is `Ishikawa` or `Ips`.
+  let fqdn: SimulatorFqdn
+  case uri.hostname
+  of $Pon2:
+    fqdn = Pon2
+  of $Ishikawa:
+    fqdn = Ishikawa
+  of $Ips:
+    fqdn = Ips
+  else:
+    fqdn = SimulatorFqdn.low # NOTE: dummy to compile
+    return err "Invalid simulator (invalid FQDN): {uri}".fmt
+
+  if uri.scheme notin ["https", "http"]:
+    return err "Invalid simulator (invalid scheme): {uri}".fmt
+
   case fqdn
   of Pon2:
+    if uri.path notin Pon2Paths:
+      return err "Invalid simulator (invalid path): {uri}".fmt
+
     var
       keyVals = newSeq[tuple[key: string, value: string]]()
       mode = Opt[SimulatorMode].err
-    for keyVal in query.decodeQuery:
+    for keyVal in uri.query.decodeQuery:
       if keyVal.key == ModeKey:
         if mode.isOk:
-          return err "Invalid simulator (multiple mode detected): {query}".fmt
+          return err "Invalid simulator (multiple mode detected): {uri}".fmt
         else:
           mode.ok ?StrToMode.getRes(keyVal.value).context "Invalid mode: {keyVal.value}".fmt
       else:
@@ -926,8 +983,19 @@ func parseSimulator*(query: string, fqdn: SimulatorFqdn): Res[Simulator] {.inlin
       mode.ok DefaultMode
 
     ok Simulator.init(
-      ?keyVals.encodeQuery.parseNazoPuyoWrap(fqdn).context "Invalid simulator: {query}".fmt,
+      ?keyVals.encodeQuery.parseNazoPuyoWrap(fqdn).context "Invalid simulator: {uri}".fmt,
       mode.unsafeValue,
     )
   of Ishikawa, Ips:
-    ok Simulator.init ?query.parseNazoPuyoWrap(fqdn).context "Invalid simulator: {query}".fmt
+    let mode: SimulatorMode
+    case uri.path
+    of "/simu/pe.html":
+      mode = ViewerEdit
+    of "/simu/ps.html", "/simu/pn.html":
+      mode = ViewerPlay
+    of "/simu/pv.html":
+      mode = Replay
+    else:
+      return err "Invalid simulator (invalid path): {uri}".fmt
+
+    ok Simulator.init ?uri.query.parseNazoPuyoWrap(fqdn).context "Invalid simulator: {uri}".fmt
