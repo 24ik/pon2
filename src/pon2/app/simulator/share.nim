@@ -1,175 +1,97 @@
-## This module implements the share node.
+## This module implements share views.
 ##
 
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
+{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, sugar, uri]
-import karax/[karax, karaxdsl, kbase, kdom, vdom, vstyles]
-import ./[field, messages, pairs, requirement]
-import ../[common]
-import ../../[misc]
-import ../../../../app/[simulator]
+when defined(js) or defined(nimsuggest):
+  import std/[sugar]
+  import karax/[karax, karaxdsl, kdom, vdom]
+  import ../[nazopuyowrap, simulator]
+  import ../../[core]
 
-const
-  UrlCopyButtonIdPrefix = "pon2-simulator-share-url-"
-  PosUrlCopyButtonIdPrefix = "pon2-simulator-share-pos-url-"
-  EditorUrlCopyButtonIdPrefix = "pon2-simulator-share-editor-url-"
-  EditorPosUrlCopyButtonIdPrefix = "pon2-simulator-share-editor-pos-url-"
+type ShareView* = object ## View of the share.
+  simulator: ref Simulator
 
-  DisplayDivIdPrefix = "pon2-simulator-share-display-"
-  DisplayPairDivIdPrefix = "pon2-simulator-share-display-pair-"
-  DisplayPairPosDivIdPrefix = "pon2-simulator-share-display-pair-pos-"
+# ------------------------------------------------
+# Constructor
+# ------------------------------------------------
 
-proc downloadDisplayImage(
-  id: kstring
-) {.
-  importjs:
-    &"""
-const div = document.getElementById('{DisplayDivIdPrefix}' + (#));
-div.style.display = 'block';
-html2canvas(div, {{scale: 3}}).then((canvas) => {{
-  div.style.display = 'none';
+func init*(T: type ShareView, simulator: ref Simulator): T {.inline.} =
+  T(simulator: simulator)
 
-  const element = document.createElement('a');
-  element.href = canvas.toDataURL();
-  element.download = 'puyo.png';
-  element.target = '_blank';
-  element.click();
-}});"""
-.} ## Downloads the simulator image.
+# ------------------------------------------------
+# JS backend
+# ------------------------------------------------
 
-func newDownloadHandler(id: string, withPositions: bool): () -> void =
-  ## Returns the handler for downloading.
-  # NOTE: cannot inline due to lazy evaluation
-  proc handler() =
-    document.getElementById(kstring &"{DisplayPairDivIdPrefix}{id}").style.display =
-      if withPositions: "none" else: "block"
+when defined(js) or defined(nimsuggest):
+  proc toVNode*(self: ShareView): VNode {.inline.} =
+    ## Returns the share node.
+    let goal = self.simulator[].nazoPuyoWrap.optGoal.unsafeValue
 
-    document.getElementById(kstring &"{DisplayPairPosDivIdPrefix}{id}").style.display =
-      if withPositions: "block" else: "none"
-    downloadDisplayImage id.kstring
+    if self.displayMode or self.simulator[].mode != EditorEdit:
+      return buildHtml bold:
+        text $goal
 
-  result = handler
+    # kind node
+    let kindNode = buildHtml tdiv(class = "select"):
+      select:
+        for kind in GoalKind:
+          option(selected = kind == goal.kind):
+            text $kind
+    kindNode[0].addEventListener onchange,
+      (ev: Event, target: VNode) => (
+        self.simulator[].goalKind =
+          cast[Element](kindNode[0].dom).selectedOptions[0].selectedIndex.GoalKind
+      )
 
-proc toPlayUri(
-    simulator: Simulator, withPositions: bool, editor = false
-): Uri {.inline.} =
-  ## Returns the IDE URI for playing.
-  let sim = simulator.copy
-  sim.mode = if editor: PlayEditor else: Play
+    # color node
+    let colorNode: VNode
+    if goal.kind in ColorKinds:
+      colorNode = buildHtml tdiv:
+        button(class = "button is-static px-2"):
+          text "c ="
+        tdiv(class = "select"):
+          select:
+            option(selected = goal.optColor.unsafeValue == All):
+              text "全"
+            for color in GoalColor.All.succ .. GoalColor.high:
+              option(selected = color == goal.optColor.unsafeValue):
+                text $color
+      colorNode[1].addEventListener onchange,
+        (ev: Event, target: VNode) => (
+          self.simulator[].goalColor =
+            cast[Element](kindNode[1].dom).selectedOptions[1].selectedIndex.GoalColor
+        )
+    else:
+      colorNode = nil
 
-  result = sim.toUri withPositions
+    # val node
+    let valNode: VNode
+    if goal.kind in ValKinds:
+      valNode = buildHtml tdiv:
+        button(class = "button is-static px-2"):
+          text "n ="
+        tdiv(class = "select"):
+          select:
+            for val in 0 .. 99:
+              option(selected = val == goal.optVal.unsafeValue):
+                text $val
+      valNode[1].addEventListener onchange,
+        (ev: Event, target: VNode) => (
+          self.simulator[].goalVal =
+            cast[Element](kindNode[1].dom).selectedOptions[1].selectedIndex.GoalVal
+        )
+    else:
+      valNode = nil
 
-proc newShareNode*(
-    simulator: Simulator, id: string, onlyEditorButton: bool
-): VNode {.inline.} =
-  ## Returns the share node.
-  let
-    urlCopyButtonId = &"{UrlCopyButtonIdPrefix}{id}"
-    posUrlCopyButtonId = &"{PosUrlCopyButtonIdPrefix}{id}"
-    editorUrlCopyButtonId = &"{EditorUrlCopyButtonIdPrefix}{id}"
-    editorPosUrlCopyButtonId = &"{EditorPosUrlCopyButtonIdPrefix}{id}"
-
-  result = buildHtml(tdiv):
-    if not onlyEditorButton:
+    buildHtml tdiv:
+      tdiv(class = "block mb-1"):
+        kindNode
       tdiv(class = "block"):
-        span(class = "icon"):
-          italic(class = "fa-brands fa-x-twitter")
-        span:
-          text "でシェア"
-        tdiv(class = "buttons"):
-          a(
-            class = "button is-size-7",
-            target = "_blank",
-            rel = "noopener noreferrer",
-            href = kstring $simulator.toXlink(withPositions = false),
-          ):
-            text "操作無"
-          a(
-            class = "button is-size-7",
-            target = "_blank",
-            rel = "noopener noreferrer",
-            href = kstring $simulator.toXlink(withPositions = true),
-          ):
-            text "操作有"
-      tdiv(class = "block"):
-        text "画像ダウンロード"
-        tdiv(class = "buttons"):
-          button(class = "button is-size-7", onclick = newDownloadHandler(id, false)):
-            text "操作無"
-          button(class = "button is-size-7", onclick = newDownloadHandler(id, true)):
-            text "操作有"
-      tdiv(class = "block"):
-        text "URLコピー"
-        tdiv(class = "buttons"):
-          button(
-            id = urlCopyButtonId.kstring,
-            class = "button is-size-7",
-            onclick = newCopyButtonHandler(
-              () => $simulator.toPlayUri(withPositions = false), urlCopyButtonId
-            ),
-          ):
-            text "操作無"
-          button(
-            id = posUrlCopyButtonId.kstring,
-            class = "button is-size-7",
-            onclick = newCopyButtonHandler(
-              () => $simulator.toPlayUri(withPositions = true), posUrlCopyButtonId
-            ),
-          ):
-            text "操作有"
-    if simulator.mode != SimulatorMode.Play:
-      tdiv(class = "block"):
-        text "編集者URLコピー"
-        tdiv(class = "buttons"):
-          button(
-            id = editorUrlCopyButtonId.kstring,
-            class = "button is-size-7",
-            onclick = newCopyButtonHandler(
-              () => $simulator.toPlayUri(withPositions = false, editor = true),
-              editorUrlCopyButtonId,
-            ),
-          ):
-            text "操作無"
-          button(
-            id = editorPosUrlCopyButtonId.kstring,
-            class = "button is-size-7",
-            onclick = newCopyButtonHandler(
-              () => $simulator.toPlayUri(withPositions = true, editor = true),
-              editorPosUrlCopyButtonId,
-            ),
-          ):
-            text "操作有"
-
-proc newDisplayNode*(simulator: Simulator, id: string): VNode {.inline.} =
-  ## Returns the display node for image saving.
-  ## `id` should be the same as the one used in `newShareNode`.
-  buildHtml(
-    tdiv(
-      id = kstring &"{DisplayDivIdPrefix}{id}",
-      style = style(StyleAttr.display, kstring"none"),
-    )
-  ):
-    if simulator.kind == Nazo:
-      tdiv(class = "block"):
-        simulator.newRequirementNode(id, true)
-    tdiv(class = "block"):
-      tdiv(class = "columns is-mobile is-variable is-1"):
-        tdiv(class = "column is-narrow"):
-          tdiv(class = "block"):
-            simulator.newFieldNode(true)
-          tdiv(class = "block"):
-            simulator.newMessagesNode
-        tdiv(id = kstring &"{DisplayPairDivIdPrefix}{id}", class = "column is-narrow"):
-          tdiv(class = "block"):
-            simulator.newPairsNode(true, false)
-        tdiv(
-          id = kstring &"{DisplayPairPosDivIdPrefix}{id}", class = "column is-narrow"
-        ):
-          tdiv(class = "block"):
-            simulator.newPairsNode(true, true)
+        if not colorNode.isNil:
+          colorNode
+        if not valNode.isNil:
+          valNode

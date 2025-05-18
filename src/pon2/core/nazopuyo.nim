@@ -51,20 +51,29 @@ const
     DummyCell,
   ]
 
-func mark*[F: TsuField or WaterField](nazo: NazoPuyo[F]): MarkResult {.inline.} =
+func mark*[F: TsuField or WaterField](
+    nazo: NazoPuyo[F], endStepIdx = -1
+): MarkResult {.inline.} =
   ## Marks the steps in the Nazo Puyo.
+  ## If `endStepIdx` is negative, all steps are used.
   ## This function requires that the field is settled.
   if not nazo.goal.isSupported:
     return NotSupport
 
-  let calcConn = nazo.goal.kind in {Place, PlaceMore, Conn, ConnMore}
+  let
+    calcConn = nazo.goal.kind in {Place, PlaceMore, Conn, ConnMore}
+    loopCnt =
+      if endStepIdx in 0 .. nazo.puyoPuyo.steps.len:
+        endStepIdx
+      else:
+        nazo.puyoPuyo.steps.len
   var
     puyoPuyo = nazo.puyoPuyo
     skipped = false
     popColors = set[Cell]({}) # used by AccColor[More]
     popCnt = 0 # used by AccCnt[More]
 
-  while puyoPuyo.steps.len > 0:
+  for _ in 1 .. loopCnt:
     let step = puyoPuyo.steps.peekFirst
 
     # check skip, invalid
@@ -166,7 +175,7 @@ func mark*[F: TsuField or WaterField](nazo: NazoPuyo[F]): MarkResult {.inline.} 
     if puyoPuyo.field.isDead:
       return Dead
 
-  return WrongAnswer
+  WrongAnswer
 
 # ------------------------------------------------
 # Nazo Puyo <-> string

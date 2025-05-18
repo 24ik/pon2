@@ -25,13 +25,19 @@ block: # init, `==`
 # Internal Access
 # ------------------------------------------------
 
-block: # runIt, runNazoIt
+block: # runIt
   var nazoWrap = NazoPuyoWrap.init
   nazoWrap.runIt:
     check it.field.rule == Tsu
 
     it.field[Row1, Col3] = Hard
     check it.garbagesCnt == 1
+
+    check itNazo.puyoPuyo.field.rule == Tsu
+
+  let stepCnt = nazoWrap.runIt:
+    it.steps.len
+  check stepCnt == 0
 
 # ------------------------------------------------
 # Property

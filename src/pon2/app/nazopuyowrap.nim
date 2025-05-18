@@ -8,7 +8,7 @@
 
 import std/[strformat]
 import ../[core]
-import ../private/[assign3, results2, strutils2]
+import ../private/[assign3, macros2, results2, strutils2]
 
 export results2
 
@@ -52,11 +52,11 @@ func init*(T: type NazoPuyoWrap): T {.inline.} =
 # ------------------------------------------------
 
 func `==`*(field1: TsuField, field2: WaterField): bool {.inline.} =
-  # NOTE: this may be used in `runIt`.
+  # NOTE: this function may be needed in `runIt`.
   false
 
 func `==`*(field1: WaterField, field2: TsuField): bool {.inline.} =
-  # NOTE: this may be used in `runIt`.
+  # NOTE: this function may be needed in `runIt`.
   false
 
 func `==`*(wrap1, wrap2: NazoPuyoWrap): bool {.inline.} =
@@ -73,19 +73,30 @@ func `==`*(wrap1, wrap2: NazoPuyoWrap): bool {.inline.} =
 # Internal Access
 # ------------------------------------------------
 
-template runIt*(self: NazoPuyoWrap, body: untyped): untyped =
-  ## Runs `body` with `it` (internal `PuyoPuyo`) exposed.
-  case self.rule
-  of Tsu:
-    template it(): auto =
-      self.tsu
+macro runIt*(self: untyped, body: untyped): untyped =
+  ## Runs `body` with `it` (internal `PuyoPuyo`) and `itNazo`
+  ## (internal `NazoPuyo` constructor calling) exposed.
+  ## If `self` has no goal, the behavior of `itNazo` is undefined.
+  let
+    puyoT = quote:
+      `self`.tsu
+    puyoW = quote:
+      `self`.water
+    goal = quote:
+      `self`.optGoal.unsafeValue
 
-    body
-  of Water:
-    template it(): auto =
-      self.water
+    nazoT = quote:
+      NazoPuyo[TsuField].init(`puyoT`, `goal`)
+    nazoW = quote:
+      NazoPuyo[WaterField].init(`puyoW`, `goal`)
 
-    body
+    bodyT = body.replaced("it".ident, puyoT).replaced("itNazo".ident, nazoT)
+    bodyW = body.replaced("it".ident, puyoW).replaced("itNazo".ident, nazoW)
+
+  quote:
+    case `self`.rule
+    of Tsu: `bodyT`
+    of Water: `bodyW`
 
 # ------------------------------------------------
 # Property
@@ -120,15 +131,8 @@ func toUriQuery*(self: NazoPuyoWrap, fqdn: SimulatorFqdn): Res[string] {.inline.
   const ErrMsg = "Invalid Nazo Puyo wrapper"
 
   if self.optGoal.isOk:
-    case self.rule
-    of Tsu:
-      NazoPuyo[TsuField]
-      .init(self.tsu, self.optGoal.unsafeValue)
-      .toUriQuery(fqdn).context ErrMsg
-    of Water:
-      NazoPuyo[WaterField]
-      .init(self.water, self.optGoal.unsafeValue)
-      .toUriQuery(fqdn).context ErrMsg
+    self.runIt:
+      itNazo.toUriQuery(fqdn).context ErrMsg
   else:
     self.runIt:
       it.toUriQuery(fqdn).context ErrMsg

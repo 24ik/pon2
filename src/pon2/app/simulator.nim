@@ -273,7 +273,7 @@ func moveCursorUp*(self: var Simulator) {.inline.} =
     if self.mode != EditorEdit:
       return
 
-    let stepCnt = self.nazoPuyoWrap.runIt:
+    let stepCnt = runIt self.nazoPuyoWrap:
       it.steps.len
     if self.editData.step.idx == 0:
       self.editData.step.idx.assign stepCnt
@@ -291,7 +291,7 @@ func moveCursorDown*(self: var Simulator) {.inline.} =
     if self.mode != EditorEdit:
       return
 
-    let stepCnt = self.nazoPuyoWrap.runIt:
+    let stepCnt = runIt self.nazoPuyoWrap:
       it.steps.len
     if self.editData.step.idx == stepCnt:
       self.editData.step.idx.assign 0
@@ -309,7 +309,7 @@ func moveCursorRight*(self: var Simulator) {.inline.} =
     if self.mode != EditorEdit:
       return
 
-    self.nazoPuyoWrap.runIt:
+    runIt self.nazoPuyoWrap:
       let stepCnt = it.steps.len
       if self.editData.step.idx >= stepCnt or
           it.steps[self.editData.step.idx].kind == PairPlacement:
@@ -328,7 +328,7 @@ func moveCursorLeft*(self: var Simulator) {.inline.} =
     if self.mode != EditorEdit:
       return
 
-    self.nazoPuyoWrap.runIt:
+    runIt self.nazoPuyoWrap:
       let stepCnt = it.steps.len
       if self.editData.step.idx >= stepCnt or
           it.steps[self.editData.step.idx].kind == PairPlacement:
@@ -345,7 +345,7 @@ func deleteStep*(self: var Simulator, idx: int) {.inline.} =
   if self.mode != EditorEdit:
     return
 
-  self.nazoPuyoWrap.runIt:
+  runIt self.nazoPuyoWrap:
     if idx >= it.steps.len:
       return
 
@@ -367,7 +367,7 @@ func writeCell(self: var Simulator, row: Row, col: Col, cell: Cell) {.inline.} =
     return
 
   self.editBlock:
-    self.nazoPuyoWrap.runIt:
+    runIt self.nazoPuyoWrap:
       if self.editData.insert:
         if cell == None:
           it.field.delete row, col
@@ -387,7 +387,7 @@ func writeCell(self: var Simulator, idx: int, pivot: bool, cell: Cell) {.inline.
   if self.mode != EditorEdit:
     return
 
-  self.nazoPuyoWrap.runIt:
+  runIt self.nazoPuyoWrap:
     if idx >= it.steps.len:
       case cell
       of None:
@@ -455,7 +455,7 @@ func shiftFieldUp*(self: var Simulator) {.inline.} =
     return
 
   self.editBlock:
-    self.nazoPuyoWrap.runIt:
+    runIt self.nazoPuyoWrap:
       it.field.shiftUp
 
 func shiftFieldDown*(self: var Simulator) {.inline.} =
@@ -464,7 +464,7 @@ func shiftFieldDown*(self: var Simulator) {.inline.} =
     return
 
   self.editBlock:
-    self.nazoPuyoWrap.runIt:
+    runIt self.nazoPuyoWrap:
       it.field.shiftDown
 
 func shiftFieldRight*(self: var Simulator) {.inline.} =
@@ -473,7 +473,7 @@ func shiftFieldRight*(self: var Simulator) {.inline.} =
     return
 
   self.editBlock:
-    self.nazoPuyoWrap.runIt:
+    runIt self.nazoPuyoWrap:
       it.field.shiftRight
 
 func shiftFieldLeft*(self: var Simulator) {.inline.} =
@@ -482,7 +482,7 @@ func shiftFieldLeft*(self: var Simulator) {.inline.} =
     return
 
   self.editBlock:
-    self.nazoPuyoWrap.runIt:
+    runIt self.nazoPuyoWrap:
       it.field.shiftLeft
 
 # ------------------------------------------------
@@ -495,7 +495,7 @@ func flipFieldVertical*(self: var Simulator) {.inline.} =
     return
 
   self.editBlock:
-    self.nazoPuyoWrap.runIt:
+    runIt self.nazoPuyoWrap:
       it.field.flipVertical
 
 func flipFieldHorizontal*(self: var Simulator) {.inline.} =
@@ -504,7 +504,7 @@ func flipFieldHorizontal*(self: var Simulator) {.inline.} =
     return
 
   self.editBlock:
-    self.nazoPuyoWrap.runIt:
+    runIt self.nazoPuyoWrap:
       it.field.flipHorizontal
 
 func flip*(self: var Simulator) {.inline.} =
@@ -515,7 +515,7 @@ func flip*(self: var Simulator) {.inline.} =
     if self.mode != EditorEdit:
       return
 
-    self.nazoPuyoWrap.runIt:
+    runIt self.nazoPuyoWrap:
       if self.editData.step.idx >= it.steps.len:
         return
 
@@ -626,7 +626,7 @@ func forward*(self: var Simulator, replay = false, skip = false) {.inline.} =
   ## Forwards the simulator.
   ## This functions requires that the initial field is settled.
   ## `skip` is prioritized over `replay`.
-  self.nazoPuyoWrap.runIt:
+  runIt self.nazoPuyoWrap:
     case self.state
     of Stable:
       if self.operatingIdx >= it.steps.len:
@@ -715,7 +715,7 @@ func backward*(self: var Simulator, detail = false) {.inline.} =
     return
 
   # save the steps to keep the placements
-  let steps = self.nazoPuyoWrap.runIt:
+  let steps = runIt self.nazoPuyoWrap:
     it.steps
 
   if self.mode in PlayModes and self.state == Stable:
@@ -728,7 +728,7 @@ func backward*(self: var Simulator, detail = false) {.inline.} =
 
   if self.mode in PlayModes:
     self.operatingPlacement.assign DefaultPlcmt
-    self.nazoPuyoWrap.runIt:
+    runIt self.nazoPuyoWrap:
       it.steps.assign steps
 
 func reset*(self: var Simulator) {.inline.} =
@@ -737,12 +737,12 @@ func reset*(self: var Simulator) {.inline.} =
     return
 
   # save the steps to keep the placements
-  let steps = self.nazoPuyoWrap.runIt:
+  let steps = runIt self.nazoPuyoWrap:
     it.steps
 
   self.load self.undoDeque.peekFirst
   if self.mode in PlayModes:
-    self.nazoPuyoWrap.runIt:
+    runIt self.nazoPuyoWrap:
       it.steps.assign steps
   self.operatingPlacement.assign DefaultPlcmt
   self.operatingIdx.assign 0
