@@ -7,91 +7,134 @@
 {.experimental: "views".}
 
 when defined(js) or defined(nimsuggest):
-  import std/[sugar]
+  import std/[strformat, sugar, uri]
   import karax/[karax, karaxdsl, kdom, vdom]
   import ../[nazopuyowrap, simulator]
   import ../../[core]
+  import ../../private/app/simulator/[common]
 
 type ShareView* = object ## View of the share.
   simulator: ref Simulator
+  id: string
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
-func init*(T: type ShareView, simulator: ref Simulator): T {.inline.} =
-  T(simulator: simulator)
+func init*(T: type ShareView, simulator: ref Simulator, id: string): T {.inline.} =
+  T(simulator: simulator, id: id)
 
 # ------------------------------------------------
 # JS backend
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
-  proc toVNode*(self: ShareView): VNode {.inline.} =
-    ## Returns the share node.
-    let goal = self.simulator[].nazoPuyoWrap.optGoal.unsafeValue
+  const
+    RuleDescs: array[Rule, string] = ["", "すいちゅう"]
+    DisplayDivIdPrefix = "pon2-simulator-share-display-"
 
-    if self.displayMode or self.simulator[].mode != EditorEdit:
-      return buildHtml bold:
-        text $goal
+  func toXLink(self: ShareView): Uri {.inline.} =
+    ## Returns the URI to post to X.
+    var uri = initUri()
+    uri.scheme = "https"
+    uri.hostname = "x.com"
+    uri.path = "/intent/tweet" # NOTE: "/intent/post" does not work correctly
 
-    # kind node
-    let kindNode = buildHtml tdiv(class = "select"):
-      select:
-        for kind in GoalKind:
-          option(selected = kind == goal.kind):
-            text $kind
-    kindNode[0].addEventListener onchange,
-      (ev: Event, target: VNode) => (
-        self.simulator[].goalKind =
-          cast[Element](kindNode[0].dom).selectedOptions[0].selectedIndex.GoalKind
-      )
+    var queries = newSeqOfCap[(string, string)](3)
+    queries.add ("url", $self.simulator[].toUri(clearPlacements = true))
 
-    # color node
-    let colorNode: VNode
-    if goal.kind in ColorKinds:
-      colorNode = buildHtml tdiv:
-        button(class = "button is-static px-2"):
-          text "c ="
-        tdiv(class = "select"):
-          select:
-            option(selected = goal.optColor.unsafeValue == All):
-              text "全"
-            for color in GoalColor.All.succ .. GoalColor.high:
-              option(selected = color == goal.optColor.unsafeValue):
-                text $color
-      colorNode[1].addEventListener onchange,
-        (ev: Event, target: VNode) => (
-          self.simulator[].goalColor =
-            cast[Element](kindNode[1].dom).selectedOptions[1].selectedIndex.GoalColor
-        )
+    if self.simulator[].nazoPuyoWrap.optGoal.isOk:
+      self.simulator[].nazoPuyoWrap.runIt:
+        let
+          ruleDesc = RuleDescs[it.field.rule]
+          moveCnt = it.steps.len
+          goalDesc = $self.simulator[].nazoPuyoWrap.optGoal.unsafeValue
+
+        queries.add ("text", "{ruleDesc}{moveCnt}手・{goalDesc}".fmt)
+        queries.add ("hashtags", "なぞぷよ")
+
+    uri.query = queries.encodeQuery
+
+    uri
+
+  proc downloadDisplayImg(
+    id: cstring
+  ) {.
+    importjs:
+      """
+const div = document.getElementById('{DisplayDivIdPrefix}' + (#));
+div.style.display = 'block';
+html2canvas(div, {{scale: 3}}).then((canvas) => {{
+  div.style.display = 'none';
+
+  const elem = document.createElement('a');
+  elem.href = canvas.toDataURL();
+  elem.download = 'pon2sim.png';
+  elem.target = '_blank';
+  elem.click();
+}}).catch((err) => {{
+  console.error(err);
+}});""".fmt
+  .} ## Downloads the simulator image in the display div.
+
+  proc toVNodes*(self: ShareView): tuple[share: VNode, display: VNode] {.inline.} =
+    ## Returns the share node and display node.
+    let
+      noPlcmtsUriCopyBtn = buildHtml button(class = "button is-size-7"):
+        text "操作無"
+      uriCopyBtn = buildHtml button(class = "button is-size-7"):
+        text "操作有"
+
+    noPlcmtsUriCopyBtn.addCopyBtnHandler () =>
+      $self.simulator[].toUri(clearPlacements = true)
+    uriCopyBtn.addCopyBtnHandler () => $self.simulator[].toUri(clearPlacements = false)
+
+    let noPlcmtsEditorUriCopyBtn, editorUriCopyBtn: VNode
+    if self.simulator[].mode in EditorModes:
+      noPlcmtsEditorUriCopyBtn = buildHtml button(class = "button is-size-7"):
+        text "操作無"
+      editorUriCopyBtn = buildHtml button(class = "button is-size-7"):
+        text "操作有"
+
+      noPlcmtsEditorUriCopyBtn.addCopyBtnHandler () =>
+        $self.simulator[].toUri(clearPlacements = true)
+      editorUriCopyBtn.addCopyBtnHandler () =>
+        $self.simulator[].toUri(clearPlacements = false)
     else:
-      colorNode = nil
+      noPlcmtsEditorUriCopyBtn = nil
+      editorUriCopyBtn = nil
 
-    # val node
-    let valNode: VNode
-    if goal.kind in ValKinds:
-      valNode = buildHtml tdiv:
-        button(class = "button is-static px-2"):
-          text "n ="
-        tdiv(class = "select"):
-          select:
-            for val in 0 .. 99:
-              option(selected = val == goal.optVal.unsafeValue):
-                text $val
-      valNode[1].addEventListener onchange,
-        (ev: Event, target: VNode) => (
-          self.simulator[].goalVal =
-            cast[Element](kindNode[1].dom).selectedOptions[1].selectedIndex.GoalVal
-        )
-    else:
-      valNode = nil
-
-    buildHtml tdiv:
-      tdiv(class = "block mb-1"):
-        kindNode
+    let shareNode = buildHtml tdiv:
       tdiv(class = "block"):
-        if not colorNode.isNil:
-          colorNode
-        if not valNode.isNil:
-          valNode
+        tdiv(class = "buttons"):
+          button(
+            class = "button is-size-7",
+            onclick =
+              () => (
+                block:
+                  "".getElementById.style.display = "block"
+                  self.id.cstring.downloadDisplayImg
+              ),
+          ):
+            span(class = "icon"):
+              italic(class = "fa-solid fa-download")
+          a(
+            class = "button is-size-7",
+            target = "_blank",
+            rel = "noopener noreferrer",
+            href = cstring $self.toXLink,
+          ):
+            span(class = "icon"):
+              italic(class = "fa-brands fa-x-twitter")
+      tdiv(class = "block"):
+        text "URLコピー"
+        tdiv(class = "buttons"):
+          noPlcmtsUriCopyBtn
+          uriCopyBtn
+      if self.simulator[].mode in EditorModes:
+        tdiv(class = "block"):
+          text "編集者URLコピー"
+          noPlcmtsEditorUriCopyBtn
+          editorUriCopyBtn
+
+    (shareNode, shareNode) # TODO

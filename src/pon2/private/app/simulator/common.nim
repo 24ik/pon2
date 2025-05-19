@@ -12,8 +12,8 @@
 {.experimental: "views".}
 
 when defined(js) or defined(nimsuggest):
-  import std/[dom, jsffi, jsre, strformat, sugar]
-  import karax/[karax]
+  import std/[jsffi, jsre, strformat, sugar]
+  import karax/[karax, kdom, vdom]
   import ../../[assign3]
   import ../../../[core]
 
@@ -36,21 +36,21 @@ when defined(js) or defined(nimsuggest):
     elem.innerHTML.assign html
     runLater () => (elem.innerHTML.assign oldHtml), showMs
 
-  func initCopyButtonHandler*(
-      copyStr: () -> string, btnId: cstring, showFlashMsgMs = 500
-  ): () -> void {.inline.} =
-    ## Returns the handler for copy buttons.
-    proc handler() =
-      let btn = btnId.getElementById
+  func addCopyBtnHandler*(
+      btn: VNode, copyStrFn: () -> string, showFlashMsgMs = 500
+  ) {.inline.} =
+    ## Adds the copying handler to the button.
+    proc handler(ev: Event, target: VNode) =
+      let btn = cast[Element](btn.dom)
       btn.disabled = true
 
-      copyStr().storeToClipboard
+      copyStrFn().storeToClipboard
       btn.showFlashMsg "<span class='icon'><i class='fa-solid fa-check'></i></span><span>コピー</span>",
         showFlashMsgMs
 
       runLater () => (btn.disabled = false), showFlashMsgMs
 
-    handler
+    btn.addEventListener onclick, handler
 
   # ------------------------------------------------
   # JS - Image
