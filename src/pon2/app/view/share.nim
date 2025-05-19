@@ -15,14 +15,13 @@ when defined(js) or defined(nimsuggest):
 
 type ShareView* = object ## View of the share.
   simulator: ref Simulator
-  id: string
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
-func init*(T: type ShareView, simulator: ref Simulator, id: string): T {.inline.} =
-  T(simulator: simulator, id: id)
+func init*(T: type ShareView, simulator: ref Simulator): T {.inline.} =
+  T(simulator: simulator)
 
 # ------------------------------------------------
 # JS backend
@@ -30,9 +29,7 @@ func init*(T: type ShareView, simulator: ref Simulator, id: string): T {.inline.
 
 # TODO: output correct URI when pressing copy buttons
 when defined(js) or defined(nimsuggest):
-  const
-    RuleDescs: array[Rule, string] = ["", "すいちゅう"]
-    DisplayDivIdPrefix = "pon2-simulator-share-display-"
+  const RuleDescs: array[Rule, string] = ["", "すいちゅう"]
 
   func toXLink(self: ShareView): Uri {.inline.} =
     ## Returns the URI to post to X.
@@ -59,13 +56,13 @@ when defined(js) or defined(nimsuggest):
     uri
 
   proc downloadDisplayImg(
-    id: cstring
+    displayNodeId: cstring
   ) {.
     importjs:
       """
-const div = document.getElementById('{DisplayDivIdPrefix}' + (#));
+const div = document.getElementById((#));
 div.style.display = 'block';
-html2canvas(div, {{scale: 3}}).then((canvas) => {{
+html2canvas(div, {scale: 3}).then((canvas) => {
   div.style.display = 'none';
 
   const elem = document.createElement('a');
@@ -73,12 +70,12 @@ html2canvas(div, {{scale: 3}}).then((canvas) => {{
   elem.download = 'pon2sim.png';
   elem.target = '_blank';
   elem.click();
-}}).catch((err) => {{
+}).catch((err) => {
   console.error(err);
-}});""".fmt
+});"""
   .} ## Downloads the simulator image in the display div.
 
-  proc toVNode*(self: ShareView): VNode {.inline.} =
+  proc toVNode*(self: ShareView, displayNodeId: cstring): VNode {.inline.} =
     ## Returns the share node.
     let
       noPlcmtsUriCopyBtn = buildHtml button(class = "button is-size-7"):
@@ -114,7 +111,7 @@ html2canvas(div, {{scale: 3}}).then((canvas) => {{
               () => (
                 block:
                   "".getElementById.style.display = "block"
-                  self.id.cstring.downloadDisplayImg
+                  displayNodeId.downloadDisplayImg
               ),
           ):
             span(class = "icon"):

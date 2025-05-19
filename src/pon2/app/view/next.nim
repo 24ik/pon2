@@ -1,4 +1,4 @@
-## This module implements next views.
+## This module implements nexts views.
 ##
 
 {.push raises: [].}
@@ -12,14 +12,14 @@ when defined(js) or defined(nimsuggest):
   import ../../[core]
   import ../../private/app/simulator/[common]
 
-type NextView* = object ## View of the next step.
+type NextsView* = object ## View of the next steps.
   simulator: ref Simulator
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
-func init*(T: type NextView, simulator: ref Simulator): T {.inline.} =
+func init*(T: type NextsView, simulator: ref Simulator): T {.inline.} =
   T(simulator: simulator)
 
 # ------------------------------------------------
@@ -36,7 +36,7 @@ when defined(js) or defined(nimsuggest):
     of StepKind.Garbages:
       if step.dropHard: Hard else: Garbage
 
-  func nextCell(self: NextView, pivot: bool): Cell {.inline.} =
+  func nextCell(self: NextsView, pivot: bool): Cell {.inline.} =
     ## Returns the cell in the next step.
     self.simulator[].nazoPuyoWrap.runIt:
       if self.simulator[].operatingIdx >= it.steps.len:
@@ -44,7 +44,7 @@ when defined(js) or defined(nimsuggest):
 
       it.steps[self.simulator[].operatingIdx].nextCell pivot
 
-  func doubleNextCell(self: NextView, pivot: bool): Cell {.inline.} =
+  func doubleNextCell(self: NextsView, pivot: bool): Cell {.inline.} =
     ## Returns the cell in the double next step.
     self.simulator[].nazoPuyoWrap.runIt:
       if self.simulator[].operatingIdx.succ >= it.steps.len:
@@ -52,7 +52,7 @@ when defined(js) or defined(nimsuggest):
 
       it.steps[self.simulator[].operatingIdx.succ].nextCell pivot
 
-  proc toVNode*(self: NextView): VNode {.inline.} =
+  proc toVNode*(self: NextsView): VNode {.inline.} =
     ## Returns the next node.
     buildHtml table:
       tbody:
