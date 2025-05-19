@@ -78,8 +78,8 @@ html2canvas(div, {{scale: 3}}).then((canvas) => {{
 }});""".fmt
   .} ## Downloads the simulator image in the display div.
 
-  proc toVNodes*(self: ShareView): tuple[share: VNode, display: VNode] {.inline.} =
-    ## Returns the share node and display node.
+  proc toVNode*(self: ShareView): VNode {.inline.} =
+    ## Returns the share node.
     let
       noPlcmtsUriCopyBtn = buildHtml button(class = "button is-size-7"):
         text "操作無"
@@ -105,7 +105,7 @@ html2canvas(div, {{scale: 3}}).then((canvas) => {{
       noPlcmtsEditorUriCopyBtn = nil
       editorUriCopyBtn = nil
 
-    let shareNode = buildHtml tdiv:
+    buildHtml tdiv:
       tdiv(class = "block"):
         tdiv(class = "buttons"):
           button(
@@ -137,5 +137,3 @@ html2canvas(div, {{scale: 3}}).then((canvas) => {{
           text "編集者URLコピー"
           noPlcmtsEditorUriCopyBtn
           editorUriCopyBtn
-
-    (shareNode, shareNode) # TODO
