@@ -51,7 +51,7 @@ when defined(js) or defined(nimsuggest):
         DefaultColor
 
   func initBtnHandler(self: FieldView, row: Row, col: Col): () -> void =
-    ## Returns the handler for clicking button.
+    ## Returns the handler for clicking buttons.
     # NOTE: cannot inline due to karax's limitation
     () => self.simulator[].writeCell(row, col)
 
