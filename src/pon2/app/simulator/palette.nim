@@ -1,48 +1,59 @@
-## This module implements the palette node.
+## This module implements the palette views.
 ##
 
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
+{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sugar]
-import karax/[karax, karaxdsl, kbase, vdom, vstyles]
-import ../../[misc]
-import ../../../../app/[simulator]
-import ../../../../core/[cell]
+when defined(js) or defined(nimsuggest):
+  import std/[sugar]
+  import karax/[karax, karaxdsl, vdom, vstyles]
+  import ../[simulator]
+  import ../../[core]
+  import ../../private/app/simulator/[common]
 
-const
-  ButtonClass = kstring"button px-2"
-  SelectedButtonClass = kstring"button px-2 is-selected is-primary"
+type PaletteView* = object ## View of the palette.
+  simulator: ref Simulator
 
-func newClickHandler(simulator: Simulator, cell: Cell): () -> void =
-  ## Returns the click handler.
-  # NOTE: cannot inline due to lazy evaluation
-  () => (simulator.editingCell = cell)
+# ------------------------------------------------
+# Constructor
+# ------------------------------------------------
 
-proc newPaletteNode*(simulator: Simulator): VNode {.inline.} =
-  ## Returns the palette node.
-  buildHtml(tdiv):
-    table(style = style(StyleAttr.border, kstring"1px black solid")):
+func init*(T: type PaletteView, simulator: ref Simulator): T {.inline.} =
+  T(simulator: simulator)
+
+# ------------------------------------------------
+# JS backend
+# ------------------------------------------------
+
+when defined(js) or defined(nimsuggest):
+  const
+    BtnCls = "button px-2".cstring
+    SelectBtnCls = "button px-2 is-selected is-primary".cstring
+
+  func initBtnHandler(self: PaletteView, cell: Cell): () -> void =
+    ## Returns the handler for clicking button.
+    # NOTE: cannot inline due to karax's limitation
+    () => (self.simulator[].editCell = cell)
+
+  proc toVNode*(self: PaletteView): VNode {.inline.} =
+    ## Returns the palette node.
+    buildHtml table(style = style(StyleAttr.border, "1px black solid")):
       tbody:
-        tr:
-          for cell in [None, Red, Green, Blue]:
-            td:
-              let cellClass =
-                if cell == simulator.editing.cell: SelectedButtonClass else: ButtonClass
-
-              button(class = cellClass, onclick = simulator.newClickHandler(cell)):
-                figure(class = "image is-24x24"):
-                  img(src = cell.cellImageSrc)
-        tr:
-          for i, cell in [Yellow, Purple, Garbage]:
-            td:
-              let cellClass =
-                if cell == simulator.editing.cell: SelectedButtonClass else: ButtonClass
-
-              button(class = cellClass, onclick = simulator.newClickHandler(cell)):
-                figure(class = "image is-24x24"):
-                  img(src = cell.cellImageSrc)
+        for cells in static(
+          [
+            [Cell.None, Cell.Red, Cell.Green, Cell.Blue],
+            [Cell.Yellow, Cell.Purple, Garbage, Hard],
+          ]
+        ):
+          tr:
+            for cell in cells:
+              td:
+                button(
+                  class =
+                    if cell == self.simulator[].editData.cell: SelectBtnCls else: BtnCls,
+                  onclick = self.initBtnHandler cell,
+                ):
+                  figure(class = "image is-24x24"):
+                    img(src = cell.cellImgSrc)

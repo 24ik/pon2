@@ -28,6 +28,7 @@ func init*(T: type ShareView, simulator: ref Simulator, id: string): T {.inline.
 # JS backend
 # ------------------------------------------------
 
+# TODO: output correct URI when pressing copy buttons
 when defined(js) or defined(nimsuggest):
   const
     RuleDescs: array[Rule, string] = ["", "すいちゅう"]
