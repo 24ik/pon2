@@ -1,4 +1,4 @@
-## This module implements select views.
+## This module implements settings views.
 ##
 
 {.push raises: [].}
@@ -12,14 +12,14 @@ when defined(js) or defined(nimsuggest):
   import ../[simulator]
   import ../../core/[rule] # NOTE: import `core` causes warning due to Nim's bug
 
-type SelectView* = object ## View of the selection.
+type SettingsView* = object ## View of the settings.
   simulator: ref Simulator
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
-func init*(T: type SelectView, simulator: ref Simulator): T {.inline.} =
+func init*(T: type SettingsView, simulator: ref Simulator): T {.inline.} =
   T(simulator: simulator)
 
 # ------------------------------------------------
@@ -29,7 +29,7 @@ func init*(T: type SelectView, simulator: ref Simulator): T {.inline.} =
 when defined(js) or defined(nimsuggest):
   const SelectBtnCls = "button is-selected is-primary".cstring
 
-  proc toVNode*(self: SelectView): VNode {.inline.} =
+  proc toVNode*(self: SettingsView): VNode {.inline.} =
     ## Returns the select node.
     let playBtnCls, editBtnCls: cstring
     if self.simulator[].mode in PlayModes:
