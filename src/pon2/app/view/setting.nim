@@ -27,16 +27,18 @@ func init*(T: type SettingsView, simulator: ref Simulator): T {.inline.} =
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
-  const SelectBtnCls = "button is-selected is-primary".cstring
+  const
+    BtnCls = "button".cstring
+    SelectBtnCls = "button is-selected is-primary".cstring
 
   proc toVNode*(self: SettingsView): VNode {.inline.} =
     ## Returns the select node.
     let playBtnCls, editBtnCls: cstring
     if self.simulator[].mode in PlayModes:
       playBtnCls = SelectBtnCls
-      editBtnCls = "button"
+      editBtnCls = BtnCls
     else:
-      playBtnCls = "button"
+      playBtnCls = BtnCls
       editBtnCls = SelectBtnCls
 
     let playMode, editMode: SimulatorMode
@@ -47,15 +49,6 @@ when defined(js) or defined(nimsuggest):
       playMode = EditorPlay
       editMode = EditorEdit
 
-    let tsuBtnCls, waterBtnCls: cstring
-    case self.simulator[].rule
-    of Tsu:
-      tsuBtnCls = SelectBtnCls
-      waterBtnCls = "button"
-    else:
-      tsuBtnCls = "button"
-      waterBtnCls = SelectBtnCls
-
     buildHtml tdiv:
       tdiv(class = "buttons has-addons mb-1"):
         button(class = playBtnCls, onclick = () => (self.simulator[].mode = playMode)):
@@ -65,6 +58,15 @@ when defined(js) or defined(nimsuggest):
           span(class = "icon"):
             italic(class = "fa-solid fa-pen-to-square")
       if self.simulator[].mode == EditorEdit:
+        let tsuBtnCls, waterBtnCls: cstring
+        case self.simulator[].rule
+        of Tsu:
+          tsuBtnCls = SelectBtnCls
+          waterBtnCls = BtnCls
+        else:
+          tsuBtnCls = BtnCls
+          waterBtnCls = SelectBtnCls
+
         tdiv(class = "buttons has-addons"):
           button(class = tsuBtnCls, onclick = () => (self.simulator[].rule = Tsu)):
             span(class = "icon"):

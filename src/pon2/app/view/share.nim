@@ -7,10 +7,11 @@
 {.experimental: "views".}
 
 when defined(js) or defined(nimsuggest):
-  import std/[strformat, sugar, uri]
+  import std/[asyncjs, jsconsole, jsffi, strformat, sugar, uri]
   import karax/[karax, karaxdsl, kdom, vdom]
   import ../[nazopuyowrap, simulator]
   import ../../[core]
+  import ../../private/[tables2, utils]
   import ../../private/app/simulator/[common]
 
 type ShareView* = object ## View of the share.
@@ -27,19 +28,22 @@ func init*(T: type ShareView, simulator: ref Simulator): T {.inline.} =
 # JS backend
 # ------------------------------------------------
 
-# TODO: output correct URI when pressing copy buttons
 when defined(js) or defined(nimsuggest):
   const RuleDescs: array[Rule, string] = ["", "すいちゅう"]
+
+  func toUri(self: ShareView): Uri {.inline.} =
+    ## Returns the URI of the simulator before any moves.
+    discard
 
   func toXLink(self: ShareView): Uri {.inline.} =
     ## Returns the URI to post to X.
     var uri = initUri()
     uri.scheme = "https"
     uri.hostname = "x.com"
-    uri.path = "/intent/tweet" # NOTE: "/intent/post" does not work correctly
+    uri.path = "/intent/tweet" # NOTE: "/intent/post" does not work correctly on mobile
 
     var queries = newSeqOfCap[(string, string)](3)
-    queries.add ("url", $self.simulator[].toUri(clearPlacements = true))
+    queries.add ("url", $self.simulator[].toExportUri.unsafeValue)
 
     if self.simulator[].nazoPuyoWrap.optGoal.isOk:
       self.simulator[].nazoPuyoWrap.runIt:
@@ -55,27 +59,26 @@ when defined(js) or defined(nimsuggest):
 
     uri
 
-  proc downloadDisplayImg(
-    displayNodeId: cstring
-  ) {.
-    importjs:
-      """
-const div = document.getElementById((#));
-div.style.display = 'block';
-html2canvas(div, {scale: 3}).then((canvas) => {
-  div.style.display = 'none';
+  proc downloadCameraReadyImg(cameraReadyId: cstring) =
+    let cameraReadyElem = cameraReadyId.getElemJsObjById
+    cameraReadyElem.style.display = "block".cstring
 
-  const elem = document.createElement('a');
-  elem.href = canvas.toDataURL();
-  elem.download = 'pon2sim.png';
-  elem.target = '_blank';
-  elem.click();
-}).catch((err) => {
-  console.error(err);
-});"""
-  .} ## Downloads the simulator image in the display div.
+    discard cameraReadyElem
+      .html2canvas(scale = 3)
+      .then(
+        (canvas: JsObject) => (
+          block:
+            cameraReadyElem.style.display = "none".cstring
 
-  proc toVNode*(self: ShareView, displayNodeId: cstring): VNode {.inline.} =
+            let elem = "a".createElemJsObj
+            elem.href = canvas.toDataURL()
+            elem.download = "pon2sim.png".cstring
+            elem.target = "_blank".cstring
+            elem.click()
+        )
+      ).catch
+
+  proc toVNode*(self: ShareView, cameraReadyId: cstring): VNode {.inline.} =
     ## Returns the share node.
     let
       noPlcmtsUriCopyBtn = buildHtml button(class = "button is-size-7"):
@@ -83,9 +86,9 @@ html2canvas(div, {scale: 3}).then((canvas) => {
       uriCopyBtn = buildHtml button(class = "button is-size-7"):
         text "操作有"
 
-    noPlcmtsUriCopyBtn.addCopyBtnHandler () =>
-      $self.simulator[].toUri(clearPlacements = true)
-    uriCopyBtn.addCopyBtnHandler () => $self.simulator[].toUri(clearPlacements = false)
+    noPlcmtsUriCopyBtn.addCopyBtnHandler () => $self.simulator[].toExportUri.unsafeValue
+    uriCopyBtn.addCopyBtnHandler () =>
+      $self.simulator[].toExportUri(clearPlacements = false).unsafeValue
 
     let noPlcmtsEditorUriCopyBtn, editorUriCopyBtn: VNode
     if self.simulator[].mode in EditorModes:
@@ -95,9 +98,9 @@ html2canvas(div, {scale: 3}).then((canvas) => {
         text "操作有"
 
       noPlcmtsEditorUriCopyBtn.addCopyBtnHandler () =>
-        $self.simulator[].toUri(clearPlacements = true)
+        $self.simulator[].toExportUri(viewer = false).unsafeValue
       editorUriCopyBtn.addCopyBtnHandler () =>
-        $self.simulator[].toUri(clearPlacements = false)
+        $self.simulator[].toExportUri(viewer = false, clearPlacements = false).unsafeValue
     else:
       noPlcmtsEditorUriCopyBtn = nil
       editorUriCopyBtn = nil
@@ -107,15 +110,12 @@ html2canvas(div, {scale: 3}).then((canvas) => {
         tdiv(class = "buttons"):
           button(
             class = "button is-size-7",
-            onclick =
-              () => (
-                block:
-                  "".getElementById.style.display = "block"
-                  displayNodeId.downloadDisplayImg
-              ),
+            onclick = () => cameraReadyId.downloadCameraReadyImg,
           ):
             span(class = "icon"):
               italic(class = "fa-solid fa-download")
+            span:
+              text "画像"
           a(
             class = "button is-size-7",
             target = "_blank",
@@ -124,6 +124,8 @@ html2canvas(div, {scale: 3}).then((canvas) => {
           ):
             span(class = "icon"):
               italic(class = "fa-brands fa-x-twitter")
+            span:
+              text "投稿"
       tdiv(class = "block"):
         text "URLコピー"
         tdiv(class = "buttons"):
@@ -132,5 +134,6 @@ html2canvas(div, {scale: 3}).then((canvas) => {
       if self.simulator[].mode in EditorModes:
         tdiv(class = "block"):
           text "編集者URLコピー"
-          noPlcmtsEditorUriCopyBtn
-          editorUriCopyBtn
+          tdiv(class = "buttons"):
+            noPlcmtsEditorUriCopyBtn
+            editorUriCopyBtn

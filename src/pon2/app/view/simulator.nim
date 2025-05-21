@@ -7,6 +7,7 @@
 {.experimental: "views".}
 
 when defined(js) or defined(nimsuggest):
+  import std/[jsffi]
   import karax/[karaxdsl, vdom, vstyles]
   import ./[ctrl, field, goal, msg, next, operating, palette, setting, share, step]
   import ../[nazopuyowrap, simulator]
@@ -26,35 +27,32 @@ type SimulatorView* = object ## View of the simulator.
   share: ShareView
   steps: StepsView
 
-  displayField: FieldView
-  displayGoal: GoalView
-  displaySteps: StepsView
+  cameraReadyField: FieldView
+  cameraReadyGoal: GoalView
+  cameraReadySteps: StepsView
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
-func init*(T: type SimulatorView, simulator: ref Simulator): T {.inline.} =
-  let enableCursor =
-    when defined(js):
-      not isMobile()
-    else:
-      true
-
+func init*(
+    T: type SimulatorView, simulator: ref Simulator, showCursor = true
+): T {.inline.} =
   T(
+    simulator: simulator,
     ctrl: CtrlView.init simulator,
-    field: FieldView.init(simulator, enableCursor),
-    goal: Goal.init simulator,
+    field: FieldView.init(simulator, showCursor),
+    goal: GoalView.init simulator,
     msg: MsgView.init simulator,
     nexts: NextsView.init simulator,
     operating: OperatingView.init simulator,
     palette: PaletteView.init simulator,
     settings: SettingsView.init simulator,
     share: ShareView.init simulator,
-    steps: StepsView.init(simulator, enableCursor),
-    displayField: FieldView.init(simulator, enableCursor, true),
-    displayGoal: GoalView.init(simulator, true),
-    displaySteps: StepsView.init(simulator, enableCursor, true),
+    steps: StepsView.init(simulator, showCursor),
+    cameraReadyField: FieldView.init(simulator, showCursor),
+    cameraReadyGoal: GoalView.init simulator,
+    cameraReadySteps: StepsView.init(simulator, showCursor),
   )
 
 # ------------------------------------------------
@@ -62,16 +60,18 @@ func init*(T: type SimulatorView, simulator: ref Simulator): T {.inline.} =
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
-  const DisplayNodeIdPrefix = "pon2-simulator-display-"
+  const
+    GoalIdPrefix = "pon2-simulator-goal-".cstring
+    CameraReadyIdPrefix = "pon2-simulator-cameraready-".cstring
 
-  proc toVNode*(self: SimulatorView, id: string): VNode {.inline.} =
+  proc toVNode*(self: SimulatorView, id: cstring): VNode {.inline.} =
     ## Returns the simulator node.
-    let displayNodeId = (DisplayNodeIdPrefix & id).cstring
+    let cameraReadyId = CameraReadyIdPrefix & id
 
     buildHtml tdiv:
       if self.simulator[].nazoPuyoWrap.optGoal.isOk:
         tdiv(class = "block"):
-          self.goal.toVNode
+          self.goal.toVNode GoalIdPrefix & id
       tdiv(class = "block"):
         tdiv(class = "columns is-mobile is-variable is-1"):
           tdiv(class = "column is-narrow"):
@@ -80,15 +80,14 @@ when defined(js) or defined(nimsuggest):
                 self.operating.toVNode
             tdiv(class = "block"):
               self.field.toVNode
-            if self.simulator[].mode != EditorEdit:
-              tdiv(class = "block"):
-                self.msg.toVNode
-            if self.simulator[].mode == EditorEdit:
+            tdiv(class = "block"):
+              self.msg.toVNode
+            if self.simulator[].mode != Replay:
               tdiv(class = "block"):
                 self.settings.toVNode
             tdiv(class = "block"):
-              self.share.toVNode displayNodeId
-          if self.simulator[].mode != EditorEdit:
+              self.share.toVNode cameraReadyId
+          if self.simulator[].mode notin EditModes:
             tdiv(class = "column is-narrow"):
               tdiv(class = "block"):
                 self.nexts.toVNode
@@ -100,13 +99,21 @@ when defined(js) or defined(nimsuggest):
                 self.palette.toVNode
             tdiv(class = "block"):
               self.steps.toVNode
-      tdiv(id = displayNodeId, style = style(StyleAttr.display, "none")):
+      tdiv(
+        id = cameraReadyId,
+        style = style(
+          (StyleAttr.display, "none".cstring), (StyleAttr.width, "fit-content".cstring)
+        ),
+      ):
         if self.simulator[].nazoPuyoWrap.optGoal.isOk:
           tdiv(class = "block"):
-            self.displayGoal.toVNode
+            self.cameraReadyGoal.toVNode("", cameraReady = true)
         tdiv(class = "block"):
           tdiv(class = "columns is-mobile is-variable is-1"):
             tdiv(class = "column is-narrow"):
-              self.displayField.toVNode
+              tdiv(class = "block"):
+                self.cameraReadyField.toVNode(cameraReady = true)
+              tdiv(class = "block"):
+                self.msg.toVNode
             tdiv(class = "column is-narrow"):
-              self.displaySteps.toVNode
+              self.cameraReadySteps.toVNode(cameraReady = true)

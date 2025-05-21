@@ -26,7 +26,6 @@ func init*(T: type OperatingView, simulator: ref Simulator): T {.inline.} =
 # JS backend
 # ------------------------------------------------
 
-# TODO: better impl (draw only two cells)
 when defined(js) or defined(nimsuggest):
   func operatingCell(self: OperatingView, idx: int, col: Col): Cell {.inline.} =
     ## Returns the cell in the operating area.
@@ -34,29 +33,34 @@ when defined(js) or defined(nimsuggest):
       return Cell.None
     if self.simulator[].mode notin PlayModes:
       return Cell.None
+
     self.simulator[].nazoPuyoWrap.runIt:
       if self.simulator[].operatingIdx >= it.steps.len:
         return Cell.None
-      if it.steps[self.simulator[].operatingIdx].kind != PairPlacement:
-        return Cell.None
 
-    let pair = self.simulator[].nazoPuyoWrap.runIt:
-      it.steps[self.simulator[].operatingIdx].pair
-
-    # pivot
-    if idx == 1 and col == self.simulator[].operatingPlacement.pivotCol:
-      return pair.pivot
-
-    # rotor
-    if col == self.simulator[].operatingPlacement.rotorCol:
-      if idx == 1:
-        return pair.rotor
-      if idx == 0 and self.simulator[].operatingPlacement.rotorDir == Up:
-        return pair.rotor
-      if idx == 2 and self.simulator[].operatingPlacement.rotorDir == Down:
-        return pair.rotor
-
-    Cell.None
+      let step = it.steps[self.simulator[].operatingIdx]
+      case step.kind
+      of PairPlacement:
+        # pivot
+        if idx == 1 and col == self.simulator[].operatingPlacement.pivotCol:
+          step.pair.pivot
+        # rotor
+        elif col == self.simulator[].operatingPlacement.rotorCol:
+          if idx == 1:
+            step.pair.rotor
+          elif idx == 0 and self.simulator[].operatingPlacement.rotorDir == Up:
+            step.pair.rotor
+          elif idx == 2 and self.simulator[].operatingPlacement.rotorDir == Down:
+            step.pair.rotor
+          else:
+            Cell.None
+        else:
+          Cell.None
+      of StepKind.Garbages:
+        if idx == 2 and step.cnts[col] > 0:
+          (if step.dropHard: Hard else: Garbage)
+        else:
+          Cell.None
 
   proc toVNode*(self: OperatingView): VNode {.inline.} =
     ## Returns the operating node.

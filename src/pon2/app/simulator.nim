@@ -47,6 +47,8 @@ type
     nazoPuyoWrap: NazoPuyoWrap
     moveResult: MoveResult
     state: SimulatorState
+    operatingPlacement: Placement
+    operatingIdx: int
 
   Simulator* = object ## Simulator for Puyo Puyo and Nazo Puyo.
     nazoPuyoWrap: NazoPuyoWrap
@@ -94,6 +96,8 @@ func init(T: type SimulatorDequeElem, simulator: Simulator): T {.inline.} =
     nazoPuyoWrap: simulator.nazoPuyoWrap,
     moveResult: simulator.moveResult,
     state: simulator.state,
+    operatingIdx: simulator.operatingIdx,
+    operatingPlacement: simulator.operatingPlacement,
   )
 
 func init*(T: type Simulator, wrap: NazoPuyoWrap, mode = DefaultMode): T {.inline.} =
@@ -131,6 +135,8 @@ func load(self: var Simulator, elem: SimulatorDequeElem) {.inline.} =
   self.nazoPuyoWrap.assign elem.nazoPuyoWrap
   self.moveResult.assign elem.moveResult
   self.state.assign elem.state
+  self.operatingIdx.assign elem.operatingIdx
+  self.operatingPlacement.assign elem.operatingPlacement
 
 func undo*(self: var Simulator) {.inline.} =
   ## Performs undo.
@@ -193,20 +199,26 @@ func operatingIdx*(self: Simulator): int {.inline.} =
 # ------------------------------------------------
 
 func undoAll(self: var Simulator) {.inline.} =
-  ## Loads the first data in undo deque.
+  ## Loads the data before any moves in the undo deque and clears it after the loaded
+  ## step, and clears the redo deque.
   ## If the undo deque is empty, does nothing.
   if self.undoDeque.len == 0:
     return
 
-  self.redoDeque.addLast SimulatorDequeElem.init self
-  self.load self.undoDeque.peekFirst
+  if self.mode == EditorEdit:
+    while self.state != AfterEdit:
+      self.undo
+  else:
+    self.load self.undoDeque.peekFirst
+    self.undoDeque.clear
 
-  self.undoDeque.clear
+  self.redoDeque.clear
 
-func prepareEdit(self: var Simulator) {.inline.} =
+func prepareEdit(self: var Simulator, clearRedoDeque = true) {.inline.} =
   ## Saves the current simulator to the undo deque and clears the redo deque.
   self.undoDeque.addLast SimulatorDequeElem.init self
-  self.redoDeque.clear
+  if clearRedoDeque:
+    self.redoDeque.clear
 
 template editBlock(self: var Simulator, body: untyped) =
   ## Saves the current simulator to the undo deque and clears the redo deque
@@ -226,40 +238,33 @@ func `rule=`*(self: var Simulator, rule: Rule) {.inline.} =
   self.editBlock:
     self.nazoPuyoWrap.rule = rule
 
+  self.undoDeque.clear
+  self.redoDeque.clear
+
 func `mode=`*(self: var Simulator, mode: SimulatorMode) {.inline.} =
   ## Sets the mode of the simulator.
   case self.mode
   of ViewerPlay:
     if mode != ViewerEdit:
       return
-
-    self.undoAll
   of ViewerEdit:
     if mode != ViewerPlay:
       return
-
-    self.undoAll
   of EditorPlay:
     if mode != EditorEdit:
       return
-
-    self.undoAll
   of EditorEdit:
     if mode != EditorPlay:
       return
-
-    while self.state != AfterEdit:
-      self.undo
   of Replay:
     return
 
-  self.mode.assign mode
-  self.operatingPlacement.assign DefaultPlcmt
-  self.operatingIdx.assign 0
-  self.undoDeque.clear
-  self.redoDeque.clear
+  self.undoAll
 
+  self.mode.assign mode
   self.state.assign if mode in EditModes: AfterEdit else: Stable
+
+  self.undoDeque.clear
 
 func `editCell=`*(self: var Simulator, cell: Cell) {.inline.} =
   ## Writes `editData.cell`.
@@ -455,6 +460,24 @@ func writeCell*(self: var Simulator, cell: Cell) {.inline.} =
   else:
     self.writeCell self.editData.step.idx, self.editData.step.pivot, cell
 
+func writeCnt*(self: var Simulator, idx: int, col: Col, cnt: int) {.inline.} =
+  ## Writes the count to the step.
+  if self.mode != EditorEdit:
+    return
+
+  runIt self.nazoPuyoWrap:
+    if idx >= it.steps.len:
+      return
+    if it.steps[idx].kind != StepKind.Garbages:
+      return
+
+    self.editBlock:
+      it.steps[idx].cnts[col].assign cnt
+
+func writeCnt*(self: var Simulator, cnt: int) {.inline.} =
+  ## Writes the count to the step.
+  self.writeCnt self.editData.step.idx, self.editData.step.col, cnt
+
 # ------------------------------------------------
 # Edit - Shift
 # ------------------------------------------------
@@ -632,92 +655,110 @@ func rotatePlacementLeft*(self: var Simulator) {.inline.} =
 # Forward / Backward
 # ------------------------------------------------
 
+func forwardApply(self: var Simulator, replay = false, skip = false) {.inline.} =
+  ## Forwards the simulator with `apply`.
+  ## This functions requires that the initial field is settled.
+  ## `skip` is prioritized over `replay`.
+  runIt self.nazoPuyoWrap:
+    if self.operatingIdx >= it.steps.len:
+      return
+    if self.mode in EditModes:
+      return
+
+    self.prepareEdit(clearRedoDeque = self.mode in PlayModes)
+
+    self.moveResult.assign DefaultMoveRes
+
+    # set placement
+    if self.mode in PlayModes:
+      if it.steps[self.operatingIdx].kind != PairPlacement:
+        discard
+      elif skip:
+        it.steps[self.operatingIdx].optPlacement.err
+      elif replay:
+        discard
+      else:
+        it.steps[self.operatingIdx].optPlacement.ok self.operatingPlacement
+
+    it.field.apply it.steps[self.operatingIdx]
+
+    # check pop
+    if it.field.canPop:
+      self.state.assign WillPop
+    else:
+      self.state.assign Stable
+      self.operatingIdx.inc
+      self.operatingPlacement.assign DefaultPlcmt
+
+func forwardPop(self: var Simulator) {.inline.} =
+  ## Forwards the simulator with `pop`.
+  self.prepareEdit(clearRedoDeque = self.mode in PlayModes)
+
+  let popRes: PopResult
+  runIt self.nazoPuyoWrap:
+    popRes = it.field.pop
+
+  # update moving result
+  self.moveResult.chainCnt.inc
+  var cellCnts {.noinit.}: array[Cell, int]
+  cellCnts[None].assign 0
+  staticFor(cell2, Hard .. Cell.Purple):
+    let cellCnt = popRes.cellCnt cell2
+    cellCnts[cell2].assign cellCnt
+    self.moveResult.popCnts[cell2].inc cellCnt
+  self.moveResult.detailPopCnts.add cellCnts
+  self.moveResult.fullPopCnts.unsafeValue.add popRes.connCnts
+  let h2g = popRes.hardToGarbageCnt
+  self.moveResult.hardToGarbageCnt.inc h2g
+  self.moveResult.detailHardToGarbageCnt.add h2g
+
+  # check settle
+  runIt self.nazoPuyoWrap:
+    if it.field.isSettled:
+      self.state.assign Stable
+
+      if self.mode notin EditModes:
+        self.operatingIdx.inc
+        self.operatingPlacement.assign DefaultPlcmt
+    else:
+      self.state.assign WillSettle
+
+func forwardSettle(self: var Simulator) {.inline.} =
+  ## Forwards the simulator with `settle`.
+  self.prepareEdit(clearRedoDeque = self.mode in PlayModes)
+
+  runIt self.nazoPuyoWrap:
+    it.field.settle
+
+    # check pop
+    if it.field.canPop:
+      self.state.assign WillPop
+    else:
+      self.state.assign Stable
+
+      if self.mode notin EditModes:
+        self.operatingIdx.inc
+        self.operatingPlacement.assign DefaultPlcmt
+
 func forward*(self: var Simulator, replay = false, skip = false) {.inline.} =
   ## Forwards the simulator.
   ## This functions requires that the initial field is settled.
   ## `skip` is prioritized over `replay`.
-  runIt self.nazoPuyoWrap:
-    case self.state
-    of Stable:
-      if self.operatingIdx >= it.steps.len:
-        return
-      if self.mode in EditModes:
-        return
-
-      self.prepareEdit
-
-      self.moveResult.assign DefaultMoveRes
-
-      # set placement
-      if self.mode in PlayModes:
-        if it.steps[self.operatingIdx].kind != PairPlacement:
-          discard
-        elif skip:
-          it.steps[self.operatingIdx].optPlacement.err
-        elif replay:
-          discard
-        else:
-          it.steps[self.operatingIdx].optPlacement.ok self.operatingPlacement
-
-      it.field.apply it.steps[self.operatingIdx]
-
-      # check pop
-      if it.field.canPop:
-        self.state.assign WillPop
-      else:
-        self.state.assign Stable
-        self.operatingIdx.inc
-        self.operatingPlacement.assign DefaultPlcmt
-    of WillPop:
-      self.prepareEdit
-
-      let popRes = it.field.pop
-
-      # update moving result
-      self.moveResult.chainCnt.inc
-      var cellCnts {.noinit.}: array[Cell, int]
-      cellCnts[None].assign 0
-      staticFor(cell2, Hard .. Cell.Purple):
-        let cellCnt = popRes.cellCnt cell2
-        cellCnts[cell2].assign cellCnt
-        self.moveResult.popCnts[cell2].inc cellCnt
-      self.moveResult.detailPopCnts.add cellCnts
-      self.moveResult.fullPopCnts.unsafeValue.add popRes.connCnts
-      let h2g = popRes.hardToGarbageCnt
-      self.moveResult.hardToGarbageCnt.inc h2g
-      self.moveResult.detailHardToGarbageCnt.add h2g
-
-      # check settle
-      if it.field.isSettled:
-        self.state.assign Stable
-        self.operatingIdx.inc
-        self.operatingPlacement.assign DefaultPlcmt
-      else:
-        self.state.assign WillSettle
-    of WillSettle:
-      self.prepareEdit
-
-      # check pop
-      it.field.settle
-      if it.field.canPop:
-        self.state.assign WillPop
-      else:
-        self.state.assign Stable
-        self.operatingIdx.inc
-        self.operatingPlacement.assign DefaultPlcmt
-    of AfterEdit:
+  case self.state
+  of Stable:
+    self.forwardApply replay, skip
+  of WillPop:
+    self.forwardPop
+  of WillSettle:
+    self.forwardSettle
+  of AfterEdit:
+    runIt self.nazoPuyoWrap:
       if not it.field.isSettled:
-        self.prepareEdit
-        self.state.assign WillSettle
-        self.forward
-        self.undoDeque.popLast
+        self.forwardSettle
       elif it.field.canPop:
-        self.prepareEdit
-        self.state.assign WillPop
-        self.forward
-        self.undoDeque.popLast
+        self.forwardPop
       else:
-        discard
+        return
 
 func backward*(self: var Simulator, detail = false) {.inline.} =
   ## Backwards the simulator.
@@ -728,40 +769,33 @@ func backward*(self: var Simulator, detail = false) {.inline.} =
   let steps = runIt self.nazoPuyoWrap:
     it.steps
 
-  if self.mode in PlayModes and self.state == Stable:
-    self.operatingIdx.dec
-
   if not detail:
     while self.undoDeque.peekLast.state notin {Stable, AfterEdit}:
       self.undoDeque.popLast
   self.load self.undoDeque.popLast
 
-  if self.mode in PlayModes:
-    self.operatingPlacement.assign DefaultPlcmt
+  if self.mode notin EditModes:
     runIt self.nazoPuyoWrap:
       it.steps.assign steps
 
 func reset*(self: var Simulator) {.inline.} =
-  ## Backwards the simulator to the initial one.
-  if self.undoDeque.len == 0:
-    return
-
-  # save the steps to keep the placements
-  let steps = runIt self.nazoPuyoWrap:
-    it.steps
-
-  self.load self.undoDeque.peekFirst
-  if self.mode in PlayModes:
-    runIt self.nazoPuyoWrap:
-      it.steps.assign steps
-  self.operatingPlacement.assign DefaultPlcmt
-  self.operatingIdx.assign 0
-  self.undoDeque.clear
-  self.redoDeque.clear
+  ## Backwards the simulator to the pre-move state.
+  runIt self.nazoPuyoWrap:
+    let nowSteps = it.steps
+    self.undoAll
+    it.steps.assign nowSteps
 
 # ------------------------------------------------
 # Keyboard
 # ------------------------------------------------
+
+func initDigitKeys(): seq[KeyEvent] {.inline.} =
+  ## Returns `DigitKeys`.
+  collect:
+    for c in '0' .. '9':
+      KeyEvent.init c
+
+const DigitKeys = initDigitKeys()
 
 func operate*(self: var Simulator, key: KeyEvent): bool {.inline, discardable.} =
   ## Performs an action specified by the key.
@@ -789,15 +823,15 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.inline, discardable.} 
     # forward / backward / reset
     elif key == static(KeyEvent.init 's'):
       self.forward
-    elif key in static([KeyEvent.init '2', KeyEvent.init 'w']):
+    elif key in static([KeyEvent.init 'x', KeyEvent.init 'w']):
       self.backward
-    elif key in static([KeyEvent.init('2', shift = true), KeyEvent.init 'W']):
+    elif key in static([KeyEvent.init 'X', KeyEvent.init 'W']):
       self.backward(detail = true)
-    elif key == static(KeyEvent.init '1'):
+    elif key == static(KeyEvent.init 'z'):
       self.reset
     elif key == static(KeyEvent.init "Space"):
       self.forward(skip = true)
-    elif key == static(KeyEvent.init '3'):
+    elif key == static(KeyEvent.init 'c'):
       self.forward(replay = true)
     else:
       catched.assign false
@@ -808,6 +842,12 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.inline, discardable.} 
         self.`mode=` ViewerPlay
       else:
         self.`mode=` EditorPlay
+    elif key == static(KeyEvent.init 'r') and self.mode == EditorEdit:
+      case self.rule
+      of Tsu:
+        self.`rule=` Water
+      of Water:
+        self.`rule=` Tsu
     # toggle insert / focus
     elif key == static(KeyEvent.init 'i'):
       self.toggleInsert
@@ -839,6 +879,9 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.inline, discardable.} 
       self.writeCell Hard
     elif key == static(KeyEvent.init "Space"):
       self.writeCell None
+    # write cnt
+    elif (let cnt = DigitKeys.find key; cnt >= 0):
+      self.writeCnt cnt
     # shift field
     elif key == static(KeyEvent.init 'D'):
       self.shiftFieldRight
@@ -857,25 +900,25 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.inline, discardable.} 
     elif key == static(KeyEvent.init 'Y'):
       self.redo
     # forward / backward / reset
-    elif key == static(KeyEvent.init '3'):
+    elif key == static(KeyEvent.init 'c'):
       self.forward
-    elif key == static(KeyEvent.init '2'):
+    elif key == static(KeyEvent.init 'x'):
       self.backward
-    elif key == static(KeyEvent.init('2', shift = true)):
+    elif key == static(KeyEvent.init 'X'):
       self.backward(detail = true)
-    elif key == static(KeyEvent.init '1'):
+    elif key == static(KeyEvent.init 'z'):
       self.reset
     else:
       catched.assign false
   of Replay:
     # forward / backward / reset
-    if key in static([KeyEvent.init '2', KeyEvent.init 'w']):
+    if key in static([KeyEvent.init 'x', KeyEvent.init 'w']):
       self.backward
-    elif key in static([KeyEvent.init('2', shift = true), KeyEvent.init 'W']):
+    elif key in static([KeyEvent.init 'X', KeyEvent.init 'W']):
       self.backward(detail = true)
-    elif key == static(KeyEvent.init '1'):
+    elif key == static(KeyEvent.init 'z'):
       self.reset
-    elif key in static([KeyEvent.init '3', KeyEvent.init 's']):
+    elif key in static([KeyEvent.init 'c', KeyEvent.init 's']):
       self.forward(replay = true)
     else:
       catched.assign false
@@ -999,3 +1042,14 @@ func parseSimulator*(uri: Uri): Res[Simulator] {.inline.} =
       return err "Invalid simulator (invalid path): {uri}".fmt
 
     ok Simulator.init ?uri.query.parseNazoPuyoWrap(fqdn).context "Invalid simulator: {uri}".fmt
+
+func toExportUri*(
+    self: Simulator, viewer = true, clearPlacements = true, fqdn = Pon2
+): Res[Uri] {.inline.} =
+  ## Returns the URI of the simulator with any moves reset.
+  var sim = self
+
+  sim.undoAll
+  sim.mode = if viewer: ViewerPlay else: EditorPlay
+
+  sim.toUri(clearPlacements, fqdn)

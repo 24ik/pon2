@@ -27,8 +27,6 @@ func init*(T: type MsgView, simulator: ref Simulator): T {.inline.} =
 # JS backend
 # ------------------------------------------------
 
-# TODO: better impl (draw only non-none notice garbages)
-# TODO: better message (nazo)
 when defined(js) or defined(nimsuggest):
   const ShowNoticeGarbageCnt = 6
 

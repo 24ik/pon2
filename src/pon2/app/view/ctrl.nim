@@ -35,7 +35,7 @@ when defined(js) or defined(nimsuggest):
     buildHtml tdiv:
       case self.simulator[].mode
       of PlayModes:
-        tdiv(class = "buttons is-centered mb-3"):
+        tdiv(class = "buttons mb-3"):
           button(
             class = "button is-light",
             onclick = () => self.simulator[].backward(detail = true),
@@ -48,7 +48,7 @@ when defined(js) or defined(nimsuggest):
           ):
             span(class = "icon"):
               italic(class = "fa-solid fa-angles-down")
-        tdiv(class = "buttons is-centered mb-3"):
+        tdiv(class = "buttons mb-3"):
           button(class = "button is-light", onclick = () => self.simulator[].reset):
             span(class = "icon"):
               italic(class = "fa-solid fa-backward-fast")
@@ -61,13 +61,13 @@ when defined(js) or defined(nimsuggest):
           ):
             span(class = "icon"):
               italic(class = "fa-solid fa-forward-step")
-        tdiv(class = "buttons is-centered mb-3"):
+        tdiv(class = "buttons mb-3"):
           button(
             class = "button is-info",
             onclick = () => self.simulator[].rotatePlacementLeft,
           ):
             span(class = "icon"):
-              italic(class = "fa-solid fa-arrow-rotate-left")
+              italic(class = "fa-solid fa-rotate-left")
           button(class = "button is-light", onclick = () => self.simulator[].backward):
             span(class = "icon"):
               italic(class = "fa-solid fa-backward-step")
@@ -76,8 +76,8 @@ when defined(js) or defined(nimsuggest):
             onclick = () => self.simulator[].rotatePlacementRight,
           ):
             span(class = "icon"):
-              italic(class = "fa-solid fa-arrow-rotate-right")
-        tdiv(class = "buttons is-centered mb-3"):
+              italic(class = "fa-solid fa-rotate-right")
+        tdiv(class = "buttons mb-3"):
           button(
             class = "button is-info", onclick = () => self.simulator[].movePlacementLeft
           ):
@@ -93,7 +93,7 @@ when defined(js) or defined(nimsuggest):
             span(class = "icon"):
               italic(class = "fa-solid fa-arrow-right")
       of EditModes:
-        tdiv(class = "buttons is-centered mb-3"):
+        tdiv(class = "buttons mb-3"):
           button(class = insertBtnCls, onclick = () => self.simulator[].toggleInsert):
             span(class = "icon"):
               italic(class = "fa-solid fa-indent")
@@ -102,14 +102,14 @@ when defined(js) or defined(nimsuggest):
             onclick = () => self.simulator[].flipFieldHorizontal,
           ):
             span(class = "icon"):
-              italic(class = "fa-solid fa-arrow-right-arrow-left")
+              italic(class = "fa-solid fa-right-left")
           button(class = "button is-light", onclick = () => self.simulator[].undo):
             span(class = "icon"):
-              italic(class = "fa-solid fa-circle-arrow-left")
+              italic(class = "fa-solid fa-circle-left")
           button(class = "button is-light", onclick = () => self.simulator[].redo):
             span(class = "icon"):
-              italic(class = "fa-solid fa-circle-arrow-right")
-        tdiv(class = "buttons is-centered"):
+              italic(class = "fa-solid fa-circle-right")
+        tdiv(class = "buttons mb-3"):
           button(
             class = "button is-light", onclick = () => self.simulator[].shiftFieldLeft
           ):
@@ -130,8 +130,7 @@ when defined(js) or defined(nimsuggest):
           ):
             span(class = "icon"):
               italic(class = "fa-solid fa-angles-right")
-      of Replay:
-        tdiv(class = "buttons is-centered mb-3"):
+        tdiv(class = "buttons"):
           button(class = "button is-light", onclick = () => self.simulator[].reset):
             span(class = "icon"):
               italic(class = "fa-solid fa-backward-fast")
@@ -141,7 +140,27 @@ when defined(js) or defined(nimsuggest):
           ):
             span(class = "icon"):
               italic(class = "fa-solid fa-caret-left")
-        tdiv(class = "buttons is-centered mb-3"):
+          button(class = "button is-light", onclick = () => self.simulator[].backward):
+            span(class = "icon"):
+              italic(class = "fa-solid fa-backward-step")
+          button(
+            class = "button is-light",
+            onclick = () => self.simulator[].forward(replay = true),
+          ):
+            span(class = "icon"):
+              italic(class = "fa-solid fa-forward-step")
+      of Replay:
+        tdiv(class = "buttons mb-3"):
+          button(class = "button is-light", onclick = () => self.simulator[].reset):
+            span(class = "icon"):
+              italic(class = "fa-solid fa-backward-fast")
+          button(
+            class = "button is-light",
+            onclick = () => self.simulator[].backward(detail = true),
+          ):
+            span(class = "icon"):
+              italic(class = "fa-solid fa-caret-left")
+        tdiv(class = "buttons mb-3"):
           button(class = "button is-light", onclick = () => self.simulator[].backward):
             span(class = "icon"):
               italic(class = "fa-solid fa-backward-step")
