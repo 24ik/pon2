@@ -519,7 +519,7 @@ block:
 # Forward / Backward
 # ------------------------------------------------
 
-block: # forward, backward
+block: # forward, backward, reset
   block: # play
     let
       wrap0 = NazoPuyoWrap.init parseNazoPuyo[TsuField](
@@ -749,6 +749,20 @@ rb|"""
     sim.nazoPuyoWrap.runIt:
       check it.field == field
 
+    sim.writeCell Cell.Yellow
+    field[Row0, Col0] = Cell.Yellow
+    sim.forward
+    sim.reset
+    check sim.state == AfterEdit
+    sim.nazoPuyoWrap.runIt:
+      check it.field == field
+
+    sim.backward
+    field[Row0, Col0] = Cell.None
+    check sim.state == Stable
+    sim.nazoPuyoWrap.runIt:
+      check it.field == field
+
     sim.backward
     sim.nazoPuyoWrap.runIt:
       check it.field == field2
@@ -820,7 +834,7 @@ pp|23"""
   check sim1 == sim2
 
   sim1.forward(replay = true)
-  check sim2.operate KeyEvent.init '3'
+  check sim2.operate KeyEvent.init 'c'
   check sim1 == sim2
 
   sim1.forward(skip = true)
@@ -832,7 +846,7 @@ pp|23"""
   check sim1 == sim2
 
   sim1.backward(detail = true)
-  check sim2.operate KeyEvent.init('2', shift = true)
+  check sim2.operate KeyEvent.init 'X'
   check sim1 == sim2
 
   sim1.backward
@@ -840,11 +854,11 @@ pp|23"""
   check sim1 == sim2
 
   sim1.backward
-  check sim2.operate KeyEvent.init '2'
+  check sim2.operate KeyEvent.init 'x'
   check sim1 == sim2
 
   sim1.reset
-  check sim2.operate KeyEvent.init '1'
+  check sim2.operate KeyEvent.init 'z'
   check sim1 == sim2
 
   check not sim2.operate KeyEvent.init "Tab"
@@ -939,22 +953,22 @@ pp|23"""
   check sim1 == sim2
 
   sim1.forward
-  check sim2.operate KeyEvent.init '3'
+  check sim2.operate KeyEvent.init 'c'
   check sim1 == sim2
 
   sim1.backward(detail = true)
-  check sim2.operate KeyEvent.init('2', shift = true)
+  check sim2.operate KeyEvent.init 'X'
   check sim1 == sim2
 
   sim1.backward
-  check sim2.operate KeyEvent.init '2'
+  check sim2.operate KeyEvent.init 'x'
   check sim1 == sim2
 
   sim1.reset
-  check sim2.operate KeyEvent.init '1'
+  check sim2.operate KeyEvent.init 'z'
   check sim1 == sim2
 
-  check not sim2.operate KeyEvent.init '4'
+  check not sim2.operate KeyEvent.init 'v'
   check sim1 == sim2
 
   sim1.mode = ViewerPlay
@@ -967,7 +981,7 @@ pp|23"""
   check sim3 == sim4
 
   sim3.forward(replay = true)
-  check sim4.operate KeyEvent.init '3'
+  check sim4.operate KeyEvent.init 'c'
   check sim3 == sim4
 
   sim3.forward(replay = true)
@@ -979,7 +993,7 @@ pp|23"""
   check sim3 == sim4
 
   sim3.backward(detail = true)
-  check sim4.operate KeyEvent.init('2', shift = true)
+  check sim4.operate KeyEvent.init 'X'
   check sim3 == sim4
 
   sim3.backward
@@ -987,15 +1001,41 @@ pp|23"""
   check sim3 == sim4
 
   sim3.backward
-  check sim4.operate KeyEvent.init '2'
+  check sim4.operate KeyEvent.init 'x'
   check sim3 == sim4
 
   sim3.reset
-  check sim4.operate KeyEvent.init '1'
+  check sim4.operate KeyEvent.init 'z'
   check sim3 == sim4
 
   check not sim4.operate KeyEvent.init 'Z'
   check sim3 == sim4
+
+  var
+    sim5 = Simulator.init(nazo, EditorEdit)
+    sim6 = Simulator.init(nazo, EditorEdit)
+  check sim5 == sim6
+
+  sim5.rule = Water
+  check sim6.operate KeyEvent.init 'r'
+  check sim5 == sim6
+
+  sim5.rule = Tsu
+  check sim6.operate KeyEvent.init 'r'
+  check sim5 == sim6
+
+  sim5.toggleFocus
+  check sim6.operate KeyEvent.init "Tab"
+  check sim5 == sim6
+
+  sim5.writeCell Garbage
+  check sim6.operate KeyEvent.init 'o'
+  check sim5 == sim6
+
+  for i in 0 .. 9:
+    sim5.writeCnt i
+    check sim6.operate KeyEvent.init '0'.succ i
+    check sim5 == sim6
 
 # ------------------------------------------------
 # Simulator <-> URI
@@ -1072,3 +1112,64 @@ gy|23"""
 
     check Simulator.init(nazo).toUri(clearPlacements = true) ==
       Res[Uri].ok "https://24ik.github.io/pon2/?field=t_b..&steps=rbppgy&goal=5__6".parseUri
+
+block: # toExportUri
+  # EditorEdit
+  block:
+    var sim = Simulator.init EditorEdit
+    sim.moveCursorUp
+    sim.moveCursorUp
+    sim.moveCursorLeft
+    sim.writeCell Cell.Green
+    sim.forward
+
+    check sim.toUri ==
+      Res[Uri].ok "https://24ik.github.io/pon2/?mode=ee&field=t_g&steps&goal=0_0_".parseUri
+    check sim.toExportUri ==
+      Res[Uri].ok "https://24ik.github.io/pon2/?field=t_g......&steps&goal=0_0_".parseUri
+    check sim.toExportUri(viewer = false) ==
+      Res[Uri].ok "https://24ik.github.io/pon2/?mode=ep&field=t_g......&steps&goal=0_0_".parseUri
+
+  # ViewerEdit
+  block:
+    var sim = Simulator.init ViewerEdit
+    sim.moveCursorUp
+    sim.moveCursorUp
+    sim.moveCursorLeft
+    sim.writeCell Cell.Green
+    sim.forward
+
+    check sim.toExportUri ==
+      Res[Uri].ok "https://24ik.github.io/pon2/?field=t_&steps&goal=0_0_".parseUri
+
+  # ViewerPlay
+  block:
+    let nazo = parseNazoPuyo[TsuField](
+      """
+1連鎖するべし
+======
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+------
+rb|"""
+    ).expect "Invalid Nazo Puyo"
+
+    var sim = Simulator.init nazo
+    sim.rotatePlacementRight
+    sim.forward
+
+    check sim.toUri ==
+      Res[Uri].ok "https://24ik.github.io/pon2/?field=t_rb..&steps=rb34&goal=5__1".parseUri
+    check sim.toExportUri ==
+      Res[Uri].ok "https://24ik.github.io/pon2/?field=t_&steps=rb&goal=5__1".parseUri
