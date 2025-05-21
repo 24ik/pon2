@@ -11,7 +11,7 @@ when defined(js) or defined(nimsuggest):
   import karax/[karax, karaxdsl, vdom, vstyles]
   import ../[simulator]
   import ../../[core]
-  import ../../private/app/simulator/[common]
+  import ../../private/app/[simulator]
 
 type PaletteView* = object ## View of the palette.
   simulator: ref Simulator

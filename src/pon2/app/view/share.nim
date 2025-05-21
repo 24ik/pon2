@@ -12,7 +12,7 @@ when defined(js) or defined(nimsuggest):
   import ../[nazopuyowrap, simulator]
   import ../../[core]
   import ../../private/[tables2, utils]
-  import ../../private/app/simulator/[common]
+  import ../../private/app/[simulator]
 
 type ShareView* = object ## View of the share.
   simulator: ref Simulator

@@ -11,7 +11,7 @@ when defined(js) or defined(nimsuggest):
   import karax/[karax, karaxdsl, vdom, vstyles]
   import ../[color, nazopuyowrap, simulator]
   import ../../[core]
-  import ../../private/app/simulator/[common]
+  import ../../private/app/[simulator]
 
 type FieldView* = object ## View of the field.
   simulator: ref Simulator

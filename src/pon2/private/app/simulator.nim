@@ -14,8 +14,8 @@
 when defined(js) or defined(nimsuggest):
   import std/[jsffi, jsre, strformat, sugar]
   import karax/[karax, kdom, vdom]
-  import ../../[assign3]
-  import ../../../[core]
+  import ../[assign3]
+  import ../../[core]
 
 const AssetsDir* {.define: "pon2.assets".} = "./assets"
 

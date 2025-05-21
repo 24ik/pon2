@@ -12,7 +12,7 @@ when defined(js) or defined(nimsuggest):
   import ../[color, nazopuyowrap, simulator]
   import ../../[core]
   import ../../private/[utils]
-  import ../../private/app/simulator/[common]
+  import ../../private/app/[simulator]
 
 type StepsView* = object ## View of the steps.
   simulator: ref Simulator

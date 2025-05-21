@@ -11,7 +11,7 @@ when defined(js) or defined(nimsuggest):
   import ../[nazopuyowrap, simulator]
   import ../../[core]
   import ../../private/[arrayops2, assign3, math2]
-  import ../../private/app/simulator/[common]
+  import ../../private/app/[simulator]
 
 type MsgView* = object ## View of the message.
   simulator: ref Simulator

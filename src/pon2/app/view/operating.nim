@@ -10,7 +10,7 @@ when defined(js) or defined(nimsuggest):
   import karax/[karaxdsl, vdom]
   import ../[nazopuyowrap, simulator]
   import ../../[core]
-  import ../../private/app/simulator/[common]
+  import ../../private/app/[simulator]
 
 type OperatingView* = object ## View of the operating.
   simulator: ref Simulator
