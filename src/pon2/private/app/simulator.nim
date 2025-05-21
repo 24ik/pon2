@@ -14,7 +14,7 @@
 when defined(js) or defined(nimsuggest):
   import std/[jsffi, jsre, strformat, sugar]
   import karax/[karax, kdom, vdom]
-  import ../[assign3]
+  import ../[assign3, utils]
   import ../../[core]
 
 const AssetsDir* {.define: "pon2.assets".} = "./assets"
@@ -23,12 +23,6 @@ when defined(js) or defined(nimsuggest):
   # ------------------------------------------------
   # JS - Copy Button
   # ------------------------------------------------
-
-  proc getNavigator(): JsObject {.importjs: "(navigator)".} ## Returns the navigator.
-
-  proc storeToClipboard(text: string) {.inline.} =
-    ## Writes the text to the clipboard.
-    getNavigator().clipboard.writeText text.cstring
 
   proc showFlashMsg(elem: Element, html: cstring, showMs = 500) {.inline.} =
     ## Shows the flash message `html` at `elem` for `showMs` milliseconds.
@@ -44,7 +38,7 @@ when defined(js) or defined(nimsuggest):
       let btn = cast[Element](btn.dom)
       btn.disabled = true
 
-      copyStrFn().storeToClipboard
+      getClipboard().writeText copyStrFn().cstring
       btn.showFlashMsg "<span class='icon'><i class='fa-solid fa-check'></i></span><span>コピー</span>",
         showFlashMsgMs
 
