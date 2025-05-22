@@ -1,139 +1,127 @@
-## This module implements helper procedures used in generation.
+## This module implements helper procedures used by generators.
 ##
 
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
+{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[algorithm, options, random, sequtils, sugar]
-import ../[misc]
+import std/[algorithm, random, sequtils, sugar]
+import ../[assign3, math2, results2]
 
-type GenerateError* = object of CatchableError ## Exception in generation.
+export results2
 
-# ------------------------------------------------
-# Split
-# ------------------------------------------------
-
-func round(rng: var Rand, x: SomeNumber or Natural): int {.inline.} =
+func round(rng: var Rand, x: float): int {.inline.} =
   ## Probabilistic round function.
   ## For example, `rng.round(2.7)` becomes `2` with a 30% probability and
   ## `3` with a 70% probability.
   let floorX = x.int
-  result = floorX + (rng.rand(1.0) < x.float - floorX.float).int
+  floorX + (rng.rand(1.0) < x - floorX.float).int
 
 func split*(
-    rng: var Rand, total: Natural, chunkCount: Positive, allowZeroChunk: bool
-): seq[int] {.inline.} =
-  ## Splits the number `total` into `chunkCount` chunks.
-  ## If splitting fails, `GenerateError` is raised.
-  runnableExamples:
-    import std/[math, random, sequtils]
+    rng: var Rand, total, chunkCnt: int, allowZeroChunk: bool
+): Res[seq[int]] {.inline.} =
+  ## Splits the number `total` into `chunkCnt` chunks.
+  if total < 0:
+    return err "`total` cannot be negative"
 
-    var rng = 123.initRand
-    let numbers = rng.split(10, 3, false)
-    assert numbers.sum == 10
-    assert numbers.len == 3
-    assert numbers.allIt it > 0
+  if chunkCnt < 1:
+    return err "`chunkCnt` should be greater than 0"
 
-  if chunkCount == 1:
+  if chunkCnt == 1:
     if total == 0 and not allowZeroChunk:
-      raise newException(
-        GenerateError, "`total` should be positive if `allowZeroChunk` is false."
-      )
-    else:
-      return @[total.int]
+      return err "`total` cannot be positive if `allowZeroChunk` if false"
 
-  if total == 1 and not allowZeroChunk:
-    if chunkCount == 1:
-      return @[total.int]
-    else:
-      raise newException(
-        GenerateError,
-        "`total` should be equal or greater than `chunkCount` if" &
-          "`allowZeroChunk` is false.",
-      )
+    return ok @[total]
 
-  # separation index
-  let sepIndicesWithoutLast: seq[int]
+  # separation indices
+  var sepIndices = newSeqOfCap[int](chunkCnt.succ)
+  sepIndices.add 0
+
   if allowZeroChunk:
-    sepIndicesWithoutLast = collect:
-      for _ in 0 ..< chunkCount.pred:
-        rng.rand total
+    for _ in 0 ..< chunkCnt.pred:
+      sepIndices.add rng.rand total
   else:
-    if total < chunkCount:
-      raise newException(
-        GenerateError,
-        "`total` should be equal or greater than `chunkCount` if" &
-          "`allowZeroChunk` is false.",
-      )
+    if total < chunkCnt:
+      return err "`total` should be greater than or equal to `chunkCnt` if `allowZeroChunk` is false"
 
-    var indices = (1 .. total.pred).toSeq
+    var indices = (1 ..< total).toSeq
     rng.shuffle indices
-    sepIndicesWithoutLast = indices[0 ..< chunkCount.pred]
-  let sepIndices = @[0] & sepIndicesWithoutLast.sorted & @[total.int]
+    sepIndices &= indices[0 ..< chunkCnt.pred]
+  sepIndices.sort
+  sepIndices.add total
 
-  result = collect:
-    for i in 0 ..< chunkCount:
+  let res = collect:
+    for i in 0 ..< chunkCnt:
       sepIndices[i.succ] - sepIndices[i]
+  ok res
 
 func split*(
-    rng: var Rand, total: Natural, ratios: openArray[Option[Natural]]
-): seq[int] {.inline.} =
-  ## Splits the number `total` into chunks following the probabilistic
-  ## distribution represented by `ratios`.
-  ## `ratios` can contain `none` to specify a random positive ratio, and
-  ## cannot contain anything but `none` and `some(0)` when doing so.
-  ## If all elements in `ratios` are all `some(0)`, splits randomly.
-  ## If splitting fails, `GenerateError` is raised.
-  runnableExamples:
-    import std/[options, random]
+    rng: var Rand, total: int, weights: openArray[int]
+): Res[seq[int]] {.inline.} =
+  ## Splits the number `total` into chunks following the probability `weights`.
+  ## If `weights` are all zero, splits randomly.
+  ## Note that an infinite loop can occur.
+  if total < 0:
+    return err "`total` cannot be negative"
 
-    var rng = 123.initRand
-    let numbers = rng.split(10, [some Natural 2, some Natural 3])
-    assert numbers == @[4, 6]
+  if weights.len == 0:
+    return err "`weights` should have at least one element"
 
-  if ratios.len == 0:
-    raise newException(GenerateError, "`ratios` should have at least one element.")
+  if weights.len == 1:
+    return ok @[total]
 
-  if ratios.len == 1:
-    return @[total.int]
+  if weights.anyIt it < 0:
+    return err "`weights` cannot have negative element"
 
-  if ratios.allIt it.isSome:
-    let ratios2 = ratios.mapIt it.get
+  let weightSum = weights.sum2
+  if weightSum == 0:
+    return rng.split(total, weights.len, allowZeroChunk = true)
 
-    let sumRatio = ratios2.sum2
-    if sumRatio == 0:
-      return rng.split(total, ratios.len, true)
+  var res = newSeq[int](weights.len) # NOTE: somehow `newSeqUninit` does not work
+  while true:
+    var last = total
 
-    while true:
-      result = newSeqOfCap(ratios.len)
-      var last = total
+    for i in 0 ..< weights.len.pred:
+      var rounded = rng.round total * weights[i] / weightSum
+      res[i].assign rounded
+      last.dec rounded
 
-      for mean in ratios2[0 ..^ 2].mapIt total * it / sumRatio:
-        let count = rng.round mean
-        result.add count
-        last.dec count
+    if last == 0 or (last > 0 and weights[^1] > 0):
+      res[^1].assign last
+      break
 
-      if (ratios2[^1] == 0 and last == 0) or (ratios2[^1] > 0 and last > 0):
-        result.add last
-        return
+  ok res
 
-  if ratios.anyIt it.isSome and it.get != 0:
-    raise newException(
-      GenerateError,
-      "If `ratios` contains `none`, it can contain only `none` and `some(0).",
-    )
+func split*(
+    rng: var Rand, total: int, positives: openArray[bool]
+): Res[seq[int]] {.inline.} =
+  ## Splits the number `total` into chunks randomly.
+  ## Elements of the result where `positives` are `true` are set to positive, and
+  ## the others are set to zero.
+  ## If `positives` are all `false`, splits randomly.
+  if total < 0:
+    return err "`total` cannot be negative"
 
-  result = newSeqOfCap(ratios.len)
-  let counts = rng.split(total, ratios.countIt it.isNone, false)
-  var idx = 0
-  for ratio in ratios:
-    if ratio.isSome:
-      assert ratio.get == 0
-      result.add 0
+  if positives.len == 0:
+    return err "`positive` should have at least one element"
+
+  if positives.allIt(not it):
+    return rng.split(total, positives.len, allowZeroChunk = true)
+
+  if positives.len == 1:
+    return ok @[total]
+
+  let cnts =
+    ?rng.split(total, positives.countIt it, allowZeroChunk = false).context "Cannot split"
+  var
+    res = newSeqOfCap[int](positives.len)
+    cntsIdx = 0
+  for pos in positives:
+    if pos:
+      res.add cnts[cntsIdx]
+      cntsIdx.inc
     else:
-      result.add counts[idx]
-      idx.inc
+      res.add 0
+
+  ok res

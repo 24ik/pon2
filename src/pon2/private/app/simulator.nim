@@ -1,4 +1,4 @@
-## This module implements common functions.
+## This module implements helper procedures used by simulators.
 ##
 ## Compile Options:
 ## | Option                 | Description       | Default    |
