@@ -137,6 +137,7 @@ block: # split
 # ------------------------------------------------
 
 block: # generate
+  var rng = 123.initRand
   let
     genGoalKind = Chain
     genGoalColor = GenerateGoalColor.low
@@ -168,8 +169,7 @@ block: # generate
     )
 
     rule = Tsu
-    seed = 123
-    wrapRes = settings.generate(rule, seed)
+    wrapRes = rng.generate(settings, rule)
 
   check wrapRes.isOk
   let wrap = wrapRes.unsafeValue

@@ -330,13 +330,11 @@ func generateGoal(
 # Generate
 # ------------------------------------------------
 
-proc generate[F: TsuField or WaterField, S: SomeSignedInt](
-    settings: GenerateSettings, seed: S
+proc generate[F: TsuField or WaterField](
+    rng: var Rand, settings: GenerateSettings
 ): Res[NazoPuyo[F]] {.inline.} =
   ## Returns a random Nazo Puyo that has a unique solution.
   ?settings.isValid.context "Generation failed"
-
-  var rng = seed.int64.initRand
 
   let
     useCells =
@@ -396,12 +394,12 @@ proc generate[F: TsuField or WaterField, S: SomeSignedInt](
 
   return err "Not reached here"
 
-proc generate*[S: SomeSignedInt](
-    settings: GenerateSettings, rule: Rule, seed: S
+proc generate*(
+    rng: var Rand, settings: GenerateSettings, rule: Rule
 ): Res[NazoPuyoWrap] {.inline.} =
   ## Returns a random Nazo Puyo that has a unique solution.
   case rule
   of Tsu:
-    ok NazoPuyoWrap.init ?generate[TsuField, S](settings, seed)
+    ok NazoPuyoWrap.init ?generate[TsuField](rng, settings)
   of Water:
-    ok NazoPuyoWrap.init ?generate[WaterField, S](settings, seed)
+    ok NazoPuyoWrap.init ?generate[WaterField](rng, settings)
