@@ -1,142 +1,78 @@
-## This module implements marathon mode.
+## This module implements Puyo Puyo marathon.
 ##
-when defined(js):
-  ## See also the [backend-specific documentation](./simulator/web.html).
-  ##
-  discard
 
-# NOTE: `std/critbits` is incompatible with `strictCaseObjects` in Nim-2.2.0
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
+{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[algorithm, critbits, math, options, os, sequtils, strutils, sugar, random]
-import ./[key, simulator]
-import ../core/[cell, field]
-import ../private/[misc]
-import ../private/app/[misc]
-import ../private/app/marathon/[common]
+import std/[sequtils, sugar, random]
+import ./[nazopuyowrap, simulator]
+import ../[core]
+import ../private/[arrayops2, assign3, critbits2, results2, strutils2, utils]
 
 when defined(js):
-  import std/[asyncjs, jsconsole, jsfetch]
+  import std/[asyncjs]
 
-type
-  MarathonMatchResult* = object ## Matching result.
-    strings*: seq[string]
-    pageCount*: Natural
-    pageIndex*: Natural
+type Marathon* = object ## Marathon manager.
+  simulator: Simulator
+  matchQueries: seq[string]
 
-  Marathon* = ref object ## Marathon manager.
-    simulator: Simulator
+  dataLoaded: bool
+  allQueries: seq[string]
+  critBitTree: CritBitTree[void]
 
-    allPairsStrs: Option[tuple[`seq`: seq[string], tree: CritBitTree[void]]]
-    matchResult: MarathonMatchResult
-
-    focusSimulator: bool
-
-    rng: Rand
+  rng: Rand
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
-func newMarathon*(rng = initRand()): Marathon {.inline.} =
-  ## Returns a new marathon manager without pairs' data loaded.
-  Marathon(
-    simulator: newSimulator[TsuField](Play),
-    allPairsStrs: none tuple[`seq`: seq[string], tree: CritBitTree[void]],
-    matchResult: MarathonMatchResult(strings: @[], pageCount: 0, pageIndex: 0),
-    focusSimulator: false,
+func init*(T: type Marathon, rng: Rand): T {.inline.} =
+  T(
+    simulator: Simulator.init PuyoPuyo[TsuField].init,
+    matchQueries: @[],
+    dataLoaded: false,
+    allQueries: @[],
+    critBitTree: CritBitTree[void].default,
     rng: rng,
   )
 
-proc loadData(self: Marathon, pairsStr: string) {.inline.} =
-  ## Loads pairs' data.
-  let allPairsStrsSeq = pairsStr.splitLines
-  assert allPairsStrsSeq.len == AllPairsCount
+# ------------------------------------------------
+# Load
+# ------------------------------------------------
 
-  self.allPairsStrs = some (`seq`: allPairsStrsSeq, tree: allPairsStrsSeq.toCritBitTree)
+func load*(self: var Marathon, allQueries: seq[string]) {.inline.} =
+  ## Loads steps data.
+  self.allQueries.assign allQueries
+  self.critBitTree.assign allQueries.toCritBitTree2
+  self.dataLoaded.assign true
 
 when defined(js):
-  {.push warning[Uninit]: off.}
-  proc asyncLoadDataImpl(self: Marathon, completeHandler: () -> void) {.async.} =
-    ## Loads pairs' data asynchronously.
-    ## This procedure should be called with `discard`.
-    {.push warning[ProveInit]: off.}
-    await (WebAssetsDir / "pairs" / "swap.txt").cstring.fetch
-    .then((r: Response) => r.text)
-    .then((s: cstring) => (self.loadData $s; completeHandler()))
-    .catch((e: Error) => console.error e)
-    {.pop.}
-
-  {.pop.}
-
-  proc asyncLoadData*(
-      self: Marathon, completeHandler: () -> void = () => (discard)
-  ) {.inline.} =
-    ## Loads pairs' data asynchronously.
-    discard self.asyncLoadDataImpl completeHandler
-
-else:
-  const SwapPairsTxt = staticRead NativeAssetsDir / "pairs" / "swap.txt"
-
-  proc loadData*(self: Marathon) {.inline.} =
-    ## Loads pairs' data.
-    self.loadData SwapPairsTxt
+  proc asyncLoad*(self: var Marathon, allQueries: seq[string]) {.noSideEffect, async.} =
+    ## Loads steps data asynchronously.
+    # NOTE: `func` definition is not compatible with `async`
+    self.load allQueries
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
+func dataLoaded*(self: Marathon): bool {.inline.} =
+  ## Returns `true` if steps data are loaded.
+  self.dataLoaded
+
+func matchQueries*(self: Marathon): seq[string] {.inline.} =
+  ## Returns matched queries.
+  self.matchQueries
+
 func simulator*(self: Marathon): Simulator {.inline.} =
   ## Returns the simulator.
   self.simulator
 
-func matchResult*(self: Marathon): MarathonMatchResult {.inline.} =
-  ## Returns the matching result.
-  self.matchResult
-
-func focusSimulator*(self: Marathon): bool {.inline.} =
-  ## Returns `true` if the simulator is focused.
-  self.focusSimulator
-
-func isReady*(self: Marathon): bool {.inline.} =
-  ## Returns `true` if the pairs' data is loaded.
-  self.allPairsStrs.isSome
-
-# ------------------------------------------------
-# Edit - Other
-# ------------------------------------------------
-
-proc toggleFocus*(self: Marathon) {.inline.} =
-  ## Toggles focusing to the simulator or not.
-  self.focusSimulator.toggle
-
-# ------------------------------------------------
-# Table Page
-# ------------------------------------------------
-
-proc nextResultPage*(self: Marathon) {.inline.} =
-  ## Shows the next result page.
-  if self.matchResult.pageCount == 0:
-    return
-
-  if self.matchResult.pageIndex == self.matchResult.pageCount.pred:
-    self.matchResult.pageIndex = 0
-  else:
-    self.matchResult.pageIndex.inc
-
-proc prevResultPage*(self: Marathon) {.inline.} =
-  ## Shows the previous result page.
-  if self.matchResult.pageCount == 0:
-    return
-
-  if self.matchResult.pageIndex == 0:
-    self.matchResult.pageIndex = self.matchResult.pageCount.pred
-  else:
-    self.matchResult.pageIndex.dec
+func simulator*(self: var Marathon): var Simulator {.inline.} =
+  ## Returns the simulator.
+  self.simulator
 
 # ------------------------------------------------
 # Match
@@ -144,193 +80,172 @@ proc prevResultPage*(self: Marathon) {.inline.} =
 
 func swappedPrefixes(prefix: string): seq[string] {.inline.} =
   ## Returns all prefixes with all pairs swapped.
-  ## `prefix` need to be capital.
-  assert prefix.len mod 2 == 0
-
-  # If a non-double pair (AB) exists and cells in the pair (A and B) do not
-  # appear in the others pairs, A and B are symmetric; no need to swap in this
-  # function.
-  # This process is applied to only one of all AB (fixing the concrete colors of
-  # A and B).
   var
-    pairIdx = [0, 0, 0, 0, 0, 0] # AB, AC, AD, BC, BD, CD
-    pairCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # AB, ..., CD, AA, BB, CC, DD
-  for i in countup(0, prefix.len.pred, 2):
-    case prefix[i .. i.succ]
-    of "AA":
-      pairCounts[6].inc
-    of "BB":
-      pairCounts[7].inc
-    of "CC":
-      pairCounts[8].inc
-    of "DD":
-      pairCounts[9].inc
+    lastIndices = initArrWith(6, 0) # AB, AC, AD, BC, BD, CD
+    cnts = initArrWith(10, 0) # AB, AC, AD, BC, BD, CD, AA, BB, CC, DD
+  for charIdx in countup(0, prefix.len.pred, 2):
+    case prefix[charIdx .. charIdx.succ]
     of "AB", "BA":
-      pairCounts[0].inc
-      pairIdx[0] = i
+      cnts[0].inc
+      lastIndices[0].assign charIdx
     of "AC", "CA":
-      pairCounts[1].inc
-      pairIdx[1] = i
+      cnts[1].inc
+      lastIndices[1].assign charIdx
     of "AD", "DA":
-      pairCounts[2].inc
-      pairIdx[2] = i
+      cnts[2].inc
+      lastIndices[2].assign charIdx
     of "BC", "CB":
-      pairCounts[3].inc
-      pairIdx[3] = i
+      cnts[3].inc
+      lastIndices[3].assign charIdx
     of "BD", "DB":
-      pairCounts[4].inc
-      pairIdx[4] = i
+      cnts[4].inc
+      lastIndices[4].assign charIdx
     of "CD", "DC":
-      pairCounts[5].inc
-      pairIdx[5] = i
+      cnts[5].inc
+      lastIndices[5].assign charIdx
+    of "AA":
+      cnts[6].inc
+    of "BB":
+      cnts[7].inc
+    of "CC":
+      cnts[8].inc
+    of "DD":
+      cnts[9].inc
 
+  # If a non-double pair (e.g. AB) exists and cells in the pair (e.g. A and B) only
+  # appear as the ones, one of them is not need to swap.
   let
-    notDoublePairCount = pairCounts[0 ..< 6].sum2
-    fixIdx =
-      if pairCounts[0] > 0 and notDoublePairCount == pairCounts[0] and
-          pairCounts[6] + pairCounts[7] == 0:
-        pairIdx[0]
-      elif pairCounts[1] > 0 and notDoublePairCount == pairCounts[1] and
-        pairCounts[6] + pairCounts[8] == 0:
-        pairIdx[1]
-      elif pairCounts[2] > 0 and notDoublePairCount == pairCounts[2] and
-        pairCounts[6] + pairCounts[9] == 0:
-        pairIdx[2]
-      elif pairCounts[3] > 0 and notDoublePairCount == pairCounts[3] and
-        pairCounts[7] + pairCounts[8] == 0:
-        pairIdx[3]
-      elif pairCounts[4] > 0 and notDoublePairCount == pairCounts[4] and
-        pairCounts[7] + pairCounts[9] == 0:
-        pairIdx[4]
-      elif pairCounts[5] > 0 and notDoublePairCount == pairCounts[5] and
-        pairCounts[8] + pairCounts[9] == 0:
-        pairIdx[5]
+    cntAbAc = cnts[0] + cnts[1]
+    cntAbAd = cnts[0] + cnts[2]
+    cntAcAd = cnts[1] + cnts[2]
+    cntBcBd = cnts[3] + cnts[4]
+    cntBcCd = cnts[3] + cnts[5]
+    cntBdCd = cnts[4] + cnts[5]
+  var fixIndices = newSeqOfCap[int](2)
+  if cnts[0] > 0 and cntAcAd + cntBcBd + (cnts[6] + cnts[7]) == 0: # AB
+    fixIndices.add lastIndices[0]
+  if cnts[1] > 0 and cntAbAd + cntBcCd + (cnts[6] + cnts[8]) == 0: # AC
+    fixIndices.add lastIndices[1]
+  if cnts[2] > 0 and cntAbAc + cntBdCd + (cnts[6] + cnts[9]) == 0: # AD
+    fixIndices.add lastIndices[2]
+  if cnts[3] > 0 and cntAbAc + cntBdCd + (cnts[7] + cnts[8]) == 0: # BC
+    fixIndices.add lastIndices[3]
+  if cnts[4] > 0 and cntAbAd + cntBcCd + (cnts[7] + cnts[9]) == 0: # BD
+    fixIndices.add lastIndices[4]
+  if cnts[5] > 0 and cntAcAd + cntBcBd + (cnts[8] + cnts[9]) == 0: # CD
+    fixIndices.add lastIndices[5]
+
+  let pairsSeq = collect:
+    for charIdx in countup(0, prefix.len.pred, 2):
+      let
+        c1 = prefix[charIdx]
+        c2 = prefix[charIdx.succ]
+
+      if c1 == c2 or charIdx in fixIndices:
+        @[c1 & c2]
       else:
-        -1
+        @[c1 & c2, c2 & c1]
+  pairsSeq.product2.mapIt it.join
 
-    pairsSeq = collect:
-      for i in countup(0, prefix.len.pred, 2):
-        let
-          c1 = prefix[i]
-          c2 = prefix[i.succ]
+func initReplaceDataSeqArr(): array[4, seq[seq[(string, string)]]] {.inline.} =
+  ## Returns `ReplaceDataSeqArr`.
+  let
+    replaceDataSeq1 = collect:
+      for c0 in Cell.Red .. Cell.Purple:
+        @[("A", $c0)]
+    replaceDataSeq2 = collect:
+      for c0 in Cell.Red .. Cell.Purple:
+        for c1 in Cell.Red .. Cell.Purple:
+          if c0 != c1:
+            @[("A", $c0), ("B", $c1)]
+    replaceDataSeq3 = collect:
+      for c0 in Cell.Red .. Cell.Purple:
+        for c1 in Cell.Red .. Cell.Purple:
+          for c2 in Cell.Red .. Cell.Purple:
+            if {c0, c1, c2}.card == 3:
+              @[("A", $c0), ("B", $c1), ("C", $c2)]
+    replaceDataSeq4 = collect:
+      for c0 in Cell.Red .. Cell.Purple:
+        for c1 in Cell.Red .. Cell.Purple:
+          for c2 in Cell.Red .. Cell.Purple:
+            for c3 in Cell.Red .. Cell.Purple:
+              if {c0, c1, c2, c3}.card == 4:
+                @[("A", $c0), ("B", $c1), ("C", $c2), ("D", $c3)]
 
-        if c1 == c2 or i == fixIdx:
-          @[c1 & c2]
-        else:
-          @[c1 & c2, c2 & c1]
-
-  result = pairsSeq.product2.mapIt it.join
-
-func initReplaceData(keys: string): seq[seq[(string, string)]] {.inline.} =
-  ## Returns arguments for prefix replacing.
-  case keys.len
-  of 1:
-    result = collect:
-      for p0 in ColorPuyo.low .. ColorPuyo.high:
-        @[($keys[0], $p0)]
-  of 2:
-    result = collect:
-      for p0 in ColorPuyo.low .. ColorPuyo.high:
-        for p1 in ColorPuyo.low .. ColorPuyo.high:
-          if p0 != p1:
-            @[($keys[0], $p0), ($keys[1], $p1)]
-  of 3:
-    result = collect:
-      for p0 in ColorPuyo.low .. ColorPuyo.high:
-        for p1 in ColorPuyo.low .. ColorPuyo.high:
-          for p2 in ColorPuyo.low .. ColorPuyo.high:
-            if {p0, p1, p2}.card == 3:
-              @[($keys[0], $p0), ($keys[1], $p1), ($keys[2], $p2)]
-  of 4:
-    result = collect:
-      for p0 in ColorPuyo.low .. ColorPuyo.high:
-        for p1 in ColorPuyo.low .. ColorPuyo.high:
-          for p2 in ColorPuyo.low .. ColorPuyo.high:
-            for p3 in ColorPuyo.low .. ColorPuyo.high:
-              if {p0, p1, p2, p3}.card == 4:
-                @[($keys[0], $p0), ($keys[1], $p1), ($keys[2], $p2), ($keys[3], $p3)]
-  else:
-    result = @[] # HACK: dummy to suppress warning
-    assert false
+  [replaceDataSeq1, replaceDataSeq2, replaceDataSeq3, replaceDataSeq4]
 
 const
-  ReplaceDataSeq = [
-    "A".initReplaceData, "AB".initReplaceData, "ABC".initReplaceData,
-    "ABCD".initReplaceData,
-  ]
-  NeedReplaceKeysSeq = ["a".toSet2, "ab".toSet2, "abc".toSet2, "abcd".toSet2]
+  ReplaceDataSeqArr = initReplaceDataSeqArr()
+  ReplaceNeedKeysArr = ["a".toSet2, "ab".toSet2, "abc".toSet2, "abcd".toSet2]
 
-proc match*(self: Marathon, prefix: string) {.inline.} =
+func match*(self: var Marathon, prefix: string) {.inline.} =
+  ## Searches queries that have specified prefixes and sets them to the marathon
+  ## manager.
   if prefix == "":
-    self.matchResult.strings = @[]
+    self.matchQueries.setLen 0
+    return
+
+  let chars = prefix.toSet2
+  if chars in ReplaceNeedKeysArr:
+    if prefix.len mod 2 == 1:
+      return
+
+    # ref: https://sengiken.web.fc2.com/tsumo/
+    let matchCntMax =
+      case prefix.len
+      of 2:
+        45000 # AB
+      of 4:
+        11000 # ABAC
+      of 6:
+        2600 # ABABAC
+      else:
+        400 # ABABACBD
+    self.matchQueries.assign newSeqOfCap[string](matchCntMax)
+    for replaceData in ReplaceDataSeqArr[chars.card.pred]:
+      for pre in prefix.toUpperAscii.swappedPrefixes:
+        for query in self.critBitTree.itemsWithPrefix pre.multiReplace replaceData:
+          self.matchQueries &= query
   else:
-    var keys = prefix.toSet2
-    if keys in NeedReplaceKeysSeq:
-      if prefix.len mod 2 == 1:
-        return
-
-      let prefix2 = prefix.toUpperAscii # HACK: prevent to confuse 'b' with Blue
-
-      self.matchResult.strings = newSeqOfCap(45000)
-      for replaceData in ReplaceDataSeq[keys.card.pred]:
-        for prefix3 in prefix2.swappedPrefixes:
-          {.push warning[ProveInit]: off.}
-          self.matchResult.strings &=
-            self.allPairsStrs.get.tree.itemsWithPrefix(prefix3.multiReplace replaceData).toSeq
-          {.pop.}
-    else:
-      self.matchResult.strings =
-        self.allPairsStrs.get.tree.itemsWithPrefix(prefix).toSeq
-
-  self.matchResult.pageCount =
-    ceil(self.matchResult.strings.len / MatchResultPairsCountPerPage).Natural
-  self.matchResult.pageIndex = 0
-
-  if self.matchResult.strings.len > 0:
-    self.focusSimulator = false
+    # ref: https://sengiken.web.fc2.com/tsumo/
+    let matchCntMax =
+      case prefix.len
+      of 1:
+        14000 # R
+      of 2:
+        4300 # RR
+      of 3:
+        1500 # YYY
+      else:
+        410 # YYYY
+    self.matchQueries.assign newSeqOfCap[string](matchCntMax)
+    for query in self.critBitTree.itemsWithPrefix prefix:
+      self.matchQueries &= query
 
 # ------------------------------------------------
-# Play
+# Simulator
 # ------------------------------------------------
 
-proc play(self: Marathon, pairsStr: string) {.inline.} =
-  ## Plays a marathon mode with the given pairs.
-  self.simulator.reset
-  self.simulator.pairsPositions = pairsStr.toPairsPositions
-
-  self.focusSimulator = true
-
-proc play*(self: Marathon, pairsIdx: Natural) {.inline.} =
-  ## Plays a marathon mode with the given pairs.
-  self.play self.matchResult.strings[pairsIdx]
-
-proc play*(self: Marathon, onlyMatched = true) {.inline.} =
-  ## Plays a marathon mode with the random mathced pairs.
-  ## If `onlyMatched` is true, the pairs are chosen from the matched result;
-  ## otherwise, chosen from all pairs.
-  if not onlyMatched:
-    {.push warning[ProveInit]: off.}
-    self.play self.rng.sample self.allPairsStrs.get.seq
-    {.pop.}
+func loadSteps(self: var Marathon, query: string) {.inline.} =
+  ## Applies the steps to the simulator.
+  let stepsRes = query.parseSteps Pon2
+  if stepsRes.isErr:
     return
 
-  if self.matchResult.strings.len == 0:
-    return
+  self.simulator.assign Simulator.init PuyoPuyo[TsuField].init(
+    TsuField.init, stepsRes.unsafeValue
+  )
 
-  self.play self.rng.sample self.matchResult.strings
+func selectQuery*(self: var Marathon, idx: int) {.inline.} =
+  ## Applies the selected query to the simulator.
+  if idx < self.matchQueries.len:
+    self.loadSteps self.matchQueries[idx]
 
-# ------------------------------------------------
-# Keyboard Operation
-# ------------------------------------------------
-
-proc operate*(self: Marathon, event: KeyEvent): bool {.inline.} =
-  ## Does operation specified by the keyboard input.
-  ## Returns `true` if any action is executed.
-  if event == initKeyEvent("Tab", shift = true):
-    self.toggleFocus
-    return true
-
-  if self.focusSimulator:
-    return self.simulator.operate event
-
-  result = false
+func selectRandomQuery*(self: var Marathon, fromMatched = true) {.inline.} =
+  ## Applies a random query to the simulator.
+  if fromMatched:
+    if self.matchQueries.len > 0:
+      self.loadSteps self.rng.sample self.matchQueries
+  else:
+    if self.dataLoaded:
+      self.loadSteps self.rng.sample self.allQueries

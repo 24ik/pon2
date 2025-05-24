@@ -6,6 +6,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
+import std/[algorithm, sequtils, typetraits]
 import ./[assign3]
 
 when defined(js) or defined(nimsuggest):
@@ -31,6 +32,24 @@ func decRot*[T: Ordinal](x: var T) {.inline.} =
     x.assign T.high
   else:
     x.dec
+
+func product2*[T](seqs: openArray[seq[T]]): seq[seq[T]] {.inline.} =
+  ## Returns a cartesian product.
+  case seqs.len
+  of 0:
+    @[newSeq[T]()]
+  of 1:
+    seqs[0].mapIt @[it]
+  else:
+    seqs.product
+
+template toSet2*(iter: untyped): untyped =
+  ## Converts the iterable to a built-in set type.
+  var res: set[iter.elementType] = {}
+  for e in iter:
+    res.incl e
+
+  res
 
 when defined(js) or defined(nimsuggest):
   proc getSelectedIdx*(

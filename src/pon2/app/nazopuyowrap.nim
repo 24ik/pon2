@@ -77,6 +77,7 @@ macro runIt*(self: untyped, body: untyped): untyped =
   ## Runs `body` with `it` (internal `PuyoPuyo`) and `itNazo`
   ## (internal `NazoPuyo` constructor calling) exposed.
   ## If `self` has no goal, the behavior of `itNazo` is undefined.
+  ## Note that this macro may be incompatible with "method-like" calling.
   let
     puyoT = quote:
       `self`.tsu
