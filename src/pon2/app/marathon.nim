@@ -13,6 +13,8 @@ import ../private/[arrayops2, assign3, critbits2, results2, strutils2, utils]
 
 when defined(js):
   import std/[asyncjs]
+else:
+  import chronos
 
 type Marathon* = object ## Marathon manager.
   simulator: Simulator
@@ -49,10 +51,17 @@ func load*(self: var Marathon, allQueries: seq[string]) {.inline.} =
   self.dataLoaded.assign true
 
 when defined(js):
-  proc asyncLoad*(self: var Marathon, allQueries: seq[string]) {.noSideEffect, async.} =
+  proc asyncLoad*(
+      self: var Marathon, allQueries: seq[string]
+  ) {.noSideEffect, inline, async.} =
     ## Loads steps data asynchronously.
     # NOTE: `func` definition is not compatible with `async`
     self.load allQueries
+
+else:
+  proc asyncLoad*(self: ref Marathon, allQueries: seq[string]) {.inline, async.} =
+    ## Loads steps data asynchronously.
+    self[].load allQueries
 
 # ------------------------------------------------
 # Property
@@ -221,6 +230,19 @@ func match*(self: var Marathon, prefix: string) {.inline.} =
     self.matchQueries.assign newSeqOfCap[string](matchCntMax)
     for query in self.critBitTree.itemsWithPrefix prefix:
       self.matchQueries &= query
+
+when defined(js):
+  proc asyncMatch*(self: var Marathon, prefix: string) {.noSideEffect, inline, async.} =
+    ## Searches queries that have specified prefixes and sets them to the marathon
+    ## manager.
+    # NOTE: `func` definition is not compatible with `async`
+    self.match prefix
+
+else:
+  proc asyncMatch*(self: ref Marathon, prefix: string) {.inline, async.} =
+    ## Searches queries that have specified prefixes and sets them to the marathon
+    ## manager.
+    self[].match prefix
 
 # ------------------------------------------------
 # Simulator

@@ -8,6 +8,8 @@ import ../../src/pon2/app/[marathon, nazopuyowrap, simulator]
 
 when defined(js):
   import std/[asyncjs, sugar]
+else:
+  import chronos
 
 # ------------------------------------------------
 # Load / Property
@@ -31,15 +33,18 @@ block: # load, dataLoaded, matchQueries, simulator
   marathon.simulator.writeCell Cell.Green
   check marathon.simulator == sim
 
-when defined(js):
-  block: # asyncLoad
-    var
-      rng = 123.initRand
-      marathon = Marathon.init rng
-
+block: # asyncLoad
+  var rng = 123.initRand
+  when defined(js):
+    var marathon = Marathon.init rng
     discard marathon.asyncLoad(@[]).then(() => (check marathon.dataLoaded)).catch(
         (err: Error) => (check false)
       )
+  else:
+    var marathon = new Marathon
+    marathon[] = Marathon.init rng
+    waitFor marathon.asyncLoad @[]
+    check marathon[].dataLoaded
 
 # ------------------------------------------------
 # Match
@@ -96,6 +101,23 @@ block: # match
 
   marathon.match "cabb"
   check marathon.matchQueries == @["bgyy"]
+
+block: # asyncMatch
+  var
+    rng = 123.initRand
+    marathon = Marathon.init rng
+  marathon.load @["rrgg", "rgrg", "rgbb"]
+
+  when defined(js):
+    discard marathon
+      .asyncMatch("rr")
+      .then(() => (check marathon.matchQueries == @["rrgg"]))
+      .catch((err: Error) => (check false))
+  else:
+    var marathonRef = new Marathon
+    marathonRef[] = marathon
+    waitFor marathonRef.asyncMatch "rr"
+    check marathonRef[].matchQueries == @["rrgg"]
 
 # ------------------------------------------------
 # Simulator

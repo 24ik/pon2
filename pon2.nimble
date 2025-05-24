@@ -13,6 +13,7 @@ bin = @["pon2"]
 
 requires "nim ^= 2.2.4"
 
+requires "chronos ^= 4.0.4"
 requires "docopt ^= 0.7.1"
 requires "karax ^= 1.5.0"
 requires "nigui ^= 0.2.8"
