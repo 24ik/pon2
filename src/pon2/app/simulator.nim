@@ -84,7 +84,7 @@ const
   DefaultPlcmt = Up2
   DefaultMoveRes = MoveResult.init true
   DefaultEditData = SimulatorEditData(
-    cell: None,
+    cell: Cell.None,
     focusField: true,
     field: (Row.low, Col.low),
     step: (0, true, Col.low),
@@ -384,7 +384,7 @@ func writeCell(self: var Simulator, row: Row, col: Col, cell: Cell) {.inline.} =
   self.editBlock:
     runIt self.nazoPuyoWrap:
       if self.editData.insert:
-        if cell == None:
+        if cell == Cell.None:
           it.field.delete row, col
         else:
           it.field.insert row, col, cell
@@ -405,7 +405,7 @@ func writeCell(self: var Simulator, idx: int, pivot: bool, cell: Cell) {.inline.
   runIt self.nazoPuyoWrap:
     if idx >= it.steps.len:
       case cell
-      of None:
+      of Cell.None:
         return
       of Hard, Garbage:
         self.editBlock:
@@ -414,14 +414,14 @@ func writeCell(self: var Simulator, idx: int, pivot: bool, cell: Cell) {.inline.
         self.editBlock:
           it.steps.addLast Step.init Pair.init(cell, cell)
     else:
-      if cell == None:
+      if cell == Cell.None:
         self.deleteStep idx
         return
 
       if self.editData.insert:
         self.editBlock:
           case cell
-          of None:
+          of Cell.None:
             discard # not reached here
           of Hard, Garbage:
             it.steps.insert Step.init(ZeroArr, cell == Hard), idx
@@ -430,7 +430,7 @@ func writeCell(self: var Simulator, idx: int, pivot: bool, cell: Cell) {.inline.
       else:
         self.editBlock:
           case cell
-          of None:
+          of Cell.None:
             discard # not reached here
           of Hard, Garbage:
             let cellIsHard = cell == Hard
@@ -701,7 +701,7 @@ func forwardPop(self: var Simulator) {.inline.} =
   # update moving result
   self.moveResult.chainCnt.inc
   var cellCnts {.noinit.}: array[Cell, int]
-  cellCnts[None].assign 0
+  cellCnts[Cell.None].assign 0
   staticFor(cell2, Hard .. Cell.Purple):
     let cellCnt = popRes.cellCnt cell2
     cellCnts[cell2].assign cellCnt
@@ -878,7 +878,7 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.inline, discardable.} 
     elif key == static(KeyEvent.init 'p'):
       self.writeCell Hard
     elif key == static(KeyEvent.init "Space"):
-      self.writeCell None
+      self.writeCell Cell.None
     # write cnt
     elif (let cnt = DigitKeys.find key; cnt >= 0):
       self.writeCnt cnt

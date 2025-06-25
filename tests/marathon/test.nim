@@ -34,15 +34,16 @@ block: # load, dataLoaded, matchQueries, simulator
   check marathon.simulator == sim
 
 block: # asyncLoad
-  var rng = 123.initRand
+  var
+    rng = 123.initRand
+    marathon = new Marathon
+  marathon[] = Marathon.init rng
+
   when defined(js):
-    var marathon = Marathon.init rng
-    discard marathon.asyncLoad(@[]).then(() => (check marathon.dataLoaded)).catch(
+    discard marathon.asyncLoad(@[]).then(() => (check marathon[].dataLoaded)).catch(
         (err: Error) => (check false)
       )
   else:
-    var marathon = new Marathon
-    marathon[] = Marathon.init rng
     waitFor marathon.asyncLoad @[]
     check marathon[].dataLoaded
 
@@ -105,19 +106,18 @@ block: # match
 block: # asyncMatch
   var
     rng = 123.initRand
-    marathon = Marathon.init rng
-  marathon.load @["rrgg", "rgrg", "rgbb"]
+    marathon = new Marathon
+  marathon[] = Marathon.init rng
+  marathon[].load @["rrgg", "rgrg", "rgbb"]
 
   when defined(js):
     discard marathon
       .asyncMatch("rr")
-      .then(() => (check marathon.matchQueries == @["rrgg"]))
+      .then(() => (check marathon[].matchQueries == @["rrgg"]))
       .catch((err: Error) => (check false))
   else:
-    var marathonRef = new Marathon
-    marathonRef[] = marathon
-    waitFor marathonRef.asyncMatch "rr"
-    check marathonRef[].matchQueries == @["rrgg"]
+    waitFor marathon.asyncMatch "rr"
+    check marathon[].matchQueries == @["rrgg"]
 
 # ------------------------------------------------
 # Simulator

@@ -6,9 +6,10 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
+import ../../[app]
+
 when defined(js) or defined(nimsuggest):
   import karax/[karaxdsl, vdom]
-  import ../[nazopuyowrap, simulator]
   import ../../[core]
   import ../../private/[arrayops2, assign3, math2]
   import ../../private/app/[simulator]

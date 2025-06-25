@@ -12,7 +12,7 @@
 {.experimental: "views".}
 
 when defined(js) or defined(nimsuggest):
-  import std/[jsffi, jsre, strformat, sugar]
+  import std/[jsre, strformat, sugar]
   import karax/[karax, kdom, vdom]
   import ../[assign3, utils]
   import ../../[core]

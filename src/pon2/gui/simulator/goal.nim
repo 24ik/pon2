@@ -6,10 +6,11 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
+import ../../[app]
+
 when defined(js) or defined(nimsuggest):
-  import std/[jsffi, sugar]
+  import std/[sugar]
   import karax/[karax, karaxdsl, vdom]
-  import ../[nazopuyowrap, simulator]
   import ../../[core]
   import ../../private/[utils]
 

@@ -11,9 +11,9 @@ import ./[nazopuyowrap, simulator]
 import ../[core]
 import ../private/[arrayops2, assign3, critbits2, results2, strutils2, utils]
 
-when defined(js):
-  import std/[asyncjs]
-else:
+when defined(js) or defined(nimsuggest):
+  import std/[dom]
+when not defined(js):
   import chronos
 
 type Marathon* = object ## Marathon manager.
@@ -50,18 +50,10 @@ func load*(self: var Marathon, allQueries: seq[string]) {.inline.} =
   self.critBitTree.assign allQueries.toCritBitTree2
   self.dataLoaded.assign true
 
-when defined(js):
-  proc asyncLoad*(
-      self: var Marathon, allQueries: seq[string]
-  ) {.noSideEffect, inline, async.} =
-    ## Loads steps data asynchronously.
-    # NOTE: `func` definition is not compatible with `async`
-    self.load allQueries
-
-else:
-  proc asyncLoad*(self: ref Marathon, allQueries: seq[string]) {.inline, async.} =
-    ## Loads steps data asynchronously.
-    self[].load allQueries
+proc asyncLoad*(self: ref Marathon, allQueries: seq[string]) {.inline, async.} =
+  ## Loads steps data asynchronously.
+  await sleepZeroAsync()
+  self[].load allQueries
 
 # ------------------------------------------------
 # Property
@@ -231,18 +223,11 @@ func match*(self: var Marathon, prefix: string) {.inline.} =
     for query in self.critBitTree.itemsWithPrefix prefix:
       self.matchQueries &= query
 
-when defined(js):
-  proc asyncMatch*(self: var Marathon, prefix: string) {.noSideEffect, inline, async.} =
-    ## Searches queries that have specified prefixes and sets them to the marathon
-    ## manager.
-    # NOTE: `func` definition is not compatible with `async`
-    self.match prefix
-
-else:
-  proc asyncMatch*(self: ref Marathon, prefix: string) {.inline, async.} =
-    ## Searches queries that have specified prefixes and sets them to the marathon
-    ## manager.
-    self[].match prefix
+proc asyncMatch*(self: ref Marathon, prefix: string) {.inline, async.} =
+  ## Searches for queries that have specified prefixes and sets them to the marathon
+  ## manager asynchronously.
+  await sleepZeroAsync()
+  self[].match prefix
 
 # ------------------------------------------------
 # Simulator

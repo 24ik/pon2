@@ -6,10 +6,11 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
+import ../../[app]
+
 when defined(js) or defined(nimsuggest):
   import std/[sugar]
   import karax/[karax, karaxdsl, vdom]
-  import ../[simulator]
   import ../../core/[rule] # NOTE: import `core` causes warning due to Nim's bug
 
 type SettingsView* = object ## View of the settings.

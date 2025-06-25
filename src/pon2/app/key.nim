@@ -8,7 +8,7 @@
 
 import ../private/[strutils2]
 
-when defined(js):
+when defined(js) or defined(nimsuggest):
   import std/[dom]
 
 type KeyEvent* = object ## Keyboard Event.
@@ -50,7 +50,7 @@ func init*(
 # JS backend
 # ------------------------------------------------
 
-when defined(js):
+when defined(js) or defined(nimsuggest):
   func toKeyEvent*(event: KeyboardEvent): KeyEvent {.inline.} =
     ## Returns the keyboard event converted from the `KeyboardEvent`.
     KeyEvent.init(

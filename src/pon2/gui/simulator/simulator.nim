@@ -6,11 +6,12 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
+import ../../[app]
+
 when defined(js) or defined(nimsuggest):
   import std/[jsffi]
   import karax/[karaxdsl, vdom, vstyles]
   import ./[ctrl, field, goal, msg, next, operating, palette, setting, share, step]
-  import ../[nazopuyowrap, simulator]
   import ../../[core]
 
 type SimulatorView* = object ## View of the simulator.

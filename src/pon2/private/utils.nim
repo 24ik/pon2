@@ -10,8 +10,15 @@ import std/[algorithm, sequtils, typetraits]
 import ./[assign3]
 
 when defined(js) or defined(nimsuggest):
-  import std/[asyncjs, dom, jsffi, jsre]
+  import std/[asyncjs, dom, jsffi, jsre, sugar]
   import ./[tables2]
+
+  export asyncjs, jsffi
+
+when not defined(js):
+  import chronos
+
+  export chronos
 
 func toggle*(b: var bool) {.inline.} =
   ## Toggles the bool variable.
@@ -52,12 +59,17 @@ template toSet2*(iter: untyped): untyped =
   res
 
 when defined(js) or defined(nimsuggest):
+  proc sleepAsync*(ms: int): Future[void] {.inline.} =
+    ## Sleeps asynchronously.
+    newPromise (resolve: () -> void) => (discard resolve.setTimeout ms)
+
   proc getSelectedIdx*(
     selectId: cstring
-  ): int {.importjs: "document.getElementById(#).selectedIndex".}
+  ): int {.inline, importjs: "document.getElementById(#).selectedIndex".}
     ## Returns the selected index.
 
-  proc getNavigator*(): JsObject {.importjs: "(navigator)".} ## Returns the navigator.
+  proc getNavigator*(): JsObject {.inline, importjs: "(navigator)".}
+    ## Returns the navigator.
 
   proc getClipboard*(): JsObject {.inline.} =
     ## Returns the clipboard.
@@ -65,9 +77,11 @@ when defined(js) or defined(nimsuggest):
 
   proc getElemJsObjById*(
     id: cstring
-  ): JsObject {.importjs: "document.getElementById(#)".} ## Returns the element.
+  ): JsObject {.inline, importjs: "document.getElementById(#)".} ## Returns the element.
 
-  proc createElemJsObj*(id: cstring): JsObject {.importjs: "document.createElement(#)".}
+  proc createElemJsObj*(
+    id: cstring
+  ): JsObject {.inline, importjs: "document.createElement(#)".}
     ## Creates an element and returns it.
 
   proc mobileDetected*(): bool {.inline.} =
@@ -76,10 +90,14 @@ when defined(js) or defined(nimsuggest):
 
   proc html2canvas*(
     elem: JsObject
-  ): Future[JsObject] {.async, importjs: "html2canvas(#)".}
+  ): Future[JsObject] {.inline, async, importjs: "html2canvas(#)".}
     ## Runs html2canvas and returns the canvas.
 
   proc html2canvas*(
     elem: JsObject, scale: int
-  ): Future[JsObject] {.async, importjs: "html2canvas(#, {scale: #})".}
+  ): Future[JsObject] {.inline, async, importjs: "html2canvas(#, {scale: #})".}
     ## Runs html2canvas and returns the canvas.
+
+proc sleepZeroAsync*(): Future[void] {.inline.} =
+  ## Sleeps zero sec asynchronously.
+  sleepAsync (when defined(js): 0 else: ZeroDuration)

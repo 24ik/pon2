@@ -1,46 +1,77 @@
-## This module implements IDEs.
+## This module implements the IDE.
 ##
-# TODO: this file
+when defined(js):
+  ## See also the [backend-specific documentation](./ide/web.html).
+  ##
+  discard
+else:
+  ## See also the [backend-specific documentation](./ide/native.html).
+  ##
+  discard
 
-{.push raises: [].}
+{.experimental: "inferGenericTypes".}
+{.experimental: "notnil".}
+{.experimental: "strictCaseObjects".}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
 import std/[deques, sequtils, sugar, uri]
-import ./[key, nazopuyowrap, simulator]
-import ../[core]
-import ../private/[utils]
+import ./[key, nazopuyo, simulator]
+import ../core/[field, fqdn, nazopuyo, pairposition, puyopuyo, requirement]
+import ../private/[misc]
 
 when defined(js):
-  import std/[asyncjs]
+  import std/[options]
+  import karax/[karax, kdom, vdom]
+  import ../core/[pair]
+  import ../private/[webworker]
+  import ../private/app/[solve, permute]
+  import ../private/app/ide/web/[webworker]
 else:
-  import chronos
+  {.push warning[Deprecated]: off.}
+  import std/[cpuinfo, threadpool]
+  {.pop.}
+  import nigui
+  import ./[permute, solve]
 
-type Ide* = object ## IDE for Puyo Puyo and Nazo Puyo.
-  simulator: Simulator
-  resultSimulator: Simulator
+type
+  AnswerData* = object ## Data used in the answer simulator.
+    hasData*: bool
+    pairsPositionsSeq*: seq[PairsPositions]
+    index*: Natural
 
-  progress: ref tuple[now: int, total: int]
-  focusResult: bool
+  Ide* = ref object ## Puyo Puyo & Nazo Puyo IDE.
+    simulator: Simulator
+    answerSimulator: Simulator
+
+    answerData: AnswerData
+
+    focusAnswer: bool
+    solving: bool
+    permuting: bool
+
+    progressBarData: tuple[now: Natural, total: Natural]
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
-func init*(T: type Ide, simulator: Simulator): T {.inline.} =
-  var progress = new tuple[now: int, total: int]
-  progress[] = (0, 0)
-
-  T(
+func newIde*(simulator: Simulator): Ide {.inline.} =
+  ## Returns a new IDE.
+  Ide(
     simulator: simulator,
-    resultSimulator: Simulator.init Replay,
-    progress: progress,
+    answerSimulator: initNazoPuyo[TsuField]().newSimulator View,
+    answerData: AnswerData(hasData: false, pairsPositionsSeq: @[], index: 0),
     focusAnswer: false,
+    solving: false,
+    permuting: false,
+    progressBarData: (now: 0, total: 0),
   )
 
-func init*(T: type Ide): T {.inline.} =
-  T.init Simulator.init EditorEdit
+func newIde*(): Ide {.inline.} =
+  ## Returns a new IDE.
+  initNazoPuyo[TsuField]().newSimulator(PlayEditor).newIde
 
 # ------------------------------------------------
 # Property
@@ -50,40 +81,40 @@ func simulator*(self: Ide): Simulator {.inline.} =
   ## Returns the simulator.
   self.simulator
 
-func resultSimulator*(self: Ide): Simulator {.inline.} =
-  ## Returns the result simulator.
-  self.resultSimulator
+func answerSimulator*(self: Ide): Simulator {.inline.} =
+  ## Returns the answer simulator.
+  self.answerSimulator
 
-func progress*(self: Ide): tuple[now: int, total: int] {.inline.} =
-  ## Returns the progress.
-  self.progress[]
+func answerData*(self: Ide): AnswerData {.inline.} =
+  ## Returns the data for the answer simulator.
+  self.answerData
 
-func focusResult*(self: Ide): bool {.inline.} =
-  ## Returns `true` if the result simulator is focused.
-  self.focusResult
+func focusAnswer*(self: Ide): bool {.inline.} =
+  ## Returns `true` if the answer simulator is focused.
+  self.focusAnswer
+
+func solving*(self: Ide): bool {.inline.} =
+  ## Returns `true` if a nazo puyo is being solved.
+  self.solving
+
+func permuting*(self: Ide): bool {.inline.} =
+  ## Returns `true` if a nazo puyo is being permuted.
+  self.permuting
+
+func progressBarData*(self: Ide): tuple[now: int, total: int] {.inline.} =
+  ## Returns the progress bar information.
+  self.progressBarData
 
 # ------------------------------------------------
 # Edit - Other
 # ------------------------------------------------
 
-func toggleFocus*(self: var Ide) {.inline.} =
-  ## Toggles focusing to result simulator or not.
-  self.focusResult.toggle
+proc toggleFocus*(self: Ide) {.inline.} =
+  ## Toggles focusing to answer simulator or not.
+  self.focusAnswer.toggle
 
 # ------------------------------------------------
 # Solve
-# ------------------------------------------------
-
-when defined(js):
-  proc asyncSolve*(self: ref Ide) {.inline, async.} =
-    discard
-
-else:
-  proc asyncSolve*(self: ref Ide) {.inline, async.} =
-    discard
-
-# ------------------------------------------------
-# Solve old
 # ------------------------------------------------
 
 when defined(js):
@@ -106,13 +137,14 @@ proc updateAnswerSimulator[F: TsuField or WaterField](
   else:
     self.focusAnswer = false
 
-proc solve2*(
+proc solve*(
     self: Ide,
     parallelCount: Positive =
       when defined(js):
         6
       else:
-        max(1, countProcessors()),
+        max(1, countProcessors())
+    ,
 ) {.inline.} =
   ## Solves the nazo puyo.
   if self.solving or self.permuting or self.simulator.kind != Nazo or
@@ -181,7 +213,8 @@ proc permute*(
       when defined(js):
         6
       else:
-        max(1, countProcessors()),
+        max(1, countProcessors())
+    ,
 ) {.inline.} =
   ## Permutes the nazo puyo.
   if self.solving or self.permuting or self.simulator.kind != Nazo or

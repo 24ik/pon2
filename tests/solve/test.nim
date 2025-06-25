@@ -571,3 +571,28 @@ rr|
 rb|""".tsuSolve(
       false
     ) <= toAnswers("1N", "5N54", "6N54")
+
+  block: # with spawn
+    check """
+13連鎖するべし
+======
+......
+......
+......
+.....r
+.o..gg
+gg..bg
+bbr.rr
+byrrbr
+gyybby
+gbrggg
+gybyby
+byybyy
+bggybb
+------
+yy|
+gg|
+yy|
+bg|
+yg|""".tsuSolve ==
+      "23344N2121".toAnswers
