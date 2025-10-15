@@ -4,3 +4,4 @@ import ./pon2/core
 # TODO: web workerは別ファイルにしなくてもいい可能性あり？ 参考：https://jsfiddle.net/Ma4YT/2/
 # TODO: importjs with inline
 # TODO: PuyoPuyo[R: static Rule] = object: when R == Tsu: xxx else: xxx などが可能らしい
+# TODO: cligen検討
