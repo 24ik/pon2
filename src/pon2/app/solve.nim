@@ -1021,13 +1021,3 @@ when defined(js) or defined(nimsuggest):
     answers &= answersSeq.concat
 
     answers
-
-when not defined(js):
-  proc solveAsync*[F: TsuField or WaterField](
-      nazo: NazoPuyo[F],
-      progress: ref tuple[now: int, total: int],
-      calcAllAnswers: static bool = true,
-  ): Future[seq[SolveAnswer]] {.inline, async.} =
-    ## Solves the Nazo Puyo asynchronously with multiple threads.
-    ## This function requires that the field is settled.
-    discard # TODO: implementation
