@@ -119,7 +119,7 @@ when isMainModule:
 .o.oo.
 .o.oo.
 .o.oo.
-.o.oo.""".parseTsuField.expect
+.o.oo.""".parseTsuField.unsafeValue
 
     "invalidPlacements".measureExecTime:
       discard field.invalidPlacements
@@ -176,7 +176,7 @@ gybgbb
 rgybgy
 rgybgy
 rgybgy"""
-      ).expect
+      ).unsafeValue
       pair = BlueGreen
       plcmt = Up2
 
@@ -208,7 +208,7 @@ bgrbrg
 bgrbrp
 rgrbrp
 pbgrbr"""
-      ).expect
+      ).unsafeValue
       pair = GreenBlue
       plcmt = Up0
 
@@ -247,7 +247,7 @@ by|
 by|
 rg|
 ry|"""
-    ).expect
+    ).unsafeValue
   do:
     discard nazo.solve
 
@@ -278,6 +278,6 @@ yb|
 yr|
 gr|
 gb|"""
-    ).expect
+    ).unsafeValue
   do:
     discard nazo.solve
