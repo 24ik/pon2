@@ -5,3 +5,4 @@ import ./pon2/core
 # TODO: importjs with inline
 # TODO: PuyoPuyo[R: static Rule] = object: when R == Tsu: xxx else: xxx などが可能らしい
 # TODO: cligen検討
+# TODO: async permute

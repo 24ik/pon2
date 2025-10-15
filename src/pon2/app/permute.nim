@@ -114,5 +114,3 @@ iterator permute*[F: TsuField or WaterField](
           step.optPlacement = answers[0][stepIdx]
 
       yield nazo2
-
-# TODO: async
