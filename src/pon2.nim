@@ -6,3 +6,4 @@ import ./pon2/core
 # TODO: PuyoPuyo[R: static Rule] = object: when R == Tsu: xxx else: xxx などが可能らしい
 # TODO: cligen検討
 # TODO: async-solve, async-permuteを実装して，ideの機能もasyncにする
+# ただし，可能ならideでのそれらの機能だけasyncにして，async-solveとかは用意しない方向

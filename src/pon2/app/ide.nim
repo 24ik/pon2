@@ -1,307 +1,216 @@
 ## This module implements IDEs.
 ##
-# TODO: this file
 
 {.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[deques, sequtils, sugar, uri]
-import ./[key, nazopuyowrap, simulator]
+import std/[deques, sequtils, sugar]
+import ./[key, nazopuyowrap, permute, simulator, solve]
 import ../[core]
-import ../private/[utils]
+import ../private/[assign3, utils]
 
 when defined(js):
   import std/[asyncjs]
 else:
   import chronos
 
-type Ide* = object ## IDE for Puyo Puyo and Nazo Puyo.
-  simulator: Simulator
-  resultSimulator: Simulator
+type
+  IdeReplayData* = object ## Data for the replay simulator.
+    stepsSeq: seq[Steps]
+    stepsIdx: int
 
-  progress: ref tuple[now: int, total: int]
-  focusResult: bool
+  Ide* = object ## IDE for Puyo Puyo and Nazo Puyo.
+    simulator: Simulator
+    replaySimulator: Simulator
+
+    focusReplay: bool
+
+    working: bool
+    replayData: IdeReplayData
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
 func init*(T: type Ide, simulator: Simulator): T {.inline.} =
-  var progress = new tuple[now: int, total: int]
-  progress[] = (0, 0)
-
   T(
     simulator: simulator,
-    resultSimulator: Simulator.init Replay,
-    progress: progress,
-    focusAnswer: false,
+    replaySimulator: Simulator.init Replay,
+    focusReplay: false,
+    working: false,
+    replayData: IdeReplayData(stepsSeq: @[], stepsIdx: 0),
   )
 
 func init*(T: type Ide): T {.inline.} =
   T.init Simulator.init EditorEdit
 
 # ------------------------------------------------
-# Property
+# Property - Getter
 # ------------------------------------------------
 
 func simulator*(self: Ide): Simulator {.inline.} =
   ## Returns the simulator.
   self.simulator
 
-func resultSimulator*(self: Ide): Simulator {.inline.} =
-  ## Returns the result simulator.
-  self.resultSimulator
+func replaySimulator*(self: Ide): Simulator {.inline.} =
+  ## Returns the replay simulator.
+  self.replaySimulator
 
-func progress*(self: Ide): tuple[now: int, total: int] {.inline.} =
-  ## Returns the progress.
-  self.progress[]
-
-func focusResult*(self: Ide): bool {.inline.} =
-  ## Returns `true` if the result simulator is focused.
-  self.focusResult
+func focusReplay*(self: Ide): bool {.inline.} =
+  ## Returns `true` if the replay simulator is focused.
+  self.focusReplay
 
 # ------------------------------------------------
 # Edit - Other
 # ------------------------------------------------
 
 func toggleFocus*(self: var Ide) {.inline.} =
-  ## Toggles focusing to result simulator or not.
-  self.focusResult.toggle
+  ## Toggles focusing to replay simulator or not.
+  if self.simulator.mode in EditorModes:
+    self.focusReplay.toggle
+
+# ------------------------------------------------
+# Replay
+# ------------------------------------------------
+
+proc nextReplay*(self: var Ide) {.inline.} =
+  ## Shows the next answer.
+  if self.simulator.mode notin EditorModes or self.replayData.stepsSeq.len == 0:
+    return
+
+  if self.replayData.stepsIdx == self.replayData.stepsSeq.len.pred:
+    self.replayData.stepsIdx.assign 0
+  else:
+    self.replayData.stepsIdx.inc
+
+  self.replaySimulator.reset
+  runIt self.replaySimulator.nazoPuyoWrap:
+    var nazo = itNazo
+    nazo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIdx]
+
+    self.replaySimulator.assign Simulator.init(nazo, Replay)
+
+proc prevReplay*(self: var Ide) {.inline.} =
+  ## Shows the previous answer.
+  if self.simulator.mode notin EditorModes or self.replayData.stepsSeq.len == 0:
+    return
+
+  if self.replayData.stepsIdx == 0:
+    self.replayData.stepsIdx.assign self.replayData.stepsSeq.len.pred
+  else:
+    self.replayData.stepsIdx.dec
+
+  self.replaySimulator.reset
+  runIt self.replaySimulator.nazoPuyoWrap:
+    var nazo = itNazo
+    nazo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIdx]
+
+    self.replaySimulator.assign Simulator.init(nazo, Replay)
 
 # ------------------------------------------------
 # Solve
 # ------------------------------------------------
 
-when defined(js):
-  proc asyncSolve*(self: ref Ide) {.inline, async.} =
-    discard
-
-else:
-  proc asyncSolve*(self: ref Ide) {.inline, async.} =
-    discard
-
-# ------------------------------------------------
-# Solve old
-# ------------------------------------------------
-
-when defined(js):
-  const ResultMonitorIntervalMs = 100
-
-proc updateAnswerSimulator[F: TsuField or WaterField](
-    self: Ide, nazo: NazoPuyo[F]
+func workPostProcess[F: TsuField or WaterField](
+    self: var Ide, nazo: NazoPuyo[F]
 ) {.inline.} =
-  ## Updates the answer simulator.
-  ## This function is assumed to be called after `self.answerData.pairsPositionsSeq` is set.
-  assert self.answerData.hasData
-
-  if self.answerData.pairsPositionsSeq.len > 0:
-    self.focusAnswer = true
-    self.answerData.index = 0
+  ## Updates the replay simulator.
+  if self.replayData.stepsSeq.len > 0:
+    self.focusReplay.assign true
+    self.replayData.stepsIdx.assign 0
 
     var nazo2 = nazo
-    nazo2.puyoPuyo.pairsPositions = self.answerData.pairsPositionsSeq[0]
-    self.answerSimulator = nazo2.newSimulator self.answerSimulator.mode
+    nazo2.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIdx]
+    self.replaySimulator.assign Simulator.init(nazo2, Replay)
   else:
-    self.focusAnswer = false
+    self.focusReplay.assign false
 
-proc solve2*(
-    self: Ide,
-    parallelCount: Positive =
-      when defined(js):
-        6
-      else:
-        max(1, countProcessors()),
-) {.inline.} =
+proc solve*(self: var Ide) {.inline.} =
   ## Solves the nazo puyo.
-  if self.solving or self.permuting or self.simulator.kind != Nazo or
-      self.simulator.state != Stable:
+  if self.working or self.simulator.mode notin EditorModes or
+      self.simulator.nazoPuyoWrap.optGoal.isErr or
+      self.simulator.state notin {Stable, AfterEdit}:
     return
-  self.simulator.nazoPuyoWrap.get:
-    if wrappedNazoPuyo.moveCount == 0:
+  runIt self.simulator.nazoPuyoWrap:
+    if it.steps.len == 0:
       return
 
-  self.solving = true
+  self.working.assign true
+  self.replayData.stepsSeq.setLen 0
 
-  self.simulator.nazoPuyoWrap.get:
-    when defined(js):
-      let results = new seq[seq[SolveAnswer]]
-      wrappedNazoPuyo.asyncSolve(results, parallelCount = parallelCount)
+  runIt self.simulator.nazoPuyoWrap:
+    let
+      answers = itNazo.solve
+      stepsSeq = collect:
+        for ans in answers:
+          var steps = it.steps
+          for stepIdx, optPlcmt in ans:
+            if steps[stepIdx].kind == PairPlacement:
+              steps[stepIdx].optPlacement.assign optPlcmt
 
-      self.progressBarData.total =
-        if wrappedNazoPuyo.puyoPuyo.pairsPositions.peekFirst.pair.isDouble:
-          wrappedNazoPuyo.puyoPuyo.field.validDoublePositions.card
-        else:
-          wrappedNazoPuyo.puyoPuyo.field.validPositions.card
-      self.progressBarData.now = 0
+          steps
 
-      var interval: Interval
-      proc showAnswer() =
-        let oldBarCount = self.progressBarData.now
-        self.progressBarData.now = results[].len
+    self.replayData.stepsSeq.assign stepsSeq
+    self.workPostProcess itNazo
 
-        if results[].len == self.progressBarData.total:
-          self.progressBarData.total = 0
-          self.answerData.hasData = true
-          self.answerData.pairsPositionsSeq = collect:
-            for answer in results[].concat:
-              var pairsPositions = wrappedNazoPuyo.puyoPuyo.pairsPositions
-              pairsPositions.positions = answer
-              pairsPositions
-          self.updateAnswerSimulator wrappedNazoPuyo
-          self.solving = false
-          interval.clearInterval
-
-        if self.progressBarData.now != oldBarCount and not kxi.surpressRedraws:
-          kxi.redraw
-
-      interval = showAnswer.setInterval ResultMonitorIntervalMs
-    else:
-      # FIXME: make asynchronous, redraw
-      self.answerData.hasData = true
-      self.answerData.pairsPositionsSeq = collect:
-        for answer in wrappedNazoPuyo.solve(parallelCount = parallelCount):
-          var pairsPositions = wrappedNazoPuyo.puyoPuyo.pairsPositions
-          pairsPositions.positions = answer
-          pairsPositions
-      self.updateAnswerSimulator wrappedNazoPuyo
-      self.solving = false
+  self.working.assign false
 
 # ------------------------------------------------
 # Permute
 # ------------------------------------------------
 
 proc permute*(
-    self: Ide,
-    fixMoves: seq[Positive],
-    allowDouble: bool,
-    allowLastDouble: bool,
-    parallelCount =
-      when defined(js):
-        6
-      else:
-        max(1, countProcessors()),
+    self: var Ide, fixIndices: openArray[int], allowDblNotLast, allowDblLast: bool
 ) {.inline.} =
   ## Permutes the nazo puyo.
-  if self.solving or self.permuting or self.simulator.kind != Nazo or
-      self.simulator.state != Stable:
+  if self.working or self.simulator.mode notin EditorModes or
+      self.simulator.nazoPuyoWrap.optGoal.isErr or
+      self.simulator.state notin {Stable, AfterEdit}:
     return
-  self.simulator.nazoPuyoWrap.get:
-    if wrappedNazoPuyo.moveCount == 0:
+  runIt self.simulator.nazoPuyoWrap:
+    if it.steps.len == 0:
       return
 
-  self.permuting = true
+  self.working.assign true
+  self.replayData.stepsSeq.setLen 0
 
-  self.simulator.nazoPuyoWrap.get:
-    when defined(js):
-      let
-        results = new seq[Option[PairsPositions]]
-        pairsPositionsSeq =
-          wrappedNazoPuyo.allPairsPositionsSeq(fixMoves, allowDouble, allowLastDouble)
-      wrappedNazoPuyo.asyncPermute(
-        results, pairsPositionsSeq, fixMoves, allowDouble, allowLastDouble,
-        parallelCount,
-      )
+  runIt self.simulator.nazoPuyoWrap:
+    for nazo in itNazo.permute(fixIndices, allowDblNotLast, allowDblLast):
+      self.replayData.stepsSeq.add nazo.puyoPuyo.steps
 
-      self.progressBarData.total = pairsPositionsSeq.len
-      self.progressBarData.now = 0
+    self.workPostProcess itNazo
 
-      var interval: Interval
-      proc showAnswer() =
-        let oldBarCount = self.progressBarData.now
-        self.progressBarData.now = results[].len
-
-        if results[].len == pairsPositionsSeq.len:
-          self.progressBarData.total = 0
-          self.answerData.hasData = true
-          self.answerData.pairsPositionsSeq = results[].filterIt(it.isSome).mapIt it.get
-          self.updateAnswerSimulator wrappedNazoPuyo
-          self.permuting = false
-          interval.clearInterval
-
-        if self.progressBarData.now != oldBarCount and not kxi.surpressRedraws:
-          kxi.redraw
-
-      interval = showAnswer.setInterval ResultMonitorIntervalMs
-    else:
-      # FIXME: make asynchronous, redraw
-      self.answerData.pairsPositionsSeq =
-        wrappedNazoPuyo.permute(fixMoves, allowDouble, allowLastDouble).toSeq
-      self.updateAnswerSimulator wrappedNazoPuyo
-      self.permuting = false
+  self.working.assign false
 
 # ------------------------------------------------
-# Answer
+# Keyboard
 # ------------------------------------------------
 
-proc nextAnswer*(self: Ide) {.inline.} =
-  ## Shows the next answer.
-  if not self.answerData.hasData or self.answerData.pairsPositionsSeq.len == 0:
-    return
-
-  if self.answerData.index == self.answerData.pairsPositionsSeq.len.pred:
-    self.answerData.index = 0
-  else:
-    self.answerData.index.inc
-
-  self.answerSimulator.reset
-  self.answerSimulator.pairsPositions =
-    self.answerData.pairsPositionsSeq[self.answerData.index]
-
-proc prevAnswer*(self: Ide) {.inline.} =
-  ## Shows the previous answer.
-  if not self.answerData.hasData or self.answerData.pairsPositionsSeq.len == 0:
-    return
-
-  if self.answerData.index == 0:
-    self.answerData.index = self.answerData.pairsPositionsSeq.len.pred
-  else:
-    self.answerData.index.dec
-
-  self.answerSimulator.reset
-  self.answerSimulator.pairsPositions =
-    self.answerData.pairsPositionsSeq[self.answerData.index]
-
-# ------------------------------------------------
-# IDE <-> URI
-# ------------------------------------------------
-
-func toUri*(self: Ide, withPositions = true, fqdn = Pon2): Uri {.inline.} =
-  ## Returns the URI converted from the IDE.
-  self.simulator.toUri(withPositions, fqdn)
-
-proc parseIde*(uri: Uri): Ide {.inline.} =
-  ## Returns the IDE converted from the URI.
-  ## If the URI is invalid, `ValueError` is raised.
-  uri.parseSimulator.newIde
-
-# ------------------------------------------------
-# Keyboard Operation
-# ------------------------------------------------
-
-proc operate*(self: Ide, event: KeyEvent): bool {.inline.} =
-  ## Does operation specified by the keyboard input.
-  ## Returns `true` if any action is executed.
-  if self.simulator.mode in {PlayEditor, Edit}:
-    if event == initKeyEvent("Tab", shift = true):
+proc operate*(self: var Ide, key: KeyEvent): bool {.inline, discardable.} =
+  ## Performs an action specified by the key.
+  ## Returns `true` if the key is catched.
+  if self.simulator.mode in EditorModes:
+    # focus
+    if key == static(KeyEvent.init("Tab", shift = true)):
       self.toggleFocus
       return true
 
-    if self.focusAnswer:
-      # move answer
-      if event == initKeyEvent("KeyA"):
-        self.prevAnswer
-        return true
-      if event == initKeyEvent("KeyD"):
-        self.nextAnswer
-        return true
-
-      return self.answerSimulator.operate event
-
     # solve
-    if event == initKeyEvent("Enter"):
+    if key == static(KeyEvent.init "Enter"):
       self.solve
       return true
 
-  return self.simulator.operate event
+    if self.focusReplay:
+      # next/prev replay
+      if key == static(KeyEvent.init 'a'):
+        self.prevReplay
+        return true
+      if key == static(KeyEvent.init 'd'):
+        self.nextReplay
+        return true
+
+      return self.replaySimulator.operate key
+
+  return self.simulator.operate key

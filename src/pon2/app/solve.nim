@@ -928,7 +928,7 @@ when defined(js) or defined(nimsuggest):
 
       var ans = newSeqOfCap[OptPlacement](str.len div 2)
       for charIdx in countup(0, str.len.pred, 2):
-        let optPlcmtRes = str.subStr(charIdx, charIdx.succ).parseOptPlacement
+        let optPlcmtRes = str.substr(charIdx, charIdx.succ).parseOptPlacement
         if optPlcmtRes.isOk:
           ans.add optPlcmtRes.unsafeValue
 
