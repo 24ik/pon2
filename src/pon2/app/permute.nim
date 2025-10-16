@@ -111,6 +111,6 @@ iterator permute*[F: TsuField or WaterField](
     if answers.len == 1:
       for stepIdx, step in nazo2.puyoPuyo.steps.mpairs:
         if step.kind == PairPlacement:
-          step.optPlacement = answers[0][stepIdx]
+          step.optPlacement.assign answers[0][stepIdx]
 
       yield nazo2
