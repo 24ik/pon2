@@ -2,7 +2,6 @@
 ## [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 ##
 ## Submodule Documentations:
-## - [color](./app/color.html)
 ## - [generate](./app/generate.html)
 ## - [ide](./app/ide.html)
 ## - [key](./app/key.html)
@@ -23,7 +22,6 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import
-  ./app/[color, generate, ide, key, marathon, nazopuyowrap, permute, simulator, solve]
+import ./app/[generate, ide, key, marathon, nazopuyowrap, permute, simulator, solve]
 
-export color, generate, ide, key, marathon, nazopuyowrap, permute, simulator, solve
+export generate, ide, key, marathon, nazopuyowrap, permute, simulator, solve
