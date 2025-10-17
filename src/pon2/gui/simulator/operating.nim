@@ -11,7 +11,7 @@ import ../../[app]
 when defined(js) or defined(nimsuggest):
   import karax/[karaxdsl, vdom]
   import ../../[core]
-  import ../../private/app/[simulator]
+  import ../../private/gui/[simulator]
 
 type OperatingView* = object ## View of the operating.
   simulator: ref Simulator

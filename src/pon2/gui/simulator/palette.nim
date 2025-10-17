@@ -12,7 +12,7 @@ when defined(js) or defined(nimsuggest):
   import std/[sugar]
   import karax/[karax, karaxdsl, vdom, vstyles]
   import ../../[core]
-  import ../../private/app/[simulator]
+  import ../../private/gui/[simulator]
 
 type PaletteView* = object ## View of the palette.
   simulator: ref Simulator
