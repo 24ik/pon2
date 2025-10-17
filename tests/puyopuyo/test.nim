@@ -37,7 +37,8 @@ block: # init
 
 block: # cellCnt, puyoCnt, colorPuyoCnt, garbagesCnt
   let
-    fieldT = """
+    fieldT =
+      """
 rgo...
 .go...
 ..o...
@@ -50,8 +51,9 @@ rgo...
 ......
 ......
 ......
-......""".parseTsuField.expect "Invalid field"
-    fieldW = """
+......""".parseTsuField.unsafeValue
+    fieldW =
+      """
 ......
 ......
 ......
@@ -65,7 +67,7 @@ rgo...
 ....hh
 .....p
 .....p
-.....p""".parseWaterField.expect "Invalid field"
+.....p""".parseWaterField.unsafeValue
     steps = [
       Step.init(RedGreen),
       Step.init(BlueBlue, Down3),
@@ -96,7 +98,8 @@ block: # move
   let
     stepsBefore = [Step.init(BlueGreen, Right1)].toDeque2
     stepsAfter = Deque[Step].init
-    fieldBefore = """
+    fieldBefore =
+      """
 ......
 ......
 ......
@@ -109,8 +112,9 @@ block: # move
 .b....
 .b....
 .bgrr.
-hggoo.""".parseTsuField.expect "Invalid field"
-    fieldAfter = """
+hggoo.""".parseTsuField.unsafeValue
+    fieldAfter =
+      """
 ......
 ......
 ......
@@ -123,7 +127,7 @@ hggoo.""".parseTsuField.expect "Invalid field"
 ......
 ......
 ....r.
-o..ro.""".parseTsuField.expect "Invalid field"
+o..ro.""".parseTsuField.unsafeValue
   var puyoPuyo = PuyoPuyo[TsuField].init(fieldBefore, stepsBefore)
 
   let
@@ -167,7 +171,7 @@ by|
 rg|23
 [3,0,0,0,4,0]
 pp|4N"""
-      puyoPuyo = parsePuyoPuyo[TsuField](str).expect "Invalid PuyoPuyo"
+      puyoPuyo = parsePuyoPuyo[TsuField](str).unsafeValue
 
     check $puyoPuyo == str
 
@@ -190,7 +194,7 @@ r.....
 ......
 ------
 """
-      puyoPuyo = parsePuyoPuyo[TsuField](str).expect "Invalid PuyoPuyo"
+      puyoPuyo = parsePuyoPuyo[TsuField](str).unsafeValue
 
     check $puyoPuyo == str
 
@@ -220,7 +224,7 @@ block: # toUriQuery, parsePuyoPuyo
 by|
 (0,1,0,0,0,1)
 rg|23"""
-      puyoPuyo = parsePuyoPuyo[TsuField](str).expect "Invalid PuyoPuyo"
+      puyoPuyo = parsePuyoPuyo[TsuField](str).unsafeValue
 
       queryPon2 = "field=t_op......yg....b.r&steps=byo0_1_0_0_0_1org23"
       queryIshikawa = "6E004g031_E1ahce"
@@ -254,7 +258,7 @@ rg|23"""
 .....r
 ------
 """
-      puyoPuyo = parsePuyoPuyo[TsuField](str).expect "Invalid PuyoPuyo"
+      puyoPuyo = parsePuyoPuyo[TsuField](str).unsafeValue
 
       queryPon2 = "field=t_r&steps"
       queryPon22 = "field=t_r&steps="

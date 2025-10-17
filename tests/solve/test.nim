@@ -14,7 +14,7 @@ func toOptPlcmt(str: string): OptPlacement =
   if str == NonePlcmtStr:
     NonePlacement
   else:
-    OptPlacement.ok str.parsePlacement.expect "Invalid placement"
+    OptPlacement.ok str.parsePlacement.unsafeValue
 
 func toAnswers(strs: varargs[string]): HashSet[SolveAnswer] =
   ## Returns the answers converted from the string representation.
@@ -29,17 +29,11 @@ func toAnswers(strs: varargs[string]): HashSet[SolveAnswer] =
 
 proc tsuSolve(str: string, calcAllAnswers: static bool = true): HashSet[SolveAnswer] =
   ## Returns the answers of Tsu Nazo Puyo.
-
-  parseNazoPuyo[TsuField](str)
-  .expect("Invalid NazoPuyo")
-  .solve(calcAllAnswers).toHashSet
+  parseNazoPuyo[TsuField](str).unsafeValue.solve(calcAllAnswers).toHashSet
 
 proc waterSolve(str: string, calcAllAnswers: static bool = true): HashSet[SolveAnswer] =
   ## Returns the answers of Water Nazo Puyo.
-
-  parseNazoPuyo[WaterField](str)
-  .expect("Invalid NazoPuyo")
-  .solve(calcAllAnswers).toHashSet
+  parseNazoPuyo[WaterField](str).unsafeValue.solve(calcAllAnswers).toHashSet
 
 block: # solve
   block: # Clear

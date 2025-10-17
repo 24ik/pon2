@@ -104,7 +104,7 @@ block: # `mode=`
 rb|
 (0,0,0,0,0,1)
 py|"""
-  ).expect "Invalid Nazo Puyo"
+  ).unsafeValue
 
   block: # from ViewerPlay
     let field0 = nazo.puyoPuyo.field
@@ -184,7 +184,7 @@ block: # moveCursorUp, moveCursorDown, moveCursorRight, moveCursorLeft
 rb|
 (0,0,0,0,0,1)
 py|"""
-  ).expect "Invalid Nazo Puyo"
+  ).unsafeValue
   var sim = Simulator.init(nazo, EditorEdit)
 
   sim.moveCursorUp
@@ -242,7 +242,7 @@ block: # deleteStep
 rb|3N
 (0,0,0,0,0,1)
 py|"""
-  ).expect "Invalid Nazo Puyo"
+  ).unsafeValue
   var
     steps = nazo.puyoPuyo.steps
     sim = Simulator.init(nazo, EditorEdit)
@@ -287,7 +287,7 @@ block: # writeCell
 rb|3N
 (0,0,0,0,0,1)
 py|"""
-  ).expect "Invalid Nazo Puyo"
+  ).unsafeValue
   var
     field = nazo.puyoPuyo.field
     steps = nazo.puyoPuyo.steps
@@ -384,7 +384,7 @@ block: # shiftFieldUp, shiftFieldDown, shiftFieldRight, shiftFieldLeft
 ------
 rg|
 (0,1,2,3,4,5)"""
-  ).expect "Invalid Nazo Puyo"
+  ).unsafeValue
   var
     field = nazo.puyoPuyo.field
     steps = nazo.puyoPuyo.steps
@@ -807,7 +807,7 @@ block: # operate
 rg|1N
 by|
 pp|23"""
-  ).expect "Invalid Nazo Puyo"
+  ).unsafeValue
   var
     sim1 = Simulator.init nazo
     sim2 = Simulator.init nazo
@@ -1108,7 +1108,7 @@ block: # toUri, parseSimulator
 rb|1N
 pp|
 gy|23"""
-    ).expect "Invalid Nazo Puyo"
+    ).unsafeValue
 
     check Simulator.init(nazo).toUri(clearPlacements = true) ==
       Res[Uri].ok "https://24ik.github.io/pon2/?field=t_b..&steps=rbppgy&goal=5__6".parseUri
@@ -1163,7 +1163,7 @@ block: # toExportUri
 ......
 ------
 rb|"""
-    ).expect "Invalid Nazo Puyo"
+    ).unsafeValue
 
     var sim = Simulator.init nazo
     sim.rotatePlacementRight

@@ -4,7 +4,6 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2/app/[color]
 import ../../src/pon2/gui/[color]
 
 # ------------------------------------------------

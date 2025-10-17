@@ -73,7 +73,7 @@ yy.bbb
 ------
 by|
 by|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
 
     check nazo.mark2(Left3, Down2) == Accept
     check nazo.mark2(OptPlacement.ok Left3, NonePlacement) == WrongAnswer
@@ -99,7 +99,7 @@ by|"""
 ------
 bg|
 rg|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
 
     check nazo.mark2(Down2, Left5) == Accept
     check nazo.mark2(Left3, Left5) == WrongAnswer
@@ -125,7 +125,7 @@ rg|"""
 ------
 bg|
 rg|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
 
     check nazo.mark2(Down2, Left5) == Accept
     check nazo.mark2(Left3, Left5) == WrongAnswer
@@ -151,7 +151,7 @@ ooobbb
 ------
 yy|
 yg|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
 
     check nazo.mark2(Up0, Down1) == Accept
     check nazo.mark2(Right3, Down3) == WrongAnswer
@@ -177,7 +177,7 @@ ooobbb
 ------
 yy|
 yg|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
 
     check nazo.mark2(Up0, Down1) == Accept
     check nazo.mark2(Right3, Down3) == WrongAnswer
@@ -204,7 +204,7 @@ rpor..
 ------
 ry|
 rp|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
 
     check nazo.mark2(Left2, Down1) == Accept
     check nazo.mark2(Down2, Down1) == WrongAnswer
@@ -231,7 +231,7 @@ rpor..
 ------
 ry|
 rp|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
 
     check nazo.mark2(Left2, Down1) == Accept
     check nazo.mark2(Down2, Down1) == WrongAnswer
@@ -258,7 +258,7 @@ rp|"""
 by|
 by|
 by|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
 
     check nazo.mark2(Up1, Left2, Up4) == Accept
     check nazo.mark2(Down3, Up3, Left4) == WrongAnswer
@@ -285,7 +285,7 @@ by|"""
 by|
 by|
 by|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
 
     check nazo.mark2(Up1, Left2, Up4) == Accept
     check nazo.mark2(Down3, Up3, Left4) == WrongAnswer
@@ -311,7 +311,7 @@ by|"""
 ------
 gp|
 gp|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
     check nazo.mark2(Left5, Down5) == Accept
     check nazo.mark2(Down5, Up4) == WrongAnswer
 
@@ -336,7 +336,7 @@ gp|"""
 ------
 gp|
 gp|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
     check nazo.mark2(Left5, Down5) == Accept
     check nazo.mark2(Down5, Up4) == WrongAnswer
 
@@ -361,7 +361,7 @@ rrgbb.
 ------
 rb|
 rg|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
     check nazo.mark2(Down2, Left2) == Accept
     check nazo.mark2(Down5, Down1) == WrongAnswer
 
@@ -386,7 +386,7 @@ rrgbb.
 ------
 rb|
 rg|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
     check nazo.mark2(Down2, Left2) == Accept
     check nazo.mark2(Down5, Down1) == WrongAnswer
 
@@ -411,7 +411,7 @@ yyryy.
 ------
 ry|
 ry|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
     check nazo.mark2(Down3, Left2) == Accept
     check nazo.mark2(Up2, Down3) == WrongAnswer
 
@@ -436,7 +436,7 @@ yyryy.
 ------
 ry|
 ry|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
     check nazo.mark2(Down3, Left2) == Accept
     check nazo.mark2(Up2, Down3) == WrongAnswer
 
@@ -461,7 +461,7 @@ gggbr.
 ------
 gg|
 bg|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
     check nazo.mark2(Up3, Left4) == Accept
     check nazo.mark2(Up1, Left2) == WrongAnswer
 
@@ -486,7 +486,7 @@ gggbr.
 ------
 gg|
 bg|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
     check nazo.mark2(Up3, Left4) == Accept
     check nazo.mark2(Up1, Left2) == WrongAnswer
 
@@ -511,7 +511,7 @@ bg|"""
 ------
 rg|
 by|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
 
     check nazo.mark2(Up2) == Dead
     check nazo.mark2(Up5) == InvalidMove
@@ -538,7 +538,7 @@ yyryy.
 ------
 ry|
 ry|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
 
     check nazo.mark2(NonePlacement) == NotSupport
 
@@ -562,7 +562,7 @@ ry|"""
 ......
 ------
 rr|"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
 
     check nazo.mark2(Down1) == WrongAnswer
 
@@ -586,7 +586,7 @@ rr|"""
 rrr...
 ------
 """
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
 
     check nazo.mark2 == WrongAnswer
 
@@ -611,7 +611,7 @@ yy.bbb
 ------
 by|43
 by|3S"""
-    ).expect "Invalid NazoPuyo"
+    ).unsafeValue
 
     check nazo.mark(-1) == Accept
     check nazo.mark(0) == WrongAnswer
@@ -648,7 +648,7 @@ rg|23
 [3,0,0,0,4,0]
 pp|4N"""
 
-    nazoPuyo = parseNazoPuyo[TsuField](str).expect "Invalid NazoPuyo"
+    nazoPuyo = parseNazoPuyo[TsuField](str).unsafeValue
 
   check $nazoPuyo == str
 
@@ -680,7 +680,7 @@ block: # toUriQuery, parseNazoPuyo
 by|
 (0,1,0,0,0,1)
 rg|23"""
-      nazoPuyo = parseNazoPuyo[TsuField](str).expect "Invalid NazoPuyo"
+      nazoPuyo = parseNazoPuyo[TsuField](str).unsafeValue
 
       queryPon2 = "field=t_op......yg....b.r&steps=byo0_1_0_0_0_1org23&goal=5__2"
       queryIshikawa = "6E004g031_E1ahce__u02"
@@ -716,7 +716,7 @@ rg|23"""
 g.....
 ------
 """
-      nazoPuyo = parseNazoPuyo[TsuField](str).expect "Invalid NazoPuyo"
+      nazoPuyo = parseNazoPuyo[TsuField](str).unsafeValue
 
       queryPon2 = "field=t_g.....&steps&goal=0_1_"
       queryIshikawa = "g00___210"
@@ -752,7 +752,7 @@ g.....
 ......
 ------
 """
-      nazoPuyo = parseNazoPuyo[TsuField](str).expect "Invalid NazoPuyo"
+      nazoPuyo = parseNazoPuyo[TsuField](str).unsafeValue
 
       queryPon2 = "field=t_&steps&goal=9__3"
       queryIshikawa = "___E03"

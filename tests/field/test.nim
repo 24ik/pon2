@@ -23,11 +23,11 @@ proc toBinField(str: string): BinField =
 
 func toTsuField(str: string): TsuField =
   ## Returns the Tsu field converted from the string representation.
-  str.parseTsuField.expect "Invalid TsuField"
+  str.parseTsuField.unsafeValue
 
 func toWaterField(str: string): WaterField =
   ## Returns the Water field converted from the string representation.
-  str.parseWaterField.expect "Invalid WaterField"
+  str.parseWaterField.unsafeValue
 
 # ------------------------------------------------
 # Constructor
@@ -2123,8 +2123,8 @@ r.....
     check queryWRes == Res[string].ok "w_r.....~.g......b......y......p......o....h"
 
     let
-      queryT = queryTRes.expect "Invalid query"
-      queryW = queryWRes.expect "Invalid query"
+      queryT = queryTRes.unsafeValue
+      queryW = queryWRes.unsafeValue
 
     check queryT.parseTsuField(Pon2) == Res[TsuField].ok fieldT
     check queryW.parseWaterField(Pon2) == Res[WaterField].ok fieldW
@@ -2141,7 +2141,7 @@ r.....
       check queryTRes == Res[string].ok "~1.02.003.0004.00005.00000600009."
       check queryWRes.isErr
 
-      let queryT = queryTRes.expect "Invalid query"
+      let queryT = queryTRes.unsafeValue
 
       check queryT.parseTsuField(fqdn) == Res[TsuField].ok fieldT
 
@@ -2167,8 +2167,7 @@ r.....
     for fqdn in [Ishikawa, Ips]:
       let queryRes = field.toUriQuery(fqdn)
       check queryRes == Res[string].ok "10g"
-      check queryRes.expect("Invalid query").parseTsuField(fqdn) ==
-        Res[TsuField].ok field
+      check queryRes.unsafeValue.parseTsuField(fqdn) == Res[TsuField].ok field
 
   block: # empty field
     check TsuField.init.toUriQuery(Pon2) == Res[string].ok "t_"
