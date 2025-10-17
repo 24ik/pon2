@@ -11,19 +11,16 @@ import ./[key, nazopuyowrap, permute, simulator, solve]
 import ../[core]
 import ../private/[assign3, utils]
 
-when defined(js):
-  import std/[asyncjs]
-else:
-  import chronos
-
 type
   IdeReplayData* = object ## Data for the replay simulator.
     stepsSeq: seq[Steps]
     stepsIdx: int
 
-  Ide* = object ## IDE for Puyo Puyo and Nazo Puyo.
-    simulator: Simulator
-    replaySimulator: Simulator
+  Ide* = object
+    ## IDE for Puyo Puyo and Nazo Puyo.
+    # NOTE: we want to use non-ref here, but use ref since GUI requires ref-Simulator
+    simulator: ref Simulator
+    replaySimulator: ref Simulator
 
     focusReplay: bool
 
@@ -34,27 +31,62 @@ type
 # Constructor
 # ------------------------------------------------
 
-func init*(T: type Ide, simulator: Simulator): T {.inline.} =
+proc init*(T: type Ide, simulator: ref Simulator): T {.inline.} =
+  let replaySimRef = new Simulator
+  replaySimRef[] = Simulator.init Replay
+
   T(
     simulator: simulator,
-    replaySimulator: Simulator.init Replay,
+    replaySimulator: replaySimRef,
     focusReplay: false,
     working: false,
     replayData: IdeReplayData(stepsSeq: @[], stepsIdx: 0),
   )
 
-func init*(T: type Ide): T {.inline.} =
+proc init*(T: type Ide, simulator: Simulator): T {.inline.} =
+  var simRef = new Simulator
+  simRef[] = simulator
+  T.init simRef
+
+proc init*(T: type Ide): T {.inline.} =
   T.init Simulator.init EditorEdit
+
+# ------------------------------------------------
+# Operator
+# ------------------------------------------------
+
+func `==`*(ide1, ide2: Ide): bool {.inline.} =
+  ide1.focusReplay == ide2.focusReplay and ide1.working == ide2.working and
+    ide1.replayData == ide2.replayData and ide1.simulator[] == ide2.simulator[] and
+    ide1.replaySimulator[] == ide2.replaySimulator[]
+
+# ------------------------------------------------
+# Copy
+# ------------------------------------------------
+
+proc copy*(self: Ide): Ide {.inline.} =
+  ## Returns the (deep) copy of the IDE.
+  var ide = self
+
+  let simRef = new Simulator
+  simRef[] = self.simulator[]
+  ide.simulator.assign simRef
+
+  let replaySimRef = new Simulator
+  replaySimRef[] = self.replaySimulator[]
+  ide.replaySimulator.assign replaySimRef
+
+  ide
 
 # ------------------------------------------------
 # Property - Getter
 # ------------------------------------------------
 
-func simulator*(self: Ide): Simulator {.inline.} =
+func simulator*(self: Ide): ref Simulator {.inline.} =
   ## Returns the simulator.
   self.simulator
 
-func replaySimulator*(self: Ide): Simulator {.inline.} =
+func replaySimulator*(self: Ide): ref Simulator {.inline.} =
   ## Returns the replay simulator.
   self.replaySimulator
 
@@ -62,13 +94,25 @@ func focusReplay*(self: Ide): bool {.inline.} =
   ## Returns `true` if the replay simulator is focused.
   self.focusReplay
 
+func working*(self: Ide): bool {.inline.} =
+  ## Returns `true` if the IDE is working.
+  self.working
+
+func replayStepsCnt*(self: Ide): int {.inline.} =
+  ## Returns the number of steps for the replay simulator.
+  self.replayData.stepsSeq.len
+
+func replayStepsIdx*(self: Ide): int {.inline.} =
+  ## Returns the index of steps for the replay simulator.
+  self.replayData.stepsIdx
+
 # ------------------------------------------------
 # Edit - Other
 # ------------------------------------------------
 
 func toggleFocus*(self: var Ide) {.inline.} =
   ## Toggles focusing to replay simulator or not.
-  if self.simulator.mode in EditorModes:
+  if self.simulator[].mode in EditorModes:
     self.focusReplay.toggle
 
 # ------------------------------------------------
@@ -77,7 +121,7 @@ func toggleFocus*(self: var Ide) {.inline.} =
 
 proc nextReplay*(self: var Ide) {.inline.} =
   ## Shows the next answer.
-  if self.simulator.mode notin EditorModes or self.replayData.stepsSeq.len == 0:
+  if self.simulator[].mode notin EditorModes or self.replayData.stepsSeq.len == 0:
     return
 
   if self.replayData.stepsIdx == self.replayData.stepsSeq.len.pred:
@@ -85,16 +129,16 @@ proc nextReplay*(self: var Ide) {.inline.} =
   else:
     self.replayData.stepsIdx.inc
 
-  self.replaySimulator.reset
-  runIt self.replaySimulator.nazoPuyoWrap:
+  self.replaySimulator[].reset
+  runIt self.replaySimulator[].nazoPuyoWrap:
     var nazo = itNazo
     nazo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIdx]
 
-    self.replaySimulator.assign Simulator.init(nazo, Replay)
+    self.replaySimulator[] = Simulator.init(nazo, Replay)
 
 proc prevReplay*(self: var Ide) {.inline.} =
   ## Shows the previous answer.
-  if self.simulator.mode notin EditorModes or self.replayData.stepsSeq.len == 0:
+  if self.simulator[].mode notin EditorModes or self.replayData.stepsSeq.len == 0:
     return
 
   if self.replayData.stepsIdx == 0:
@@ -102,18 +146,18 @@ proc prevReplay*(self: var Ide) {.inline.} =
   else:
     self.replayData.stepsIdx.dec
 
-  self.replaySimulator.reset
-  runIt self.replaySimulator.nazoPuyoWrap:
+  self.replaySimulator[].reset
+  runIt self.replaySimulator[].nazoPuyoWrap:
     var nazo = itNazo
     nazo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIdx]
 
-    self.replaySimulator.assign Simulator.init(nazo, Replay)
+    self.replaySimulator[] = Simulator.init(nazo, Replay)
 
 # ------------------------------------------------
 # Solve
 # ------------------------------------------------
 
-func workPostProcess[F: TsuField or WaterField](
+proc workPostProcess[F: TsuField or WaterField](
     self: var Ide, nazo: NazoPuyo[F]
 ) {.inline.} =
   ## Updates the replay simulator.
@@ -123,24 +167,24 @@ func workPostProcess[F: TsuField or WaterField](
 
     var nazo2 = nazo
     nazo2.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIdx]
-    self.replaySimulator.assign Simulator.init(nazo2, Replay)
+    self.replaySimulator[] = Simulator.init(nazo2, Replay)
   else:
     self.focusReplay.assign false
 
 proc solve*(self: var Ide) {.inline.} =
   ## Solves the nazo puyo.
-  if self.working or self.simulator.mode notin EditorModes or
-      self.simulator.nazoPuyoWrap.optGoal.isErr or
-      self.simulator.state notin {Stable, AfterEdit}:
+  if self.working or self.simulator[].mode notin EditorModes or
+      self.simulator[].nazoPuyoWrap.optGoal.isErr or
+      self.simulator[].state notin {Stable, AfterEdit}:
     return
-  runIt self.simulator.nazoPuyoWrap:
+  runIt self.simulator[].nazoPuyoWrap:
     if it.steps.len == 0:
       return
 
   self.working.assign true
   self.replayData.stepsSeq.setLen 0
 
-  runIt self.simulator.nazoPuyoWrap:
+  runIt self.simulator[].nazoPuyoWrap:
     let
       answers = itNazo.solve
       stepsSeq = collect:
@@ -165,18 +209,18 @@ proc permute*(
     self: var Ide, fixIndices: openArray[int], allowDblNotLast, allowDblLast: bool
 ) {.inline.} =
   ## Permutes the nazo puyo.
-  if self.working or self.simulator.mode notin EditorModes or
-      self.simulator.nazoPuyoWrap.optGoal.isErr or
-      self.simulator.state notin {Stable, AfterEdit}:
+  if self.working or self.simulator[].mode notin EditorModes or
+      self.simulator[].nazoPuyoWrap.optGoal.isErr or
+      self.simulator[].state notin {Stable, AfterEdit}:
     return
-  runIt self.simulator.nazoPuyoWrap:
+  runIt self.simulator[].nazoPuyoWrap:
     if it.steps.len == 0:
       return
 
   self.working.assign true
   self.replayData.stepsSeq.setLen 0
 
-  runIt self.simulator.nazoPuyoWrap:
+  runIt self.simulator[].nazoPuyoWrap:
     for nazo in itNazo.permute(fixIndices, allowDblNotLast, allowDblLast):
       self.replayData.stepsSeq.add nazo.puyoPuyo.steps
 
@@ -191,7 +235,7 @@ proc permute*(
 proc operate*(self: var Ide, key: KeyEvent): bool {.inline, discardable.} =
   ## Performs an action specified by the key.
   ## Returns `true` if the key is catched.
-  if self.simulator.mode in EditorModes:
+  if self.simulator[].mode in EditorModes:
     # focus
     if key == static(KeyEvent.init("Tab", shift = true)):
       self.toggleFocus
@@ -211,6 +255,6 @@ proc operate*(self: var Ide, key: KeyEvent): bool {.inline, discardable.} =
         self.nextReplay
         return true
 
-      return self.replaySimulator.operate key
+      return self.replaySimulator[].operate key
 
-  return self.simulator.operate key
+  return self.simulator[].operate key
