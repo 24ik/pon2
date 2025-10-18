@@ -32,10 +32,6 @@ func init*(T: type ShareView, simulator: ref Simulator): T {.inline.} =
 when defined(js) or defined(nimsuggest):
   const RuleDescs: array[Rule, string] = ["", "すいちゅう"]
 
-  func toUri(self: ShareView): Uri {.inline.} =
-    ## Returns the URI of the simulator before any moves.
-    "TODO".parseUri
-
   func toXLink(self: ShareView): Uri {.inline.} =
     ## Returns the URI to post to X.
     var uri = initUri()
@@ -105,7 +101,6 @@ when defined(js) or defined(nimsuggest):
       editorUriCopyBtn.addCopyBtnHandler () =>
         $self.simulator[].toExportUri(viewer = false, clearPlacements = false).unsafeValue
     else:
-      # TODO
       noPlcmtsEditorUriCopyBtn = nil
       editorUriCopyBtn = nil
 
