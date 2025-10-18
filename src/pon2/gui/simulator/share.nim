@@ -9,8 +9,8 @@
 import ../../[app]
 
 when defined(js) or defined(nimsuggest):
-  import std/[asyncjs, jsconsole, jsffi, strformat, sugar, uri]
-  import karax/[karax, karaxdsl, kdom, vdom]
+  import std/[asyncjs, jsffi, strformat, sugar, uri]
+  import karax/[karax, karaxdsl, vdom]
   import ../../[core]
   import ../../private/[tables2, utils]
   import ../../private/gui/[simulator]
@@ -34,7 +34,7 @@ when defined(js) or defined(nimsuggest):
 
   func toUri(self: ShareView): Uri {.inline.} =
     ## Returns the URI of the simulator before any moves.
-    discard
+    "TODO".parseUri
 
   func toXLink(self: ShareView): Uri {.inline.} =
     ## Returns the URI to post to X.
@@ -64,6 +64,7 @@ when defined(js) or defined(nimsuggest):
     let cameraReadyElem = cameraReadyId.getElemJsObjById
     cameraReadyElem.style.display = "block".cstring
 
+    {.push warning[Uninit]: off.}
     discard cameraReadyElem
       .html2canvas(scale = 3)
       .then(
@@ -78,6 +79,7 @@ when defined(js) or defined(nimsuggest):
             elem.click()
         )
       ).catch
+    {.pop.}
 
   proc toVNode*(self: ShareView, cameraReadyId: cstring): VNode {.inline.} =
     ## Returns the share node.
@@ -103,6 +105,7 @@ when defined(js) or defined(nimsuggest):
       editorUriCopyBtn.addCopyBtnHandler () =>
         $self.simulator[].toExportUri(viewer = false, clearPlacements = false).unsafeValue
     else:
+      # TODO
       noPlcmtsEditorUriCopyBtn = nil
       editorUriCopyBtn = nil
 

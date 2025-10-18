@@ -50,10 +50,13 @@ func load*(self: var Marathon, allQueries: seq[string]) {.inline.} =
   self.critBitTree.assign allQueries.toCritBitTree2
   self.dataLoaded.assign true
 
+{.push warning[Uninit]: off.}
 proc asyncLoad*(self: ref Marathon, allQueries: seq[string]) {.inline, async.} =
   ## Loads steps data asynchronously.
   await sleepZeroAsync()
   self[].load allQueries
+
+{.pop.}
 
 # ------------------------------------------------
 # Property
@@ -205,8 +208,10 @@ func match*(self: var Marathon, prefix: string) {.inline.} =
     self.matchQueries.assign newSeqOfCap[string](matchCntMax)
     for replaceData in ReplaceDataSeqArr[chars.card.pred]:
       for pre in prefix.toUpperAscii.swappedPrefixes:
+        {.push warning[ProveInit]: off.}
         for query in self.critBitTree.itemsWithPrefix pre.multiReplace replaceData:
           self.matchQueries &= query
+        {.pop.}
   else:
     # ref: https://sengiken.web.fc2.com/tsumo/
     let matchCntMax =
@@ -223,11 +228,14 @@ func match*(self: var Marathon, prefix: string) {.inline.} =
     for query in self.critBitTree.itemsWithPrefix prefix:
       self.matchQueries &= query
 
+{.push warning[Uninit]: off.}
 proc asyncMatch*(self: ref Marathon, prefix: string) {.inline, async.} =
   ## Searches for queries that have specified prefixes and sets them to the marathon
   ## manager asynchronously.
   await sleepZeroAsync()
   self[].match prefix
+
+{.pop.}
 
 # ------------------------------------------------
 # Simulator

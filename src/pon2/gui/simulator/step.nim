@@ -128,8 +128,9 @@ when defined(js) or defined(nimsuggest):
   ): VNode {.inline.} =
     ## Returns the garbages node.
     let
-      cntsColsCls =
+      cntsColsCls = (
         if editable: "columns is-mobile is-gapless" else: "columns is-mobile is-1"
+      ).cstring
       imgSrc = if step.dropHard: Hard.cellImgSrc else: Garbage.cellImgSrc
 
     buildHtml tdiv(class = "columns is-mobile is-1 is-vcentered"):
