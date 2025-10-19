@@ -13,7 +13,7 @@ when defined(js) or defined(nimsuggest):
   import karax/[karax, karaxdsl, vdom]
   import ../../[core]
   import ../../private/[tables2, utils]
-  import ../../private/gui/[simulator]
+  import ../../private/gui/[utils]
 
 type ShareView* = object ## View of the share.
   simulator: ref Simulator

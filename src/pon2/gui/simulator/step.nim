@@ -14,7 +14,7 @@ when defined(js) or defined(nimsuggest):
   import ../[color]
   import ../../[core]
   import ../../private/[utils]
-  import ../../private/gui/[simulator]
+  import ../../private/gui/[utils]
 
 type StepsView* = object ## View of the steps.
   simulator: ref Simulator

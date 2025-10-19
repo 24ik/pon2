@@ -1,4 +1,4 @@
-## This module implements helper procedures used by simulator views.
+## This module implements utility functions.
 ##
 ## Compile Options:
 ## | Option                 | Description       | Default    |
