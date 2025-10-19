@@ -29,7 +29,7 @@ requires "unittest2 ^= 0.2.4"
 
 import std/[os, sequtils, strformat, strutils]
 
-task web, "Make Web Pages":
+task www, "Make Web Pages":
   const
     danger {.booldefine.} = true
     minify {.booldefine.} = true
@@ -38,7 +38,7 @@ task web, "Make Web Pages":
   proc compile(src: string, dst: string, options: varargs[string]) =
     let
       (_, tail) = dst.splitPath
-      rawJs = getTempDir() / &"raw-{tail}"
+      rawJs = getTempDir() / "raw-{tail}".fmt
 
     if verbose:
       echo "[pon2] Raw JS output file: ", rawJs
@@ -46,7 +46,7 @@ task web, "Make Web Pages":
     var cmds = @["nim", "js"] & options.toSeq
     if danger:
       cmds.add "-d:danger"
-    cmds &= [&"-o:{rawJs}", src]
+    cmds &= ["-o:{rawJs}".fmt, src]
 
     exec cmds.join " "
 
@@ -60,19 +60,20 @@ task web, "Make Web Pages":
     else:
       cpFile rawJs, dst
 
-  # GUI application
-  "src/pon2.nim".compile "www/index.min.js"
-  "src/pon2.nim".compile "www/worker.min.js", "-d:pon2.worker"
+  # IDE
+  "src/pon2.nim".compile "www/ide/index.min.js"
+  #"src/pon2.nim".compile "www/worker.min.js", "-d:pon2.worker"
 
   # marathon
-  "src/pon2.nim".compile "www/marathon/index.min.js", "-d:pon2.marathon", "-d:pon2.assets.web=../assets"
+  #"src/pon2.nim".compile "www/marathon/index.min.js", "-d:pon2.marathon", "-d:pon2.assets.web=../assets"
 
   # documentation
-  rmDir "www/docs/native"
-  exec &"nim doc --project --outdir:www/docs/native src/pon2.nim"
-  rmDir "www/docs/web"
-  exec &"nim doc --project --outdir:www/docs/web --backend:js src/pon2.nim"
-  "www/docs/simulator/main.nim".compile "www/docs/simulator/index.min.js"
+  rmDir "www/docs/api"
+  exec "nim doc --project --outdir:www/docs/api/native src/pon2.nim"
+  exec "nim doc --project --outdir:www/docs/api/web --backend:js src/pon2.nim"
+  #"www/docs/simulator/main.nim".compile "www/docs/simulator/index.min.js"
 
   # assets
+  rmDir "www/assets"
   cpDir "assets", "www/assets"
+

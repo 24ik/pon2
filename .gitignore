@@ -1,17 +1,12 @@
-/tests/test
-/benchmarks/main
-
-/src/htmldocs/
-
-/www/assets/
-/www/docs/simulator/index.min.js
-/www/docs/native/
-/www/docs/web/
-/www/marathon/index.min.js
-/www/index.min.js
-/www/worker.min.js
-
 /pon2
 /pon2.exe
 
 /assets/pairs/generate
+/benchmarks/main
+/tests/test
+
+/www/assets/
+/www/docs/api/
+/www/docs/simulator/index.min.js
+/www/ide/index.min.js
+/www/marathon/index.min.js
