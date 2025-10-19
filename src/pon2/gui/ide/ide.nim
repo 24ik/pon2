@@ -6,13 +6,13 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
+import ./[ctrl, pagination, setting]
+import ../[simulator]
 import ../../[app]
 
 when defined(js) or defined(nimsuggest):
   import std/[jsffi, strformat]
   import karax/[karaxdsl, vdom]
-  import ./[ctrl, pagination, setting]
-  import ../[simulator]
 
 type IdeView* = object ## View of the IDE.
   ide: ref Ide

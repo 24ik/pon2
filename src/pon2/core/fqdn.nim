@@ -16,7 +16,7 @@ import ../private/[results2, tables2]
 
 export results2
 
-const Pon2Fqdn* {.define: "pon2.fqdn".} = "24ik.github.io"
+const Pon2Fqdn {.define: "pon2.fqdn".} = "24ik.github.io"
 
 type SimulatorFqdn* {.pure.} = enum
   ## FQDN of the web simulator.

@@ -28,12 +28,15 @@ type
 func init*(T: type IdeSettingView, ide: ref Ide): T {.inline.} =
   T(ide: ide)
 
-func init(
-    T: type IdeSetting, fixIndices: seq[int], allowDblNotLast, allowDblLast: bool
-): T {.inline.} =
-  T(
-    fixIndices: fixIndices, allowDblNotLast: allowDblNotLast, allowDblLast: allowDblLast
-  )
+when defined(js) or defined(nimsuggest):
+  func init(
+      T: type IdeSetting, fixIndices: seq[int], allowDblNotLast, allowDblLast: bool
+  ): T {.inline.} =
+    T(
+      fixIndices: fixIndices,
+      allowDblNotLast: allowDblNotLast,
+      allowDblLast: allowDblLast,
+    )
 
 # ------------------------------------------------
 # JS backend
