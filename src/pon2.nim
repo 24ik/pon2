@@ -55,8 +55,8 @@ when isMainModule:
   # ------------------------------------------------
 
   when defined(js) or defined(nimsuggest):
-    import std/[strformat]
-    import karax/[karax, karaxdsl, vdom]
+    import std/[strformat, sugar]
+    import karax/[karax, karaxdsl, kdom, vdom]
     import ./pon2/private/[assign3]
     import ./pon2/private/gui/[utils]
 
@@ -78,6 +78,14 @@ when isMainModule:
             ):
               text "操作方法"
 
+    proc keyHandler(ide: ref Ide, event: Event) {.inline.} =
+      ## Runs the keyboard event handler.
+      ## Returns `true` if the event is handled.
+      if ide[].operate(cast[KeyboardEvent](event).toKeyEvent):
+        if not kxi.surpressRedraws:
+          kxi.redraw
+        event.preventDefault
+
     # ------------------------------------------------
     # JS - Main
     # ------------------------------------------------
@@ -95,6 +103,8 @@ when isMainModule:
     proc renderer(routerData: RouterData): VNode =
       ## Returns the root node.
       if not initialized:
+        document.onkeydown = (event: Event) => globalIdeRef.keyHandler event
+
         var uri = initUri()
         uri.scheme.assign "https"
         uri.hostname.assign $Pon2

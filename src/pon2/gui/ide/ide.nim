@@ -54,7 +54,8 @@ when defined(js) or defined(nimsuggest):
 
     buildHtml tdiv(class = "columns is-mobile is-variable is-1"):
       tdiv(class = "column is-narrow"):
-        self.simulator.toVNode "{SimulatorIdPrefix}{id}".fmt.cstring
+        section(class = "section"):
+          self.simulator.toVNode "{SimulatorIdPrefix}{id}".fmt.cstring
       if self.ide[].simulator[].mode in EditorModes and
           self.ide[].simulator[].nazoPuyoWrap.optGoal.isOk:
         tdiv(class = "column is-narrow"):

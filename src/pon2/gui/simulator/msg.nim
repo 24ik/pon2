@@ -37,8 +37,7 @@ when defined(js) or defined(nimsuggest):
       return ""
 
     if self.simulator[].nazoPuyoWrap.optGoal.isOk:
-      self.simulator[].nazoPuyoWrap.runIt:
-        $itNazo.mark self.simulator[].operatingIdx
+      $self.simulator[].mark
     else:
       self.simulator[].nazoPuyoWrap.runIt:
         if it.field.isDead:
@@ -94,4 +93,3 @@ when defined(js) or defined(nimsuggest):
             td:
               tdiv(class = "is-size-7"):
                 text $score
-      text self.msg

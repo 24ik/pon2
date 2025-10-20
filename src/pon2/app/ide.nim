@@ -235,7 +235,7 @@ proc permute*(
 
 proc operate*(self: var Ide, key: KeyEvent): bool {.inline, discardable.} =
   ## Performs an action specified by the key.
-  ## Returns `true` if the key is catched.
+  ## Returns `true` if the key is handled.
   if self.simulator[].mode in EditorModes:
     # focus
     if key == static(KeyEvent.init("Tab", shift = true)):

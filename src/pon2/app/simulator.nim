@@ -786,6 +786,30 @@ func reset*(self: var Simulator) {.inline.} =
     it.steps.assign nowSteps
 
 # ------------------------------------------------
+# Mark
+# ------------------------------------------------
+
+func mark*(self: Simulator): MarkResult {.inline.} =
+  ## Marks the steps in the Nazo Puyo in the simulator.
+  var nazoWrap = self.nazoPuyoWrap
+  if self.mode == EditorEdit:
+    if self.state != AfterEdit:
+      for idx in 1 .. self.undoDeque.len:
+        let elem = self.undoDeque[^idx]
+        if elem.state == AfterEdit:
+          nazoWrap.assign elem.nazoPuyoWrap
+          break
+  else:
+    if self.undoDeque.len > 0:
+      nazoWrap.assign self.undoDeque.peekFirst.nazoPuyoWrap
+
+  let nowSteps = self.nazoPuyoWrap.runIt:
+    it.steps
+  nazoWrap.runIt:
+    it.steps.assign nowSteps
+    itNazo.mark self.operatingIdx
+
+# ------------------------------------------------
 # Keyboard
 # ------------------------------------------------
 
@@ -799,7 +823,7 @@ const DigitKeys = initDigitKeys()
 
 func operate*(self: var Simulator, key: KeyEvent): bool {.inline, discardable.} =
   ## Performs an action specified by the key.
-  ## Returns `true` if the key is catched.
+  ## Returns `true` if the key is handled.
   var catched = true
 
   case self.mode

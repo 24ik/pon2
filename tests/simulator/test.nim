@@ -782,6 +782,71 @@ rb|"""
       check it.field == field0
 
 # ------------------------------------------------
+# Mark
+# ------------------------------------------------
+
+block: # mark
+  let nazo = parseNazoPuyo[TsuField](
+    """
+1連鎖するべし
+======
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+.yyy..
+------
+yy|
+yy|"""
+  ).unsafeValue
+  var sim = Simulator.init nazo
+  check sim.mark == WrongAnswer
+
+  sim.movePlacementRight
+  sim.movePlacementRight
+  sim.movePlacementRight
+  sim.forward
+  while sim.state != Stable:
+    sim.forward
+  check sim.mark == WrongAnswer
+
+  sim.forward
+  while sim.state != Stable:
+    sim.forward
+  check sim.mark == Accept
+
+  sim.backward
+  check sim.mark == WrongAnswer
+
+  sim.backward
+  check sim.mark == WrongAnswer
+
+  sim.movePlacementLeft
+  sim.forward
+  while sim.state != Stable:
+    sim.forward
+  check sim.mark == Accept
+
+  sim.forward
+  while sim.state != Stable:
+    sim.forward
+  check sim.mark == Accept
+
+  sim.backward
+  check sim.mark == Accept
+
+  sim.backward
+  check sim.mark == WrongAnswer
+
+# ------------------------------------------------
 # Keyboard
 # ------------------------------------------------
 
