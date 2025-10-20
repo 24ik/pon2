@@ -1,29 +1,20 @@
 # Pon! Tsu
 
-Pon! Tsu is an application and library for [Puyo Puyo](https://puyo.sega.jp/)
+Pon! Tsu is an application and library of [Puyo Puyo](https://puyo.sega.jp/)
 and [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 
 Features:
-- Solver: Solves the Nazo Puyo.
-- Generator: Generates the Nazo Puyo.
-- Permuter: Permutes the pairs in the Nazo Puyo to find a unique-solution
-problem.
-- [IDE](https://24ik.github.io/pon2/?kind=n&mode=e&field=t-&pairs&req-kind=0&req-color=0): IDE for Puyo Puyo and Nazo Puyo.
-- [Marathon](https://24ik.github.io/pon2/marathon/): Search for pairs sequence and play a marathon mode.
-
-Not supported now:
-- Wall Puyo, Hard-garbage Puyo, and Iron Puyo
-- Dropping garbage puyo
-- Puyo Puyo Fever
-
-Note that now I am working hard on CUI and web-GUI development, and the
-native-GUI application is beta version.
+- Solve Nazo Puyos.
+- Generate Nazo Puyos.
+- Permute pairs in Nazo Puyos to find unique-solution problems.
+- [Edit Nazo Puyos](https://24ik.github.io/pon2/stable/ide/?mode=ee&field=t-&steps&goal=0_0_).
+- [Play a marathon mode](https://24ik.github.io/pon2/stable/marathon/).
 
 ## Installation
 
 ### Downloading Built Binary
 
-You can get the built binary at the
+The built binary is available at the
 [latest release](https://github.com/24ik/pon2/releases/latest).
 
 ### Manual Installation
@@ -32,36 +23,26 @@ You can get the built binary at the
 nimble install pon2 -p:-d:danger
 ```
 
-If you want to specify the instruction set, use the following command:
-
-```shell
-nimble install pon2 -p:-d:danger -p:-d:pon2.avx2=<bool> -p:-d:pon2.bmi2=<bool>
-```
+The list of compile options is available in the
+[API documentation](https://24ik.github.io/pon2/stable/docs/api/).
 
 ## Usage
 
 ### CLI or Native Application
 
-Run `pon2 -h`.
+See the usage by running `pon2`.
 
 ### Web Application
 
 See the documentations:
 
-- [Simulator](https://24ik.github.io/pon2/docs/simulator/)
+- [Simulator](https://24ik.github.io/pon2/stable/docs/simulator/)
 
 ## For Developers
 
-It is necessary to place the `assets` directory to the one specified by
-`-d:pon2.assets.native` or `-d:pon2.assets.web`.
-
-### Known Issues
-
-- AVX2 only works on Linux.
-
 ### API Usage
 
-See the [API documentation](https://24ik.github.io/pon2/docs/).
+See the [API documentation](https://24ik.github.io/pon2/docs/api/).
 
 ### Running Tests
 
@@ -69,19 +50,9 @@ See the [API documentation](https://24ik.github.io/pon2/docs/).
 nimble test
 ```
 
-### Writing Tests
+### Generating Web Pages
 
-1. Create a new directory directly under the `tests` directory.
-1. Create a new file `main.nim` in the directory.
-1. Write the entry point of the test as `main()` procedure in the file.
-
-### Generating Web Page
-
-Run the following command to generate files in the `www` directory.
-
-```shell
-nimble web
-```
+Run `nimble web` to generate files in the `www` directory.
 
 ### Contribution
 
