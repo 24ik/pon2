@@ -52,7 +52,7 @@ nimble test
 
 ### Generating Web Pages
 
-Run `nimble web` to generate files in the `www` directory.
+Run `nimble www` to generate files in the `www` directory.
 
 ### Contribution
 
