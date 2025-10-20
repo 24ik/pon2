@@ -36,7 +36,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - run: |-
-          nimble -y web
+          nimble -y www
           mkdir ROOT
           mv www ROOT/${{ github.ref_name }}
 
