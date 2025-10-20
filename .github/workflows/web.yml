@@ -1,27 +1,26 @@
-name: Deploy Web Page
+name: Deploy Web Pages
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 on:
   push:
     tags:
       - "v*.*.*"
+      - "dev"
 
   workflow_dispatch:
 
 jobs:
-  web-build:
+  build-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/cache@v4
         with:
@@ -32,24 +31,15 @@ jobs:
         if: runner.os != 'Windows'
       - uses: jiro4989/setup-nim-action@v2
         with:
-          nim-version: "2.2.x"
+          nim-version: '2.2.x'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: nimble -y web
+      - run: |-
+          nimble -y web
+          mkdir ROOT
+          mv www ROOT/${{ github.ref_name }}
 
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: JamesIves/github-pages-deploy-action@v4
         with:
-          path: ./www
-
-  web-deploy:
-    needs: web-build
-
-    runs-on: ubuntu-latest
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - uses: actions/deploy-pages@v4
+          folder: ROOT
+          clean: false

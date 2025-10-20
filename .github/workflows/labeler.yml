@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - run: |-
           echo "ALL_LABELS=\"$(grep -Po '(?<=name: ).*' ./.github/labels.yml | tr '\n' ' ')\"" >> $GITHUB_OUTPUT
@@ -32,7 +32,7 @@ jobs:
           echo "COMMIT_MESSAGES=\"$(git log --format=%s ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | tr '\n' ' ')\"" >> $GITHUB_OUTPUT
         id: labeler-commits
 
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |-
