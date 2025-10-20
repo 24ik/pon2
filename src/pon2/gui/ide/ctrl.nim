@@ -12,7 +12,7 @@ when defined(js) or defined(nimsuggest):
   import std/[sugar]
   import karax/[karax, karaxdsl, vdom]
   import ./[setting]
-  import ../../private/gui/[utils]
+  import ../../private/[gui]
 
 type IdeCtrlView* = object ## View of the IDE controller.
   ide: ref Ide

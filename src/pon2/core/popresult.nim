@@ -8,8 +8,7 @@
 
 import std/[sequtils]
 import ./[cell, common]
-import ../private/[arrayops2, assign3, staticfor2, unionfind]
-import ../private/core/[binfield]
+import ../private/[arrayops2, assign3, core, staticfor2, unionfind]
 
 type PopResult* = object ## Pop Results.
   red: BinField

@@ -13,8 +13,7 @@ when defined(js) or defined(nimsuggest):
   import karax/[karax, karaxdsl, vdom, vstyles]
   import ../[color]
   import ../../[core]
-  import ../../private/[utils]
-  import ../../private/gui/[utils]
+  import ../../private/[gui, utils]
 
 type StepsView* = object ## View of the steps.
   simulator: ref Simulator

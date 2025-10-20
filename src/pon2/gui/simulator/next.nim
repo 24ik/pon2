@@ -11,7 +11,7 @@ import ../../[app]
 when defined(js) or defined(nimsuggest):
   import karax/[karaxdsl, vdom]
   import ../../[core]
-  import ../../private/gui/[utils]
+  import ../../private/[gui]
 
 type NextsView* = object ## View of the next steps.
   simulator: ref Simulator

@@ -12,8 +12,7 @@ when defined(js) or defined(nimsuggest):
   import std/[asyncjs, jsffi, strformat, sugar, uri]
   import karax/[karax, karaxdsl, vdom]
   import ../../[core]
-  import ../../private/[tables2, utils]
-  import ../../private/gui/[utils]
+  import ../../private/[gui, tables2, utils]
 
 type ShareView* = object ## View of the share.
   simulator: ref Simulator

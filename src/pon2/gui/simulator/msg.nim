@@ -12,7 +12,7 @@ when defined(js) or defined(nimsuggest):
   import karax/[karaxdsl, vdom]
   import ../../[core]
   import ../../private/[arrayops2, assign3, math2]
-  import ../../private/gui/[utils]
+  import ../../private/[gui]
 
 type MsgView* = object ## View of the message.
   simulator: ref Simulator
