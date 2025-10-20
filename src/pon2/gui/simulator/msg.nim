@@ -93,3 +93,4 @@ when defined(js) or defined(nimsuggest):
             td:
               tdiv(class = "is-size-7"):
                 text $score
+      text self.msg.cstring

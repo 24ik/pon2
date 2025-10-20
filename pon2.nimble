@@ -27,8 +27,9 @@ requires "unittest2 ^= 0.2.4"
 
 import std/[os, sequtils, strformat, strutils]
 
-task www, "Make Web Pages":
+task www, "Generate Web Pages":
   const
+    Pon2Path {.define: "pon2.path".} = ""
     danger {.booldefine.} = true
     minify {.booldefine.} = true
     verbose {.booldefine.} = false
@@ -42,6 +43,8 @@ task www, "Make Web Pages":
       echo "[pon2] Raw JS output file: ", rawJs
 
     var cmds = @["nim", "js"] & options.toSeq
+    if Pon2Path != "":
+      cmds.add "-d:pon2.path={Pon2Path}".fmt
     if danger:
       cmds.add "-d:danger"
     cmds &= ["-o:{rawJs}".fmt, src]
