@@ -77,7 +77,7 @@ when defined(js) or defined(nimsuggest):
       of Crown: "crown"
       of Comet: "comet"
 
-    "{AssetsDir}/notice/{stem}.png".fmt.cstring
+    "{AssetsDir}/noticegarbage/{stem}.png".fmt.cstring
 
   # ------------------------------------------------
   # JS - Others

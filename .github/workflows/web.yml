@@ -36,11 +36,23 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - run: |-
-          nimble -y www
-          mkdir ROOT
-          mv www ROOT/${{ github.ref_name }}
+          if [[ "${{ github.ref_type }}" == 'tag' ]]; then
+            DIR_NAME=$(echo "${{ github.ref_name }}" | sed 's/^v//' | cut -d. -f1-2)
+          else:
+            DIR_NAME="${{ github.ref_name }}"
+          fi
+          echo "DIR_NAME=$DIR_NAME" >> $GITHUB_ENV
+          nimble -y -d:pon2.path="/pon2/$DIR_NAME" www
 
       - uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: ROOT
-          clean: false
+          folder: www
+          target-folder: ${{ env.DIR_NAME }}
+
+      - run: nimble -y www
+        if: github.ref_type == 'tag'
+      - uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: www
+          target-folder: stable
+        if: github.ref_type == 'tag'
