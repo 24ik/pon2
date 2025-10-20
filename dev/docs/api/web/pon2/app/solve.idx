@@ -1,0 +1,4 @@
+nimTitle	solve	pon2/app/solve.html	module src/pon2/app/solve		0
+nim	SolveAnswer	pon2/app/solve.html#SolveAnswer	type SolveAnswer		25
+nim	solve	pon2/app/solve.html#solve,NazoPuyo[F: TsuField or WaterField],staticbool	proc solve[F: TsuField or WaterField](nazo: NazoPuyo[F];\n                                 calcAllAnswers: static bool = true): seq[\n    SolveAnswer]		822
+nim	solveAsync	pon2/app/solve.html#solveAsync,NazoPuyo[F: TsuField or WaterField],ref.tuple[int,int],int,staticbool	proc solveAsync[F: TsuField or WaterField](nazo: NazoPuyo[F]; progress: ref tuple[\n    now: int, total: int]; workerCnt: int; calcAllAnswers: static bool = true): Future[\n    seq[SolveAnswer]]		944

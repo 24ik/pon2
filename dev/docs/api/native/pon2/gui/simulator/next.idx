@@ -1,0 +1,3 @@
+nimTitle	next	pon2/gui/simulator/next.html	module src/pon2/gui/simulator/next		0
+nim	NextsView	pon2/gui/simulator/next.html#NextsView	object NextsView		16
+nim	init	pon2/gui/simulator/next.html#init,typeNextsView,ref.Simulator	proc init(T: type NextsView; simulator: ref Simulator): T:type		23

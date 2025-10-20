@@ -1,0 +1,3 @@
+nimTitle	step	pon2/gui/simulator/step.html	module src/pon2/gui/simulator/step		0
+nim	StepsView	pon2/gui/simulator/step.html#StepsView	object StepsView		18
+nim	init	pon2/gui/simulator/step.html#init,typeStepsView,ref.Simulator	proc init(T: type StepsView; simulator: ref Simulator; showCursor = true): T:type		26
