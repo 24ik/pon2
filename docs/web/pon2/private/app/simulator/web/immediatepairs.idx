@@ -1,2 +1,0 @@
-nimTitle	immediatepairs	pon2/private/app/simulator/web/immediatepairs.html	module src/pon2/private/app/simulator/web/immediatepairs		0
-nim	newImmediatePairsNode	pon2/private/app/simulator/web/immediatepairs.html#newImmediatePairsNode,Simulator	proc newImmediatePairsNode(simulator: Simulator): VNode		17

@@ -1,4 +1,0 @@
-nimTitle	messages	pon2/private/app/simulator/native/messages.html	module src/pon2/private/app/simulator/native/messages		0
-nim	MessagesControl	pon2/private/app/simulator/native/messages.html#MessagesControl	type MessagesControl		18
-nim	newMessagesControl	pon2/private/app/simulator/native/messages.html#newMessagesControl,Simulator,Assets	proc newMessagesControl(simulator: Simulator; assets: Assets): MessagesControl		40
-nim	setWidth	pon2/private/app/simulator/native/messages.html#setWidth,MessagesControl,Natural	proc setWidth(control: MessagesControl; width: Natural)		57

@@ -1,2 +1,0 @@
-nimTitle	searchresult	pon2/private/app/marathon/web/searchresult.html	module src/pon2/private/app/marathon/web/searchresult		0
-nim	newMarathonSearchResultNode	pon2/private/app/marathon/web/searchresult.html#newMarathonSearchResultNode,Marathon	proc newMarathonSearchResultNode(marathon: Marathon): VNode		25

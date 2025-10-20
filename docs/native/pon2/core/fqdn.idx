@@ -1,3 +1,0 @@
-nimTitle	fqdn	pon2/core/fqdn.html	module src/pon2/core/fqdn		0
-nim	Pon2Fqdn	pon2/core/fqdn.html#Pon2Fqdn	const Pon2Fqdn		16
-nim	IdeFqdn	pon2/core/fqdn.html#IdeFqdn	enum IdeFqdn		18

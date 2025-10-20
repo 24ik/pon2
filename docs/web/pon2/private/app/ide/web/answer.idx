@@ -1,2 +1,0 @@
-nimTitle	answer	pon2/private/app/ide/web/answer.html	module src/pon2/private/app/ide/web/answer		0
-nim	newAnswerSimulatorNode	pon2/private/app/ide/web/answer.html#newAnswerSimulatorNode,Ide,string	proc newAnswerSimulatorNode(ide: Ide; id: string): VNode		15

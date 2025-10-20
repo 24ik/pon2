@@ -1,3 +1,0 @@
-nimTitle	operating	pon2/private/app/simulator/native/operating.html	module src/pon2/private/app/simulator/native/operating		0
-nim	OperatingPairControl	pon2/private/app/simulator/native/operating.html#OperatingPairControl	type OperatingPairControl		18
-nim	newOperatingControl	pon2/private/app/simulator/native/operating.html#newOperatingControl,Simulator,Assets	proc newOperatingControl(simulator: Simulator; assets: Assets): OperatingPairControl		45

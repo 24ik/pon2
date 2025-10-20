@@ -1,3 +1,0 @@
-nimTitle	native	pon2/app/simulator/native.html	module src/pon2/app/simulator/native		0
-nim	SimulatorControl	pon2/app/simulator/native.html#SimulatorControl	type SimulatorControl		25
-nim	newSimulatorControl	pon2/app/simulator/native.html#newSimulatorControl,Simulator	proc newSimulatorControl(self: Simulator): SimulatorControl		31

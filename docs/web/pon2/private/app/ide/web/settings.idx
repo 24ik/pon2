@@ -1,3 +1,0 @@
-nimTitle	settings	pon2/private/app/ide/web/settings.html	module src/pon2/private/app/ide/web/settings		0
-nim	newEditorSettingsNode	pon2/private/app/ide/web/settings.html#newEditorSettingsNode,Ide,string	proc newEditorSettingsNode(ide: Ide; id: string): VNode		29
-nim	getSettings	pon2/private/app/ide/web/settings.html#getSettings,string,Positive	proc getSettings(id: string; moveCount: Positive): tuple[parallelCount: int,\n    fixMoves: seq[Positive], allowDouble: bool, allowLastDouble: bool]		68

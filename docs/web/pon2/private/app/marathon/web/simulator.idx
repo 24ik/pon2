@@ -1,2 +1,0 @@
-nimTitle	simulator	pon2/private/app/marathon/web/simulator.html	module src/pon2/private/app/marathon/web/simulator		0
-nim	newMarathonSimulatorNode	pon2/private/app/marathon/web/simulator.html#newMarathonSimulatorNode,Marathon,string	proc newMarathonSimulatorNode(marathon: Marathon; id: string): VNode		15

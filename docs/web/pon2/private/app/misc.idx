@@ -1,8 +1,0 @@
-nimTitle	misc	pon2/private/app/misc.html	module src/pon2/private/app/misc		0
-nim	NativeAssetsDir	pon2/private/app/misc.html#NativeAssetsDir	const NativeAssetsDir		21
-nim	WebAssetsDir	pon2/private/app/misc.html#WebAssetsDir	const WebAssetsDir		22
-nim	newCopyButtonHandler	pon2/private/app/misc.html#newCopyButtonHandler,,string	proc newCopyButtonHandler(copyStr: () -> string; id: string; disableMs = 500.Natural): () ->\n    void		47
-nim	cellImageSrc	pon2/private/app/misc.html#cellImageSrc,Cell	proc cellImageSrc(cell: Cell): kstring		69
-nim	noticeGarbageImageSrc	pon2/private/app/misc.html#noticeGarbageImageSrc,NoticeGarbage	proc noticeGarbageImageSrc(notice: NoticeGarbage): kstring		84
-nim	NoticeGarbageNoneImageSrc	pon2/private/app/misc.html#NoticeGarbageNoneImageSrc	const NoticeGarbageNoneImageSrc		98
-nim	isMobile	pon2/private/app/misc.html#isMobile	proc isMobile(): bool		105

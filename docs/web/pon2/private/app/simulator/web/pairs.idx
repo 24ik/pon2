@@ -1,2 +1,0 @@
-nimTitle	pairs	pon2/private/app/simulator/web/pairs.html	module src/pon2/private/app/simulator/web/pairs		0
-nim	newPairsNode	pon2/private/app/simulator/web/pairs.html#newPairsNode,Simulator	proc newPairsNode(simulator: Simulator; displayMode = false; showPositions = true): VNode		35
