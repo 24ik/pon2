@@ -1,0 +1,68 @@
+nimTitle	simulator	pon2/app/simulator.html	module src/pon2/app/simulator		0
+nim	SimulatorKind	pon2/app/simulator.html#SimulatorKind	enum SimulatorKind		39
+nim	SimulatorMode	pon2/app/simulator.html#SimulatorMode	enum SimulatorMode		44
+nim	SimulatorState	pon2/app/simulator.html#SimulatorState	enum SimulatorState		51
+nim	SimulatorEditing	pon2/app/simulator.html#SimulatorEditing	object SimulatorEditing		57
+nim	Simulator	pon2/app/simulator.html#Simulator	type Simulator		64
+nim	SimulatorUriPath	pon2/app/simulator.html#SimulatorUriPath	const SimulatorUriPath		83
+nim	newSimulator	pon2/app/simulator.html#newSimulator,NazoPuyoWrap	proc newSimulator(nazoPuyoWrap: NazoPuyoWrap; mode = Play): Simulator		125
+nim	newSimulator	pon2/app/simulator.html#newSimulator,NazoPuyo[F: TsuField or WaterField]	proc newSimulator[F: TsuField or WaterField](nazo: NazoPuyo[F]; mode = Play): Simulator		129
+nim	newSimulator	pon2/app/simulator.html#newSimulator,PuyoPuyo[F: TsuField or WaterField]	proc newSimulator[F: TsuField or WaterField](puyoPuyo: PuyoPuyo[F]; mode = Play): Simulator		135
+nim	newSimulator	pon2/app/simulator.html#newSimulator	proc newSimulator[F: TsuField or WaterField](mode = Play): Simulator		143
+nim	copy	pon2/app/simulator.html#copy,Simulator	proc copy(self: Simulator): Simulator		151
+nim	nazoPuyoWrap	pon2/app/simulator.html#nazoPuyoWrap,Simulator	proc nazoPuyoWrap(self: Simulator): NazoPuyoWrap		174
+nim	nazoPuyoWrapBeforeMoves	pon2/app/simulator.html#nazoPuyoWrapBeforeMoves,Simulator	proc nazoPuyoWrapBeforeMoves(self: Simulator): NazoPuyoWrap		178
+nim	rule	pon2/app/simulator.html#rule,Simulator	proc rule(self: Simulator): Rule		192
+nim	kind	pon2/app/simulator.html#kind,Simulator	proc kind(self: Simulator): SimulatorKind		195
+nim	mode	pon2/app/simulator.html#mode,Simulator	proc mode(self: Simulator): SimulatorMode		198
+nim	rule=	pon2/app/simulator.html#rule=,Simulator,Rule	proc rule=(self: Simulator; rule: Rule)		201
+nim	kind=	pon2/app/simulator.html#kind=,Simulator,SimulatorKind	proc kind=(self: Simulator; kind: SimulatorKind)		204
+nim	mode=	pon2/app/simulator.html#mode=,Simulator,SimulatorMode	proc mode=(self: Simulator; mode: SimulatorMode)		207
+nim	editing	pon2/app/simulator.html#editing,Simulator	proc editing(self: Simulator): SimulatorEditing		223
+nim	editingCell=	pon2/app/simulator.html#editingCell=,Simulator,Cell	proc editingCell=(self: Simulator; cell: Cell)		227
+nim	pairsPositions=	pon2/app/simulator.html#pairsPositions=,Simulator,PairsPositions	proc pairsPositions=(self: Simulator; pairsPositions: PairsPositions)		234
+nim	positions=	pon2/app/simulator.html#positions=,Simulator,Deque[Position]	proc positions=(self: Simulator; positions: Deque[Position])		242
+nim	state	pon2/app/simulator.html#state,Simulator	proc state(self: Simulator): SimulatorState		254
+nim	score	pon2/app/simulator.html#score,Simulator	proc score(self: Simulator): int		258
+nim	positions	pon2/app/simulator.html#positions,Simulator	proc positions(self: Simulator): Deque[Position]		261
+nim	operatingIndex	pon2/app/simulator.html#operatingIndex,Simulator	proc operatingIndex(self: Simulator): int		265
+nim	operatingPosition	pon2/app/simulator.html#operatingPosition,Simulator	proc operatingPosition(self: Simulator): Position		269
+nim	toggleInserting	pon2/app/simulator.html#toggleInserting,Simulator	proc toggleInserting(self: Simulator)		277
+nim	toggleFocus	pon2/app/simulator.html#toggleFocus,Simulator	proc toggleFocus(self: Simulator)		280
+nim	moveCursorUp	pon2/app/simulator.html#moveCursorUp,Simulator	proc moveCursorUp(self: Simulator)		287
+nim	moveCursorDown	pon2/app/simulator.html#moveCursorDown,Simulator	proc moveCursorDown(self: Simulator)		299
+nim	moveCursorRight	pon2/app/simulator.html#moveCursorRight,Simulator	proc moveCursorRight(self: Simulator)		312
+nim	moveCursorLeft	pon2/app/simulator.html#moveCursorLeft,Simulator	proc moveCursorLeft(self: Simulator)		319
+nim	deletePairPosition	pon2/app/simulator.html#deletePairPosition,Simulator,Natural	proc deletePairPosition(self: Simulator; idx: Natural)		335
+nim	deletePairPosition	pon2/app/simulator.html#deletePairPosition,Simulator	proc deletePairPosition(self: Simulator)		342
+nim	writeCell	pon2/app/simulator.html#writeCell,Simulator,Row,Column	proc writeCell(self: Simulator; row: Row; col: Column)		363
+nim	writeCell	pon2/app/simulator.html#writeCell,Simulator,Natural,bool	proc writeCell(self: Simulator; idx: Natural; axis: bool)		397
+nim	writeCell	pon2/app/simulator.html#writeCell,Simulator,Cell	proc writeCell(self: Simulator; cell: Cell)		401
+nim	shiftFieldUp	pon2/app/simulator.html#shiftFieldUp,Simulator	proc shiftFieldUp(self: Simulator)		412
+nim	shiftFieldDown	pon2/app/simulator.html#shiftFieldDown,Simulator	proc shiftFieldDown(self: Simulator)		418
+nim	shiftFieldRight	pon2/app/simulator.html#shiftFieldRight,Simulator	proc shiftFieldRight(self: Simulator)		424
+nim	shiftFieldLeft	pon2/app/simulator.html#shiftFieldLeft,Simulator	proc shiftFieldLeft(self: Simulator)		430
+nim	flipFieldV	pon2/app/simulator.html#flipFieldV,Simulator	proc flipFieldV(self: Simulator)		440
+nim	flipFieldH	pon2/app/simulator.html#flipFieldH,Simulator	proc flipFieldH(self: Simulator)		446
+nim	flip	pon2/app/simulator.html#flip,Simulator	proc flip(self: Simulator)		452
+nim	requirementKind=	pon2/app/simulator.html#requirementKind=,Simulator,RequirementKind	proc requirementKind=(self: Simulator; kind: RequirementKind)		464
+nim	requirementColor=	pon2/app/simulator.html#requirementColor=,Simulator,RequirementColor	proc requirementColor=(self: Simulator; color: RequirementColor)		473
+nim	requirementNumber=	pon2/app/simulator.html#requirementNumber=,Simulator,RequirementNumber	proc requirementNumber=(self: Simulator; num: RequirementNumber)		484
+nim	undo	pon2/app/simulator.html#undo,Simulator	proc undo(self: Simulator)		499
+nim	redo	pon2/app/simulator.html#redo,Simulator	proc redo(self: Simulator)		507
+nim	moveOperatingPositionRight	pon2/app/simulator.html#moveOperatingPositionRight,Simulator	proc moveOperatingPositionRight(self: Simulator)		519
+nim	moveOperatingPositionLeft	pon2/app/simulator.html#moveOperatingPositionLeft,Simulator	proc moveOperatingPositionLeft(self: Simulator)		523
+nim	rotateOperatingPositionRight	pon2/app/simulator.html#rotateOperatingPositionRight,Simulator	proc rotateOperatingPositionRight(self: Simulator)		527
+nim	rotateOperatingPositionLeft	pon2/app/simulator.html#rotateOperatingPositionLeft,Simulator	proc rotateOperatingPositionLeft(self: Simulator)		531
+nim	forward	pon2/app/simulator.html#forward,Simulator	proc forward(self: Simulator; replay = false; skip = false)		539
+nim	backward	pon2/app/simulator.html#backward,Simulator	proc backward(self: Simulator; toStable = true)		598
+nim	reset	pon2/app/simulator.html#reset,Simulator	proc reset(self: Simulator)		613
+nim	toUriQuery	pon2/app/simulator.html#toUriQuery,Simulator	proc toUriQuery(self: Simulator; withPositions = true; fqdn = Pon2): string		642
+nim	toUri	pon2/app/simulator.html#toUri,Simulator	proc toUri(self: Simulator; withPositions = true; fqdn = Pon2): Uri		675
+nim	parseSimulator	pon2/app/simulator.html#parseSimulator,string,IdeFqdn	proc parseSimulator(query: string; fqdn: IdeFqdn): Simulator		698
+nim	parseSimulator	pon2/app/simulator.html#parseSimulator,Uri	proc parseSimulator(uri: Uri): Simulator		763
+nim	operate	pon2/app/simulator.html#operate,Simulator,KeyEvent	proc operate(self: Simulator; event: KeyEvent): bool		810
+nimgrp	writecell	pon2/app/simulator.html#writeCell-procs-all	proc		363
+nimgrp	newsimulator	pon2/app/simulator.html#newSimulator-procs-all	proc		125
+nimgrp	parsesimulator	pon2/app/simulator.html#parseSimulator-procs-all	proc		698
+nimgrp	deletepairposition	pon2/app/simulator.html#deletePairPosition-procs-all	proc		335

@@ -1,0 +1,2 @@
+nimTitle	answer	pon2/private/app/ide/native/answer.html	module src/pon2/private/app/ide/native/answer		0
+nim	newAnswerSimulatorControl	pon2/private/app/ide/native/answer.html#newAnswerSimulatorControl,Ide	proc newAnswerSimulatorControl(ide: Ide): SimulatorControl		14

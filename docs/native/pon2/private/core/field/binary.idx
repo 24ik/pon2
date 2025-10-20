@@ -1,0 +1,25 @@
+nimTitle	binary	pon2/private/core/field/binary.html	module src/pon2/private/core/field/binary		0
+nim	isDead	pon2/private/core/field/binary.html#isDead,M256i,Rule	proc isDead(self: BinaryField; rule: Rule): bool		36
+nim	invalidPositions	pon2/private/core/field/binary.html#invalidPositions,M256i	proc invalidPositions(self: BinaryField): set[Position]		63
+nim	validPositions	pon2/private/core/field/binary.html#validPositions,M256i	proc validPositions(self: BinaryField): set[Position]		91
+nim	validDoublePositions	pon2/private/core/field/binary.html#validDoublePositions,M256i	proc validDoublePositions(self: BinaryField): set[Position]		96
+nim	shiftUpWithoutTrim	pon2/private/core/field/binary.html#shiftUpWithoutTrim,M256i,staticint32	proc shiftUpWithoutTrim(self: var BinaryField; amount: static int32 = 1)		105
+nim	shiftDownWithoutTrim	pon2/private/core/field/binary.html#shiftDownWithoutTrim,M256i,staticint32	proc shiftDownWithoutTrim(self: var BinaryField; amount: static int32 = 1)		109
+nim	shiftRightWithoutTrim	pon2/private/core/field/binary.html#shiftRightWithoutTrim,M256i	proc shiftRightWithoutTrim(self: var BinaryField)		113
+nim	shiftLeftWithoutTrim	pon2/private/core/field/binary.html#shiftLeftWithoutTrim,M256i	proc shiftLeftWithoutTrim(self: var BinaryField)		117
+nim	shiftedUp	pon2/private/core/field/binary.html#shiftedUp,M256i	proc shiftedUp(self: BinaryField): BinaryField		121
+nim	shiftedDown	pon2/private/core/field/binary.html#shiftedDown,M256i	proc shiftedDown(self: BinaryField): BinaryField		125
+nim	shiftedRight	pon2/private/core/field/binary.html#shiftedRight,M256i	proc shiftedRight(self: BinaryField): BinaryField		129
+nim	shiftedLeft	pon2/private/core/field/binary.html#shiftedLeft,M256i	proc shiftedLeft(self: BinaryField): BinaryField		133
+nim	flipV	pon2/private/core/field/binary.html#flipV,M256i	proc flipV(self: var BinaryField)		141
+nim	flipH	pon2/private/core/field/binary.html#flipH,M256i	proc flipH(self: var BinaryField)		145
+nim	expanded	pon2/private/core/field/binary.html#expanded,M256i	proc expanded(self: BinaryField): BinaryField		153
+nim	disappeared	pon2/private/core/field/binary.html#disappeared,M256i	proc disappeared(self: BinaryField): BinaryField		215
+nim	willDisappear	pon2/private/core/field/binary.html#willDisappear,M256i	proc willDisappear(self: BinaryField): bool		219
+nim	connect2	pon2/private/core/field/binary.html#connect2,M256i	proc connect2(self: BinaryField): BinaryField		233
+nim	connect2V	pon2/private/core/field/binary.html#connect2V,M256i	proc connect2V(self: BinaryField): BinaryField		261
+nim	connect2H	pon2/private/core/field/binary.html#connect2H,M256i	proc connect2H(self: BinaryField): BinaryField		282
+nim	connect3	pon2/private/core/field/binary.html#connect3,M256i	proc connect3(self: BinaryField): BinaryField		303
+nim	connect3V	pon2/private/core/field/binary.html#connect3V,M256i	proc connect3V(self: BinaryField): BinaryField		310
+nim	connect3H	pon2/private/core/field/binary.html#connect3H,M256i	proc connect3H(self: BinaryField): BinaryField		333
+nim	connect3L	pon2/private/core/field/binary.html#connect3L,M256i	proc connect3L(self: BinaryField): BinaryField		356

@@ -1,0 +1,19 @@
+nimTitle	misc	pon2/private/misc.html	module src/pon2/private/misc		0
+nim	Pon2RootDir	pon2/private/misc.html#Pon2RootDir	const Pon2RootDir		50
+nim	Pon2Version	pon2/private/misc.html#Pon2Version	const Pon2Version		51
+nim	sum2	pon2/private/misc.html#sum2,openArray[T]	proc sum2[T: SomeNumber or Natural](arr: openArray[T]): T		59
+nim	toSet2	pon2/private/misc.html#toSet2.t,untyped	template toSet2(iter: untyped): untyped		65
+nim	initXLink	pon2/private/misc.html#initXLink,string,string	proc initXLink(text = ""; hashTag = ""; uri = initUri()): Uri		77
+nim	parseSomeInt	pon2/private/misc.html#parseSomeInt,string	proc parseSomeInt[T: SomeNumber or Natural or Positive](val: string): T		95
+nim	parseSomeInt	pon2/private/misc.html#parseSomeInt,char	proc parseSomeInt[T: SomeNumber or Natural or Positive](val: char): T		100
+nim	copy	pon2/private/misc.html#copy,Deque[T]	proc copy[T](deque: Deque[T]): Deque[T]		109
+nim	insert	pon2/private/misc.html#insert,Deque[T],sinkT	proc insert[T](deque: var Deque[T]; item: sink T; idx = 0.Natural)		117
+nim	delete	pon2/private/misc.html#delete,Deque[T],Natural	proc delete[T](deque: var Deque[T]; idx: Natural)		126
+nim	toggle	pon2/private/misc.html#toggle,bool	proc toggle(b: var bool)		141
+nim	product2	pon2/private/misc.html#product2,openArray[seq[T]]	proc product2[T](x: openArray[seq[T]]): seq[seq[T]]		144
+nim	zip	pon2/private/misc.html#zip.i,openArray[T],openArray[U],openArray[V]	iterator zip[T, U, V](s1: openArray[T]; s2: openArray[U]; s3: openArray[V]): (T, U, V)		155
+nim	sample	pon2/private/misc.html#sample,Rand,openArray[T],Natural	proc sample[T](rng: var Rand; arr: openArray[T]; count: Natural): seq[T]		164
+nim	incRot	pon2/private/misc.html#incRot,T	proc incRot[T: Ordinal](x: var T)		170
+nim	decRot	pon2/private/misc.html#decRot,T	proc decRot[T: Ordinal](x: var T)		177
+nim	processorCount	pon2/private/misc.html#processorCount	proc processorCount(): int		184
+nimgrp	parsesomeint	pon2/private/misc.html#parseSomeInt-procs-all	proc		95

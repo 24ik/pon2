@@ -1,0 +1,2 @@
+nimTitle	controller	pon2/private/app/simulator/web/controller.html	module src/pon2/private/app/simulator/web/controller		0
+nim	newControllerNode	pon2/private/app/simulator/web/controller.html#newControllerNode,Simulator	proc newControllerNode(simulator: Simulator): VNode		15

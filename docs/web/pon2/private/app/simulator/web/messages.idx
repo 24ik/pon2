@@ -1,0 +1,2 @@
+nimTitle	messages	pon2/private/app/simulator/web/messages.html	module src/pon2/private/app/simulator/web/messages		0
+nim	newMessagesNode	pon2/private/app/simulator/web/messages.html#newMessagesNode,Simulator	proc newMessagesNode(simulator: Simulator): VNode		18

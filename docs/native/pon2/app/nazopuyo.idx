@@ -1,0 +1,7 @@
+nimTitle	nazopuyo	pon2/app/nazopuyo.html	module src/pon2/app/nazopuyo		0
+nim	NazoPuyoWrap	pon2/app/nazopuyo.html#NazoPuyoWrap	object NazoPuyoWrap		14
+nim	initNazoPuyoWrap	pon2/app/nazopuyo.html#initNazoPuyoWrap,NazoPuyo[F: TsuField or WaterField]	proc initNazoPuyoWrap[F: TsuField or WaterField](nazo: NazoPuyo[F]): NazoPuyoWrap		23
+nim	get	pon2/app/nazopuyo.html#get.t,NazoPuyoWrap,untyped	template get(self: NazoPuyoWrap; body: untyped): untyped		36
+nim	rule	pon2/app/nazopuyo.html#rule,NazoPuyoWrap	proc rule(self: NazoPuyoWrap): Rule		50
+nim	rule=	pon2/app/nazopuyo.html#rule=,NazoPuyoWrap,Rule	proc rule=(self: var NazoPuyoWrap; rule: Rule)		54
+nim	`==`	pon2/app/nazopuyo.html#==,NazoPuyoWrap,NazoPuyoWrap	proc `==`(nazo1, nazo2: NazoPuyoWrap): bool		80

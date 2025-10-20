@@ -1,0 +1,5 @@
+nimTitle	generate	pon2/private/app/generate.html	module src/pon2/private/app/generate		0
+nim	GenerateError	pon2/private/app/generate.html#GenerateError	object GenerateError		14
+nim	split	pon2/private/app/generate.html#split,Rand,Natural,Positive,bool	proc split(rng: var Rand; total: Natural; chunkCount: Positive; allowZeroChunk: bool): seq[\n    int]		27
+nim	split	pon2/private/app/generate.html#split,Rand,Natural,openArray[Option[Natural]]	proc split(rng: var Rand; total: Natural; ratios: openArray[Option[Natural]]): seq[\n    int]		82
+nimgrp	split	pon2/private/app/generate.html#split-procs-all	proc		27

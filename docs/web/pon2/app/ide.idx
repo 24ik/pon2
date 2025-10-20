@@ -1,0 +1,21 @@
+nimTitle	ide	pon2/app/ide.html	module src/pon2/app/ide		0
+nim	AnswerData	pon2/app/ide.html#AnswerData	object AnswerData		39
+nim	Ide	pon2/app/ide.html#Ide	type Ide		44
+nim	newIde	pon2/app/ide.html#newIde,Simulator	proc newIde(simulator: Simulator): Ide		60
+nim	newIde	pon2/app/ide.html#newIde	proc newIde(): Ide		72
+nim	simulator	pon2/app/ide.html#simulator,Ide	proc simulator(self: Ide): Simulator		80
+nim	answerSimulator	pon2/app/ide.html#answerSimulator,Ide	proc answerSimulator(self: Ide): Simulator		84
+nim	answerData	pon2/app/ide.html#answerData,Ide	proc answerData(self: Ide): AnswerData		88
+nim	focusAnswer	pon2/app/ide.html#focusAnswer,Ide	proc focusAnswer(self: Ide): bool		92
+nim	solving	pon2/app/ide.html#solving,Ide	proc solving(self: Ide): bool		96
+nim	permuting	pon2/app/ide.html#permuting,Ide	proc permuting(self: Ide): bool		100
+nim	progressBarData	pon2/app/ide.html#progressBarData,Ide	proc progressBarData(self: Ide): tuple[now: int, total: int]		104
+nim	toggleFocus	pon2/app/ide.html#toggleFocus,Ide	proc toggleFocus(self: Ide)		112
+nim	solve	pon2/app/ide.html#solve,Ide,Positive	proc solve(self: Ide; parallelCount: Positive = when defined(js):\n  6\nelse:\n  max(1, countProcessors()))		140
+nim	permute	pon2/app/ide.html#permute,Ide,seq[Positive],bool,bool	proc permute(self: Ide; fixMoves: seq[Positive]; allowDouble: bool;\n        allowLastDouble: bool; parallelCount = when defined(js):\n  6\nelse:\n  max(1, countProcessors()))		207
+nim	nextAnswer	pon2/app/ide.html#nextAnswer,Ide	proc nextAnswer(self: Ide)		271
+nim	prevAnswer	pon2/app/ide.html#prevAnswer,Ide	proc prevAnswer(self: Ide)		285
+nim	toUri	pon2/app/ide.html#toUri,Ide	proc toUri(self: Ide; withPositions = true; fqdn = Pon2): Uri		303
+nim	parseIde	pon2/app/ide.html#parseIde,Uri	proc parseIde(uri: Uri): Ide		307
+nim	operate	pon2/app/ide.html#operate,Ide,KeyEvent	proc operate(self: Ide; event: KeyEvent): bool		316
+nimgrp	newide	pon2/app/ide.html#newIde-procs-all	proc		60

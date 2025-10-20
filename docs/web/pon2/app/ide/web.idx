@@ -1,0 +1,6 @@
+nimTitle	web	pon2/app/ide/web.html	module src/pon2/app/ide/web		0
+nim	runKeyboardEventHandler	pon2/app/ide/web.html#runKeyboardEventHandler,Ide,KeyEvent	proc runKeyboardEventHandler(self: Ide; event: KeyEvent): bool		21
+nim	runKeyboardEventHandler	pon2/app/ide/web.html#runKeyboardEventHandler,Ide,Event	proc runKeyboardEventHandler(self: Ide; event: Event): bool		30
+nim	newKeyboardEventHandler	pon2/app/ide/web.html#newKeyboardEventHandler,Ide	proc newKeyboardEventHandler(self: Ide): (event: Event) -> void		38
+nim	newIdeNode	pon2/app/ide/web.html#newIdeNode,Ide,string	proc newIdeNode(self: Ide; setKeyHandler = true; wrapSection = true; id = ""): VNode		76
+nimgrp	runkeyboardeventhandler	pon2/app/ide/web.html#runKeyboardEventHandler-procs-all	proc		21

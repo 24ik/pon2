@@ -1,0 +1,2 @@
+nimTitle	searchbar	pon2/private/app/marathon/web/searchbar.html	module src/pon2/private/app/marathon/web/searchbar		0
+nim	newMarathonSearchBarNode	pon2/private/app/marathon/web/searchbar.html#newMarathonSearchBarNode,Marathon,string	proc newMarathonSearchBarNode(marathon: Marathon; id: string): VNode		15

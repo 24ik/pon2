@@ -1,0 +1,3 @@
+nimTitle	pagination	pon2/private/app/ide/native/pagination.html	module src/pon2/private/app/ide/native/pagination		0
+nim	EditorPaginationControl	pon2/private/app/ide/native/pagination.html#EditorPaginationControl	type EditorPaginationControl		15
+nim	newEditorPaginationControl	pon2/private/app/ide/native/pagination.html#newEditorPaginationControl,Ide	proc newEditorPaginationControl(ide: Ide): EditorPaginationControl		56
