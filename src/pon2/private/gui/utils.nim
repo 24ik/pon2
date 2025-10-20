@@ -1,9 +1,9 @@
 ## This module implements utility functions.
 ##
 ## Compile Options:
-## | Option                 | Description       | Default    |
-## | ---------------------- | ----------------- | ---------- |
-## | `-d:pon2.assets=<str>` | Assets directory. | `./assets` |
+## | Option                 | Description       | Default     |
+## | ---------------------- | ----------------- | ----------- |
+## | `-d:pon2.assets=<str>` | Assets directory. | `../assets` |
 ##
 
 {.push raises: [].}
@@ -17,7 +17,7 @@ when defined(js) or defined(nimsuggest):
   import ../[assign3, utils]
   import ../../[core]
 
-const AssetsDir* {.define: "pon2.assets".} = "./assets"
+const AssetsDir* {.define: "pon2.assets".} = "../assets"
 
 when defined(js) or defined(nimsuggest):
   # ------------------------------------------------

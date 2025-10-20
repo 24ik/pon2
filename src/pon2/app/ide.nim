@@ -44,8 +44,9 @@ proc init*(T: type Ide, simulator: ref Simulator): T {.inline.} =
   )
 
 proc init*(T: type Ide, simulator: Simulator): T {.inline.} =
-  var simRef = new Simulator
+  let simRef = new Simulator
   simRef[] = simulator
+
   T.init simRef
 
 proc init*(T: type Ide): T {.inline.} =

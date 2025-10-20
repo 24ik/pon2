@@ -7,9 +7,9 @@
 ## - [simulator](./gui/simulator.html)
 ##
 ## Compile Options:
-## | Option                 | Description       | Default    |
-## | ---------------------- | ----------------- | ---------- |
-## | `-d:pon2.assets=<str>` | Assets directory. | `./assets` |
+## | Option                 | Description       | Default     |
+## | ---------------------- | ----------------- | ----------- |
+## | `-d:pon2.assets=<str>` | Assets directory. | `../assets` |
 ##
 
 {.push raises: [].}

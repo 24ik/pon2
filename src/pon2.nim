@@ -19,7 +19,7 @@
 ## | `-d:pon2.bmi=<int>`               | BMI level. (2: BMI2, 1: BMI1, 0: None) | 2                |
 ## | `-d:pon2.clmul=<bool>`            | Uses CLMUL.                            | `true`           |
 ## | `-d:pon2.path=<str>`              | Path of the web simulator.             | `/pon2/`         |
-## | `-d:pon2.assets=<str>`            | Assets directory.                      | `./assets`       |
+## | `-d:pon2.assets=<str>`            | Assets directory.                      | `../assets`      |
 ##
 
 {.experimental: "strictDefs".}
@@ -82,14 +82,15 @@ when isMainModule:
     # JS - Main
     # ------------------------------------------------
 
-    var
-      initialized = false
-      parseFailed = false
     let
       globalSimRef = new Simulator
       globalIdeRef = new Ide
-      globalIdeView = IdeView.init(globalIdeRef, not isMobile())
     globalIdeRef[] = Ide.init globalSimRef
+
+    let globalIdeView = IdeView.init(globalIdeRef, not isMobile())
+    var
+      initialized = false
+      parseFailed = false
 
     proc renderer(routerData: RouterData): VNode =
       ## Returns the root node.
