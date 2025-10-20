@@ -18,7 +18,7 @@
 ## | `-d:pon2.simd=<int>`              | SIMD level. (1: SSE4.2, 0: None)       | 1                |
 ## | `-d:pon2.bmi=<int>`               | BMI level. (2: BMI2, 1: BMI1, 0: None) | 2                |
 ## | `-d:pon2.clmul=<bool>`            | Uses CLMUL.                            | `true`           |
-## | `-d:pon2.path=<str>`              | Path of the web simulator.             | `/pon2/`         |
+## | `-d:pon2.path=<str>`              | Path of the web simulator.             | `/pon2/stable/`  |
 ## | `-d:pon2.assets=<str>`            | Assets directory.                      | `../assets`      |
 ##
 
@@ -72,7 +72,7 @@ when isMainModule:
             text "Pon!通 Version {Pon2Ver}".fmt
           tdiv(class = "column is-narrow"):
             a(
-              href = "https://{Pon2}/pon2/docs/simulator/".fmt.cstring,
+              href = "../docs/simulator/",
               target = "_blank",
               rel = "noopener noreferrer",
             ):

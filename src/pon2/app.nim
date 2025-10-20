@@ -12,9 +12,9 @@
 ## - [solve](./app/solve.html)
 ##
 ## Compile Options:
-## | Option               | Description                | Default  |
-## | -------------------- | -------------------------- | -------- |
-## | `-d:pon2.path=<str>` | Path of the web simulator. | `/pon2/` |
+## | Option               | Description                | Default         |
+## | -------------------- | -------------------------- | --------------- |
+## | `-d:pon2.path=<str>` | Path of the web simulator. | `/pon2/stable/` |
 ##
 
 {.push raises: [].}

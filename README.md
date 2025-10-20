@@ -42,7 +42,7 @@ See the documentations:
 
 ### API Usage
 
-See the [API documentation](https://24ik.github.io/pon2/docs/api/).
+See the [API documentation](https://24ik.github.io/pon2/stable/docs/api/).
 
 ### Running Tests
 

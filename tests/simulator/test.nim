@@ -1110,14 +1110,14 @@ block: # toUri, parseSimulator
   block: # Nazo Puyo
     let
       sim = Simulator.init
-      uriPon2 = "https://24ik.github.io/pon2/?field=t_&steps&goal=0_0_".parseUri
+      uriPon2 = "https://24ik.github.io/pon2/stable/?field=t_&steps&goal=0_0_".parseUri
       uriIshikawa = "https://ishikawapuyo.net/simu/pn.html?___200".parseUri
       uriIps = "https://ips.karou.jp/simu/pn.html?___200".parseUri
       uriPon22 =
-        "https://24ik.github.io/pon2/?mode=vp&field=t_&steps&goal=0_0_".parseUri
-      uriPon23 = "http://24ik.github.io/pon2/?field=t_&steps&goal=0_0_".parseUri
+        "https://24ik.github.io/pon2/stable/?mode=vp&field=t_&steps&goal=0_0_".parseUri
+      uriPon23 = "http://24ik.github.io/pon2/stable/?field=t_&steps&goal=0_0_".parseUri
       uriPon24 =
-        "https://24ik.github.io/pon2/index.html?field=t_&steps&goal=0_0_".parseUri
+        "https://24ik.github.io/pon2/stable/index.html?field=t_&steps&goal=0_0_".parseUri
       uriIshikawa2 = "http://ishikawapuyo.net/simu/pn.html?___200".parseUri
       uriIps2 = "http://ishikawapuyo.net/simu/pn.html?___200".parseUri
 
@@ -1137,7 +1137,7 @@ block: # toUri, parseSimulator
   block: # Puyo Puyo
     let
       sim = Simulator.init PuyoPuyo[TsuField].init
-      uriPon2 = "https://24ik.github.io/pon2/?field=t_&steps".parseUri
+      uriPon2 = "https://24ik.github.io/pon2/stable/?field=t_&steps".parseUri
       uriIshikawa = "https://ishikawapuyo.net/simu/ps.html".parseUri
       uriIps = "https://ips.karou.jp/simu/ps.html".parseUri
       uriIshikawa2 = "https://ishikawapuyo.net/simu/ps.html?".parseUri
@@ -1176,7 +1176,7 @@ gy|23"""
     ).unsafeValue
 
     check Simulator.init(nazo).toUri(clearPlacements = true) ==
-      Res[Uri].ok "https://24ik.github.io/pon2/?field=t_b..&steps=rbppgy&goal=5__6".parseUri
+      Res[Uri].ok "https://24ik.github.io/pon2/stable/?field=t_b..&steps=rbppgy&goal=5__6".parseUri
 
 block: # toExportUri
   # EditorEdit
@@ -1189,11 +1189,11 @@ block: # toExportUri
     sim.forward
 
     check sim.toUri ==
-      Res[Uri].ok "https://24ik.github.io/pon2/?mode=ee&field=t_g&steps&goal=0_0_".parseUri
+      Res[Uri].ok "https://24ik.github.io/pon2/stable/?mode=ee&field=t_g&steps&goal=0_0_".parseUri
     check sim.toExportUri ==
-      Res[Uri].ok "https://24ik.github.io/pon2/?field=t_g......&steps&goal=0_0_".parseUri
+      Res[Uri].ok "https://24ik.github.io/pon2/stable/?field=t_g......&steps&goal=0_0_".parseUri
     check sim.toExportUri(viewer = false) ==
-      Res[Uri].ok "https://24ik.github.io/pon2/?mode=ep&field=t_g......&steps&goal=0_0_".parseUri
+      Res[Uri].ok "https://24ik.github.io/pon2/stable/?mode=ep&field=t_g......&steps&goal=0_0_".parseUri
 
   # ViewerEdit
   block:
@@ -1205,7 +1205,7 @@ block: # toExportUri
     sim.forward
 
     check sim.toExportUri ==
-      Res[Uri].ok "https://24ik.github.io/pon2/?field=t_&steps&goal=0_0_".parseUri
+      Res[Uri].ok "https://24ik.github.io/pon2/stable/?field=t_&steps&goal=0_0_".parseUri
 
   # ViewerPlay
   block:
@@ -1235,6 +1235,6 @@ rb|"""
     sim.forward
 
     check sim.toUri ==
-      Res[Uri].ok "https://24ik.github.io/pon2/?field=t_rb..&steps=rb34&goal=5__1".parseUri
+      Res[Uri].ok "https://24ik.github.io/pon2/stable/?field=t_rb..&steps=rb34&goal=5__1".parseUri
     check sim.toExportUri ==
-      Res[Uri].ok "https://24ik.github.io/pon2/?field=t_&steps=rb&goal=5__1".parseUri
+      Res[Uri].ok "https://24ik.github.io/pon2/stable/?field=t_&steps=rb&goal=5__1".parseUri
