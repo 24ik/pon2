@@ -1,0 +1,43 @@
+nimTitle	main	pon2/private/core/field/avx2/main.html	module src/pon2/private/core/field/avx2/main		0
+nim	TsuField	pon2/private/core/field/avx2/main.html#TsuField	object TsuField		19
+nim	WaterField	pon2/private/core/field/avx2/main.html#WaterField	object WaterField		25
+nim	initField	pon2/private/core/field/avx2/main.html#initField	proc initField[F: TsuField or WaterField](): F		35
+nim	toTsuField	pon2/private/core/field/avx2/main.html#toTsuField,WaterField	proc toTsuField(self: WaterField): TsuField		58
+nim	toWaterField	pon2/private/core/field/avx2/main.html#toWaterField,TsuField	proc toWaterField(self: TsuField): WaterField		67
+nim	exist	pon2/private/core/field/avx2/main.html#exist	proc exist(self: TsuField or WaterField): BinaryField		80
+nim	`[]`	pon2/private/core/field/avx2/main.html#[],,Row,Column	proc `[]`(self: TsuField or WaterField; row: Row; col: Column): Cell		131
+nim	`[]=`	pon2/private/core/field/avx2/main.html#[]=,,Row,Column,Cell	proc `[]=`(self: var (TsuField or WaterField); row: Row; col: Column; cell: Cell)		169
+nim	insert	pon2/private/core/field/avx2/main.html#insert,TsuField,Row,Column,Cell	proc insert(self: var TsuField; row: Row; col: Column; cell: Cell)		197
+nim	insert	pon2/private/core/field/avx2/main.html#insert,WaterField,Row,Column,Cell	proc insert(self: var WaterField; row: Row; col: Column; cell: Cell)		202
+nim	removeSqueeze	pon2/private/core/field/avx2/main.html#removeSqueeze,TsuField,Row,Column	proc removeSqueeze(self: var TsuField; row: Row; col: Column)		222
+nim	removeSqueeze	pon2/private/core/field/avx2/main.html#removeSqueeze,WaterField,Row,Column	proc removeSqueeze(self: var WaterField; row: Row; col: Column)		227
+nim	puyoCount	pon2/private/core/field/avx2/main.html#puyoCount,,Puyo	proc puyoCount(self: TsuField or WaterField; puyo: Puyo): int		239
+nim	puyoCount	pon2/private/core/field/avx2/main.html#puyoCount	proc puyoCount(self: TsuField or WaterField): int		257
+nim	colorCount	pon2/private/core/field/avx2/main.html#colorCount	proc colorCount(self: TsuField or WaterField): int		261
+nim	garbageCount	pon2/private/core/field/avx2/main.html#garbageCount	proc garbageCount(self: TsuField or WaterField): int		265
+nim	connect2	pon2/private/core/field/avx2/main.html#connect2,F	proc connect2[F: TsuField or WaterField](self: F): F		273
+nim	connect2V	pon2/private/core/field/avx2/main.html#connect2V,F	proc connect2V[F: TsuField or WaterField](self: F): F		284
+nim	connect2H	pon2/private/core/field/avx2/main.html#connect2H,F	proc connect2H[F: TsuField or WaterField](self: F): F		295
+nim	connect3	pon2/private/core/field/avx2/main.html#connect3,F	proc connect3[F: TsuField or WaterField](self: F): F		306
+nim	connect3V	pon2/private/core/field/avx2/main.html#connect3V,F	proc connect3V[F: TsuField or WaterField](self: F): F		317
+nim	connect3H	pon2/private/core/field/avx2/main.html#connect3H,F	proc connect3H[F: TsuField or WaterField](self: F): F		328
+nim	connect3L	pon2/private/core/field/avx2/main.html#connect3L,F	proc connect3L[F: TsuField or WaterField](self: F): F		339
+nim	shiftedUp	pon2/private/core/field/avx2/main.html#shiftedUp,F	proc shiftedUp[F: TsuField or WaterField](self: F): F		354
+nim	shiftedDown	pon2/private/core/field/avx2/main.html#shiftedDown,F	proc shiftedDown[F: TsuField or WaterField](self: F): F		363
+nim	shiftedRight	pon2/private/core/field/avx2/main.html#shiftedRight,F	proc shiftedRight[F: TsuField or WaterField](self: F): F		372
+nim	shiftedLeft	pon2/private/core/field/avx2/main.html#shiftedLeft,F	proc shiftedLeft[F: TsuField or WaterField](self: F): F		381
+nim	flippedV	pon2/private/core/field/avx2/main.html#flippedV,F	proc flippedV[F: TsuField or WaterField](self: F): F		403
+nim	flippedH	pon2/private/core/field/avx2/main.html#flippedH,F	proc flippedH[F: TsuField or WaterField](self: F): F		412
+nim	disappear	pon2/private/core/field/avx2/main.html#disappear	proc disappear(self: var (TsuField or WaterField)): DisappearResult		425
+nim	willDisappear	pon2/private/core/field/avx2/main.html#willDisappear	proc willDisappear(self: TsuField or WaterField): bool		450
+nim	put	pon2/private/core/field/avx2/main.html#put,TsuField,Pair,Position	proc put(self: var TsuField; pair: Pair; pos: Position)		459
+nim	put	pon2/private/core/field/avx2/main.html#put,WaterField,Pair,Position	proc put(self: var WaterField; pair: Pair; pos: Position)		481
+nim	drop	pon2/private/core/field/avx2/main.html#drop,TsuField	proc drop(self: var TsuField)		521
+nim	drop	pon2/private/core/field/avx2/main.html#drop,WaterField	proc drop(self: var WaterField)		530
+nim	toArray	pon2/private/core/field/avx2/main.html#toArray	proc toArray(self: TsuField or WaterField): array[Row, array[Column, Cell]]		575
+nim	parseField	pon2/private/core/field/avx2/main.html#parseField,array[Row,array[Column,Cell]]	proc parseField[F: TsuField or WaterField](arr: array[Row, array[Column, Cell]]): F		595
+nimgrp	drop	pon2/private/core/field/avx2/main.html#drop-procs-all	proc		521
+nimgrp	puyocount	pon2/private/core/field/avx2/main.html#puyoCount-procs-all	proc		239
+nimgrp	removesqueeze	pon2/private/core/field/avx2/main.html#removeSqueeze-procs-all	proc		222
+nimgrp	put	pon2/private/core/field/avx2/main.html#put-procs-all	proc		459
+nimgrp	insert	pon2/private/core/field/avx2/main.html#insert-procs-all	proc		197

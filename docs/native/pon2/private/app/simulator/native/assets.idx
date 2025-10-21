@@ -1,0 +1,3 @@
+nimTitle	assets	pon2/private/app/simulator/native/assets.html	module src/pon2/private/app/simulator/native/assets		0
+nim	Assets	pon2/private/app/simulator/native/assets.html#Assets	type Assets		21
+nim	newAssets	pon2/private/app/simulator/native/assets.html#newAssets,int	proc newAssets(timeoutSec = 180): Assets		34

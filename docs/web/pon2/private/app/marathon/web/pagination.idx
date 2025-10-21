@@ -1,0 +1,2 @@
+nimTitle	pagination	pon2/private/app/marathon/web/pagination.html	module src/pon2/private/app/marathon/web/pagination		0
+nim	newMarathonPaginationNode	pon2/private/app/marathon/web/pagination.html#newMarathonPaginationNode,Marathon	proc newMarathonPaginationNode(marathon: Marathon): VNode		16

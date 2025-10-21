@@ -1,0 +1,3 @@
+nimTitle	pairs	pon2/private/app/simulator/native/pairs.html	module src/pon2/private/app/simulator/native/pairs		0
+nim	PairsControl	pon2/private/app/simulator/native/pairs.html#PairsControl	type PairsControl		19
+nim	newPairsControl	pon2/private/app/simulator/native/pairs.html#newPairsControl,Simulator,Assets	proc newPairsControl(simulator: Simulator; assets: Assets): PairsControl		162

@@ -1,0 +1,3 @@
+nimTitle	controller	pon2/private/app/ide/native/controller.html	module src/pon2/private/app/ide/native/controller		0
+nim	EditorControllerControl	pon2/private/app/ide/native/controller.html#EditorControllerControl	type EditorControllerControl		16
+nim	newEditorControllerControl	pon2/private/app/ide/native/controller.html#newEditorControllerControl,Ide	proc newEditorControllerControl(ide: Ide): EditorControllerControl		35

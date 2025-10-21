@@ -1,0 +1,2 @@
+nimTitle	controller	pon2/private/app/ide/web/controller.html	module src/pon2/private/app/ide/web/controller		0
+nim	newEditorControllerNode	pon2/private/app/ide/web/controller.html#newEditorControllerNode,Ide,string	proc newEditorControllerNode(ide: Ide; settingsId: string): VNode		18

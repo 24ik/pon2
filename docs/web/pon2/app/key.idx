@@ -1,0 +1,4 @@
+nimTitle	key	pon2/app/key.html	module src/pon2/app/key		0
+nim	KeyEvent	pon2/app/key.html#KeyEvent	object KeyEvent		11
+nim	initKeyEvent	pon2/app/key.html#initKeyEvent,string	proc initKeyEvent(code: string; shift = false; control = false; alt = false;\n             meta = false): KeyEvent		22
+nim	toKeyEvent	pon2/app/key.html#toKeyEvent,KeyboardEvent	proc toKeyEvent(event: KeyboardEvent): KeyEvent		35

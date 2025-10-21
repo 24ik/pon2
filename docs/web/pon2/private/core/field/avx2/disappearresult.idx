@@ -1,0 +1,9 @@
+nimTitle	disappearresult	pon2/private/core/field/avx2/disappearresult.html	module src/pon2/private/core/field/avx2/disappearresult		0
+nim	DisappearResult	pon2/private/core/field/avx2/disappearresult.html#DisappearResult	object DisappearResult		17
+nim	notDisappeared	pon2/private/core/field/avx2/disappearresult.html#notDisappeared,DisappearResult	proc notDisappeared(self: DisappearResult): bool		28
+nim	colorCount	pon2/private/core/field/avx2/disappearresult.html#colorCount,DisappearResult	proc colorCount(self: DisappearResult): int		36
+nim	garbageCount	pon2/private/core/field/avx2/disappearresult.html#garbageCount,DisappearResult	proc garbageCount(self: DisappearResult): int		40
+nim	puyoCount	pon2/private/core/field/avx2/disappearresult.html#puyoCount,DisappearResult,Puyo	proc puyoCount(self: DisappearResult; puyo: Puyo): int		44
+nim	puyoCount	pon2/private/core/field/avx2/disappearresult.html#puyoCount,DisappearResult	proc puyoCount(self: DisappearResult): int		62
+nim	connectionCounts	pon2/private/core/field/avx2/disappearresult.html#connectionCounts,DisappearResult	proc connectionCounts(self: DisappearResult): array[ColorPuyo, seq[int]]		141
+nimgrp	puyocount	pon2/private/core/field/avx2/disappearresult.html#puyoCount-procs-all	proc		44

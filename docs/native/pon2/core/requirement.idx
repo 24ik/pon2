@@ -1,0 +1,26 @@
+nimTitle	requirement	pon2/core/requirement.html	module src/pon2/core/requirement		0
+nim	RequirementKind	pon2/core/requirement.html#RequirementKind	enum RequirementKind		15
+nim	RequirementColor	pon2/core/requirement.html#RequirementColor	enum RequirementColor		35
+nim	RequirementNumber	pon2/core/requirement.html#RequirementNumber	type RequirementNumber		46
+nim	Requirement	pon2/core/requirement.html#Requirement	object Requirement		48
+nim	NoColorKinds	pon2/core/requirement.html#NoColorKinds	const NoColorKinds		54
+nim	NoNumberKinds	pon2/core/requirement.html#NoNumberKinds	const NoNumberKinds		58
+nim	ColorKinds	pon2/core/requirement.html#ColorKinds	const ColorKinds		60
+nim	NumberKinds	pon2/core/requirement.html#NumberKinds	const NumberKinds		61
+nim	initRequirement	pon2/core/requirement.html#initRequirement,RequirementKind,RequirementColor,RequirementNumber	proc initRequirement(kind: RequirementKind; color: RequirementColor;\n                number: RequirementNumber): Requirement		67
+nim	initRequirement	pon2/core/requirement.html#initRequirement,RequirementKind,RequirementColor	proc initRequirement(kind: RequirementKind; color: RequirementColor): Requirement		73
+nim	initRequirement	pon2/core/requirement.html#initRequirement,RequirementKind,RequirementNumber	proc initRequirement(kind: RequirementKind; number: RequirementNumber): Requirement		79
+nim	isSupported	pon2/core/requirement.html#isSupported,Requirement	proc isSupported(self: Requirement): bool		92
+nim	kind	pon2/core/requirement.html#kind,Requirement	proc kind(self: Requirement): RequirementKind		98
+nim	color	pon2/core/requirement.html#color,Requirement	proc color(self: Requirement): RequirementColor		102
+nim	number	pon2/core/requirement.html#number,Requirement	proc number(self: Requirement): RequirementNumber		107
+nim	kind=	pon2/core/requirement.html#kind=,Requirement,RequirementKind	proc kind=(self: var Requirement; kind: RequirementKind)		112
+nim	color=	pon2/core/requirement.html#color=,Requirement,RequirementColor	proc color=(self: var Requirement; color: RequirementColor)		132
+nim	number=	pon2/core/requirement.html#number=,Requirement,RequirementNumber	proc number=(self: var Requirement; number: RequirementNumber)		140
+nim	`$`	pon2/core/requirement.html#$,Requirement	proc `$`(self: Requirement): string		152
+nim	parseRequirement	pon2/core/requirement.html#parseRequirement,string	proc parseRequirement(str: string): Requirement		179
+nim	RequirementQueryKeys	pon2/core/requirement.html#RequirementQueryKeys	const RequirementQueryKeys		212
+nim	toUriQuery	pon2/core/requirement.html#toUriQuery,Requirement	proc toUriQuery(self: Requirement; fqdn = Pon2): string		214
+nim	parseRequirement	pon2/core/requirement.html#parseRequirement,string,IdeFqdn	proc parseRequirement(query: string; fqdn: IdeFqdn): Requirement		241
+nimgrp	initrequirement	pon2/core/requirement.html#initRequirement-procs-all	proc		67
+nimgrp	parserequirement	pon2/core/requirement.html#parseRequirement-procs-all	proc		179
