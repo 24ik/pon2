@@ -1,3 +1,0 @@
-nimTitle	solve	pon2/app/solve.html	module src/pon2/app/solve		0
-nim	SolveAnswer	pon2/app/solve.html#SolveAnswer	type SolveAnswer		25
-nim	solve	pon2/app/solve.html#solve,NazoPuyo[F: TsuField or WaterField],staticbool	proc solve[F: TsuField or WaterField](nazo: NazoPuyo[F];\n                                 calcAllAnswers: static bool = true): seq[\n    SolveAnswer]		822

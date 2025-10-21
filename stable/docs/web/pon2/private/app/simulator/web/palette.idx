@@ -1,0 +1,2 @@
+nimTitle	palette	pon2/private/app/simulator/web/palette.html	module src/pon2/private/app/simulator/web/palette		0
+nim	newPaletteNode	pon2/private/app/simulator/web/palette.html#newPaletteNode,Simulator	proc newPaletteNode(simulator: Simulator): VNode		26

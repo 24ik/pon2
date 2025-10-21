@@ -1,3 +1,0 @@
-nimTitle	field	pon2/gui/simulator/field.html	module src/pon2/gui/simulator/field		0
-nim	FieldView	pon2/gui/simulator/field.html#FieldView	object FieldView		18
-nim	init	pon2/gui/simulator/field.html#init,typeFieldView,ref.Simulator	proc init(T: type FieldView; simulator: ref Simulator; showCursor = true): T:type		26

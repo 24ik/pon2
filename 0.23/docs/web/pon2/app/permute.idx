@@ -1,0 +1,2 @@
+nimTitle	permute	pon2/app/permute.html	module src/pon2/app/permute		0
+nim	permute	pon2/app/permute.html#permute.i,NazoPuyo[F: TsuField or WaterField],seq[Positive],bool,bool,staticbool,Positive	iterator permute[F: TsuField or WaterField](nazo: NazoPuyo[F]; fixMoves: seq[Positive];\n                                   allowDouble: bool; allowLastDouble: bool;\n                                   showProgress: static bool = false;\n    parallelCount: Positive = when true:\n  1\nelse:\n  max(1, countProcessors())): PairsPositions		23

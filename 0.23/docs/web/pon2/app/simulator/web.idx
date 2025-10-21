@@ -1,0 +1,2 @@
+nimTitle	web	pon2/app/simulator/web.html	module src/pon2/app/simulator/web		0
+nim	newSimulatorNode	pon2/app/simulator/web.html#newSimulatorNode,Simulator,string	proc newSimulatorNode(self: Simulator; wrapSection = true; id = ""; isAnswer = false): VNode		74

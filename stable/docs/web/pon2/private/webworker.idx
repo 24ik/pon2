@@ -1,0 +1,11 @@
+nimTitle	webworker	pon2/private/webworker.html	module src/pon2/private/webworker		0
+nim	WorkerReturnCode	pon2/private/webworker.html#WorkerReturnCode	enum WorkerReturnCode		28
+nim	WorkerTask	pon2/private/webworker.html#WorkerTask	type WorkerTask		33
+nim	WorkerCompleteHandler	pon2/private/webworker.html#WorkerCompleteHandler	type WorkerCompleteHandler		37
+nim	Worker	pon2/private/webworker.html#Worker	type Worker		40
+nim	DefaultWorkerTask	pon2/private/webworker.html#DefaultWorkerTask	const DefaultWorkerTask		47
+nim	DefaultWorkerCompleteHandler	pon2/private/webworker.html#DefaultWorkerCompleteHandler	const DefaultWorkerCompleteHandler		48
+nim	assignToWorker	pon2/private/webworker.html#assignToWorker,WorkerTask	proc assignToWorker(task: WorkerTask)		69
+nim	run	pon2/private/webworker.html#run,Worker,varargs[string]	proc run(self: Worker; args: varargs[string])		77
+nim	completeHandler=	pon2/private/webworker.html#completeHandler=,Worker,WorkerCompleteHandler	proc completeHandler=(self: Worker; handler: WorkerCompleteHandler)		89
+nim	newWorker	pon2/private/webworker.html#newWorker	proc newWorker(): Worker		108

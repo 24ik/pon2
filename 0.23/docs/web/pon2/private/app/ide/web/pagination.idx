@@ -1,0 +1,2 @@
+nimTitle	pagination	pon2/private/app/ide/web/pagination.html	module src/pon2/private/app/ide/web/pagination		0
+nim	newEditorPaginationNode	pon2/private/app/ide/web/pagination.html#newEditorPaginationNode,Ide	proc newEditorPaginationNode(ide: Ide): VNode		15

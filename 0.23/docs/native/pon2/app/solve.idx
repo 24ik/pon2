@@ -1,0 +1,2 @@
+nimTitle	solve	pon2/app/solve.html	module src/pon2/app/solve		0
+nim	solve	pon2/app/solve.html#solve,NazoPuyo[F: TsuField or WaterField],staticbool,staticbool,Positive	proc solve[F: TsuField or WaterField](nazo: NazoPuyo[F];\n                                 showProgress: static bool = false;\n                                 earlyStopping: static bool = false;\n                                 parallelCount: Positive = processorCount()): seq[\n    SolveAnswer]		196

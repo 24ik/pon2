@@ -1,2 +1,0 @@
-nimTitle	strutils2	pon2/private/strutils2.html	module src/pon2/private/strutils2		0
-nim	parseIntRes	pon2/private/strutils2.html#parseIntRes,string	proc parseIntRes(str: string): Res[int]		14

@@ -1,0 +1,15 @@
+nimTitle	nazopuyo	pon2/core/nazopuyo.html	module src/pon2/core/nazopuyo		0
+nim	NazoPuyo	pon2/core/nazopuyo.html#NazoPuyo	object NazoPuyo		14
+nim	initNazoPuyo	pon2/core/nazopuyo.html#initNazoPuyo	proc initNazoPuyo[F: TsuField or WaterField](): NazoPuyo[F]		24
+nim	`==`	pon2/core/nazopuyo.html#==,NazoPuyo[TsuField],NazoPuyo[WaterField]	proc `==`(nazo1: NazoPuyo[TsuField]; nazo2: NazoPuyo[WaterField]): bool		32
+nim	`==`	pon2/core/nazopuyo.html#==,NazoPuyo[WaterField],NazoPuyo[TsuField]	proc `==`(nazo1: NazoPuyo[WaterField]; nazo2: NazoPuyo[TsuField]): bool		35
+nim	toTsuNazoPuyo	pon2/core/nazopuyo.html#toTsuNazoPuyo,NazoPuyo[F: TsuField or WaterField]	proc toTsuNazoPuyo[F: TsuField or WaterField](self: NazoPuyo[F]): NazoPuyo[TsuField]		42
+nim	toWaterNazoPuyo	pon2/core/nazopuyo.html#toWaterNazoPuyo,NazoPuyo[F: TsuField or WaterField]	proc toWaterNazoPuyo[F: TsuField or WaterField](self: NazoPuyo[F]): NazoPuyo[\n    WaterField]		50
+nim	rule	pon2/core/nazopuyo.html#rule,NazoPuyo[F: TsuField or WaterField]	proc rule[F: TsuField or WaterField](self: NazoPuyo[F]): Rule		62
+nim	moveCount	pon2/core/nazopuyo.html#moveCount,NazoPuyo[F: TsuField or WaterField]	proc moveCount[F: TsuField or WaterField](self: NazoPuyo[F]): int		66
+nim	`$`	pon2/core/nazopuyo.html#$,NazoPuyo[F: TsuField or WaterField]	proc `$`[F: TsuField or WaterField](self: NazoPuyo[F]): string		76
+nim	parseNazoPuyo	pon2/core/nazopuyo.html#parseNazoPuyo,string	proc parseNazoPuyo[F: TsuField or WaterField](str: string): NazoPuyo[F]		80
+nim	toUriQuery	pon2/core/nazopuyo.html#toUriQuery,NazoPuyo[F: TsuField or WaterField]	proc toUriQuery[F: TsuField or WaterField](self: NazoPuyo[F]; fqdn = Pon2): string		95
+nim	parseNazoPuyo	pon2/core/nazopuyo.html#parseNazoPuyo,string,IdeFqdn	proc parseNazoPuyo[F: TsuField or WaterField](query: string; fqdn: IdeFqdn): NazoPuyo[\n    F]		106
+nimgrp	==	pon2/core/nazopuyo.html#==-procs-all	proc		32
+nimgrp	parsenazopuyo	pon2/core/nazopuyo.html#parseNazoPuyo-procs-all	proc		80

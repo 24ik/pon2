@@ -1,2 +1,0 @@
-nimTitle	critbits2	pon2/private/critbits2.html	module src/pon2/private/critbits2		0
-nim	toCritBitTree2	pon2/private/critbits2.html#toCritBitTree2,sinkopenArray[string]	proc toCritBitTree2(items: sink openArray[string]): CritBitTree[void]		13

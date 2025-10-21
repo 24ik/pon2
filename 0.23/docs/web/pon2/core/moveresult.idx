@@ -1,0 +1,26 @@
+nimTitle	moveresult	pon2/core/moveresult.html	module src/pon2/core/moveresult		0
+nim	MoveResult	pon2/core/moveresult.html#MoveResult	object MoveResult		15
+nim	initMoveResult	pon2/core/moveresult.html#initMoveResult,Natural,array[Puyo,int]	proc initMoveResult(chainCount: Natural; disappearCounts: array[Puyo, int]): MoveResult		25
+nim	initMoveResult	pon2/core/moveresult.html#initMoveResult,Natural,array[Puyo,int],seq[array[Puyo,int]]	proc initMoveResult(chainCount: Natural; disappearCounts: array[Puyo, int];\n               detailDisappearCounts: seq[array[Puyo, int]]): MoveResult		36
+nim	initMoveResult	pon2/core/moveresult.html#initMoveResult,Natural,array[Puyo,int],seq[array[Puyo,int]],seq[array[ColorPuyo,seq[int]]]	proc initMoveResult(chainCount: Natural; disappearCounts: array[Puyo, int];\n               detailDisappearCounts: seq[array[Puyo, int]];\n               fullDisappearCounts: seq[array[ColorPuyo, seq[int]]]): MoveResult		49
+nim	puyoCount	pon2/core/moveresult.html#puyoCount,MoveResult,Puyo	proc puyoCount(self: MoveResult; puyo: Puyo): int		67
+nim	puyoCount	pon2/core/moveresult.html#puyoCount,MoveResult	proc puyoCount(self: MoveResult): int		71
+nim	colorCount	pon2/core/moveresult.html#colorCount,MoveResult	proc colorCount(self: MoveResult): int		75
+nim	garbageCount	pon2/core/moveresult.html#garbageCount,MoveResult	proc garbageCount(self: MoveResult): int		79
+nim	puyoCounts	pon2/core/moveresult.html#puyoCounts,MoveResult,Puyo	proc puyoCounts(self: MoveResult; puyo: Puyo): seq[int]		87
+nim	puyoCounts	pon2/core/moveresult.html#puyoCounts,MoveResult	proc puyoCounts(self: MoveResult): seq[int]		92
+nim	colorCounts	pon2/core/moveresult.html#colorCounts,MoveResult	proc colorCounts(self: MoveResult): seq[int]		97
+nim	garbageCounts	pon2/core/moveresult.html#garbageCounts,MoveResult	proc garbageCounts(self: MoveResult): seq[int]		102
+nim	colors	pon2/core/moveresult.html#colors,MoveResult	proc colors(self: MoveResult): set[ColorPuyo]		111
+nim	colorsSeq	pon2/core/moveresult.html#colorsSeq,MoveResult	proc colorsSeq(self: MoveResult): seq[set[ColorPuyo]]		119
+nim	colorPlaces	pon2/core/moveresult.html#colorPlaces,MoveResult,ColorPuyo	proc colorPlaces(self: MoveResult; color: ColorPuyo): seq[int]		136
+nim	colorPlaces	pon2/core/moveresult.html#colorPlaces,MoveResult	proc colorPlaces(self: MoveResult): seq[int]		141
+nim	colorConnects	pon2/core/moveresult.html#colorConnects,MoveResult,ColorPuyo	proc colorConnects(self: MoveResult; color: ColorPuyo): seq[int]		152
+nim	colorConnects	pon2/core/moveresult.html#colorConnects,MoveResult	proc colorConnects(self: MoveResult): seq[int]		157
+nim	score	pon2/core/moveresult.html#score,MoveResult	proc score(self: MoveResult): int		197
+nim	noticeGarbageCounts	pon2/core/moveresult.html#noticeGarbageCounts,MoveResult,Rule	proc noticeGarbageCounts(self: MoveResult; rule: Rule): array[NoticeGarbage, int]		225
+nimgrp	colorconnects	pon2/core/moveresult.html#colorConnects-procs-all	proc		152
+nimgrp	puyocount	pon2/core/moveresult.html#puyoCount-procs-all	proc		67
+nimgrp	colorplaces	pon2/core/moveresult.html#colorPlaces-procs-all	proc		136
+nimgrp	initmoveresult	pon2/core/moveresult.html#initMoveResult-procs-all	proc		25
+nimgrp	puyocounts	pon2/core/moveresult.html#puyoCounts-procs-all	proc		87

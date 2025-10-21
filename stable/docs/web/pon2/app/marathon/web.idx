@@ -1,0 +1,6 @@
+nimTitle	web	pon2/app/marathon/web.html	module src/pon2/app/marathon/web		0
+nim	runKeyboardEventHandler	pon2/app/marathon/web.html#runKeyboardEventHandler,Marathon,KeyEvent	proc runKeyboardEventHandler(self: Marathon; event: KeyEvent): bool		23
+nim	runKeyboardEventHandler	pon2/app/marathon/web.html#runKeyboardEventHandler,Marathon,Event	proc runKeyboardEventHandler(self: Marathon; event: Event): bool		32
+nim	newKeyboardEventHandler	pon2/app/marathon/web.html#newKeyboardEventHandler,Marathon	proc newKeyboardEventHandler(self: Marathon): (event: Event) -> void		42
+nim	newMarathonNode	pon2/app/marathon/web.html#newMarathonNode,Marathon,string	proc newMarathonNode(self: Marathon; setKeyHandler = true; wrapSection = true;\n                id = ""): VNode		74
+nimgrp	runkeyboardeventhandler	pon2/app/marathon/web.html#runKeyboardEventHandler-procs-all	proc		23

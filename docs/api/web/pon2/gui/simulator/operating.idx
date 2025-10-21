@@ -1,4 +1,0 @@
-nimTitle	operating	pon2/gui/simulator/operating.html	module src/pon2/gui/simulator/operating		0
-nim	OperatingView	pon2/gui/simulator/operating.html#OperatingView	object OperatingView		16
-nim	init	pon2/gui/simulator/operating.html#init,typeOperatingView,ref.Simulator	proc init(T: type OperatingView; simulator: ref Simulator): T:type		23
-nim	toVNode	pon2/gui/simulator/operating.html#toVNode,OperatingView	proc toVNode(self: OperatingView): VNode		66

@@ -1,0 +1,7 @@
+nimTitle	native	pon2/app/ide/native.html	module src/pon2/app/ide/native		0
+nim	IdeControl	pon2/app/ide/native.html#IdeControl	type IdeControl		18
+nim	IdeWindow	pon2/app/ide/native.html#IdeWindow	type IdeWindow		20
+nim	runKeyboardEventHandler	pon2/app/ide/native.html#runKeyboardEventHandler,IdeWindow,KeyboardEvent	proc runKeyboardEventHandler(window: IdeWindow; event: KeyboardEvent;\n                        keys = downKeys()): bool		27
+nim	newKeyboardEventHandler	pon2/app/ide/native.html#newKeyboardEventHandler	proc newKeyboardEventHandler(): (event: KeyboardEvent) -> void		44
+nim	newIdeControl	pon2/app/ide/native.html#newIdeControl,Ide	proc newIdeControl(self: Ide): IdeControl		52
+nim	newIdeWindow	pon2/app/ide/native.html#newIdeWindow,Ide,string	proc newIdeWindow(self: Ide; title = "Pon!通"; setKeyHandler = true): IdeWindow		75

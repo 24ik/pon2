@@ -1,3 +1,0 @@
-nimTitle	goal	pon2/gui/simulator/goal.html	module src/pon2/gui/simulator/goal		0
-nim	GoalView	pon2/gui/simulator/goal.html#GoalView	object GoalView		17
-nim	init	pon2/gui/simulator/goal.html#init,typeGoalView,ref.Simulator	proc init(T: type GoalView; simulator: ref Simulator): T:type		24

@@ -1,0 +1,10 @@
+nimTitle	common	pon2/private/app/simulator/common.html	module src/pon2/private/app/simulator/common		0
+nim	ShownNoticeGarbageCount	pon2/private/app/simulator/common.html#ShownNoticeGarbageCount	const ShownNoticeGarbageCount		23
+nim	fieldCellBackgroundColor	pon2/private/app/simulator/common.html#fieldCellBackgroundColor,Simulator,Row,Column	proc fieldCellBackgroundColor(simulator: Simulator; row: Row; col: Column;\n                         displayMode = false): Color		29
+nim	needPairPointer	pon2/private/app/simulator/common.html#needPairPointer,Simulator,Natural	proc needPairPointer(simulator: Simulator; idx: Natural): bool		56
+nim	pairCellBackgroundColor	pon2/private/app/simulator/common.html#pairCellBackgroundColor,Simulator,Natural,bool	proc pairCellBackgroundColor(simulator: Simulator; idx: Natural; axis: bool): Color		61
+nim	operatingPairCell	pon2/private/app/simulator/common.html#operatingPairCell,Simulator,range[],Column	proc operatingPairCell(simulator: Simulator; idx: range[-1 .. 1]; col: Column): Cell		81
+nim	immediateNextPairCell	pon2/private/app/simulator/common.html#immediateNextPairCell,Simulator,bool	proc immediateNextPairCell(simulator: Simulator; axis: bool): Cell		128
+nim	immediateDoubleNextPairCell	pon2/private/app/simulator/common.html#immediateDoubleNextPairCell,Simulator,bool	proc immediateDoubleNextPairCell(simulator: Simulator; axis: bool): Cell		138
+nim	getMessages	pon2/private/app/simulator/common.html#getMessages,Simulator	proc getMessages(simulator: Simulator): tuple[state: string, score: int,\n    noticeGarbages: array[NoticeGarbage, int]]		152
+nim	toXLink	pon2/private/app/simulator/common.html#toXLink,Simulator,bool	proc toXLink(simulator: Simulator; withPositions: bool): Uri		198

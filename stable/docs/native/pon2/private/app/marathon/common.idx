@@ -1,0 +1,4 @@
+nimTitle	common	pon2/private/app/marathon/common.html	module src/pon2/private/app/marathon/common		0
+nim	MatchResultPairsCountPerPage	pon2/private/app/marathon/common.html#MatchResultPairsCountPerPage	const MatchResultPairsCountPerPage		15
+nim	AllPairsCount	pon2/private/app/marathon/common.html#AllPairsCount	const AllPairsCount		16
+nim	toPairsPositions	pon2/private/app/marathon/common.html#toPairsPositions,string	proc toPairsPositions(str: string): PairsPositions		18

@@ -1,0 +1,5 @@
+nimTitle	cell	pon2/core/cell.html	module src/pon2/core/cell		0
+nim	Cell	pon2/core/cell.html#Cell	enum Cell		14
+nim	ColorPuyo	pon2/core/cell.html#ColorPuyo	type ColorPuyo		24
+nim	Puyo	pon2/core/cell.html#Puyo	type Puyo		25
+nim	parseCell	pon2/core/cell.html#parseCell,string	proc parseCell(str: string): Cell		35

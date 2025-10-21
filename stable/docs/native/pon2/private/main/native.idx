@@ -1,0 +1,6 @@
+nimTitle	native	pon2/private/main/native.html	module src/pon2/private/main/native		0
+nim	runSolver	pon2/private/main/native.html#runSolver,Table[string,Value]	proc runSolver(args: Table[string, Value])		81
+nim	runGenerator	pon2/private/main/native.html#runGenerator,Table[string,Value]	proc runGenerator(args: Table[string, Value])		106
+nim	runPermuter	pon2/private/main/native.html#runPermuter,Table[string,Value]	proc runPermuter(args: Table[string, Value])		190
+nim	runIde	pon2/private/main/native.html#runIde,Table[string,Value]	proc runIde(args: Table[string, Value])		230
+nim	getCommandLineArguments	pon2/private/main/native.html#getCommandLineArguments	proc getCommandLineArguments(): Table[string, Value]		333

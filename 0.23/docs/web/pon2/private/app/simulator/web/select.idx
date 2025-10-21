@@ -1,0 +1,2 @@
+nimTitle	select	pon2/private/app/simulator/web/select.html	module src/pon2/private/app/simulator/web/select		0
+nim	newSelectNode	pon2/private/app/simulator/web/select.html#newSelectNode,Simulator	proc newSelectNode(simulator: Simulator): VNode		20

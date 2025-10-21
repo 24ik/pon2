@@ -1,7 +1,0 @@
-nimTitle	unionfind	pon2/private/unionfind.html	module src/pon2/private/unionfind		0
-nim	UnionFindNode	pon2/private/unionfind.html#UnionFindNode	type UnionFindNode		12
-nim	UnionFind	pon2/private/unionfind.html#UnionFind	object UnionFind		14
-nim	init	pon2/private/unionfind.html#init,typeUnionFind,int	proc init(T: type UnionFind; size: int): T:type		22
-nim	root	pon2/private/unionfind.html#root,UnionFind,UnionFindNode	proc root(self: var UnionFind; node: UnionFindNode): UnionFindNode		33
-nim	merge	pon2/private/unionfind.html#merge,UnionFind,UnionFindNode,UnionFindNode	proc merge(self: var UnionFind; node1, node2: UnionFindNode)		44
-nim	connected	pon2/private/unionfind.html#connected,UnionFind,UnionFindNode,UnionFindNode	proc connected(self: var UnionFind; node1, node2: UnionFindNode): bool		66

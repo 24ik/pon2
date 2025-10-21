@@ -1,0 +1,2 @@
+nimTitle	permute	pon2/private/app/permute.html	module src/pon2/private/app/permute		0
+nim	allPairsPositionsSeq	pon2/private/app/permute.html#allPairsPositionsSeq,NazoPuyo[F: TsuField or WaterField],openArray[Positive],bool,bool	proc allPairsPositionsSeq[F: TsuField or WaterField](nazo: NazoPuyo[F];\n    fixMoves: openArray[Positive]; allowDouble: bool; allowLastDouble: bool): seq[\n    PairsPositions]		65

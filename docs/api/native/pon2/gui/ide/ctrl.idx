@@ -1,3 +1,0 @@
-nimTitle	ctrl	pon2/gui/ide/ctrl.html	module src/pon2/gui/ide/ctrl		0
-nim	IdeCtrlView	pon2/gui/ide/ctrl.html#IdeCtrlView	object IdeCtrlView		17
-nim	init	pon2/gui/ide/ctrl.html#init,typeIdeCtrlView,ref.Ide	proc init(T: type IdeCtrlView; ide: ref Ide): T:type		24

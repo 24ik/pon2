@@ -1,0 +1,7 @@
+nimTitle	intrinsic	pon2/private/intrinsic.html	module src/pon2/private/intrinsic		0
+nim	UseAvx2	pon2/private/intrinsic.html#UseAvx2	const UseAvx2		22
+nim	UseBmi2	pon2/private/intrinsic.html#UseBmi2	const UseBmi2		23
+nim	pext	pon2/private/intrinsic.html#pext,uint64,uint64	proc pext(a, mask: uint64): uint64		43
+nim	pext	pon2/private/intrinsic.html#pext,uint32,uint32	proc pext(a, mask: uint32): uint32		46
+nim	pext	pon2/private/intrinsic.html#pext,uint16,uint16	proc pext(a, mask: uint16): uint16		49
+nimgrp	pext	pon2/private/intrinsic.html#pext-procs-all	proc		43

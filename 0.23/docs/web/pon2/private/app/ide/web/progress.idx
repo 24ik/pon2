@@ -1,0 +1,2 @@
+nimTitle	progress	pon2/private/app/ide/web/progress.html	module src/pon2/private/app/ide/web/progress		0
+nim	newEditorProgressBarNode	pon2/private/app/ide/web/progress.html#newEditorProgressBarNode,Ide	proc newEditorProgressBarNode(ide: Ide): VNode		15

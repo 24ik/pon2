@@ -1,0 +1,3 @@
+nimTitle	immediatepairs	pon2/private/app/simulator/native/immediatepairs.html	module src/pon2/private/app/simulator/native/immediatepairs		0
+nim	ImmediatePairsControl	pon2/private/app/simulator/native/immediatepairs.html#ImmediatePairsControl	type ImmediatePairsControl		18
+nim	newImmediatePairsControl	pon2/private/app/simulator/native/immediatepairs.html#newImmediatePairsControl,Simulator,Assets	proc newImmediatePairsControl(simulator: Simulator; assets: Assets): ImmediatePairsControl		59

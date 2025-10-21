@@ -1,2 +1,0 @@
-nimTitle	tables2	pon2/private/tables2.html	module src/pon2/private/tables2		0
-nim	getRes	pon2/private/tables2.html#getRes,,K	proc getRes[K, V](tbl: Table[K, V] or TableRef[K, V] or OrderedTable[K, V] or\n    OrderedTableRef[K, V]; key: K): Res[V]		14

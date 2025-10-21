@@ -1,0 +1,2 @@
+nimTitle	web	pon2/private/main/web.html	module src/pon2/private/main/web		0
+nim	ideRenderer	pon2/private/main/web.html#ideRenderer,RouterData	proc ideRenderer(routerData: RouterData): VNode		176
