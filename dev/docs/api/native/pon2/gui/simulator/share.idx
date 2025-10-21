@@ -1,0 +1,3 @@
+nimTitle	share	pon2/gui/simulator/share.html	module src/pon2/gui/simulator/share		0
+nim	ShareView	pon2/gui/simulator/share.html#ShareView	object ShareView		17
+nim	init	pon2/gui/simulator/share.html#init,typeShareView,ref.Simulator	proc init(T: type ShareView; simulator: ref Simulator): T:type		24

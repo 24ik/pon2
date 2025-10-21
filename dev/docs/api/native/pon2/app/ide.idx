@@ -1,0 +1,21 @@
+nimTitle	ide	pon2/app/ide.html	module src/pon2/app/ide		0
+nim	IdeReplayData	pon2/app/ide.html#IdeReplayData	object IdeReplayData		15
+nim	Ide	pon2/app/ide.html#Ide	object Ide		19
+nim	init	pon2/app/ide.html#init,typeIde,ref.Simulator	proc init(T: type Ide; simulator: ref Simulator): T:type		34
+nim	init	pon2/app/ide.html#init,typeIde,Simulator	proc init(T: type Ide; simulator: Simulator): T:type		46
+nim	init	pon2/app/ide.html#init,typeIde	proc init(T: type Ide): T:type		52
+nim	`==`	pon2/app/ide.html#==,Ide,Ide	proc `==`(ide1, ide2: Ide): bool		59
+nim	copy	pon2/app/ide.html#copy,Ide	proc copy(self: Ide): Ide		68
+nim	simulator	pon2/app/ide.html#simulator,Ide	proc simulator(self: Ide): ref Simulator		86
+nim	replaySimulator	pon2/app/ide.html#replaySimulator,Ide	proc replaySimulator(self: Ide): ref Simulator		90
+nim	focusReplay	pon2/app/ide.html#focusReplay,Ide	proc focusReplay(self: Ide): bool		94
+nim	working	pon2/app/ide.html#working,Ide	proc working(self: Ide): bool		98
+nim	replayStepsCnt	pon2/app/ide.html#replayStepsCnt,Ide	proc replayStepsCnt(self: Ide): int		102
+nim	replayStepsIdx	pon2/app/ide.html#replayStepsIdx,Ide	proc replayStepsIdx(self: Ide): int		106
+nim	toggleFocus	pon2/app/ide.html#toggleFocus,Ide	proc toggleFocus(self: var Ide)		114
+nim	nextReplay	pon2/app/ide.html#nextReplay,Ide	proc nextReplay(self: var Ide)		123
+nim	prevReplay	pon2/app/ide.html#prevReplay,Ide	proc prevReplay(self: var Ide)		140
+nim	solve	pon2/app/ide.html#solve,Ide	proc solve(self: var Ide)		175
+nim	permute	pon2/app/ide.html#permute,Ide,openArray[int],bool,bool	proc permute(self: var Ide; fixIndices: openArray[int];\n        allowDblNotLast, allowDblLast: bool)		209
+nim	operate	pon2/app/ide.html#operate,Ide,KeyEvent	proc operate(self: var Ide; key: KeyEvent): bool		236
+nimgrp	init	pon2/app/ide.html#init-procs-all	proc		34

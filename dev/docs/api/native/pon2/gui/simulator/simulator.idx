@@ -1,0 +1,3 @@
+nimTitle	simulator	pon2/gui/simulator/simulator.html	module src/pon2/gui/simulator/simulator		0
+nim	SimulatorView	pon2/gui/simulator/simulator.html#SimulatorView	object SimulatorView		17
+nim	init	pon2/gui/simulator/simulator.html#init,typeSimulatorView,ref.Simulator	proc init(T: type SimulatorView; simulator: ref Simulator; showCursor = true): T:type		39

@@ -1,0 +1,17 @@
+nimTitle	binfield	pon2/private/core/binfield.html	module src/pon2/private/core/binfield		0
+nim	BinField	pon2/private/core/binfield.html#BinField	type BinField		22
+nim	isDead	pon2/private/core/binfield.html#isDead,M128i,staticRule	proc isDead(self: BinField; rule: static Rule): bool		38
+nim	invalidPlacements	pon2/private/core/binfield.html#invalidPlacements,M128i	proc invalidPlacements(self: BinField): set[Placement]		64
+nim	validPlacements	pon2/private/core/binfield.html#validPlacements,M128i	proc validPlacements(self: BinField): set[Placement]		95
+nim	validDblPlacements	pon2/private/core/binfield.html#validDblPlacements,M128i	proc validDblPlacements(self: BinField): set[Placement]		99
+nim	extractedPop	pon2/private/core/binfield.html#extractedPop,M128i	proc extractedPop(self: BinField): BinField		149
+nim	canPop	pon2/private/core/binfield.html#canPop,M128i	proc canPop(self: BinField): bool		160
+nim	conn2	pon2/private/core/binfield.html#conn2,M128i	proc conn2(self: BinField): BinField		208
+nim	conn2Vertical	pon2/private/core/binfield.html#conn2Vertical,M128i	proc conn2Vertical(self: BinField): BinField		212
+nim	conn2Horizontal	pon2/private/core/binfield.html#conn2Horizontal,M128i	proc conn2Horizontal(self: BinField): BinField		216
+nim	conn3	pon2/private/core/binfield.html#conn3,M128i	proc conn3(self: BinField): BinField		254
+nim	conn3Vertical	pon2/private/core/binfield.html#conn3Vertical,M128i	proc conn3Vertical(self: BinField): BinField		258
+nim	conn3Horizontal	pon2/private/core/binfield.html#conn3Horizontal,M128i	proc conn3Horizontal(self: BinField): BinField		282
+nim	conn3LShape	pon2/private/core/binfield.html#conn3LShape,M128i	proc conn3LShape(self: BinField): BinField		306
+nim	toArr	pon2/private/core/binfield.html#toArr,M128i	proc toArr(self: BinField): array[Row, array[Col, bool]]		314
+nim	toBinField	pon2/private/core/binfield.html#toBinField,array[Row,array[Col,bool]]	proc toBinField(arr: array[Row, array[Col, bool]]): BinField		325

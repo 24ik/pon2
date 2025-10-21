@@ -1,0 +1,6 @@
+nimTitle	utils	pon2/private/gui/utils.html	module src/pon2/private/gui/utils		0
+nim	AssetsDir	pon2/private/gui/utils.html#AssetsDir	const AssetsDir		20
+nim	addCopyBtnHandler	pon2/private/gui/utils.html#addCopyBtnHandler,VNode,,int	proc addCopyBtnHandler(btn: VNode; copyStrFn: () -> string; showFlashMsgMs = 500)		33
+nim	cellImgSrc	pon2/private/gui/utils.html#cellImgSrc,Cell	proc cellImgSrc(cell: Cell): cstring		53
+nim	noticeGarbageImgSrc	pon2/private/gui/utils.html#noticeGarbageImgSrc,NoticeGarbage	proc noticeGarbageImgSrc(notice: NoticeGarbage): cstring		68
+nim	isMobile	pon2/private/gui/utils.html#isMobile	proc isMobile(): bool		86
