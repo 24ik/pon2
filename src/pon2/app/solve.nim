@@ -271,7 +271,7 @@ func filter4[T: SomeInteger](x: T): T {.inline.} =
   when nimvm:
     result = x.filter4Nim
   else:
-    when defined(gcc) or defined(clang):
+    when (defined(amd64) or defined(i386)) and (defined(gcc) or defined(clang)):
       {.push warning[Uninit]: off.}
       var zero {.noinit.}: int
       asm """

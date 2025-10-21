@@ -19,6 +19,10 @@ const
   BmiLvl {.define: "pon2.testbmi".} = BmiLvlValMax
   ClmulLvl {.define: "pon2.testclmul".} = ClmulLvlValMax
 
+  TestC {.define: "pon2.testc".} = true
+  TestCpp {.define: "pon2.testcpp".} = true
+  TestJs {.define: "pon2.testjs".} = true
+
 static:
   doAssert SimdLvl in 1 .. SimdLvlValMax
   doAssert BmiLvl in 1 .. BmiLvlValMax
@@ -94,9 +98,12 @@ template suites(backend: Backend): untyped =
 
 proc main() =
   randomize()
-  suites C
-  suites Cpp
-  suites Js
+  when TestC:
+    suites C
+  when TestCpp:
+    suites Cpp
+  when TestJs:
+    suites Js
 
 when isMainModule:
   main()
