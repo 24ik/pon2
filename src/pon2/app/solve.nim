@@ -265,7 +265,7 @@ func filter4Nim[T: SomeInteger](x: T): T {.inline.} =
   ## Returns `x` if `x >= 4`; otherwise 0.
   x * (x >= 4).T
 
-func filter4[T: SomeInteger](x: T): T {.inline.} =
+func filter4[T: SomeInteger](x: T): T {.inline, noinit.} =
   ## Returns `x` if `x >= 4`; otherwise 0.
   # NOTE: asm uses `result`, so "expression return" is unavailable
   when nimvm:
