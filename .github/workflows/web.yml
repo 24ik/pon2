@@ -43,9 +43,7 @@ jobs:
           echo "DIR_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
         if: ${{ github.ref_type }} == 'tag'
 
-      - run: echo "${{ env.DIR_NAME }}"
-
-      - run: nimble -y -d:pon2.path="/pon2/${{ env.DIR_NAME }}" www
+      - run: nimble -y -d:pon2.path="/pon2/${{ env.DIR_NAME }}/ide/" www
 
       - uses: JamesIves/github-pages-deploy-action@v4
         with:

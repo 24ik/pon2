@@ -48,7 +48,7 @@ when defined(js) or defined(nimsuggest):
         disabled = self.ide[].working,
         onclick = () => self.ide.runPermute settingId,
       ):
-        text "解探索"
+        text "ツモ並べ替え"
       if not isMobile():
         button(
           class = (
