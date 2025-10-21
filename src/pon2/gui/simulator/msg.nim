@@ -33,14 +33,11 @@ when defined(js) or defined(nimsuggest):
 
   func msg(self: MsgView): string {.inline.} =
     ## Returns the message.
-    if self.simulator[].state != Stable:
-      return ""
-
     if self.simulator[].nazoPuyoWrap.optGoal.isOk:
       $self.simulator[].mark
     else:
       self.simulator[].nazoPuyoWrap.runIt:
-        if it.field.isDead:
+        if self.simulator[].state == Stable and it.field.isDead:
           $MarkResult.Dead
         else:
           ""
@@ -77,20 +74,21 @@ when defined(js) or defined(nimsuggest):
       noticeGarbageCnts = self.noticeGarbageCnts score
 
     buildHtml tdiv:
-      table:
-        tbody:
-          tr:
-            for notice in countdown(Comet, Small):
-              for _ in 1 .. noticeGarbageCnts[notice]:
+      if self.simulator[].nazoPuyoWrap.optGoal.isErr:
+        table:
+          tbody:
+            tr:
+              for notice in countdown(Comet, Small):
+                for _ in 1 .. noticeGarbageCnts[notice]:
+                  td:
+                    figure(class = "image is-16x16"):
+                      img(src = notice.noticeGarbageImgSrc)
+
+              for _ in 1 .. ShowNoticeGarbageCnt - noticeGarbageCnts.sum2:
                 td:
                   figure(class = "image is-16x16"):
-                    img(src = notice.noticeGarbageImgSrc)
-
-            for _ in 1 .. ShowNoticeGarbageCnt - noticeGarbageCnts.sum2:
+                    img(src = Cell.None.cellImgSrc)
               td:
-                figure(class = "image is-16x16"):
-                  img(src = Cell.None.cellImgSrc)
-            td:
-              tdiv(class = "is-size-7"):
-                text $score
+                tdiv(class = "is-size-7"):
+                  text $score
       text self.msg.cstring
