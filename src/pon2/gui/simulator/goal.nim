@@ -37,10 +37,19 @@ when defined(js) or defined(nimsuggest):
   proc toVNode*(self: GoalView, id: cstring, cameraReady = false): VNode {.inline.} =
     ## Returns the goal node.
     ## `id` is not used if `cameraReady` is `true`; otherwise `id` should be unique.
-    let goal = self.simulator[].nazoPuyoWrap.optGoal.unsafeValue
+    let
+      goal = self.simulator[].nazoPuyoWrap.optGoal.unsafeValue
+      accepted = self.simulator[].mark == Accept
+
     if cameraReady or self.simulator[].mode != EditorEdit:
-      return buildHtml bold:
-        text $goal
+      return buildHtml article(
+        class = (if accepted: "message is-success" else: "message is-info").cstring
+      ):
+        tdiv(class = "message-body"):
+          text $goal
+          if accepted:
+            span(class = "icon"):
+              italic(class = "fa-solid fa-circle-check")
 
     let
       kindId = KindIdPrefix & id

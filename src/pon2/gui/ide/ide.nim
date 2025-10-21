@@ -13,6 +13,7 @@ import ../../[app]
 when defined(js) or defined(nimsuggest):
   import std/[jsffi, strformat]
   import karax/[karaxdsl, vdom]
+  import ../../private/[gui]
 
 type IdeView* = object ## View of the IDE.
   ide: ref Ide
@@ -52,9 +53,9 @@ when defined(js) or defined(nimsuggest):
     ## Returns the IDE node.
     let settingId = "{SettingIdPrefix}{id}".fmt.cstring
 
-    buildHtml tdiv(class = "columns is-mobile is-variable is-1"):
+    buildHtml tdiv(class = "columns is-1"):
       tdiv(class = "column is-narrow"):
-        section(class = "section"):
+        section(class = (if isMobile(): "section pt-3 pl-3" else: "section").cstring):
           self.simulator.toVNode "{SimulatorIdPrefix}{id}".fmt.cstring
       if self.ide[].simulator[].mode in EditorModes and
           self.ide[].simulator[].nazoPuyoWrap.optGoal.isOk:

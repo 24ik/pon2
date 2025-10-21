@@ -11,6 +11,7 @@ import ../../[app]
 when defined(js) or defined(nimsuggest):
   import std/[strformat, sugar]
   import karax/[karax, karaxdsl, vdom]
+  import ../../private/[gui]
 
 type IdePaginationView* = object ## View of the IDE pagination.
   ide: ref Ide
@@ -29,18 +30,26 @@ func init*(T: type IdePaginationView, ide: ref Ide): T {.inline.} =
 when defined(js) or defined(nimsuggest):
   proc toVNode*(self: IDEPaginationView): VNode {.inline.} =
     ## Returns the IDE pagination node.
-    let replayNum =
-      if self.ide[].replayStepsCnt == 0:
-        0
-      else:
-        self.ide[].replayStepsIdx.succ
+    let
+      replayNum =
+        if self.ide[].replayStepsCnt == 0:
+          0
+        else:
+          self.ide[].replayStepsIdx.succ
+      mobile = isMobile()
 
     buildHtml nav(class = "pagination"):
       button(class = "button pagination-link", onclick = () => self.ide[].prevReplay):
         span(class = "icon"):
           italic(class = "fa-solid fa-backward-step")
+          if not mobile:
+            span(style = counterStyle):
+              text "A"
       button(class = "button pagination-link is-static"):
         text "{replayNum} / {self.ide[].replayStepsCnt}".fmt
       button(class = "button pagination-link", onclick = () => self.ide[].nextReplay):
         span(class = "icon"):
           italic(class = "fa-solid fa-forward-step")
+          if not mobile:
+            span(style = counterStyle):
+              text "D"

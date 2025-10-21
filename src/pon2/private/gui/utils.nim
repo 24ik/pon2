@@ -13,13 +13,31 @@
 
 when defined(js) or defined(nimsuggest):
   import std/[jsre, strformat, sugar]
-  import karax/[karax, kdom, vdom]
+  import karax/[karax, kdom, vdom, vstyles]
   import ../[assign3, utils]
   import ../../[core]
 
 const AssetsDir* {.define: "pon2.assets".} = "../assets"
 
 when defined(js) or defined(nimsuggest):
+  let
+    counterStyle* = style(
+      (StyleAttr.color, "#ff8c00".cstring),
+      (StyleAttr.fontSize, "0.6rem".cstring),
+      (StyleAttr.position, "absolute".cstring),
+      (StyleAttr.top, "-0.2em".cstring),
+      (StyleAttr.right, "0.3em".cstring),
+      (StyleAttr.pointerEvents, "none".cstring),
+    )
+    bottomFixStyle* = style(
+      (StyleAttr.position, "fixed".cstring),
+      (StyleAttr.bottom, "calc(16px + env(safe-area-inset-bottom))".cstring),
+      (StyleAttr.left, "50%".cstring),
+      (StyleAttr.transform, "translateX(-50%)".cstring),
+      (StyleAttr.zIndex, "100".cstring),
+    )
+    translucentStyle* = style(StyleAttr.backgroundColor, "#00000010")
+
   # ------------------------------------------------
   # JS - Copy Button
   # ------------------------------------------------

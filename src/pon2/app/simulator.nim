@@ -764,6 +764,8 @@ func backward*(self: var Simulator, detail = false) {.inline.} =
   ## Backwards the simulator.
   if self.undoDeque.len == 0:
     return
+  if self.state == AfterEdit:
+    return
 
   # save the steps to keep the placements
   let steps = runIt self.nazoPuyoWrap:

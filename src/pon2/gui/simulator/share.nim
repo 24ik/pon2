@@ -105,33 +105,39 @@ when defined(js) or defined(nimsuggest):
 
     buildHtml tdiv:
       tdiv(class = "block"):
-        tdiv(class = "buttons"):
-          button(
-            class = "button is-size-7",
-            onclick = () => cameraReadyId.downloadCameraReadyImg,
-          ):
-            span(class = "icon"):
-              italic(class = "fa-solid fa-download")
-            span:
-              text "画像"
-          a(
-            class = "button is-size-7",
-            target = "_blank",
-            rel = "noopener noreferrer",
-            href = cstring $self.toXLink,
-          ):
-            span(class = "icon"):
-              italic(class = "fa-brands fa-x-twitter")
-            span:
-              text "投稿"
+        tdiv(class = "field is-grouped"):
+          tdiv(class = "control"):
+            button(
+              class = "button is-size-7",
+              onclick = () => cameraReadyId.downloadCameraReadyImg,
+            ):
+              span(class = "icon"):
+                italic(class = "fa-solid fa-download")
+              span:
+                text "画像"
+          tdiv(class = "control"):
+            a(
+              class = "button is-size-7",
+              target = "_blank",
+              rel = "noopener noreferrer",
+              href = cstring $self.toXLink,
+            ):
+              span(class = "icon"):
+                italic(class = "fa-brands fa-x-twitter")
+              span:
+                text "投稿"
       tdiv(class = "block"):
         text "URLコピー"
-        tdiv(class = "buttons"):
-          noPlcmtsUriCopyBtn
-          uriCopyBtn
+        tdiv(class = "field is-grouped"):
+          tdiv(class = "control"):
+            noPlcmtsUriCopyBtn
+          tdiv(class = "control"):
+            uriCopyBtn
       if self.simulator[].mode in EditorModes:
         tdiv(class = "block"):
           text "編集者URLコピー"
-          tdiv(class = "buttons"):
-            noPlcmtsEditorUriCopyBtn
-            editorUriCopyBtn
+          tdiv(class = "field is-grouped"):
+            tdiv(class = "control"):
+              noPlcmtsEditorUriCopyBtn
+            tdiv(class = "control"):
+              editorUriCopyBtn
