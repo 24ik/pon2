@@ -1,9 +1,9 @@
 ## This module implements simulators.
 ##
 ## Compile Options:
-## | Option               | Description                | Default         |
-## | -------------------- | -------------------------- | --------------- |
-## | `-d:pon2.path=<str>` | Path of the web simulator. | `/pon2/stable/` |
+## | Option               | Description                | Default             |
+## | -------------------- | -------------------------- | ------------------- |
+## | `-d:pon2.path=<str>` | Path of the web simulator. | `/pon2/stable/ide/` |
 ##
 
 {.push raises: [].}
@@ -70,7 +70,7 @@ const
   PlayModes* = {ViewerPlay, EditorPlay}
   EditModes* = {ViewerEdit, EditorEdit}
 
-  Pon2Path* {.define: "pon2.path".} = "/pon2/stable/"
+  Pon2Path* {.define: "pon2.path".} = "/pon2/stable/ide/"
 
 static:
   doAssert Pon2Path.startsWith '/'
