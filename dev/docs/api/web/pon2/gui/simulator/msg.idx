@@ -1,4 +1,4 @@
 nimTitle	msg	pon2/gui/simulator/msg.html	module src/pon2/gui/simulator/msg		0
 nim	MsgView	pon2/gui/simulator/msg.html#MsgView	object MsgView		17
 nim	init	pon2/gui/simulator/msg.html#init,typeMsgView,ref.Simulator	proc init(T: type MsgView; simulator: ref Simulator): T:type		24
-nim	toVNode	pon2/gui/simulator/msg.html#toVNode,MsgView	proc toVNode(self: MsgView): VNode		73
+nim	toVNode	pon2/gui/simulator/msg.html#toVNode,MsgView	proc toVNode(self: MsgView): VNode		70
