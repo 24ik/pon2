@@ -1,4 +1,4 @@
 nimTitle	palette	pon2/gui/simulator/palette.html	module src/pon2/gui/simulator/palette		0
 nim	PaletteView	pon2/gui/simulator/palette.html#PaletteView	object PaletteView		17
 nim	init	pon2/gui/simulator/palette.html#init,typePaletteView,ref.Simulator	proc init(T: type PaletteView; simulator: ref Simulator): T:type		24
-nim	toVNode	pon2/gui/simulator/palette.html#toVNode,PaletteView	proc toVNode(self: PaletteView): VNode		41
+nim	toVNode	pon2/gui/simulator/palette.html#toVNode,PaletteView	proc toVNode(self: PaletteView): VNode		45

@@ -1,6 +1,9 @@
 nimTitle	utils	pon2/private/gui/utils.html	module src/pon2/private/gui/utils		0
 nim	AssetsDir	pon2/private/gui/utils.html#AssetsDir	const AssetsDir		20
-nim	addCopyBtnHandler	pon2/private/gui/utils.html#addCopyBtnHandler,VNode,,int	proc addCopyBtnHandler(btn: VNode; copyStrFn: () -> string; showFlashMsgMs = 500)		33
-nim	cellImgSrc	pon2/private/gui/utils.html#cellImgSrc,Cell	proc cellImgSrc(cell: Cell): cstring		53
-nim	noticeGarbageImgSrc	pon2/private/gui/utils.html#noticeGarbageImgSrc,NoticeGarbage	proc noticeGarbageImgSrc(notice: NoticeGarbage): cstring		68
-nim	isMobile	pon2/private/gui/utils.html#isMobile	proc isMobile(): bool		86
+nim	counterStyle	pon2/private/gui/utils.html#counterStyle	let counterStyle		24
+nim	bottomFixStyle	pon2/private/gui/utils.html#bottomFixStyle	let bottomFixStyle		32
+nim	translucentStyle	pon2/private/gui/utils.html#translucentStyle	let translucentStyle		39
+nim	addCopyBtnHandler	pon2/private/gui/utils.html#addCopyBtnHandler,VNode,,int	proc addCopyBtnHandler(btn: VNode; copyStrFn: () -> string; showFlashMsgMs = 500)		51
+nim	cellImgSrc	pon2/private/gui/utils.html#cellImgSrc,Cell	proc cellImgSrc(cell: Cell): cstring		71
+nim	noticeGarbageImgSrc	pon2/private/gui/utils.html#noticeGarbageImgSrc,NoticeGarbage	proc noticeGarbageImgSrc(notice: NoticeGarbage): cstring		86
+nim	isMobile	pon2/private/gui/utils.html#isMobile	proc isMobile(): bool		104

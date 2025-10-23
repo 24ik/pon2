@@ -1,4 +1,5 @@
 nimTitle	ctrl	pon2/gui/simulator/ctrl.html	module src/pon2/gui/simulator/ctrl		0
-nim	CtrlView	pon2/gui/simulator/ctrl.html#CtrlView	object CtrlView		15
-nim	init	pon2/gui/simulator/ctrl.html#init,typeCtrlView,ref.Simulator	proc init(T: type CtrlView; simulator: ref Simulator): T:type		22
-nim	toVNode	pon2/gui/simulator/ctrl.html#toVNode,CtrlView	proc toVNode(self: CtrlView): VNode		32
+nim	CtrlView	pon2/gui/simulator/ctrl.html#CtrlView	object CtrlView		16
+nim	init	pon2/gui/simulator/ctrl.html#init,typeCtrlView,ref.Simulator	proc init(T: type CtrlView; simulator: ref Simulator): T:type		23
+nim	toSideVNode	pon2/gui/simulator/ctrl.html#toSideVNode,CtrlView	proc toSideVNode(self: CtrlView): VNode		31
+nim	toBottomVNode	pon2/gui/simulator/ctrl.html#toBottomVNode,CtrlView	proc toBottomVNode(self: CtrlView): VNode		249
