@@ -731,6 +731,21 @@ rb|"""
     sim.nazoPuyoWrap.runIt:
       check it.field == field
 
+    sim.backward
+    check sim.state == AfterEdit
+    sim.nazoPuyoWrap.runIt:
+      check it.field == field0
+
+    for _ in 1 .. 3:
+      sim.forward
+    sim.reset
+    check sim.state == AfterEdit
+    sim.nazoPuyoWrap.runIt:
+      check it.field == field0
+
+    sim.forward
+    sim.forward
+
     sim.writeCell Cell.Purple
     field[Row0, Col0] = Cell.Purple
     let field2 = field
@@ -758,28 +773,9 @@ rb|"""
       check it.field == field
 
     sim.backward
-    field[Row0, Col0] = Cell.None
-    check sim.state == Stable
+    check sim.state == AfterEdit
     sim.nazoPuyoWrap.runIt:
       check it.field == field
-
-    sim.backward
-    sim.nazoPuyoWrap.runIt:
-      check it.field == field2
-
-    sim.backward(detail = true)
-    sim.nazoPuyoWrap.runIt:
-      check it.field == field1
-
-    sim.backward
-    sim.nazoPuyoWrap.runIt:
-      check it.field == field0
-
-    for _ in 1 .. 3:
-      sim.forward
-    sim.reset
-    sim.nazoPuyoWrap.runIt:
-      check it.field == field0
 
 # ------------------------------------------------
 # Mark

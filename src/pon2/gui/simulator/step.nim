@@ -35,7 +35,7 @@ func init*(
 when defined(js) or defined(nimsuggest):
   const
     CellCls = "button p-0".cstring
-    SelectCellCls = "button p-0 is-selected is-primary".cstring
+    SelectCellCls = "button p-0 is-primary".cstring
     GarbageCntSelectIdPrefix = "pon2-simulator-step-garbagecnt-".cstring
 
   func initDeleteBtnHandler(self: StepsView, stepIdx: int): () -> void =
@@ -126,11 +126,7 @@ when defined(js) or defined(nimsuggest):
       self: StepsView, step: Step, stepIdx: int, editable: bool
   ): VNode {.inline.} =
     ## Returns the garbages node.
-    let
-      cntsColsCls = (
-        if editable: "columns is-mobile is-gapless" else: "columns is-mobile is-1"
-      ).cstring
-      imgSrc = if step.dropHard: Hard.cellImgSrc else: Garbage.cellImgSrc
+    let imgSrc = if step.dropHard: Hard.cellImgSrc else: Garbage.cellImgSrc
 
     buildHtml tdiv(class = "columns is-mobile is-1 is-vcentered"):
       # garbage/hard
@@ -148,7 +144,11 @@ when defined(js) or defined(nimsuggest):
             img(src = imgSrc)
       # cnts
       tdiv(class = "column is-narrow"):
-        tdiv(class = cntsColsCls):
+        tdiv(
+          class = (
+            if isMobile(): "columns is-mobile is-gapless" else: "columns is-mobile is-1"
+          ).cstring
+        ):
           for col in Col:
             let
               selectId = "{GarbageCntSelectIdPrefix}{stepIdx}-{col.ord}".fmt.cstring
@@ -172,8 +172,7 @@ when defined(js) or defined(nimsuggest):
                       option(selected = cnt == step.cnts[col]):
                         text $cnt
               else:
-                bold:
-                  text $step.cnts[col]
+                text $step.cnts[col]
 
   proc toVNode*(self: StepsView, cameraReady = false): VNode {.inline.} =
     ## Returns the steps view.
@@ -208,7 +207,8 @@ when defined(js) or defined(nimsuggest):
                         italic(class = "fa-solid fa-trash")
 
                 tdiv(class = "column is-narrow"):
-                  text $stepIdx.succ
+                  bold:
+                    text $stepIdx.succ
 
                 # step
                 tdiv(class = "column is-narrow"):
@@ -235,7 +235,8 @@ when defined(js) or defined(nimsuggest):
                       italic(class = "fa-solid fa-trash")
 
                 tdiv(class = "column is-narrow"):
-                  text $placeholderIdx.succ
+                  bold:
+                    text $placeholderIdx.succ
 
                 tdiv(class = "column is-narrow"):
                   self.pairPlcmtNode(DummyStep, placeholderIdx, editable)
