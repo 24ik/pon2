@@ -6,24 +6,33 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
+import ../../[app]
+
+when defined(js) or defined(nimsuggest):
+  import karax/[karaxdsl, vdom]
+  import ../../[core]
+  import ../../private/[gui]
+
+type NextsView* = object ## View of the next steps.
+  simulator: ref Simulator
+
+# ------------------------------------------------
+# Constructor
+# ------------------------------------------------
+
+func init*(T: type NextsView, simulator: ref Simulator): T {.inline.} =
+  T(simulator: simulator)
+
 # ------------------------------------------------
 # JS backend
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
-  import karax/[karaxdsl, vdom]
-  import ../../[app]
-  import ../../private/[gui]
-
-  proc nextCell[S: Simulator or Studio](
-      self: ref S, helper: VNodeHelper, dblNext: bool, pivot: bool
-  ): Cell {.inline.} =
+  func nextCell(self: NextsView, dblNext: bool, pivot: bool): Cell {.inline.} =
     ## Returns the cell in the next or double-next step.
-    let
-      stepIdx = self.derefSimulator(helper).operatingIdx.succ 1 + dblNext.int
-      nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
+    let stepIdx = self.simulator[].operatingIdx.succ 1 + dblNext.int
 
-    nazoWrap.runIt:
+    self.simulator[].nazoPuyoWrap.runIt:
       if stepIdx < it.steps.len:
         let step = it.steps[stepIdx]
         case step.kind
@@ -34,9 +43,7 @@ when defined(js) or defined(nimsuggest):
       else:
         Cell.None
 
-  proc toNextVNode*[S: Simulator or Studio](
-      self: ref S, helper: VNodeHelper
-  ): VNode {.inline.} =
+  proc toVNode*(self: NextsView): VNode {.inline.} =
     ## Returns the next node.
     buildHtml table:
       tbody:
@@ -51,13 +58,11 @@ when defined(js) or defined(nimsuggest):
         tr:
           td:
             figure(class = "image is-24x24"):
-              img(
-                src = self.nextCell(helper, dblNext = false, pivot = false).cellImgSrc
-              )
+              img(src = self.nextCell(dblNext = false, pivot = false).cellImgSrc)
         tr:
           td:
             figure(class = "image is-24x24"):
-              img(src = self.nextCell(helper, dblNext = false, pivot = true).cellImgSrc)
+              img(src = self.nextCell(dblNext = false, pivot = true).cellImgSrc)
 
         # separator
         tr:
@@ -69,8 +74,8 @@ when defined(js) or defined(nimsuggest):
         tr:
           td:
             figure(class = "image is-24x24"):
-              img(src = self.nextCell(helper, dblNext = true, pivot = false).cellImgSrc)
+              img(src = self.nextCell(dblNext = true, pivot = false).cellImgSrc)
         tr:
           td:
             figure(class = "image is-24x24"):
-              img(src = self.nextCell(helper, dblNext = true, pivot = true).cellImgSrc)
+              img(src = self.nextCell(dblNext = true, pivot = true).cellImgSrc)

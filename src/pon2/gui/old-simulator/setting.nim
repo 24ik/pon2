@@ -6,26 +6,37 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
+import ../../[app]
+
+when defined(js) or defined(nimsuggest):
+  import std/[sugar]
+  import karax/[karax, karaxdsl, vdom]
+  import ../../core/[rule] # NOTE: import `core` causes warning due to Nim's bug
+  import ../../private/[gui]
+
+type SettingsView* = object ## View of the settings.
+  simulator: ref Simulator
+
+# ------------------------------------------------
+# Constructor
+# ------------------------------------------------
+
+func init*(T: type SettingsView, simulator: ref Simulator): T {.inline.} =
+  T(simulator: simulator)
+
 # ------------------------------------------------
 # JS backend
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
-  import std/[sugar]
-  import karax/[karaxdsl, vdom]
-  import ../../[app]
-  import ../../private/[gui]
-
   const
     BtnCls = "button".cstring
     SelectBtnCls = "button is-primary is-selected".cstring
 
-  proc toSettingsVNode*[S: Simulator or Studio](
-      self: ref S, helper: VNodeHelper
-  ): VNode {.inline.} =
+  proc toVNode*(self: SettingsView): VNode {.inline.} =
     ## Returns the select node.
     let playBtnCls, editBtnCls: cstring
-    if self.derefSimulator(helper).mode in PlayModes:
+    if self.simulator[].mode in PlayModes:
       playBtnCls = SelectBtnCls
       editBtnCls = BtnCls
     else:
@@ -33,38 +44,34 @@ when defined(js) or defined(nimsuggest):
       editBtnCls = SelectBtnCls
 
     let playMode, editMode: SimulatorMode
-    if self.derefSimulator(helper).mode in ViewerModes:
+    if self.simulator[].mode in ViewerModes:
       playMode = ViewerPlay
       editMode = ViewerEdit
     else:
       playMode = EditorPlay
       editMode = EditorEdit
 
+    let mobile = isMobile()
+
     buildHtml tdiv:
       tdiv(class = "field has-addons"):
         tdiv(class = "control"):
-          button(
-            class = playBtnCls,
-            onclick = () => (self.derefSimulator(helper).mode = playMode),
-          ):
+          button(class = playBtnCls, onclick = () => (self.simulator[].mode = playMode)):
             span(class = "icon"):
               italic(class = "fa-solid fa-gamepad")
-              if not helper.mobile and self.derefSimulator(helper).mode notin PlayModes:
+              if not mobile and self.simulator[].mode notin PlayModes:
                 span(style = counterStyle):
                   text "M"
         tdiv(class = "control"):
-          button(
-            class = editBtnCls,
-            onclick = () => (self.derefSimulator(helper).mode = editMode),
-          ):
+          button(class = editBtnCls, onclick = () => (self.simulator[].mode = editMode)):
             span(class = "icon"):
               italic(class = "fa-solid fa-pen-to-square")
-              if not helper.mobile and self.derefSimulator(helper).mode notin EditModes:
+              if not mobile and self.simulator[].mode notin EditModes:
                 span(style = counterStyle):
                   text "M"
-      if self.derefSimulator(helper).mode == EditorEdit:
+      if self.simulator[].mode == EditorEdit:
         let tsuBtnCls, waterBtnCls: cstring
-        case self.derefSimulator(helper).rule
+        case self.simulator[].rule
         of Tsu:
           tsuBtnCls = SelectBtnCls
           waterBtnCls = BtnCls
@@ -74,22 +81,16 @@ when defined(js) or defined(nimsuggest):
 
         tdiv(class = "field has-addons"):
           tdiv(class = "control"):
-            button(
-              class = tsuBtnCls,
-              onclick = () => (self.derefSimulator(helper).rule = Tsu),
-            ):
+            button(class = tsuBtnCls, onclick = () => (self.simulator[].rule = Tsu)):
               span(class = "icon"):
                 italic(class = "fa-solid fa-2")
-                if not helper.mobile and self.derefSimulator(helper).rule != Tsu:
+                if not mobile and self.simulator[].rule != Tsu:
                   span(style = counterStyle):
                     text "R"
           tdiv(class = "control"):
-            button(
-              class = waterBtnCls,
-              onclick = () => (self.derefSimulator(helper).rule = Water),
-            ):
+            button(class = waterBtnCls, onclick = () => (self.simulator[].rule = Water)):
               span(class = "icon"):
                 italic(class = "fa-solid fa-droplet")
-                if not helper.mobile and self.derefSimulator(helper).rule != Water:
+                if not mobile and self.simulator[].rule != Water:
                   span(style = counterStyle):
                     text "R"

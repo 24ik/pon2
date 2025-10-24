@@ -6,21 +6,32 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
+import ../../[app]
+
+when defined(js) or defined(nimsuggest):
+  import std/[asyncjs, jsffi, strformat, sugar, uri]
+  import karax/[karax, karaxdsl, vdom]
+  import ../../[core]
+  import ../../private/[gui, tables2, utils]
+
+type ShareView* = object ## View of the share.
+  simulator: ref Simulator
+
+# ------------------------------------------------
+# Constructor
+# ------------------------------------------------
+
+func init*(T: type ShareView, simulator: ref Simulator): T {.inline.} =
+  T(simulator: simulator)
+
 # ------------------------------------------------
 # JS backend
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
-  import std/[asyncjs, jsffi, strformat, sugar, uri]
-  import karax/[karaxdsl, vdom]
-  import ../../[app]
-  import ../../private/[gui, tables2, utils]
-
   const RuleDescs: array[Rule, string] = ["", "すいちゅう"]
 
-  proc toXLink[S: Simulator or Studio](
-      self: ref S, helper: VNodeHelper
-  ): Uri {.inline.} =
+  func toXLink(self: ShareView): Uri {.inline.} =
     ## Returns the URI to post to X.
     var uri = initUri()
     uri.scheme = "https"
@@ -28,15 +39,14 @@ when defined(js) or defined(nimsuggest):
     uri.path = "/intent/tweet" # NOTE: "/intent/post" does not work correctly on mobile
 
     var queries = newSeqOfCap[(string, string)](3)
-    queries.add ("url", $self.derefSimulator(helper).toExportUri.unsafeValue)
+    queries.add ("url", $self.simulator[].toExportUri.unsafeValue)
 
-    if self.derefSimulator(helper).nazoPuyoWrap.optGoal.isOk:
-      let nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      nazoWrap.runIt:
+    if self.simulator[].nazoPuyoWrap.optGoal.isOk:
+      self.simulator[].nazoPuyoWrap.runIt:
         let
           ruleDesc = RuleDescs[it.field.rule]
           moveCnt = it.steps.len
-          goalDesc = $self.derefSimulator(helper).nazoPuyoWrap.optGoal.unsafeValue
+          goalDesc = $self.simulator[].nazoPuyoWrap.optGoal.unsafeValue
 
         queries.add ("text", "{ruleDesc}{moveCnt}手・{goalDesc}".fmt)
         queries.add ("hashtags", "なぞぷよ")
@@ -45,8 +55,8 @@ when defined(js) or defined(nimsuggest):
 
     uri
 
-  proc downloadCameraReadyImg(helper: VNodeHelper) =
-    let cameraReadyElem = helper.simulator.cameraReadyId.getElemJsObjById
+  proc downloadCameraReadyImg(cameraReadyId: cstring) =
+    let cameraReadyElem = cameraReadyId.getElemJsObjById
     cameraReadyElem.style.display = "block".cstring
 
     {.push warning[Uninit]: off.}
@@ -66,9 +76,7 @@ when defined(js) or defined(nimsuggest):
       ).catch
     {.pop.}
 
-  proc toShareVNode*[S: Simulator or Studio](
-      self: ref S, helper: VNodeHelper
-  ): VNode {.inline.} =
+  proc toVNode*(self: ShareView, cameraReadyId: cstring): VNode {.inline.} =
     ## Returns the share node.
     let
       noPlcmtsUriCopyBtn = buildHtml button(class = "button is-size-7"):
@@ -76,24 +84,21 @@ when defined(js) or defined(nimsuggest):
       uriCopyBtn = buildHtml button(class = "button is-size-7"):
         text "操作有"
 
-    noPlcmtsUriCopyBtn.addCopyBtnHandler () =>
-      $self.derefSimulator(helper).toExportUri.unsafeValue
+    noPlcmtsUriCopyBtn.addCopyBtnHandler () => $self.simulator[].toExportUri.unsafeValue
     uriCopyBtn.addCopyBtnHandler () =>
-      $self.derefSimulator(helper).toExportUri(clearPlacements = false).unsafeValue
+      $self.simulator[].toExportUri(clearPlacements = false).unsafeValue
 
     let noPlcmtsEditorUriCopyBtn, editorUriCopyBtn: VNode
-    if self.derefSimulator(helper).mode in EditorModes:
+    if self.simulator[].mode in EditorModes:
       noPlcmtsEditorUriCopyBtn = buildHtml button(class = "button is-size-7"):
         text "操作無"
       editorUriCopyBtn = buildHtml button(class = "button is-size-7"):
         text "操作有"
 
       noPlcmtsEditorUriCopyBtn.addCopyBtnHandler () =>
-        $self.derefSimulator(helper).toExportUri(viewer = false).unsafeValue
+        $self.simulator[].toExportUri(viewer = false).unsafeValue
       editorUriCopyBtn.addCopyBtnHandler () =>
-        $self
-        .derefSimulator(helper)
-        .toExportUri(viewer = false, clearPlacements = false).unsafeValue
+        $self.simulator[].toExportUri(viewer = false, clearPlacements = false).unsafeValue
     else:
       noPlcmtsEditorUriCopyBtn = nil
       editorUriCopyBtn = nil
@@ -103,7 +108,8 @@ when defined(js) or defined(nimsuggest):
         tdiv(class = "field is-grouped"):
           tdiv(class = "control"):
             button(
-              class = "button is-size-7", onclick = () => helper.downloadCameraReadyImg
+              class = "button is-size-7",
+              onclick = () => cameraReadyId.downloadCameraReadyImg,
             ):
               span(class = "icon"):
                 italic(class = "fa-solid fa-download")
@@ -114,7 +120,7 @@ when defined(js) or defined(nimsuggest):
               class = "button is-size-7",
               target = "_blank",
               rel = "noopener noreferrer",
-              href = cstring $self.toXLink helper,
+              href = cstring $self.toXLink,
             ):
               span(class = "icon"):
                 italic(class = "fa-brands fa-x-twitter")
@@ -127,7 +133,7 @@ when defined(js) or defined(nimsuggest):
             noPlcmtsUriCopyBtn
           tdiv(class = "control"):
             uriCopyBtn
-      if self.derefSimulator(helper).mode in EditorModes:
+      if self.simulator[].mode in EditorModes:
         tdiv(class = "block"):
           text "編集者URLコピー"
           tdiv(class = "field is-grouped"):

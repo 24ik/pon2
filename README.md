@@ -6,8 +6,8 @@ and [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 Features:
 - Solve Nazo Puyos.
 - Generate Nazo Puyos.
-- Permute pairs in Nazo Puyos to find unique-solution problems.
-- [Edit Nazo Puyos](https://24ik.github.io/pon2/stable/ide/?mode=ee&field=t-&steps&goal=0_0_).
+- Permute pairs in Nazo Puyos to find unique-solution questions.
+- [Edit Nazo Puyos](https://24ik.github.io/pon2/stable/studio/?mode=ee&field=t-&steps&goal=0_0_).
 - [Play a marathon mode](https://24ik.github.io/pon2/stable/marathon/).
 
 ## Installation
@@ -28,15 +28,7 @@ The list of compile options is available in the
 
 ## Usage
 
-### CLI or Native Application
-
 See the usage by running `pon2`.
-
-### Web Application
-
-See the documentations:
-
-- [Simulator](https://24ik.github.io/pon2/stable/docs/simulator/)
 
 ## For Developers
 

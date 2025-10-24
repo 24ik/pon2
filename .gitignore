@@ -1,12 +1,13 @@
 /pon2
 /pon2.exe
-
 /assets/pairs/generate
+/assets/pairs/generate.exe
 /benchmarks/main
+/benchmarks/main.exe
 /tests/test
+/tests/test.exe
 
 /www/assets/
 /www/docs/api/
-/www/docs/simulator/index.min.js
-/www/ide/index.min.js
+/www/studio/index.min.js
 /www/marathon/index.min.js

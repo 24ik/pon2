@@ -1,9 +1,9 @@
 ## This module implements simulators.
 ##
 ## Compile Options:
-## | Option               | Description                | Default             |
-## | -------------------- | -------------------------- | ------------------- |
-## | `-d:pon2.path=<str>` | Path of the web simulator. | `/pon2/stable/ide/` |
+## | Option               | Description             | Default                |
+## | -------------------- | ----------------------- | ---------------------- |
+## | `-d:pon2.path=<str>` | Path of the web studio. | `/pon2/stable/studio/` |
 ##
 
 {.push raises: [].}
@@ -70,7 +70,7 @@ const
   PlayModes* = {ViewerPlay, EditorPlay}
   EditModes* = {ViewerEdit, EditorEdit}
 
-  Pon2Path* {.define: "pon2.path".} = "/pon2/stable/ide/"
+  Pon2Path* {.define: "pon2.path".} = "/pon2/stable/studio/"
 
 static:
   doAssert Pon2Path.startsWith '/'
@@ -791,8 +791,11 @@ func reset*(self: var Simulator) {.inline.} =
 # Mark
 # ------------------------------------------------
 
-func mark*(self: Simulator): MarkResult {.inline.} =
+func mark*(self: Simulator): Opt[MarkResult] {.inline.} =
   ## Marks the steps in the Nazo Puyo in the simulator.
+  if self.nazoPuyoWrap.optGoal.isErr:
+    return err()
+
   var nazoWrap = self.nazoPuyoWrap
   if self.mode == EditorEdit:
     if self.state != AfterEdit:
@@ -809,7 +812,7 @@ func mark*(self: Simulator): MarkResult {.inline.} =
     it.steps
   nazoWrap.runIt:
     it.steps.assign nowSteps
-    itNazo.mark self.operatingIdx
+    ok itNazo.mark self.operatingIdx
 
 # ------------------------------------------------
 # Keyboard
