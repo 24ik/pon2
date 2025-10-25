@@ -170,7 +170,7 @@ when isMainModule:
         urls[0].parseUri.openDefaultBrowser.isOkOr:
           echo "ブラウザの起動に失敗しました．"
 
-      runIt sim.nazoPuyoWrap:
+      unwrapNazoPuyo sim.nazoPuyoWrap:
         let
           answers = itNazo.solve
           stepsSeq = collect:
@@ -221,7 +221,7 @@ when isMainModule:
         echo "なぞぷよのURLを入力してください．"
         return
 
-      runIt sim.nazoPuyoWrap:
+      unwrapNazoPuyo sim.nazoPuyoWrap:
         var idx = 0
         for nazo in itNazo.permute(fixIndices, allowDblNotLast, allowDblLast):
           let

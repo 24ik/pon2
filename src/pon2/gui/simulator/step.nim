@@ -83,7 +83,7 @@ when defined(js) or defined(nimsuggest):
         not self.derefSimulator(helper).editData.focusField and
         self.derefSimulator(helper).editData.step.idx == stepIdx
       nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      steps = nazoWrap.runIt:
+      steps = nazoWrap.unwrapNazoPuyo:
         it.steps
       isPlaceholder = stepIdx >= steps.len
       optPlcmtDesc = (if isPlaceholder: ""
@@ -182,7 +182,7 @@ when defined(js) or defined(nimsuggest):
     let
       editable = self.derefSimulator(helper).mode == EditorEdit and not cameraReady
       nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      steps = nazoWrap.runIt:
+      steps = nazoWrap.unwrapNazoPuyo:
         it.steps
 
     buildHtml table(class = "table is-narrow"):

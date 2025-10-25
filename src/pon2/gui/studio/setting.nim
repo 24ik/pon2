@@ -37,7 +37,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toStudioSettingsVNode*(self: ref Studio, helper: VNodeHelper): VNode {.inline.} =
     ## Returns the studio settings node.
-    let stepCnt = runIt self[].simulator.nazoPuyoWrap:
+    let stepCnt = unwrapNazoPuyo self[].simulator.nazoPuyoWrap:
       it.steps.len
 
     buildHtml tdiv:

@@ -101,7 +101,7 @@ func nextReplay*(self: var Studio) {.inline.} =
     self.replayData.stepsIdx.inc
 
   self.replaySimulator.reset
-  runIt self.replaySimulator.nazoPuyoWrap:
+  unwrapNazoPuyo self.replaySimulator.nazoPuyoWrap:
     var nazo = itNazo
     nazo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIdx]
 
@@ -118,7 +118,7 @@ func prevReplay*(self: var Studio) {.inline.} =
     self.replayData.stepsIdx.dec
 
   self.replaySimulator.reset
-  runIt self.replaySimulator.nazoPuyoWrap:
+  unwrapNazoPuyo self.replaySimulator.nazoPuyoWrap:
     var nazo = itNazo
     nazo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIdx]
 
@@ -148,14 +148,14 @@ proc solve*(self: var Studio) {.inline.} =
       self.simulator.nazoPuyoWrap.optGoal.isErr or
       self.simulator.state notin {Stable, AfterEdit}:
     return
-  runIt self.simulator.nazoPuyoWrap:
+  unwrapNazoPuyo self.simulator.nazoPuyoWrap:
     if it.steps.len == 0:
       return
 
   self.working.assign true
   self.replayData.stepsSeq.setLen 0
 
-  runIt self.simulator.nazoPuyoWrap:
+  unwrapNazoPuyo self.simulator.nazoPuyoWrap:
     let
       answers = itNazo.solve
       stepsSeq = collect:
@@ -184,14 +184,14 @@ proc permute*(
       self.simulator.nazoPuyoWrap.optGoal.isErr or
       self.simulator.state notin {Stable, AfterEdit}:
     return
-  runIt self.simulator.nazoPuyoWrap:
+  unwrapNazoPuyo self.simulator.nazoPuyoWrap:
     if it.steps.len == 0:
       return
 
   self.working.assign true
   self.replayData.stepsSeq.setLen 0
 
-  runIt self.simulator.nazoPuyoWrap:
+  unwrapNazoPuyo self.simulator.nazoPuyoWrap:
     for nazo in itNazo.permute(fixIndices, allowDblNotLast, allowDblLast):
       self.replayData.stepsSeq.add nazo.puyoPuyo.steps
 

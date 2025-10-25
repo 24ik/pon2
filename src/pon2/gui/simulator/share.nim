@@ -32,7 +32,7 @@ when defined(js) or defined(nimsuggest):
 
     if self.derefSimulator(helper).nazoPuyoWrap.optGoal.isOk:
       let nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      nazoWrap.runIt:
+      nazoWrap.unwrapNazoPuyo:
         let
           ruleDesc = RuleDescs[it.field.rule]
           moveCnt = it.steps.len

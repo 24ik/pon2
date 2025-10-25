@@ -52,11 +52,11 @@ func init*(T: type NazoPuyoWrap): T {.inline.} =
 # ------------------------------------------------
 
 func `==`*(field1: TsuField, field2: WaterField): bool {.inline.} =
-  # NOTE: this function may be needed in `runIt`.
+  # NOTE: this function may be needed in `unwrapNazoPuyo`.
   false
 
 func `==`*(field1: WaterField, field2: TsuField): bool {.inline.} =
-  # NOTE: this function may be needed in `runIt`.
+  # NOTE: this function may be needed in `unwrapNazoPuyo`.
   false
 
 func `==`*(wrap1, wrap2: NazoPuyoWrap): bool {.inline.} =
@@ -73,7 +73,7 @@ func `==`*(wrap1, wrap2: NazoPuyoWrap): bool {.inline.} =
 # Internal Access
 # ------------------------------------------------
 
-macro runIt*(self: untyped, body: untyped): untyped =
+macro unwrapNazoPuyo*(self: untyped, body: untyped): untyped =
   ## Runs `body` with `it` (internal `PuyoPuyo`) and `itNazo`
   ## (internal `NazoPuyo` constructor calling) exposed.
   ## If `self` has no goal, the behavior of `itNazo` is undefined.
@@ -112,7 +112,7 @@ func `rule=`*(self: var NazoPuyoWrap, rule: Rule) {.inline.} =
   if rule == self.rule:
     return
 
-  self.runIt:
+  self.unwrapNazoPuyo:
     case rule
     of Tsu:
       self.assign NazoPuyoWrap.init(
@@ -132,10 +132,10 @@ func toUriQuery*(self: NazoPuyoWrap, fqdn: SimulatorFqdn): Res[string] {.inline.
   const ErrMsg = "Invalid Nazo Puyo wrapper"
 
   if self.optGoal.isOk:
-    self.runIt:
+    self.unwrapNazoPuyo:
       itNazo.toUriQuery(fqdn).context ErrMsg
   else:
-    self.runIt:
+    self.unwrapNazoPuyo:
       it.toUriQuery(fqdn).context ErrMsg
 
 func parseNazoPuyoWrap*(

@@ -46,7 +46,7 @@ when defined(js) or defined(nimsuggest):
     let
       editable = not cameraReady and self.derefSimulator(helper).mode in EditModes
       nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      arr = nazoWrap.runIt:
+      arr = nazoWrap.unwrapNazoPuyo:
         it.field.toArr
       tableBorder = (StyleAttr.border, "1px gray solid".cstring)
       tableStyle =
