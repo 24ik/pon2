@@ -1,8 +1,0 @@
-nimTitle	color	pon2/gui/color.html	module src/pon2/gui/color		0
-nim	Color	pon2/gui/color.html#Color	object Color		13
-nim	init	pon2/gui/color.html#init,typeColor,int,int,int,int	proc init(T: type Color; red, green, blue: int; alpha = 255): T:type		23
-nim	SelectColor	pon2/gui/color.html#SelectColor	const SelectColor		27
-nim	GhostColor	pon2/gui/color.html#GhostColor	const GhostColor		28
-nim	WaterColor	pon2/gui/color.html#WaterColor	const WaterColor		29
-nim	DefaultColor	pon2/gui/color.html#DefaultColor	const DefaultColor		30
-nim	code	pon2/gui/color.html#code,Color	proc code(color: Color): cstring		37

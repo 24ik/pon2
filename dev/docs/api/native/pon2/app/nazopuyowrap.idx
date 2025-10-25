@@ -6,7 +6,7 @@ nim	init	pon2/app/nazopuyowrap.html#init,typeNazoPuyoWrap	proc init(T: type Nazo
 nim	`==`	pon2/app/nazopuyowrap.html#==,TsuField,WaterField	proc `==`(field1: TsuField; field2: WaterField): bool		54
 nim	`==`	pon2/app/nazopuyowrap.html#==,WaterField,TsuField	proc `==`(field1: WaterField; field2: TsuField): bool		58
 nim	`==`	pon2/app/nazopuyowrap.html#==,NazoPuyoWrap,NazoPuyoWrap	proc `==`(wrap1, wrap2: NazoPuyoWrap): bool		62
-nim	runIt	pon2/app/nazopuyowrap.html#runIt.m,untyped,untyped	macro runIt(self: untyped; body: untyped): untyped		76
+nim	unwrapNazoPuyo	pon2/app/nazopuyowrap.html#unwrapNazoPuyo.m,untyped,untyped	macro unwrapNazoPuyo(self: untyped; body: untyped): untyped		76
 nim	rule	pon2/app/nazopuyowrap.html#rule,NazoPuyoWrap	proc rule(self: NazoPuyoWrap): Rule		106
 nim	rule=	pon2/app/nazopuyowrap.html#rule=,NazoPuyoWrap,Rule	proc rule=(self: var NazoPuyoWrap; rule: Rule)		110
 nim	toUriQuery	pon2/app/nazopuyowrap.html#toUriQuery,NazoPuyoWrap,SimulatorFqdn	proc toUriQuery(self: NazoPuyoWrap; fqdn: SimulatorFqdn): Res[string]		130
