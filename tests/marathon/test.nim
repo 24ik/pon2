@@ -137,15 +137,15 @@ block: # selectQuery, selectRandomQuery
   marathon.match "ab"
   for i in 0 ..< 2:
     marathon.selectQuery i
-    runIt marathon.simulator.nazoPuyoWrap:
+    unwrapNazoPuyo marathon.simulator.nazoPuyoWrap:
       check not it.steps[0].pair.isDbl
 
   for _ in 1 .. 10:
     marathon.selectRandomQuery
-    runIt marathon.simulator.nazoPuyoWrap:
+    unwrapNazoPuyo marathon.simulator.nazoPuyoWrap:
       check not it.steps[0].pair.isDbl
 
   for _ in 1 .. 10:
     marathon.selectRandomQuery(fromMatched = false)
-    runIt marathon.simulator.nazoPuyoWrap:
+    unwrapNazoPuyo marathon.simulator.nazoPuyoWrap:
       check it.steps in queries.map (query: string) => query.parseSteps(Pon2).unsafeValue

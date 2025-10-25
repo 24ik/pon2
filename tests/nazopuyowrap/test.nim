@@ -25,9 +25,9 @@ block: # init, `==`
 # Internal Access
 # ------------------------------------------------
 
-block: # runIt
+block: # unwrapNazoPuyo
   var nazoWrap = NazoPuyoWrap.init
-  nazoWrap.runIt:
+  nazoWrap.unwrapNazoPuyo:
     check it.field.rule == Tsu
 
     it.field[Row1, Col3] = Hard
@@ -35,7 +35,7 @@ block: # runIt
 
     check itNazo.puyoPuyo.field.rule == Tsu
 
-  let stepCnt = nazoWrap.runIt:
+  let stepCnt = nazoWrap.unwrapNazoPuyo:
     it.steps.len
   check stepCnt == 0
 

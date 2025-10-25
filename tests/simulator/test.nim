@@ -113,7 +113,7 @@ py|"""
     sim.forward
     sim.mode = ViewerEdit
 
-    sim.nazoPuyoWrap.runIt:
+    sim.nazoPuyoWrap.unwrapNazoPuyo:
       check it.field == field0
 
   block: # from ViewerEdit
@@ -123,7 +123,7 @@ py|"""
     sim.forward
     sim.mode = ViewerPlay
 
-    sim.nazoPuyoWrap.runIt:
+    sim.nazoPuyoWrap.unwrapNazoPuyo:
       check it.field == field0
 
   block: # from EditorPlay
@@ -133,7 +133,7 @@ py|"""
     sim.forward
     sim.mode = EditorEdit
 
-    sim.nazoPuyoWrap.runIt:
+    sim.nazoPuyoWrap.unwrapNazoPuyo:
       check it.field == field0
 
   block: # from EditorEdit
@@ -143,7 +143,7 @@ py|"""
     sim.forward
     sim.mode = EditorPlay
 
-    sim.nazoPuyoWrap.runIt:
+    sim.nazoPuyoWrap.unwrapNazoPuyo:
       check it.field == field0
 
 block: # `editCell=`
@@ -249,16 +249,16 @@ py|"""
 
   sim.deleteStep
   steps.delete 0
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
   sim.deleteStep 1
   steps.delete 1
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
   sim.deleteStep 1
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
 # ------------------------------------------------
@@ -296,37 +296,37 @@ py|"""
   sim.editCell = Green
   sim.writeCell Row3, Col4
   field[Row3, Col4] = Green
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.field == field
 
   sim.writeCell Blue
   field[Row0, Col0] = Blue
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.field == field
 
   sim.toggleInsert
 
   sim.writeCell Row6, Col4
   field.insert Row6, Col4, Green
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.field == field
 
   sim.editCell = None
   sim.writeCell Row8, Col4
   field.delete Row8, Col4
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.field == field
 
   sim.toggleFocus
 
   sim.writeCell Yellow
   steps.insert Step.init(YellowYellow), 0
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
   sim.writeCell None
   steps.delete 0
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
   sim.toggleInsert
@@ -334,29 +334,29 @@ py|"""
   sim.editCell = Blue
   sim.writeCell 2, false
   steps[2].pair.rotor = Blue
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
   sim.editCell = Garbage
   sim.writeCell 1, false
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
   sim.editCell = Hard
   sim.writeCell 1, true
   steps[1].dropHard.assign true
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
   sim.writeCell 2, true
   steps[2] = Step.init([0, 0, 0, 0, 0, 0], true)
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
   sim.editCell = Purple
   sim.writeCell 3, true
   steps.addLast Step.init PurplePurple
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
 # ------------------------------------------------
@@ -392,55 +392,55 @@ rg|
 
   sim.shiftFieldUp
   field.shiftUp
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.field == field
 
   sim.shiftFieldDown
   field.shiftDown
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.field == field
 
   sim.shiftFieldRight
   field.shiftRight
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.field == field
 
   sim.shiftFieldLeft
   field.shiftLeft
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.field == field
 
   sim.flipFieldVertical
   field.flipVertical
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.field == field
 
   sim.flipFieldHorizontal
   field.flipHorizontal
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.field == field
 
   sim.flip
   field.flipHorizontal
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.field == field
 
   sim.toggleFocus
 
   sim.flip
   steps[0].pair.swap
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
   sim.moveCursorDown
   sim.flip
   steps[1].cnts.reverse
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
   sim.moveCursorDown
   sim.flip
-  sim.nazoPuyoWrap.runIt:
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
 # ------------------------------------------------
@@ -721,26 +721,26 @@ rb|"""
     sim.forward
     field.settle
     check sim.state == WillPop
-    sim.nazoPuyoWrap.runIt:
+    sim.nazoPuyoWrap.unwrapNazoPuyo:
       check it.field == field
 
     sim.forward
     discard field.pop
     let field1 = field
     check sim.state == WillSettle
-    sim.nazoPuyoWrap.runIt:
+    sim.nazoPuyoWrap.unwrapNazoPuyo:
       check it.field == field
 
     sim.backward
     check sim.state == AfterEdit
-    sim.nazoPuyoWrap.runIt:
+    sim.nazoPuyoWrap.unwrapNazoPuyo:
       check it.field == field0
 
     for _ in 1 .. 3:
       sim.forward
     sim.reset
     check sim.state == AfterEdit
-    sim.nazoPuyoWrap.runIt:
+    sim.nazoPuyoWrap.unwrapNazoPuyo:
       check it.field == field0
 
     sim.forward
@@ -750,18 +750,18 @@ rb|"""
     field[Row0, Col0] = Cell.Purple
     let field2 = field
     check sim.state == AfterEdit
-    sim.nazoPuyoWrap.runIt:
+    sim.nazoPuyoWrap.unwrapNazoPuyo:
       check it.field == field
 
     sim.forward
     field.settle
     check sim.state == Stable
-    sim.nazoPuyoWrap.runIt:
+    sim.nazoPuyoWrap.unwrapNazoPuyo:
       check it.field == field
 
     sim.forward
     check sim.state == Stable
-    sim.nazoPuyoWrap.runIt:
+    sim.nazoPuyoWrap.unwrapNazoPuyo:
       check it.field == field
 
     sim.writeCell Cell.Yellow
@@ -769,12 +769,12 @@ rb|"""
     sim.forward
     sim.reset
     check sim.state == AfterEdit
-    sim.nazoPuyoWrap.runIt:
+    sim.nazoPuyoWrap.unwrapNazoPuyo:
       check it.field == field
 
     sim.backward
     check sim.state == AfterEdit
-    sim.nazoPuyoWrap.runIt:
+    sim.nazoPuyoWrap.unwrapNazoPuyo:
       check it.field == field
 
 # ------------------------------------------------

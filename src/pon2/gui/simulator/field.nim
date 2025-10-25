@@ -12,8 +12,8 @@
 
 when defined(js) or defined(nimsuggest):
   import std/[sugar]
+  import chroma
   import karax/[karaxdsl, vdom, vstyles]
-  import ../[color]
   import ../../[app]
   import ../../private/[gui]
 
@@ -46,10 +46,20 @@ when defined(js) or defined(nimsuggest):
     let
       editable = not cameraReady and self.derefSimulator(helper).mode in EditModes
       nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      arr = nazoWrap.runIt:
+      arr = nazoWrap.unwrapNazoPuyo:
         it.field.toArr
+      tableBorder = (StyleAttr.border, "1px gray solid".cstring)
+      tableStyle =
+        if editable:
+          style(
+            tableBorder,
+            (StyleAttr.borderCollapse, "separate".cstring),
+            (StyleAttr.borderSpacing, "1px".cstring),
+          )
+        else:
+          style(tableBorder)
 
-    buildHtml table(style = style(StyleAttr.border, "1px gray solid")):
+    buildHtml table(style = tableStyle):
       tbody:
         for row in Row:
           tr:
@@ -58,7 +68,7 @@ when defined(js) or defined(nimsuggest):
                 imgSrc = arr[row][col].cellImgSrc
                 cellStyle = style(
                   StyleAttr.backgroundColor,
-                  self.cellBgColor(helper, row, col, editable).code,
+                  self.cellBgColor(helper, row, col, editable).toHtmlHex.cstring,
                 )
 
               td:

@@ -9,10 +9,12 @@ srcDir = "src"
 installExt = @["nim"]
 bin = @["pon2"]
 
+
 # Dependencies
 
 requires "nim ^= 2.2.4"
 
+requires "chroma ^= 1.0.0"
 requires "chronos ^= 4.0.4"
 requires "cligen ^= 1.9.3"
 requires "karax ^= 1.5.0"
@@ -22,6 +24,7 @@ requires "results ^= 0.5.1"
 requires "stew ^= 0.4.2"
 requires "suru ^= 0.3.2"
 requires "unittest2 ^= 0.2.4"
+
 
 # Tasks
 
@@ -77,4 +80,3 @@ task www, "Generate Web Pages":
   # assets
   rmDir "www/assets"
   cpDir "assets", "www/assets"
-

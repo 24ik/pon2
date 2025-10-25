@@ -67,7 +67,7 @@ block: # generate
   if goal.kind in ValKinds:
     check goal.optVal.unsafeValue == genGoalVal
 
-  wrap.runIt:
+  wrap.unwrapNazoPuyo:
     let nazo = itNazo
 
     check nazo.puyoPuyo.steps.len == moveCnt

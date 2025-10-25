@@ -26,7 +26,7 @@ when defined(js) or defined(nimsuggest):
 
     let
       nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      steps = nazoWrap.runIt:
+      steps = nazoWrap.unwrapNazoPuyo:
         it.steps
     if self.derefSimulator(helper).operatingIdx >= steps.len:
       return Cell.None

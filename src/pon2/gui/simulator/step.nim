@@ -12,8 +12,8 @@
 
 when defined(js) or defined(nimsuggest):
   import std/[strformat, sugar]
+  import chroma
   import karax/[karaxdsl, vdom, vstyles]
-  import ../[color]
   import ../../[app]
   import ../../private/[gui, utils]
 
@@ -83,7 +83,7 @@ when defined(js) or defined(nimsuggest):
         not self.derefSimulator(helper).editData.focusField and
         self.derefSimulator(helper).editData.step.idx == stepIdx
       nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      steps = nazoWrap.runIt:
+      steps = nazoWrap.unwrapNazoPuyo:
         it.steps
       isPlaceholder = stepIdx >= steps.len
       optPlcmtDesc = (if isPlaceholder: ""
@@ -155,7 +155,7 @@ when defined(js) or defined(nimsuggest):
                 if not self.derefSimulator(helper).editData.focusField and
                     self.derefSimulator(helper).editData.step.idx == stepIdx and
                     self.derefSimulator(helper).editData.step.col == col:
-                  style(StyleAttr.backgroundColor, SelectColor.code)
+                  style(StyleAttr.backgroundColor, SelectColor.toHtmlHex.cstring)
                 else:
                   style()
 
@@ -182,7 +182,7 @@ when defined(js) or defined(nimsuggest):
     let
       editable = self.derefSimulator(helper).mode == EditorEdit and not cameraReady
       nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      steps = nazoWrap.runIt:
+      steps = nazoWrap.unwrapNazoPuyo:
         it.steps
 
     buildHtml table(class = "table is-narrow"):

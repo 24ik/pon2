@@ -26,7 +26,7 @@ when defined(js) or defined(nimsuggest):
       $helper.simulator.markResultOpt.unsafeValue
     else:
       let nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      nazoWrap.runIt:
+      nazoWrap.unwrapNazoPuyo:
         if self.derefSimulator(helper).state == Stable and it.field.isDead:
           $MarkResult.Dead
         else:

@@ -23,7 +23,7 @@ when defined(js) or defined(nimsuggest):
       stepIdx = self.derefSimulator(helper).operatingIdx.succ 1 + dblNext.int
       nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
 
-    nazoWrap.runIt:
+    nazoWrap.unwrapNazoPuyo:
       if stepIdx < it.steps.len:
         let step = it.steps[stepIdx]
         case step.kind
