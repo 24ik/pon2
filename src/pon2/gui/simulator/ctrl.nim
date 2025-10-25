@@ -338,5 +338,25 @@ when defined(js) or defined(nimsuggest):
               ):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-forward-step")
-        of EditorEdit, Replay:
+        of Replay:
+          tdiv(class = "field is-grouped is-grouped-centered"):
+            tdiv(class = "control"):
+              button(
+                class = "button", onclick = () => self.derefSimulator(helper).reset
+              ):
+                span(class = "icon"):
+                  italic(class = "fa-solid fa-backward-fast")
+            tdiv(class = "control"):
+              button(
+                class = "button", onclick = () => self.derefSimulator(helper).backward
+              ):
+                span(class = "icon"):
+                  italic(class = "fa-solid fa-backward-step")
+            tdiv(class = "control"):
+              button(
+                class = "button", onclick = () => self.derefSimulator(helper).forward
+              ):
+                span(class = "icon"):
+                  italic(class = "fa-solid fa-forward-step")
+        of EditorEdit:
           discard

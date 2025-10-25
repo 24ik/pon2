@@ -21,9 +21,9 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper
   ): VNode {.inline.} =
     ## Returns the simulator node.
-    let wideCtrl =
-      self.derefSimulator(helper).mode == Replay or
-      (self.derefSimulator(helper).mode in PlayModes and helper.mobile)
+    let
+      mode = self.derefSimulator(helper).mode
+      wideCtrl = helper.mobile and mode in PlayModes
 
     buildHtml tdiv:
       if self.derefSimulator(helper).nazoPuyoWrap.optGoal.isOk:
@@ -31,22 +31,23 @@ when defined(js) or defined(nimsuggest):
           self.toGoalVNode helper
       tdiv(class = "block"):
         tdiv(
-          class = "columns is-mobile is-1", style = style(StyleAttr.overflowX, "auto")
+          class = (if helper.mobile: "columns is-mobile is-1" else: "columns is-mobile").cstring,
+          style = style(StyleAttr.overflowX, "auto"),
         ):
           tdiv(class = "column is-narrow"):
-            if self.derefSimulator(helper).mode notin EditModes:
+            if mode notin EditModes:
               tdiv(class = "block"):
                 self.toOperatingVNode helper
             tdiv(class = "block"):
               self.toFieldVNode helper
             tdiv(class = "block"):
               self.toMsgVNode helper
-            if self.derefSimulator(helper).mode != Replay:
+            if mode != Replay:
               tdiv(class = "block"):
                 self.toSettingsVNode helper
             tdiv(class = "block"):
               self.toShareVNode helper
-          if not helper.mobile and self.derefSimulator(helper).mode in PlayModes:
+          if not wideCtrl and mode notin EditModes:
             tdiv(class = "column is-narrow"):
               self.toNextVNode helper
           tdiv(class = "column is-narrow"):
@@ -54,7 +55,11 @@ when defined(js) or defined(nimsuggest):
               tdiv(class = "block"):
                 self.toSideCtrlVNode helper
             tdiv(class = "block"):
-              tdiv(class = "columns is-mobile is-1"):
+              tdiv(
+                class = (
+                  if helper.mobile: "columns is-mobile is-1" else: "columns is-mobile"
+                ).cstring
+              ):
                 if wideCtrl:
                   tdiv(class = "column is-narrow"):
                     self.toNextVNode helper
@@ -62,22 +67,21 @@ when defined(js) or defined(nimsuggest):
                   class =
                     "column is-narrow is-flex is-flex-direction-column is-align-items-flex-start"
                 ):
-                  if self.derefSimulator(helper).mode in EditModes and not helper.mobile:
+                  if mode in EditModes and not helper.mobile:
                     tdiv(class = "block"):
                       self.toPaletteVNode helper
-                  if self.derefSimulator(helper).mode == EditorEdit or
-                      (self.derefSimulator(helper).mode != Replay and not helper.mobile):
+                  if not helper.mobile or mode == EditorEdit:
                     tdiv(class = "block"):
                       self.toSideCtrlVNode helper
                   tdiv(class = "block"):
                     self.toStepsVNode helper
-      if helper.mobile and self.derefSimulator(helper).mode != Replay:
+      if helper.mobile:
         tdiv(style = bottomFixStyle):
           tdiv(class = "columns is-mobile is-1"):
-            if self.derefSimulator(helper).mode in EditModes:
+            if mode in EditModes:
               tdiv(class = "column is-narrow"):
                 self.toPaletteVNode helper
-            if self.derefSimulator(helper).mode != EditorEdit:
+            if mode != EditorEdit:
               tdiv(class = "column is-narrow"):
                 self.toBottomCtrlVNode helper
       tdiv(

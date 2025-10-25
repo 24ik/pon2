@@ -114,7 +114,10 @@ when isMainModule:
       buildHtml tdiv:
         if errMsg == "":
           let (helper, replayHelper) = VNodeHelper.init2(globalStudioRef, "pon2-main")
-          globalStudioRef.toStudioVNode(helper, replayHelper)
+          section(
+            class = (if helper.mobile: "section pt-3 pl-3" else: "section").cstring
+          ):
+            globalStudioRef.toStudioVNode(helper, replayHelper)
         else:
           section(class = "section"):
             tdiv(class = "content"):

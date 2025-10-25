@@ -48,8 +48,18 @@ when defined(js) or defined(nimsuggest):
       nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
       arr = nazoWrap.runIt:
         it.field.toArr
+      tableBorder = (StyleAttr.border, "1px gray solid".cstring)
+      tableStyle =
+        if editable:
+          style(
+            tableBorder,
+            (StyleAttr.borderCollapse, "separate".cstring),
+            (StyleAttr.borderSpacing, "1px".cstring),
+          )
+        else:
+          style(tableBorder)
 
-    buildHtml table(style = style(StyleAttr.border, "1px gray solid")):
+    buildHtml table(style = tableStyle):
       tbody:
         for row in Row:
           tr:
