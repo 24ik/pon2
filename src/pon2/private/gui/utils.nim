@@ -11,13 +11,24 @@
 {.experimental: "strictFuncs".}
 {.push experimental: "views".}
 
+import chroma
+
 when defined(js) or defined(nimsuggest):
   import std/[jsffi, jsre, strformat, sugar]
   import karax/[karax, kdom, vdom, vstyles]
   import ../[assign3, utils]
   import ../../[app]
 
-const AssetsDir* {.define: "pon2.assets".} = "../assets"
+const
+  AssetsDir* {.define: "pon2.assets".} = "../assets"
+
+  SelectColor* = hsl(171, 100, 41).color
+  GhostColor* = rgb(200, 200, 200).color
+  WaterColor* = rgb(135, 248, 255).color
+  DefaultColor* = rgb(225, 225, 225).color
+
+  CounterStyleColor = rgb(255, 140, 0).color
+  TranslucentStyleColor = rgba(0, 0, 0, 16).color
 
 # ------------------------------------------------
 # JS backend
@@ -41,7 +52,7 @@ when defined(js) or defined(nimsuggest):
 
   let
     counterStyle* = style(
-      (StyleAttr.color, "#ff8c00".cstring),
+      (StyleAttr.color, CounterStyleColor.toHtmlHex.cstring),
       (StyleAttr.fontSize, "0.6rem".cstring),
       (StyleAttr.position, "absolute".cstring),
       (StyleAttr.top, "-0.2em".cstring),
@@ -55,7 +66,8 @@ when defined(js) or defined(nimsuggest):
       (StyleAttr.transform, "translateX(-50%)".cstring),
       (StyleAttr.zIndex, "100".cstring),
     )
-    translucentStyle* = style(StyleAttr.backgroundColor, "#00000010")
+    translucentStyle* =
+      style(StyleAttr.backgroundColor, TranslucentStyleColor.toHtmlHex.cstring)
 
   # ------------------------------------------------
   # JS - Dereference

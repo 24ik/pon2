@@ -12,8 +12,8 @@
 
 when defined(js) or defined(nimsuggest):
   import std/[strformat, sugar]
+  import chroma
   import karax/[karaxdsl, vdom, vstyles]
-  import ../[color]
   import ../../[app]
   import ../../private/[gui, utils]
 
@@ -155,7 +155,7 @@ when defined(js) or defined(nimsuggest):
                 if not self.derefSimulator(helper).editData.focusField and
                     self.derefSimulator(helper).editData.step.idx == stepIdx and
                     self.derefSimulator(helper).editData.step.col == col:
-                  style(StyleAttr.backgroundColor, SelectColor.code)
+                  style(StyleAttr.backgroundColor, SelectColor.toHtmlHex.cstring)
                 else:
                   style()
 

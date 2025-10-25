@@ -2,7 +2,6 @@
 ## [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 ##
 ## Submodule Documentations:
-## - [color](./gui/color.html)
 ## - [simulator](./gui/simulator.html)
 ## - [studio](./gui/studio.html)
 ##
@@ -18,7 +17,7 @@
 {.experimental: "views".}
 
 import ./[app]
-import ./gui/[color, simulator, studio]
+import ./gui/[simulator, studio]
 
 export app
-export color, simulator, studio
+export simulator, studio

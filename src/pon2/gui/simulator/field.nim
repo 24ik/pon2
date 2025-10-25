@@ -12,8 +12,8 @@
 
 when defined(js) or defined(nimsuggest):
   import std/[sugar]
+  import chroma
   import karax/[karaxdsl, vdom, vstyles]
-  import ../[color]
   import ../../[app]
   import ../../private/[gui]
 
@@ -68,7 +68,7 @@ when defined(js) or defined(nimsuggest):
                 imgSrc = arr[row][col].cellImgSrc
                 cellStyle = style(
                   StyleAttr.backgroundColor,
-                  self.cellBgColor(helper, row, col, editable).code,
+                  self.cellBgColor(helper, row, col, editable).toHtmlHex.cstring,
                 )
 
               td:
