@@ -52,7 +52,7 @@ when defined(js) or defined(nimsuggest):
 
   let
     counterStyle* = style(
-      (StyleAttr.color, CounterStyleColor.toHtmlHex.cstring),
+      (StyleAttr.color, CounterStyleColor.toHtmlRgba.cstring),
       (StyleAttr.fontSize, "0.6rem".cstring),
       (StyleAttr.position, "absolute".cstring),
       (StyleAttr.top, "-0.2em".cstring),
@@ -67,7 +67,7 @@ when defined(js) or defined(nimsuggest):
       (StyleAttr.zIndex, "100".cstring),
     )
     translucentStyle* =
-      style(StyleAttr.backgroundColor, TranslucentStyleColor.toHtmlHex.cstring)
+      style(StyleAttr.backgroundColor, TranslucentStyleColor.toHtmlRgba.cstring)
 
   # ------------------------------------------------
   # JS - Dereference

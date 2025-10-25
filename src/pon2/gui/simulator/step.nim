@@ -155,7 +155,7 @@ when defined(js) or defined(nimsuggest):
                 if not self.derefSimulator(helper).editData.focusField and
                     self.derefSimulator(helper).editData.step.idx == stepIdx and
                     self.derefSimulator(helper).editData.step.col == col:
-                  style(StyleAttr.backgroundColor, SelectColor.toHtmlHex.cstring)
+                  style(StyleAttr.backgroundColor, SelectColor.toHtmlRgba.cstring)
                 else:
                   style()
 
