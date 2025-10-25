@@ -1,34 +1,37 @@
-## The `pon2` module provides the applications and the APIs for
+## The `pon2` module provides the applications and the APIs of
 ## [Puyo Puyo](https://puyo.sega.jp/) and
 ## [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 ##
 ## To access the APIs, either `import pon2` as an "all-in-one" or import the following
 ## submodules individually:
+## - [pon2/gui](./pon2/gui.html)
 ## - [pon2/app](./pon2/app.html)
 ## - [pon2/core](./pon2/core.html)
-## - [pon2/gui](./pon2/gui.html)
+##
+## Note that these submodules are listed in descending order of "layers".
+## Importing a higher-level module automatically imports all modules below it.
 ##
 ## Compile Options:
-## | Option                            | Description                            | Default             |
-## | --------------------------------- | -------------------------------------- | ------------------- |
-## | `-d:pon2.waterheight=<int>`       | Height of the water.                   | `8`                 |
-## | `-d:pon2.fqdn=<str>`              | FQDN of the web simulator.             | `24ik.github.io`    |
-## | `-d:pon2.garbagerate.tsu=<int>`   | Garbage rate in Tsu rule.              | `70`                |
-## | `-d:pon2.garbagerate.water=<int>` | Garbage rate in Water rule.            | `90`                |
-## | `-d:pon2.simd=<int>`              | SIMD level. (1: SSE4.2, 0: None)       | 1                   |
-## | `-d:pon2.bmi=<int>`               | BMI level. (2: BMI2, 1: BMI1, 0: None) | 2                   |
-## | `-d:pon2.clmul=<bool>`            | Uses CLMUL.                            | `true`              |
-## | `-d:pon2.path=<str>`              | Path of the web simulator.             | `/pon2/stable/ide/` |
-## | `-d:pon2.assets=<str>`            | Assets directory.                      | `../assets`         |
+## | Option                            | Description                            | Default                |
+## | --------------------------------- | -------------------------------------- | ---------------------- |
+## | `-d:pon2.waterheight=<int>`       | Height of the water.                   | `8`                    |
+## | `-d:pon2.fqdn=<str>`              | FQDN of the web simulator.             | `24ik.github.io`       |
+## | `-d:pon2.garbagerate.tsu=<int>`   | Garbage rate in Tsu rule.              | `70`                   |
+## | `-d:pon2.garbagerate.water=<int>` | Garbage rate in Water rule.            | `90`                   |
+## | `-d:pon2.simd=<int>`              | SIMD level. (1: SSE4.2, 0: None)       | 1                      |
+## | `-d:pon2.bmi=<int>`               | BMI level. (2: BMI2, 1: BMI1, 0: None) | 2                      |
+## | `-d:pon2.clmul=<bool>`            | Uses CLMUL.                            | `true`                 |
+## | `-d:pon2.path=<str>`              | Path of the web studio.                | `/pon2/stable/studio/` |
+## | `-d:pon2.assets=<str>`            | Assets directory.                      | `../assets`            |
 ##
 
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./pon2/[app, core, gui]
+import ./pon2/[gui]
 
-export app, core, gui
+export gui
 
 when isMainModule:
   import std/[parsecfg, streams]
@@ -57,8 +60,7 @@ when isMainModule:
   when defined(js) or defined(nimsuggest):
     import std/[strformat, sugar]
     import karax/[karax, karaxdsl, kdom, vdom]
-    import ./pon2/private/[assign3]
-    import ./pon2/private/gui/[utils]
+    import ./pon2/private/[assign3, gui]
 
     # ------------------------------------------------
     # JS - Utils
@@ -67,21 +69,14 @@ when isMainModule:
     proc initFooterNode(): VNode {.inline.} =
       ## Returns the footer node.
       buildHtml footer(class = "footer"):
-        tdiv(class = "columns"):
-          tdiv(class = "column is-narrow"):
+        tdiv(class = "content has-text-centered"):
+          p:
             text "Pon!通 Version {Pon2Ver}".fmt
-          tdiv(class = "column is-narrow"):
-            a(
-              href = "../docs/simulator/",
-              target = "_blank",
-              rel = "noopener noreferrer",
-            ):
-              text "操作方法"
 
-    proc keyHandler(ide: ref Ide, event: Event) {.inline.} =
+    proc keyHandler(studio: ref Studio, event: Event) {.inline.} =
       ## Runs the keyboard event handler.
       ## Returns `true` if the event is handled.
-      if ide[].operate(cast[KeyboardEvent](event).toKeyEvent):
+      if studio[].operate(cast[KeyboardEvent](event).toKeyEvent):
         if not kxi.surpressRedraws:
           kxi.redraw
         event.preventDefault
@@ -90,20 +85,15 @@ when isMainModule:
     # JS - Main
     # ------------------------------------------------
 
-    let
-      globalSimRef = new Simulator
-      globalIdeRef = new Ide
-    globalIdeRef[] = Ide.init globalSimRef
-
-    let globalIdeView = IdeView.init(globalIdeRef, not isMobile())
+    let globalStudioRef = new Studio
     var
       initialized = false
-      parseFailed = false
+      errMsg = ""
 
     proc renderer(routerData: RouterData): VNode =
       ## Returns the root node.
       if not initialized:
-        document.onkeydown = (event: Event) => globalIdeRef.keyHandler event
+        document.onkeydown = (event: Event) => globalStudioRef.keyHandler event
 
         var uri = initUri()
         uri.scheme.assign "https"
@@ -115,18 +105,29 @@ when isMainModule:
 
         let simRes = uri.parseSimulator
         if simRes.isOk:
-          globalSimRef[] = simRes.unsafeValue
+          globalStudioRef[] = Studio.init simRes.unsafeValue
         else:
-          parseFailed = true
+          errMsg.assign simRes.error
 
-        initialized = true
+        initialized.assign true
 
       buildHtml tdiv:
-        if parseFailed:
-          text("URL形式エラー")
+        if errMsg == "":
+          let (helper, replayHelper) = VNodeHelper.init2(globalStudioRef, "pon2-main")
+          globalStudioRef.toStudioVNode(helper, replayHelper)
         else:
-          globalIdeView.toVNode "pon2-main"
-          initFooterNode()
+          section(class = "section"):
+            tdiv(class = "content"):
+              h1(class = "title"):
+                text("Pon!通 URL形式エラー")
+              tdiv(class = "field"):
+                label(class = "label"):
+                  text "エラー内容"
+                tdiv(class = "control"):
+                  textarea(class = "textarea is-large", readonly = true):
+                    text errMsg
+
+        initFooterNode()
 
     renderer.setRenderer
 

@@ -2,7 +2,7 @@
 
 version = "0.23.14"
 author = "Keisuke Izumiya"
-description = "Application for Puyo Puyo and Nazo Puyo"
+description = "Application of Puyo Puyo and Nazo Puyo"
 license = "Apache-2.0"
 
 srcDir = "src"
@@ -62,7 +62,7 @@ task www, "Generate Web Pages":
       cpFile rawJs, dst
 
   # IDE
-  "src/pon2.nim".compile "www/ide/index.min.js"
+  "src/pon2.nim".compile "www/studio/index.min.js"
   #"src/pon2.nim".compile "www/worker.min.js", "-d:pon2.worker"
 
   # marathon

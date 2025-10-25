@@ -3,18 +3,18 @@
 ##
 ## Submodule Documentations:
 ## - [generate](./app/generate.html)
-## - [ide](./app/ide.html)
 ## - [key](./app/key.html)
 ## - [marathon](./app/marathon.html)
 ## - [nazopuyowrap](./app/nazopuyowrap.html)
 ## - [permute](./app/permute.html)
 ## - [simulator](./app/simulator.html)
 ## - [solve](./app/solve.html)
+## - [studio](./app/studio.html)
 ##
 ## Compile Options:
-## | Option               | Description                | Default             |
-## | -------------------- | -------------------------- | ------------------- |
-## | `-d:pon2.path=<str>` | Path of the web simulator. | `/pon2/stable/ide/` |
+## | Option               | Description             | Default                |
+## | -------------------- | ----------------------- | ---------------------- |
+## | `-d:pon2.path=<str>` | Path of the web studio. | `/pon2/stable/studio/` |
 ##
 
 {.push raises: [].}
@@ -22,6 +22,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./app/[generate, ide, key, marathon, nazopuyowrap, permute, simulator, solve]
+import ./[core]
+import ./app/[generate, key, marathon, nazopuyowrap, permute, simulator, solve, studio]
 
-export generate, ide, key, marathon, nazopuyowrap, permute, simulator, solve
+export core
+export generate, key, marathon, nazopuyowrap, permute, simulator, solve, studio

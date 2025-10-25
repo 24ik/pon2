@@ -6,42 +6,52 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
+import ../../[app]
+
+when defined(js) or defined(nimsuggest):
+  import karax/[karaxdsl, vdom]
+  import ../../[core]
+  import ../../private/[arrayops2, assign3, math2]
+  import ../../private/[gui]
+
+type MsgView* = object ## View of the message.
+  simulator: ref Simulator
+
+# ------------------------------------------------
+# Constructor
+# ------------------------------------------------
+
+func init*(T: type MsgView, simulator: ref Simulator): T {.inline.} =
+  T(simulator: simulator)
+
 # ------------------------------------------------
 # JS backend
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
-  import karax/[karaxdsl, vdom]
-  import ../../[app]
-  import ../../private/[arrayops2, assign3, gui, math2]
-
-when defined(js) or defined(nimsuggest):
   const ShowNoticeGarbageCnt = 6
 
-  proc txtMsg[S: Simulator or Studio](
-      self: ref S, helper: VNodeHelper
-  ): string {.inline.} =
-    ## Returns the text message.
-    if self.derefSimulator(helper).nazoPuyoWrap.optGoal.isOk:
-      $helper.simulator.markResultOpt.unsafeValue
+  func msg(self: MsgView): string {.inline.} =
+    ## Returns the message.
+    if self.simulator[].nazoPuyoWrap.optGoal.isOk:
+      $self.simulator[].mark
     else:
-      let nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      nazoWrap.runIt:
-        if self.derefSimulator(helper).state == Stable and it.field.isDead:
+      self.simulator[].nazoPuyoWrap.runIt:
+        if self.simulator[].state == Stable and it.field.isDead:
           $MarkResult.Dead
         else:
           ""
 
-  proc score[S: Simulator or Studio](self: ref S, helper: VNodeHelper): int {.inline.} =
+  func score(self: MsgView): int {.inline.} =
     ## Returns the score.
-    self.derefSimulator(helper).moveResult.score.unsafeValue
+    self.simulator[].moveResult.score.unsafeValue
 
-  proc noticeGarbageCnts[S: Simulator or Studio](
-      self: ref S, helper: VNodeHelper, score: int
+  func noticeGarbageCnts(
+      self: MsgView, score: int
   ): array[NoticeGarbage, int] {.inline.} =
     ## Returns the numbers of notice garbages.
     let originalNoticeGarbageCnts =
-      score.noticeGarbageCnts(self.derefSimulator(helper).rule).unsafeValue
+      score.noticeGarbageCnts(self.simulator[].rule).unsafeValue
 
     var
       cnts = initArrWith[NoticeGarbage, int](0)
@@ -57,16 +67,14 @@ when defined(js) or defined(nimsuggest):
 
     cnts
 
-  proc toMsgVNode*[S: Simulator or Studio](
-      self: ref S, helper: VNodeHelper
-  ): VNode {.inline.} =
+  proc toVNode*(self: MsgView): VNode {.inline.} =
     ## Returns the message node.
     let
-      score = self.score helper
-      noticeGarbageCnts = self.noticeGarbageCnts(helper, score)
+      score = self.score
+      noticeGarbageCnts = self.noticeGarbageCnts score
 
     buildHtml tdiv:
-      if self.derefSimulator(helper).nazoPuyoWrap.optGoal.isErr:
+      if self.simulator[].nazoPuyoWrap.optGoal.isErr:
         table:
           tbody:
             tr:
@@ -83,4 +91,4 @@ when defined(js) or defined(nimsuggest):
               td:
                 tdiv(class = "is-size-7"):
                   text $score
-      text self.txtMsg(helper).cstring
+      text self.msg.cstring

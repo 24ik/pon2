@@ -6,45 +6,57 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
+import ../../[app]
+
+when defined(js) or defined(nimsuggest):
+  import std/[strformat, sugar]
+  import karax/[karax, karaxdsl, vdom, vstyles]
+  import ../[color]
+  import ../../[core]
+  import ../../private/[gui, utils]
+
+type StepsView* = object ## View of the steps.
+  simulator: ref Simulator
+  showCursor: bool
+
+# ------------------------------------------------
+# Constructor
+# ------------------------------------------------
+
+func init*(
+    T: type StepsView, simulator: ref Simulator, showCursor = true
+): T {.inline.} =
+  T(simulator: simulator, showCursor: showCursor)
+
 # ------------------------------------------------
 # JS backend
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
-  import std/[strformat, sugar]
-  import karax/[karaxdsl, vdom, vstyles]
-  import ../[color]
-  import ../../[app]
-  import ../../private/[gui, utils]
-
   const
     CellCls = "button p-0".cstring
     SelectCellCls = "button p-0 is-primary".cstring
+    GarbageCntSelectIdPrefix = "pon2-simulator-step-garbagecnt-".cstring
 
-  func initDeleteBtnHandler[S: Simulator or Studio](
-      self: ref S, helper: VNodeHelper, stepIdx: int
-  ): () -> void =
+  func initDeleteBtnHandler(self: StepsView, stepIdx: int): () -> void =
     ## Returns the handler for clicking delete buttons.
     # NOTE: cannot inline due to karax's limitation
-    () => self.derefSimulator(helper).deleteStep stepIdx
+    () => self.simulator[].deleteStep stepIdx
 
-  func initWriteBtnHandler[S: Simulator or Studio](
-      self: ref S, helper: VNodeHelper, idx: int, pivot: bool
-  ): () -> void =
+  func initWriteBtnHandler(self: StepsView, idx: int, pivot: bool): () -> void =
     ## Returns the handler for clicking write buttons.
     # NOTE: cannot inline due to karax's limitation
-    () => self.derefSimulator(helper).writeCell(idx, pivot)
+    () => self.simulator[].writeCell(idx, pivot)
 
-  func initCntSelectHandler[S: Simulator or Studio](
-      self: ref S, helper: VNodeHelper, idx: int, col: Col, selectId: cstring
+  func initCntSelectHandler(
+      self: StepsView, idx: int, col: Col, selectId: cstring
   ): () -> void =
     ## Returns the handler for selecting garbage cnt.
     # NOTE: cannot inline due to karax's limitation
-    () => self.derefSimulator(helper).writeCnt(idx, col, selectId.getSelectedIdx)
+    () => self.simulator[].writeCnt(idx, col, selectId.getSelectedIdx)
 
-  proc pairPlcmtCellNode[S: Simulator or Studio](
-      self: ref S,
-      helper: VNodeHelper,
+  proc pairPlcmtCellNode(
+      self: StepsView,
       step: Step,
       stepIdx: int,
       editable, stepHasCursor, isPlaceholder, pivot: bool,
@@ -61,11 +73,12 @@ when defined(js) or defined(nimsuggest):
     if editable:
       buildHtml button(
         class =
-          if stepHasCursor and (
-            self.derefSimulator(helper).editData.step.pivot == pivot
-          ): SelectCellCls else: CellCls,
+          if stepHasCursor and (self.simulator[].editData.step.pivot == pivot):
+            SelectCellCls
+          else:
+            CellCls,
         style = style(StyleAttr.maxHeight, "24px"),
-        onclick = self.initWriteBtnHandler(helper, stepIdx, pivot),
+        onclick = self.initWriteBtnHandler(stepIdx, pivot),
       ):
         figure(class = "image is-24x24"):
           img(src = imgSrc)
@@ -73,21 +86,23 @@ when defined(js) or defined(nimsuggest):
       buildHtml figure(class = "image is-24x24"):
         img(src = imgSrc)
 
-  proc pairPlcmtNode[S: Simulator or Studio](
-      self: ref S, helper: VNodeHelper, step: Step, stepIdx: int, editable: bool
+  proc pairPlcmtNode(
+      self: StepsView, step: Step, stepIdx: int, editable: bool
   ): VNode {.inline.} =
     ## Returns the pair-placement node.
     let
       stepHasCursor =
-        editable and not helper.mobile and
-        not self.derefSimulator(helper).editData.focusField and
-        self.derefSimulator(helper).editData.step.idx == stepIdx
-      nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      steps = nazoWrap.runIt:
-        it.steps
-      isPlaceholder = stepIdx >= steps.len
-      optPlcmtDesc = (if isPlaceholder: ""
-      else: $steps[stepIdx].optPlacement).cstring
+        editable and self.showCursor and not self.simulator[].editData.focusField and
+        self.simulator[].editData.step.idx == stepIdx
+      optPlcmtDesc: cstring
+      isPlaceholder: bool
+    self.simulator[].nazoPuyoWrap.runIt:
+      isPlaceholder = stepIdx >= it.steps.len
+
+      if isPlaceholder:
+        optPlcmtDesc = "" # NOTE: dummy to compile
+      else:
+        optPlcmtDesc = cstring $it.steps[stepIdx].optPlacement
 
     buildHtml tdiv(class = "columns is-mobile is-1"):
       # pair
@@ -95,23 +110,11 @@ when defined(js) or defined(nimsuggest):
         tdiv(class = "columns is-mobile is-gapless"):
           tdiv(class = "column is-narrow"):
             self.pairPlcmtCellNode(
-              helper,
-              step,
-              stepIdx,
-              editable,
-              stepHasCursor,
-              isPlaceholder,
-              pivot = true,
+              step, stepIdx, editable, stepHasCursor, isPlaceholder, pivot = true
             )
           tdiv(class = "column is-narrow"):
             self.pairPlcmtCellNode(
-              helper,
-              step,
-              stepIdx,
-              editable,
-              stepHasCursor,
-              isPlaceholder,
-              pivot = false,
+              step, stepIdx, editable, stepHasCursor, isPlaceholder, pivot = false
             )
 
       # placement
@@ -119,8 +122,8 @@ when defined(js) or defined(nimsuggest):
         tdiv(class = "column is-narrow"):
           text optPlcmtDesc
 
-  proc garbagesNode[S: Simulator or Studio](
-      self: ref S, helper: VNodeHelper, step: Step, stepIdx: int, editable: bool
+  proc garbagesNode(
+      self: StepsView, step: Step, stepIdx: int, editable: bool
   ): VNode {.inline.} =
     ## Returns the garbages node.
     let imgSrc = if step.dropHard: Hard.cellImgSrc else: Garbage.cellImgSrc
@@ -132,7 +135,7 @@ when defined(js) or defined(nimsuggest):
           button(
             class = CellCls,
             style = style(StyleAttr.maxHeight, "24px"),
-            onclick = () => (self.derefSimulator(helper).writeCell(stepIdx, true)),
+            onclick = () => (self.simulator[].writeCell(stepIdx, true)),
           ):
             figure(class = "image is-24x24"):
               img(src = imgSrc)
@@ -143,18 +146,16 @@ when defined(js) or defined(nimsuggest):
       tdiv(class = "column is-narrow"):
         tdiv(
           class = (
-            if helper.mobile: "columns is-mobile is-gapless"
-            else: "columns is-mobile is-1"
+            if isMobile(): "columns is-mobile is-gapless" else: "columns is-mobile is-1"
           ).cstring
         ):
           for col in Col:
             let
-              selectId =
-                "pon2-simulator-step-garbagecnt-{stepIdx}-{col.ord}".fmt.cstring
+              selectId = "{GarbageCntSelectIdPrefix}{stepIdx}-{col.ord}".fmt.cstring
               selectStyle =
-                if not self.derefSimulator(helper).editData.focusField and
-                    self.derefSimulator(helper).editData.step.idx == stepIdx and
-                    self.derefSimulator(helper).editData.step.col == col:
+                if not self.simulator[].editData.focusField and
+                    self.simulator[].editData.step.idx == stepIdx and
+                    self.simulator[].editData.step.col == col:
                   style(StyleAttr.backgroundColor, SelectColor.code)
                 else:
                   style()
@@ -165,7 +166,7 @@ when defined(js) or defined(nimsuggest):
                   select(
                     id = selectId,
                     style = selectStyle,
-                    onchange = self.initCntSelectHandler(helper, stepIdx, col, selectId),
+                    onchange = self.initCntSelectHandler(stepIdx, col, selectId),
                   ):
                     for cnt in 0 .. 9:
                       option(selected = cnt == step.cnts[col]):
@@ -173,24 +174,21 @@ when defined(js) or defined(nimsuggest):
               else:
                 text $step.cnts[col]
 
-  proc toStepsVNode*[S: Simulator or Studio](
-      self: ref S, helper: VNodeHelper, cameraReady = false
-  ): VNode {.inline.} =
+  proc toVNode*(self: StepsView, cameraReady = false): VNode {.inline.} =
     ## Returns the steps view.
-    const PlaceholderStep = Step.init
+    const DummyStep = Step.init
 
     let
-      editable = self.derefSimulator(helper).mode == EditorEdit and not cameraReady
-      nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      steps = nazoWrap.runIt:
+      editable = self.simulator[].mode == EditorEdit and not cameraReady
+      steps = self.simulator[].nazoPuyoWrap.runIt:
         it.steps
 
     buildHtml table(class = "table is-narrow"):
       tbody:
         for stepIdx, step in steps:
           let rowCls =
-            if not editable and self.derefSimulator(helper).state == Stable and
-                self.derefSimulator(helper).operatingIdx == stepIdx:
+            if not editable and self.simulator[].state == Stable and
+                self.simulator[].operatingIdx == stepIdx:
               "is-selected".cstring
             else:
               "".cstring
@@ -203,7 +201,7 @@ when defined(js) or defined(nimsuggest):
                   tdiv(class = "column is-narrow"):
                     button(
                       class = "button is-size-7",
-                      onclick = self.initDeleteBtnHandler(helper, stepIdx),
+                      onclick = self.initDeleteBtnHandler stepIdx,
                     ):
                       span(class = "icon"):
                         italic(class = "fa-solid fa-trash")
@@ -216,9 +214,9 @@ when defined(js) or defined(nimsuggest):
                 tdiv(class = "column is-narrow"):
                   case step.kind
                   of PairPlacement:
-                    self.pairPlcmtNode(helper, step, stepIdx, editable)
+                    self.pairPlcmtNode(step, stepIdx, editable)
                   of StepKind.Garbages:
-                    self.garbagesNode(helper, step, stepIdx, editable)
+                    self.garbagesNode(step, stepIdx, editable)
 
         # placeholder after the last step
         if editable:
@@ -241,4 +239,4 @@ when defined(js) or defined(nimsuggest):
                     text $placeholderIdx.succ
 
                 tdiv(class = "column is-narrow"):
-                  self.pairPlcmtNode(helper, PlaceholderStep, placeholderIdx, editable)
+                  self.pairPlcmtNode(DummyStep, placeholderIdx, editable)

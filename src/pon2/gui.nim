@@ -3,8 +3,8 @@
 ##
 ## Submodule Documentations:
 ## - [color](./gui/color.html)
-## - [ide](./gui/ide.html)
 ## - [simulator](./gui/simulator.html)
+## - [studio](./gui/studio.html)
 ##
 ## Compile Options:
 ## | Option                 | Description       | Default     |
@@ -17,6 +17,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./gui/[color, ide, simulator]
+import ./[app]
+import ./gui/[color, simulator, studio]
 
-export color, ide, simulator
+export app
+export color, simulator, studio

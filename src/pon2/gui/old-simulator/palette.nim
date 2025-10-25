@@ -6,16 +6,29 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
+import ../../[app]
+
+when defined(js) or defined(nimsuggest):
+  import std/[sugar]
+  import karax/[karax, karaxdsl, vdom]
+  import ../../[core]
+  import ../../private/[gui]
+
+type PaletteView* = object ## View of the palette.
+  simulator: ref Simulator
+
+# ------------------------------------------------
+# Constructor
+# ------------------------------------------------
+
+func init*(T: type PaletteView, simulator: ref Simulator): T {.inline.} =
+  T(simulator: simulator)
+
 # ------------------------------------------------
 # JS backend
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
-  import std/[sugar]
-  import karax/[karaxdsl, vdom]
-  import ../../[app]
-  import ../../private/[gui]
-
   const
     BtnCls = "button px-2".cstring
     SelectBtnCls = "button px-2 is-primary".cstring
@@ -24,17 +37,15 @@ when defined(js) or defined(nimsuggest):
       "L".cstring, ";".cstring,
     ]
 
-  func initBtnHandler[S: Simulator or Studio](
-      self: ref S, helper: VNodeHelper, cell: Cell
-  ): () -> void =
+  func initBtnHandler(self: PaletteView, cell: Cell): () -> void =
     ## Returns the handler for clicking button.
     # NOTE: cannot inline due to karax's limitation
-    () => (self.derefSimulator(helper).editCell = cell)
+    () => (self.simulator[].editCell = cell)
 
-  proc toPaletteVNode*[S: Simulator or Studio](
-      self: ref S, helper: VNodeHelper
-  ): VNode {.inline.} =
+  proc toVNode*(self: PaletteView): VNode {.inline.} =
     ## Returns the palette node.
+    let mobile = isMobile()
+
     buildHtml tdiv(class = "card", style = translucentStyle):
       tdiv(class = "card-content p-1"):
         table:
@@ -47,14 +58,14 @@ when defined(js) or defined(nimsuggest):
             ):
               tr:
                 for cell in cells:
-                  let cellSelected = cell == self.derefSimulator(helper).editData.cell
+                  let cellSelected = cell == self.simulator[].editData.cell
                   td:
                     button(
                       class = if cellSelected: SelectBtnCls else: BtnCls,
-                      onclick = self.initBtnHandler(helper, cell),
+                      onclick = self.initBtnHandler cell,
                     ):
                       figure(class = "image is-24x24"):
                         img(src = cell.cellImgSrc)
-                      if not helper.mobile and not cellSelected:
+                      if not mobile and not cellSelected:
                         span(style = counterStyle):
                           text ShortCuts[cell]
