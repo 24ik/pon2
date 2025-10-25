@@ -56,23 +56,12 @@
 </li>
 <li>
   <details open>
-    <summary><a class="reference reference-toplevel" href="#7" id="57">Types</a></summary>
-    <ul class="simple simple-toc-section">
-      <li><a class="reference" href="#StepsView" title="StepsView = object">StepsView</a></li>
-
-    </ul>
-  </details>
-</li>
-<li>
-  <details open>
     <summary><a class="reference reference-toplevel" href="#12" id="62">Procs</a></summary>
     <ul class="simple simple-toc-section">
-      <ul class="simple nested-toc-section">init
-  <li><a class="reference" href="#init%2CtypeStepsView%2Cref.Simulator" title="init(T: type StepsView; simulator: ref Simulator; showCursor = true): T:type">init(T: type StepsView; simulator: ref Simulator; showCursor = true): T:type</a></li>
-
-</ul>
-<ul class="simple nested-toc-section">toVNode
-  <li><a class="reference" href="#toVNode%2CStepsView" title="toVNode(self: StepsView; cameraReady = false): VNode">toVNode(self: StepsView; cameraReady = false): VNode</a></li>
+      <ul class="simple nested-toc-section">toStepsVNode
+  <li><a class="reference" href="#toStepsVNode%2Cref.S%2CVNodeHelper" title="toStepsVNode[S: Simulator or Studio](self: ref S; helper: VNodeHelper;
+                                     cameraReady = false): VNode">toStepsVNode[S: Simulator or Studio](self: ref S; helper: VNodeHelper;
+                                     cameraReady = false): VNode</a></li>
 
 </ul>
 
@@ -91,42 +80,16 @@
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
-    <a class="reference external" href="../../app.html">../../app</a>, <a class="reference external" href="../color.html">../color</a>, <a class="reference external" href="../../core.html">../../core</a>, <a class="reference external" href="../../private/gui.html">../../private/gui</a>, <a class="reference external" href="../../private/utils.html">../../private/utils</a>
-  </dl>
-</div>
-<div class="section" id="7">
-  <h1><a class="toc-backref" href="#7">Types</a></h1>
-  <dl class="item">
-    <div id="StepsView">
-  <dt><pre><a href="step.html#StepsView"><span class="Identifier">StepsView</span></a> <span class="Other">=</span> <span class="Keyword">object</span></pre></dt>
-  <dd>
-    
-    View of the steps.
-    
-  </dd>
-</div>
-
+    <a class="reference external" href="../color.html">../color</a>, <a class="reference external" href="../../app.html">../../app</a>, <a class="reference external" href="../../private/gui.html">../../private/gui</a>, <a class="reference external" href="../../private/utils.html">../../private/utils</a>
   </dl>
 </div>
 <div class="section" id="12">
   <h1><a class="toc-backref" href="#12">Procs</a></h1>
   <dl class="item">
-    <div id="init-procs-all">
-  <div id="init,typeStepsView,ref.Simulator">
-  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeStepsView%2Cref.Simulator"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">StepsView</span><span class="Other">;</span> <span class="Identifier">simulator</span><span class="Other">:</span> <span class="Keyword">ref</span> <a href="../../app/simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">showCursor</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.
-    <span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-  <dd>
-    
-    
-    
-  </dd>
-</div>
-
-</div>
-<div id="toVNode-procs-all">
-  <div id="toVNode,StepsView">
-  <dt><pre><span class="Keyword">proc</span> <a href="#toVNode%2CStepsView"><span class="Identifier">toVNode</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="step.html#StepsView"><span class="Identifier">StepsView</span></a><span class="Other">;</span> <span class="Identifier">cameraReady</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">VNode</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+    <div id="toStepsVNode-procs-all">
+  <div id="toStepsVNode,ref.S,VNodeHelper">
+  <dt><pre><span class="Keyword">proc</span> <a href="#toStepsVNode%2Cref.S%2CVNodeHelper"><span class="Identifier">toStepsVNode</span></a><span class="Other">[</span><span class="Identifier">S</span><span class="Other">:</span> <a href="../../app/simulator.html#Simulator"><span class="Identifier">Simulator</span></a> <span class="Keyword">or</span> <a href="../../app/studio.html#Studio"><span class="Identifier">Studio</span></a><span class="Other">]</span><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">ref</span> <span class="Identifier">S</span><span class="Other">;</span> <span class="Identifier">helper</span><span class="Other">:</span> <a href="../../private/gui/utils.html#VNodeHelper"><span class="Identifier">VNodeHelper</span></a><span class="Other">;</span>
+    <span class="Identifier">cameraReady</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">VNode</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the steps view.
@@ -145,7 +108,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-10-23 18:30:05 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-10-25 04:03:23 UTC</small>
       </div>
     </div>
   </div>

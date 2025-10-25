@@ -1,4 +1,2 @@
 nimTitle	share	pon2/gui/simulator/share.html	module src/pon2/gui/simulator/share		0
-nim	ShareView	pon2/gui/simulator/share.html#ShareView	object ShareView		17
-nim	init	pon2/gui/simulator/share.html#init,typeShareView,ref.Simulator	proc init(T: type ShareView; simulator: ref Simulator): T:type		24
-nim	toVNode	pon2/gui/simulator/share.html#toVNode,ShareView,cstring	proc toVNode(self: ShareView; cameraReadyId: cstring): VNode		79
+nim	toShareVNode	pon2/gui/simulator/share.html#toShareVNode,ref.S,VNodeHelper	proc toShareVNode[S: Simulator or Studio](self: ref S; helper: VNodeHelper): VNode		69

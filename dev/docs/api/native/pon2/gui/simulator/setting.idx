@@ -1,3 +1,1 @@
 nimTitle	setting	pon2/gui/simulator/setting.html	module src/pon2/gui/simulator/setting		0
-nim	SettingsView	pon2/gui/simulator/setting.html#SettingsView	object SettingsView		17
-nim	init	pon2/gui/simulator/setting.html#init,typeSettingsView,ref.Simulator	proc init(T: type SettingsView; simulator: ref Simulator): T:type		24

@@ -1,4 +1,0 @@
-nimTitle	setting	pon2/gui/ide/setting.html	module src/pon2/gui/ide/setting		0
-nim	IdeSettingView	pon2/gui/ide/setting.html#IdeSettingView	object IdeSettingView		16
-nim	IdeSetting	pon2/gui/ide/setting.html#IdeSetting	object IdeSetting		19
-nim	init	pon2/gui/ide/setting.html#init,typeIdeSettingView,ref.Ide	proc init(T: type IdeSettingView; ide: ref Ide): T:type		28

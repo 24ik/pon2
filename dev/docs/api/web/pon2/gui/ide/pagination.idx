@@ -1,4 +1,0 @@
-nimTitle	pagination	pon2/gui/ide/pagination.html	module src/pon2/gui/ide/pagination		0
-nim	IdePaginationView	pon2/gui/ide/pagination.html#IdePaginationView	object IdePaginationView		16
-nim	init	pon2/gui/ide/pagination.html#init,typeIdePaginationView,ref.Ide	proc init(T: type IdePaginationView; ide: ref Ide): T:type		23
-nim	toVNode	pon2/gui/ide/pagination.html#toVNode,IdePaginationView	proc toVNode(self: IdePaginationView): VNode		31

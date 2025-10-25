@@ -1,4 +1,0 @@
-nimTitle	ide	pon2/gui/ide/ide.html	module src/pon2/gui/ide/ide		0
-nim	IdeView	pon2/gui/ide/ide.html#IdeView	object IdeView		18
-nim	init	pon2/gui/ide/ide.html#init,typeIdeView,ref.Ide	proc init(T: type IdeView; ide: ref Ide; showCursor = true): T:type		32
-nim	toVNode	pon2/gui/ide/ide.html#toVNode,IdeView,cstring	proc toVNode(self: IdeView; id: cstring): VNode		52

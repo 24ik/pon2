@@ -1,4 +1,2 @@
 nimTitle	next	pon2/gui/simulator/next.html	module src/pon2/gui/simulator/next		0
-nim	NextsView	pon2/gui/simulator/next.html#NextsView	object NextsView		16
-nim	init	pon2/gui/simulator/next.html#init,typeNextsView,ref.Simulator	proc init(T: type NextsView; simulator: ref Simulator): T:type		23
-nim	toVNode	pon2/gui/simulator/next.html#toVNode,NextsView	proc toVNode(self: NextsView): VNode		46
+nim	toNextVNode	pon2/gui/simulator/next.html#toNextVNode,ref.S,VNodeHelper	proc toNextVNode[S: Simulator or Studio](self: ref S; helper: VNodeHelper): VNode		37

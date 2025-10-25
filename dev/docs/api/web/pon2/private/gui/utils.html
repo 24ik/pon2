@@ -56,6 +56,25 @@
 </li>
 <li>
   <details open>
+    <summary><a class="reference reference-toplevel" href="#7" id="57">Types</a></summary>
+    <ul class="simple simple-toc-section">
+      <li><a class="reference" href="#SimulatorVNodeHelper" title="SimulatorVNodeHelper = object
+  goalId*: cstring
+  cameraReadyId*: cstring
+  markResultOpt*: Opt[MarkResult]">SimulatorVNodeHelper</a></li>
+<li><a class="reference" href="#StudioVNodeHelper" title="StudioVNodeHelper = object
+  isReplay*: bool
+  settingId*: cstring">StudioVNodeHelper</a></li>
+<li><a class="reference" href="#VNodeHelper" title="VNodeHelper = object
+  mobile*: bool
+  simulator*: SimulatorVNodeHelper
+  studioOpt*: Opt[StudioVNodeHelper]">VNodeHelper</a></li>
+
+    </ul>
+  </details>
+</li>
+<li>
+  <details open>
     <summary><a class="reference reference-toplevel" href="#9" id="59">Lets</a></summary>
     <ul class="simple simple-toc-section">
       <li><a class="reference" href="#bottomFixStyle" title="bottomFixStyle = style([(position, cstring(&quot;fixed&quot;)), (bottom,
@@ -94,8 +113,19 @@
   <li><a class="reference" href="#cellImgSrc%2CCell" title="cellImgSrc(cell: Cell): cstring">cellImgSrc(cell: Cell): cstring</a></li>
 
 </ul>
-<ul class="simple nested-toc-section">isMobile
-  <li><a class="reference" href="#isMobile" title="isMobile(): bool">isMobile(): bool</a></li>
+<ul class="simple nested-toc-section">derefSimulator
+  <li><a class="reference" href="#derefSimulator%2Cref.Simulator%2CVNodeHelper" title="derefSimulator(self: ref Simulator; helper: VNodeHelper): var Simulator">derefSimulator(self: ref Simulator; helper: VNodeHelper): var Simulator</a></li>
+<li><a class="reference" href="#derefSimulator%2Cref.Studio%2CVNodeHelper" title="derefSimulator(self: ref Studio; helper: VNodeHelper): var Simulator">derefSimulator(self: ref Studio; helper: VNodeHelper): var Simulator</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">init
+  <li><a class="reference" href="#init%2CtypeVNodeHelper%2Cref.Simulator%2Ccstring" title="init(T: type VNodeHelper; simulatorRef: ref Simulator; rootId: cstring): T:type">init(T: type VNodeHelper; simulatorRef: ref Simulator; rootId: cstring): T:type</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">init2
+  <li><a class="reference" href="#init2%2CtypeVNodeHelper%2Cref.Studio%2Ccstring" title="init2(T: type VNodeHelper; studioRef: ref Studio; rootId: cstring): tuple[
+    main, replay: VNodeHelper]">init2(T: type VNodeHelper; studioRef: ref Studio; rootId: cstring): tuple[
+    main, replay: VNodeHelper]</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">noticeGarbageImgSrc
@@ -122,7 +152,45 @@
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
-    <a class="reference external" href="../assign3.html">../assign3</a>, <a class="reference external" href="../utils.html">../utils</a>, <a class="reference external" href="../../core.html">../../core</a>
+    <a class="reference external" href="../assign3.html">../assign3</a>, <a class="reference external" href="../utils.html">../utils</a>, <a class="reference external" href="../../app.html">../../app</a>
+  </dl>
+</div>
+<div class="section" id="7">
+  <h1><a class="toc-backref" href="#7">Types</a></h1>
+  <dl class="item">
+    <div id="SimulatorVNodeHelper">
+  <dt><pre><a href="utils.html#SimulatorVNodeHelper"><span class="Identifier">SimulatorVNodeHelper</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">goalId</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">cstring</span>
+  <span class="Identifier">cameraReadyId</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">cstring</span>
+  <span class="Identifier">markResultOpt</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Opt</span><span class="Other">[</span><a href="../../core/nazopuyo.html#MarkResult"><span class="Identifier">MarkResult</span></a><span class="Other">]</span></pre></dt>
+  <dd>
+    
+    Helper for making VNode of simulators.
+    
+  </dd>
+</div>
+<div id="StudioVNodeHelper">
+  <dt><pre><a href="utils.html#StudioVNodeHelper"><span class="Identifier">StudioVNodeHelper</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">isReplay</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
+  <span class="Identifier">settingId</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">cstring</span></pre></dt>
+  <dd>
+    
+    Helper for making VNode of studios.
+    
+  </dd>
+</div>
+<div id="VNodeHelper">
+  <dt><pre><a href="utils.html#VNodeHelper"><span class="Identifier">VNodeHelper</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">mobile</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
+  <span class="Identifier">simulator</span><span class="Operator">*</span><span class="Other">:</span> <a href="utils.html#SimulatorVNodeHelper"><span class="Identifier">SimulatorVNodeHelper</span></a>
+  <span class="Identifier">studioOpt</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Opt</span><span class="Other">[</span><a href="utils.html#StudioVNodeHelper"><span class="Identifier">StudioVNodeHelper</span></a><span class="Other">]</span></pre></dt>
+  <dd>
+    
+    Helper for making VNode.
+    
+  </dd>
+</div>
+
   </dl>
 </div>
 <div class="section" id="9">
@@ -203,12 +271,46 @@
 </div>
 
 </div>
-<div id="isMobile-procs-all">
-  <div id="isMobile">
-  <dt><pre><span class="Keyword">proc</span> <a href="#isMobile"><span class="Identifier">isMobile</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<div id="derefSimulator-procs-all">
+  <div id="derefSimulator,ref.Simulator,VNodeHelper">
+  <dt><pre><span class="Keyword">func</span> <a href="#derefSimulator%2Cref.Simulator%2CVNodeHelper"><span class="Identifier">derefSimulator</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">ref</span> <a href="../../app/simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">helper</span><span class="Other">:</span> <a href="utils.html#VNodeHelper"><span class="Identifier">VNodeHelper</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="../../app/simulator.html#Simulator"><span class="Identifier">Simulator</span></a> {.
+    <span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Returns <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt> if a mobile device is detected.
+    
+    
+  </dd>
+</div>
+<div id="derefSimulator,ref.Studio,VNodeHelper">
+  <dt><pre><span class="Keyword">proc</span> <a href="#derefSimulator%2Cref.Studio%2CVNodeHelper"><span class="Identifier">derefSimulator</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">ref</span> <a href="../../app/studio.html#Studio"><span class="Identifier">Studio</span></a><span class="Other">;</span> <span class="Identifier">helper</span><span class="Other">:</span> <a href="utils.html#VNodeHelper"><span class="Identifier">VNodeHelper</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="../../app/simulator.html#Simulator"><span class="Identifier">Simulator</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Dereferences the simulator.
+    
+  </dd>
+</div>
+
+</div>
+<div id="init-procs-all">
+  <div id="init,typeVNodeHelper,ref.Simulator,cstring">
+  <dt><pre><span class="Keyword">proc</span> <a href="#init%2CtypeVNodeHelper%2Cref.Simulator%2Ccstring"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">VNodeHelper</span><span class="Other">;</span> <span class="Identifier">simulatorRef</span><span class="Other">:</span> <span class="Keyword">ref</span> <a href="../../app/simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">rootId</span><span class="Other">:</span> <span class="Identifier">cstring</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.
+    <span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    
+    
+  </dd>
+</div>
+
+</div>
+<div id="init2-procs-all">
+  <div id="init2,typeVNodeHelper,ref.Studio,cstring">
+  <dt><pre><span class="Keyword">proc</span> <a href="#init2%2CtypeVNodeHelper%2Cref.Studio%2Ccstring"><span class="Identifier">init2</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">VNodeHelper</span><span class="Other">;</span> <span class="Identifier">studioRef</span><span class="Other">:</span> <span class="Keyword">ref</span> <a href="../../app/studio.html#Studio"><span class="Identifier">Studio</span></a><span class="Other">;</span> <span class="Identifier">rootId</span><span class="Other">:</span> <span class="Identifier">cstring</span><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span>
+    <span class="Identifier">main</span><span class="Other">,</span> <span class="Identifier">replay</span><span class="Other">:</span> <a href="utils.html#VNodeHelper"><span class="Identifier">VNodeHelper</span></a><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    
     
   </dd>
 </div>
@@ -236,7 +338,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-10-23 18:30:04 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-10-25 04:03:23 UTC</small>
       </div>
     </div>
   </div>

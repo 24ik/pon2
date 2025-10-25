@@ -1,4 +1,2 @@
 nimTitle	simulator	pon2/gui/simulator/simulator.html	module src/pon2/gui/simulator/simulator		0
-nim	SimulatorView	pon2/gui/simulator/simulator.html#SimulatorView	object SimulatorView		18
-nim	init	pon2/gui/simulator/simulator.html#init,typeSimulatorView,ref.Simulator	proc init(T: type SimulatorView; simulator: ref Simulator; showCursor = true): T:type		40
-nim	toVNode	pon2/gui/simulator/simulator.html#toVNode,SimulatorView,cstring	proc toVNode(self: SimulatorView; id: cstring): VNode		69
+nim	toSimulatorVNode	pon2/gui/simulator/simulator.html#toSimulatorVNode,ref.S,VNodeHelper	proc toSimulatorVNode[S: Simulator or Studio](self: ref S; helper: VNodeHelper): VNode		20
