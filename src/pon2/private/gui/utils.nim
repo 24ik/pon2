@@ -31,7 +31,7 @@ when defined(js) or defined(nimsuggest):
       markResultOpt*: Opt[MarkResult]
 
     StudioVNodeHelper* = object ## Helper for making VNode of studios.
-      isReplay*: bool
+      isReplaySimulator*: bool
       settingId*: cstring
 
     VNodeHelper* = object ## Helper for making VNode.
@@ -72,7 +72,7 @@ when defined(js) or defined(nimsuggest):
   {.pop.}
   proc derefSimulator*(self: ref Studio, helper: VNodeHelper): var Simulator =
     ## Dereferences the simulator.
-    if helper.studioOpt.unsafeValue.isReplay:
+    if helper.studioOpt.unsafeValue.isReplaySimulator:
       return self[].replaySimulator
     else:
       return self[].simulator
@@ -96,8 +96,10 @@ when defined(js) or defined(nimsuggest):
       markResultOpt: simulator.mark,
     )
 
-  func init(T: type StudioVNodeHelper, rootId: cstring, isReplay: bool): T {.inline.} =
-    T(settingId: "pon2-studio-setting-" & rootId, isReplay: isReplay)
+  func init(
+      T: type StudioVNodeHelper, rootId: cstring, isReplaySimulator: bool
+  ): T {.inline.} =
+    T(settingId: "pon2-studio-setting-" & rootId, isReplaySimulator: isReplaySimulator)
 
   proc init*(
       T: type VNodeHelper, simulatorRef: ref Simulator, rootId: cstring
@@ -120,14 +122,15 @@ when defined(js) or defined(nimsuggest):
       main: VNodeHelper(
         mobile: mobile,
         simulator: SimulatorVNodeHelper.init(studioRef[].simulator, mainRootId),
-        studioOpt:
-          Opt[StudioVNodeHelper].ok StudioVNodeHelper.init(mainRootId, isReplay = false),
+        studioOpt: Opt[StudioVNodeHelper].ok StudioVNodeHelper.init(
+          mainRootId, isReplaySimulator = false
+        ),
       ),
       replay: VNodeHelper(
         mobile: mobile,
         simulator: SimulatorVNodeHelper.init(studioRef[].replaySimulator, replayRootId),
         studioOpt: Opt[StudioVNodeHelper].ok StudioVNodeHelper.init(
-          replayRootId, isReplay = true
+          replayRootId, isReplaySimulator = true
         ),
       ),
     )
