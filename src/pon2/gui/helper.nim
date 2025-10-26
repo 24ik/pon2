@@ -14,16 +14,39 @@ when defined(js) or defined(nimsuggest):
   import std/[jsffi, jsre]
   import karax/[kdom, vdom]
   import ../[app]
-  import ../private/gui/[helper]
 
-  type VNodeHelper* = object ## Helper for making VNode.
-    mobile*: bool
-    simulator*: SimulatorVNodeHelper
-    studioOpt*: Opt[StudioVNodeHelper]
+  type
+    SimulatorVNodeHelper* = object ## Helper for making VNode of simulators.
+      goalId*: cstring
+      cameraReadyId*: cstring
+      markResultOpt*: Opt[MarkResult]
+
+    StudioVNodeHelper* = object ## Helper for making VNode of studios.
+      isReplaySimulator*: bool
+      settingId*: cstring
+
+    VNodeHelper* = object ## Helper for making VNode.
+      mobile*: bool
+      simulator*: SimulatorVNodeHelper
+      studioOpt*: Opt[StudioVNodeHelper]
 
   proc isMobile(): bool {.inline.} =
     ## Returns `true` if a mobile device is detected.
     r"iPhone|Android.+Mobile".newRegExp in navigator.userAgent
+
+  func init(
+      T: type SimulatorVNodeHelper, simulator: Simulator, rootId: cstring
+  ): T {.inline.} =
+    T(
+      goalId: "pon2-simulator-goal-" & rootId,
+      cameraReadyId: "pon2-simulator-cameraready-" & rootId,
+      markResultOpt: simulator.mark,
+    )
+
+  func init(
+      T: type StudioVNodeHelper, rootId: cstring, isReplaySimulator: bool
+  ): T {.inline.} =
+    T(settingId: "pon2-studio-setting-" & rootId, isReplaySimulator: isReplaySimulator)
 
   proc init*(
       T: type VNodeHelper, simulatorRef: ref Simulator, rootId: cstring

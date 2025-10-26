@@ -9,7 +9,7 @@
 {.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
-{.push experimental: "views".}
+{.experimental: "views".}
 
 import chroma
 
@@ -18,7 +18,6 @@ when defined(js) or defined(nimsuggest):
   import karax/[karax, kdom, vdom, vstyles]
   import ../[assign3, utils]
   import ../../[app]
-  import ../../gui/[helper]
 
 const
   AssetsDir* {.define: "pon2.assets".} = "../assets"
@@ -54,28 +53,6 @@ when defined(js) or defined(nimsuggest):
     )
     translucentStyle* =
       style(StyleAttr.backgroundColor, TranslucentStyleColor.toHtmlRgba.cstring)
-
-  # ------------------------------------------------
-  # JS - Dereference
-  # ------------------------------------------------
-
-  func derefSimulator*(
-      self: ref Simulator, helper: VNodeHelper
-  ): var Simulator {.inline.} =
-    ## Dereferences the simulator.
-    self[]
-
-  # NOTE: views rejects this procedure
-  # ref: https://github.com/24ik/pon2/issues/224#issuecomment-3445207849
-  {.pop.}
-  proc derefSimulator*(self: ref Studio, helper: VNodeHelper): var Simulator =
-    ## Dereferences the simulator.
-    if helper.studioOpt.unsafeValue.isReplaySimulator:
-      return self[].replaySimulator
-    else:
-      return self[].simulator
-
-  {.push experimental: "views".}
 
   # ------------------------------------------------
   # JS - Copy Button

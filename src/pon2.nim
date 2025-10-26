@@ -60,7 +60,7 @@ when isMainModule:
   when defined(js) or defined(nimsuggest):
     import std/[strformat, sugar]
     import karax/[karax, karaxdsl, kdom, vdom]
-    import ./pon2/private/[assign3, gui]
+    import ./pon2/private/[assign3]
 
     # ------------------------------------------------
     # JS - Utils

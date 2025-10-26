@@ -1,7 +1,7 @@
 ## This module implements private stuff for `gui`.
 ##
 ## Submodule Documentations:
-## - [helper](./gui/helper.html)
+## - [deref](./gui/deref.html)
 ## - [utils](./gui/utils.html)
 ##
 
@@ -10,6 +10,6 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./gui/[helper, utils]
+import ./gui/[deref, utils]
 
-export helper, utils
+export deref, utils
