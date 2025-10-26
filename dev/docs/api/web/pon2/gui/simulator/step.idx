@@ -1,2 +1,2 @@
 nimTitle	step	pon2/gui/simulator/step.html	module src/pon2/gui/simulator/step		0
-nim	toStepsVNode	pon2/gui/simulator/step.html#toStepsVNode,ref.S,VNodeHelper	proc toStepsVNode[S: Simulator or Studio](self: ref S; helper: VNodeHelper;\n                                     cameraReady = false): VNode		176
+nim	toStepsVNode	pon2/gui/simulator/step.html#toStepsVNode,ref.S,VNodeHelper	proc toStepsVNode[S: Simulator or Studio](self: ref S; helper: VNodeHelper;\n                                     cameraReady = false): VNode		177
