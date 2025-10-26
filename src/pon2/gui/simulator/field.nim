@@ -68,7 +68,7 @@ when defined(js) or defined(nimsuggest):
                 imgSrc = arr[row][col].cellImgSrc
                 cellStyle = style(
                   StyleAttr.backgroundColor,
-                  self.cellBgColor(helper, row, col, editable).toHtmlHex.cstring,
+                  self.cellBgColor(helper, row, col, editable).toHtmlRgba.cstring,
                 )
 
               td:
