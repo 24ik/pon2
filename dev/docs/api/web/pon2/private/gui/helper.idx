@@ -1,6 +1,0 @@
-nimTitle	helper	pon2/private/gui/helper.html	module src/pon2/private/gui/helper		0
-nim	SimulatorVNodeHelper	pon2/private/gui/helper.html#SimulatorVNodeHelper	object SimulatorVNodeHelper		20
-nim	StudioVNodeHelper	pon2/private/gui/helper.html#StudioVNodeHelper	object StudioVNodeHelper		25
-nim	init	pon2/private/gui/helper.html#init,typeSimulatorVNodeHelper,Simulator,cstring	proc init(T: type SimulatorVNodeHelper; simulator: Simulator; rootId: cstring): T:type		29
-nim	init	pon2/private/gui/helper.html#init,typeStudioVNodeHelper,cstring,bool	proc init(T: type StudioVNodeHelper; rootId: cstring; isReplaySimulator: bool): T:type		38
-nimgrp	init	pon2/private/gui/helper.html#init-procs-all	proc		29
