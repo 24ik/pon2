@@ -82,13 +82,13 @@
                         (left, cstring(&quot;50%&quot;)),
                         (transform, cstring(&quot;translateX(-50%)&quot;)),
                         (zIndex, cstring(&quot;100&quot;))])">bottomFixStyle</a></li>
-<li><a class="reference" href="#counterStyle" title="counterStyle = style([(color, cstring(toHtmlHex(CounterStyleColor))),
+<li><a class="reference" href="#counterStyle" title="counterStyle = style([(color, cstring(toHtmlRgba(CounterStyleColor))),
                       (fontSize, cstring(&quot;0.6rem&quot;)),
                       (position, cstring(&quot;absolute&quot;)),
                       (top, cstring(&quot;-0.2em&quot;)), (right, cstring(&quot;0.3em&quot;)),
                       (pointerEvents, cstring(&quot;none&quot;))])">counterStyle</a></li>
 <li><a class="reference" href="#translucentStyle" title="translucentStyle = style(backgroundColor,
-                         cstring(toHtmlHex(TranslucentStyleColor)))">translucentStyle</a></li>
+                         cstring(toHtmlRgba(TranslucentStyleColor)))">translucentStyle</a></li>
 
     </ul>
   </details>
@@ -216,7 +216,7 @@
   </dd>
 </div>
 <div id="counterStyle">
-  <dt><pre><a href="utils.html#counterStyle"><span class="Identifier">counterStyle</span></a> <span class="Other">=</span> <span class="Identifier">style</span><span class="Other">(</span><span class="Other">[</span><span class="Other">(</span><span class="Identifier">color</span><span class="Other">,</span> <span class="Identifier">cstring</span><span class="Other">(</span><span class="Identifier">toHtmlHex</span><span class="Other">(</span><span class="Identifier">CounterStyleColor</span><span class="Other">)</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span>
+  <dt><pre><a href="utils.html#counterStyle"><span class="Identifier">counterStyle</span></a> <span class="Other">=</span> <span class="Identifier">style</span><span class="Other">(</span><span class="Other">[</span><span class="Other">(</span><span class="Identifier">color</span><span class="Other">,</span> <span class="Identifier">cstring</span><span class="Other">(</span><span class="Identifier">toHtmlRgba</span><span class="Other">(</span><span class="Identifier">CounterStyleColor</span><span class="Other">)</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span>
                       <span class="Other">(</span><span class="Identifier">fontSize</span><span class="Other">,</span> <span class="Identifier">cstring</span><span class="Other">(</span><span class="StringLit">&quot;0.6rem&quot;</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span>
                       <span class="Other">(</span><span class="Identifier">position</span><span class="Other">,</span> <span class="Identifier">cstring</span><span class="Other">(</span><span class="StringLit">&quot;absolute&quot;</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span>
                       <span class="Other">(</span><span class="Identifier">top</span><span class="Other">,</span> <span class="Identifier">cstring</span><span class="Other">(</span><span class="StringLit">&quot;-0.2em&quot;</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span> <span class="Other">(</span><span class="Identifier">right</span><span class="Other">,</span> <span class="Identifier">cstring</span><span class="Other">(</span><span class="StringLit">&quot;0.3em&quot;</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span>
@@ -229,7 +229,7 @@
 </div>
 <div id="translucentStyle">
   <dt><pre><a href="utils.html#translucentStyle"><span class="Identifier">translucentStyle</span></a> <span class="Other">=</span> <span class="Identifier">style</span><span class="Other">(</span><span class="Identifier">backgroundColor</span><span class="Other">,</span>
-                         <span class="Identifier">cstring</span><span class="Other">(</span><span class="Identifier">toHtmlHex</span><span class="Other">(</span><span class="Identifier">TranslucentStyleColor</span><span class="Other">)</span><span class="Other">)</span><span class="Other">)</span></pre></dt>
+                         <span class="Identifier">cstring</span><span class="Other">(</span><span class="Identifier">toHtmlRgba</span><span class="Other">(</span><span class="Identifier">TranslucentStyleColor</span><span class="Other">)</span><span class="Other">)</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -380,7 +380,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-10-25 22:05:43 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-10-26 01:24:38 UTC</small>
       </div>
     </div>
   </div>
