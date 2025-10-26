@@ -14,6 +14,7 @@ when defined(js) or defined(nimsuggest):
   import std/[strformat, sugar]
   import chroma
   import karax/[karaxdsl, vdom, vstyles]
+  import ../[helper]
   import ../../[app]
   import ../../private/[gui, utils]
 

@@ -14,6 +14,7 @@ when defined(js) or defined(nimsuggest):
   import std/[jsffi]
   import karax/[karaxdsl, vdom, vstyles]
   import ./[ctrl, field, goal, msg, next, operating, palette, setting, share, step]
+  import ../[helper]
   import ../../[app]
   import ../../private/[gui]
 

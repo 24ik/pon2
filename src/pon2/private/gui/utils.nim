@@ -14,10 +14,11 @@
 import chroma
 
 when defined(js) or defined(nimsuggest):
-  import std/[jsffi, jsre, strformat, sugar]
+  import std/[jsffi, strformat, sugar]
   import karax/[karax, kdom, vdom, vstyles]
   import ../[assign3, utils]
   import ../../[app]
+  import ../../gui/[helper]
 
 const
   AssetsDir* {.define: "pon2.assets".} = "../assets"
@@ -35,21 +36,6 @@ const
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
-  type
-    SimulatorVNodeHelper* = object ## Helper for making VNode of simulators.
-      goalId*: cstring
-      cameraReadyId*: cstring
-      markResultOpt*: Opt[MarkResult]
-
-    StudioVNodeHelper* = object ## Helper for making VNode of studios.
-      isReplaySimulator*: bool
-      settingId*: cstring
-
-    VNodeHelper* = object ## Helper for making VNode.
-      mobile*: bool
-      simulator*: SimulatorVNodeHelper
-      studioOpt*: Opt[StudioVNodeHelper]
-
   let
     counterStyle* = style(
       (StyleAttr.color, CounterStyleColor.toHtmlRgba.cstring),
@@ -90,62 +76,6 @@ when defined(js) or defined(nimsuggest):
       return self[].simulator
 
   {.push experimental: "views".}
-
-  # ------------------------------------------------
-  # JS - VNode Helper
-  # ------------------------------------------------
-
-  proc isMobile(): bool {.inline.} =
-    ## Returns `true` if a mobile device is detected.
-    r"iPhone|Android.+Mobile".newRegExp in navigator.userAgent
-
-  func init(
-      T: type SimulatorVNodeHelper, simulator: Simulator, rootId: cstring
-  ): T {.inline.} =
-    T(
-      goalId: "pon2-simulator-goal-" & rootId,
-      cameraReadyId: "pon2-simulator-cameraready-" & rootId,
-      markResultOpt: simulator.mark,
-    )
-
-  func init(
-      T: type StudioVNodeHelper, rootId: cstring, isReplaySimulator: bool
-  ): T {.inline.} =
-    T(settingId: "pon2-studio-setting-" & rootId, isReplaySimulator: isReplaySimulator)
-
-  proc init*(
-      T: type VNodeHelper, simulatorRef: ref Simulator, rootId: cstring
-  ): T {.inline.} =
-    VNodeHelper(
-      mobile: isMobile(),
-      simulator: SimulatorVNodeHelper.init(simulatorRef[], rootId),
-      studioOpt: Opt[StudioVNodeHelper].err,
-    )
-
-  proc init2*(
-      T: type VNodeHelper, studioRef: ref Studio, rootId: cstring
-  ): tuple[main, replay: VNodeHelper] {.inline.} =
-    let
-      mobile = isMobile()
-      mainRootId = "pon2-studio-main-" & rootId
-      replayRootId = "pon2-studio-replay-" & rootId
-
-    (
-      main: VNodeHelper(
-        mobile: mobile,
-        simulator: SimulatorVNodeHelper.init(studioRef[].simulator, mainRootId),
-        studioOpt: Opt[StudioVNodeHelper].ok StudioVNodeHelper.init(
-          mainRootId, isReplaySimulator = false
-        ),
-      ),
-      replay: VNodeHelper(
-        mobile: mobile,
-        simulator: SimulatorVNodeHelper.init(studioRef[].replaySimulator, replayRootId),
-        studioOpt: Opt[StudioVNodeHelper].ok StudioVNodeHelper.init(
-          replayRootId, isReplaySimulator = true
-        ),
-      ),
-    )
 
   # ------------------------------------------------
   # JS - Copy Button

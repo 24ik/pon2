@@ -12,6 +12,7 @@
 
 when defined(js) or defined(nimsuggest):
   import karax/[karaxdsl, vdom]
+  import ../[helper]
   import ../../[app]
   import ../../private/[gui]
 

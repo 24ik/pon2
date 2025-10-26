@@ -13,6 +13,7 @@
 when defined(js) or defined(nimsuggest):
   import std/[strformat, sugar]
   import karax/[karax, karaxdsl, vdom]
+  import ../[helper]
   import ../../[app]
   import ../../private/[gui]
 

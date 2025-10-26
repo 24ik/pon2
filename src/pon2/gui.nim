@@ -2,6 +2,7 @@
 ## [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 ##
 ## Submodule Documentations:
+## - [helper](./gui/helper.html)
 ## - [simulator](./gui/simulator.html)
 ## - [studio](./gui/studio.html)
 ##
@@ -17,7 +18,7 @@
 {.experimental: "views".}
 
 import ./[app]
-import ./gui/[simulator, studio]
+import ./gui/[helper, simulator, studio]
 
 export app
-export simulator, studio
+export helper, simulator, studio

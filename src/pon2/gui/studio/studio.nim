@@ -14,7 +14,7 @@ when defined(js) or defined(nimsuggest):
   import std/[jsffi, strformat]
   import karax/[karax, karaxdsl, vdom]
   import ./[ctrl, pagination, setting]
-  import ../[simulator]
+  import ../[helper, simulator]
   import ../../[app]
   import ../../private/[gui]
 

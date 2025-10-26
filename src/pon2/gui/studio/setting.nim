@@ -18,8 +18,8 @@ type StudioSetting* = object ## Studio settings.
 when defined(js) or defined(nimsuggest):
   import std/[jsffi, strformat]
   import karax/[kdom, karaxdsl, vdom]
+  import ../[helper]
   import ../../[app]
-  import ../../private/[gui]
 
   const
     AllowDblNotLastIdPrefix = "pon2-studio-setting-dbl-"
