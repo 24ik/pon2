@@ -389,6 +389,34 @@ func flipHorizontal*(self: var Bit64BinField) {.inline.} =
     self[_].assign after
 
 # ------------------------------------------------
+# Rotate
+# ------------------------------------------------
+
+func rotate*(self: var Bit64BinField) {.inline.} =
+  ## Rotates the binary field by 180 degrees.
+  ## Ghost cells are cleared before the rotation.
+  let
+    visible = self.keptVisible
+
+    after1 = visible[0].reverseBits shl 14
+    after0 = visible[1].reverseBits shl 14
+
+  expand2 after:
+    self[_].assign after
+
+func crossRotate*(self: var Bit64BinField) {.inline.} =
+  ## Rotates the binary field by 180 degrees in groups of three rows.
+  ## Ghost cells are cleared before the rotation.
+  let
+    visible = self.keptVisible
+
+    after0 = visible[0].reverseBits shl 14
+    after1 = visible[1].reverseBits shl 14
+
+  expand2 after:
+    self[_].assign after
+
+# ------------------------------------------------
 # Indexer
 # ------------------------------------------------
 

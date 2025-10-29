@@ -85,7 +85,7 @@ func mark*[F: TsuField or WaterField](
           return InvalidMove
       else:
         skipped = true
-    of StepKind.Garbages:
+    of StepKind.Garbages, Rotate:
       discard
 
     let moveRes = puyoPuyo.move calcConn

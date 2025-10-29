@@ -73,6 +73,8 @@ rgo...
       Step.init(BlueBlue, Down3),
       Step.init([Col0: 2, 0, 0, 1, 0, 1], true),
       Step.init([Col0: 0, 0, 0, 0, 1, 0], false),
+      Step.init(cross = false),
+      Step.init(cross = true),
     ].toDeque2
 
     puyoT = PuyoPuyo[TsuField].init(fieldT, steps)
@@ -170,6 +172,8 @@ by|
 (0,1,0,0,0,2)
 rg|23
 [3,0,0,0,4,0]
+O
+X
 pp|4N"""
       puyoPuyo = parsePuyoPuyo[TsuField](str).unsafeValue
 

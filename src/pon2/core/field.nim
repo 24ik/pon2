@@ -341,6 +341,22 @@ func flipHorizontal*[F: TsuField or WaterField](self: var F) {.inline.} =
     self[i].flipHorizontal
 
 # ------------------------------------------------
+# Rotate
+# ------------------------------------------------
+
+func rotate*[F: TsuField or WaterField](self: var F) {.inline.} =
+  ## Rotates the binary field by 180 degrees.
+  ## Ghost cells are cleared before the rotation.
+  staticFor(i, 0 ..< 3):
+    self[i].rotate
+
+func crossRotate*[F: TsuField or WaterField](self: var F) {.inline.} =
+  ## Rotates the binary field by 180 degrees in groups of three rows.
+  ## Ghost cells are cleared before the rotation.
+  staticFor(i, 0 ..< 3):
+    self[i].crossRotate
+
+# ------------------------------------------------
 # Place
 # ------------------------------------------------
 
@@ -503,6 +519,8 @@ func apply*[F: TsuField or WaterField](self: var F, step: Step) {.inline.} =
     self.place step.pair, step.optPlacement
   of Garbages:
     self.dropGarbages step.cnts, step.dropHard
+  of Rotate:
+    if step.cross: self.crossRotate else: self.rotate
 
 # ------------------------------------------------
 # Settle
@@ -530,7 +548,7 @@ func isSettled*[F: TsuField or WaterField](self: F): bool {.inline.} =
 const MaxChainCnt = Height * Width div 4
 
 template moveImpl[F: TsuField or WaterField](
-    self: var F, calcConn: static bool, applyBody: untyped
+    self: var F, settleAfterApply, calcConn: static bool, applyBody: untyped
 ): MoveResult =
   ## Applies `applyBody`, advances the field until chains end, and returns a moving
   ## result.
@@ -546,6 +564,9 @@ template moveImpl[F: TsuField or WaterField](
     var fullPopCnts = newSeqOfCap[array[Cell, seq[int]]](MaxChainCnt)
 
   applyBody
+
+  when settleAfterApply:
+    self.settle
 
   while true:
     let popRes = self.pop
@@ -586,7 +607,7 @@ func move*[F: TsuField or WaterField](
 ): MoveResult {.inline.} =
   ## Places the pair, advances the field until chains end, and returns a moving result.
   ## This function requires that the field is settled.
-  self.moveImpl(calcConn):
+  self.moveImpl(settleAfterApply = false, calcConn = calcConn):
     self.place pair, plcmt
 
 func move*[F: TsuField or WaterField](
@@ -595,8 +616,16 @@ func move*[F: TsuField or WaterField](
   ## Drops hard or garbage puyos, advances the field until chains end, and returns a
   ## moving result.
   ## This function requires that the field is settled and the counts are non-negative.
-  self.moveImpl(calcConn):
+  self.moveImpl(settleAfterApply = false, calcConn = calcConn):
     self.dropGarbages cnts, dropHard
+
+func move*[F: TsuField or WaterField](
+    self: var F, cross: bool, calcConn: static bool = true
+): MoveResult {.inline.} =
+  ## Rotates the field, advances the field until chains end, and returns a moving
+  ## result.
+  self.moveImpl(settleAfterApply = false, calcConn = calcConn):
+    if cross: self.crossRotate else: self.rotate
 
 func move*[F: TsuField or WaterField](
     self: var F, step: Step, calcConn = true
@@ -604,11 +633,19 @@ func move*[F: TsuField or WaterField](
   ## Applies the step, advances the field until chains end, and returns a moving result.
   ## This function requires that the field is settled.
   if calcConn:
-    self.moveImpl(true):
-      self.apply step
+    if step.kind == Rotate:
+      self.moveImpl(settleAfterApply = true, calcConn = true):
+        self.apply step
+    else:
+      self.moveImpl(settleAfterApply = false, calcConn = true):
+        self.apply step
   else:
-    self.moveImpl(false):
-      self.apply step
+    if step.kind == Rotate:
+      self.moveImpl(settleAfterApply = true, calcConn = false):
+        self.apply step
+    else:
+      self.moveImpl(settleAfterApply = false, calcConn = false):
+        self.apply step
 
 # ------------------------------------------------
 # Field <-> array
