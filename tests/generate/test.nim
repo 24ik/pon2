@@ -11,39 +11,34 @@ import ../../src/pon2/app/[generate, nazopuyowrap, solve]
 # Generate
 # ------------------------------------------------
 
-block: # generate
-  var rng = 123.initRand
+proc checkGenerate(
+    genGoalKind: GoalKind,
+    genGoalColor: GenerateGoalColor,
+    genGoalVal: GoalVal,
+    moveCnt: int,
+    colorCnt: int,
+    heights: tuple[weights: Opt[array[Col, int]], positives: Opt[array[Col, bool]]],
+    puyoCnts: tuple[colors: int, garbage: int, hard: int],
+    conn2Cnts: tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int]],
+    conn3Cnts:
+      tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int], lShape: Opt[int]],
+    dropGarbagesIndices: seq[int],
+    dropHardsIndices: seq[int],
+    rotateIndices: seq[int],
+    crossRotateIndices: seq[int],
+    allowDblNotLast: bool,
+    allowDblLast: bool,
+    rule: Rule,
+    seed: int,
+) {.raises: [Exception].} =
+  var rng = seed.initRand
   let
-    genGoalKind = Chain
-    genGoalColor = GenerateGoalColor.low
-    genGoalVal = 5
     genGoal = GenerateGoal.init(genGoalKind, genGoalColor, genGoalVal)
-
-    moveCnt = 2
-    colorCnt = 3
-    heights = (
-      weights: Opt[array[Col, int]].err,
-      positives: Opt[array[Col, bool]].ok [false, true, true, true, false, false],
-    )
-    puyoCnts = (colors: genGoalVal * 4, garbage: 5, hard: 1)
-    conn2Cnts = (total: Opt[int].err, vertical: Opt[int].ok 0, horizontal: Opt[int].err)
-    conn3Cnts = (
-      total: Opt[int].ok 2,
-      vertical: Opt[int].err,
-      horizontal: Opt[int].err,
-      lShape: Opt[int].ok 1,
-    )
-    allowDblNotLast = true
-    allowDblLast = false
-    allowGarbagesStep = false
-    allowHardStep = false
-
     settings = GenerateSettings.init(
       genGoal, moveCnt, colorCnt, heights, puyoCnts, conn2Cnts, conn3Cnts,
-      allowDblNotLast, allowDblLast, allowGarbagesStep, allowHardStep,
+      dropGarbagesIndices, dropHardsIndices, rotateIndices, crossRotateIndices,
+      allowDblNotLast, allowDblLast,
     )
-
-    rule = Tsu
     wrapRes = rng.generate(settings, rule)
 
   check wrapRes.isOk
@@ -79,10 +74,19 @@ block: # generate
     check nazo.puyoPuyo.field.isSettled
     check not nazo.puyoPuyo.field.canPop
 
-    if heights.positives.isOk:
+    let baseRow =
+      case rule
+      of Tsu: Row.high
+      of Water: AirHeight.Row
+    if heights.weights.isOk:
+      if heights.weights.unsafeValue != [0, 0, 0, 0, 0, 0]:
+        for col in Col:
+          if heights.weights.unsafeValue[col] == 0:
+            check nazo.puyoPuyo.field[baseRow, col] == None
+    else:
       for col in Col:
         check heights.positives.unsafeValue[col] ==
-          (nazo.puyoPuyo.field[Row.high, col] != None)
+          (nazo.puyoPuyo.field[baseRow, col] != None)
 
     check puyoCnts.colors == nazo.puyoPuyo.colorPuyoCnt
     check puyoCnts.garbage == nazo.puyoPuyo.cellCnt Garbage
@@ -118,12 +122,21 @@ block: # generate
       check nazo.puyoPuyo.steps[^1].kind != PairPlacement or
         not nazo.puyoPuyo.steps[^1].pair.isDbl
 
-    if not allowGarbagesStep:
-      check nazo.puyoPuyo.steps.toSeq.all (step) => step.kind != StepKind.Garbages
+    for stepIdx in dropGarbagesIndices:
+      check nazo.puyoPuyo.steps[stepIdx].kind == StepKind.Garbages and
+        not nazo.puyoPuyo.steps[stepIdx].dropHard
 
-    if not allowHardStep:
-      check nazo.puyoPuyo.steps.toSeq.all (step) =>
-        step.kind != StepKind.Garbages or not step.dropHard
+    for stepIdx in dropHardsIndices:
+      check nazo.puyoPuyo.steps[stepIdx].kind == StepKind.Garbages and
+        nazo.puyoPuyo.steps[stepIdx].dropHard
+
+    for stepIdx in rotateIndices:
+      check nazo.puyoPuyo.steps[stepIdx].kind == StepKind.Rotate and
+        not nazo.puyoPuyo.steps[stepIdx].cross
+
+    for stepIdx in crossRotateIndices:
+      check nazo.puyoPuyo.steps[stepIdx].kind == StepKind.Rotate and
+        nazo.puyoPuyo.steps[stepIdx].cross
 
     let ans = nazo.solve
     check ans.len == 1
@@ -134,3 +147,59 @@ block: # generate
         check step.optPlacement == ans[0][stepIdx]
       else:
         check ans[0][stepIdx].isErr
+
+block: # generate
+  checkGenerate(
+    Chain,
+    GenerateGoalColor.low,
+    5,
+    2,
+    3,
+    (
+      weights: Opt[array[Col, int]].err,
+      positives: Opt[array[Col, bool]].ok [false, true, true, true, false, false],
+    ),
+    (colors: 20, garbage: 5, hard: 1),
+    (total: Opt[int].err, vertical: Opt[int].ok 0, horizontal: Opt[int].err),
+    (
+      total: Opt[int].ok 2,
+      vertical: Opt[int].err,
+      horizontal: Opt[int].err,
+      lShape: Opt[int].ok 1,
+    ),
+    @[0],
+    newSeq[int](),
+    newSeq[int](),
+    newSeq[int](),
+    false,
+    false,
+    Water,
+    123,
+  )
+  checkGenerate(
+    Clear,
+    GenerateGoalColor.All,
+    0,
+    2,
+    2,
+    (
+      weights: Opt[array[Col, int]].ok [0, 0, 1, 2, 3, 0],
+      positives: Opt[array[Col, bool]].err,
+    ),
+    (colors: 12, garbage: 3, hard: 0),
+    (total: Opt[int].ok 2, vertical: Opt[int].err, horizontal: Opt[int].err),
+    (
+      total: Opt[int].ok 1,
+      vertical: Opt[int].err,
+      horizontal: Opt[int].err,
+      lShape: Opt[int].err,
+    ),
+    newSeq[int](),
+    newSeq[int](),
+    @[0],
+    newSeq[int](),
+    false,
+    false,
+    Tsu,
+    456,
+  )

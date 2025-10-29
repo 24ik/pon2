@@ -478,7 +478,7 @@ func childrenAtDepth[F: TsuField or WaterField](
 
       continue
 
-    if childIsLeaf or child.canPrune(goal, kind, color, false):
+    if childIsLeaf or child.canPrune(goal, kind, color):
       continue
 
     if childIsSpawned:
