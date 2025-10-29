@@ -624,7 +624,7 @@ func move*[F: TsuField or WaterField](
 ): MoveResult {.inline.} =
   ## Rotates the field, advances the field until chains end, and returns a moving
   ## result.
-  self.moveImpl(settleAfterApply = false, calcConn = calcConn):
+  self.moveImpl(settleAfterApply = true, calcConn = calcConn):
     if cross: self.crossRotate else: self.rotate
 
 func move*[F: TsuField or WaterField](
