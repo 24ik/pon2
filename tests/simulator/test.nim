@@ -6,7 +6,7 @@
 import std/[algorithm, unittest, uri]
 import ../../src/pon2/[core]
 import ../../src/pon2/app/[key, nazopuyowrap, simulator]
-import ../../src/pon2/private/[assign3]
+import ../../src/pon2/private/[assign3, utils]
 
 # ------------------------------------------------
 # Constructor
@@ -54,7 +54,7 @@ block:
   check sim.state == Stable
   check sim.editData ==
     SimulatorEditData(
-      cell: None,
+      cell: Cell.None,
       focusField: true,
       field: (Row.low, Col.low),
       step: (0, true, Col.low),
@@ -149,8 +149,8 @@ py|"""
 block: # `editCell=`
   var sim = Simulator.init ViewerEdit
 
-  sim.editCell = None
-  check sim.editData.cell == None
+  sim.editCell = Cell.None
+  check sim.editData.cell == Cell.None
 
   sim.editCell = Cell.Red
   check sim.editData.cell == Cell.Red
@@ -286,7 +286,8 @@ block: # writeCell
 ------
 rb|3N
 (0,0,0,0,0,1)
-py|"""
+py|
+X"""
   ).unsafeValue
   var
     field = nazo.puyoPuyo.field
@@ -311,7 +312,7 @@ py|"""
   sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.field == field
 
-  sim.editCell = None
+  sim.editCell = Cell.None
   sim.writeCell Row8, Col4
   field.delete Row8, Col4
   sim.nazoPuyoWrap.unwrapNazoPuyo:
@@ -324,7 +325,7 @@ py|"""
   sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
-  sim.writeCell None
+  sim.writeCell Cell.None
   steps.delete 0
   sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
@@ -355,7 +356,13 @@ py|"""
 
   sim.editCell = Purple
   sim.writeCell 3, true
-  steps.addLast Step.init PurplePurple
+  steps[3] = Step.init PurplePurple
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
+    check it.steps == steps
+
+  sim.editCell = Yellow
+  sim.writeCell 4, false
+  steps.addLast Step.init YellowYellow
   sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
@@ -383,7 +390,8 @@ block: # shiftFieldUp, shiftFieldDown, shiftFieldRight, shiftFieldLeft
 ......
 ------
 rg|
-(0,1,2,3,4,5)"""
+(0,1,2,3,4,5)
+O"""
   ).unsafeValue
   var
     field = nazo.puyoPuyo.field
@@ -435,6 +443,12 @@ rg|
   sim.moveCursorDown
   sim.flip
   steps[1].cnts.reverse
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
+    check it.steps == steps
+
+  sim.moveCursorDown
+  sim.flip
+  steps[2].cross.toggle
   sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
@@ -540,7 +554,8 @@ block: # forward, backward, reset
 .ogbrr
 .ggooo
 ------
-rb|"""
+rb|
+O"""
       ).unsafeValue
       wrap0P = NazoPuyoWrap.init parseNazoPuyo[TsuField](
         """
@@ -560,7 +575,8 @@ rb|"""
 .ogbrr
 .ggooo
 ------
-rb|6N"""
+rb|6N
+O"""
       ).unsafeValue
       wrap1 = NazoPuyoWrap.init parseNazoPuyo[TsuField](
         """
@@ -580,7 +596,8 @@ rb|6N"""
 .ogbrr
 .ggooo
 ------
-rb|6N"""
+rb|6N
+O"""
       ).unsafeValue
       wrap2 = NazoPuyoWrap.init parseNazoPuyo[TsuField](
         """
@@ -600,7 +617,8 @@ rb|6N"""
 .ogb..
 .ggo..
 ------
-rb|6N"""
+rb|6N
+O"""
       ).unsafeValue
       wrap3 = NazoPuyoWrap.init parseNazoPuyo[TsuField](
         """
@@ -620,7 +638,50 @@ rb|6N"""
 .ogb..
 .ggobb
 ------
-rb|6N"""
+rb|6N
+O"""
+      ).unsafeValue
+      wrap4 = NazoPuyoWrap.init parseNazoPuyo[TsuField](
+        """
+3連鎖するべし
+======
+......
+bbogg.
+..bgo.
+...o..
+......
+......
+......
+......
+......
+......
+......
+......
+......
+------
+rb|6N
+O"""
+      ).unsafeValue
+      wrap5 = NazoPuyoWrap.init parseNazoPuyo[TsuField](
+        """
+3連鎖するべし
+======
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+...g..
+..ogg.
+bbboo.
+------
+rb|6N
+O"""
       ).unsafeValue
 
       cnts: array[Cell, int] = [0, 0, 2, 4, 0, 0, 0, 0]
@@ -629,6 +690,8 @@ rb|6N"""
       moveRes1 = MoveResult.init true
       moveRes2 = MoveResult.init(1, cnts, 0, @[cnts], @[0], @[full])
       moveRes3 = moveRes2
+      moveRes4 = MoveResult.init true
+      moveRes5 = MoveResult.init true
 
     var sim = Simulator.init wrap0
     check sim.moveResult == moveRes0
@@ -648,14 +711,26 @@ rb|6N"""
     check sim.moveResult == moveRes3
 
     sim.forward
-    check sim.nazoPuyoWrap == wrap3
-    check sim.moveResult == moveRes3
+    check sim.nazoPuyoWrap == wrap4
+    check sim.moveResult == moveRes4
+
+    sim.forward
+    check sim.nazoPuyoWrap == wrap5
+    check sim.moveResult == moveRes5
+
+    sim.forward
+    check sim.nazoPuyoWrap == wrap5
+    check sim.moveResult == moveRes5
 
     sim.forward(replay = true)
-    check sim.nazoPuyoWrap == wrap3
-    check sim.moveResult == moveRes3
+    check sim.nazoPuyoWrap == wrap5
+    check sim.moveResult == moveRes5
 
     sim.forward(skip = true)
+    check sim.nazoPuyoWrap == wrap5
+    check sim.moveResult == moveRes5
+
+    sim.backward
     check sim.nazoPuyoWrap == wrap3
     check sim.moveResult == moveRes3
 
@@ -984,7 +1059,7 @@ pp|23"""
   check sim2.operate KeyEvent.init 'p'
   check sim1 == sim2
 
-  sim1.writeCell None
+  sim1.writeCell Cell.None
   check sim2.operate KeyEvent.init "Space"
   check sim1 == sim2
 
