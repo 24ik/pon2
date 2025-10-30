@@ -14,47 +14,70 @@ when defined(js) or defined(nimsuggest):
   import karax/[karaxdsl, vdom]
   import ../[helper]
   import ../../[app]
-  import ../../private/[gui]
+  import ../../private/[gui, results2]
 
-  proc operatingCell[S: Simulator or Studio](
+  proc toOperatingCellVNode[S: Simulator or Studio](
       self: ref S, helper: VNodeHelper, idx: int, col: Col
-  ): Cell {.inline.} =
-    ## Returns the cell in the operating area.
-    if self.derefSimulator(helper).state != Stable:
-      return Cell.None
-    if self.derefSimulator(helper).mode notin PlayModes:
-      return Cell.None
+  ): VNode {.inline.} =
+    ## Returns the node of the cell in the operating area.
+    var cross = false
+    let cellOpt =
+      if self.derefSimulator(helper).state != Stable or
+          self.derefSimulator(helper).mode notin PlayModes:
+        Opt[Cell].ok Cell.None
+      else:
+        let
+          nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
+          steps = nazoWrap.unwrapNazoPuyo:
+            it.steps
 
-    let
-      nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      steps = nazoWrap.unwrapNazoPuyo:
-        it.steps
-    if self.derefSimulator(helper).operatingIdx >= steps.len:
-      return Cell.None
-
-    let step = steps[self.derefSimulator(helper).operatingIdx]
-    case step.kind
-    of PairPlacement:
-      # pivot
-      if idx == 1 and col == self.derefSimulator(helper).operatingPlacement.pivotCol:
-        step.pair.pivot
-      # rotor
-      elif col == self.derefSimulator(helper).operatingPlacement.rotorCol:
-        if idx == 1:
-          step.pair.rotor
-        elif idx == 0 and self.derefSimulator(helper).operatingPlacement.rotorDir == Up:
-          step.pair.rotor
-        elif idx == 2 and self.derefSimulator(helper).operatingPlacement.rotorDir == Down:
-          step.pair.rotor
+        if self.derefSimulator(helper).operatingIdx >= steps.len:
+          Opt[Cell].ok Cell.None
         else:
-          Cell.None
+          let step = steps[self.derefSimulator(helper).operatingIdx]
+          case step.kind
+          of PairPlacement:
+            # pivot
+            if idx == 1 and
+                col == self.derefSimulator(helper).operatingPlacement.pivotCol:
+              Opt[Cell].ok step.pair.pivot
+            # rotor
+            elif col == self.derefSimulator(helper).operatingPlacement.rotorCol:
+              if idx == 1:
+                Opt[Cell].ok step.pair.rotor
+              elif idx == 0 and
+                  self.derefSimulator(helper).operatingPlacement.rotorDir == Up:
+                Opt[Cell].ok step.pair.rotor
+              elif idx == 2 and
+                  self.derefSimulator(helper).operatingPlacement.rotorDir == Down:
+                Opt[Cell].ok step.pair.rotor
+              else:
+                Opt[Cell].ok Cell.None
+            else:
+              Opt[Cell].ok Cell.None
+          of StepKind.Garbages:
+            if idx == 2 and step.cnts[col] > 0:
+              Opt[Cell].ok (if step.dropHard: Hard else: Garbage)
+            else:
+              Opt[Cell].ok Cell.None
+          of Rotate:
+            cross = step.cross
+
+            if idx == 2 and col == Col2:
+              Opt[Cell].err
+            else:
+              Opt[Cell].ok Cell.None
+
+    buildHtml figure(class = "image is-24x24"):
+      if cellOpt.isOk:
+        img(src = cellOpt.unsafeValue.cellImgSrc)
       else:
-        Cell.None
-    of StepKind.Garbages:
-      if idx == 2 and step.cnts[col] > 0:
-        (if step.dropHard: Hard else: Garbage)
-      else:
-        Cell.None
+        span(class = "icon"):
+          italic(
+            class = (
+              if cross: "fa-solid fa-arrows-rotate" else: "fa-solid fa-rotate-right"
+            ).cstring
+          )
 
   proc toOperatingVNode*[S: Simulator or Studio](
       self: ref S, helper: VNodeHelper
@@ -66,5 +89,4 @@ when defined(js) or defined(nimsuggest):
           tr:
             for col in Col:
               td:
-                figure(class = "image is-24x24"):
-                  img(src = self.operatingCell(helper, idx, col).cellImgSrc)
+                self.toOperatingCellVNode(helper, idx, col)

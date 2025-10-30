@@ -174,6 +174,31 @@ when defined(js) or defined(nimsuggest):
               else:
                 text $step.cnts[col]
 
+  proc rotateNode[S: Simulator or Studio](
+      self: ref S, helper: VNodeHelper, step: Step, stepIdx: int, editable: bool
+  ): VNode {.inline.} =
+    ## Returns the rotate node.
+    let icon = buildHtml span(class = "icon"):
+      italic(
+        class = (
+          if step.cross: "fa-solid fa-arrows-rotate" else: "fa-solid fa-rotate-right"
+        ).cstring
+      )
+
+    if editable:
+      buildHtml button(
+        class = (
+          if not helper.mobile and not self.derefSimulator(helper).editData.focusField and
+              self.derefSimulator(helper).editData.step.idx == stepIdx:
+          "button is-size-7 is-primary"
+          else: "button is-size-7"
+        ).cstring,
+        onclick = () => (self.derefSimulator(helper).writeCell(stepIdx, true)),
+      ):
+        icon
+    else:
+      icon
+
   proc toStepsVNode*[S: Simulator or Studio](
       self: ref S, helper: VNodeHelper, cameraReady = false
   ): VNode {.inline.} =
@@ -220,6 +245,8 @@ when defined(js) or defined(nimsuggest):
                     self.pairPlcmtNode(helper, step, stepIdx, editable)
                   of StepKind.Garbages:
                     self.garbagesNode(helper, step, stepIdx, editable)
+                  of Rotate:
+                    self.rotateNode(helper, step, stepIdx, editable)
 
         # placeholder after the last step
         if editable:
