@@ -123,27 +123,24 @@ template childImpl[F: TsuField or WaterField](
     else:
       0
 
-  when kind in {AccColor, AccColorMore}:
-    var childFieldCnts {.noinit.}, childStepsCnts {.noinit.}: array[Cell, int]
+  var childFieldCnts = self.fieldCnts
+  when kind in ColorKinds and color in GoalColor.Red .. GoalColor.Purple:
+    const GoalCell = GoalColorToCell[color]
+    childFieldCnts[GoalCell].assign self.fieldCnts[GoalCell].pred moveRes.cellCnt GoalCell
   else:
-    var childFieldCnts = self.fieldCnts
-    when kind in ColorKinds and color in GoalColor.Red .. GoalColor.Purple:
-      const GoalCell = GoalColorToCell[color]
-      childFieldCnts[GoalCell].assign self.fieldCnts[GoalCell].pred moveRes.cellCnt GoalCell
-    else:
-      staticFor(cell2, Cell.Red .. Cell.Purple):
-        childFieldCnts[cell2].dec moveRes.cellCnt cell2
+    staticFor(cell2, Cell.Red .. Cell.Purple):
+      childFieldCnts[cell2].dec moveRes.cellCnt cell2
 
-    var childStepsCnts = self.stepsCnts
-    when stepKind == PairPlacement:
-      let
-        pivotCell = step.pair.pivot
-        rotorCell = step.pair.rotor
+  var childStepsCnts = self.stepsCnts
+  when stepKind == PairPlacement:
+    let
+      pivotCell = step.pair.pivot
+      rotorCell = step.pair.rotor
 
-      childFieldCnts[pivotCell].inc
-      childFieldCnts[rotorCell].inc
-      childStepsCnts[pivotCell].dec
-      childStepsCnts[rotorCell].dec
+    childFieldCnts[pivotCell].inc
+    childFieldCnts[rotorCell].inc
+    childStepsCnts[pivotCell].dec
+    childStepsCnts[rotorCell].dec
 
   when kind in {Clear, AccCnt, AccCntMore, ClearChain, ClearChainMore, Cnt, CntMore} and
       color in {All, GoalColor.Garbages}:
@@ -153,6 +150,11 @@ template childImpl[F: TsuField or WaterField](
 
     when stepKind == StepKind.Garbages:
       childStepsCnts[Garbage.pred step.dropHard.int].dec step.garbagesCnt
+
+  when stepKind == Rotate:
+    staticFor(col, Col):
+      let cell = self.field[Row0, col]
+      childFieldCnts[cell].dec (cell != Cell.None).int
 
   SolveNode[F].init(
     self.depth.succ, childField, moveRes, childPopColors, childPopCnt, childFieldCnts,
@@ -183,6 +185,15 @@ func childGarbages[F: TsuField or WaterField](
       step.cnts, step.dropHard, static(kind in {Place, PlaceMore, Conn, ConnMore})
     )
 
+func childRotate[F: TsuField or WaterField](
+    self: SolveNode[F], kind: static GoalKind, color: static GoalColor, step: Step
+): SolveNode[F] {.inline.} =
+  ## Returns the child node with the `step` edge.
+  self.childImpl(kind, color, step, Rotate):
+    childField.move(
+      cross = step.cross, static(kind in {Place, PlaceMore, Conn, ConnMore})
+    )
+
 func children[F: TsuField or WaterField](
     self: SolveNode[F], kind: static GoalKind, color: static GoalColor, step: Step
 ): seq[tuple[node: SolveNode[F], optPlacement: OptPlacement]] {.inline.} =
@@ -197,6 +208,8 @@ func children[F: TsuField or WaterField](
     plcmts.mapIt (self.childPairPlcmt(kind, color, step, it), OptPlacement.ok it)
   of StepKind.Garbages:
     @[(self.childGarbages(kind, color, step), NonePlacement)]
+  of Rotate:
+    @[(self.childRotate(kind, color, step), NonePlacement)]
 
 # ------------------------------------------------
 # Accept
@@ -285,11 +298,7 @@ cmovl %2, %0
       result = x.filter4Nim
 
 func canPrune[F: TsuField or WaterField](
-    self: SolveNode[F],
-    goal: Goal,
-    kind: static GoalKind,
-    color: static GoalColor,
-    isZeroDepth: static bool,
+    self: SolveNode[F], goal: Goal, kind: static GoalKind, color: static GoalColor
 ): bool {.inline.} =
   ## Returns `true` if the node is unsolvable.
   # clear
@@ -355,12 +364,9 @@ func canPrune[F: TsuField or WaterField](
     of Clear:
       false
     of AccColor, AccColorMore:
-      when isZeroDepth:
-        let possibleVal = sum2It[Cell, int](Cell.Red .. Cell.Purple):
-          (self.cellCnt(it) >= 4).int
-        possibleVal < goal.optVal.unsafeValue
-      else:
-        false
+      let possibleVal = sum2It[Cell, int](Cell.Red .. Cell.Purple):
+        (self.cellCnt(it) >= 4).int
+      possibleVal < goal.optVal.unsafeValue
     of AccCnt, AccCntMore, Cnt, CntMore, Conn, ConnMore:
       let nowPossibleCnt = staticCase:
         case color
@@ -472,7 +478,7 @@ func childrenAtDepth[F: TsuField or WaterField](
 
       continue
 
-    if childIsLeaf or child.canPrune(goal, kind, color, false):
+    if childIsLeaf or child.canPrune(goal, kind, color):
       continue
 
     if childIsSpawned:
@@ -658,7 +664,7 @@ func solveSingleThread[F: TsuField or WaterField](
   ## This function requires that the field is settled and `answers` is empty.
   ## Answers in `answers` are set in reverse order.
   when isZeroDepth:
-    if self.canPrune(goal, kind, color, true):
+    if self.canPrune(goal, kind, color):
       return
 
   let
@@ -684,7 +690,7 @@ func solveSingleThread[F: TsuField or WaterField](
 
       continue
 
-    if childIsLeaf or child.canPrune(goal, kind, color, false):
+    if childIsLeaf or child.canPrune(goal, kind, color):
       continue
 
     child.solveSingleThread childAnswersSeq[childIdx],
@@ -710,15 +716,15 @@ when not defined(js):
       calcAllAnswers: static bool,
       kind: static GoalKind,
       color: static GoalColor,
-      isZeroDepth: static bool,
   ): bool {.inline.} =
     ## Solves the Nazo Puyo at the node with a single thread.
     ## This function requires that the field is settled and `answers` is empty.
     ## `answers` is set in reverse order.
     ## `result` has no meanings; only used to get FlowVar.
     # NOTE: non-static arguments should be placed before static ones due to `spawn` bug.
-    self.solveSingleThread answers[],
-      moveCnt, calcAllAnswers, goal, kind, color, steps, isZeroDepth
+    self.solveSingleThread(
+      answers[], moveCnt, calcAllAnswers, goal, kind, color, steps, isZeroDepth = true
+    )
     true
 
   func checkSpawnFinished(
@@ -760,7 +766,6 @@ when not defined(js):
       kind: static GoalKind,
       color: static GoalColor,
       steps: Steps,
-      isZeroDepth: static bool,
   ) {.inline.} =
     ## Solves the Nazo Puyo at the node with multiple threads.
     ## This function requires that the field is settled and `answers` is empty.
@@ -793,14 +798,7 @@ when not defined(js):
     while nodeIdx < nodeCnt:
       if preferSpawn():
         futures.add spawn nodes[nodeIdx].solveSingleThread(
-          answersSeq[nodeIdx].addr,
-          moveCnt,
-          goal,
-          steps,
-          calcAllAnswers,
-          kind,
-          color,
-          isZeroDepth,
+          answersSeq[nodeIdx].addr, moveCnt, goal, steps, calcAllAnswers, kind, color
         )
 
         runningNodeIndices.incl nodeIdx
@@ -850,14 +848,8 @@ proc solve*[F: TsuField or WaterField](
         ans.reverse
     else:
       root.solveMultiThread(
-        answers,
-        moveCnt,
-        calcAllAnswers,
-        nazo.goal,
-        StaticKind,
-        StaticColor,
+        answers, moveCnt, calcAllAnswers, nazo.goal, StaticKind, StaticColor,
         nazo.puyoPuyo.steps,
-        isZeroDepth = true,
       )
 
   answers

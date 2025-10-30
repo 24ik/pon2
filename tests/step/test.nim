@@ -37,7 +37,14 @@ block: # init
     check step.cnts == cnts
     check step.dropHard
 
-  check Step.init == Step.init(Pair.init)
+  block:
+    let
+      cross = false
+      step = Step.init(cross)
+    check step.kind == Rotate
+    check step.cross == cross
+
+  check Step.init == Step.init Pair.init
 
 # ------------------------------------------------
 # Property
@@ -58,6 +65,9 @@ block: # isValid
     let step = Step.init([Col0: -1, 0, 0, 0, 0, 0], false)
     check not step.isValid(originalCompatible = true)
     check not step.isValid(originalCompatible = false)
+
+  check Step.init(cross = true).isValid
+  check Step.init(cross = false).isValid
 
 # ------------------------------------------------
 # Count
@@ -93,6 +103,16 @@ block: # cellCnt, puyoCnt, colorPuyoCnt, garbagesCnt
     check steps.puyoCnt == 30
     check steps.colorPuyoCnt == 2
     check steps.garbagesCnt == 28
+
+  block:
+    let steps = Step.init(cross = false)
+    check steps.cellCnt(Red) == 0
+    check steps.cellCnt(Yellow) == 0
+    check steps.cellCnt(Garbage) == 0
+    check steps.cellCnt(Hard) == 0
+    check steps.puyoCnt == 0
+    check steps.colorPuyoCnt == 0
+    check steps.garbagesCnt == 0
 
 # ------------------------------------------------
 # Step <-> string / URI
@@ -135,6 +155,24 @@ block: # garbages
     check step.toUriQuery(Ishikawa).isErr
     check step.toUriQuery(Ips).isErr
 
+  block: # rotate
+    let step = Step.init(cross = false)
+    check $step == "O"
+    check "O".parseStep == Res[Step].ok step
+
+    check step.toUriQuery(Pon2) == Res[string].ok "O"
+    check step.toUriQuery(Ishikawa).isErr
+    check step.toUriQuery(Ips).isErr
+
+  block: # cross rotate
+    let step = Step.init(cross = true)
+    check $step == "X"
+    check "X".parseStep == Res[Step].ok step
+
+    check step.toUriQuery(Pon2) == Res[string].ok "X"
+    check step.toUriQuery(Ishikawa).isErr
+    check step.toUriQuery(Ips).isErr
+
 # ------------------------------------------------
 # Steps <-> string / URI
 # ------------------------------------------------
@@ -169,6 +207,20 @@ block: # `$`, parseSteps, toUriQuery
     check str.parseSteps == Res[Steps].ok steps
 
     let query = "h0_0_2_0_1_3hpb"
+    check steps.toUriQuery(Pon2) == Res[string].ok query
+    check steps.toUriQuery(Ishikawa).isErr
+    check steps.toUriQuery(Ips).isErr
+
+    check query.parseSteps(Pon2) == Res[Steps].ok steps
+
+  block: # rotate
+    let steps = [Step.init(cross = true), Step.init(cross = false)].toDeque2
+
+    let str = "X\nO"
+    check $steps == str
+    check str.parseSteps == Res[Steps].ok steps
+
+    let query = "XO"
     check steps.toUriQuery(Pon2) == Res[string].ok query
     check steps.toUriQuery(Ishikawa).isErr
     check steps.toUriQuery(Ips).isErr

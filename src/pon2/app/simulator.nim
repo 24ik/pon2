@@ -435,7 +435,7 @@ func writeCell(self: var Simulator, idx: int, pivot: bool, cell: Cell) {.inline.
           of Hard, Garbage:
             let cellIsHard = cell == Hard
             case it.steps[idx].kind
-            of PairPlacement:
+            of PairPlacement, Rotate:
               it.steps[idx].assign Step.init(ZeroArr, cellIsHard)
             of StepKind.Garbages:
               it.steps[idx].dropHard.assign cellIsHard
@@ -446,7 +446,7 @@ func writeCell(self: var Simulator, idx: int, pivot: bool, cell: Cell) {.inline.
                 it.steps[idx].pair.pivot = cell
               else:
                 it.steps[idx].pair.rotor = cell
-            of StepKind.Garbages:
+            of StepKind.Garbages, Rotate:
               it.steps[idx].assign Step.init Pair.init(cell, cell)
 
 func writeCell*(self: var Simulator, idx: int, pivot: bool) {.inline.} =
@@ -558,6 +558,8 @@ func flip*(self: var Simulator) {.inline.} =
           it.steps[self.editData.step.idx].pair.swap
         of StepKind.Garbages:
           it.steps[self.editData.step.idx].cnts.reverse
+        of Rotate:
+          it.steps[self.editData.step.idx].cross.toggle
 
 # ------------------------------------------------
 # Edit - Goal
@@ -680,10 +682,20 @@ func forwardApply(self: var Simulator, replay = false, skip = false) {.inline.} 
       else:
         it.steps[self.operatingIdx].optPlacement.ok self.operatingPlacement
 
-    it.field.apply it.steps[self.operatingIdx]
+    let step = it.steps[self.operatingIdx]
+    it.field.apply step
 
-    # check pop
-    if it.field.canPop:
+    # set state
+    if step.kind == Rotate:
+      if it.field.isSettled:
+        self.state.assign Stable
+
+        if self.mode notin EditModes:
+          self.operatingIdx.inc
+          self.operatingPlacement.assign DefaultPlcmt
+      else:
+        self.state.assign WillSettle
+    elif it.field.canPop:
       self.state.assign WillPop
     else:
       self.state.assign Stable

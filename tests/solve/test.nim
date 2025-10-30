@@ -478,6 +478,28 @@ yg|
 yr|""".tsuSolve ==
       "3S..4S".toAnswers
 
+  block: # rotate
+    check """
+ぷよ全て消すべし
+======
+.....o
+.....o
+....bo
+....bo
+....bo
+...yro
+...oro
+...oro
+...ogo
+...ogo
+...ogo
+...oro
+.yyobo
+------
+O
+gy|""".tsuSolve ==
+      "..32".toAnswers
+
   block: # initial nazopuyo is clear
     check """
 ぷよ全て消すべし

@@ -6,7 +6,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[algorithm, random, sequtils, sugar]
+import std/[algorithm, random, sequtils, sets, sugar]
 import ./[nazopuyowrap, solve]
 import ../[core]
 import ../private/[arrayops2, assign3, deques2, math2, results2, staticfor2]
@@ -35,10 +35,12 @@ type
     conn2Cnts: tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int]]
     conn3Cnts:
       tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int], lShape: Opt[int]]
+    dropGarbagesIndices: seq[int]
+    dropHardsIndices: seq[int]
+    rotateIndices: seq[int]
+    crossRotateIndices: seq[int]
     allowDblNotLast: bool
     allowDblLast: bool
-    allowGarbagesStep: bool
-    allowHardStep: bool
 
 # ------------------------------------------------
 # Constructor
@@ -58,7 +60,8 @@ func init*(
     conn2Cnts: tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int]],
     conn3Cnts:
       tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int], lShape: Opt[int]],
-    allowDblNotLast, allowDblLast, allowGarbagesStep, allowHardStep: bool,
+    dropGarbagesIndices, dropHardsIndices, rotateIndices, crossRotateIndices: seq[int],
+    allowDblNotLast, allowDblLast: bool,
 ): T {.inline.} =
   GenerateSettings(
     goal: goal,
@@ -68,10 +71,12 @@ func init*(
     puyoCnts: puyoCnts,
     conn2Cnts: conn2Cnts,
     conn3Cnts: conn3Cnts,
+    dropGarbagesIndices: dropGarbagesIndices,
+    dropHardsIndices: dropHardsIndices,
+    rotateIndices: rotateIndices,
+    crossRotateIndices: crossRotateIndices,
     allowDblNotLast: allowDblNotLast,
     allowDblLast: allowDblLast,
-    allowGarbagesStep: allowGarbagesStep,
-    allowHardStep: allowHardStep,
   )
 
 # ------------------------------------------------
@@ -251,6 +256,31 @@ func isValid(self: GenerateSettings): Res[void] {.inline.} =
     if conn3VHL > self.conn3Cnts.total.unsafeValue:
       return err "`conn3Cnts.total` is too small"
 
+  let
+    dropGarbagesIndexSet = self.dropGarbagesIndices.toHashSet
+    dropHardsIndexSet = self.dropHardsIndices.toHashSet
+    rotateIndexSet = self.rotateIndices.toHashSet
+    crossRotateIndexSet = self.crossRotateIndices.toHashSet
+    notPairPlacementIndexSet =
+      dropGarbagesIndexSet + dropHardsIndexSet + rotateIndexSet + crossRotateIndexSet
+
+  if dropGarbagesIndexSet.card > self.puyoCnts.garbage:
+    return err "`dropGarbagesIndices` is too large"
+
+  if dropHardsIndexSet.card > self.puyoCnts.hard:
+    return err "`dropHardsIndices` is too large"
+
+  if notPairPlacementIndexSet.anyIt it notin 0 ..< self.moveCnt.pred:
+    return err "`indices` are out of range"
+
+  if notPairPlacementIndexSet.card !=
+      dropGarbagesIndexSet.card + dropHardsIndexSet.card + rotateIndexSet.card +
+      crossRotateIndexSet.card:
+    return err "all `indices` should be disjoint"
+
+  if notPairPlacementIndexSet.card >= self.moveCnt:
+    return err "at least one pair-step is required"
+
   Res[void].ok
 
 # ------------------------------------------------
@@ -272,121 +302,126 @@ func generatePuyoPuyo[F: TsuField or WaterField](
 ): Res[PuyoPuyo[F]] {.inline.} =
   ## Returns a random Puyo Puyo.
   ## Note that an infinite loop can occur.
-  # steps (garbages)
+  ## This function requires the settings passes `isValid`.
   let
-    garbagesCellCnt = settings.puyoCnts.garbage + settings.puyoCnts.hard
+    dropGarbagesIndexSet = settings.dropGarbagesIndices.toHashSet
+    dropHardsIndexSet = settings.dropHardsIndices.toHashSet
+    rotateIndexSet = settings.rotateIndices.toHashSet
+    crossRotateIndexSet = settings.crossRotateIndices.toHashSet
 
-    garbagesStepCntMax =
-      if settings.allowGarbagesStep:
-        min(settings.moveCnt.pred div 2, garbagesCellCnt)
-      else:
-        0
+    pairPlcmtStepCnt =
+      settings.moveCnt - (
+        dropGarbagesIndexSet + dropHardsIndexSet + rotateIndexSet + crossRotateIndexSet
+      ).card
 
-  # steps (garbages)
   var
-    garbageCnt {.noinit.}, hardCnt {.noinit.}: int
     cells = newSeq[Cell]()
-    steps = Steps.init
+    steps = initDeque[Step](settings.moveCnt)
+    garbageCntInField = 0
+    hardCntInField = 0
   while true:
     let
-      garbagesStepCnt = rng.rand garbagesStepCntMax
-      garbagesCellCntInSteps = rng.rand garbagesStepCnt .. garbagesCellCnt
-    var garbagesSteps = newSeqOfCap[Step](garbagesStepCnt)
-
-    garbageCnt.assign settings.puyoCnts.garbage
-    hardCnt.assign settings.puyoCnts.hard
-
-    if garbagesStepCnt > 0:
-      let
-        garbagesCellCntsInSteps =
-          ?rng.split(garbagesCellCntInSteps, garbagesStepCnt, allowZeroChunk = false).context "Steps generation failed"
-        garbagesCntsInSteps = collect:
-          for total in garbagesCellCntsInSteps:
-            rng.generateGarbagesCnts total
-
-      var failed = false
-      for garbagesStepIdx in 0 ..< garbagesStepCnt:
-        let
-          cnt = garbagesCellCntsInSteps[garbagesStepIdx]
-          cnts = garbagesCntsInSteps[garbagesStepIdx]
-
-        var dropHards = newSeqOfCap[bool](2)
-        if cnt <= garbageCnt:
-          dropHards.add false
-        if settings.allowHardStep and cnt <= hardCnt:
-          dropHards.add true
-        if dropHards.len == 0:
-          failed = true
-          break
-
-        let dropHard = rng.sample dropHards
-        garbagesSteps.add Step.init(cnts, dropHard)
-
-        if dropHard:
-          hardCnt.dec cnt
+      garbageCntInSteps =
+        if dropGarbagesIndexSet.card == 0:
+          0
         else:
-          garbageCnt.dec cnt
-      if failed:
-        continue
+          rng.rand dropGarbagesIndexSet.card .. settings.puyoCnts.garbage
+      hardCntInSteps =
+        if dropHardsIndexSet.card == 0:
+          0
+        else:
+          rng.rand dropHardsIndexSet.card .. settings.puyoCnts.hard
 
-    if settings.puyoCnts.colors + garbageCnt + hardCnt >
-        Height * Width - 1 + (settings.moveCnt - garbagesStepCnt) * 2:
-      continue
+    garbageCntInField = settings.puyoCnts.garbage - garbageCntInSteps
+    hardCntInField = settings.puyoCnts.hard - hardCntInSteps
 
-    # color cells
+    # initialize cells
     let
       (chainCntMax, extraCnt) = settings.puyoCnts.colors.divmod 4
       chainCnts =
-        ?rng.split(chainCntMax, useCells.len, allowZeroChunk = false).context "Generation failed"
+        ?rng.split(chainCntMax, useCells.len, allowZeroChunk = false).context "Puyo Puyo generation failed"
       extraCnts =
-        ?rng.split(extraCnt, useCells.len, allowZeroChunk = true).context "Generation failed"
-    cells.assign newSeqOfCap[Cell](settings.puyoCnts.colors + garbageCnt + hardCnt)
+        ?rng.split(extraCnt, useCells.len, allowZeroChunk = true).context "Puyo Puyo generation failed"
+    cells.assign newSeqOfCap[Cell](
+      settings.puyoCnts.colors + garbageCntInField + hardCntInField
+    )
     for i, cell in useCells:
       cells &= cell.repeat chainCnts[i] * 4 + extraCnts[i]
     rng.shuffle cells
 
     # steps (pair-placement)
-    let
-      pairPlcmtStepCnt = settings.moveCnt - garbagesStepCnt
-      cellIdxStartInSteps = cells.len - pairPlcmtStepCnt * 2
-      pairPlcmtSteps = collect:
-        for i in 0 ..< pairPlcmtStepCnt:
-          let idx = cellIdxStartInSteps + 2 * i
-          Step.init Pair.init(cells[idx], cells[idx.succ])
+    let pairPlcmtSteps = collect:
+      for i in 1 .. pairPlcmtStepCnt:
+        Step.init Pair.init(cells[^(2 * i - 1)], cells[^(2 * i)])
 
-    let dblStepCntMax =
-      if settings.allowDblNotLast:
-        pairPlcmtStepCnt - (not settings.allowDblLast).int
-      else:
-        settings.allowDblLast.int
-    if pairPlcmtSteps.countIt(it.pair.isDbl) > dblStepCntMax:
-      continue
+    # check steps (pair-placement)
+    if not settings.allowDblNotLast:
+      for i in 0 ..< pairPlcmtSteps.len.pred:
+        if pairPlcmtSteps[i].pair.isDbl:
+          continue
+    if not settings.allowDblLast:
+      if pairPlcmtSteps[^1].pair.isDbl:
+        continue
+
+    # steps (garbages)
+    let
+      garbagesSteps =
+        if dropGarbagesIndexSet.card == 0:
+          newSeq[Step]()
+        else:
+          let garbageCntsInSteps =
+            ?rng.split(
+              garbageCntInSteps, dropGarbagesIndexSet.card, allowZeroChunk = false
+            ).context "Steps generation failed"
+          collect:
+            for total in garbageCntsInSteps:
+              Step.init(rng.generateGarbagesCnts(total), dropHard = false)
+      hardsSteps =
+        if dropHardsIndexSet.card == 0:
+          newSeq[Step]()
+        else:
+          let hardCntsInSteps =
+            ?rng.split(hardCntInSteps, dropHardsIndexSet.card, allowZeroChunk = false).context "Steps generation failed"
+          collect:
+            for total in hardCntsInSteps:
+              Step.init(rng.generateGarbagesCnts(total), dropHard = true)
 
     # steps
-    var stepsSeq = garbagesSteps & pairPlcmtSteps
-    rng.shuffle stepsSeq
-    while stepsSeq[^1].kind != PairPlacement or
-        (not settings.allowDblLast and stepsSeq[^1].pair.isDbl):
-      rng.shuffle stepsSeq
-    steps.assign stepsSeq.toDeque2
+    var
+      garbagesStepsIdx = 0
+      hardsStepsIdx = 0
+      pairPlcmtStepsIdx = 0
+    for stepIdx in 0 ..< settings.moveCnt:
+      if stepIdx in dropGarbagesIndexSet:
+        steps.addLast garbagesSteps[garbagesStepsIdx]
+        garbagesStepsIdx.inc
+      elif stepIdx in dropHardsIndexSet:
+        steps.addLast hardsSteps[hardsStepsIdx]
+        hardsStepsIdx.inc
+      elif stepIdx in rotateIndexSet:
+        steps.addLast Step.init(cross = false)
+      elif stepIdx in crossRotateIndexSet:
+        steps.addLast Step.init(cross = true)
+      else:
+        steps.addLast pairPlcmtSteps[pairPlcmtStepsIdx]
+        pairPlcmtStepsIdx.inc
 
-    # cells
-    cells.setLen cellIdxStartInSteps
-    cells &= Garbage.repeat garbageCnt
-    cells &= Hard.repeat hardCnt
+    # fix cells
+    cells.setLen cells.len.pred pairPlcmtStepCnt * 2
+    cells &= Garbage.repeat garbageCntInField
+    cells &= Hard.repeat hardCntInField
     rng.shuffle cells
 
     break
 
   # field heights
-  let cellCntInField = cells.len
   var cellCntsInField = newSeq[int]()
   while true:
     cellCntsInField.assign(
       if settings.heights.weights.isOk:
-        ?rng.split(cellCntInField, settings.heights.weights.unsafeValue).context "Field generation failed"
+        ?rng.split(cells.len, settings.heights.weights.unsafeValue).context "Field generation failed"
       else:
-        ?rng.split(cellCntInField, settings.heights.positives.unsafeValue).context "Field generation failed"
+        ?rng.split(cells.len, settings.heights.positives.unsafeValue).context "Field generation failed"
     )
     if cellCntsInField.allIt(it in 0 .. (when F is TsuField: Height else: WaterHeight)):
       break

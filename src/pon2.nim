@@ -199,7 +199,7 @@ when isMainModule:
 
     proc runPermuter(
         urls: seq[string],
-        fixIndices = newSeq[int](),
+        fixMoves = newSeq[int](),
         allowDblNotLast = true,
         allowDblLast = false,
         openQuestion = false,
@@ -221,6 +221,7 @@ when isMainModule:
         echo "なぞぷよのURLを入力してください．"
         return
 
+      let fixIndices = fixMoves.mapIt it.pred
       unwrapNazoPuyo sim.nazoPuyoWrap:
         var idx = 0
         for nazo in itNazo.permute(fixIndices, allowDblNotLast, allowDblLast):
@@ -274,8 +275,10 @@ when isMainModule:
         c3l = -1,
         allowDblNotLast = true,
         allowDblLast = false,
-        sg = false,
-        sh = false,
+        sg = newSeq[int](),
+        sh = newSeq[int](),
+        sr = newSeq[int](),
+        sc = newSeq[int](),
         openQuestion = false,
         openAnswer = false,
         seed = 0,
@@ -294,8 +297,10 @@ when isMainModule:
         conn3CntH = c3h
         conn3CntL = c3l
 
-        stepGarbages = sg
-        stepHards = sh
+        stepGarbages = sg.mapIt it.pred
+        stepHards = sh.mapIt it.pred
+        stepRotate = sr.mapIt it.pred
+        stepCrossRotate = sc.mapIt it.pred
 
       let errMsg =
         if rule notin 0 .. Rule.high.ord:
@@ -365,10 +370,12 @@ when isMainModule:
           (colors: puyoCntColor2, garbage: puyoCntGarbage, hard: puyoCntHard),
           conn2Cnts,
           conn3Cnts,
-          allowDblNotLast,
-          allowDblLast,
           stepGarbages,
           stepHards,
+          stepRotate,
+          stepCrossRotate,
+          allowDblNotLast,
+          allowDblLast,
         )
 
       let seed2: int64
@@ -434,12 +441,14 @@ $subcmds""",
         runPermuter,
         cmdName = "p",
         short = {
+          "fixMoves": 'f',
           "allowDblNotLast": 'D',
           "allowDblLast": 'd',
           "openQuestion": 'B',
           "openAnswer": 'b',
         },
         help = {
+          "fixMoves": "何手目を固定するか",
           "allowDblNotLast": "最終手以外のゾロを許可",
           "allowDblLast": "最終手のゾロを許可",
           "openQuestion": "問題をブラウザで開く",
@@ -486,10 +495,12 @@ $subcmds""",
           "c3v": "縦3連結数",
           "c3h": "横3連結数",
           "c3l": "L字3連結数",
+          "sg": "何手目でお邪魔ぷよを落下させるか",
+          "sh": "何手目で固ぷよを落下させるか",
+          "sr": "何手目で大回転させるか",
+          "sc": "何手目でクロス回転させるか",
           "allowDblNotLast": "最終手以外のゾロを許可",
           "allowDblLast": "最終手のゾロを許可",
-          "sg": "お邪魔ぷよ落下を許可",
-          "sh": "固ぷよ落下を許可",
           "openQuestion": "問題をブラウザで開く",
           "openAnswer": "解をブラウザで開く",
           "seed": "シード",

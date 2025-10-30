@@ -277,6 +277,24 @@ func flipHorizontal*(self: var XmmBinField) {.inline.} =
   )
 
 # ------------------------------------------------
+# Rotate
+# ------------------------------------------------
+
+func rotate*(self: var XmmBinField) {.inline.} =
+  ## Rotates the binary field by 180 degrees.
+  ## Ghost cells are cleared before the rotation.
+  self.assign self.keptVisible.reverseBits.mm_shuffle_epi8(
+    mm_set_epi8(11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1, -1, -1, -1)
+  ).mm_srli_epi16 2
+
+func crossRotate*(self: var XmmBinField) {.inline.} =
+  ## Rotates the binary field by 180 degrees in groups of three rows.
+  ## Ghost cells are cleared before the rotation.
+  self.assign self.keptVisible.reverseBits.mm_shuffle_epi8(
+    mm_set_epi8(5, 4, 3, 2, 1, 0, 11, 10, 9, 8, 7, 6, -1, -1, -1, -1)
+  ).mm_srli_epi16 2
+
+# ------------------------------------------------
 # Indexer
 # ------------------------------------------------
 
