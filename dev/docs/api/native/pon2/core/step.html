@@ -65,9 +65,11 @@
     optPlacement*: OptPlacement
   of Garbages:
     cnts*: array[Col, int]
-    dropHard*: bool">Step</a></li>
+    dropHard*: bool
+  of Rotate:
+    cross*: bool">Step</a></li>
 <li><a class="reference" href="#StepKind" title="StepKind {.pure.} = enum
-  PairPlacement, Garbages">StepKind</a></li>
+  PairPlacement, Garbages, Rotate">StepKind</a></li>
 <li><a class="reference" href="#Steps" title="Steps = Deque[Step]">Steps</a></li>
 
     </ul>
@@ -104,6 +106,7 @@
 <ul class="simple nested-toc-section">init
   <li><a class="reference" href="#init%2CtypeStep" title="init(T: type Step): T:type">init(T: type Step): T:type</a></li>
 <li><a class="reference" href="#init%2CtypeStep%2Carray%5BCol%2Cint%5D%2Cbool" title="init(T: type Step; cnts: array[Col, int]; dropHard: bool): T:type">init(T: type Step; cnts: array[Col, int]; dropHard: bool): T:type</a></li>
+<li><a class="reference" href="#init%2CtypeStep%2Cbool" title="init(T: type Step; cross: bool): T:type">init(T: type Step; cross: bool): T:type</a></li>
 <li><a class="reference" href="#init%2CtypeStep%2CPair" title="init(T: type Step; pair: Pair): T:type">init(T: type Step; pair: Pair): T:type</a></li>
 <li><a class="reference" href="#init%2CtypeStep%2CPair%2COptPlacement" title="init(T: type Step; pair: Pair; optPlcmt: OptPlacement): T:type">init(T: type Step; pair: Pair; optPlcmt: OptPlacement): T:type</a></li>
 <li><a class="reference" href="#init%2CtypeStep%2CPair%2CPlacement" title="init(T: type Step; pair: Pair; plcmt: Placement): T:type">init(T: type Step; pair: Pair; plcmt: Placement): T:type</a></li>
@@ -166,7 +169,9 @@
     <span class="Identifier">optPlacement</span><span class="Operator">*</span><span class="Other">:</span> <a href="placement.html#OptPlacement"><span class="Identifier">OptPlacement</span></a>
   <span class="Keyword">of</span> <span class="Identifier">Garbages</span><span class="Other">:</span>
     <span class="Identifier">cnts</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Col</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span>
-    <span class="Identifier">dropHard</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span></pre></dt>
+    <span class="Identifier">dropHard</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
+  <span class="Keyword">of</span> <span class="Identifier">Rotate</span><span class="Other">:</span>
+    <span class="Identifier">cross</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span></pre></dt>
   <dd>
     
     Game step.
@@ -175,7 +180,7 @@
 </div>
 <div id="StepKind">
   <dt><pre><a href="step.html#StepKind"><span class="Identifier">StepKind</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">PairPlacement</span><span class="Other">,</span> <span class="Identifier">Garbages</span></pre></dt>
+  <span class="Identifier">PairPlacement</span><span class="Other">,</span> <span class="Identifier">Garbages</span><span class="Other">,</span> <span class="Identifier">Rotate</span></pre></dt>
   <dd>
     
     Discriminator for <tt class="docutils literal"><span class="pre"><span class="Identifier">Step</span></span></tt>.
@@ -297,6 +302,14 @@
 <div id="init,typeStep,array[Col,int],bool">
   <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeStep%2Carray%5BCol%2Cint%5D%2Cbool"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">Step</span><span class="Other">;</span> <span class="Identifier">cnts</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Col</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">dropHard</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    
+    
+  </dd>
+</div>
+<div id="init,typeStep,bool">
+  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeStep%2Cbool"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">Step</span><span class="Other">;</span> <span class="Identifier">cross</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -441,7 +454,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-10-28 11:34:16 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-10-30 00:53:43 UTC</small>
       </div>
     </div>
   </div>

@@ -43,23 +43,23 @@ nim	shiftFieldLeft	pon2/app/simulator.html#shiftFieldLeft,Simulator	proc shiftFi
 nim	flipFieldVertical	pon2/app/simulator.html#flipFieldVertical,Simulator	proc flipFieldVertical(self: var Simulator)		525
 nim	flipFieldHorizontal	pon2/app/simulator.html#flipFieldHorizontal,Simulator	proc flipFieldHorizontal(self: var Simulator)		534
 nim	flip	pon2/app/simulator.html#flip,Simulator	proc flip(self: var Simulator)		543
-nim	goalKind=	pon2/app/simulator.html#goalKind=,Simulator,GoalKind	proc goalKind=(self: var Simulator; kind: GoalKind)		570
-nim	goalColor=	pon2/app/simulator.html#goalColor=,Simulator,GoalColor	proc goalColor=(self: var Simulator; color: GoalColor)		594
-nim	goalVal=	pon2/app/simulator.html#goalVal=,Simulator,GoalVal	proc goalVal=(self: var Simulator; val: GoalVal)		608
-nim	toggleFocus	pon2/app/simulator.html#toggleFocus,Simulator	proc toggleFocus(self: var Simulator)		626
-nim	toggleInsert	pon2/app/simulator.html#toggleInsert,Simulator	proc toggleInsert(self: var Simulator)		630
-nim	movePlacementRight	pon2/app/simulator.html#movePlacementRight,Simulator	proc movePlacementRight(self: var Simulator)		638
-nim	movePlacementLeft	pon2/app/simulator.html#movePlacementLeft,Simulator	proc movePlacementLeft(self: var Simulator)		642
-nim	rotatePlacementRight	pon2/app/simulator.html#rotatePlacementRight,Simulator	proc rotatePlacementRight(self: var Simulator)		646
-nim	rotatePlacementLeft	pon2/app/simulator.html#rotatePlacementLeft,Simulator	proc rotatePlacementLeft(self: var Simulator)		650
-nim	forward	pon2/app/simulator.html#forward,Simulator	proc forward(self: var Simulator; replay = false; skip = false)		743
-nim	backward	pon2/app/simulator.html#backward,Simulator	proc backward(self: var Simulator; detail = false)		763
-nim	reset	pon2/app/simulator.html#reset,Simulator	proc reset(self: var Simulator)		783
-nim	mark	pon2/app/simulator.html#mark,Simulator	proc mark(self: Simulator): Opt[MarkResult]		794
-nim	operate	pon2/app/simulator.html#operate,Simulator,KeyEvent	proc operate(self: var Simulator; key: KeyEvent): bool		829
-nim	toUri	pon2/app/simulator.html#toUri,Simulator	proc toUri(self: Simulator; clearPlacements = false; fqdn = Pon2): Res[Uri]		981
-nim	parseSimulator	pon2/app/simulator.html#parseSimulator,Uri	proc parseSimulator(uri: Uri): Res[Simulator]		1018
-nim	toExportUri	pon2/app/simulator.html#toExportUri,Simulator	proc toExportUri(self: Simulator; viewer = true; clearPlacements = true; fqdn = Pon2): Res[\n    Uri]		1075
+nim	goalKind=	pon2/app/simulator.html#goalKind=,Simulator,GoalKind	proc goalKind=(self: var Simulator; kind: GoalKind)		572
+nim	goalColor=	pon2/app/simulator.html#goalColor=,Simulator,GoalColor	proc goalColor=(self: var Simulator; color: GoalColor)		596
+nim	goalVal=	pon2/app/simulator.html#goalVal=,Simulator,GoalVal	proc goalVal=(self: var Simulator; val: GoalVal)		610
+nim	toggleFocus	pon2/app/simulator.html#toggleFocus,Simulator	proc toggleFocus(self: var Simulator)		628
+nim	toggleInsert	pon2/app/simulator.html#toggleInsert,Simulator	proc toggleInsert(self: var Simulator)		632
+nim	movePlacementRight	pon2/app/simulator.html#movePlacementRight,Simulator	proc movePlacementRight(self: var Simulator)		640
+nim	movePlacementLeft	pon2/app/simulator.html#movePlacementLeft,Simulator	proc movePlacementLeft(self: var Simulator)		644
+nim	rotatePlacementRight	pon2/app/simulator.html#rotatePlacementRight,Simulator	proc rotatePlacementRight(self: var Simulator)		648
+nim	rotatePlacementLeft	pon2/app/simulator.html#rotatePlacementLeft,Simulator	proc rotatePlacementLeft(self: var Simulator)		652
+nim	forward	pon2/app/simulator.html#forward,Simulator	proc forward(self: var Simulator; replay = false; skip = false)		755
+nim	backward	pon2/app/simulator.html#backward,Simulator	proc backward(self: var Simulator; detail = false)		775
+nim	reset	pon2/app/simulator.html#reset,Simulator	proc reset(self: var Simulator)		795
+nim	mark	pon2/app/simulator.html#mark,Simulator	proc mark(self: Simulator): Opt[MarkResult]		806
+nim	operate	pon2/app/simulator.html#operate,Simulator,KeyEvent	proc operate(self: var Simulator; key: KeyEvent): bool		841
+nim	toUri	pon2/app/simulator.html#toUri,Simulator	proc toUri(self: Simulator; clearPlacements = false; fqdn = Pon2): Res[Uri]		993
+nim	parseSimulator	pon2/app/simulator.html#parseSimulator,Uri	proc parseSimulator(uri: Uri): Res[Simulator]		1030
+nim	toExportUri	pon2/app/simulator.html#toExportUri,Simulator	proc toExportUri(self: Simulator; viewer = true; clearPlacements = true; fqdn = Pon2): Res[\n    Uri]		1087
 nimgrp	writecell	pon2/app/simulator.html#writeCell-procs-all	proc		394
 nimgrp	writecnt	pon2/app/simulator.html#writeCnt-procs-all	proc		463
 nimgrp	deletestep	pon2/app/simulator.html#deleteStep-procs-all	proc		358

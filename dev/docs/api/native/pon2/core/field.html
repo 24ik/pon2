@@ -130,6 +130,10 @@
   <li><a class="reference" href="#conn3Vertical%2CF" title="conn3Vertical[F: TsuField or WaterField](self: F): F">conn3Vertical[F: TsuField or WaterField](self: F): F</a></li>
 
 </ul>
+<ul class="simple nested-toc-section">crossRotate
+  <li><a class="reference" href="#crossRotate%2CF" title="crossRotate[F: TsuField or WaterField](self: var F)">crossRotate[F: TsuField or WaterField](self: var F)</a></li>
+
+</ul>
 <ul class="simple nested-toc-section">delete
   <li><a class="reference" href="#delete%2CF%2CRow%2CCol" title="delete[F: TsuField or WaterField](self: var F; row: Row; col: Col)">delete[F: TsuField or WaterField](self: var F; row: Row; col: Col)</a></li>
 
@@ -176,6 +180,9 @@
   <li><a class="reference" href="#move%2CF%2Carray%5BCol%2Cint%5D%2Cbool%2Cstaticbool" title="move[F: TsuField or WaterField](self: var F; cnts: array[Col, int];
                                 dropHard: bool; calcConn: static bool = true): MoveResult">move[F: TsuField or WaterField](self: var F; cnts: array[Col, int];
                                 dropHard: bool; calcConn: static bool = true): MoveResult</a></li>
+<li><a class="reference" href="#move%2CF%2Cbool%2Cstaticbool" title="move[F: TsuField or WaterField](self: var F; cross: bool;
+                                calcConn: static bool = true): MoveResult">move[F: TsuField or WaterField](self: var F; cross: bool;
+                                calcConn: static bool = true): MoveResult</a></li>
 <li><a class="reference" href="#move%2CF%2CPair%2CPlacement%2Cstaticbool" title="move[F: TsuField or WaterField](self: var F; pair: Pair; plcmt: Placement;
                                 calcConn: static bool = true): MoveResult">move[F: TsuField or WaterField](self: var F; pair: Pair; plcmt: Placement;
                                 calcConn: static bool = true): MoveResult</a></li>
@@ -204,6 +211,10 @@
 </ul>
 <ul class="simple nested-toc-section">puyoCnt
   <li><a class="reference" href="#puyoCnt%2CF" title="puyoCnt[F: TsuField or WaterField](self: F): int">puyoCnt[F: TsuField or WaterField](self: F): int</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">rotate
+  <li><a class="reference" href="#rotate%2CF" title="rotate[F: TsuField or WaterField](self: var F)">rotate[F: TsuField or WaterField](self: var F)</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">rule
@@ -491,6 +502,17 @@
 </div>
 
 </div>
+<div id="crossRotate-procs-all">
+  <div id="crossRotate,F">
+  <dt><pre><span class="Keyword">func</span> <a href="#crossRotate%2CF"><span class="Identifier">crossRotate</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">:</span> <a href="field.html#TsuField"><span class="Identifier">TsuField</span></a> <span class="Keyword">or</span> <a href="field.html#WaterField"><span class="Identifier">WaterField</span></a><span class="Other">]</span><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">F</span><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Rotates the binary field by 180 degrees in groups of three rows. Ghost cells are cleared before the rotation.
+    
+  </dd>
+</div>
+
+</div>
 <div id="delete-procs-all">
   <div id="delete,F,Row,Col">
   <dt><pre><span class="Keyword">func</span> <a href="#delete%2CF%2CRow%2CCol"><span class="Identifier">delete</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">:</span> <a href="field.html#TsuField"><span class="Identifier">TsuField</span></a> <span class="Keyword">or</span> <a href="field.html#WaterField"><span class="Identifier">WaterField</span></a><span class="Other">]</span><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">F</span><span class="Other">;</span> <span class="Identifier">row</span><span class="Other">:</span> <a href="common.html#Row"><span class="Identifier">Row</span></a><span class="Other">;</span> <span class="Identifier">col</span><span class="Other">:</span> <a href="common.html#Col"><span class="Identifier">Col</span></a><span class="Other">)</span> {.
@@ -617,6 +639,16 @@
     
   </dd>
 </div>
+<div id="move,F,bool,staticbool">
+  <dt><pre><span class="Keyword">func</span> <a href="#move%2CF%2Cbool%2Cstaticbool"><span class="Identifier">move</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">:</span> <a href="field.html#TsuField"><span class="Identifier">TsuField</span></a> <span class="Keyword">or</span> <a href="field.html#WaterField"><span class="Identifier">WaterField</span></a><span class="Other">]</span><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">F</span><span class="Other">;</span> <span class="Identifier">cross</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">;</span>
+                                     <span class="Identifier">calcConn</span><span class="Other">:</span> <span class="Identifier">static</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a> {.
+    <span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Rotates the field, advances the field until chains end, and returns a moving result.
+    
+  </dd>
+</div>
 <div id="move,F,Pair,Placement,staticbool">
   <dt><pre><span class="Keyword">func</span> <a href="#move%2CF%2CPair%2CPlacement%2Cstaticbool"><span class="Identifier">move</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">:</span> <a href="field.html#TsuField"><span class="Identifier">TsuField</span></a> <span class="Keyword">or</span> <a href="field.html#WaterField"><span class="Identifier">WaterField</span></a><span class="Other">]</span><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">F</span><span class="Other">;</span> <span class="Identifier">pair</span><span class="Other">:</span> <a href="pair.html#Pair"><span class="Identifier">Pair</span></a><span class="Other">;</span> <span class="Identifier">plcmt</span><span class="Other">:</span> <a href="placement.html#Placement"><span class="Identifier">Placement</span></a><span class="Other">;</span>
                                      <span class="Identifier">calcConn</span><span class="Other">:</span> <span class="Identifier">static</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a> {.
@@ -728,6 +760,17 @@
   <dd>
     
     Returns the number of puyos in the field.
+    
+  </dd>
+</div>
+
+</div>
+<div id="rotate-procs-all">
+  <div id="rotate,F">
+  <dt><pre><span class="Keyword">func</span> <a href="#rotate%2CF"><span class="Identifier">rotate</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">:</span> <a href="field.html#TsuField"><span class="Identifier">TsuField</span></a> <span class="Keyword">or</span> <a href="field.html#WaterField"><span class="Identifier">WaterField</span></a><span class="Other">]</span><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">F</span><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Rotates the binary field by 180 degrees. Ghost cells are cleared before the rotation.
     
   </dd>
 </div>
@@ -931,7 +974,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-10-28 11:34:17 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-10-30 00:53:44 UTC</small>
       </div>
     </div>
   </div>

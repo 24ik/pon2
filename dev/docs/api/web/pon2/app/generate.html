@@ -80,19 +80,21 @@
   <li><a class="reference" href="#init%2CtypeGenerateGoal%2CGoalKind%2CGenerateGoalColor%2CGoalVal" title="init(T: type GenerateGoal; kind: GoalKind; color: GenerateGoalColor;
      val: GoalVal): T:type">init(T: type GenerateGoal; kind: GoalKind; color: GenerateGoalColor;
      val: GoalVal): T:type</a></li>
-<li><a class="reference" href="#init%2CtypeGenerateSettings%2CGenerateGoal%2Cint%2Cint%2Ctuple%5BOpt%5Barray%5BCol%2Cint%5D%5D%2COpt%5Barray%5BCol%2Cbool%5D%5D%5D%2Ctuple%5Bint%2Cint%2Cint%5D%2Ctuple%5BOpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%5D%2Ctuple%5BOpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%5D%2Cbool%2Cbool%2Cbool%2Cbool" title="init(T: type GenerateSettings; goal: GenerateGoal; moveCnt, colorCnt: int;
+<li><a class="reference" href="#init%2CtypeGenerateSettings%2CGenerateGoal%2Cint%2Cint%2Ctuple%5BOpt%5Barray%5BCol%2Cint%5D%5D%2COpt%5Barray%5BCol%2Cbool%5D%5D%5D%2Ctuple%5Bint%2Cint%2Cint%5D%2Ctuple%5BOpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%5D%2Ctuple%5BOpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%5D%2Cseq%5Bint%5D%2Cseq%5Bint%5D%2Cseq%5Bint%5D%2Cseq%5Bint%5D%2Cbool%2Cbool" title="init(T: type GenerateSettings; goal: GenerateGoal; moveCnt, colorCnt: int;
     heights: tuple[weights: Opt[array[Col, int]],
                    positives: Opt[array[Col, bool]]];
      puyoCnts: tuple[colors: int, garbage: int, hard: int]; conn2Cnts: tuple[
     total: Opt[int], vertical: Opt[int], horizontal: Opt[int]]; conn3Cnts: tuple[
     total: Opt[int], vertical: Opt[int], horizontal: Opt[int], lShape: Opt[int]];
-     allowDblNotLast, allowDblLast, allowGarbagesStep, allowHardStep: bool): T:type">init(T: type GenerateSettings; goal: GenerateGoal; moveCnt, colorCnt: int;
+    dropGarbagesIndices, dropHardsIndices, rotateIndices, crossRotateIndices: seq[
+    int]; allowDblNotLast, allowDblLast: bool): T:type">init(T: type GenerateSettings; goal: GenerateGoal; moveCnt, colorCnt: int;
     heights: tuple[weights: Opt[array[Col, int]],
                    positives: Opt[array[Col, bool]]];
      puyoCnts: tuple[colors: int, garbage: int, hard: int]; conn2Cnts: tuple[
     total: Opt[int], vertical: Opt[int], horizontal: Opt[int]]; conn3Cnts: tuple[
     total: Opt[int], vertical: Opt[int], horizontal: Opt[int], lShape: Opt[int]];
-     allowDblNotLast, allowDblLast, allowGarbagesStep, allowHardStep: bool): T:type</a></li>
+    dropGarbagesIndices, dropHardsIndices, rotateIndices, crossRotateIndices: seq[
+    int]; allowDblNotLast, allowDblLast: bool): T:type</a></li>
 
 </ul>
 
@@ -173,15 +175,15 @@
     
   </dd>
 </div>
-<div id="init,typeGenerateSettings,GenerateGoal,int,int,tuple[Opt[array[Col,int]],Opt[array[Col,bool]]],tuple[int,int,int],tuple[Opt[int],Opt[int],Opt[int]],tuple[Opt[int],Opt[int],Opt[int],Opt[int]],bool,bool,bool,bool">
-  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeGenerateSettings%2CGenerateGoal%2Cint%2Cint%2Ctuple%5BOpt%5Barray%5BCol%2Cint%5D%5D%2COpt%5Barray%5BCol%2Cbool%5D%5D%5D%2Ctuple%5Bint%2Cint%2Cint%5D%2Ctuple%5BOpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%5D%2Ctuple%5BOpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%5D%2Cbool%2Cbool%2Cbool%2Cbool"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">GenerateSettings</span><span class="Other">;</span> <span class="Identifier">goal</span><span class="Other">:</span> <a href="generate.html#GenerateGoal"><span class="Identifier">GenerateGoal</span></a><span class="Other">;</span> <span class="Identifier">moveCnt</span><span class="Other">,</span> <span class="Identifier">colorCnt</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span>
+<div id="init,typeGenerateSettings,GenerateGoal,int,int,tuple[Opt[array[Col,int]],Opt[array[Col,bool]]],tuple[int,int,int],tuple[Opt[int],Opt[int],Opt[int]],tuple[Opt[int],Opt[int],Opt[int],Opt[int]],seq[int],seq[int],seq[int],seq[int],bool,bool">
+  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeGenerateSettings%2CGenerateGoal%2Cint%2Cint%2Ctuple%5BOpt%5Barray%5BCol%2Cint%5D%5D%2COpt%5Barray%5BCol%2Cbool%5D%5D%5D%2Ctuple%5Bint%2Cint%2Cint%5D%2Ctuple%5BOpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%5D%2Ctuple%5BOpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%5D%2Cseq%5Bint%5D%2Cseq%5Bint%5D%2Cseq%5Bint%5D%2Cseq%5Bint%5D%2Cbool%2Cbool"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">GenerateSettings</span><span class="Other">;</span> <span class="Identifier">goal</span><span class="Other">:</span> <a href="generate.html#GenerateGoal"><span class="Identifier">GenerateGoal</span></a><span class="Other">;</span> <span class="Identifier">moveCnt</span><span class="Other">,</span> <span class="Identifier">colorCnt</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span>
     <span class="Identifier">heights</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">weights</span><span class="Other">:</span> <span class="Identifier">Opt</span><span class="Other">[</span><span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Col</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span><span class="Other">,</span>
                    <span class="Identifier">positives</span><span class="Other">:</span> <span class="Identifier">Opt</span><span class="Other">[</span><span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Col</span><span class="Other">,</span> <span class="Identifier">bool</span><span class="Other">]</span><span class="Other">]</span><span class="Other">]</span><span class="Other">;</span>
           <span class="Identifier">puyoCnts</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">colors</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">,</span> <span class="Identifier">garbage</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">,</span> <span class="Identifier">hard</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">conn2Cnts</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span>
     <span class="Identifier">total</span><span class="Other">:</span> <span class="Identifier">Opt</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">vertical</span><span class="Other">:</span> <span class="Identifier">Opt</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">horizontal</span><span class="Other">:</span> <span class="Identifier">Opt</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">conn3Cnts</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span>
     <span class="Identifier">total</span><span class="Other">:</span> <span class="Identifier">Opt</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">vertical</span><span class="Other">:</span> <span class="Identifier">Opt</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">horizontal</span><span class="Other">:</span> <span class="Identifier">Opt</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">lShape</span><span class="Other">:</span> <span class="Identifier">Opt</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span><span class="Other">;</span>
-          <span class="Identifier">allowDblNotLast</span><span class="Other">,</span> <span class="Identifier">allowDblLast</span><span class="Other">,</span> <span class="Identifier">allowGarbagesStep</span><span class="Other">,</span> <span class="Identifier">allowHardStep</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.
-    <span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+    <span class="Identifier">dropGarbagesIndices</span><span class="Other">,</span> <span class="Identifier">dropHardsIndices</span><span class="Other">,</span> <span class="Identifier">rotateIndices</span><span class="Other">,</span> <span class="Identifier">crossRotateIndices</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span>
+    <span class="Identifier">int</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">allowDblNotLast</span><span class="Other">,</span> <span class="Identifier">allowDblLast</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -206,7 +208,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-10-28 11:34:44 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-10-30 00:54:08 UTC</small>
       </div>
     </div>
   </div>

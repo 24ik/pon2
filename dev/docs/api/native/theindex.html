@@ -354,6 +354,12 @@
 <li><a class="reference external"
           data-doc-search-tag="results2: proc context[T](self: Res[T]; ctx: string): Res[T]" href="pon2/private/results2.html#context%2CRes%5BT%5D%2Cstring">results2: proc context[T](self: Res[T]; ctx: string): Res[T]</a></li>
           </ul></dd>
+<dt><a name="crossRotate" href="#crossRotate"><span>crossRotate:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="field: proc crossRotate[F: TsuField or WaterField](self: var F)" href="pon2/core/field.html#crossRotate%2CF">field: proc crossRotate[F: TsuField or WaterField](self: var F)</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="xmm: proc crossRotate(self: var XmmBinField)" href="pon2/private/core/binfield/xmm.html#crossRotate%2CM128i">xmm: proc crossRotate(self: var XmmBinField)</a></li>
+          </ul></dd>
 <dt><a name="dataLoaded" href="#dataLoaded"><span>dataLoaded:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="marathon: proc dataLoaded(self: Marathon): bool" href="pon2/app/marathon.html#dataLoaded%2CMarathon">marathon: proc dataLoaded(self: Marathon): bool</a></li>
@@ -558,13 +564,15 @@
      puyoCnts: tuple[colors: int, garbage: int, hard: int]; conn2Cnts: tuple[
     total: Opt[int], vertical: Opt[int], horizontal: Opt[int]]; conn3Cnts: tuple[
     total: Opt[int], vertical: Opt[int], horizontal: Opt[int], lShape: Opt[int]];
-     allowDblNotLast, allowDblLast, allowGarbagesStep, allowHardStep: bool): T:type" href="pon2/app/generate.html#init%2CtypeGenerateSettings%2CGenerateGoal%2Cint%2Cint%2Ctuple%5BOpt%5Barray%5BCol%2Cint%5D%5D%2COpt%5Barray%5BCol%2Cbool%5D%5D%5D%2Ctuple%5Bint%2Cint%2Cint%5D%2Ctuple%5BOpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%5D%2Ctuple%5BOpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%5D%2Cbool%2Cbool%2Cbool%2Cbool">generate: proc init(T: type GenerateSettings; goal: GenerateGoal; moveCnt, colorCnt: int;
+    dropGarbagesIndices, dropHardsIndices, rotateIndices, crossRotateIndices: seq[
+    int]; allowDblNotLast, allowDblLast: bool): T:type" href="pon2/app/generate.html#init%2CtypeGenerateSettings%2CGenerateGoal%2Cint%2Cint%2Ctuple%5BOpt%5Barray%5BCol%2Cint%5D%5D%2COpt%5Barray%5BCol%2Cbool%5D%5D%5D%2Ctuple%5Bint%2Cint%2Cint%5D%2Ctuple%5BOpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%5D%2Ctuple%5BOpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%5D%2Cseq%5Bint%5D%2Cseq%5Bint%5D%2Cseq%5Bint%5D%2Cseq%5Bint%5D%2Cbool%2Cbool">generate: proc init(T: type GenerateSettings; goal: GenerateGoal; moveCnt, colorCnt: int;
     heights: tuple[weights: Opt[array[Col, int]],
                    positives: Opt[array[Col, bool]]];
      puyoCnts: tuple[colors: int, garbage: int, hard: int]; conn2Cnts: tuple[
     total: Opt[int], vertical: Opt[int], horizontal: Opt[int]]; conn3Cnts: tuple[
     total: Opt[int], vertical: Opt[int], horizontal: Opt[int], lShape: Opt[int]];
-     allowDblNotLast, allowDblLast, allowGarbagesStep, allowHardStep: bool): T:type</a></li>
+    dropGarbagesIndices, dropHardsIndices, rotateIndices, crossRotateIndices: seq[
+    int]; allowDblNotLast, allowDblLast: bool): T:type</a></li>
           <li><a class="reference external"
           data-doc-search-tag="key: proc init(T: type KeyEvent; c: char; shift = false; ctrl = false; alt = false;
      meta = false): T:type" href="pon2/app/key.html#init%2CtypeKeyEvent%2Cchar">key: proc init(T: type KeyEvent; c: char; shift = false; ctrl = false; alt = false;
@@ -653,6 +661,8 @@
           data-doc-search-tag="step: proc init(T: type Step): T:type" href="pon2/core/step.html#init%2CtypeStep">step: proc init(T: type Step): T:type</a></li>
           <li><a class="reference external"
           data-doc-search-tag="step: proc init(T: type Step; cnts: array[Col, int]; dropHard: bool): T:type" href="pon2/core/step.html#init%2CtypeStep%2Carray%5BCol%2Cint%5D%2Cbool">step: proc init(T: type Step; cnts: array[Col, int]; dropHard: bool): T:type</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="step: proc init(T: type Step; cross: bool): T:type" href="pon2/core/step.html#init%2CtypeStep%2Cbool">step: proc init(T: type Step; cross: bool): T:type</a></li>
           <li><a class="reference external"
           data-doc-search-tag="step: proc init(T: type Step; pair: Pair): T:type" href="pon2/core/step.html#init%2CtypeStep%2CPair">step: proc init(T: type Step; pair: Pair): T:type</a></li>
           <li><a class="reference external"
@@ -851,6 +861,10 @@
           data-doc-search-tag="field: proc move[F: TsuField or WaterField](self: var F; cnts: array[Col, int];
                                 dropHard: bool; calcConn: static bool = true): MoveResult" href="pon2/core/field.html#move%2CF%2Carray%5BCol%2Cint%5D%2Cbool%2Cstaticbool">field: proc move[F: TsuField or WaterField](self: var F; cnts: array[Col, int];
                                 dropHard: bool; calcConn: static bool = true): MoveResult</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="field: proc move[F: TsuField or WaterField](self: var F; cross: bool;
+                                calcConn: static bool = true): MoveResult" href="pon2/core/field.html#move%2CF%2Cbool%2Cstaticbool">field: proc move[F: TsuField or WaterField](self: var F; cross: bool;
+                                calcConn: static bool = true): MoveResult</a></li>
           <li><a class="reference external"
           data-doc-search-tag="field: proc move[F: TsuField or WaterField](self: var F; pair: Pair; plcmt: Placement;
                                 calcConn: static bool = true): MoveResult" href="pon2/core/field.html#move%2CF%2CPair%2CPlacement%2Cstaticbool">field: proc move[F: TsuField or WaterField](self: var F; pair: Pair; plcmt: Placement;
@@ -1245,6 +1259,12 @@
 <dt><a name="root" href="#root"><span>root:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="unionfind: proc root(self: var UnionFind; node: UnionFindNode): UnionFindNode" href="pon2/private/unionfind.html#root%2CUnionFind%2CUnionFindNode">unionfind: proc root(self: var UnionFind; node: UnionFindNode): UnionFindNode</a></li>
+          </ul></dd>
+<dt><a name="rotate" href="#rotate"><span>rotate:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="field: proc rotate[F: TsuField or WaterField](self: var F)" href="pon2/core/field.html#rotate%2CF">field: proc rotate[F: TsuField or WaterField](self: var F)</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="xmm: proc rotate(self: var XmmBinField)" href="pon2/private/core/binfield/xmm.html#rotate%2CM128i">xmm: proc rotate(self: var XmmBinField)</a></li>
           </ul></dd>
 <dt><a name="rotatedLeft" href="#rotatedLeft"><span>rotatedLeft:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -1730,7 +1750,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-10-28 11:34:32 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-10-30 00:53:58 UTC</small>
       </div>
     </div>
   </div>

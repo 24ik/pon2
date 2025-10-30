@@ -46,17 +46,19 @@ nim	shiftLeftRaw	pon2/private/core/binfield/xmm.html#shiftLeftRaw,M128i	proc shi
 nim	shiftLeft	pon2/private/core/binfield/xmm.html#shiftLeft,M128i	proc shiftLeft(self: var XmmBinField)		259
 nim	flipVertical	pon2/private/core/binfield/xmm.html#flipVertical,M128i	proc flipVertical(self: var XmmBinField)		267
 nim	flipHorizontal	pon2/private/core/binfield/xmm.html#flipHorizontal,M128i	proc flipHorizontal(self: var XmmBinField)		273
-nim	`[]`	pon2/private/core/binfield/xmm.html#[],M128i,staticRow,staticCol	proc `[]`(self: XmmBinField; row: static Row; col: static Col): bool		287
-nim	`[]`	pon2/private/core/binfield/xmm.html#[],M128i,Row,Col	proc `[]`(self: XmmBinField; row: Row; col: Col): bool		295
-nim	`[]=`	pon2/private/core/binfield/xmm.html#[]=,M128i,Row,Col,bool	proc `[]=`(self: var XmmBinField; row: Row; col: Col; val: bool)		302
-nim	insert	pon2/private/core/binfield/xmm.html#insert,M128i,Row,Col,bool,staticRule	proc insert(self: var XmmBinField; row: Row; col: Col; val: bool; rule: static Rule)		360
-nim	delete	pon2/private/core/binfield/xmm.html#delete,M128i,Row,Col,staticRule	proc delete(self: var XmmBinField; row: Row; col: Col; rule: static Rule)		409
-nim	dropGarbagesTsu	pon2/private/core/binfield/xmm.html#dropGarbagesTsu,M128i,array[Col,int],M128i	proc dropGarbagesTsu(self: var XmmBinField; cnts: array[Col, int];\n                existField: XmmBinField)		430
-nim	dropGarbagesWater	pon2/private/core/binfield/xmm.html#dropGarbagesWater,M128i,M128i,M128i,array[Col,int],M128i	proc dropGarbagesWater(self, other1, other2: var XmmBinField; cnts: array[Col, int];\n                  existField: XmmBinField)		447
-nim	settleTsu	pon2/private/core/binfield/xmm.html#settleTsu,M128i,M128i,M128i,M128i	proc settleTsu(field1, field2, field3: var XmmBinField; existField: XmmBinField)		522
-nim	settleWater	pon2/private/core/binfield/xmm.html#settleWater,M128i,M128i,M128i,M128i	proc settleWater(field1, field2, field3: var XmmBinField; existField: XmmBinField)		550
-nim	areSettledTsu	pon2/private/core/binfield/xmm.html#areSettledTsu,M128i,M128i,M128i,M128i	proc areSettledTsu(field1, field2, field3, existField: XmmBinField): bool		561
-nim	areSettledWater	pon2/private/core/binfield/xmm.html#areSettledWater,M128i,M128i,M128i,M128i	proc areSettledWater(field1, field2, field3, existField: XmmBinField): bool		570
+nim	rotate	pon2/private/core/binfield/xmm.html#rotate,M128i	proc rotate(self: var XmmBinField)		283
+nim	crossRotate	pon2/private/core/binfield/xmm.html#crossRotate,M128i	proc crossRotate(self: var XmmBinField)		290
+nim	`[]`	pon2/private/core/binfield/xmm.html#[],M128i,staticRow,staticCol	proc `[]`(self: XmmBinField; row: static Row; col: static Col): bool		305
+nim	`[]`	pon2/private/core/binfield/xmm.html#[],M128i,Row,Col	proc `[]`(self: XmmBinField; row: Row; col: Col): bool		313
+nim	`[]=`	pon2/private/core/binfield/xmm.html#[]=,M128i,Row,Col,bool	proc `[]=`(self: var XmmBinField; row: Row; col: Col; val: bool)		320
+nim	insert	pon2/private/core/binfield/xmm.html#insert,M128i,Row,Col,bool,staticRule	proc insert(self: var XmmBinField; row: Row; col: Col; val: bool; rule: static Rule)		378
+nim	delete	pon2/private/core/binfield/xmm.html#delete,M128i,Row,Col,staticRule	proc delete(self: var XmmBinField; row: Row; col: Col; rule: static Rule)		427
+nim	dropGarbagesTsu	pon2/private/core/binfield/xmm.html#dropGarbagesTsu,M128i,array[Col,int],M128i	proc dropGarbagesTsu(self: var XmmBinField; cnts: array[Col, int];\n                existField: XmmBinField)		448
+nim	dropGarbagesWater	pon2/private/core/binfield/xmm.html#dropGarbagesWater,M128i,M128i,M128i,array[Col,int],M128i	proc dropGarbagesWater(self, other1, other2: var XmmBinField; cnts: array[Col, int];\n                  existField: XmmBinField)		465
+nim	settleTsu	pon2/private/core/binfield/xmm.html#settleTsu,M128i,M128i,M128i,M128i	proc settleTsu(field1, field2, field3: var XmmBinField; existField: XmmBinField)		540
+nim	settleWater	pon2/private/core/binfield/xmm.html#settleWater,M128i,M128i,M128i,M128i	proc settleWater(field1, field2, field3: var XmmBinField; existField: XmmBinField)		568
+nim	areSettledTsu	pon2/private/core/binfield/xmm.html#areSettledTsu,M128i,M128i,M128i,M128i	proc areSettledTsu(field1, field2, field3, existField: XmmBinField): bool		579
+nim	areSettledWater	pon2/private/core/binfield/xmm.html#areSettledWater,M128i,M128i,M128i,M128i	proc areSettledWater(field1, field2, field3, existField: XmmBinField): bool		588
 nimgrp	kept	pon2/private/core/binfield/xmm.html#kept-procs-all	proc		137
-nimgrp	[]	pon2/private/core/binfield/xmm.html#[]-procs-all	proc		287
+nimgrp	[]	pon2/private/core/binfield/xmm.html#[]-procs-all	proc		305
 nimgrp	sum	pon2/private/core/binfield/xmm.html#sum-procs-all	proc		82

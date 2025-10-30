@@ -112,6 +112,10 @@
   <li><a class="reference" href="#clear%2CM128i" title="clear(self: var XmmBinField)">clear(self: var XmmBinField)</a></li>
 
 </ul>
+<ul class="simple nested-toc-section">crossRotate
+  <li><a class="reference" href="#crossRotate%2CM128i" title="crossRotate(self: var XmmBinField)">crossRotate(self: var XmmBinField)</a></li>
+
+</ul>
 <ul class="simple nested-toc-section">delete
   <li><a class="reference" href="#delete%2CM128i%2CRow%2CCol%2CstaticRule" title="delete(self: var XmmBinField; row: Row; col: Col; rule: static Rule)">delete(self: var XmmBinField; row: Row; col: Col; rule: static Rule)</a></li>
 
@@ -191,6 +195,10 @@
 </ul>
 <ul class="simple nested-toc-section">replace
   <li><a class="reference" href="#replace%2CM128i%2CCol%2CM128i" title="replace(self: var XmmBinField; col: Col; after: XmmBinField)">replace(self: var XmmBinField; col: Col; after: XmmBinField)</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">rotate
+  <li><a class="reference" href="#rotate%2CM128i" title="rotate(self: var XmmBinField)">rotate(self: var XmmBinField)</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">settleTsu
@@ -457,6 +465,18 @@
 </div>
 
 </div>
+<div id="crossRotate-procs-all">
+  <div id="crossRotate,M128i">
+  <dt><pre><span class="Keyword">func</span> <a href="#crossRotate%2CM128i"><span class="Identifier">crossRotate</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="xmm.html#XmmBinField"><span class="Identifier">XmmBinField</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Rotates the binary field by 180 degrees in groups of three rows. Ghost cells are cleared before the rotation.
+    
+  </dd>
+</div>
+
+</div>
 <div id="delete-procs-all">
   <div id="delete,M128i,Row,Col,staticRule">
   <dt><pre><span class="Keyword">func</span> <a href="#delete%2CM128i%2CRow%2CCol%2CstaticRule"><span class="Identifier">delete</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="xmm.html#XmmBinField"><span class="Identifier">XmmBinField</span></a><span class="Other">;</span> <span class="Identifier">row</span><span class="Other">:</span> <a href="../../../core/common.html#Row"><span class="Identifier">Row</span></a><span class="Other">;</span> <span class="Identifier">col</span><span class="Other">:</span> <a href="../../../core/common.html#Col"><span class="Identifier">Col</span></a><span class="Other">;</span> <span class="Identifier">rule</span><span class="Other">:</span> <span class="Identifier">static</span> <span class="Identifier">Rule</span><span class="Other">)</span> {.
@@ -685,6 +705,17 @@
   <dd>
     
     Replaces the column of the binary field by <tt class="docutils literal"><span class="pre"><span class="Identifier">after</span></span></tt>.
+    
+  </dd>
+</div>
+
+</div>
+<div id="rotate-procs-all">
+  <div id="rotate,M128i">
+  <dt><pre><span class="Keyword">func</span> <a href="#rotate%2CM128i"><span class="Identifier">rotate</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="xmm.html#XmmBinField"><span class="Identifier">XmmBinField</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Rotates the binary field by 180 degrees. Ghost cells are cleared before the rotation.
     
   </dd>
 </div>
@@ -991,7 +1022,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-10-28 11:34:33 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-10-30 00:53:58 UTC</small>
       </div>
     </div>
   </div>
