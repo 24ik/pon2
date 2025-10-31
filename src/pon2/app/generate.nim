@@ -270,7 +270,8 @@ func isValid(self: GenerateSettings): Res[void] {.inline.} =
   if dropHardsIndexSet.card > self.puyoCnts.hard:
     return err "`dropHardsIndices` is too large"
 
-  if notPairPlacementIndexSet.anyIt it notin 0 ..< self.moveCnt.pred:
+  # if notPairPlacementIndexSet.anyIt it notin 0 ..< self.moveCnt.pred:
+  if notPairPlacementIndexSet.anyIt it notin 0 ..< self.moveCnt:
     return err "`indices` are out of range"
 
   if notPairPlacementIndexSet.card !=
