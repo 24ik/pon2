@@ -179,11 +179,12 @@ when defined(js) or defined(nimsuggest):
   ): VNode {.inline.} =
     ## Returns the rotate node.
     let icon = buildHtml span(class = "icon"):
-      italic(
-        class = (
-          if step.cross: "fa-solid fa-arrows-rotate" else: "fa-solid fa-rotate-right"
-        ).cstring
-      )
+      if step.cross:
+        span(class = "fa-stack", style = style(StyleAttr.fontSize, "0.5em")):
+          italic(class = "fa-solid fa-arrows-rotate fa-stack-2x")
+          italic(class = "fa-solid fa-xmark fa-stack-1x")
+      else:
+        italic(class = "fa-solid fa-arrows-rotate")
 
     if editable:
       buildHtml button(

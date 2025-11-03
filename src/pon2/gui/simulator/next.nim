@@ -11,7 +11,7 @@
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
-  import karax/[karaxdsl, vdom]
+  import karax/[karaxdsl, vdom, vstyles]
   import ../[helper]
   import ../../[app]
   import ../../private/[gui, results2]
@@ -48,11 +48,12 @@ when defined(js) or defined(nimsuggest):
         img(src = cellOpt.unsafeValue.cellImgSrc)
       else:
         span(class = "icon"):
-          italic(
-            class = (
-              if cross: "fa-solid fa-arrows-rotate" else: "fa-solid fa-rotate-right"
-            ).cstring
-          )
+          if cross:
+            span(class = "fa-stack", style = style(StyleAttr.fontSize, "0.5em")):
+              italic(class = "fa-solid fa-arrows-rotate fa-stack-2x")
+              italic(class = "fa-solid fa-xmark fa-stack-1x")
+          else:
+            italic(class = "fa-solid fa-arrows-rotate")
 
   proc toNextVNode*[S: Simulator or Studio](
       self: ref S, helper: VNodeHelper
