@@ -54,7 +54,7 @@ block:
   check sim.state == Stable
   check sim.editData ==
     SimulatorEditData(
-      cell: Cell.None,
+      editObj: SimulatorEditObj(kind: EditCell, cell: Cell.None),
       focusField: true,
       field: (Row.low, Col.low),
       step: (0, true, Col.low),
@@ -150,13 +150,22 @@ block: # `editCell=`
   var sim = Simulator.init ViewerEdit
 
   sim.editCell = Cell.None
-  check sim.editData.cell == Cell.None
+  check sim.editData.editObj.cell == Cell.None
 
   sim.editCell = Cell.Red
-  check sim.editData.cell == Cell.Red
+  check sim.editData.editObj.cell == Cell.Red
 
   sim.editCell = Garbage
-  check sim.editData.cell == Garbage
+  check sim.editData.editObj.cell == Garbage
+
+block: # `editCross=`
+  var sim = Simulator.init ViewerEdit
+
+  sim.editCross = true
+  check sim.editData.editObj.cross
+
+  sim.editCross = false
+  check not sim.editData.editObj.cross
 
 # ------------------------------------------------
 # Edit - Cursor
@@ -265,7 +274,7 @@ py|"""
 # Edit - Write
 # ------------------------------------------------
 
-block: # writeCell
+block: # writeCell, writeRotate
   let nazo = parseNazoPuyo[TsuField](
     """
 3連鎖するべし
@@ -305,8 +314,14 @@ X"""
   sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.field == field
 
+  sim.editCross = true
+  sim.writeCell Row3, Col4
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
+    check it.field == field
+
   sim.toggleInsert
 
+  sim.editCell = Green
   sim.writeCell Row6, Col4
   field.insert Row6, Col4, Green
   sim.nazoPuyoWrap.unwrapNazoPuyo:
@@ -363,6 +378,22 @@ X"""
   sim.editCell = Yellow
   sim.writeCell 4, false
   steps.addLast Step.init YellowYellow
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
+    check it.steps == steps
+
+  sim.editCross = false
+  sim.writeCell 2, true
+  steps[2] = Step.init(cross = false)
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
+    check it.steps == steps
+
+  sim.writeRotate(cross = true)
+  steps[0] = Step.init(cross = true)
+  sim.nazoPuyoWrap.unwrapNazoPuyo:
+    check it.steps == steps
+
+  sim.writeRotate(cross = false)
+  steps[0] = Step.init(cross = false)
   sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
@@ -1004,7 +1035,7 @@ pp|23"""
   check sim1 == sim2
 
   sim1.mode = ViewerEdit
-  check sim2.operate KeyEvent.init 'm'
+  check sim2.operate KeyEvent.init 't'
   check sim1 == sim2
 
   sim1.toggleInsert
@@ -1063,6 +1094,14 @@ pp|23"""
   check sim2.operate KeyEvent.init "Space"
   check sim1 == sim2
 
+  sim1.writeRotate(cross = false)
+  check sim2.operate KeyEvent.init 'n'
+  check sim1 == sim2
+
+  sim1.writeRotate(cross = true)
+  check sim2.operate KeyEvent.init 'm'
+  check sim1 == sim2
+
   sim1.shiftFieldRight
   check sim2.operate KeyEvent.init 'D'
   check sim1 == sim2
@@ -1111,7 +1150,7 @@ pp|23"""
   check sim1 == sim2
 
   sim1.mode = ViewerPlay
-  check sim2.operate KeyEvent.init 'm'
+  check sim2.operate KeyEvent.init 't'
   check sim1 == sim2
 
   var

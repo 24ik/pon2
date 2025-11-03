@@ -36,8 +36,20 @@ type
     WillSettle
     AfterEdit
 
+  SimulatorEditObjKind* {.pure.} = enum
+    ## Kind of edit objects.
+    EditCell
+    EditRotate
+
+  SimulatorEditObj* = object ## Edit object.
+    case kind*: SimulatorEditObjKind
+    of EditCell:
+      cell*: Cell
+    of EditRotate:
+      cross*: bool
+
   SimulatorEditData* = object ## Edit information.
-    cell*: Cell
+    editObj*: SimulatorEditObj
     focusField*: bool
     field*: tuple[row: Row, col: Col]
     step*: tuple[idx: int, pivot: bool, col: Col]
@@ -84,12 +96,18 @@ const
   DefaultPlcmt = Up2
   DefaultMoveRes = MoveResult.init true
   DefaultEditData = SimulatorEditData(
-    cell: Cell.None,
+    editObj: SimulatorEditObj(kind: EditCell, cell: Cell.None),
     focusField: true,
     field: (Row.low, Col.low),
     step: (0, true, Col.low),
     insert: false,
   )
+
+func init(T: type SimulatorEditObj, cell: Cell): T {.inline.} =
+  T(kind: EditCell, cell: cell)
+
+func init(T: type SimulatorEditObj, cross: bool): T {.inline.} =
+  T(kind: EditRotate, cross: cross)
 
 func init(T: type SimulatorDequeElem, simulator: Simulator): T {.inline.} =
   T(
@@ -125,6 +143,20 @@ func init*[F: TsuField or WaterField](
 
 func init*(T: type Simulator, mode = DefaultMode): T {.inline.} =
   T.init(NazoPuyoWrap.init, mode)
+
+# ------------------------------------------------
+# Operator
+# ------------------------------------------------
+
+func `==`*(obj1, obj2: SimulatorEditObj): bool {.inline.} =
+  if obj1.kind != obj2.kind:
+    return false
+
+  case obj1.kind
+  of EditCell:
+    obj1.cell == obj2.cell
+  of EditRotate:
+    obj1.cross == obj2.cross
 
 # ------------------------------------------------
 # Undo / Redo
@@ -267,11 +299,18 @@ func `mode=`*(self: var Simulator, mode: SimulatorMode) {.inline.} =
   self.undoDeque.clear
 
 func `editCell=`*(self: var Simulator, cell: Cell) {.inline.} =
-  ## Writes `editData.cell`.
+  ## Writes the cell to `editData.editObj`.
   if self.mode notin EditModes:
     return
 
-  self.editData.cell.assign cell
+  self.editData.editObj.assign SimulatorEditObj.init cell
+
+func `editCross=`*(self: var Simulator, cross: bool) {.inline.} =
+  ## Writes the cell to `editData.editObj`.
+  if self.mode notin EditModes:
+    return
+
+  self.editData.editObj.assign SimulatorEditObj.init cross
 
 # ------------------------------------------------
 # Edit - Cursor
@@ -393,7 +432,11 @@ func writeCell(self: var Simulator, row: Row, col: Col, cell: Cell) {.inline.} =
 
 func writeCell*(self: var Simulator, row: Row, col: Col) {.inline.} =
   ## Writes the selecting cell to the field.
-  self.writeCell row, col, self.editData.cell
+  case self.editData.editObj.kind
+  of EditCell:
+    self.writeCell row, col, self.editData.editObj.cell
+  of EditRotate:
+    discard
 
 func writeCell(self: var Simulator, idx: int, pivot: bool, cell: Cell) {.inline.} =
   ## Writes the cell to the step.
@@ -449,9 +492,36 @@ func writeCell(self: var Simulator, idx: int, pivot: bool, cell: Cell) {.inline.
             of StepKind.Garbages, Rotate:
               it.steps[idx].assign Step.init Pair.init(cell, cell)
 
+func writeRotate(self: var Simulator, idx: int, pivot: bool, cross: bool) {.inline.} =
+  ## Writes the rotation to the step.
+  if self.mode != EditorEdit:
+    return
+
+  unwrapNazoPuyo self.nazoPuyoWrap:
+    if idx >= it.steps.len:
+      self.editBlock:
+        it.steps.addLast Step.init(cross = cross)
+    else:
+      if self.editData.insert:
+        self.editBlock:
+          it.steps.insert Step.init(cross = cross), idx
+      else:
+        case it.steps[idx].kind
+        of PairPlacement, StepKind.Garbages:
+          self.editBlock:
+            it.steps[idx].assign Step.init(cross = cross)
+        of Rotate:
+          if it.steps[idx].cross != cross:
+            self.editBlock:
+              it.steps[idx].cross.toggle
+
 func writeCell*(self: var Simulator, idx: int, pivot: bool) {.inline.} =
   ## Writes the selecting cell to the step.
-  self.writeCell idx, pivot, self.editData.cell
+  case self.editData.editObj.kind
+  of EditCell:
+    self.writeCell idx, pivot, self.editData.editObj.cell
+  of EditRotate:
+    self.writeRotate idx, pivot, self.editData.editObj.cross
 
 func writeCell*(self: var Simulator, cell: Cell) {.inline.} =
   ## Writes the cell to the field or the step.
@@ -459,6 +529,13 @@ func writeCell*(self: var Simulator, cell: Cell) {.inline.} =
     self.writeCell self.editData.field.row, self.editData.field.col, cell
   else:
     self.writeCell self.editData.step.idx, self.editData.step.pivot, cell
+
+func writeRotate*(self: var Simulator, cross: bool) {.inline.} =
+  ## Writes the rotate to the field or the step.
+  if self.editData.focusField:
+    discard
+  else:
+    self.writeRotate self.editData.step.idx, self.editData.step.pivot, cross
 
 func writeCnt*(self: var Simulator, idx: int, col: Col, cnt: int) {.inline.} =
   ## Writes the count to the step.
@@ -846,7 +923,7 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.inline, discardable.} 
   case self.mode
   of PlayModes:
     # mode
-    if key == static(KeyEvent.init 'm'):
+    if key == static(KeyEvent.init 't'):
       if self.mode == ViewerPlay:
         self.`mode=` ViewerEdit
       else:
@@ -878,7 +955,7 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.inline, discardable.} 
       catched.assign false
   of EditModes:
     # mode
-    if key == static(KeyEvent.init 'm'):
+    if key == static(KeyEvent.init 't'):
       if self.mode == ViewerEdit:
         self.`mode=` ViewerPlay
       else:
@@ -920,6 +997,11 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.inline, discardable.} 
       self.writeCell Hard
     elif key == static(KeyEvent.init "Space"):
       self.writeCell Cell.None
+    # write rotate
+    elif key == static(KeyEvent.init 'n'):
+      self.writeRotate(cross = false)
+    elif key == static(KeyEvent.init 'm'):
+      self.writeRotate(cross = true)
     # write cnt
     elif (let cnt = DigitKeys.find key; cnt >= 0):
       self.writeCnt cnt

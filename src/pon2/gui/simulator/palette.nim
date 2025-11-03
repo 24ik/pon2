@@ -12,7 +12,7 @@
 
 when defined(js) or defined(nimsuggest):
   import std/[sugar]
-  import karax/[karaxdsl, vdom]
+  import karax/[karaxdsl, vdom, vstyles]
   import ../[helper]
   import ../../[app]
   import ../../private/[gui]
@@ -32,15 +32,24 @@ when defined(js) or defined(nimsuggest):
     # NOTE: cannot inline due to karax's limitation
     () => (self.derefSimulator(helper).editCell = cell)
 
+  func initBtnHandler[S: Simulator or Studio](
+      self: ref S, helper: VNodeHelper, cross: bool
+  ): () -> void =
+    ## Returns the handler for clicking button.
+    # NOTE: cannot inline due to karax's limitation
+    () => (self.derefSimulator(helper).editCross = cross)
+
   proc toPaletteVNode*[S: Simulator or Studio](
       self: ref S, helper: VNodeHelper
   ): VNode {.inline.} =
     ## Returns the palette node.
+    let editObj = self.derefSimulator(helper).editData.editObj
+
     buildHtml tdiv(class = "card", style = translucentStyle):
       tdiv(class = "card-content p-1"):
         table:
           tbody:
-            for cells in static(
+            for row, cells in static(
               [
                 [Cell.None, Cell.Red, Cell.Green, Cell.Blue],
                 [Cell.Yellow, Cell.Purple, Garbage, Hard],
@@ -48,7 +57,7 @@ when defined(js) or defined(nimsuggest):
             ):
               tr:
                 for cell in cells:
-                  let cellSelected = cell == self.derefSimulator(helper).editData.cell
+                  let cellSelected = editObj.kind == EditCell and editObj.cell == cell
                   td:
                     button(
                       class = if cellSelected: SelectBtnCls else: BtnCls,
@@ -59,3 +68,25 @@ when defined(js) or defined(nimsuggest):
                       if not helper.mobile and not cellSelected:
                         span(style = counterStyle):
                           text ShortCuts[cell]
+                td:
+                  let
+                    cross = row.bool
+                    selected = editObj.kind == EditRotate and editObj.cross == cross
+                  button(
+                    class = if selected: SelectBtnCls else: BtnCls,
+                    onclick = self.initBtnHandler(helper, cross),
+                  ):
+                    figure(class = "image is-24x24"):
+                      span(class = "icon"):
+                        if cross:
+                          span(
+                            class = "fa-stack",
+                            style = style(StyleAttr.fontSize, "0.5em"),
+                          ):
+                            italic(class = "fa-solid fa-arrows-rotate fa-stack-2x")
+                            italic(class = "fa-solid fa-xmark fa-stack-1x")
+                        else:
+                          italic(class = "fa-solid fa-arrows-rotate")
+                    if not helper.mobile and not selected:
+                      span(style = counterStyle):
+                        text (if cross: "M" else: "N").cstring

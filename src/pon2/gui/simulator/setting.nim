@@ -52,7 +52,7 @@ when defined(js) or defined(nimsuggest):
               italic(class = "fa-solid fa-gamepad")
               if not helper.mobile and self.derefSimulator(helper).mode notin PlayModes:
                 span(style = counterStyle):
-                  text "M"
+                  text "T"
         tdiv(class = "control"):
           button(
             class = editBtnCls,
@@ -62,7 +62,7 @@ when defined(js) or defined(nimsuggest):
               italic(class = "fa-solid fa-pen-to-square")
               if not helper.mobile and self.derefSimulator(helper).mode notin EditModes:
                 span(style = counterStyle):
-                  text "M"
+                  text "T"
       if self.derefSimulator(helper).mode == EditorEdit:
         let tsuBtnCls, waterBtnCls: cstring
         case self.derefSimulator(helper).rule
