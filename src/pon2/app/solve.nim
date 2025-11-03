@@ -144,12 +144,23 @@ template childImpl[F: TsuField or WaterField](
 
   when kind in {Clear, AccCnt, AccCntMore, ClearChain, ClearChainMore, Cnt, CntMore} and
       color in {All, GoalColor.Garbages}:
-    let h2g = moveRes.hardToGarbageCnt
-    childFieldCnts[Hard].dec moveRes.popCnts[Hard] + h2g
-    childFieldCnts[Garbage].dec moveRes.popCnts[Garbage] - h2g
+    let stepGarbageHardCnt, isHard, isGarbage: int
+    when stepKind == StepKind.Garbages:
+      stepGarbageHardCnt = step.garbagesCnt
+      isHard = step.dropHard.int
+      isGarbage = (not step.dropHard).int
+    else:
+      stepGarbageHardCnt = 0
+      isHard = 0
+      isGarbage = 0
+
+    childFieldCnts[Hard].dec moveRes.popCnts[Hard] + moveRes.hardToGarbageCnt -
+      stepGarbageHardCnt * isHard
+    childFieldCnts[Garbage].dec moveRes.popCnts[Garbage] - moveRes.hardToGarbageCnt -
+      stepGarbageHardCnt * isGarbage
 
     when stepKind == StepKind.Garbages:
-      childStepsCnts[Garbage.pred step.dropHard.int].dec step.garbagesCnt
+      childStepsCnts[Garbage.pred isHard].dec stepGarbageHardCnt
 
   when stepKind == Rotate:
     staticFor(col, Col):
