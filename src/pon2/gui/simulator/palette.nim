@@ -25,21 +25,21 @@ when defined(js) or defined(nimsuggest):
       "L".cstring, ";".cstring,
     ]
 
-  func initBtnHandler[S: Simulator or Studio](
+  func initBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, cell: Cell
   ): () -> void =
     ## Returns the handler for clicking button.
     # NOTE: cannot inline due to karax's limitation
     () => (self.derefSimulator(helper).editCell = cell)
 
-  func initBtnHandler[S: Simulator or Studio](
+  func initBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, cross: bool
   ): () -> void =
     ## Returns the handler for clicking button.
     # NOTE: cannot inline due to karax's limitation
     () => (self.derefSimulator(helper).editCross = cross)
 
-  proc toPaletteVNode*[S: Simulator or Studio](
+  proc toPaletteVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
   ): VNode {.inline.} =
     ## Returns the palette node.

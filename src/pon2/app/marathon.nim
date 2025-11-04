@@ -11,20 +11,19 @@ import ./[nazopuyowrap, simulator]
 import ../[core]
 import ../private/[arrayops2, assign3, critbits2, results2, strutils2, utils]
 
-when defined(js) or defined(nimsuggest):
-  import std/[dom]
-when not defined(js):
-  import chronos
+type
+  MarathonMatchData* = object ## Match data.
+    queries: seq[string]
+    queryIdx: int
 
-type Marathon* = object ## Marathon manager.
-  simulator: Simulator
-  matchQueries: seq[string]
+  Marathon* = object ## Marathon manager.
+    simulator: Simulator
+    matchData: MarathonMatchData
 
-  dataLoaded: bool
-  allQueries: seq[string]
-  critBitTree: CritBitTree[void]
+    allQueries: seq[string]
+    critBitTree: CritBitTree[void]
 
-  rng: Rand
+    rng: Rand
 
 # ------------------------------------------------
 # Constructor
@@ -33,8 +32,7 @@ type Marathon* = object ## Marathon manager.
 func init*(T: type Marathon, rng: Rand): T {.inline.} =
   T(
     simulator: Simulator.init PuyoPuyo[TsuField].init,
-    matchQueries: @[],
-    dataLoaded: false,
+    matchData: MarathonMatchData(queries: @[], queryIdx: 0),
     allQueries: @[],
     critBitTree: CritBitTree[void].default,
     rng: rng,
@@ -46,29 +44,16 @@ func init*(T: type Marathon, rng: Rand): T {.inline.} =
 
 func load*(self: var Marathon, allQueries: seq[string]) {.inline.} =
   ## Loads steps data.
-  self.allQueries.assign allQueries
   self.critBitTree.assign allQueries.toCritBitTree2
-  self.dataLoaded.assign true
-
-{.push warning[Uninit]: off.}
-proc asyncLoad*(self: ref Marathon, allQueries: seq[string]) {.inline, async.} =
-  ## Loads steps data asynchronously.
-  await sleepZeroAsync()
-  self[].load allQueries
-
-{.pop.}
+  self.allQueries.assign allQueries
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-func dataLoaded*(self: Marathon): bool {.inline.} =
+func isReady*(self: Marathon): bool {.inline.} =
   ## Returns `true` if steps data are loaded.
-  self.dataLoaded
-
-func matchQueries*(self: Marathon): seq[string] {.inline.} =
-  ## Returns matched queries.
-  self.matchQueries
+  self.allQueries.len > 0
 
 func simulator*(self: Marathon): Simulator {.inline.} =
   ## Returns the simulator.
@@ -77,6 +62,18 @@ func simulator*(self: Marathon): Simulator {.inline.} =
 func simulator*(self: var Marathon): var Simulator {.inline.} =
   ## Returns the simulator.
   self.simulator
+
+func matchQueries*(self: Marathon): seq[string] {.inline.} =
+  ## Returns the matched queries.
+  self.matchData.queries
+
+func matchQueryIdx*(self: Marathon): int {.inline.} =
+  ## Returns the index of the matched queries.
+  self.matchData.queryIdx
+
+func allQueries*(self: Marathon): seq[string] {.inline.} =
+  ## Returns the all queries.
+  self.allQueries
 
 # ------------------------------------------------
 # Match
@@ -186,7 +183,8 @@ func match*(self: var Marathon, prefix: string) {.inline.} =
   ## Searches queries that have specified prefixes and sets them to the marathon
   ## manager.
   if prefix == "":
-    self.matchQueries.setLen 0
+    self.matchData.queries.setLen 0
+    self.matchData.queryIdx.assign 0
     return
 
   let chars = prefix.toSet2
@@ -205,12 +203,12 @@ func match*(self: var Marathon, prefix: string) {.inline.} =
         2600 # ABABAC
       else:
         400 # ABABACBD
-    self.matchQueries.assign newSeqOfCap[string](matchCntMax)
+    self.matchData.queries.assign newSeqOfCap[string](matchCntMax)
     for replaceData in ReplaceDataSeqArr[chars.card.pred]:
       for pre in prefix.toUpperAscii.swappedPrefixes:
         {.push warning[ProveInit]: off.}
         for query in self.critBitTree.itemsWithPrefix pre.multiReplace replaceData:
-          self.matchQueries &= query
+          self.matchData.queries &= query
         {.pop.}
   else:
     # ref: https://sengiken.web.fc2.com/tsumo/
@@ -224,16 +222,11 @@ func match*(self: var Marathon, prefix: string) {.inline.} =
         1500 # YYY
       else:
         410 # YYYY
-    self.matchQueries.assign newSeqOfCap[string](matchCntMax)
+    self.matchData.queries.assign newSeqOfCap[string](matchCntMax)
     for query in self.critBitTree.itemsWithPrefix prefix:
-      self.matchQueries &= query
+      self.matchData.queries &= query
 
-{.push warning[Uninit]: off.}
-proc asyncMatch*(self: ref Marathon, prefix: string) {.inline, async.} =
-  ## Searches for queries that have specified prefixes and sets them to the marathon
-  ## manager asynchronously.
-  await sleepZeroAsync()
-  self[].match prefix
+  self.matchData.queryIdx.assign 0
 
 {.pop.}
 
@@ -253,14 +246,14 @@ func loadSteps(self: var Marathon, query: string) {.inline.} =
 
 func selectQuery*(self: var Marathon, idx: int) {.inline.} =
   ## Applies the selected query to the simulator.
-  if idx < self.matchQueries.len:
-    self.loadSteps self.matchQueries[idx]
+  if idx in 0 ..< self.matchData.queries.len:
+    self.loadSteps self.matchData.queries[idx]
 
 func selectRandomQuery*(self: var Marathon, fromMatched = true) {.inline.} =
   ## Applies a random query to the simulator.
   if fromMatched:
-    if self.matchQueries.len > 0:
+    if self.matchData.queries.len > 0:
       self.loadSteps self.rng.sample self.matchQueries
   else:
-    if self.dataLoaded:
+    if self.isReady:
       self.loadSteps self.rng.sample self.allQueries

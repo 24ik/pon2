@@ -17,7 +17,7 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
-  proc toSideCtrlVNode*[S: Simulator or Studio](
+  proc toSideCtrlVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
   ): VNode {.inline.} =
     ## Returns the controller node replaced next the field.
@@ -274,7 +274,7 @@ when defined(js) or defined(nimsuggest):
                     span(style = counterStyle):
                       text "D"
 
-  proc toBottomCtrlVNode*[S: Simulator or Studio](
+  proc toBottomCtrlVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
   ): VNode {.inline.} =
     ## Returns the controller node replaced bottom of the window.

@@ -23,6 +23,7 @@
 ## | `-d:pon2.clmul=<bool>`            | Uses CLMUL.                            | `true`                 |
 ## | `-d:pon2.path=<str>`              | Path of the web studio.                | `/pon2/stable/studio/` |
 ## | `-d:pon2.assets=<str>`            | Assets directory.                      | `../assets`            |
+## | `-d:pon2.build.marathon`          | Builds marathon pages.                 | `<undefined>`          |
 ##
 
 {.experimental: "strictDefs".}
@@ -62,9 +63,26 @@ when isMainModule:
     import karax/[karax, karaxdsl, kdom, vdom]
     import ./pon2/private/[assign3]
 
+    when defined(pon2.build.marathon):
+      import std/[asyncjs, jsfetch, random]
+      import ./pon2/private/[gui, strutils2]
+
     # ------------------------------------------------
     # JS - Utils
     # ------------------------------------------------
+
+    proc initErrNode(msg: string): VNode {.inline.} =
+      ## Returns the error node.
+      buildHtml section(class = "section"):
+        tdiv(class = "content"):
+          h1(class = "title"):
+            text("Pon!通 URL形式エラー")
+          tdiv(class = "field"):
+            label(class = "label"):
+              text "エラー内容"
+            tdiv(class = "control"):
+              textarea(class = "textarea is-large", readonly = true):
+                text msg.cstring
 
     proc initFooterNode(): VNode {.inline.} =
       ## Returns the footer node.
@@ -73,66 +91,121 @@ when isMainModule:
           p:
             text "Pon!通 Version {Pon2Ver}".fmt
 
-    proc keyHandler(studio: ref Studio, event: Event) {.inline.} =
-      ## Runs the keyboard event handler.
-      ## Returns `true` if the event is handled.
-      if studio[].operate(cast[KeyboardEvent](event).toKeyEvent):
-        if not kxi.surpressRedraws:
-          kxi.redraw
-        event.preventDefault
-
     # ------------------------------------------------
     # JS - Main
     # ------------------------------------------------
 
-    let globalStudioRef = new Studio
-    var
-      initialized = false
-      errMsg = ""
+    when defined(pon2.build.marathon):
+      # ------------------------------------------------
+      # JS - Main - Marathon
+      # ------------------------------------------------
 
-    proc renderer(routerData: RouterData): VNode =
-      ## Returns the root node.
-      if not initialized:
-        document.onkeydown = (event: Event) => globalStudioRef.keyHandler event
+      proc keyHandler(marathon: ref Marathon, event: Event) {.inline.} =
+        ## Runs the keyboard event handler.
+        ## Returns `true` if the event is handled.
+        if document.activeElement.className != "input" and
+            marathon[].simulator.operate(cast[KeyboardEvent](event).toKeyEvent):
+          if not kxi.surpressRedraws:
+            kxi.redraw
+          event.preventDefault
 
-        var uri = initUri()
-        uri.scheme.assign "https"
-        uri.hostname.assign $Pon2
-        uri.path.assign Pon2Path
+      let globalMarathonRef = new Marathon
+      var
+        initialized = false
+        errMsg = ""
 
-        let routerQuery = $routerData.queryString
-        uri.query.assign routerQuery.substr(1, routerQuery.high)
+      proc renderer(): VNode =
+        ## Returns the root node.
+        if not initialized:
+          document.onkeydown = (event: Event) => globalMarathonRef.keyHandler event
 
-        let simRes = uri.parseSimulator
-        if simRes.isOk:
-          globalStudioRef[] = Studio.init simRes.unsafeValue
-        else:
-          errMsg.assign simRes.error
+          randomize()
+          var rng = int64.rand.initRand
+          globalMarathonRef[] = Marathon.init rng
 
-        initialized.assign true
+          {.push warning[Uninit]: off.}
+          {.push warning[ProveInit]: off.}
+          discard "{AssetsDir}/marathon/swap.txt".fmt.cstring.fetch
+            .then((r: Response) => r.text)
+            .then(
+              (s: cstring) => (
+                block:
+                  globalMarathonRef[].load ($s).splitLines
+                  if not kxi.surpressRedraws:
+                    kxi.redraw
+              )
+            )
+            .catch((e: Error) => (errMsg = $e.message))
+          {.pop.}
+          {.pop.}
 
-      buildHtml tdiv:
-        if errMsg == "":
-          let (helper, replayHelper) = VNodeHelper.init2(globalStudioRef, "pon2-main")
-          section(
-            class = (if helper.mobile: "section pt-3 pl-3" else: "section").cstring
-          ):
-            globalStudioRef.toStudioVNode(helper, replayHelper)
-        else:
-          section(class = "section"):
-            tdiv(class = "content"):
-              h1(class = "title"):
-                text("Pon!通 URL形式エラー")
-              tdiv(class = "field"):
-                label(class = "label"):
-                  text "エラー内容"
-                tdiv(class = "control"):
-                  textarea(class = "textarea is-large", readonly = true):
-                    text errMsg
+          initialized.assign true
 
-        initFooterNode()
+        buildHtml tdiv:
+          if errMsg == "":
+            let helper = VNodeHelper.init(globalMarathonRef, "pon2-main")
+            section(
+              class = (if helper.mobile: "section pt-3 pl-3" else: "section").cstring
+            ):
+              globalMarathonRef.toMarathonVNode helper
+          else:
+            errMsg.initErrNode
 
-    renderer.setRenderer
+          initFooterNode()
+
+      renderer.setRenderer
+    else:
+      # ------------------------------------------------
+      # JS - Main - Studio
+      # ------------------------------------------------
+
+      proc keyHandler(studio: ref Studio, event: Event) {.inline.} =
+        ## Runs the keyboard event handler.
+        ## Returns `true` if the event is handled.
+        if studio[].operate(cast[KeyboardEvent](event).toKeyEvent):
+          if not kxi.surpressRedraws:
+            kxi.redraw
+          event.preventDefault
+
+      let globalStudioRef = new Studio
+      var
+        initialized = false
+        errMsg = ""
+
+      proc renderer(routerData: RouterData): VNode =
+        ## Returns the root node.
+        if not initialized:
+          document.onkeydown = (event: Event) => globalStudioRef.keyHandler event
+
+          var uri = initUri()
+          uri.scheme.assign "https"
+          uri.hostname.assign $Pon2
+          uri.path.assign Pon2Path
+
+          let routerQuery = $routerData.queryString
+          uri.query.assign routerQuery.substr(1, routerQuery.high)
+
+          let simRes = uri.parseSimulator
+          if simRes.isOk:
+            globalStudioRef[] = Studio.init simRes.unsafeValue
+          else:
+            errMsg.assign simRes.error
+
+          initialized.assign true
+
+        buildHtml tdiv:
+          if errMsg == "":
+            let (helper, replayHelper) = VNodeHelper.init2(globalStudioRef, "pon2-main")
+            section(
+              class = (if helper.mobile: "section pt-3 pl-3" else: "section").cstring
+            ):
+              globalStudioRef.toStudioVNode(helper, replayHelper)
+          else:
+            errMsg.initErrNode
+
+          initFooterNode()
+
+      renderer.setRenderer
 
   # ------------------------------------------------
   # Native backend

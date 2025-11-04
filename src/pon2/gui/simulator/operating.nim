@@ -16,7 +16,7 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui, results2]
 
-  proc toOperatingCellVNode[S: Simulator or Studio](
+  proc toOperatingCellVNode[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, idx: int, col: Col
   ): VNode {.inline.} =
     ## Returns the node of the cell in the operating area.
@@ -80,7 +80,7 @@ when defined(js) or defined(nimsuggest):
           else:
             italic(class = "fa-solid fa-arrows-rotate")
 
-  proc toOperatingVNode*[S: Simulator or Studio](
+  proc toOperatingVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
   ): VNode {.inline.} =
     ## Returns the operating node.

@@ -19,7 +19,7 @@ when defined(js) or defined(nimsuggest):
 when defined(js) or defined(nimsuggest):
   const ShowNoticeGarbageCnt = 6
 
-  proc txtMsg[S: Simulator or Studio](
+  proc txtMsg[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
   ): string {.inline.} =
     ## Returns the text message.
@@ -33,11 +33,13 @@ when defined(js) or defined(nimsuggest):
         else:
           ""
 
-  proc score[S: Simulator or Studio](self: ref S, helper: VNodeHelper): int {.inline.} =
+  proc score[S: Simulator or Studio or Marathon](
+      self: ref S, helper: VNodeHelper
+  ): int {.inline.} =
     ## Returns the score.
     self.derefSimulator(helper).moveResult.score.unsafeValue
 
-  proc noticeGarbageCnts[S: Simulator or Studio](
+  proc noticeGarbageCnts[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, score: int
   ): array[NoticeGarbage, int] {.inline.} =
     ## Returns the numbers of notice garbages.
@@ -58,7 +60,7 @@ when defined(js) or defined(nimsuggest):
 
     cnts
 
-  proc toMsgVNode*[S: Simulator or Studio](
+  proc toMsgVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
   ): VNode {.inline.} =
     ## Returns the message node.

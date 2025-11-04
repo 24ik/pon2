@@ -22,28 +22,28 @@ when defined(js) or defined(nimsuggest):
     CellCls = "button p-0".cstring
     SelectCellCls = "button p-0 is-primary".cstring
 
-  func initDeleteBtnHandler[S: Simulator or Studio](
+  func initDeleteBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, stepIdx: int
   ): () -> void =
     ## Returns the handler for clicking delete buttons.
     # NOTE: cannot inline due to karax's limitation
     () => self.derefSimulator(helper).deleteStep stepIdx
 
-  func initWriteBtnHandler[S: Simulator or Studio](
+  func initWriteBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, idx: int, pivot: bool
   ): () -> void =
     ## Returns the handler for clicking write buttons.
     # NOTE: cannot inline due to karax's limitation
     () => self.derefSimulator(helper).writeCell(idx, pivot)
 
-  func initCntSelectHandler[S: Simulator or Studio](
+  func initCntSelectHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, idx: int, col: Col, selectId: cstring
   ): () -> void =
     ## Returns the handler for selecting garbage cnt.
     # NOTE: cannot inline due to karax's limitation
     () => self.derefSimulator(helper).writeCnt(idx, col, selectId.getSelectedIdx)
 
-  proc pairPlcmtCellNode[S: Simulator or Studio](
+  proc pairPlcmtCellNode[S: Simulator or Studio or Marathon](
       self: ref S,
       helper: VNodeHelper,
       step: Step,
@@ -74,7 +74,7 @@ when defined(js) or defined(nimsuggest):
       buildHtml figure(class = "image is-24x24"):
         img(src = imgSrc)
 
-  proc pairPlcmtNode[S: Simulator or Studio](
+  proc pairPlcmtNode[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, step: Step, stepIdx: int, editable: bool
   ): VNode {.inline.} =
     ## Returns the pair-placement node.
@@ -120,7 +120,7 @@ when defined(js) or defined(nimsuggest):
         tdiv(class = "column is-narrow"):
           text optPlcmtDesc
 
-  proc garbagesNode[S: Simulator or Studio](
+  proc garbagesNode[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, step: Step, stepIdx: int, editable: bool
   ): VNode {.inline.} =
     ## Returns the garbages node.
@@ -174,7 +174,7 @@ when defined(js) or defined(nimsuggest):
               else:
                 text $step.cnts[col]
 
-  proc rotateNode[S: Simulator or Studio](
+  proc rotateNode[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, step: Step, stepIdx: int, editable: bool
   ): VNode {.inline.} =
     ## Returns the rotate node.
@@ -200,7 +200,7 @@ when defined(js) or defined(nimsuggest):
     else:
       icon
 
-  proc toStepsVNode*[S: Simulator or Studio](
+  proc toStepsVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, cameraReady = false
   ): VNode {.inline.} =
     ## Returns the steps view.

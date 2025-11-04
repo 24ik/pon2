@@ -3,6 +3,7 @@
 ##
 ## Submodule Documentations:
 ## - [helper](./gui/helper.html)
+## - [marathon](./gui/marathon.html)
 ## - [simulator](./gui/simulator.html)
 ## - [studio](./gui/studio.html)
 ##
@@ -18,7 +19,7 @@
 {.experimental: "views".}
 
 import ./[app]
-import ./gui/[helper, simulator, studio]
+import ./gui/[helper, marathon, simulator, studio]
 
 export app
-export helper, simulator, studio
+export helper, marathon, simulator, studio

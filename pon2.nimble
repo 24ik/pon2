@@ -12,7 +12,7 @@ bin = @["pon2"]
 
 # Dependencies
 
-requires "nim ^= 2.2.4"
+requires "nim ^= 2.2.6"
 
 requires "chroma ^= 1.0.0"
 requires "chronos ^= 4.0.4"
@@ -64,18 +64,17 @@ task www, "Generate Web Pages":
     else:
       cpFile rawJs, dst
 
-  # IDE
+  # studio
   "src/pon2.nim".compile "www/studio/index.min.js"
   #"src/pon2.nim".compile "www/worker.min.js", "-d:pon2.worker"
 
   # marathon
-  #"src/pon2.nim".compile "www/marathon/index.min.js", "-d:pon2.marathon", "-d:pon2.assets.web=../assets"
+  "src/pon2.nim".compile "www/marathon/index.min.js", "-d:pon2.build.marathon"
 
   # documentation
   rmDir "www/docs/api"
   exec "nim doc --project --outdir:www/docs/api/native src/pon2.nim"
   exec "nim doc --project --outdir:www/docs/api/web --backend:js src/pon2.nim"
-  #"www/docs/simulator/main.nim".compile "www/docs/simulator/index.min.js"
 
   # assets
   rmDir "www/assets"

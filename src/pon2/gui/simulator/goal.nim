@@ -17,7 +17,7 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui, utils]
 
-  proc toGoalVNode*[S: Simulator or Studio](
+  proc toGoalVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, cameraReady = false
   ): VNode {.inline.} =
     ## Returns the goal node.

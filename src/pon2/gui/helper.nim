@@ -25,10 +25,14 @@ when defined(js) or defined(nimsuggest):
       isReplaySimulator*: bool
       settingId*: cstring
 
+    MarathonVNodeHelper* = object ## Helper for making VNode of marathon.
+      searchBarId*: cstring
+
     VNodeHelper* = object ## Helper for making VNode.
       mobile*: bool
       simulator*: SimulatorVNodeHelper
       studioOpt*: Opt[StudioVNodeHelper]
+      marathonOpt*: Opt[MarathonVNodeHelper]
 
   proc isMobile(): bool {.inline.} =
     ## Returns `true` if a mobile device is detected.
@@ -48,6 +52,9 @@ when defined(js) or defined(nimsuggest):
   ): T {.inline.} =
     T(settingId: "pon2-studio-setting-" & rootId, isReplaySimulator: isReplaySimulator)
 
+  func init(T: type MarathonVNodeHelper, rootId: cstring): T {.inline.} =
+    T(searchBarId: "pon2-marathon-searchbar-" & rootId)
+
   proc init*(
       T: type VNodeHelper, simulatorRef: ref Simulator, rootId: cstring
   ): T {.inline.} =
@@ -55,6 +62,7 @@ when defined(js) or defined(nimsuggest):
       mobile: isMobile(),
       simulator: SimulatorVNodeHelper.init(simulatorRef[], rootId),
       studioOpt: Opt[StudioVNodeHelper].err,
+      marathonOpt: Opt[MarathonVNodeHelper].err,
     )
 
   proc init2*(
@@ -72,6 +80,7 @@ when defined(js) or defined(nimsuggest):
         studioOpt: Opt[StudioVNodeHelper].ok StudioVNodeHelper.init(
           mainRootId, isReplaySimulator = false
         ),
+        marathonOpt: Opt[MarathonVNodeHelper].err,
       ),
       replay: VNodeHelper(
         mobile: mobile,
@@ -79,5 +88,16 @@ when defined(js) or defined(nimsuggest):
         studioOpt: Opt[StudioVNodeHelper].ok StudioVNodeHelper.init(
           replayRootId, isReplaySimulator = true
         ),
+        marathonOpt: Opt[MarathonVNodeHelper].err,
       ),
+    )
+
+  proc init*(
+      T: type VNodeHelper, marathonRef: ref Marathon, rootId: cstring
+  ): T {.inline.} =
+    VNodeHelper(
+      mobile: isMobile(),
+      simulator: SimulatorVNodeHelper.init(marathonRef[].simulator, rootId),
+      studioOpt: Opt[StudioVNodeHelper].err,
+      marathonOpt: Opt[MarathonVNodeHelper].ok MarathonVNodeHelper.init rootId,
     )

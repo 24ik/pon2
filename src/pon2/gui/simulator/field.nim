@@ -18,7 +18,7 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
-  proc cellBgColor[S: Simulator or Studio](
+  proc cellBgColor[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, row: Row, col: Col, editable: bool
   ): Color {.inline.} =
     ## Returns the cell's background color.
@@ -33,14 +33,14 @@ when defined(js) or defined(nimsuggest):
     else:
       DefaultColor
 
-  func initBtnHandler[S: Simulator or Studio](
+  func initBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, row: Row, col: Col
   ): () -> void =
     ## Returns the handler for clicking buttons.
     # NOTE: cannot inline due to karax's limitation
     () => self.derefSimulator(helper).writeCell(row, col)
 
-  proc toFieldVNode*[S: Simulator or Studio](
+  proc toFieldVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, cameraReady = false
   ): VNode {.inline.} =
     ## Returns the field node.

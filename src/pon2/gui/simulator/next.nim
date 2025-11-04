@@ -16,7 +16,7 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui, results2]
 
-  proc toNextCellVNode[S: Simulator or Studio](
+  proc toNextCellVNode[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, dblNext: bool, pivot: bool
   ): VNode {.inline.} =
     ## Returns the node of the cell in the next or double-next step.
@@ -55,7 +55,7 @@ when defined(js) or defined(nimsuggest):
           else:
             italic(class = "fa-solid fa-arrows-rotate")
 
-  proc toNextVNode*[S: Simulator or Studio](
+  proc toNextVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
   ): VNode {.inline.} =
     ## Returns the next node.

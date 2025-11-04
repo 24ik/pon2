@@ -21,7 +21,7 @@ when defined(js) or defined(nimsuggest):
     BtnCls = "button".cstring
     SelectBtnCls = "button is-primary is-selected".cstring
 
-  proc toSettingsVNode*[S: Simulator or Studio](
+  proc toSettingsVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
   ): VNode {.inline.} =
     ## Returns the select node.

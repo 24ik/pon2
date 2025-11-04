@@ -31,3 +31,9 @@ when defined(js) or defined(nimsuggest):
       return self[].simulator
 
   {.push experimental: "views".}
+
+  proc derefSimulator*(
+      self: ref Marathon, helper: VNodeHelper
+  ): var Simulator {.inline.} =
+    ## Dereferences the simulator.
+    self[].simulator

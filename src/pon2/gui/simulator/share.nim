@@ -19,7 +19,7 @@ when defined(js) or defined(nimsuggest):
 
   const RuleDescs: array[Rule, string] = ["", "すいちゅう"]
 
-  proc toXLink[S: Simulator or Studio](
+  proc toXLink[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
   ): Uri {.inline.} =
     ## Returns the URI to post to X.
@@ -67,7 +67,7 @@ when defined(js) or defined(nimsuggest):
       ).catch
     {.pop.}
 
-  proc toShareVNode*[S: Simulator or Studio](
+  proc toShareVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
   ): VNode {.inline.} =
     ## Returns the share node.

@@ -18,7 +18,7 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
-  proc toSimulatorVNode*[S: Simulator or Studio](
+  proc toSimulatorVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
   ): VNode {.inline.} =
     ## Returns the simulator node.
