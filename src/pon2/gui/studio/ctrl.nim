@@ -28,7 +28,8 @@ when defined(js) or defined(nimsuggest):
     buildHtml tdiv(class = "field is-grouped"):
       tdiv(class = "control"):
         button(
-          class = "button", disabled = self[].working, onclick = () => self[].solve
+          class = (if self[].working: "button is-loading" else: "button").cstring,
+          onclick = () => self[].solve,
         ):
           text "解探索"
           if not helper.mobile:
@@ -36,8 +37,7 @@ when defined(js) or defined(nimsuggest):
               text "Enter"
       tdiv(class = "control"):
         button(
-          class = "button",
-          disabled = self[].working,
+          class = (if self[].working: "button is-loading" else: "button").cstring,
           onclick = () => self.runPermute helper,
         ):
           text "ツモ並べ替え"
