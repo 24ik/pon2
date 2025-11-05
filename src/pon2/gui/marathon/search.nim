@@ -22,7 +22,7 @@ when defined(js) or defined(nimsuggest):
     ## Returns the marathon search bar node.
     let rate =
       if self[].isReady:
-        self[].matchQueries.len / self[].allQueries.len
+        self[].matchQueryCnt / self[].allQueryCnt
       else:
         0.0
 

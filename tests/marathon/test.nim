@@ -2,30 +2,55 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[random, sequtils, sets, sugar, unittest]
+import std/[critbits, random, sequtils, sets, sugar, unittest]
 import ../../src/pon2/[core]
 import ../../src/pon2/app/[key, marathon, nazopuyowrap, simulator]
+
+# ------------------------------------------------
+# Operator
+# ------------------------------------------------
+
+func `==`(tree1, tree2: CritBitTree[void]): bool =
+  tree1.items.toSeq == tree2.items.toSeq
 
 # ------------------------------------------------
 # Load / Property
 # ------------------------------------------------
 
-block: # load, isReady
+block: # load, isReady, `isReady=`, allQueryCnt
   var
     rng = 123.initRand
     marathon = Marathon.init rng
-
   check not marathon.isReady
+  check marathon.allQueryCnt == 0
 
   marathon.load @["rr"]
-  check marathon.isReady
+  check not marathon.isReady
+  check marathon.allQueryCnt == 0
 
-block: # matchQueries, simulator
+  marathon.load @["rg"]
+  check not marathon.isReady
+  check marathon.allQueryCnt == 0
+
+  marathon.isReady = true
+  check marathon.isReady
+  check marathon.allQueryCnt == 2
+
+  marathon.isReady = false
+  check marathon.isReady
+  check marathon.allQueryCnt == 2
+
+  marathon.load @["ry"]
+  check marathon.isReady
+  check marathon.allQueryCnt == 2
+
+  check Marathon.init(rng, ["rr", "rg"], isReady = true) == marathon
+  check Marathon.init(rng, @["rr", "rg"], isReady = true) == marathon
+
+block: # simulator
   var
     rng = 123.initRand
     marathon = Marathon.init rng
-
-  check marathon.matchQueries.len == 0
 
   var sim = Simulator.init PuyoPuyo[TsuField].init
   check marathon.simulator == sim
@@ -38,78 +63,76 @@ block: # matchQueries, simulator
 # Match
 # ------------------------------------------------
 
-block: # match
+block: # matchQueryCnt, match
   var
     rng = 123.initRand
-    marathon = Marathon.init rng
-
-  marathon.load @["rrgg", "rgrg", "byby", "rgrb", "grrb", "bgyy"]
-
-  marathon.match ""
-  check marathon.matchQueries.len == 0
+    marathon = Marathon.init(rng, ["rrgg", "rgrg", "byby", "rgrb", "grrb", "bgyy"])
 
   marathon.match "r"
-  check marathon.matchQueries.len == 3
-  check marathon.matchQueries.toHashSet == ["rrgg", "rgrg", "rgrb"].toHashSet
+  check marathon.matchQueryCnt == 0
 
-  marathon.match "y"
-  check marathon.matchQueries.len == 0
-
-  marathon.match "rr"
-  check marathon.matchQueries.toHashSet == ["rrgg"].toHashSet
-
-  marathon.match "rg"
-  check marathon.matchQueries.len == 2
-  check marathon.matchQueries.toHashSet == ["rgrg", "rgrb"].toHashSet
-
-  marathon.match "gr"
-  check marathon.matchQueries.toHashSet == ["grrb"].toHashSet
+  marathon.isReady = true
 
   marathon.match ""
-  check marathon.matchQueries.len == 0
+  check marathon.matchQueryCnt == 0
+
+  marathon.match "r"
+  check marathon.matchQueryCnt == 3
+
+  marathon.match "y"
+  check marathon.matchQueryCnt == 0
+
+  marathon.match "rr"
+  check marathon.matchQueryCnt == 1
+
+  marathon.match "rg"
+  check marathon.matchQueryCnt == 2
+
+  marathon.match "gr"
+  check marathon.matchQueryCnt == 1
+
+  marathon.match ""
+  check marathon.matchQueryCnt == 0
 
   marathon.match "a"
-  check marathon.matchQueries.len == 0
+  check marathon.matchQueryCnt == 0
 
   marathon.match "ab"
-  check marathon.matchQueries.len == 5
-  check marathon.matchQueries.toHashSet ==
-    ["rgrg", "byby", "rgrb", "grrb", "bgyy"].toHashSet
+  check marathon.matchQueryCnt == 5
 
   marathon.match "bc"
-  check marathon.matchQueries.len == 0
+  check marathon.matchQueryCnt == 0
 
   marathon.match "abac"
-  check marathon.matchQueries.len == 2
-  check marathon.matchQueries.toHashSet == ["rgrb", "grrb"].toHashSet
+  check marathon.matchQueryCnt == 2
 
   marathon.match "abc"
-  check marathon.matchQueries.len == 2
-  check marathon.matchQueries.toHashSet == ["rgrb", "grrb"].toHashSet
+  check marathon.matchQueryCnt == 2
 
   marathon.match "abcc"
-  check marathon.matchQueries.toHashSet == ["bgyy"].toHashSet
+  check marathon.matchQueryCnt == 1
 
   marathon.match "cabb"
-  check marathon.matchQueries.toHashSet == ["bgyy"].toHashSet
+  check marathon.matchQueryCnt == 1
 
 # ------------------------------------------------
 # Simulator
 # ------------------------------------------------
 
 block: # selectQuery, selectRandomQuery
+  let queries = ["rrgg", "rgrg", "rgbb"]
   var
     rng = 123.initRand
-    marathon = Marathon.init rng
-
-  let queries = @["rrgg", "rgrg", "rgbb"]
-  marathon.load queries
-
-  check marathon.matchQueries.len == 0
+    marathon = Marathon.init(rng, queries)
 
   marathon.selectQuery 0
   check marathon.simulator == Simulator.init PuyoPuyo[TsuField].init
 
+  marathon.match "ab"
+  marathon.selectQuery 0
+  check marathon.simulator == Simulator.init PuyoPuyo[TsuField].init
+
+  marathon.isReady = true
   marathon.match "ab"
 
   for i in 0 ..< 2:
@@ -137,12 +160,10 @@ block: # selectQuery, selectRandomQuery
 block: # operate
   var
     rng = 123.initRand
-    marathon1 = Marathon.init rng
+    marathon1 = Marathon.init(rng, ["rrgg", "rgrg", "rgbb", "rgyy", "rgyg"])
+  marathon1.isReady = true
 
-  let queries = @["rrgg", "rgrg", "rgbb", "rgyy", "rgyg"]
-  marathon1.load queries
   marathon1.match "rg"
-
   var marathon2 = marathon1
 
   marathon1.operate KeyEvent.init("Enter")

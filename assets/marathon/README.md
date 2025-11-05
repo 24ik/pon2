@@ -1,3 +1,5 @@
 # Marathon Steps
 
-`swap.txt` is a modifed version (pivot and rotor are swapped) of the steps data fetched from [the article](https://puyo-camp.jp/posts/86154).
+All text files are modified versions (pivot and rotor puyos are swapped and the file
+is divided into chunks) of the data fetched from
+[the puyo-camp article](https://puyo-camp.jp/posts/86154).

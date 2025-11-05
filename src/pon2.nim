@@ -61,11 +61,13 @@ when isMainModule:
   when defined(js) or defined(nimsuggest):
     import std/[strformat, sugar]
     import karax/[karax, karaxdsl, kdom, vdom]
-    import ./pon2/private/[assign3, gui]
+    import ./pon2/private/[gui]
 
     when defined(pon2.build.marathon):
       import std/[asyncjs, jsfetch, random]
       import ./pon2/private/[strutils2]
+    else:
+      import ./pon2/private/[assign3]
 
     # ------------------------------------------------
     # JS - Utils
@@ -112,36 +114,40 @@ when isMainModule:
             if focusInput:
               document.activeElement.blur
 
+      randomize()
+      var rng = int64.rand.initRand
       let globalMarathonRef = new Marathon
+      globalMarathonRef[] = Marathon.init rng
+
+      const ChunkCnt = 16
       var
-        initialized = false
-        errMsg = ""
+        errMsgs = newSeqOfCap[string](ChunkCnt)
+        completes = newSeqOfCap[bool](ChunkCnt)
+
+      for chunkIdx in 0 ..< ChunkCnt:
+        {.push warning[Uninit]: off.}
+        {.push warning[ProveInit]: off.}
+        discard "{AssetsDir}/marathon/swap{chunkIdx}.txt".fmt.cstring.fetch
+          .then((r: Response) => r.text)
+          .then(
+            (s: cstring) => (
+              block:
+                globalMarathonRef[].load ($s).splitLines
+                completes.add true
+                if completes.len == ChunkCnt:
+                  globalMarathonRef[].isReady = true
+                  safeRedraw()
+            )
+          )
+          .catch((e: Error) => errMsgs.add "[Chunk {chunkIdx}] {e.message}".fmt)
+        {.pop.}
+        {.pop.}
+
+      document.onkeydown = (event: Event) => globalMarathonRef.keyHandler event
 
       proc renderer(): VNode =
         ## Returns the root node.
-        if not initialized:
-          document.onkeydown = (event: Event) => globalMarathonRef.keyHandler event
-
-          randomize()
-          var rng = int64.rand.initRand
-          globalMarathonRef[] = Marathon.init rng
-
-          {.push warning[Uninit]: off.}
-          {.push warning[ProveInit]: off.}
-          discard "{AssetsDir}/marathon/swap.txt".fmt.cstring.fetch
-            .then((r: Response) => r.text)
-            .then(
-              (s: cstring) => (
-                block:
-                  globalMarathonRef[].load ($s).splitLines
-                  safeRedraw()
-              )
-            )
-            .catch((e: Error) => (errMsg = $e.message))
-          {.pop.}
-          {.pop.}
-
-          initialized.assign true
+        let errMsg = errMsgs.join "\n"
 
         buildHtml tdiv:
           if errMsg == "":
