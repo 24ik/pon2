@@ -113,3 +113,12 @@ when defined(js) or defined(nimsuggest):
 
     "{AssetsDir}/noticegarbage/{stem}.png".fmt.cstring
   {.pop.}
+
+  # ------------------------------------------------
+  # JS - Others
+  # ------------------------------------------------
+
+  proc safeRedraw*() {.inline.} =
+    ## Redraws the window.
+    if not kxi.surpressRedraws:
+      kxi.redraw

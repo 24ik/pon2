@@ -4,7 +4,7 @@
 
 import std/[random, sequtils, sets, sugar, unittest]
 import ../../src/pon2/[core]
-import ../../src/pon2/app/[marathon, nazopuyowrap, simulator]
+import ../../src/pon2/app/[key, marathon, nazopuyowrap, simulator]
 
 # ------------------------------------------------
 # Load / Property
@@ -122,7 +122,33 @@ block: # selectQuery, selectRandomQuery
     unwrapNazoPuyo marathon.simulator.nazoPuyoWrap:
       check not it.steps[0].pair.isDbl
 
+  let stepsSeq = queries.mapIt(it.parseSteps(Pon2).unsafeValue).mapIt it.toSeq.map(
+    (step: Step) => Step.init step.pair.swapped
+  ).toDeque2
   for _ in 1 .. 5:
     marathon.selectRandomQuery(fromMatched = false)
     unwrapNazoPuyo marathon.simulator.nazoPuyoWrap:
-      check it.steps in queries.map (query: string) => query.parseSteps(Pon2).unsafeValue
+      check it.steps in stepsSeq
+
+# ------------------------------------------------
+# Keyboard
+# ------------------------------------------------
+
+block: # operate
+  var
+    rng = 123.initRand
+    marathon1 = Marathon.init rng
+
+  let queries = @["rrgg", "rgrg", "rgbb", "rgyy", "rgyg"]
+  marathon1.load queries
+  marathon1.match "rg"
+
+  var marathon2 = marathon1
+
+  marathon1.operate KeyEvent.init("Enter")
+  marathon2.selectRandomQuery
+  check marathon1 == marathon2
+
+  marathon1.operate KeyEvent.init("Enter", shift = true)
+  marathon2.selectRandomQuery(fromMatched = false)
+  check marathon1 == marathon2

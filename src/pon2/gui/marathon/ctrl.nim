@@ -15,6 +15,7 @@ when defined(js) or defined(nimsuggest):
   import karax/[karax, karaxdsl, vdom]
   import ../[helper]
   import ../../[app]
+  import ../../private/[gui]
 
   proc toMarathonCtrlVNode*(self: ref Marathon, helper: VNodeHelper): VNode {.inline.} =
     ## Returns the marathon controller node.
@@ -29,6 +30,10 @@ when defined(js) or defined(nimsuggest):
             disabled = not self[].isReady,
           ):
             text "全ツモ"
+            if not helper.mobile:
+              span(style = counterStyle):
+                text "Sft+Enter"
+
         tdiv(class = "control"):
           button(
             class = "button",
@@ -36,3 +41,6 @@ when defined(js) or defined(nimsuggest):
             disabled = self[].matchQueries.len == 0,
           ):
             text "指定ツモ"
+            if not helper.mobile:
+              span(style = counterStyle):
+                text "Enter"

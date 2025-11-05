@@ -7,7 +7,7 @@
 {.experimental: "views".}
 
 import std/[sequtils, sugar, random]
-import ./[nazopuyowrap, simulator]
+import ./[key, nazopuyowrap, simulator]
 import ../[core]
 import ../private/[arrayops2, assign3, critbits2, results2, strutils2, utils]
 
@@ -236,13 +236,12 @@ func match*(self: var Marathon, prefix: string) {.inline.} =
 
 func loadSteps(self: var Marathon, query: string) {.inline.} =
   ## Applies the steps to the simulator.
-  let stepsRes = query.parseSteps Pon2
-  if stepsRes.isErr:
-    return
+  var steps = initDeque[Step](query.len div 2)
+  for i in countup(0, query.len.pred, 2):
+    (query[i.succ] & query[i]).parseStep(Pon2).isErrOr:
+      steps.addLast value
 
-  self.simulator.assign Simulator.init PuyoPuyo[TsuField].init(
-    TsuField.init, stepsRes.unsafeValue
-  )
+  self.simulator.assign Simulator.init PuyoPuyo[TsuField].init(TsuField.init, steps)
 
 func selectQuery*(self: var Marathon, idx: int) {.inline.} =
   ## Applies the selected query to the simulator.
@@ -257,3 +256,19 @@ func selectRandomQuery*(self: var Marathon, fromMatched = true) {.inline.} =
   else:
     if self.isReady:
       self.loadSteps self.rng.sample self.allQueries
+
+# ------------------------------------------------
+# Keyboard
+# ------------------------------------------------
+
+proc operate*(self: var Marathon, key: KeyEvent): bool {.inline, discardable.} =
+  ## Performs an action specified by the key.
+  ## Returns `true` if the key is handled.
+  if key == static(KeyEvent.init "Enter"):
+    self.selectRandomQuery
+    return true
+  if key == static(KeyEvent.init("Enter", shift = true)):
+    self.selectRandomQuery(fromMatched = false)
+    return true
+
+  return self.simulator.operate key

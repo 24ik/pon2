@@ -61,11 +61,11 @@ when isMainModule:
   when defined(js) or defined(nimsuggest):
     import std/[strformat, sugar]
     import karax/[karax, karaxdsl, kdom, vdom]
-    import ./pon2/private/[assign3]
+    import ./pon2/private/[assign3, gui]
 
     when defined(pon2.build.marathon):
       import std/[asyncjs, jsfetch, random]
-      import ./pon2/private/[gui, strutils2]
+      import ./pon2/private/[strutils2]
 
     # ------------------------------------------------
     # JS - Utils
@@ -102,12 +102,15 @@ when isMainModule:
 
       proc keyHandler(marathon: ref Marathon, event: Event) {.inline.} =
         ## Runs the keyboard event handler.
-        ## Returns `true` if the event is handled.
-        if document.activeElement.className != "input" and
-            marathon[].simulator.operate(cast[KeyboardEvent](event).toKeyEvent):
-          if not kxi.surpressRedraws:
-            kxi.redraw
-          event.preventDefault
+        let
+          keyboardEvent = cast[KeyboardEvent](event)
+          focusInput = document.activeElement.className == "input"
+        if not focusInput or keyboardEvent.code == "Enter":
+          if marathon[].operate keyboardEvent.toKeyEvent:
+            safeRedraw()
+            event.preventDefault
+            if focusInput:
+              document.activeElement.blur
 
       let globalMarathonRef = new Marathon
       var
@@ -131,8 +134,7 @@ when isMainModule:
               (s: cstring) => (
                 block:
                   globalMarathonRef[].load ($s).splitLines
-                  if not kxi.surpressRedraws:
-                    kxi.redraw
+                  safeRedraw()
               )
             )
             .catch((e: Error) => (errMsg = $e.message))
@@ -161,10 +163,8 @@ when isMainModule:
 
       proc keyHandler(studio: ref Studio, event: Event) {.inline.} =
         ## Runs the keyboard event handler.
-        ## Returns `true` if the event is handled.
         if studio[].operate(cast[KeyboardEvent](event).toKeyEvent):
-          if not kxi.surpressRedraws:
-            kxi.redraw
+          safeRedraw()
           event.preventDefault
 
       let globalStudioRef = new Studio
