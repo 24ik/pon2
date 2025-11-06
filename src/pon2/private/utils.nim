@@ -59,8 +59,8 @@ template toSet2*(iter: untyped): untyped =
   res
 
 when defined(js) or defined(nimsuggest):
-  proc sleepAsync*(ms: int): Future[void] {.inline.} =
-    ## Sleeps asynchronously.
+  proc sleep*(ms: int): Future[void] {.inline.} =
+    ## Sleeps.
     newPromise (resolve: () -> void) => (discard resolve.setTimeout ms)
 
   proc getSelectedIdx*(
@@ -97,7 +97,3 @@ when defined(js) or defined(nimsuggest):
     elem: JsObject, scale: int
   ): Future[JsObject] {.inline, async, importjs: "html2canvas(#, {scale: #})".}
     ## Runs html2canvas and returns the canvas.
-
-proc sleepZeroAsync*(): Future[void] {.inline.} =
-  ## Sleeps zero sec asynchronously.
-  sleepAsync (when defined(js): 0 else: ZeroDuration)
