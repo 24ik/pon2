@@ -11,7 +11,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[asyncjs, dom, jsffi, sequtils, strformat, sugar]
+import std/[asyncjs, jsffi, sequtils, strformat, sugar]
 import ./[assign3, deques2, results2, strutils2, utils]
 
 type
@@ -102,16 +102,16 @@ proc run*(
 ): Future[Res[seq[string]]] {.async.} =
   ## Runs the task.
   var freeWorkerIdx = -1
-  block Waiting:
+  block waiting:
     while freeWorkerIdx < 0:
       for workerIdx, workerRef in self.workerRefs:
         if not workerRef[].running:
           freeWorkerIdx.assign workerIdx
-          break Waiting
+          break waiting
 
       await sleep PoolPollingMs
 
-  await self.workerRefs[freeWorkerIdx].run args
+  return await self.workerRefs[freeWorkerIdx].run args
 
 # ------------------------------------------------
 # Callee
