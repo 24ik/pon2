@@ -24,80 +24,106 @@
 ## | `-d:pon2.path=<str>`              | Path of the web studio.                | `/pon2/stable/studio/` |
 ## | `-d:pon2.assets=<str>`            | Assets directory.                      | `../assets`            |
 ## | `-d:pon2.build.marathon`          | Builds marathon pages.                 | `<undefined>`          |
+## | `-d:pon2.build.worker`            | Builds web workers.                    | `<undefined>`          |
 ##
 
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./pon2/[gui]
+import std/[parsecfg, streams]
+import ./pon2/private/[paths2]
 
-export gui
+when defined(pon2.build.worker):
+  import ./pon2/[app]
+else:
+  import ./pon2/[gui]
+
+  export gui
+
+proc getNimbleFile(): Path {.inline.} =
+  ## Returns the path to `pon2.nimble`.
+  let
+    head = srcPath().splitPath2.head
+    (head2, tail2) = head.splitPath2
+
+  (if tail2 == "src".Path: head2 else: head).joinPath "pon2.nimble".Path
+
+const Pon2Version* = ($getNimbleFile()).staticRead.newStringStream.loadConfig.getSectionValue(
+  "", "version"
+)
 
 when isMainModule:
-  import std/[parsecfg, streams]
-  import ./pon2/private/[paths2]
-
-  # ------------------------------------------------
-  # Utils
-  # ------------------------------------------------
-
-  proc getNimbleFile(): Path {.inline.} =
-    ## Returns the path to `pon2.nimble`.
-    let
-      head = srcPath().splitPath2.head
-      (head2, tail2) = head.splitPath2
-
-    (if tail2 == "src".Path: head2 else: head).joinPath "pon2.nimble".Path
-
-  const Pon2Ver = ($getNimbleFile()).staticRead.newStringStream.loadConfig.getSectionValue(
-    "", "version"
-  )
-
   # ------------------------------------------------
   # JS backend
   # ------------------------------------------------
 
   when defined(js) or defined(nimsuggest):
-    import std/[strformat, sugar]
-    import karax/[karax, karaxdsl, kdom, vdom]
-    import ./pon2/private/[gui]
+    import std/[strformat]
 
-    when defined(pon2.build.marathon):
-      import std/[asyncjs, jsfetch, random]
-      import ./pon2/private/[strutils2]
+    when defined(pon2.build.worker):
+      import ./pon2/private/[app, results2, webworker]
     else:
-      import ./pon2/private/[assign3]
+      import std/[sugar]
+      import karax/[karax, karaxdsl, kdom, vdom]
+      import ./pon2/private/[gui]
+      when defined(pon2.build.marathon):
+        import std/[asyncjs, jsfetch, random]
+        import ./pon2/private/[strutils2]
+      else:
+        import ./pon2/private/[assign3]
 
     # ------------------------------------------------
     # JS - Utils
     # ------------------------------------------------
 
-    proc initErrNode(msg: string): VNode {.inline.} =
-      ## Returns the error node.
-      buildHtml section(class = "section"):
-        tdiv(class = "content"):
-          h1(class = "title"):
-            text("Pon!通 URL形式エラー")
-          tdiv(class = "field"):
-            label(class = "label"):
-              text "エラー内容"
-            tdiv(class = "control"):
-              textarea(class = "textarea is-large", readonly = true):
-                text msg.cstring
+    when not defined(pon2.build.worker):
+      proc initErrNode(msg: string): VNode {.inline.} =
+        ## Returns the error node.
+        buildHtml section(class = "section"):
+          tdiv(class = "content"):
+            h1(class = "title"):
+              text("Pon!通 URL形式エラー")
+            tdiv(class = "field"):
+              label(class = "label"):
+                text "エラー内容"
+              tdiv(class = "control"):
+                textarea(class = "textarea is-large", readonly = true):
+                  text msg.cstring
 
-    proc initFooterNode(): VNode {.inline.} =
-      ## Returns the footer node.
-      buildHtml footer(class = "footer"):
-        tdiv(class = "content has-text-centered"):
-          p:
-            text "Pon!通 Version {Pon2Ver}".fmt
+      proc initFooterNode(): VNode {.inline.} =
+        ## Returns the footer node.
+        buildHtml footer(class = "footer"):
+          tdiv(class = "content has-text-centered"):
+            p:
+              text "Pon!通 Version {Pon2Version}".fmt
 
     # ------------------------------------------------
     # JS - Main
     # ------------------------------------------------
 
-    when defined(pon2.build.marathon):
+    when defined(pon2.build.worker):
+      proc task(args: seq[string]): Res[seq[string]] =
+        let errMsg = "Invalid run args: {args}".fmt
+
+        if args.len == 0:
+          return err errMsg
+
+        let (rule, goal, steps) = ?args.parseSolveInfo.context errMsg
+
+        var answers = newSeq[SolveAnswer]()
+        case rule
+        of Tsu:
+          let node = ?parseSolveNode[TsuField](args).context errMsg
+          node.solveSingleThread answers, steps.len, true, goal, steps
+        of Water:
+          let node = ?parseSolveNode[WaterField](args).context errMsg
+          node.solveSingleThread answers, steps.len, true, goal, steps
+
+        ok answers.toStrs
+
+      task.register
+    elif defined(pon2.build.marathon):
       # ------------------------------------------------
       # JS - Main - Marathon
       # ------------------------------------------------
@@ -169,33 +195,37 @@ when isMainModule:
 
       proc keyHandler(studio: ref Studio, event: Event) {.inline.} =
         ## Runs the keyboard event handler.
-        if studio[].operate(cast[KeyboardEvent](event).toKeyEvent):
+        if studio.operate(cast[KeyboardEvent](event).toKeyEvent):
           safeRedraw()
           event.preventDefault
 
       let globalStudioRef = new Studio
+
       var
-        initialized = false
         errMsg = ""
+        initialized = false
+
+      document.onkeydown = (event: Event) => globalStudioRef.keyHandler event
 
       proc renderer(routerData: RouterData): VNode =
         ## Returns the root node.
         if not initialized:
-          document.onkeydown = (event: Event) => globalStudioRef.keyHandler event
-
-          var uri = initUri()
-          uri.scheme.assign "https"
-          uri.hostname.assign $Pon2
-          uri.path.assign Pon2Path
-
-          let routerQuery = $routerData.queryString
-          uri.query.assign routerQuery.substr(1, routerQuery.high)
-
-          let simRes = uri.parseSimulator
-          if simRes.isOk:
-            globalStudioRef[] = Studio.init simRes.unsafeValue
+          if routerData.queryString == "":
+            globalStudioRef[] = Studio.init
           else:
-            errMsg.assign simRes.error
+            var uri = initUri()
+            uri.scheme.assign "https"
+            uri.hostname.assign $Pon2
+            uri.path.assign Pon2Path
+
+            let routerQuery = $routerData.queryString
+            uri.query.assign routerQuery.substr(1, routerQuery.high)
+
+            let simRes = uri.parseSimulator
+            if simRes.isOk:
+              globalStudioRef[] = Studio.init simRes.unsafeValue
+            else:
+              errMsg.assign simRes.error
 
           initialized.assign true
 
@@ -496,7 +526,7 @@ when isMainModule:
     {.push warning[ProveInit]: off.}
     dispatchMulti [
       "multi",
-      doc = "Pon!通 Ver. {Pon2Ver}".fmt,
+      doc = "Pon!通 Ver. {Pon2Version}".fmt,
       usage =
         """${doc}
 

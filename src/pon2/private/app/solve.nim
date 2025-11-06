@@ -10,6 +10,10 @@ import std/[sequtils, typetraits]
 import ../../[core]
 import ../../private/[assign3, core, macros2, math2, staticfor2]
 
+when defined(js) or defined(nimsuggest):
+  import std/[strformat, sugar]
+  import ../../private/[results2, strutils2]
+
 type SolveNode*[F: TsuField or WaterField] = object ## Node of solutions search tree.
   depth: int
 
@@ -205,6 +209,7 @@ func children[F: TsuField or WaterField](
     @[(self.childGarbages(kind, color, step), NonePlacement)]
   of Rotate:
     @[(self.childRotate(kind, color, step), NonePlacement)]
+
 # ------------------------------------------------
 # Accept
 # ------------------------------------------------
@@ -412,11 +417,122 @@ func canPrune[F: TsuField or WaterField](
       possiblePlace < goal.optVal.unsafeValue
 
 # ------------------------------------------------
+# Static Getter
+# ------------------------------------------------
+
+template withStaticColor(goal: Goal, body: untyped): untyped =
+  ## Runs `body` with `StaticColor` exposed.
+  case goal.optColor.unsafeValue
+  of All:
+    const StaticColor {.inject.} = All
+    body
+  of GoalColor.Red:
+    const StaticColor {.inject.} = GoalColor.Red
+    body
+  of GoalColor.Green:
+    const StaticColor {.inject.} = GoalColor.Green
+    body
+  of GoalColor.Blue:
+    const StaticColor {.inject.} = GoalColor.Blue
+    body
+  of GoalColor.Yellow:
+    const StaticColor {.inject.} = GoalColor.Yellow
+    body
+  of GoalColor.Purple:
+    const StaticColor {.inject.} = GoalColor.Purple
+    body
+  of GoalColor.Garbages:
+    const StaticColor {.inject.} = GoalColor.Garbages
+    body
+  of Colors:
+    const StaticColor {.inject.} = Colors
+    body
+
+template withStaticKindColor(goal: Goal, body: untyped): untyped =
+  ## Runs `body` with `StaticKind` and `StaticColor` exposed.
+  case goal.kind
+  of Clear:
+    const StaticKind {.inject.} = Clear
+    goal.withStaticColor:
+      body
+  of AccColor:
+    const
+      StaticKind {.inject.} = AccColor
+      StaticColor {.inject.} = GoalColor.low
+    body
+  of AccColorMore:
+    const
+      StaticKind {.inject.} = AccColorMore
+      StaticColor {.inject.} = GoalColor.low
+    body
+  of AccCnt:
+    const StaticKind {.inject.} = AccCnt
+    goal.withStaticColor:
+      body
+  of AccCntMore:
+    const StaticKind {.inject.} = AccCntMore
+    goal.withStaticColor:
+      body
+  of Chain:
+    const
+      StaticKind {.inject.} = Chain
+      StaticColor {.inject.} = GoalColor.low
+    body
+  of ChainMore:
+    const
+      StaticKind {.inject.} = ChainMore
+      StaticColor {.inject.} = GoalColor.low
+    body
+  of ClearChain:
+    const StaticKind {.inject.} = ClearChain
+    goal.withStaticColor:
+      body
+  of ClearChainMore:
+    const StaticKind {.inject.} = ClearChainMore
+    goal.withStaticColor:
+      body
+  of Color:
+    const
+      StaticKind {.inject.} = Color
+      StaticColor {.inject.} = GoalColor.low
+    body
+  of ColorMore:
+    const
+      StaticKind {.inject.} = ColorMore
+      StaticColor {.inject.} = GoalColor.low
+    body
+  of Cnt:
+    const StaticKind {.inject.} = Cnt
+    goal.withStaticColor:
+      body
+  of CntMore:
+    const StaticKind {.inject.} = CntMore
+    goal.withStaticColor:
+      body
+  of Place:
+    const StaticKind {.inject.} = Place
+    goal.withStaticColor:
+      body
+  of PlaceMore:
+    const StaticKind {.inject.} = PlaceMore
+    goal.withStaticColor:
+      body
+  of Conn:
+    const StaticKind {.inject.} = Conn
+    goal.withStaticColor:
+      body
+  of ConnMore:
+    const StaticKind {.inject.} = ConnMore
+    goal.withStaticColor:
+      body
+
+# ------------------------------------------------
 # Child - Depth
 # ------------------------------------------------
 
-func childrenAtDepth*[F: TsuField or WaterField](
+func childrenAtDepth[F: TsuField or WaterField](
     self: SolveNode[F],
+    targetDepth: int,
     nodes: var seq[SolveNode[F]],
     optPlcmtsSeq: var seq[seq[OptPlacement]],
     answers: var seq[seq[OptPlacement]],
@@ -427,26 +543,16 @@ func childrenAtDepth*[F: TsuField or WaterField](
     color: static GoalColor,
     steps: Steps,
 ) {.inline.} =
-  ## Calculates nodes with depth 3 (named `TargetDepth` in this function)
-  ## and sets them to `nodes`.
+  ## Calculates nodes with the given depth and sets them to `nodes`.
   ## A sequence of edges to reach them is set to `optPlcmtsSeq`.
-  ## Answers that have `TargetDepth` or less steps are set to `answers` in reverse
+  ## Answers that have `targetDepth` or less steps are set to `answers` in reverse
   ## order.
   ## This function requires that the field is settled and `nodes`, `optPlcmtsSeq`, and
   ## `answers` are empty.
-  ## Note that this function should not be called directly; instead call a `NazoPuyo`'s
-  ## method.
-  # NOTE: `TargetDepth == 3` is good; see https://github.com/24ik/pon2/issues/198
-  # NOTE: `TargetDepth` should be less than 4 due to the limitations of Nim's built-in
-  # sets, that is used by node indices (22^3 < int16.high < 22^4)
-  const
-    TargetDepth = 3
-    PlcmtLen = Placement.enumLen
-
   let
     step = steps[self.depth]
     childDepth = self.depth.succ
-    childIsSpawned = childDepth == TargetDepth
+    childIsSpawned = childDepth == targetDepth
     childIsLeaf = childDepth == moveCnt
     children = self.children(kind, color, step)
 
@@ -455,9 +561,9 @@ func childrenAtDepth*[F: TsuField or WaterField](
     optPlcmtsSeqSeq = newSeqOfCap[seq[seq[OptPlacement]]](children.len)
     answersSeq = newSeqOfCap[seq[seq[OptPlacement]]](children.len)
   for _ in 1 .. children.len:
-    nodesSeq.add newSeqOfCap[SolveNode[F]](PlcmtLen)
-    optPlcmtsSeqSeq.add newSeqOfCap[seq[OptPlacement]](PlcmtLen)
-    answersSeq.add newSeqOfCap[seq[OptPlacement]](PlcmtLen)
+    nodesSeq.add newSeqOfCap[SolveNode[F]](static(Placement.enumLen))
+    optPlcmtsSeqSeq.add newSeqOfCap[seq[OptPlacement]](static(Placement.enumLen))
+    answersSeq.add newSeqOfCap[seq[OptPlacement]](static(Placement.enumLen))
 
   for childIdx, (child, optPlcmt) in children.pairs:
     if child.isAccepted(goal, kind, color):
@@ -482,7 +588,8 @@ func childrenAtDepth*[F: TsuField or WaterField](
       optPlcmts.add optPlcmt
       optPlcmtsSeqSeq[childIdx].add optPlcmts
     else:
-      child.childrenAtDepth nodesSeq[childIdx],
+      child.childrenAtDepth targetDepth,
+        nodesSeq[childIdx],
         optPlcmtsSeqSeq[childIdx],
         answersSeq[childIdx],
         moveCnt,
@@ -508,32 +615,32 @@ func childrenAtDepth*[F: TsuField or WaterField](
   answers &= answersSeq.concat
 
 func childrenAtDepth*[F: TsuField or WaterField](
-    self: NazoPuyo[F],
+    self: SolveNode[F],
+    targetDepth: int,
     nodes: var seq[SolveNode[F]],
     optPlcmtsSeq: var seq[seq[OptPlacement]],
     answers: var seq[seq[OptPlacement]],
     moveCnt: int,
     calcAllAnswers: static bool,
     goal: Goal,
-    kind: static GoalKind,
-    color: static GoalColor,
     steps: Steps,
 ) {.inline.} =
-  ## Calculates nodes with depth 3 (named `TargetDepth` in this function)
-  ## and sets them to `nodes`.
+  ## Calculates nodes with the given depth and sets them to `nodes`.
   ## A sequence of edges to reach them is set to `optPlcmtsSeq`.
   ## Answers that have `TargetDepth` or less steps are set to `answers` in reverse
   ## order.
   ## This function requires that the field is settled and `nodes`, `optPlcmtsSeq`, and
   ## `answers` are empty.
-  SolveNode[F].init(self.puyoPuyo).childrenAtDepth nodes,
-    optPlcmtsSeq, answers, moveCnt, calcAllAnswers, goal, kind, color, steps
+  goal.withStaticKindColor:
+    self.childrenAtDepth targetDepth,
+      nodes, optPlcmtsSeq, answers, moveCnt, calcAllAnswers, goal, StaticKind,
+      StaticColor, steps
 
 # ------------------------------------------------
 # Solve
 # ------------------------------------------------
 
-func solveSingleThread*[F: TsuField or WaterField](
+func solveSingleThread[F: TsuField or WaterField](
     self: SolveNode[F],
     answers: var seq[seq[OptPlacement]],
     moveCnt: int,
@@ -542,12 +649,12 @@ func solveSingleThread*[F: TsuField or WaterField](
     kind: static GoalKind,
     color: static GoalColor,
     steps: Steps,
-    isZeroDepth: static bool,
+    checkPruneFirst: static bool = false,
 ) {.inline.} =
   ## Solves the Nazo Puyo at the node with a single thread.
   ## This function requires that the field is settled and `answers` is empty.
   ## Answers in `answers` are set in reverse order.
-  when isZeroDepth:
+  when checkPruneFirst:
     if self.canPrune(goal, kind, color):
       return
 
@@ -589,3 +696,243 @@ func solveSingleThread*[F: TsuField or WaterField](
         return
 
   answers &= childAnswersSeq.concat
+
+func solveSingleThread*[F: TsuField or WaterField](
+    self: SolveNode[F],
+    answers: var seq[seq[OptPlacement]],
+    moveCnt: int,
+    calcAllAnswers: static bool,
+    goal: Goal,
+    steps: Steps,
+    checkPruneFirst: static bool = false,
+) {.inline.} =
+  ## Solves the Nazo Puyo at the node with a single thread.
+  ## This function requires that the field is settled and `answers` is empty.
+  ## Answers in `answers` are set in reverse order.
+  goal.withStaticKindColor:
+    self.solveSingleThread answers,
+      moveCnt, calcAllAnswers, goal, StaticKind, StaticColor, steps, checkPruneFirst
+
+# ------------------------------------------------
+# SolveNode <-> string
+# ------------------------------------------------
+
+when defined(js) or defined(nimsuggest):
+  const
+    Sep1 = ":"
+    Sep2 = ";"
+    Sep3 = "!"
+    Sep4 = "|"
+    ErrStr = "err"
+
+  func toStr(self: MoveResult): string {.inline.} =
+    ## Returns the string representation of the move result.
+    var strs = newSeqOfCap[string](6)
+
+    strs.add $self.chainCnt
+    strs.add self.popCnts.mapIt($it).join Sep1
+    strs.add $self.hardToGarbageCnt
+    strs.add self.detailPopCnts.mapIt(it.map((cnt: int) => $cnt).join Sep1).join Sep2
+    strs.add self.detailHardToGarbageCnt.mapIt($it).join Sep1
+    if self.fullPopCnts.isOk:
+      strs.add self.fullPopCnts.unsafeValue.mapIt(
+        it.map((cnts: seq[int]) => cnts.map((cnt: int) => $cnt).join Sep1).join Sep2
+      ).join Sep3
+    else:
+      strs.add ErrStr
+
+    strs.join Sep4
+
+  func toStr(self: set[Cell]): string {.inline.} =
+    ## Returns the string representation of the cells.
+    self.mapIt($it).join
+
+  func toStr(self: array[Cell, int]): string {.inline.} =
+    ## Returns the string representation of the array.
+    self.mapIt($it).join Sep1
+
+  func toStrs*[F: TsuField or WaterField](
+      self: SolveNode[F], goal: Goal, steps: Steps
+  ): seq[string] {.inline.} =
+    ## Returns the string representations of the node.
+    var strs = newSeqOfCap[string](10)
+
+    strs.add $self.field.rule
+    strs.add $goal.toUriQuery.unsafeValue
+    strs.add $steps.toUriQuery.unsafeValue
+
+    strs.add $self.depth
+
+    strs.add $self.field.toUriQuery.unsafeValue
+    strs.add self.moveResult.toStr
+
+    strs.add self.popColors.toStr
+    strs.add $self.popCnt
+
+    strs.add $self.fieldCnts.toStr
+    strs.add $self.stepsCnts.toStr
+
+    strs
+
+  func parseMoveResult(str: string): Res[MoveResult] {.inline.} =
+    ## Returns the move result converted from the string representation.
+    let errMsg = "Invalid move result: {str}".fmt
+
+    let strs = str.split2 Sep4
+    if strs.len != 6:
+      return err errMsg & "debug1"
+
+    let chainCnt = ?strs[0].parseIntRes.context errMsg
+
+    let popCntsStrs = strs[1].split2 Sep1
+    if popCntsStrs.len != static(Cell.enumLen):
+      return err errMsg & "debug2"
+    var popCnts {.noinit.}: array[Cell, int]
+    for i, s in popCntsStrs:
+      popCnts[Cell.low.succ i].assign ?s.parseIntRes.context errMsg
+
+    let hardToGarbageCnt = ?strs[2].parseIntRes.context errMsg
+
+    let detailPopCnts = collect:
+      for detailPopCntsStrSeqSeq in strs[3].split2 Sep2:
+        let detailPopCntsStrSeq = detailPopCntsStrSeqSeq.split2 Sep1
+        if detailPopCntsStrSeq.len != static(Cell.enumLen):
+          return err errMsg & "debug3"
+
+        var popCnts {.noinit.}: array[Cell, int]
+        for i, s in detailPopCntsStrSeq:
+          popCnts[Cell.low.succ i].assign ?s.parseIntRes.context errMsg
+
+        popCnts
+
+    let detailHardToGarbageCnt = collect:
+      for s in strs[4].split2 Sep1:
+        ?s.parseIntRes.context errMsg
+
+    if strs[5] == ErrStr:
+      return ok MoveResult.init(
+        chainCnt, popCnts, hardToGarbageCnt, detailPopCnts, detailHardToGarbageCnt
+      )
+
+    let fullPopCnts = collect:
+      for fullPopCntsStrSeqSeq in strs[5].split2 Sep3:
+        let fullPopCntsStrSeqs = fullPopCntsStrSeqSeq.split2 Sep2
+        if fullPopCntsStrSeqs.len != static(Cell.enumLen):
+          return err errMsg & "debug4"
+
+        var cnts {.noinit.}: array[Cell, seq[int]]
+        for cellOrd, fullPopCntsStrSeq in fullPopCntsStrSeqs:
+          cnts[Cell.low.succ cellOrd].assign fullPopCntsStrSeq.split2(Sep1).mapIt ?it.parseIntRes.context errMsg
+
+        cnts
+
+    ok MoveResult.init(
+      chainCnt, popCnts, hardToGarbageCnt, detailPopCnts, detailHardToGarbageCnt,
+      fullPopCnts,
+    )
+
+  func parseCells(str: string): Res[set[Cell]] {.inline.} =
+    ## Returns the cells converted from the string representation.
+    let errMsg = "Invalid cells: {str}".fmt
+
+    var cells: set[Cell] = {}
+    for c in str:
+      cells.incl ?($c).parseCell.context errMsg
+
+    ok cells
+
+  func parseCounts(str: string): Res[array[Cell, int]] {.inline.} =
+    ## Returns the counts converted from the string representation.
+    let errMsg = "Invalid counts: {str}".fmt
+
+    let strs = str.split2 Sep1
+    if strs.len != static(Cell.enumLen):
+      return err errMsg
+
+    var arr {.noinit.}: array[Cell, int]
+    for i, s in strs:
+      arr[Cell.low.succ i].assign ?s.parseIntRes.context errMsg
+
+    ok arr
+
+  func parseSolveInfo*(
+      strs: seq[string]
+  ): Res[tuple[rule: Rule, goal: Goal, steps: Steps]] {.inline.} =
+    ## Returns the rule of the solve node converted from the string representations.
+    let errMsg = "Invalid solve info: {strs}".fmt
+
+    if strs.len != 10:
+      return err errMsg
+
+    ok (
+      ?strs[0].parseRule.context errMsg,
+      ?strs[1].parseGoal(Pon2).context errMsg,
+      ?strs[2].parseSteps(Pon2).context errMsg,
+    )
+
+  func parseSolveNode*[F: TsuField or WaterField](
+      strs: seq[string]
+  ): Res[SolveNode[F]] {.inline.} =
+    ## Returns the solve node converted from the string representations.
+    let errMsg = "Invalid node: {strs}".fmt
+
+    if strs.len != 10:
+      return err errMsg
+
+    let depth = ?strs[3].parseIntRes.context errMsg
+
+    let
+      field =
+        when F is TsuField:
+          ?strs[4].parseTsuField(Pon2).context errMsg
+        else:
+          ?strs[4].parseWaterField(Pon2).context errMsg
+      moveResult = ?strs[5].parseMoveResult.context errMsg
+
+    let
+      popColors = ?strs[6].parseCells.context errMsg
+      popCnt = ?strs[7].parseIntRes.context errMsg
+
+    let
+      fieldCnts = ?strs[8].parseCounts.context errMsg
+      stepsCnts = ?strs[9].parseCounts.context errMsg
+
+    ok SolveNode[F].init(
+      depth, field, moveResult, popColors, popCnt, fieldCnts, stepsCnts
+    )
+
+# ------------------------------------------------
+# SolveNode <-> string
+# ------------------------------------------------
+
+when defined(js) or defined(nimsuggest):
+  const NonePlcmtStr = ".."
+
+  func toStrs*(answers: seq[seq[OptPlacement]]): seq[string] {.inline.} =
+    ## Returns the string representations of the answers.
+    collect:
+      for ans in answers:
+        (
+          ans.mapIt(
+            if it.isOk:
+              $it.unsafeValue
+            else:
+              NonePlcmtStr
+          )
+        ).join
+
+  func parseSolveAnswers*(strs: seq[string]): Res[seq[seq[OptPlacement]]] {.inline.} =
+    ## Returns the answers converted from the run result.
+    var answers = newSeqOfCap[seq[OptPlacement]](strs.len)
+    for str in strs:
+      let errMsg = "Invalid answers: {str}".fmt
+
+      if str.len mod 2 == 1:
+        return err errMsg
+
+      let ans = collect:
+        for charIdx in countup(0, str.len.pred, 2):
+          ?str.substr(charIdx, charIdx.succ).parseOptPlacement.context errMsg
+      answers.add ans
+
+    ok answers

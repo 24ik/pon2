@@ -14,6 +14,9 @@
 import std/[asyncjs, jsffi, sequtils, strformat, sugar]
 import ./[assign3, deques2, results2, strutils2, utils]
 
+when not defined(pon2.build.worker):
+  import ./[math2]
+
 type
   WebWorkerTask* = ((args: seq[string]) {.raises: [], gcsafe.} -> Res[seq[string]])
     ## Task executed by web workers.
@@ -42,7 +45,7 @@ proc newWorkerObj(): JsObject {.inline, importjs: "new Worker('{WebWorkerPath}')
 proc init(T: type WebWorker): T {.inline.} =
   T(workerObj: newWorkerObj(), running: false)
 
-proc init*(T: type WebWorkerPool, workerCnt = 1): T {.inline.} =
+proc init(T: type WebWorkerPool, workerCnt = 1): T {.inline.} =
   let workerRefs = collect:
     for _ in 1 .. workerCnt:
       let workerRef = new WebWorker
@@ -61,15 +64,15 @@ func parseRes(str: string): Res[seq[string]] {.inline.} =
   ## Returns the result of the web worker's task.
   let errMsg = "Invalid result: {str}".fmt
 
-  let strs = str.split(MsgSep, 1)
+  let strs = str.split2(MsgSep, 1)
   if strs.len != 2:
     return err errMsg
 
   case strs[0]
   of OkStr:
-    ok strs[1].split MsgSep
+    ok strs[1].split2 MsgSep
   of ErrStr:
-    err strs[1].split(MsgSep).join "\n"
+    err strs[1].split2(MsgSep).join "\n"
   else:
     err errMsg
 
@@ -119,14 +122,6 @@ proc run*(
 
 proc getSelf(): JsObject {.inline, importjs: "(self)".} ## Returns the web worker object.
 
-func split2(str, sep: string): seq[string] {.inline.} =
-  ## Returns the split strings.
-  ## If the string is empty, returns an empty sequence.
-  if str.len == 0:
-    @[]
-  else:
-    str.split sep
-
 func toStr(res: Res[seq[string]]): string {.inline.} =
   ## Returns the string representation of the task result.
   if res.isOk:
@@ -139,3 +134,9 @@ proc register*(task: WebWorkerTask) {.inline.} =
   getSelf().onmessage =
     (event: JsObject) =>
     getSelf().postMessage ($event.data.to cstring).split2(MsgSep).task.toStr.cstring
+
+when not defined(pon2.build.worker):
+  let webWorkerPool* = WebWorkerPool.init getNavigator().hardwareConcurrency
+  .to(int)
+  .ceilDiv(2)
+  .clamp(1, 16)

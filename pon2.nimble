@@ -1,6 +1,6 @@
 # Package
 
-version = "0.23.14"
+version = "0.24.0"
 author = "Keisuke Izumiya"
 description = "Application of Puyo Puyo and Nazo Puyo"
 license = "Apache-2.0"
@@ -66,7 +66,7 @@ task www, "Generate Web Pages":
 
   # studio
   "src/pon2.nim".compile "www/studio/index.min.js"
-  #"src/pon2.nim".compile "www/worker.min.js", "-d:pon2.worker"
+  "src/pon2.nim".compile "www/studio/worker.min.js", "-d:pon2.build.worker"
 
   # marathon
   "src/pon2.nim".compile "www/marathon/index.min.js", "-d:pon2.build.marathon"

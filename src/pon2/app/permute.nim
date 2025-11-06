@@ -11,6 +11,10 @@ import ./[solve]
 import ../[core]
 import ../private/[assign3, staticfor2]
 
+when defined(js) or defined(nimsuggest):
+  when not defined(pon2.build.worker):
+    import std/[asyncjs]
+
 # ------------------------------------------------
 # Steps
 # ------------------------------------------------
@@ -97,20 +101,72 @@ func allStepsSeq(
 # Permute
 # ------------------------------------------------
 
-iterator permute*[F: TsuField or WaterField](
+proc permute*[F: TsuField or WaterField](
     nazo: NazoPuyo[F], fixIndices: openArray[int], allowDblNotLast, allowDblLast: bool
-): NazoPuyo[F] {.inline.} =
-  ## Yields Nazo Puyo that is obtained by permuting steps and has a unique answer.
-  for steps in nazo.puyoPuyo.steps.allStepsSeq(
-    fixIndices, allowDblNotLast, allowDblLast
-  ):
-    var nazo2 = nazo
-    nazo2.puyoPuyo.steps.assign steps
+): seq[NazoPuyo[F]] {.inline.} =
+  ## Returns a sequence of Nazo Puyos that is obtained by permuting steps and has a
+  ## unique answer.
+  collect:
+    for steps in nazo.puyoPuyo.steps.allStepsSeq(
+      fixIndices, allowDblNotLast, allowDblLast
+    ):
+      var nazo2 = nazo
+      nazo2.puyoPuyo.steps.assign steps
 
-    let answers = nazo2.solve(calcAllAnswers = false)
-    if answers.len == 1:
-      for stepIdx, step in nazo2.puyoPuyo.steps.mpairs:
-        if step.kind == PairPlacement:
-          step.optPlacement.assign answers[0][stepIdx]
+      let answers = nazo2.solve(calcAllAnswers = false)
+      if answers.len == 1:
+        for stepIdx, step in nazo2.puyoPuyo.steps.mpairs:
+          if step.kind == PairPlacement:
+            step.optPlacement.assign answers[0][stepIdx]
 
-      yield nazo2
+        nazo2
+
+# ------------------------------------------------
+# Permute - Async
+# ------------------------------------------------
+
+when defined(js) or defined(nimsuggest):
+  when not defined(pon2.build.worker):
+    proc asyncPermute*[F: TsuField or WaterField](
+        nazo: NazoPuyo[F],
+        fixIndices: openArray[int],
+        allowDblNotLast, allowDblLast: bool,
+        progressRef: ref tuple[now, total: int],
+    ): Future[seq[NazoPuyo[F]]] {.inline, async.} =
+      ## Permutes the Nazo Puyo asynchronously with web workers.
+      ## This function requires that the field is settled.
+      let stepsSeq =
+        nazo.puyoPuyo.steps.allStepsSeq(fixIndices, allowDblNotLast, allowDblLast)
+      if not progressRef.isNil:
+        progressRef[].now.assign 0
+        progressRef[].total.assign stepsSeq.len
+
+      var nazos = newSeq[NazoPuyo[F]]()
+      for steps in stepsSeq:
+        var nazo2 = nazo
+        nazo2.puyoPuyo.steps.assign steps
+
+        let answers = await nazo2.asyncSolve(calcAllAnswers = false)
+        if answers.len == 1:
+          for stepIdx, step in nazo2.puyoPuyo.steps.mpairs:
+            if step.kind == PairPlacement:
+              step.optPlacement.assign answers[0][stepIdx]
+
+          nazos.add nazo2
+
+        if not progressRef.isNil:
+          progressRef[].now.inc
+
+      return nazos
+
+    proc asyncPermute*[F: TsuField or WaterField](
+        nazo: NazoPuyo[F],
+        fixIndices: openArray[int],
+        allowDblNotLast, allowDblLast: bool,
+    ): Future[seq[NazoPuyo[F]]] {.inline.} =
+      ## Permutes the Nazo Puyo asynchronously with web workers.
+      ## This function requires that the field is settled.
+      let progressRef = new tuple[now, total: int]
+      progressRef[] = (0, 0)
+
+      nazo.asyncPermute(fixIndices, allowDblNotLast, allowDblLast, progressRef)

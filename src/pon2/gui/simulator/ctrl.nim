@@ -104,7 +104,7 @@ when defined(js) or defined(nimsuggest):
                 onclick = () => self.derefSimulator(helper).flipFieldHorizontal,
               ):
                 span(class = "icon"):
-                  italic(class = "fa-solid fa-right-left")
+                  italic(class = "fa-solid fa-arrow-right-arrow-left")
                   if not helper.mobile:
                     span(style = counterStyle):
                       text "F"
