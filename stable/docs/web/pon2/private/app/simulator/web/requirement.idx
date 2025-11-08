@@ -1,2 +1,0 @@
-nimTitle	requirement	pon2/private/app/simulator/web/requirement.html	module src/pon2/private/app/simulator/web/requirement		0
-nim	newRequirementNode	pon2/private/app/simulator/web/requirement.html#newRequirementNode,Simulator,string	proc newRequirementNode(simulator: Simulator; id: string; displayMode = false): VNode		55

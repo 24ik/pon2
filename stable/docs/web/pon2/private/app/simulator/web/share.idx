@@ -1,3 +1,0 @@
-nimTitle	share	pon2/private/app/simulator/web/share.html	module src/pon2/private/app/simulator/web/share		0
-nim	newShareNode	pon2/private/app/simulator/web/share.html#newShareNode,Simulator,string,bool	proc newShareNode(simulator: Simulator; id: string; onlyEditorButton: bool): VNode		68
-nim	newDisplayNode	pon2/private/app/simulator/web/share.html#newDisplayNode,Simulator,string	proc newDisplayNode(simulator: Simulator; id: string): VNode		149

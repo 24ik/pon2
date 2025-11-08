@@ -1,5 +1,0 @@
-nimTitle	requirement	pon2/private/app/simulator/native/requirement.html	module src/pon2/private/app/simulator/native/requirement		0
-nim	RequirementControl	pon2/private/app/simulator/native/requirement.html#RequirementControl	type RequirementControl		16
-nim	newRequirementControl	pon2/private/app/simulator/native/requirement.html#newRequirementControl,Simulator	proc newRequirementControl(simulator: Simulator): RequirementControl		101
-nim	setWidth	pon2/private/app/simulator/native/requirement.html#setWidth,RequirementControl,Natural	proc setWidth(control: RequirementControl; width: Natural)		166
-nim	updateRequirementControl	pon2/private/app/simulator/native/requirement.html#updateRequirementControl,RequirementControl,ClickEvent	proc updateRequirementControl(control: RequirementControl; event: ClickEvent)		172

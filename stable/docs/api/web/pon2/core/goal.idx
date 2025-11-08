@@ -1,0 +1,26 @@
+nimTitle	goal	pon2/core/goal.html	module src/pon2/core/goal		0
+nim	GoalKind	pon2/core/goal.html#GoalKind	enum GoalKind		16
+nim	GoalColor	pon2/core/goal.html#GoalColor	enum GoalColor		36
+nim	GoalVal	pon2/core/goal.html#GoalVal	type GoalVal		47
+nim	OptGoalColor	pon2/core/goal.html#OptGoalColor	type OptGoalColor		49
+nim	OptGoalVal	pon2/core/goal.html#OptGoalVal	type OptGoalVal		50
+nim	Goal	pon2/core/goal.html#Goal	object Goal		52
+nim	NoColorKinds	pon2/core/goal.html#NoColorKinds	const NoColorKinds		58
+nim	NoValKinds	pon2/core/goal.html#NoValKinds	const NoValKinds		60
+nim	ColorKinds	pon2/core/goal.html#ColorKinds	const ColorKinds		62
+nim	ValKinds	pon2/core/goal.html#ValKinds	const ValKinds		63
+nim	init	pon2/core/goal.html#init,typeGoal,GoalKind,OptGoalColor,OptGoalVal	proc init(T: type Goal; kind: GoalKind; optColor: OptGoalColor; optVal: OptGoalVal): T:type		69
+nim	init	pon2/core/goal.html#init,typeGoal,GoalKind,GoalColor,GoalVal	proc init(T: type Goal; kind: GoalKind; color: GoalColor; val: GoalVal): T:type		74
+nim	init	pon2/core/goal.html#init,typeGoal,GoalKind,GoalColor	proc init(T: type Goal; kind: GoalKind; color: GoalColor): T:type		77
+nim	init	pon2/core/goal.html#init,typeGoal,GoalKind,GoalVal	proc init(T: type Goal; kind: GoalKind; val: GoalVal): T:type		80
+nim	init	pon2/core/goal.html#init,typeGoal	proc init(T: type Goal): T:type		83
+nim	isNormalForm	pon2/core/goal.html#isNormalForm,Goal	proc isNormalForm(self: Goal): bool		90
+nim	isSupported	pon2/core/goal.html#isSupported,Goal	proc isSupported(self: Goal): bool		96
+nim	normalize	pon2/core/goal.html#normalize,Goal	proc normalize(self: var Goal)		116
+nim	normalized	pon2/core/goal.html#normalized,Goal	proc normalized(self: Goal): Goal		133
+nim	`$`	pon2/core/goal.html#$,Goal	proc `$`(self: Goal): string		156
+nim	parseGoal	pon2/core/goal.html#parseGoal,string	proc parseGoal(str: string): Res[Goal]		165
+nim	toUriQuery	pon2/core/goal.html#toUriQuery,Goal	proc toUriQuery(self: Goal; fqdn = Pon2): Res[string]		230
+nim	parseGoal	pon2/core/goal.html#parseGoal,string,SimulatorFqdn	proc parseGoal(query: string; fqdn: SimulatorFqdn): Res[Goal]		265
+nimgrp	parsegoal	pon2/core/goal.html#parseGoal-procs-all	proc		165
+nimgrp	init	pon2/core/goal.html#init-procs-all	proc		69

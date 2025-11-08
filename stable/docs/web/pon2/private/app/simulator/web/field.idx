@@ -1,2 +1,0 @@
-nimTitle	field	pon2/private/app/simulator/web/field.html	module src/pon2/private/app/simulator/web/field		0
-nim	newFieldNode	pon2/private/app/simulator/web/field.html#newFieldNode,Simulator	proc newFieldNode(simulator: Simulator; displayMode = false): VNode		23

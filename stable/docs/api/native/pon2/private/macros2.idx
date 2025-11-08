@@ -1,0 +1,5 @@
+nimTitle	macros2	pon2/private/macros2.html	module src/pon2/private/macros2		0
+nim	replaced	pon2/private/macros2.html#replaced,NimNode,NimNode,NimNode	proc replaced(node, before, after: NimNode): NimNode		19
+nim	replace	pon2/private/macros2.html#replace,NimNode,NimNode,NimNode	proc replace(node: var NimNode; before, after: NimNode)		33
+nim	defineExpand	pon2/private/macros2.html#defineExpand.m,untyped,varargs[untyped]	macro defineExpand(macroIdentSuffix: untyped; expandSuffixes: varargs[untyped]): untyped		41
+nim	staticCase	pon2/private/macros2.html#staticCase.m,typed	macro staticCase(caseStmtOrExpr: typed): untyped		109

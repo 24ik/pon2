@@ -1,2 +1,0 @@
-nimTitle	operating	pon2/private/app/simulator/web/operating.html	module src/pon2/private/app/simulator/web/operating		0
-nim	newOperatingNode	pon2/private/app/simulator/web/operating.html#newOperatingNode,Simulator	proc newOperatingNode(simulator: Simulator): VNode		17

@@ -1,9 +1,0 @@
-nimTitle	fieldtype	pon2/core/fieldtype.html	module src/pon2/core/fieldtype		0
-nim	Height	pon2/core/fieldtype.html#Height	const Height		17
-nim	Width	pon2/core/fieldtype.html#Width	const Width		18
-nim	WaterHeight	pon2/core/fieldtype.html#WaterHeight	const WaterHeight		19
-nim	AirHeight	pon2/core/fieldtype.html#AirHeight	const AirHeight		20
-nim	Row	pon2/core/fieldtype.html#Row	type Row		27
-nim	Column	pon2/core/fieldtype.html#Column	type Column		28
-nim	WaterRow	pon2/core/fieldtype.html#WaterRow	type WaterRow		29
-nim	AirRow	pon2/core/fieldtype.html#AirRow	type AirRow		30
