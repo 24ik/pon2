@@ -1,248 +1,281 @@
 ## This module implements Nazo Puyo solvers.
 ##
 
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
+{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[deques, options, sequtils, setutils, tables]
-import ./[nazopuyo]
-import ../core/[field, nazopuyo, pairposition, position, requirement]
-import ../private/[misc]
-import ../private/app/[solve as solveModule]
+import std/[algorithm]
+import ../[core]
+import ../private/[core, macros2, utils]
+import ../private/app/[solve]
+
+when defined(js) or defined(nimsuggest):
+  import std/[dom]
+  import ../private/[strutils2]
+
+  when not defined(pon2.build.worker):
+    import std/[asyncjs, jsconsole, sequtils, sugar]
+    import ../private/[assign3, webworker]
 
 when not defined(js):
+  import std/[os, sequtils, sugar]
+
   {.push warning[Deprecated]: off.}
-  import std/[os, threadpool]
+  import std/[threadpool]
   {.pop.}
-  import suru
 
-export solveModule.SolveAnswer
+type SolveAnswer* = seq[OptPlacement]
+  ## Nazo Puyo answer.
+  ## Elements corresponding to non-`PairPlacement` steps are set to `NonePlacement`.
 
-# ------------------------------------------------
-# Solve
-# ------------------------------------------------
+when not defined(js):
+  proc solveSingleThread[F: TsuField or WaterField](
+      self: SolveNode[F],
+      answers: ptr seq[SolveAnswer],
+      moveCnt: int,
+      goal: Goal,
+      steps: Steps,
+      calcAllAnswers: static bool,
+  ): bool {.inline.} =
+    ## Solves the Nazo Puyo at the node with a single thread.
+    ## This function requires that the field is settled and `answers` is empty.
+    ## `answers` is set in reverse order.
+    ## `result` has no meanings; only used to get FlowVar.
+    # NOTE: non-static arguments should be placed before static ones due to `spawn` bug.
+    self.solveSingleThread(
+      answers[], moveCnt, calcAllAnswers, goal, steps, checkPruneFirst = false
+    )
+    true
 
-proc solve[F: TsuField or WaterField](
-    nazo: NazoPuyo[F],
-    reqKind: static RequirementKind,
-    reqColor: static RequirementColor,
-    showProgress: static bool,
-    earlyStopping: static bool,
-    parallelCount: Positive,
-): seq[SolveAnswer] {.inline.} =
-  ## Solves the nazo puyo.
-  ## `showProgress` and `parallelCount` is ignored on JS backend.
-  if not nazo.requirement.isSupported or nazo.moveCount == 0:
-    return @[]
+  func checkSpawnFinished(
+      futures: seq[FlowVar[bool]],
+      answers: var seq[SolveAnswer],
+      answersSeq: var seq[seq[SolveAnswer]],
+      runningNodeIndices: var set[int16],
+      optPlcmtsSeq: seq[seq[OptPlacement]],
+      calcAllAnswers: static bool,
+  ): bool {.inline.} =
+    ## Checks all the spawned threads and reflects results if they have finished.
+    ## Returns `true` if early-returned.
+    var finishNodeIndices = set[int16]({})
 
-  let rootNode = nazo.initNode
-  if rootNode.canPrune(reqKind, reqColor):
-    return @[]
+    for runningNodeIdx in runningNodeIndices:
+      if not futures[runningNodeIdx].isReady:
+        continue
 
-  let childNodes = rootNode.children(reqKind, reqColor)
+      finishNodeIndices.incl runningNodeIdx
 
-  when defined(js):
-    result = @[]
-    for (child, pos) in childNodes:
-      var childResults = child.solve(nazo.moveCount, reqKind, reqColor, earlyStopping)
-      for res in childResults.mitems:
-        res.addFirst pos
+      let optPlcmts = optPlcmtsSeq[runningNodeIdx]
+      for ans in answersSeq[runningNodeIdx].mitems:
+        ans &= optPlcmts
+        ans.reverse
 
-      result &= childResults
+      when not calcAllAnswers:
+        if answers.len + answersSeq[runningNodeIdx].len > 1:
+          runningNodeIndices.excl finishNodeIndices
+          return true
 
-      when earlyStopping:
-        if result.len > 1:
-          return
-  else:
-    const ParallelSolvingWaitIntervalMs = 10
+    runningNodeIndices.excl finishNodeIndices
+    false
 
-    # setup progress bar
-    when showProgress:
-      var progressBar = initSuruBar()
-      progressBar[0].total = childNodes.len
-      progressBar.setup
+  proc solveMultiThread[F: TsuField or WaterField](
+      self: SolveNode[F],
+      answers: var seq[SolveAnswer],
+      moveCnt: int,
+      calcAllAnswers: static bool,
+      goal: Goal,
+      steps: Steps,
+  ) {.inline.} =
+    ## Solves the Nazo Puyo at the node with multiple threads.
+    ## This function requires that the field is settled and `answers` is empty.
+    const
+      SpawnWaitMs = 25
+      SolveWaitMs = 50
 
-      when earlyStopping:
-        proc shutDownProgressBar() =
-          progressBar.inc progressBar[0].total - progressBar[0].progress
-          progressBar.update
-          progressBar.finish
+    # NOTE: `TargetDepth == 3` is good; see https://github.com/24ik/pon2/issues/198
+    # NOTE: `TargetDepth` should be less than 4 due to the limitations of Nim's built-in
+    # sets, that is used by node indices (22^3 < int16.high < 22^4)
+    const TargetDepth = 3
 
-    # spawn tasks
     var
-      threadsRunning = false.repeat parallelCount
-      futures = newSeq[FlowVar[seq[Deque[Position]]]](parallelCount)
-      results = newSeqOfCap[seq[Deque[Position]]](childNodes.len)
-      positions = newSeq[Position](parallelCount)
-    for (child, pos) in childNodes:
-      var spawned = false
-      while not spawned:
-        for threadIdx in 0 ..< parallelCount:
-          if threadsRunning[threadIdx] and futures[threadIdx].isReady:
-            var answers = ^futures[threadIdx]
-            for answer in answers.mitems:
-              answer.addFirst positions[threadIdx]
-            results.add answers
+      nodes = newSeq[SolveNode[F]]()
+      optPlcmtsSeq = newSeq[seq[OptPlacement]]()
+    self.childrenAtDepth TargetDepth,
+      nodes, optPlcmtsSeq, answers, moveCnt, calcAllAnswers, goal, steps
 
-            threadsRunning[threadIdx] = false
+    for ans in answers.mitems:
+      ans.reverse
 
-            when showProgress:
-              progressBar.inc
-              progressBar.update
+    when not calcAllAnswers:
+      if answers.len > 1:
+        return
 
-            when earlyStopping:
-              if results.mapIt(it.len).sum2 > 1:
-                when showProgress:
-                  shutDownProgressBar()
+    let nodeCnt = nodes.len
+    var
+      answersSeq = collect:
+        for _ in 1 .. nodeCnt:
+          newSeq[SolveAnswer]()
+      futures = newSeqOfCap[FlowVar[bool]](nodeCnt)
+      runningNodeIndices = set[int16]({})
 
-                return results.concat
+    var nodeIdx = 0'i16
+    while nodeIdx < nodeCnt:
+      if preferSpawn():
+        futures.add spawn nodes[nodeIdx].solveSingleThread(
+          answersSeq[nodeIdx].addr, moveCnt, goal, steps, calcAllAnswers
+        )
 
-          if not threadsRunning[threadIdx]:
-            futures[threadIdx] =
-              spawn child.solve(nazo.moveCount, reqKind, reqColor, earlyStopping)
-            spawned = true
-            threadsRunning[threadIdx] = true
-            positions[threadIdx] = pos
+        runningNodeIndices.incl nodeIdx
+        nodeIdx.inc
 
-            break
+        continue
 
-          sleep ParallelSolvingWaitIntervalMs
-
-    # wait running tasks
-    var runningThreadIdxes =
-      (0'i16 ..< parallelCount.int16).toSeq.filterIt(threadsRunning[it]).toSet2
-    while runningThreadIdxes.card > 0:
-      for threadIdx in runningThreadIdxes:
-        if futures[threadIdx].isReady:
-          var answers = ^futures[threadIdx]
-          for answer in answers.mitems:
-            answer.addFirst positions[threadIdx]
-          results.add answers
-
-          runningThreadIdxes.excl threadIdx
-
-          when showProgress:
-            progressBar.inc
-            progressBar.update
-
-          when earlyStopping:
-            if results.mapIt(it.len).sum2 > 1:
-              when showProgress:
-                shutDownProgressBar()
-
-              return results.concat
-
-      sleep ParallelSolvingWaitIntervalMs
-
-    result = results.concat
-
-    when showProgress:
-      progressBar.finish
-
-proc solve[F: TsuField or WaterField](
-    nazo: NazoPuyo[F],
-    reqKind: static RequirementKind,
-    showProgress: static bool,
-    earlyStopping: static bool,
-    parallelCount: Positive,
-): seq[SolveAnswer] {.inline.} =
-  ## Solves the nazo puyo.
-  ## `showProgress` and `parallelCount` is ignored on JS backend.
-  assert reqKind in {
-    Clear, DisappearCount, DisappearCountMore, ChainClear, ChainMoreClear,
-    DisappearCountSametime, DisappearCountMoreSametime, DisappearPlace,
-    DisappearPlaceMore, DisappearConnect, DisappearConnectMore,
-  }
-
-  result =
-    case nazo.requirement.color
-    of RequirementColor.All:
-      nazo.solve(
-        reqKind, RequirementColor.All, showProgress, earlyStopping, parallelCount
+      let earlyReturned {.used.} = futures.checkSpawnFinished(
+        answers, answersSeq, runningNodeIndices, optPlcmtsSeq, calcAllAnswers
       )
-    of RequirementColor.Red:
-      nazo.solve(
-        reqKind, RequirementColor.Red, showProgress, earlyStopping, parallelCount
+      when not calcAllAnswers:
+        if earlyReturned:
+          break
+
+      sleep SpawnWaitMs
+
+    while runningNodeIndices.card > 0:
+      discard futures.checkSpawnFinished(
+        answers, answersSeq, runningNodeIndices, optPlcmtsSeq, calcAllAnswers
       )
-    of RequirementColor.Green:
-      nazo.solve(
-        reqKind, RequirementColor.Green, showProgress, earlyStopping, parallelCount
-      )
-    of RequirementColor.Blue:
-      nazo.solve(
-        reqKind, RequirementColor.Blue, showProgress, earlyStopping, parallelCount
-      )
-    of RequirementColor.Yellow:
-      nazo.solve(
-        reqKind, RequirementColor.Yellow, showProgress, earlyStopping, parallelCount
-      )
-    of RequirementColor.Purple:
-      nazo.solve(
-        reqKind, RequirementColor.Purple, showProgress, earlyStopping, parallelCount
-      )
-    of RequirementColor.Garbage:
-      nazo.solve(
-        reqKind, RequirementColor.Garbage, showProgress, earlyStopping, parallelCount
-      )
-    of RequirementColor.Color:
-      nazo.solve(
-        reqKind, RequirementColor.Color, showProgress, earlyStopping, parallelCount
-      )
+      sleep SolveWaitMs
+
+    answers &= answersSeq.concat
 
 proc solve*[F: TsuField or WaterField](
-    nazo: NazoPuyo[F],
-    showProgress: static bool = false,
-    earlyStopping: static bool = false,
-    parallelCount: Positive = processorCount(),
+    nazo: NazoPuyo[F], calcAllAnswers: static bool = true
 ): seq[SolveAnswer] {.inline.} =
-  ## Solves the nazo puyo.
-  ## `showProgress` and `parallelCount` is ignored on JS backend.
-  const DummyColor = RequirementColor.All
+  ## Solves the Nazo Puyo.
+  ## A single thread is used on JS backend; otherwise multiple threads are used.
+  ## This function requires that the field is settled.
+  if not nazo.goal.isSupported or nazo.puyoPuyo.steps.len == 0:
+    return @[]
 
-  result =
-    case nazo.requirement.kind
-    of Clear:
-      nazo.solve(Clear, showProgress, earlyStopping, parallelCount)
-    of DisappearColor:
-      nazo.solve(DisappearColor, DummyColor, showProgress, earlyStopping, parallelCount)
-    of DisappearColorMore:
-      nazo.solve(
-        DisappearColorMore, DummyColor, showProgress, earlyStopping, parallelCount
+  let
+    root = SolveNode[F].init nazo.puyoPuyo
+    moveCnt = nazo.puyoPuyo.steps.len
+  var answers = newSeq[SolveAnswer]()
+
+  when defined(js):
+    root.solveSingleThread(
+      answers,
+      moveCnt,
+      calcAllAnswers,
+      nazo.goal,
+      nazo.puyoPuyo.steps,
+      checkPruneFirst = true,
+    )
+
+    for ans in answers.mitems:
+      ans.reverse
+  else:
+    root.solveMultiThread(
+      answers, moveCnt, calcAllAnswers, nazo.goal, nazo.puyoPuyo.steps
+    )
+
+  answers
+
+# ------------------------------------------------
+# Solve - Async
+# ------------------------------------------------
+
+when defined(js) or defined(nimsuggest):
+  when not defined(pon2.build.worker):
+    func initCompleteHandler(
+        nodeIdx: int,
+        optPlcmtsSeq: seq[seq[OptPlacement]],
+        answersSeqRef: ref seq[seq[SolveAnswer]],
+        progressRef: ref tuple[now, total: int],
+    ): Res[seq[string]] -> void =
+      ## Returns a handler called after a web worker job completes.
+      (res: Res[seq[string]]) => (
+        block:
+          if res.isOk:
+            let answersRes = res.unsafeValue.parseSolveAnswers
+            if answersRes.isOk:
+              var answers = answersRes.unsafeValue
+              for ans in answers.mitems:
+                ans &= optPlcmtsSeq[nodeIdx]
+                ans.reverse
+
+              answersSeqRef[][nodeIdx].assign answers
+            else:
+              console.error answersRes.error.cstring
+          else:
+            console.error res.error.cstring
+
+          if not progressRef.isNil:
+            progressRef[].now.inc
       )
-    of DisappearCount:
-      nazo.solve(DisappearCount, showProgress, earlyStopping, parallelCount)
-    of DisappearCountMore:
-      nazo.solve(DisappearCountMore, showProgress, earlyStopping, parallelCount)
-    of Chain:
-      nazo.solve(Chain, DummyColor, showProgress, earlyStopping, parallelCount)
-    of ChainMore:
-      nazo.solve(ChainMore, DummyColor, showProgress, earlyStopping, parallelCount)
-    of ChainClear:
-      nazo.solve(ChainClear, showProgress, earlyStopping, parallelCount)
-    of ChainMoreClear:
-      nazo.solve(ChainMoreClear, showProgress, earlyStopping, parallelCount)
-    of DisappearColorSametime:
-      nazo.solve(
-        DisappearColorSametime, DummyColor, showProgress, earlyStopping, parallelCount
-      )
-    of DisappearColorMoreSametime:
-      nazo.solve(
-        DisappearColorMoreSametime, DummyColor, showProgress, earlyStopping,
-        parallelCount,
-      )
-    of DisappearCountSametime:
-      nazo.solve(DisappearCountSametime, showProgress, earlyStopping, parallelCount)
-    of DisappearCountMoreSametime:
-      nazo.solve(DisappearCountMoreSametime, showProgress, earlyStopping, parallelCount)
-    of DisappearPlace:
-      nazo.solve(DisappearPlace, showProgress, earlyStopping, parallelCount)
-    of DisappearPlaceMore:
-      nazo.solve(DisappearPlaceMore, showProgress, earlyStopping, parallelCount)
-    of DisappearConnect:
-      nazo.solve(DisappearConnect, showProgress, earlyStopping, parallelCount)
-    of DisappearConnectMore:
-      nazo.solve(DisappearConnectMore, showProgress, earlyStopping, parallelCount)
+
+    proc asyncSolve*[F: TsuField or WaterField](
+        nazo: NazoPuyo[F],
+        progressRef: ref tuple[now, total: int],
+        calcAllAnswers: static bool = true,
+    ): Future[seq[SolveAnswer]] {.inline, async.} =
+      ## Solves the Nazo Puyo asynchronously with web workers.
+      ## This function requires that the field is settled.
+      # NOTE: 2 and 3 show similar performance; 2 is chosen for faster `childrenAtDepth`
+      const TargetDepth = 2
+
+      if not nazo.goal.isSupported or nazo.puyoPuyo.steps.len == 0:
+        return newSeq[SolveAnswer]()
+
+      let rootNode = SolveNode[F].init nazo.puyoPuyo
+
+      var
+        nodes = newSeq[SolveNode[F]]()
+        optPlcmtsSeq = newSeq[seq[OptPlacement]]()
+        answers = newSeq[SolveAnswer]()
+
+      rootNode.childrenAtDepth TargetDepth,
+        nodes, optPlcmtsSeq, answers, nazo.puyoPuyo.steps.len, calcAllAnswers,
+        nazo.goal, nazo.puyoPuyo.steps
+
+      for ans in answers.mitems:
+        ans.reverse
+
+      when not calcAllAnswers:
+        if answers.len > 1:
+          return newSeq[SolveAnswer]()
+
+      let nodeCnt = nodes.len
+      if not progressRef.isNil:
+        progressRef[].now.assign 0
+        progressRef[].total.assign nodeCnt
+      let answersSeqRef = new seq[seq[SolveAnswer]]
+      answersSeqRef[] = collect:
+        for _ in 1 .. nodeCnt:
+          newSeq[SolveAnswer]()
+
+      {.push warning[Uninit]: off.}
+      {.push warning[ProveInit]: off.}
+      let futures = collect:
+        for nodeIdx, node in nodes:
+          webWorkerPool
+          .run(node.toStrs(nazo.goal, nazo.puyoPuyo.steps))
+          .then(initCompleteHandler(nodeIdx, optPlcmtsSeq, answersSeqRef, progressRef))
+          .catch((e: Error) => console.error e)
+      {.pop.}
+      {.pop.}
+      for future in futures:
+        await future
+
+      return answersSeqRef[].concat
+
+    proc asyncSolve*[F: TsuField or WaterField](
+        nazo: NazoPuyo[F], calcAllAnswers: static bool = true
+    ): Future[seq[SolveAnswer]] {.inline.} =
+      ## Solves the Nazo Puyo asynchronously with web workers.
+      ## This function requires that the field is settled.
+      let progressRef = new tuple[now, total: int]
+      progressRef[] = (0, 0)
+
+      nazo.asyncSolve(progressRef, calcAllAnswers)

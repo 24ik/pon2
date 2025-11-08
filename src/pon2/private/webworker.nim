@@ -1,111 +1,142 @@
-## This module implements the web worker.
+## This module implements web workers.
 ##
 ## Compile Options:
-## | Option                         | Description                  | Default         |
-## | ------------------------------ | ---------------------------- | --------------- |
-## | `-d:pon2.workerfilename=<str>` | File name of the web worker. | `worker.min.js` |
-##
-## Outline of the processing flow:
-##
-## 1. The main file launches the web worker by `newWorker()`.
-## 1. The main file assigns the handler that executed after the task is done by
-##     `Worker.completeHandler=()`.
-## 1. The main file makes the worker do the task by `Worker.run()`. The task is
-##     implemented in the worker file by `assignToWorker()`.
-## 1. The handler is executed.
+## | Option                    | Description            | Default           |
+## | ------------------------- | ---------------------- | ----------------- |
+## | `-d:pon2.webworker=<str>` | Web workers directory. | `./worker.min.js` |
 ##
 
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
+{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[jsffi, strformat, strutils, sugar]
+import std/[asyncjs, jsffi, sequtils, strformat, sugar]
+import ./[assign3, deques2, results2, strutils2, utils]
+
+when not defined(pon2.build.worker):
+  import ./[math2]
 
 type
-  WorkerReturnCode* {.pure.} = enum
-    ## Return code of the worker task.
-    Success = "success"
-    Failure = "failure"
+  WebWorkerTask* = ((args: seq[string]) {.raises: [], gcsafe.} -> Res[seq[string]])
+    ## Task executed by web workers.
 
-  WorkerTask* =
-    seq[string] -> tuple[returnCode: WorkerReturnCode, messages: seq[string]]
-    ## Task executed in a new thread.
+  WebWorker = object ## Web worker.
+    workerObj: JsObject
+    running: bool
 
-  WorkerCompleteHandler* = (returnCode: WorkerReturnCode, messages: seq[string]) -> void
-    ## Handler executed after the `WorkerTask` completed.
-
-  Worker* = ref object ## Web worker.
-    running*: bool
-    webWorker: JsObject
+  WebWorkerPool* = object ## Web worker pool.
+    workerRefs: seq[ref WebWorker]
 
 const
-  WorkerFileName {.define: "pon2.workerfilename".} = "worker.min.js"
-
-  DefaultWorkerTask*: WorkerTask = (args: seq[string]) => (Success, newSeq[string](0))
-  DefaultWorkerCompleteHandler*: WorkerCompleteHandler =
-    (returnCode: WorkerReturnCode, messages: seq[string]) => (discard)
-
-  HeaderSep = "|-<pon2-webworker-header-sep>-|"
-  MessageSep = "|-<pon2-webworker-sep>-|"
-
-# ------------------------------------------------
-# Task
-# ------------------------------------------------
-
-proc getSelf(): JsObject {.importjs: "(self)".} ## Returns the web worker object.
-
-func split2(str: string, sep: string): seq[string] {.inline.} =
-  ## Splits `str` by `sep`.
-  ## If `str == ""`, returns `@[]`
-  ## (unlike `strutils.split`; it returns `@[""]`).
-  if str == "":
-    @[]
-  else:
-    str.split sep
-
-proc assignToWorker*(task: WorkerTask) {.inline.} =
-  ## Assigns the task to the worker.
-  proc runTask(event: JsObject) =
-    let (returnCode, messages) = task(($event.data.to cstring).split2 MessageSep)
-    getSelf().postMessage cstring &"{returnCode}{HeaderSep}{messages.join MessageSep}"
-
-  getSelf().onmessage = runTask
-
-proc run*(self: Worker, args: varargs[string]) {.inline.} =
-  ## Runs the task and sends the message to the caller of the worker.
-  self.running = true
-  self.webWorker.postMessage cstring args.join MessageSep
+  WebWorkerPath {.define: "pon2.webworker".} = "./worker.min.js"
+  MsgSep = "<pon2-webworker-sep>"
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
-proc newWebWorker(): JsObject {.importjs: &"new Worker('{WorkerFileName}')".}
-  ## Returns the web worker launched by the caller.
+const
+  OkStr = "ok"
+  ErrStr = "err"
 
-proc `completeHandler=`*(self: Worker, handler: WorkerCompleteHandler) {.inline.} =
-  proc runHandler(event: JsObject) =
-    self.running = false
+proc newWorkerObj(): JsObject {.inline, importjs: "new Worker('{WebWorkerPath}')".fmt.}
 
-    let messages = ($event.data.to cstring).split HeaderSep
-    if messages.len != 2:
-      echo "Invalid arguments are passed to the complete handler: ", $messages
-      return
+proc init(T: type WebWorker): T {.inline.} =
+  T(workerObj: newWorkerObj(), running: false)
 
-    case messages[0]
-    of $Success:
-      handler(Success, messages[1].split2 MessageSep)
-    of $Failure:
-      echo "The task failed; error message: ", messages[1]
-    else:
-      echo "Invalid return code is passed to the complete handler: ", messages[0]
+proc init(T: type WebWorkerPool, workerCnt = 1): T {.inline.} =
+  let workerRefs = collect:
+    for _ in 1 .. workerCnt:
+      let workerRef = new WebWorker
+      workerRef[] = WebWorker.init
+      workerRef
 
-  self.webWorker.onmessage = runHandler
+  T(workerRefs: workerRefs)
 
-proc newWorker*(): Worker {.inline.} =
-  ## Returns the worker.
-  result = Worker(running: false, webWorker: newWebWorker())
-  result.completeHandler = DefaultWorkerCompleteHandler
+# ------------------------------------------------
+# Caller
+# ------------------------------------------------
+
+const PoolPollingMs = 100
+
+func parseRes(str: string): Res[seq[string]] {.inline.} =
+  ## Returns the result of the web worker's task.
+  let errMsg = "Invalid result: {str}".fmt
+
+  let strs = str.split2(MsgSep, 1)
+  if strs.len != 2:
+    return err errMsg
+
+  case strs[0]
+  of OkStr:
+    ok strs[1].split2 MsgSep
+  of ErrStr:
+    err strs[1].split2(MsgSep).join "\n"
+  else:
+    err errMsg
+
+proc run(
+    self: ref WebWorker, args: varargs[string]
+): Future[Res[seq[string]]] {.inline.} =
+  ## Runs the task.
+  ## If the worker is running, returns an error.
+  if self[].running:
+    return newPromise (resolve: (response: Res[seq[string]]) -> void) =>
+      Res[seq[string]].err("Worker is running").resolve
+
+  self[].running.assign true
+
+  let argsSeq = args.toSeq
+  proc handler(resolve: (response: Res[seq[string]]) -> void) =
+    self[].workerObj.onmessage =
+      (ev: JsObject) => (
+        block:
+          ($ev.data.to cstring).parseRes.resolve
+          self[].running.assign false
+      )
+
+    self[].workerObj.postMessage argsSeq.join(MsgSep).cstring
+
+  handler.newPromise
+
+proc run*(
+    self: WebWorkerPool, args: varargs[string]
+): Future[Res[seq[string]]] {.async.} =
+  ## Runs the task.
+  var freeWorkerIdx = -1
+  block waiting:
+    while freeWorkerIdx < 0:
+      for workerIdx, workerRef in self.workerRefs:
+        if not workerRef[].running:
+          freeWorkerIdx.assign workerIdx
+          break waiting
+
+      await sleep PoolPollingMs
+
+  return await self.workerRefs[freeWorkerIdx].run args
+
+# ------------------------------------------------
+# Callee
+# ------------------------------------------------
+
+proc getSelf(): JsObject {.inline, importjs: "(self)".} ## Returns the web worker object.
+
+func toStr(res: Res[seq[string]]): string {.inline.} =
+  ## Returns the string representation of the task result.
+  if res.isOk:
+    "{OkStr}{MsgSep}{res.unsafeValue.join MsgSep}".fmt
+  else:
+    "{ErrStr}{MsgSep}{res.error}".fmt
+
+proc register*(task: WebWorkerTask) {.inline.} =
+  ## Registers the task to the web worker.
+  getSelf().onmessage =
+    (event: JsObject) =>
+    getSelf().postMessage ($event.data.to cstring).split2(MsgSep).task.toStr.cstring
+
+when not defined(pon2.build.worker):
+  let webWorkerPool* = WebWorkerPool.init getNavigator().hardwareConcurrency
+  .to(int)
+  .ceilDiv(2)
+  .clamp(1, 16)

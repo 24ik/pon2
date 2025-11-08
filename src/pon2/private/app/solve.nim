@@ -1,595 +1,938 @@
-## This module implements nodes of solution search tree.
+## This module implements helpers for Nazo Puyo solving.
 ##
 
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
+{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[deques, options, sequtils, setutils, strutils, sugar, tables, uri]
-import ../[misc]
-import ../core/[mark]
-import
-  ../../core/[
-    cell, field, fqdn, moveresult, nazopuyo, pair, pairposition, position, puyopuyo,
-    requirement,
-  ]
+import std/[sequtils, typetraits]
+import ../../[core]
+import ../../private/[assign3, core, macros2, math2, staticfor2]
 
-type
-  SolveAnswer* = Deque[Position] ## Nazo Puyo answer.
+when defined(js) or defined(nimsuggest):
+  import std/[strformat, sugar]
+  import ../../private/[results2, strutils2]
 
-  Node*[F: TsuField or WaterField] = object ## Node of solution search tree.
-    nazoPuyo: NazoPuyo[F]
-    moveResult: MoveResult
+type SolveNode*[F: TsuField or WaterField] = object ## Node of solutions search tree.
+  depth: int
 
-    # cumulative data
-    disappearedColors: set[ColorPuyo]
-    disappearedCount: int
+  field: F
+  moveResult: MoveResult
 
-    # number of color puyos that do not disappear yet
-    fieldCounts: array[ColorPuyo, int]
-    pairsCounts: array[ColorPuyo, int]
-    garbageCount: int
+  popColors: set[Cell]
+  popCnt: int
+
+  fieldCnts: array[Cell, int]
+  stepsCnts: array[Cell, int]
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
-func initNode*[F: TsuField or WaterField](nazo: NazoPuyo[F]): Node[F] {.inline.} =
-  ## Returns the root node of the nazo puyo.
-  result = Node[F](
-    nazoPuyo: nazo,
-    moveResult: initMoveResult(0, [0, 0, 0, 0, 0, 0, 0]),
-    disappearedColors: {},
-    disappearedCount: 0,
-    fieldCounts: [0, 0, 0, 0, 0],
-    pairsCounts: [0, 0, 0, 0, 0],
-    garbageCount: nazo.puyoPuyo.field.garbageCount,
+func init[F: TsuField or WaterField](
+    T: type SolveNode[F],
+    depth: int,
+    field: F,
+    moveRes: MoveResult,
+    popColors: set[Cell],
+    popCnt: int,
+    fieldCnts, stepsCnts: array[Cell, int],
+): T {.inline.} =
+  T(
+    depth: depth,
+    field: field,
+    moveResult: moveRes,
+    popColors: popColors,
+    popCnt: popCnt,
+    fieldCnts: fieldCnts,
+    stepsCnts: stepsCnts,
   )
 
-  for color in ColorPuyo:
-    result.fieldCounts[color] = nazo.puyoPuyo.field.puyoCount color
-    result.pairsCounts[color] = nazo.puyoPuyo.pairsPositions.puyoCount color
+func init*[F: TsuField or WaterField](
+    T: type SolveNode[F], puyoPuyo: PuyoPuyo[F]
+): T {.inline.} =
+  var fieldCnts {.noinit.}, stepsCnts {.noinit.}: array[Cell, int]
+  fieldCnts[Cell.None] = 0
+  stepsCnts[Cell.None] = 0
+  staticFor(cell2, Hard .. Cell.Purple):
+    fieldCnts[cell2].assign puyoPuyo.field.cellCnt cell2
+    stepsCnts[cell2].assign puyoPuyo.steps.cellCnt cell2
 
-# ------------------------------------------------
-# Property
-# ------------------------------------------------
-
-func colorCount[F: TsuField or WaterField](
-    node: Node[F], color: ColorPuyo
-): int {.inline.} =
-  ## Returns the number of `color` puyos that do not disappear yet.
-  node.fieldCounts[color] + node.pairsCounts[color]
-
-func isLeaf[F: TsuField or WaterField](node: Node[F]): bool {.inline.} =
-  ## Returns `true` if the node is a leaf.
-  node.nazoPuyo.puyoPuyo.movingCompleted or node.nazoPuyo.puyoPuyo.field.isDead
+  T.init(0, puyoPuyo.field, static(MoveResult.init), {}, 0, fieldCnts, stepsCnts)
 
 # ------------------------------------------------
 # Child
 # ------------------------------------------------
 
-const ReqColorToPuyo: array[RequirementColor, Puyo] = [
-  Puyo.low, Cell.Red, Cell.Green, Cell.Blue, Cell.Yellow, Cell.Purple, Cell.Garbage,
-  Puyo.low,
-]
+const
+  DummyCell = Cell.low
+  GoalColorToCell: array[GoalColor, Cell] = [
+    DummyCell, Cell.Red, Cell.Green, Cell.Blue, Cell.Yellow, Cell.Purple, DummyCell,
+    DummyCell,
+  ]
 
-func child[F: TsuField or WaterField](
-    node: Node[F],
-    pos: Position,
-    reqKind: static RequirementKind,
-    reqColor: static RequirementColor,
-): Node[F] {.inline.} =
-  ## Returns the child node with the `pos` edge.
-  result = node
-  result.moveResult =
-    when reqKind in {
-      Clear, DisappearColor, DisappearColorMore, DisappearCount, DisappearCountMore,
-      Chain, ChainMore, ChainClear, ChainMoreClear,
-    }:
-      result.nazoPuyo.puyoPuyo.move0 pos
-    elif reqKind in {
-      DisappearColorSametime, DisappearColorMoreSametime, DisappearCountSametime,
-      DisappearCountMoreSametime,
-    }:
-      result.nazoPuyo.puyoPuyo.move1 pos
+template childImpl[F: TsuField or WaterField](
+    self: SolveNode[F],
+    kind: static GoalKind,
+    color: static GoalColor,
+    step: Step,
+    stepKind: static StepKind,
+    moveBody: untyped,
+): SolveNode[F] =
+  ## Returns the child node with `childField` injected.
+  ## This function requires that the field is settled.
+  ## `stepKind` is used instead of `step.kind`.
+  var childField {.inject.} = self.field
+
+  let moveRes = moveBody
+
+  let childPopColors = staticCase:
+    case kind
+    of AccColor, AccColorMore:
+      self.popColors + moveRes.colors
     else:
-      result.nazoPuyo.puyoPuyo.move2 pos
+      set[Cell]({})
 
-  # update cumulative data
-  when reqKind in {DisappearColor, DisappearColorMore}:
-    result.disappearedColors.incl result.moveResult.colors
-  elif reqKind in {DisappearCount, DisappearCountMore}:
-    when reqColor == RequirementColor.All:
-      result.disappearedCount.inc result.moveResult.puyoCount
-    elif reqColor == RequirementColor.Color:
-      result.disappearedCount.inc result.moveResult.colorCount
-    elif reqColor == RequirementColor.Garbage:
-      result.disappearedCount.inc result.moveResult.garbageCount
+  let childPopCnt = staticCase:
+    case kind
+    of AccCnt, AccCntMore:
+      let newCnt = staticCase:
+        case color
+        of All:
+          moveRes.puyoCnt
+        of Colors:
+          moveRes.colorPuyoCnt
+        of GoalColor.Garbages:
+          moveRes.garbagesCnt
+        else:
+          moveRes.cellCnt static(GoalColorToCell[color])
+      self.popCnt.succ newCnt
     else:
-      result.disappearedCount.inc result.moveResult.puyoCount ReqColorToPuyo[reqColor]
+      0
 
-  # update fieldCounts, pairsCounts
-  when reqKind notin {DisappearColor, DisappearColorMore}:
-    when reqKind notin ColorKinds or
-        reqColor in
-        {RequirementColor.All, RequirementColor.Color, RequirementColor.Garbage}:
-      for color in ColorPuyo:
-        result.fieldCounts[color] = result.nazoPuyo.puyoPuyo.field.puyoCount color
+  var childFieldCnts = self.fieldCnts
+  when kind in ColorKinds and color in GoalColor.Red .. GoalColor.Purple:
+    const GoalCell = GoalColorToCell[color]
+    childFieldCnts[GoalCell].assign self.fieldCnts[GoalCell].pred moveRes.cellCnt GoalCell
+  else:
+    staticFor(cell2, Cell.Red .. Cell.Purple):
+      childFieldCnts[cell2].dec moveRes.cellCnt cell2
+
+  var childStepsCnts = self.stepsCnts
+  when stepKind == PairPlacement:
+    let
+      pivotCell = step.pair.pivot
+      rotorCell = step.pair.rotor
+
+    childFieldCnts[pivotCell].inc
+    childFieldCnts[rotorCell].inc
+    childStepsCnts[pivotCell].dec
+    childStepsCnts[rotorCell].dec
+
+  when kind in {Clear, AccCnt, AccCntMore, ClearChain, ClearChainMore, Cnt, CntMore} and
+      color in {All, GoalColor.Garbages}:
+    let stepGarbageHardCnt, isHard, isGarbage: int
+    when stepKind == StepKind.Garbages:
+      stepGarbageHardCnt = step.garbagesCnt
+      isHard = step.dropHard.int
+      isGarbage = (not step.dropHard).int
     else:
-      let puyo = ReqColorToPuyo[reqColor]
-      result.fieldCounts[puyo] = result.nazoPuyo.puyoPuyo.field.puyoCount puyo
+      stepGarbageHardCnt = 0
+      isHard = 0
+      isGarbage = 0
 
-    let movePair = node.nazoPuyo.puyoPuyo.pairsPositions.peekFirst.pair
-    result.pairsCounts[movePair.axis].dec
-    result.pairsCounts[movePair.child].dec
+    childFieldCnts[Hard].dec moveRes.popCnts[Hard] + moveRes.hardToGarbageCnt -
+      stepGarbageHardCnt * isHard
+    childFieldCnts[Garbage].dec moveRes.popCnts[Garbage] - moveRes.hardToGarbageCnt -
+      stepGarbageHardCnt * isGarbage
 
-  # update garbageCount
-  when reqKind in {
-    Clear, DisappearCount, DisappearCountMore, ChainClear, ChainMoreClear,
-    DisappearCountSametime, DisappearCountMoreSametime,
-  }:
-    when reqColor in {RequirementColor.All, RequirementColor.Garbage}:
-      result.garbageCount.dec result.moveResult.garbageCount
+    when stepKind == StepKind.Garbages:
+      childStepsCnts[Garbage.pred isHard].dec stepGarbageHardCnt
 
-func children*[F: TsuField or WaterField](
-    node: Node[F], reqKind: static RequirementKind, reqColor: static RequirementColor
-): seq[tuple[node: Node[F], position: Position]] {.inline.} =
+  when stepKind == Rotate:
+    staticFor(col, Col):
+      let cell = self.field[Row0, col]
+      childFieldCnts[cell].dec (cell != Cell.None).int
+
+  SolveNode[F].init(
+    self.depth.succ, childField, moveRes, childPopColors, childPopCnt, childFieldCnts,
+    childStepsCnts,
+  )
+
+func childPairPlcmt[F: TsuField or WaterField](
+    self: SolveNode[F],
+    kind: static GoalKind,
+    color: static GoalColor,
+    step: Step,
+    plcmt: Placement,
+): SolveNode[F] {.inline.} =
+  ## Returns the child node with the `step` edge.
+  ## This function requires that the field is settled.
+  self.childImpl(kind, color, step, PairPlacement):
+    childField.move(
+      step.pair, plcmt, static(kind in {Place, PlaceMore, Conn, ConnMore})
+    )
+
+func childGarbages[F: TsuField or WaterField](
+    self: SolveNode[F], kind: static GoalKind, color: static GoalColor, step: Step
+): SolveNode[F] {.inline.} =
+  ## Returns the child node with the `step` edge.
+  ## This function requires that the field is settled.
+  self.childImpl(kind, color, step, StepKind.Garbages):
+    childField.move(
+      step.cnts, step.dropHard, static(kind in {Place, PlaceMore, Conn, ConnMore})
+    )
+
+func childRotate[F: TsuField or WaterField](
+    self: SolveNode[F], kind: static GoalKind, color: static GoalColor, step: Step
+): SolveNode[F] {.inline.} =
+  ## Returns the child node with the `step` edge.
+  self.childImpl(kind, color, step, Rotate):
+    childField.move(
+      cross = step.cross, static(kind in {Place, PlaceMore, Conn, ConnMore})
+    )
+
+func children[F: TsuField or WaterField](
+    self: SolveNode[F], kind: static GoalKind, color: static GoalColor, step: Step
+): seq[tuple[node: SolveNode[F], optPlacement: OptPlacement]] {.inline.} =
   ## Returns the children of the node.
-  let positions =
-    if node.nazoPuyo.puyoPuyo.pairsPositions.peekFirst.pair.isDouble:
-      node.nazoPuyo.puyoPuyo.field.validDoublePositions
-    else:
-      node.nazoPuyo.puyoPuyo.field.validPositions
+  ## This function requires that the field is settled.
+  ## `optPlacement` is set to `NonePlacement` if the edge is non-`PairPlacement`.
+  case step.kind
+  of PairPlacement:
+    let plcmts =
+      if step.pair.isDbl: self.field.validDblPlacements else: self.field.validPlacements
 
-  result = positions.mapIt (node: node.child(it, reqKind, reqColor), position: it)
+    plcmts.mapIt (self.childPairPlcmt(kind, color, step, it), OptPlacement.ok it)
+  of StepKind.Garbages:
+    @[(self.childGarbages(kind, color, step), NonePlacement)]
+  of Rotate:
+    @[(self.childRotate(kind, color, step), NonePlacement)]
 
 # ------------------------------------------------
 # Accept
 # ------------------------------------------------
 
+func cellCnt[F: TsuField or WaterField](
+    self: SolveNode[F], cell: Cell
+): int {.inline.} =
+  ## Returns the number of `cell` in the node.
+  self.fieldCnts[cell] + self.stepsCnts[cell]
+
+func garbagesCnt[F: TsuField or WaterField](self: SolveNode[F]): int {.inline.} =
+  ## Returns the number of hard and garbage puyos in the node.
+  (self.fieldCnts[Hard] + self.fieldCnts[Garbage]) +
+    (self.stepsCnts[Hard] + self.stepsCnts[Garbage])
+
 func isAccepted[F: TsuField or WaterField](
-    node: Node[F], reqKind: static RequirementKind, reqColor: static RequirementColor
+    self: SolveNode[F], goal: Goal, kind: static GoalKind, color: static GoalColor
 ): bool {.inline.} =
-  ## Returns `true` if the requirement is satisfied.
-  # check if the field is clear
-  when reqKind in {Clear, ChainClear, ChainMoreClear}:
-    let fieldCount: int
-    when reqColor == RequirementColor.All:
-      fieldCount = node.fieldCounts.sum2 + node.garbageCount
-    elif reqColor == RequirementColor.Color:
-      fieldCount = node.fieldCounts.sum2
-    elif reqColor == RequirementColor.Garbage:
-      fieldCount = node.garbageCount
+  ## Returns `true` if the goal is satisfied.
+  # check clear
+  staticCase:
+    case kind
+    of Clear, ClearChain, ClearChainMore:
+      let fieldCnt = staticCase:
+        case color
+        of All:
+          self.fieldCnts.sum2
+        of Colors:
+          self.fieldCnts.sum2 Cell.Red .. Cell.Purple
+        of GoalColor.Garbages:
+          self.fieldCnts[Hard] + self.fieldCnts[Garbage]
+        else:
+          self.fieldCnts[static(GoalColorToCell[color])]
+
+      if fieldCnt > 0:
+        return false
     else:
-      fieldCount = node.fieldCounts[ReqColorToPuyo[reqColor]]
+      discard
 
-    if fieldCount > 0:
-      return false
-
-  # check if the requirement is satisfied
-  when reqKind == Clear:
-    result = true
-  elif reqKind in {DisappearColor, DisappearColorMore}:
-    result =
-      node.nazoPuyo.requirement.disappearColorSatisfied(node.disappearedColors, reqKind)
-  elif reqKind in {DisappearCount, DisappearCountMore}:
-    result =
-      node.nazoPuyo.requirement.disappearCountSatisfied(node.disappearedCount, reqKind)
-  elif reqKind in {Chain, ChainMore, ChainClear, ChainMoreClear}:
-    result = node.nazoPuyo.requirement.chainSatisfied(node.moveResult, reqKind)
-  elif reqKind in {DisappearColorSametime, DisappearColorMoreSametime}:
-    result = node.nazoPuyo.requirement.disappearColorSametimeSatisfied(
-      node.moveResult, reqKind
-    )
-  elif reqKind in {DisappearCountSametime, DisappearCountMoreSametime}:
-    result = node.nazoPuyo.requirement.disappearCountSametimeSatisfied(
-      node.moveResult, reqKind, reqColor
-    )
-  elif reqKind in {DisappearPlace, DisappearPlaceMore}:
-    result = node.nazoPuyo.requirement.disappearPlaceSatisfied(
-      node.moveResult, reqKind, reqColor
-    )
-  elif reqKind in {DisappearConnect, DisappearConnectMore}:
-    result = node.nazoPuyo.requirement.disappearConnectSatisfied(
-      node.moveResult, reqKind, reqColor
-    )
-  else:
-    assert false
+  # check kind-specific
+  staticCase:
+    case kind
+    of Clear:
+      true
+    of AccColor, AccColorMore:
+      goal.isSatisfiedAccColor(self.popColors, kind)
+    of AccCnt, AccCntMore:
+      goal.isSatisfiedAccCnt(self.popCnt, kind)
+    of Chain, ChainMore, ClearChain, ClearChainMore:
+      goal.isSatisfiedChain(self.moveResult, kind)
+    of Color, ColorMore:
+      goal.isSatisfiedColor(self.moveResult, kind)
+    of Cnt, CntMore:
+      goal.isSatisfiedCnt(self.moveResult, kind, color)
+    of Place, PlaceMore:
+      goal.isSatisfiedPlace(self.moveResult, kind, color)
+    of Conn, ConnMore:
+      goal.isSatisfiedConn(self.moveResult, kind, color)
 
 # ------------------------------------------------
 # Prune
 # ------------------------------------------------
 
-func filter4[T: SomeNumber or Natural](x: T): T {.inline.} =
-  ## If `x` is equal or greater than 4, returns `x`; otherwise returns 0.
+func filter4Nim[T: SomeInteger](x: T): T {.inline.} =
+  ## Returns `x` if `x >= 4`; otherwise 0.
   x * (x >= 4).T
 
-func canPrune*[F: TsuField or WaterField](
-    node: Node[F],
-    reqKind: static RequirementKind,
-    reqColor: static RequirementColor,
-    firstCall: static bool = false,
+func filter4[T: SomeInteger](x: T): T {.inline, noinit.} =
+  ## Returns `x` if `x >= 4`; otherwise 0.
+  # NOTE: asm uses `result`, so "expression return" is unavailable
+  when nimvm:
+    result = x.filter4Nim
+  else:
+    when (defined(amd64) or defined(i386)) and (defined(gcc) or defined(clang)):
+      {.push warning[Uninit]: off.}
+      var zero {.noinit.}: int
+      asm """
+xor %2, %2
+cmp $4, %1
+cmovl %2, %0
+: "=&r"(`result`)
+: "0"(`x`), "r"(`zero`)"""
+      {.pop.}
+    else:
+      result = x.filter4Nim
+
+func canPrune[F: TsuField or WaterField](
+    self: SolveNode[F], goal: Goal, kind: static GoalKind, color: static GoalColor
 ): bool {.inline.} =
   ## Returns `true` if the node is unsolvable.
-  # check if it is possible to clear the field
-  when reqKind in {Clear, ChainClear, ChainMoreClear}:
-    let canPrune: bool
-    when reqColor == RequirementColor.All:
-      var
-        hasNotDisappearableColor = false
-        hasDisappearableColor = false
+  # clear
+  staticCase:
+    case kind
+    of Clear, ClearChain, ClearChainMore:
+      let canPrune = staticCase:
+        case color
+        of All:
+          var
+            unpoppableColorExist = false
+            poppableColorNotExist = true
 
-      for color in ColorPuyo:
-        if node.fieldCounts[color] > 0:
-          if node.colorCount(color) >= 4:
-            hasDisappearableColor = true
-            break
-          else:
-            hasNotDisappearableColor = true
-            break
+          staticFor(cell2, Cell.Red .. Cell.Purple):
+            let
+              fieldCnt = self.fieldCnts[cell2]
+              cnt = fieldCnt + self.stepsCnts[cell2]
+              cntLt4 = cnt < 4
 
-      canPrune =
-        hasNotDisappearableColor or (
-          node.garbageCount > 0 and not hasDisappearableColor
-        )
-    elif reqColor == RequirementColor.Color:
-      canPrune = (ColorPuyo.low .. ColorPuyo.high).anyIt(
-        node.fieldCounts[it] > 0 and node.colorCount(it) < 4
-      )
-    elif reqColor == RequirementColor.Garbage:
-      canPrune =
-        node.garbageCount > 0 and
-        (ColorPuyo.low .. ColorPuyo.high).allIt node.colorCount(it) < 4
-    else:
-      const color = ReqColorToPuyo[reqColor]
-      canPrune = node.fieldCounts[color] > 0 and node.colorCount(color) < 4
+            poppableColorNotExist.assign poppableColorNotExist and cntLt4
+            unpoppableColorExist.assign unpoppableColorExist or (
+              fieldCnt > 0 and cntLt4
+            )
 
-    if canPrune:
-      return true
+          unpoppableColorExist or (
+            poppableColorNotExist and
+            (self.fieldCnts[Hard] + self.fieldCnts[Garbage] > 0)
+          )
+        of GoalColor.Garbages:
+          var poppableColorNotExist = true
 
-  # requirement-specific pruning
-  when reqKind == Clear:
-    result = false
-  elif reqKind in {DisappearColor, DisappearColorMore}:
-    when firstCall:
-      result =
-        (ColorPuyo.low .. ColorPuyo.high).countIt(node.colorCount(it) >= 4) <
-        node.nazoPuyo.requirement.number
-    else:
-      result = false
-  elif reqKind in {
-    DisappearCount, DisappearCountMore, DisappearCountSametime,
-    DisappearCountMoreSametime, DisappearConnect, DisappearConnectMore,
-  }:
-    let nowPossibleCount: int
-    when reqColor in
-        {RequirementColor.All, RequirementColor.Color, RequirementColor.Garbage}:
-      let colorPossibleCount =
-        (ColorPuyo.low .. ColorPuyo.high).mapIt(node.colorCount(it).filter4).sum2
+          staticFor(cell2, Cell.Red .. Cell.Purple):
+            poppableColorNotExist.assign poppableColorNotExist and
+              self.cellCnt(cell2) < 4
 
-      nowPossibleCount =
-        when reqColor == RequirementColor.All:
-          colorPossibleCount + (colorPossibleCount > 0).int * node.garbageCount
-        elif reqColor == RequirementColor.Color:
-          colorPossibleCount
-        elif reqColor == RequirementColor.Garbage:
-          assert reqKind notin {DisappearConnect, DisappearConnectMore}
-          (colorPossibleCount > 0).int * node.garbageCount
+          poppableColorNotExist and (self.fieldCnts[Hard] + self.fieldCnts[Garbage] > 0)
+        of Colors:
+          var unpoppableColorExist = false
+
+          staticFor(cell2, Cell.Red .. Cell.Purple):
+            let
+              fieldCnt = self.fieldCnts[cell2]
+              cnt = fieldCnt + self.stepsCnts[cell2]
+
+            unpoppableColorExist.assign unpoppableColorExist or
+              (fieldCnt > 0 and cnt < 4)
+
+          unpoppableColorExist
         else:
-          assert false
-          0
+          const GoalCell = GoalColorToCell[color]
+          let fieldCnt = self.fieldCnts[GoalCell]
+
+          fieldCnt > 0 and fieldCnt + self.stepsCnts[GoalCell] < 4
+
+      if canPrune:
+        return true
     else:
-      nowPossibleCount = node.colorCount(ReqColorToPuyo[reqColor]).filter4
+      discard
 
-    let possibleCount =
-      when reqKind in {DisappearCount, DisappearCountMore}:
-        node.disappearedCount + nowPossibleCount
-      elif reqKind in {
-        DisappearCountSametime, DisappearCountMoreSametime, DisappearConnect,
-        DisappearConnectMore,
-      }:
-        nowPossibleCount
-      else:
-        assert false
-        0
+  # kind-specific
+  staticCase:
+    case kind
+    of Clear:
+      false
+    of AccColor, AccColorMore:
+      let possibleVal = sum2It[Cell, int](Cell.Red .. Cell.Purple):
+        (self.cellCnt(it) >= 4).int
+      possibleVal < goal.optVal.unsafeValue
+    of AccCnt, AccCntMore, Cnt, CntMore, Conn, ConnMore:
+      let nowPossibleCnt = staticCase:
+        case color
+        of All, Colors, GoalColor.Garbages:
+          let colorPossibleCnt = sum2It[Cell, int](Cell.Red .. Cell.Purple):
+            self.cellCnt(it).filter4
+          staticCase:
+            case color
+            of All:
+              colorPossibleCnt + (colorPossibleCnt > 0).int * self.garbagesCnt
+            of Colors:
+              colorPossibleCnt
+            of GoalColor.Garbages:
+              (colorPossibleCnt > 0).int * self.garbagesCnt
+            else:
+              0 # dummy
+        else:
+          self.cellCnt(static(GoalColorToCell[color])).filter4
 
-    result = possibleCount < node.nazoPuyo.requirement.number
-  elif reqKind in {Chain, ChainMore, ChainClear, ChainMoreClear}:
-    let possibleChain =
-      sum2 (ColorPuyo.low .. ColorPuyo.high).mapIt node.colorCount(it) div 4
-    result = possibleChain < node.nazoPuyo.requirement.number
-  elif reqKind in {DisappearColorSametime, DisappearColorMoreSametime}:
-    let possibleColorCount =
-      (ColorPuyo.low .. ColorPuyo.high).countIt node.colorCount(it) >= 4
-    result = possibleColorCount < node.nazoPuyo.requirement.number
-  elif reqKind in {DisappearPlace, DisappearPlaceMore}:
-    let possiblePlace: int
-    when reqColor in {RequirementColor.All, RequirementColor.Color}:
-      possiblePlace =
-        sum2 (ColorPuyo.low .. ColorPuyo.high).mapIt (node.colorCount(it) div 4)
-    elif reqColor == RequirementColor.Garbage:
-      assert false
-      possiblePlace = 0
+      let possibleCnt = staticCase:
+        case kind
+        of AccCnt, AccCntMore:
+          self.popCnt + nowPossibleCnt
+        of Cnt, CntMore, Conn, ConnMore:
+          nowPossibleCnt
+        else:
+          0 # dummy
+
+      possibleCnt < goal.optVal.unsafeValue
+    of Chain, ChainMore, ClearChain, ClearChainMore:
+      let possibleChain = sum2It[Cell, int](Cell.Red .. Cell.Purple):
+        self.cellCnt(it) div 4
+      possibleChain < goal.optVal.unsafeValue
+    of Color, ColorMore:
+      let possibleColorCnt = sum2It[Cell, int](Cell.Red .. Cell.Purple):
+        (self.cellCnt(it) >= 4).int
+      possibleColorCnt < goal.optVal.unsafeValue
+    of Place, PlaceMore:
+      let possiblePlace = staticCase:
+        case color
+        of All, Colors:
+          sum2It[Cell, int](Cell.Red .. Cell.Purple):
+            self.cellCnt(it) div 4
+        of GoalColor.Garbages:
+          0 # dummy
+        else:
+          self.cellCnt(static(GoalColorToCell[color])) div 4
+
+      possiblePlace < goal.optVal.unsafeValue
+
+# ------------------------------------------------
+# Static Getter
+# ------------------------------------------------
+
+template withStaticColor(goal: Goal, body: untyped): untyped =
+  ## Runs `body` with `StaticColor` exposed.
+  case goal.optColor.unsafeValue
+  of All:
+    const StaticColor {.inject.} = All
+    body
+  of GoalColor.Red:
+    const StaticColor {.inject.} = GoalColor.Red
+    body
+  of GoalColor.Green:
+    const StaticColor {.inject.} = GoalColor.Green
+    body
+  of GoalColor.Blue:
+    const StaticColor {.inject.} = GoalColor.Blue
+    body
+  of GoalColor.Yellow:
+    const StaticColor {.inject.} = GoalColor.Yellow
+    body
+  of GoalColor.Purple:
+    const StaticColor {.inject.} = GoalColor.Purple
+    body
+  of GoalColor.Garbages:
+    const StaticColor {.inject.} = GoalColor.Garbages
+    body
+  of Colors:
+    const StaticColor {.inject.} = Colors
+    body
+
+template withStaticKindColor(goal: Goal, body: untyped): untyped =
+  ## Runs `body` with `StaticKind` and `StaticColor` exposed.
+  case goal.kind
+  of Clear:
+    const StaticKind {.inject.} = Clear
+    goal.withStaticColor:
+      body
+  of AccColor:
+    const
+      StaticKind {.inject.} = AccColor
+      StaticColor {.inject.} = GoalColor.low
+    body
+  of AccColorMore:
+    const
+      StaticKind {.inject.} = AccColorMore
+      StaticColor {.inject.} = GoalColor.low
+    body
+  of AccCnt:
+    const StaticKind {.inject.} = AccCnt
+    goal.withStaticColor:
+      body
+  of AccCntMore:
+    const StaticKind {.inject.} = AccCntMore
+    goal.withStaticColor:
+      body
+  of Chain:
+    const
+      StaticKind {.inject.} = Chain
+      StaticColor {.inject.} = GoalColor.low
+    body
+  of ChainMore:
+    const
+      StaticKind {.inject.} = ChainMore
+      StaticColor {.inject.} = GoalColor.low
+    body
+  of ClearChain:
+    const StaticKind {.inject.} = ClearChain
+    goal.withStaticColor:
+      body
+  of ClearChainMore:
+    const StaticKind {.inject.} = ClearChainMore
+    goal.withStaticColor:
+      body
+  of Color:
+    const
+      StaticKind {.inject.} = Color
+      StaticColor {.inject.} = GoalColor.low
+    body
+  of ColorMore:
+    const
+      StaticKind {.inject.} = ColorMore
+      StaticColor {.inject.} = GoalColor.low
+    body
+  of Cnt:
+    const StaticKind {.inject.} = Cnt
+    goal.withStaticColor:
+      body
+  of CntMore:
+    const StaticKind {.inject.} = CntMore
+    goal.withStaticColor:
+      body
+  of Place:
+    const StaticKind {.inject.} = Place
+    goal.withStaticColor:
+      body
+  of PlaceMore:
+    const StaticKind {.inject.} = PlaceMore
+    goal.withStaticColor:
+      body
+  of Conn:
+    const StaticKind {.inject.} = Conn
+    goal.withStaticColor:
+      body
+  of ConnMore:
+    const StaticKind {.inject.} = ConnMore
+    goal.withStaticColor:
+      body
+
+# ------------------------------------------------
+# Child - Depth
+# ------------------------------------------------
+
+func childrenAtDepth[F: TsuField or WaterField](
+    self: SolveNode[F],
+    targetDepth: int,
+    nodes: var seq[SolveNode[F]],
+    optPlcmtsSeq: var seq[seq[OptPlacement]],
+    answers: var seq[seq[OptPlacement]],
+    moveCnt: int,
+    calcAllAnswers: static bool,
+    goal: Goal,
+    kind: static GoalKind,
+    color: static GoalColor,
+    steps: Steps,
+) {.inline.} =
+  ## Calculates nodes with the given depth and sets them to `nodes`.
+  ## A sequence of edges to reach them is set to `optPlcmtsSeq`.
+  ## Answers that have `targetDepth` or less steps are set to `answers` in reverse
+  ## order.
+  ## This function requires that the field is settled and `nodes`, `optPlcmtsSeq`, and
+  ## `answers` are empty.
+  let
+    step = steps[self.depth]
+    childDepth = self.depth.succ
+    childIsSpawned = childDepth == targetDepth
+    childIsLeaf = childDepth == moveCnt
+    children = self.children(kind, color, step)
+
+  var
+    nodesSeq = newSeqOfCap[seq[SolveNode[F]]](children.len)
+    optPlcmtsSeqSeq = newSeqOfCap[seq[seq[OptPlacement]]](children.len)
+    answersSeq = newSeqOfCap[seq[seq[OptPlacement]]](children.len)
+  for _ in 1 .. children.len:
+    nodesSeq.add newSeqOfCap[SolveNode[F]](static(Placement.enumLen))
+    optPlcmtsSeqSeq.add newSeqOfCap[seq[OptPlacement]](static(Placement.enumLen))
+    answersSeq.add newSeqOfCap[seq[OptPlacement]](static(Placement.enumLen))
+
+  for childIdx, (child, optPlcmt) in children.pairs:
+    if child.isAccepted(goal, kind, color):
+      var ans = newSeqOfCap[OptPlacement](childDepth)
+      ans.add optPlcmt
+
+      answers.add ans
+
+      when not calcAllAnswers:
+        if answers.len > 1:
+          return
+
+      continue
+
+    if childIsLeaf or child.canPrune(goal, kind, color):
+      continue
+
+    if childIsSpawned:
+      nodesSeq[childIdx].add child
+
+      var optPlcmts = newSeqOfCap[OptPlacement](childDepth)
+      optPlcmts.add optPlcmt
+      optPlcmtsSeqSeq[childIdx].add optPlcmts
     else:
-      possiblePlace = node.colorCount(ReqColorToPuyo[reqColor]) div 4
+      child.childrenAtDepth targetDepth,
+        nodesSeq[childIdx],
+        optPlcmtsSeqSeq[childIdx],
+        answersSeq[childIdx],
+        moveCnt,
+        calcAllAnswers,
+        goal,
+        kind,
+        color,
+        steps
 
-    result = possiblePlace < node.nazoPuyo.requirement.number
-  else:
-    assert false
+      for optPlcmts in optPlcmtsSeqSeq[childIdx].mitems:
+        optPlcmts.add optPlcmt
+
+    for ans in answersSeq[childIdx].mitems:
+      ans.add optPlcmt
+
+    when not calcAllAnswers:
+      if answers.len + answersSeq[childIdx].len > 1:
+        answers &= answersSeq[childIdx]
+        return
+
+  nodes &= nodesSeq.concat
+  optPlcmtsSeq &= optPlcmtsSeqSeq.concat
+  answers &= answersSeq.concat
+
+func childrenAtDepth*[F: TsuField or WaterField](
+    self: SolveNode[F],
+    targetDepth: int,
+    nodes: var seq[SolveNode[F]],
+    optPlcmtsSeq: var seq[seq[OptPlacement]],
+    answers: var seq[seq[OptPlacement]],
+    moveCnt: int,
+    calcAllAnswers: static bool,
+    goal: Goal,
+    steps: Steps,
+) {.inline.} =
+  ## Calculates nodes with the given depth and sets them to `nodes`.
+  ## A sequence of edges to reach them is set to `optPlcmtsSeq`.
+  ## Answers that have `TargetDepth` or less steps are set to `answers` in reverse
+  ## order.
+  ## This function requires that the field is settled and `nodes`, `optPlcmtsSeq`, and
+  ## `answers` are empty.
+  goal.withStaticKindColor:
+    self.childrenAtDepth targetDepth,
+      nodes, optPlcmtsSeq, answers, moveCnt, calcAllAnswers, goal, StaticKind,
+      StaticColor, steps
 
 # ------------------------------------------------
 # Solve
 # ------------------------------------------------
 
-func solve[F: TsuField or WaterField](
-    node: Node[F],
-    results: var seq[SolveAnswer],
-    moveCount: Positive,
-    reqKind: static RequirementKind,
-    reqColor: static RequirementColor,
-    earlyStopping: static bool,
+func solveSingleThread[F: TsuField or WaterField](
+    self: SolveNode[F],
+    answers: var seq[seq[OptPlacement]],
+    moveCnt: int,
+    calcAllAnswers: static bool,
+    goal: Goal,
+    kind: static GoalKind,
+    color: static GoalColor,
+    steps: Steps,
+    checkPruneFirst: static bool = false,
 ) {.inline.} =
-  ## Solves the nazo puyo.
-  ## Results are stored in `results`.
-  if node.isAccepted(reqKind, reqColor):
-    {.push warning[Uninit]: off.}
-    results.add initDeque[Position](moveCount)
-    {.pop.}
-    return
-  if node.isLeaf or node.canPrune(reqKind, reqColor):
-    return
+  ## Solves the Nazo Puyo at the node with a single thread.
+  ## This function requires that the field is settled and `answers` is empty.
+  ## Answers in `answers` are set in reverse order.
+  when checkPruneFirst:
+    if self.canPrune(goal, kind, color):
+      return
 
-  for (child, pos) in node.children(reqKind, reqColor):
-    var childResults = newSeq[Deque[Position]](0)
-    child.solve childResults, moveCount, reqKind, reqColor, earlyStopping
+  let
+    step = steps[self.depth]
+    childDepth = self.depth.succ
+    childIsLeaf = childDepth == moveCnt
+    children = self.children(kind, color, step)
 
-    for res in childResults.mitems:
-      res.addFirst pos
+  var childAnswersSeq = newSeqOfCap[seq[seq[OptPlacement]]](children.len)
+  for _ in 1 .. children.len:
+    childAnswersSeq.add newSeqOfCap[seq[OptPlacement]](static(Placement.enumLen))
 
-    results &= childResults
+  for childIdx, (child, optPlcmt) in children.pairs:
+    if child.isAccepted(goal, kind, color):
+      var ans = newSeqOfCap[OptPlacement](childDepth)
+      ans.add optPlcmt
 
-    when earlyStopping:
-      if results.len > 1:
+      answers.add ans
+
+      when not calcAllAnswers:
+        if answers.len > 1:
+          return
+
+      continue
+
+    if childIsLeaf or child.canPrune(goal, kind, color):
+      continue
+
+    child.solveSingleThread childAnswersSeq[childIdx],
+      moveCnt, calcAllAnswers, goal, kind, color, steps, false
+
+    for ans in childAnswersSeq[childIdx].mitems:
+      ans.add optPlcmt
+
+    when not calcAllAnswers:
+      if answers.len + childAnswersSeq[childIdx].len > 1:
+        answers &= childAnswersSeq[childIdx]
         return
 
-func solve*[F: TsuField or WaterField](
-    node: Node[F],
-    moveCount: Positive,
-    reqKind: static RequirementKind,
-    reqColor: static RequirementColor,
-    earlyStopping: static bool,
-): seq[SolveAnswer] {.inline.} =
-  ## Solves the nazo puyo.
-  result = newSeq[Deque[Position]](0)
-  node.solve result, moveCount, reqKind, reqColor, earlyStopping
+  answers &= childAnswersSeq.concat
 
-func solve[F: TsuField or WaterField](
-    node: Node[F],
-    results: var seq[SolveAnswer],
-    moveCount: Positive,
-    reqKind: static RequirementKind,
-    earlyStopping: static bool,
+func solveSingleThread*[F: TsuField or WaterField](
+    self: SolveNode[F],
+    answers: var seq[seq[OptPlacement]],
+    moveCnt: int,
+    calcAllAnswers: static bool,
+    goal: Goal,
+    steps: Steps,
+    checkPruneFirst: static bool = false,
 ) {.inline.} =
-  ## Solves the nazo puyo.
-  ## Results are stored in `results`.
-  assert reqKind in {
-    RequirementKind.Clear, DisappearCount, DisappearCountMore, ChainClear,
-    ChainMoreClear, DisappearCountSametime, DisappearCountMoreSametime, DisappearPlace,
-    DisappearPlaceMore, DisappearConnect, DisappearConnectMore,
-  }
-
-  case node.nazoPuyo.requirement.color
-  of RequirementColor.All:
-    node.solve results, moveCount, reqKind, RequirementColor.All, earlyStopping
-  of RequirementColor.Red:
-    node.solve results, moveCount, reqKind, RequirementColor.Red, earlyStopping
-  of RequirementColor.Green:
-    node.solve results, moveCount, reqKind, RequirementColor.Green, earlyStopping
-  of RequirementColor.Blue:
-    node.solve results, moveCount, reqKind, RequirementColor.Blue, earlyStopping
-  of RequirementColor.Yellow:
-    node.solve results, moveCount, reqKind, RequirementColor.Yellow, earlyStopping
-  of RequirementColor.Purple:
-    node.solve results, moveCount, reqKind, RequirementColor.Purple, earlyStopping
-  of RequirementColor.Garbage:
-    node.solve results, moveCount, reqKind, RequirementColor.Garbage, earlyStopping
-  of RequirementColor.Color:
-    node.solve results, moveCount, reqKind, RequirementColor.Color, earlyStopping
-
-func solve[F: TsuField or WaterField](
-    node: Node[F],
-    results: var seq[SolveAnswer],
-    moveCount: Positive,
-    earlyStopping: static bool = false,
-) {.inline.} =
-  ## Solves the nazo puyo.
-  ## Results are stored in `results`.
-  const DummyColor = RequirementColor.All
-
-  case node.nazoPuyo.requirement.kind
-  of RequirementKind.Clear:
-    node.solve results, moveCount, RequirementKind.Clear, earlyStopping
-  of DisappearColor:
-    node.solve results, moveCount, DisappearColor, DummyColor, earlyStopping
-  of DisappearColorMore:
-    node.solve results, moveCount, DisappearColorMore, DummyColor, earlyStopping
-  of DisappearCount:
-    node.solve results, moveCount, DisappearCount, earlyStopping
-  of DisappearCountMore:
-    node.solve results, moveCount, DisappearCountMore, earlyStopping
-  of Chain:
-    node.solve results, moveCount, Chain, DummyColor, earlyStopping
-  of ChainMore:
-    node.solve results, moveCount, ChainMore, DummyColor, earlyStopping
-  of ChainClear:
-    node.solve results, moveCount, ChainClear, earlyStopping
-  of ChainMoreClear:
-    node.solve results, moveCount, ChainMoreClear, earlyStopping
-  of DisappearColorSametime:
-    node.solve results, moveCount, DisappearColorSametime, DummyColor, earlyStopping
-  of DisappearColorMoreSametime:
-    node.solve results, moveCount, DisappearColorMoreSametime, DummyColor, earlyStopping
-  of DisappearCountSametime:
-    node.solve results, moveCount, DisappearCountSametime, earlyStopping
-  of DisappearCountMoreSametime:
-    node.solve results, moveCount, DisappearCountMoreSametime, earlyStopping
-  of DisappearPlace:
-    node.solve results, moveCount, DisappearPlace, earlyStopping
-  of DisappearPlaceMore:
-    node.solve results, moveCount, DisappearPlaceMore, earlyStopping
-  of DisappearConnect:
-    node.solve results, moveCount, DisappearConnect, earlyStopping
-  of DisappearConnectMore:
-    node.solve results, moveCount, DisappearConnectMore, earlyStopping
-
-func solve*[F: TsuField or WaterField](
-    node: Node[F], moveCount: Positive, earlyStopping: static bool = false
-): seq[SolveAnswer] {.inline.} =
-  ## Solves the nazo puyo.
-  result = newSeq[Deque[Position]](0)
-  node.solve result, moveCount, earlyStopping
+  ## Solves the Nazo Puyo at the node with a single thread.
+  ## This function requires that the field is settled and `answers` is empty.
+  ## Answers in `answers` are set in reverse order.
+  goal.withStaticKindColor:
+    self.solveSingleThread answers,
+      moveCnt, calcAllAnswers, goal, StaticKind, StaticColor, steps, checkPruneFirst
 
 # ------------------------------------------------
-# Node <-> string
+# SolveNode <-> string
 # ------------------------------------------------
 
-const
-  NodeStrSep = "<pon2-solve-node-sep>"
-  NodeStrAuxSep = "<pon2-solve-node-aux-sep>"
+when defined(js) or defined(nimsuggest):
+  const
+    Sep1 = ":"
+    Sep2 = ";"
+    Sep3 = "!"
+    Sep4 = "|"
+    ErrStr = "err"
 
-func toStr(colors: set[ColorPuyo]): string {.inline.} =
-  ## Returns the string representation of the colors.
-  let strs = collect:
-    for color in ColorPuyo.low .. ColorPuyo.high:
-      $(color in colors)
+  func toStr(self: MoveResult): string {.inline.} =
+    ## Returns the string representation of the move result.
+    var strs = newSeqOfCap[string](6)
 
-  result = strs.join NodeStrAuxSep
-
-func trackingLevel(moveResult: MoveResult): int {.inline.} =
-  ## Returns the tracking level of the move result.
-  result =
-    if moveResult.fullDisappearCounts.isSome:
-      2
-    elif moveResult.detailDisappearCounts.isSome:
-      1
+    strs.add $self.chainCnt
+    strs.add self.popCnts.mapIt($it).join Sep1
+    strs.add $self.hardToGarbageCnt
+    strs.add self.detailPopCnts.mapIt(it.map((cnt: int) => $cnt).join Sep1).join Sep2
+    strs.add self.detailHardToGarbageCnt.mapIt($it).join Sep1
+    if self.fullPopCnts.isOk:
+      strs.add self.fullPopCnts.unsafeValue.mapIt(
+        it.map((cnts: seq[int]) => cnts.map((cnt: int) => $cnt).join Sep1).join Sep2
+      ).join Sep3
     else:
-      0
+      strs.add ErrStr
 
-func toStr(moveResult: MoveResult): string {.inline.} =
-  ## Returns the string representation of the move result.
-  var strs = newSeq[string](0)
+    strs.join Sep4
 
-  strs.add $moveResult.chainCount
-  strs &= moveResult.disappearCounts.mapIt $it
-  let level = moveResult.trackingLevel
-  strs.add $level
+  func toStr(self: set[Cell]): string {.inline.} =
+    ## Returns the string representation of the cells.
+    self.mapIt($it).join
 
-  if level > 0:
-    strs.add $moveResult.detailDisappearCounts.get.len
-    for counts in moveResult.detailDisappearCounts.get:
-      strs &= counts.mapIt $it
+  func toStr(self: array[Cell, int]): string {.inline.} =
+    ## Returns the string representation of the array.
+    self.mapIt($it).join Sep1
 
-    if level > 1:
-      strs.add $moveResult.fullDisappearCounts.get.len
-      for detailCounts in moveResult.fullDisappearCounts.get:
-        for color in ColorPuyo.low .. ColorPuyo.high:
-          strs.add $detailCounts[color].len
-          strs &= detailCounts[color].mapIt $it
+  func toStrs*[F: TsuField or WaterField](
+      self: SolveNode[F], goal: Goal, steps: Steps
+  ): seq[string] {.inline.} =
+    ## Returns the string representations of the node.
+    var strs = newSeqOfCap[string](10)
 
-  result = strs.join NodeStrAuxSep
+    strs.add $self.field.rule
+    strs.add $goal.toUriQuery.unsafeValue
+    strs.add $steps.toUriQuery.unsafeValue
 
-func toStr*[F: TsuField or WaterField](node: Node[F]): string {.inline.} =
-  ## Returns the string representation of the node.
-  var strs = newSeqOfCap[string](15)
+    strs.add $self.depth
 
-  strs.add $node.nazoPuyo.toUriQuery
-  strs.add node.moveResult.toStr
+    strs.add $self.field.toUriQuery.unsafeValue
+    strs.add self.moveResult.toStr
 
-  strs.add node.disappearedColors.toStr
-  strs.add $node.disappearedCount
+    strs.add self.popColors.toStr
+    strs.add $self.popCnt
 
-  for color in ColorPuyo.low .. ColorPuyo.high:
-    strs.add $node.fieldCounts[color]
-  for color in ColorPuyo.low .. ColorPuyo.high:
-    strs.add $node.pairsCounts[color]
-  strs.add $node.garbageCount
+    strs.add $self.fieldCnts.toStr
+    strs.add $self.stepsCnts.toStr
 
-  result = strs.join NodeStrSep
+    strs
 
-func parseColors(str: string): set[ColorPuyo] {.inline.} =
-  ## Converts the string to the colors.
-  ## If the conversion fails, `ValueError` will be raised.
-  result = {}
-  for i, boolVal in str.split(NodeStrAuxSep).mapIt it.parseBool:
-    result[ColorPuyo.low.succ i] = boolVal
+  func parseMoveResult(str: string): Res[MoveResult] {.inline.} =
+    ## Returns the move result converted from the string representation.
+    let errMsg = "Invalid move result: {str}".fmt
 
-func parseMoveResult(str: string): MoveResult {.inline.} =
-  ## Converts the string to the move result.
-  ## If the conversion fails, `ValueError` will be raised.
-  let strs = str.split NodeStrAuxSep
+    let strs = str.split2 Sep4
+    if strs.len != 6:
+      return err errMsg & "debug1"
 
-  let level: int
-  const Zeros: array[Puyo, int] = [0, 0, 0, 0, 0, 0, 0]
-  case strs[8].parseInt
-  of 0:
-    level = 0
-    result = initMoveResult(0, Zeros)
-  of 1:
-    level = 1
-    result = initMoveResult(0, Zeros, @[])
-  of 2:
-    level = 2
-    result = initMoveResult(0, Zeros, @[], @[])
-  else:
-    level = 0 # HACK: dummy to compile
-    result = initMoveResult(0, Zeros) # HACK: dummy to suppress warning
-    assert false
+    let chainCnt = ?strs[0].parseIntRes.context errMsg
 
-  result.chainCount = strs[0].parseInt
-  for i in 0 ..< 7:
-    result.disappearCounts[Puyo.low.succ i] = strs[1 + i].parseInt
+    let popCntsStrs = strs[1].split2 Sep1
+    if popCntsStrs.len != static(Cell.enumLen):
+      return err errMsg & "debug2"
+    var popCnts {.noinit.}: array[Cell, int]
+    for i, s in popCntsStrs:
+      popCnts[Cell.low.succ i].assign ?s.parseIntRes.context errMsg
 
-  if level > 0:
-    result.detailDisappearCounts = some newSeq[array[Puyo, int]](strs[9].parseInt)
+    let hardToGarbageCnt = ?strs[2].parseIntRes.context errMsg
 
-    var idx = 10
-    for counts in result.detailDisappearCounts.get.mitems:
-      for puyo in Puyo.low .. Puyo.high:
-        counts[puyo] = strs[idx].parseInt
-        idx.inc
+    let detailPopCnts = collect:
+      for detailPopCntsStrSeqSeq in strs[3].split2 Sep2:
+        let detailPopCntsStrSeq = detailPopCntsStrSeqSeq.split2 Sep1
+        if detailPopCntsStrSeq.len != static(Cell.enumLen):
+          return err errMsg & "debug3"
 
-    if level > 1:
-      result.fullDisappearCounts =
-        some newSeq[array[ColorPuyo, seq[int]]](strs[idx].parseInt)
+        var popCnts {.noinit.}: array[Cell, int]
+        for i, s in detailPopCntsStrSeq:
+          popCnts[Cell.low.succ i].assign ?s.parseIntRes.context errMsg
 
-      for detailCounts in result.fullDisappearCounts.get.mitems:
-        for color in ColorPuyo.low .. ColorPuyo.high:
-          detailCounts[color] = newSeq(strs[idx].parseInt)
-          idx.inc
+        popCnts
 
-          for count in detailCounts[color].mitems:
-            count = strs[idx].parseInt
-            idx.inc
+    let detailHardToGarbageCnt = collect:
+      for s in strs[4].split2 Sep1:
+        ?s.parseIntRes.context errMsg
 
-func parseNode*[F: TsuField or WaterField](str: string): Node[F] {.inline.} =
-  ## Converts the string to the node.
-  ## If the conversion fails, `ValueError` will be raised.
-  let strs = str.split NodeStrSep
+    if strs[5] == ErrStr:
+      return ok MoveResult.init(
+        chainCnt, popCnts, hardToGarbageCnt, detailPopCnts, detailHardToGarbageCnt
+      )
 
-  result = initNode[F](parseNazoPuyo[F](strs[0], Pon2))
-  result.moveResult = strs[1].parseMoveResult
+    let fullPopCnts = collect:
+      for fullPopCntsStrSeqSeq in strs[5].split2 Sep3:
+        let fullPopCntsStrSeqs = fullPopCntsStrSeqSeq.split2 Sep2
+        if fullPopCntsStrSeqs.len != static(Cell.enumLen):
+          return err errMsg & "debug4"
 
-  result.disappearedColors = strs[2].parseColors
-  result.disappearedCount = strs[3].parseInt
+        var cnts {.noinit.}: array[Cell, seq[int]]
+        for cellOrd, fullPopCntsStrSeq in fullPopCntsStrSeqs:
+          cnts[Cell.low.succ cellOrd].assign fullPopCntsStrSeq.split2(Sep1).mapIt ?it.parseIntRes.context errMsg
 
-  var idx = 4
-  for color in ColorPuyo.low .. ColorPuyo.high:
-    result.fieldCounts[color] = strs[idx].parseInt
-    idx.inc
-  for color in ColorPuyo.low .. ColorPuyo.high:
-    result.pairsCounts[color] = strs[idx].parseInt
-    idx.inc
-  result.garbageCount = strs[idx].parseInt
+        cnts
+
+    ok MoveResult.init(
+      chainCnt, popCnts, hardToGarbageCnt, detailPopCnts, detailHardToGarbageCnt,
+      fullPopCnts,
+    )
+
+  func parseCells(str: string): Res[set[Cell]] {.inline.} =
+    ## Returns the cells converted from the string representation.
+    let errMsg = "Invalid cells: {str}".fmt
+
+    var cells: set[Cell] = {}
+    for c in str:
+      cells.incl ?($c).parseCell.context errMsg
+
+    ok cells
+
+  func parseCounts(str: string): Res[array[Cell, int]] {.inline.} =
+    ## Returns the counts converted from the string representation.
+    let errMsg = "Invalid counts: {str}".fmt
+
+    let strs = str.split2 Sep1
+    if strs.len != static(Cell.enumLen):
+      return err errMsg
+
+    var arr {.noinit.}: array[Cell, int]
+    for i, s in strs:
+      arr[Cell.low.succ i].assign ?s.parseIntRes.context errMsg
+
+    ok arr
+
+  func parseSolveInfo*(
+      strs: seq[string]
+  ): Res[tuple[rule: Rule, goal: Goal, steps: Steps]] {.inline.} =
+    ## Returns the rule of the solve node converted from the string representations.
+    let errMsg = "Invalid solve info: {strs}".fmt
+
+    if strs.len != 10:
+      return err errMsg
+
+    ok (
+      ?strs[0].parseRule.context errMsg,
+      ?strs[1].parseGoal(Pon2).context errMsg,
+      ?strs[2].parseSteps(Pon2).context errMsg,
+    )
+
+  func parseSolveNode*[F: TsuField or WaterField](
+      strs: seq[string]
+  ): Res[SolveNode[F]] {.inline.} =
+    ## Returns the solve node converted from the string representations.
+    let errMsg = "Invalid node: {strs}".fmt
+
+    if strs.len != 10:
+      return err errMsg
+
+    let depth = ?strs[3].parseIntRes.context errMsg
+
+    let
+      field =
+        when F is TsuField:
+          ?strs[4].parseTsuField(Pon2).context errMsg
+        else:
+          ?strs[4].parseWaterField(Pon2).context errMsg
+      moveResult = ?strs[5].parseMoveResult.context errMsg
+
+    let
+      popColors = ?strs[6].parseCells.context errMsg
+      popCnt = ?strs[7].parseIntRes.context errMsg
+
+    let
+      fieldCnts = ?strs[8].parseCounts.context errMsg
+      stepsCnts = ?strs[9].parseCounts.context errMsg
+
+    ok SolveNode[F].init(
+      depth, field, moveResult, popColors, popCnt, fieldCnts, stepsCnts
+    )
+
+# ------------------------------------------------
+# SolveNode <-> string
+# ------------------------------------------------
+
+when defined(js) or defined(nimsuggest):
+  const NonePlcmtStr = ".."
+
+  func toStrs*(answers: seq[seq[OptPlacement]]): seq[string] {.inline.} =
+    ## Returns the string representations of the answers.
+    collect:
+      for ans in answers:
+        (
+          ans.mapIt(
+            if it.isOk:
+              $it.unsafeValue
+            else:
+              NonePlcmtStr
+          )
+        ).join
+
+  func parseSolveAnswers*(strs: seq[string]): Res[seq[seq[OptPlacement]]] {.inline.} =
+    ## Returns the answers converted from the run result.
+    var answers = newSeqOfCap[seq[OptPlacement]](strs.len)
+    for str in strs:
+      let errMsg = "Invalid answers: {str}".fmt
+
+      if str.len mod 2 == 1:
+        return err errMsg
+
+      let ans = collect:
+        for charIdx in countup(0, str.len.pred, 2):
+          ?str.substr(charIdx, charIdx.succ).parseOptPlacement.context errMsg
+      answers.add ans
+
+    ok answers

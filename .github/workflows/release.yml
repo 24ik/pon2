@@ -23,9 +23,10 @@ jobs:
         os:
           - ubuntu-latest
           - windows-latest
+          - macos-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/cache@v4
         with:
@@ -46,6 +47,7 @@ jobs:
           name: ${{ runner.os }}
           path: ./pon2.exe
         if: runner.os == 'Windows'
+
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }}
@@ -59,15 +61,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
 
       - run: |-
           zip -rv Linux.zip ./Linux
           zip -rv Windows.zip ./Windows
+          zip -rv macOS.zip ./macOS
 
       - uses: softprops/action-gh-release@v2
         with:
           files: |-
             ./Linux.zip
             ./Windows.zip
+            ./macOS.zip
           generate_release_notes: true

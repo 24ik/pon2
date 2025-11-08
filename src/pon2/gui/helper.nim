@@ -1,0 +1,103 @@
+## This module implements helpers for making GUI.
+##
+
+{.push raises: [].}
+{.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
+
+# ------------------------------------------------
+# JS backend
+# ------------------------------------------------
+
+when defined(js) or defined(nimsuggest):
+  import std/[jsffi, jsre]
+  import karax/[kdom, vdom]
+  import ../[app]
+
+  type
+    SimulatorVNodeHelper* = object ## Helper for making VNode of simulators.
+      goalId*: cstring
+      cameraReadyId*: cstring
+      markResultOpt*: Opt[MarkResult]
+
+    StudioVNodeHelper* = object ## Helper for making VNode of studios.
+      isReplaySimulator*: bool
+      settingId*: cstring
+
+    MarathonVNodeHelper* = object ## Helper for making VNode of marathon.
+      searchBarId*: cstring
+
+    VNodeHelper* = object ## Helper for making VNode.
+      mobile*: bool
+      simulator*: SimulatorVNodeHelper
+      studioOpt*: Opt[StudioVNodeHelper]
+      marathonOpt*: Opt[MarathonVNodeHelper]
+
+  proc isMobile(): bool {.inline.} =
+    ## Returns `true` if a mobile device is detected.
+    r"iPhone|Android.+Mobile".newRegExp in navigator.userAgent
+
+  func init(
+      T: type SimulatorVNodeHelper, simulator: Simulator, rootId: cstring
+  ): T {.inline.} =
+    T(
+      goalId: "pon2-simulator-goal-" & rootId,
+      cameraReadyId: "pon2-simulator-cameraready-" & rootId,
+      markResultOpt: simulator.mark,
+    )
+
+  func init(
+      T: type StudioVNodeHelper, rootId: cstring, isReplaySimulator: bool
+  ): T {.inline.} =
+    T(settingId: "pon2-studio-setting-" & rootId, isReplaySimulator: isReplaySimulator)
+
+  func init(T: type MarathonVNodeHelper, rootId: cstring): T {.inline.} =
+    T(searchBarId: "pon2-marathon-searchbar-" & rootId)
+
+  proc init*(
+      T: type VNodeHelper, simulatorRef: ref Simulator, rootId: cstring
+  ): T {.inline.} =
+    VNodeHelper(
+      mobile: isMobile(),
+      simulator: SimulatorVNodeHelper.init(simulatorRef[], rootId),
+      studioOpt: Opt[StudioVNodeHelper].err,
+      marathonOpt: Opt[MarathonVNodeHelper].err,
+    )
+
+  proc init2*(
+      T: type VNodeHelper, studioRef: ref Studio, rootId: cstring
+  ): tuple[main, replay: VNodeHelper] {.inline.} =
+    let
+      mobile = isMobile()
+      mainRootId = "pon2-studio-main-" & rootId
+      replayRootId = "pon2-studio-replay-" & rootId
+
+    (
+      main: VNodeHelper(
+        mobile: mobile,
+        simulator: SimulatorVNodeHelper.init(studioRef[].simulator, mainRootId),
+        studioOpt: Opt[StudioVNodeHelper].ok StudioVNodeHelper.init(
+          mainRootId, isReplaySimulator = false
+        ),
+        marathonOpt: Opt[MarathonVNodeHelper].err,
+      ),
+      replay: VNodeHelper(
+        mobile: mobile,
+        simulator: SimulatorVNodeHelper.init(studioRef[].replaySimulator, replayRootId),
+        studioOpt: Opt[StudioVNodeHelper].ok StudioVNodeHelper.init(
+          replayRootId, isReplaySimulator = true
+        ),
+        marathonOpt: Opt[MarathonVNodeHelper].err,
+      ),
+    )
+
+  proc init*(
+      T: type VNodeHelper, marathonRef: ref Marathon, rootId: cstring
+  ): T {.inline.} =
+    VNodeHelper(
+      mobile: isMobile(),
+      simulator: SimulatorVNodeHelper.init(marathonRef[].simulator, rootId),
+      studioOpt: Opt[StudioVNodeHelper].err,
+      marathonOpt: Opt[MarathonVNodeHelper].ok MarathonVNodeHelper.init rootId,
+    )

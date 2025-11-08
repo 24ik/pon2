@@ -1,135 +1,297 @@
-## This module implements Nazo Puyos.
+## This module implements Nazo Puyo.
 ##
 
-{.experimental: "inferGenericTypes".}
-{.experimental: "notnil".}
-{.experimental: "strictCaseObjects".}
+{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[deques, options, strformat, strutils, tables, uri]
-import ./[field, fqdn, puyopuyo, requirement, rule]
+import std/[strformat, typetraits, uri]
+import
+  ./[cell, field, fqdn, goal, moveresult, pair, placement, popresult, puyopuyo, step]
+import ../private/[assign3, bitops3, core, macros2, results2, strutils2, tables2]
 
-type NazoPuyo*[F: TsuField or WaterField] = object ## Nazo Puyo.
-  puyoPuyo*: PuyoPuyo[F]
-  requirement*: Requirement
+export results2
+
+type
+  NazoPuyo*[F: TsuField or WaterField] = object ## Nazo Puyo.
+    puyoPuyo*: PuyoPuyo[F]
+    goal*: Goal
+
+  MarkResult* {.pure.} = enum
+    ## Marking result.
+    Accept = "クリア！"
+    WrongAnswer = ""
+    Dead = "ばたんきゅ〜"
+    InvalidMove = "不可能な設置"
+    SkipMove = "設置スキップ"
+    NotSupport = "未対応の条件"
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
-const DefaultRequirement = initRequirement(Clear, All)
+func init*[F: TsuField or WaterField](
+    T: type NazoPuyo[F], puyoPuyo: PuyoPuyo[F], goal: Goal
+): T {.inline.} =
+  T(puyoPuyo: puyoPuyo, goal: goal)
 
-func initNazoPuyo*[F: TsuField or WaterField](): NazoPuyo[F] {.inline.} =
-  ## Returns the initial nazo puyo.
-  NazoPuyo[F](puyoPuyo: initPuyoPuyo[F](), requirement: DefaultRequirement)
-
-# ------------------------------------------------
-# Operator
-# ------------------------------------------------
-
-func `==`*(nazo1: NazoPuyo[TsuField], nazo2: NazoPuyo[WaterField]): bool {.inline.} =
-  false
-
-func `==`*(nazo1: NazoPuyo[WaterField], nazo2: NazoPuyo[TsuField]): bool {.inline.} =
-  false
+func init*[F: TsuField or WaterField](T: type NazoPuyo[F]): T {.inline.} =
+  T.init(PuyoPuyo[F].init, Goal.init)
 
 # ------------------------------------------------
-# Convert
+# Mark
 # ------------------------------------------------
 
-func toTsuNazoPuyo*[F: TsuField or WaterField](
-    self: NazoPuyo[F]
-): NazoPuyo[TsuField] {.inline.} =
-  ## Returns the Tsu Nazo Puyo converted from the given Nazo Puyo.
-  NazoPuyo[TsuField](
-    puyoPuyo: self.puyoPuyo.toTsuPuyoPuyo, requirement: self.requirement
-  )
+const
+  DummyCell = Cell.low
+  GoalColorToCell: array[GoalColor, Cell] = [
+    DummyCell, Cell.Red, Cell.Green, Cell.Blue, Cell.Yellow, Cell.Purple, DummyCell,
+    DummyCell,
+  ]
 
-func toWaterNazoPuyo*[F: TsuField or WaterField](
-    self: NazoPuyo[F]
-): NazoPuyo[WaterField] {.inline.} =
-  ## Returns the Water Nazo Puyo converted from the given Nazo Puyo.
-  NazoPuyo[WaterField](
-    puyoPuyo: self.puyoPuyo.toWaterPuyoPuyo, requirement: self.requirement
-  )
+func mark*[F: TsuField or WaterField](
+    nazo: NazoPuyo[F], endStepIdx = -1
+): MarkResult {.inline.} =
+  ## Marks the steps in the Nazo Puyo.
+  ## If `endStepIdx` is negative, all steps are used.
+  ## This function requires that the field is settled.
+  if not nazo.goal.isSupported:
+    return NotSupport
 
-# ------------------------------------------------
-# Property
-# ------------------------------------------------
+  let
+    calcConn = nazo.goal.kind in {Place, PlaceMore, Conn, ConnMore}
+    loopCnt =
+      if endStepIdx in 0 .. nazo.puyoPuyo.steps.len:
+        endStepIdx
+      else:
+        nazo.puyoPuyo.steps.len
+  var
+    puyoPuyo = nazo.puyoPuyo
+    skipped = false
+    popColors = set[Cell]({}) # used by AccColor[More]
+    popCnt = 0 # used by AccCnt[More]
 
-func rule*[F: TsuField or WaterField](self: NazoPuyo[F]): Rule {.inline.} =
-  ## Returns the rule.
-  self.puyoPuyo.rule
+  for _ in 1 .. loopCnt:
+    let step = puyoPuyo.steps.peekFirst
 
-func moveCount*[F: TsuField or WaterField](self: NazoPuyo[F]): int {.inline.} =
-  ## Returns the number of moves of the nazo puyo.
-  self.puyoPuyo.pairsPositions.len
+    # check skip, invalid
+    case step.kind
+    of PairPlacement:
+      if step.optPlacement.isOk:
+        if skipped:
+          return SkipMove
+        if step.optPlacement.unsafeValue in puyoPuyo.field.invalidPlacements:
+          return InvalidMove
+      else:
+        skipped = true
+    of StepKind.Garbages, Rotate:
+      discard
+
+    let moveRes = puyoPuyo.move calcConn
+
+    # update accumulative results
+    case nazo.goal.kind
+    of AccColor, AccColorMore:
+      popColors.incl moveRes.colors
+    of AccCnt, AccCntMore:
+      let addCnt =
+        case nazo.goal.optColor.unsafeValue
+        of All:
+          moveRes.puyoCnt
+        of GoalColor.Garbages:
+          moveRes.garbagesCnt
+        of Colors:
+          moveRes.colorPuyoCnt
+        else:
+          moveRes.cellCnt GoalColorToCell[nazo.goal.optColor.unsafeValue]
+
+      popCnt.inc addCnt
+    else:
+      discard
+
+    # check clear
+    var satisfied =
+      if nazo.goal.kind in {Clear, ClearChain, ClearChainMore}:
+        let fieldCnt =
+          case nazo.goal.optColor.unsafeValue
+          of All:
+            puyoPuyo.field.puyoCnt
+          of GoalColor.Garbages:
+            puyoPuyo.field.garbagesCnt
+          of Colors:
+            puyoPuyo.field.colorPuyoCnt
+          else:
+            puyoPuyo.field.cellCnt GoalColorToCell[nazo.goal.optColor.unsafeValue]
+
+        fieldCnt == 0
+      else:
+        true
+
+    # check kind-specific
+    satisfied.assign satisfied and (
+      case nazo.goal.kind
+      of Clear:
+        true
+      of AccColor:
+        nazo.goal.isSatisfiedAccColor(popColors, AccColor)
+      of AccColorMore:
+        nazo.goal.isSatisfiedAccColor(popColors, AccColorMore)
+      of AccCnt:
+        nazo.goal.isSatisfiedAccCnt(popCnt, AccCnt)
+      of AccCntMore:
+        nazo.goal.isSatisfiedAccCnt(popCnt, AccCntMore)
+      of Chain:
+        nazo.goal.isSatisfiedChain(moveRes, Chain)
+      of ChainMore:
+        nazo.goal.isSatisfiedChain(moveRes, ChainMore)
+      of ClearChain:
+        nazo.goal.isSatisfiedChain(moveRes, ClearChain)
+      of ClearChainMore:
+        nazo.goal.isSatisfiedChain(moveRes, ClearChainMore)
+      of Color:
+        nazo.goal.isSatisfiedColor(moveRes, Color)
+      of ColorMore:
+        nazo.goal.isSatisfiedColor(moveRes, ColorMore)
+      of Cnt:
+        nazo.goal.isSatisfiedCnt(moveRes, Cnt)
+      of CntMore:
+        nazo.goal.isSatisfiedCnt(moveRes, CntMore)
+      of Place:
+        nazo.goal.isSatisfiedPlace(moveRes, Place)
+      of PlaceMore:
+        nazo.goal.isSatisfiedPlace(moveRes, PlaceMore)
+      of Conn:
+        nazo.goal.isSatisfiedConn(moveRes, Conn)
+      of ConnMore:
+        nazo.goal.isSatisfiedConn(moveRes, ConnMore)
+    )
+
+    if satisfied:
+      return Accept
+
+    # check dead
+    if puyoPuyo.field.isDead:
+      return Dead
+
+  WrongAnswer
 
 # ------------------------------------------------
 # Nazo Puyo <-> string
 # ------------------------------------------------
 
-const ReqPuyoPuyoSep = "\n======\n"
+const GoalPuyoPuyoSep = "\n======\n"
 
 func `$`*[F: TsuField or WaterField](self: NazoPuyo[F]): string {.inline.} =
-  # HACK: cannot `strformat` here due to inlining error
-  $self.requirement & ReqPuyoPuyoSep & $self.puyoPuyo
+  $self.goal & GoalPuyoPuyoSep & $self.puyoPuyo
 
-func parseNazoPuyo*[F: TsuField or WaterField](str: string): NazoPuyo[F] {.inline.} =
+func parseNazoPuyo*[F: TsuField or WaterField](
+    str: string
+): Res[NazoPuyo[F]] {.inline.} =
   ## Returns the Nazo Puyo converted from the string representation.
-  ## If the string is invalid, `ValueError` is raised.
-  let strs = str.split ReqPuyoPuyoSep
+  let
+    errMsg = "Invalid Nazo Puyo: {str}".fmt
+    strs = str.split GoalPuyoPuyoSep
   if strs.len != 2:
-    raise newException(ValueError, "Invalid Nazo Puyo: " & str)
+    return err "Invalid Nazo Puyo: {str}".fmt
 
-  result = NazoPuyo[F](
-    puyoPuyo: parsePuyoPuyo[F](strs[1]), requirement: strs[0].parseRequirement
-  )
+  let
+    goal = ?strs[0].parseGoal.context errMsg
+    puyoPuyo = ?parsePuyoPuyo[F](strs[1]).context errMsg
+
+  ok NazoPuyo[F].init(puyoPuyo, goal)
 
 # ------------------------------------------------
 # Nazo Puyo <-> URI
 # ------------------------------------------------
 
+const
+  GoalKey = "goal"
+  PuyoPuyoGoalIshikawaSep = "__"
+
+func toUriQueryPon2[F: TsuField or WaterField](
+    self: NazoPuyo[F]
+): Res[string] {.inline.} =
+  ## Returns the URI query converted from the Nazo Puyo.
+  let errMsg = "Nazo Puyo that does not support URI conversion: {self}".fmt
+
+  ok (?self.puyoPuyo.toUriQuery(Pon2).context errMsg) & '&' &
+    [(GoalKey, ?self.goal.toUriQuery(Pon2).context errMsg)].encodeQuery
+
+func toUriQueryIshikawa[F: TsuField or WaterField](
+    self: NazoPuyo[F]
+): Res[string] {.inline.} =
+  ## Returns the URI query converted from the Nazo Puyo.
+  let
+    errMsg = "Nazo Puyo that does not support URI conversion: {self}".fmt
+    puyoPuyoQueryRaw = ?self.puyoPuyo.toUriQuery(Ishikawa).context errMsg
+    puyoPuyoQuery =
+      if '_' in puyoPuyoQueryRaw:
+        puyoPuyoQueryRaw
+      else:
+        puyoPuyoQueryRaw & '_'
+
+  ok puyoPuyoQuery & PuyoPuyoGoalIshikawaSep &
+    ?self.goal.toUriQuery(Ishikawa).context errMsg
+
 func toUriQuery*[F: TsuField or WaterField](
     self: NazoPuyo[F], fqdn = Pon2
-): string {.inline.} =
+): Res[string] {.inline.} =
   ## Returns the URI query converted from the Nazo Puyo.
-  let sep =
-    case fqdn
-    of Pon2: "&"
-    of Ishikawa, Ips: "__"
+  case fqdn
+  of Pon2: self.toUriQueryPon2
+  of Ishikawa, Ips: self.toUriQueryIshikawa
 
-  result = &"{self.puyoPuyo.toUriQuery fqdn}{sep}{self.requirement.toUriQuery fqdn}"
+func parseNazoPuyoPon2[F: TsuField or WaterField](
+    query: string
+): Res[NazoPuyo[F]] {.inline.} =
+  ## Returns the Nazo Puyo converted from the URI query.
+  var
+    nazoPuyo = NazoPuyo[F].init
+    goalSet = false
+    keyVals = newSeq[(string, string)](0)
+
+  for (key, val) in query.decodeQuery:
+    case key
+    of GoalKey:
+      if goalSet:
+        return err "Invalid Nazo Puyo (multiple `key`): {query}".fmt
+
+      goalSet = true
+      nazoPuyo.goal = ?val.parseGoal(Pon2).context "Invalid Nazo Puyo: {query}".fmt
+    else:
+      keyVals.add (key, val)
+
+  if not goalSet:
+    const GoalKey2 = GoalKey # strformat needs this
+    return err "Invalid Nazo Puyo (missing `{GoalKey2}`): {query}".fmt
+
+  nazoPuyo.puyoPuyo =
+    ?parsePuyoPuyo[F](keyVals.encodeQuery, Pon2).context "Invalid Nazo Puyo: {query}".fmt
+
+  ok nazoPuyo
+
+func parseNazoPuyoIshikawa[F: TsuField or WaterField](
+    query: string
+): Res[NazoPuyo[F]] {.inline.} =
+  ## Returns the Nazo Puyo converted from the URI query.
+  let
+    errMsg = "Invalid Nazo Puyo: {query}".fmt
+    strs = query.rsplit(PuyoPuyoGoalIshikawaSep, 1)
+  if strs.len != 2:
+    return err errMsg
+
+  ok NazoPuyo[F].init(
+    ?parsePuyoPuyo[F](strs[0], Ishikawa).context errMsg,
+    ?strs[1].parseGoal(Ishikawa).context errMsg,
+  )
 
 func parseNazoPuyo*[F: TsuField or WaterField](
-    query: string, fqdn: IdeFqdn
-): NazoPuyo[F] {.inline.} =
+    query: string, fqdn: SimulatorFqdn
+): Res[NazoPuyo[F]] {.inline.} =
   ## Returns the Nazo Puyo converted from the URI query.
-  ## If the query is invalid, `ValueError` is raised.
   case fqdn
   of Pon2:
-    var
-      puyoPuyoKeyVals = newSeq[(string, string)](0)
-      reqKeyVals = newSeq[(string, string)](0)
-    for (key, val) in query.decodeQuery:
-      if key in RequirementQueryKeys:
-        reqKeyVals.add (key, val)
-      else:
-        puyoPuyoKeyVals.add (key, val)
-
-    result = NazoPuyo[F](
-      puyoPuyo: parsePuyoPuyo[F](puyoPuyoKeyVals.encodeQuery, fqdn),
-      requirement: reqKeyVals.encodeQuery.parseRequirement fqdn,
-    )
+    parseNazoPuyoPon2[F](query)
   of Ishikawa, Ips:
-    let queries = query.split "__"
-    case queries.len
-    of 2:
-      result = NazoPuyo[F](
-        puyoPuyo: parsePuyoPuyo[F](queries[0], fqdn),
-        requirement: queries[1].parseRequirement fqdn,
-      )
-    else:
-      raise newException(ValueError, "Invalid Nazo Puyo: " & query)
+    parseNazoPuyoIshikawa[F](query)

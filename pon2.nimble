@@ -1,46 +1,38 @@
 # Package
 
-version = "0.23.14"
+version = "0.24.0"
 author = "Keisuke Izumiya"
-description = "Application for Puyo Puyo and Nazo Puyo"
+description = "Application of Puyo Puyo and Nazo Puyo"
 license = "Apache-2.0"
 
 srcDir = "src"
 installExt = @["nim"]
 bin = @["pon2"]
 
+
 # Dependencies
 
-requires "nim ^= 2.2.0"
+requires "nim ^= 2.2.6"
 
-requires "docopt ^= 0.7.1"
-requires "karax ^= 1.3.3"
-requires "nigui ^= 0.2.8"
-requires "nimsimd ^= 1.3.0"
+requires "chroma ^= 1.0.0"
+requires "chronos ^= 4.0.4"
+requires "cligen ^= 1.9.3"
+requires "karax ^= 1.5.0"
+requires "nimsimd ^= 1.3.2"
 requires "puppy ^= 2.1.2"
+requires "results ^= 0.5.1"
+requires "stew ^= 0.4.2"
 requires "suru ^= 0.3.2"
+requires "unittest2 ^= 0.2.4"
+
 
 # Tasks
 
 import std/[os, sequtils, strformat, strutils]
 
-task test, "Run Tests":
+task www, "Generate Web Pages":
   const
-    Avx2 {.define: "pon2.avx2".} = 2
-    Bmi2 {.define: "pon2.bmi2".} = 2
-
-  exec &"nim c -r -d:pon2.avx2={Avx2} -d:pon2.bmi2={Bmi2} " & "tests/makeTest.nim"
-  exec "testament all"
-
-task benchmark, "Benchmarking":
-  const
-    Avx2 {.define: "pon2.avx2".} = true
-    Bmi2 {.define: "pon2.bmi2".} = true
-
-  exec &"nim c -r -d:pon2.avx2={Avx2} -d:pon2.bmi2={Bmi2} " & "benchmark/main.nim"
-
-task web, "Make Web Pages":
-  const
+    Pon2Path {.define: "pon2.path".} = ""
     danger {.booldefine.} = true
     minify {.booldefine.} = true
     verbose {.booldefine.} = false
@@ -48,15 +40,17 @@ task web, "Make Web Pages":
   proc compile(src: string, dst: string, options: varargs[string]) =
     let
       (_, tail) = dst.splitPath
-      rawJs = getTempDir() / &"raw-{tail}"
+      rawJs = getTempDir() / "raw-{tail}".fmt
 
     if verbose:
       echo "[pon2] Raw JS output file: ", rawJs
 
     var cmds = @["nim", "js"] & options.toSeq
+    if Pon2Path != "":
+      cmds.add "-d:pon2.path={Pon2Path}".fmt
     if danger:
       cmds.add "-d:danger"
-    cmds &= [&"-o:{rawJs}", src]
+    cmds &= ["-o:{rawJs}".fmt, src]
 
     exec cmds.join " "
 
@@ -70,19 +64,18 @@ task web, "Make Web Pages":
     else:
       cpFile rawJs, dst
 
-  # GUI application
-  "src/pon2.nim".compile "www/index.min.js"
-  "src/pon2.nim".compile "www/worker.min.js", "-d:pon2.worker"
+  # studio
+  "src/pon2.nim".compile "www/studio/index.min.js"
+  "src/pon2.nim".compile "www/studio/worker.min.js", "-d:pon2.build.worker"
 
   # marathon
-  "src/pon2.nim".compile "www/marathon/index.min.js", "-d:pon2.marathon", "-d:pon2.assets.web=../assets"
+  "src/pon2.nim".compile "www/marathon/index.min.js", "-d:pon2.build.marathon"
 
   # documentation
-  rmDir "www/docs/native"
-  exec &"nim doc --project --outdir:www/docs/native src/pon2.nim"
-  rmDir "www/docs/web"
-  exec &"nim doc --project --outdir:www/docs/web --backend:js src/pon2.nim"
-  "www/docs/simulator/main.nim".compile "www/docs/simulator/index.min.js"
+  rmDir "www/docs/api"
+  exec "nim doc --project --outdir:www/docs/api/native src/pon2.nim"
+  exec "nim doc --project --outdir:www/docs/api/web --backend:js src/pon2.nim"
 
   # assets
+  rmDir "www/assets"
   cpDir "assets", "www/assets"
