@@ -244,7 +244,7 @@ when defined(js) or defined(nimsuggest):
 
       when not calcAllAnswers:
         if answers.len > 1:
-          return newSeq[SolveAnswer]()
+          return answers
 
       let nodeCnt = nodes.len
       if not progressRef.isNil:
@@ -268,7 +268,7 @@ when defined(js) or defined(nimsuggest):
       for future in futures:
         await future
 
-      return answersSeqRef[].concat
+      return answers & answersSeqRef[].concat
 
     proc asyncSolve*[F: TsuField or WaterField](
         nazo: NazoPuyo[F], calcAllAnswers: static bool = true

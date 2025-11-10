@@ -153,7 +153,7 @@ when isMainModule:
       for chunkIdx in 0 ..< ChunkCnt:
         {.push warning[Uninit]: off.}
         {.push warning[ProveInit]: off.}
-        discard "{AssetsDir}/marathon/swap{chunkIdx}.txt".fmt.cstring.fetch
+        discard "{AssetsDir}/marathon/swap{chunkIdx:02}.txt".fmt.cstring.fetch
           .then((r: Response) => r.text)
           .then(
             (s: cstring) => (

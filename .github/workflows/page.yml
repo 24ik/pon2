@@ -36,25 +36,25 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - run: echo "DIR_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
-        if: ${{ github.ref_type }} != 'tag'
+        if: github.ref_type != 'tag'
 
       - run: |-
           DIR_NAME=$(echo "${{ github.ref_name }}" | sed 's/^v//' | cut -d. -f1-2)
           echo "DIR_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
-        if: ${{ github.ref_type }} == 'tag'
+        if: github.ref_type == 'tag'
 
-      - run: nimble -y -d:pon2.path="/pon2/${{ env.DIR_NAME }}/studio/" www
+      - run: nimble -y -d:pon2.path="/pon2/${{ env.DIR_NAME }}/studio/" page
 
       - uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: www
+          folder: pages
           target-folder: ${{ env.DIR_NAME }}
 
-      - run: nimble -y www
+      - run: nimble -y page
         if: github.ref_type == 'tag'
 
       - uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: www
+          folder: pages
           target-folder: stable
         if: github.ref_type == 'tag'
