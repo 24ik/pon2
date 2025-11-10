@@ -75,11 +75,11 @@ func focusReplay*(self: Studio): bool {.inline.} =
 
 func solving*(self: Studio): bool {.inline.} =
   ## Returns `true` if the studio is solving.
-  self.solving or self.permuting
+  self.solving
 
 func permuting*(self: Studio): bool {.inline.} =
   ## Returns `true` if the studio is permuting.
-  self.solving or self.permuting
+  self.permuting
 
 func working*(self: Studio): bool {.inline.} =
   ## Returns `true` if the studio is working.

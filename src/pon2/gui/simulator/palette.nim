@@ -17,13 +17,10 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
-  const
-    BtnCls = "button px-2".cstring
-    SelectBtnCls = "button px-2 is-primary".cstring
-    Shortcuts: array[Cell, cstring] = [
-      "Space".cstring, "P".cstring, "O".cstring, "H".cstring, "J".cstring, "K".cstring,
-      "L".cstring, ";".cstring,
-    ]
+  const Shortcuts: array[Cell, cstring] = [
+    "Space".cstring, "P".cstring, "O".cstring, "H".cstring, "J".cstring, "K".cstring,
+    "L".cstring, ";".cstring,
+  ]
 
   func initBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, cell: Cell
@@ -43,7 +40,13 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper
   ): VNode {.inline.} =
     ## Returns the palette node.
-    let editObj = self.derefSimulator(helper).editData.editObj
+    let
+      editObj = self.derefSimulator(helper).editData.editObj
+      btnCls = (if helper.mobile: "button is-large px-2" else: "button px-2").cstring
+      selectBtnCls = (
+        if helper.mobile: "button is-large is-primary px-2"
+        else: "button px-2 is-primary"
+      ).cstring
 
     buildHtml tdiv(class = "card", style = translucentStyle):
       tdiv(class = "card-content p-1"):
@@ -60,10 +63,13 @@ when defined(js) or defined(nimsuggest):
                   let cellSelected = editObj.kind == EditCell and editObj.cell == cell
                   td:
                     button(
-                      class = if cellSelected: SelectBtnCls else: BtnCls,
+                      class = if cellSelected: selectBtnCls else: btnCls,
                       onclick = self.initBtnHandler(helper, cell),
                     ):
-                      figure(class = "image is-24x24"):
+                      figure(
+                        class =
+                          (if helper.mobile: "image is-32x32" else: "image is-24x24")
+                      ):
                         img(src = cell.cellImgSrc)
                       if not helper.mobile and not cellSelected:
                         span(style = counterStyle):
@@ -73,11 +79,17 @@ when defined(js) or defined(nimsuggest):
                     cross = row.bool
                     selected = editObj.kind == EditRotate and editObj.cross == cross
                   button(
-                    class = if selected: SelectBtnCls else: BtnCls,
+                    class = if selected: selectBtnCls else: btnCls,
                     onclick = self.initBtnHandler(helper, cross),
                   ):
-                    figure(class = "image is-24x24"):
-                      span(class = "icon"):
+                    figure(
+                      class =
+                        (if helper.mobile: "image is-32x32" else: "image is-24x24")
+                    ):
+                      span(
+                        class =
+                          (if helper.mobile: "icon is-medium" else: "icon").cstring
+                      ):
                         if cross:
                           span(
                             class = "fa-stack",
