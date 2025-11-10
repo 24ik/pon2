@@ -5,8 +5,9 @@
 /tests/test
 /tests/test.exe
 
-/www/assets/
-/www/docs/api/
-/www/studio/index.min.js
-/www/studio/worker.min.js
-/www/marathon/index.min.js
+/pages/assets/
+/pages/docs/api/js/
+/pages/docs/api/native/
+/pages/studio/index.min.js
+/pages/studio/worker.min.js
+/pages/marathon/index.min.js
