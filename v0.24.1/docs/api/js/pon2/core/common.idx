@@ -1,0 +1,7 @@
+nimTitle	common	pon2/core/common.html	module src/pon2/core/common		0
+nim	Row	pon2/core/common.html#Row	enum Row		17
+nim	Col	pon2/core/common.html#Col	enum Col		32
+nim	Height	pon2/core/common.html#Height	const Height		41
+nim	Width	pon2/core/common.html#Width	const Width		42
+nim	WaterHeight	pon2/core/common.html#WaterHeight	const WaterHeight		43
+nim	AirHeight	pon2/core/common.html#AirHeight	const AirHeight		44
