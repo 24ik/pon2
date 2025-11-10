@@ -226,7 +226,7 @@ when defined(js) or defined(nimsuggest):
                   onclick = () => self.derefSimulator(helper).rotatePlacementLeft,
                 ):
                   span(class = "icon"):
-                    italic(class = "fa-solid fa-rotate-left")
+                    italic(class = "fa-solid fa-arrow-rotate-left")
                     span(style = counterStyle):
                       text "J"
               tdiv(class = "control"):
@@ -243,7 +243,7 @@ when defined(js) or defined(nimsuggest):
                   onclick = () => self.derefSimulator(helper).rotatePlacementRight,
                 ):
                   span(class = "icon"):
-                    italic(class = "fa-solid fa-rotate-right")
+                    italic(class = "fa-solid fa-arrow-rotate-right")
                     span(style = counterStyle):
                       text "K"
             tdiv(class = "field is-grouped is-grouped-centered", style = fieldStyle):
@@ -285,20 +285,21 @@ when defined(js) or defined(nimsuggest):
           tdiv(class = "field is-grouped is-grouped-centered"):
             tdiv(class = "control"):
               button(
-                class = "button",
+                class = "button is-large",
                 onclick = () => self.derefSimulator(helper).rotatePlacementLeft,
               ):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-rotate-left")
             tdiv(class = "control"):
               button(
-                class = "button", onclick = () => self.derefSimulator(helper).backward
+                class = "button is-large",
+                onclick = () => self.derefSimulator(helper).backward,
               ):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-arrow-up")
             tdiv(class = "control"):
               button(
-                class = "button",
+                class = "button is-large",
                 onclick = () => self.derefSimulator(helper).rotatePlacementRight,
               ):
                 span(class = "icon"):
@@ -306,20 +307,21 @@ when defined(js) or defined(nimsuggest):
           tdiv(class = "field is-grouped is-grouped-centered"):
             tdiv(class = "control"):
               button(
-                class = "button",
+                class = "button is-large",
                 onclick = () => self.derefSimulator(helper).movePlacementLeft,
               ):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-arrow-left")
             tdiv(class = "control"):
               button(
-                class = "button", onclick = () => self.derefSimulator(helper).forward
+                class = "button is-large",
+                onclick = () => self.derefSimulator(helper).forward,
               ):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-arrow-down")
             tdiv(class = "control"):
               button(
-                class = "button",
+                class = "button is-large",
                 onclick = () => self.derefSimulator(helper).movePlacementRight,
               ):
                 span(class = "icon"):
@@ -328,34 +330,39 @@ when defined(js) or defined(nimsuggest):
           tdiv(class = "field is-grouped is-grouped-is-centered mb-0"):
             tdiv(class = "control"):
               button(
-                class = "button", onclick = () => self.derefSimulator(helper).backward
+                class = "button is-large px-4 py-2",
+                onclick = () => self.derefSimulator(helper).backward,
               ):
-                span(class = "icon"):
+                span(class = "icon is-medium"):
                   italic(class = "fa-solid fa-backward-step")
           tdiv(class = "field is-grouped is-grouped-is-centered"):
             tdiv(class = "control"):
               button(
-                class = "button", onclick = () => self.derefSimulator(helper).forward
+                class = "button is-large px-4 py-2",
+                onclick = () => self.derefSimulator(helper).forward,
               ):
-                span(class = "icon"):
+                span(class = "icon is-medium"):
                   italic(class = "fa-solid fa-forward-step")
         of Replay:
           tdiv(class = "field is-grouped is-grouped-centered"):
             tdiv(class = "control"):
               button(
-                class = "button", onclick = () => self.derefSimulator(helper).reset
+                class = "button is-large",
+                onclick = () => self.derefSimulator(helper).reset,
               ):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-backward-fast")
             tdiv(class = "control"):
               button(
-                class = "button", onclick = () => self.derefSimulator(helper).backward
+                class = "button is-large",
+                onclick = () => self.derefSimulator(helper).backward,
               ):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-backward-step")
             tdiv(class = "control"):
               button(
-                class = "button", onclick = () => self.derefSimulator(helper).forward
+                class = "button is-large",
+                onclick = () => self.derefSimulator(helper).forward,
               ):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-forward-step")

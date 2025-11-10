@@ -59,8 +59,11 @@ when defined(js) or defined(nimsuggest):
         tdiv(class = "field is-grouped"):
           tdiv(class = "control"):
             button(
-              class = (if self[].solving: "button is-loading" else: "button").cstring,
-              disabled = self[].working,
+              class = (
+                if self[].solving: "button is-loading"
+                elif self[].working: "button is-static"
+                else: "button"
+              ).cstring,
               onclick = () => self.runSolve,
             ):
               text "解探索"
@@ -69,8 +72,11 @@ when defined(js) or defined(nimsuggest):
                   text "Enter"
           tdiv(class = "control"):
             button(
-              class = (if self[].permuting: "button is-loading" else: "button").cstring,
-              disabled = self[].working,
+              class = (
+                if self[].permuting: "button is-loading"
+                elif self[].working: "button is-static"
+                else: "button"
+              ).cstring,
               onclick = () => self.runPermute helper,
             ):
               text "ツモ並べ替え"

@@ -25,6 +25,8 @@ when defined(js) or defined(nimsuggest):
     let
       mode = self.derefSimulator(helper).mode
       wideCtrl = helper.mobile and mode in PlayModes
+      isReplaySimulator =
+        helper.studioOpt.isOk and helper.studioOpt.unsafeValue.isReplaySimulator
 
     buildHtml tdiv:
       if self.derefSimulator(helper).nazoPuyoWrap.optGoal.isOk:
@@ -71,14 +73,14 @@ when defined(js) or defined(nimsuggest):
                   if mode in EditModes and not helper.mobile:
                     tdiv(class = "block"):
                       self.toPaletteVNode helper
-                  if not helper.mobile or mode == EditorEdit:
+                  if not helper.mobile or isReplaySimulator or mode == EditorEdit:
                     tdiv(class = "block"):
                       self.toSideCtrlVNode helper
                   tdiv(class = "block"):
                     self.toStepsVNode helper
-      if helper.mobile:
+      if helper.mobile and not isReplaySimulator:
         tdiv(style = bottomFixStyle):
-          tdiv(class = "columns is-mobile is-1"):
+          tdiv(class = "columns is-mobile is-1 is-vcentered"):
             if mode in EditModes:
               tdiv(class = "column is-narrow"):
                 self.toPaletteVNode helper
