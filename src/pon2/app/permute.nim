@@ -131,15 +131,17 @@ when defined(js) or defined(nimsuggest):
         nazo: NazoPuyo[F],
         fixIndices: openArray[int],
         allowDblNotLast, allowDblLast: bool,
-        progressRef: ref tuple[now, total: int],
+        progressRef: ref tuple[now, total: int] = nil,
     ): Future[seq[NazoPuyo[F]]] {.inline, async.} =
       ## Permutes the Nazo Puyo asynchronously with web workers.
       ## This function requires that the field is settled.
       let stepsSeq =
         nazo.puyoPuyo.steps.allStepsSeq(fixIndices, allowDblNotLast, allowDblLast)
       if not progressRef.isNil:
-        progressRef[].now.assign 0
-        progressRef[].total.assign stepsSeq.len
+        if stepsSeq.len == 0:
+          progressRef[] = (1, 1)
+        else:
+          progressRef[] = (0, stepsSeq.len)
 
       var nazos = newSeq[NazoPuyo[F]]()
       for steps in stepsSeq:
@@ -158,15 +160,3 @@ when defined(js) or defined(nimsuggest):
           progressRef[].now.inc
 
       return nazos
-
-    proc asyncPermute*[F: TsuField or WaterField](
-        nazo: NazoPuyo[F],
-        fixIndices: openArray[int],
-        allowDblNotLast, allowDblLast: bool,
-    ): Future[seq[NazoPuyo[F]]] {.inline.} =
-      ## Permutes the Nazo Puyo asynchronously with web workers.
-      ## This function requires that the field is settled.
-      let progressRef = new tuple[now, total: int]
-      progressRef[] = (0, 0)
-
-      nazo.asyncPermute(fixIndices, allowDblNotLast, allowDblLast, progressRef)
