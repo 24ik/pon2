@@ -1,7 +1,0 @@
-nimTitle	color	pon2/app/color.html	module src/pon2/app/color		0
-nim	Color	pon2/app/color.html#Color	object Color		11
-nim	SelectColor	pon2/app/color.html#SelectColor	const SelectColor		18
-nim	GhostColor	pon2/app/color.html#GhostColor	const GhostColor		19
-nim	WaterColor	pon2/app/color.html#WaterColor	const WaterColor		20
-nim	DefaultColor	pon2/app/color.html#DefaultColor	const DefaultColor		21
-nim	toColorCode	pon2/app/color.html#toColorCode,Color	proc toColorCode(color: Color): kstring		31

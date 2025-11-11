@@ -1,3 +1,0 @@
-nimTitle	field	pon2/private/app/simulator/native/field.html	module src/pon2/private/app/simulator/native/field		0
-nim	FieldControl	pon2/private/app/simulator/native/field.html#FieldControl	type FieldControl		18
-nim	newFieldControl	pon2/private/app/simulator/native/field.html#newFieldControl,Simulator,Assets	proc newFieldControl(simulator: Simulator; assets: Assets): FieldControl		43

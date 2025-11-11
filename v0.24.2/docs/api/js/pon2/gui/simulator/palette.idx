@@ -1,2 +1,0 @@
-nimTitle	palette	pon2/gui/simulator/palette.html	module src/pon2/gui/simulator/palette		0
-nim	toPaletteVNode	pon2/gui/simulator/palette.html#toPaletteVNode,ref.S,VNodeHelper	proc toPaletteVNode[S: Simulator or Studio or Marathon](self: ref S;\n    helper: VNodeHelper): VNode		39

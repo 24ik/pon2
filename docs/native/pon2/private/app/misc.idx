@@ -1,8 +1,0 @@
-nimTitle	misc	pon2/private/app/misc.html	module src/pon2/private/app/misc		0
-nim	NativeAssetsDir	pon2/private/app/misc.html#NativeAssetsDir	const NativeAssetsDir		21
-nim	WebAssetsDir	pon2/private/app/misc.html#WebAssetsDir	const WebAssetsDir		22
-nim	ColorButton	pon2/private/app/misc.html#ColorButton	type ColorButton		117
-nim	newColorButton	pon2/private/app/misc.html#newColorButton,string	proc newColorButton(text = ""): ColorButton		120
-nim	handleDrawEvent	pon2/private/app/misc.html#handleDrawEvent.e,ColorButton,DrawEvent	method handleDrawEvent(control: ColorButton; event: DrawEvent)		126
-nim	pt	pon2/private/app/misc.html#pt,int	proc pt(px: int): float		143
-nim	px	pon2/private/app/misc.html#px,float	proc px(pt: float): int		147

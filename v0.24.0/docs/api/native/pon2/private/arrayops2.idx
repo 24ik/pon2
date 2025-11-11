@@ -1,4 +1,0 @@
-nimTitle	arrayops2	pon2/private/arrayops2.html	module src/pon2/private/arrayops2		0
-nim	initArrWith	pon2/private/arrayops2.html#initArrWith,staticint,T	proc initArrWith[T](size: static int; val: T): array[size, T]		11
-nim	initArrWith	pon2/private/arrayops2.html#initArrWith,T	proc initArrWith[E: enum; T](val: T): array[E, T]		24
-nimgrp	initarrwith	pon2/private/arrayops2.html#initArrWith-procs-all	proc		11

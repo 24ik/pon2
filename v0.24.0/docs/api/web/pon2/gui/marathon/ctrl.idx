@@ -1,2 +1,0 @@
-nimTitle	ctrl	pon2/gui/marathon/ctrl.html	module src/pon2/gui/marathon/ctrl		0
-nim	toMarathonCtrlVNode	pon2/gui/marathon/ctrl.html#toMarathonCtrlVNode,ref.Marathon,VNodeHelper	proc toMarathonCtrlVNode(self: ref Marathon; helper: VNodeHelper): VNode		20

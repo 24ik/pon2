@@ -1,3 +1,0 @@
-nimTitle	select	pon2/private/app/simulator/native/select.html	module src/pon2/private/app/simulator/native/select		0
-nim	SelectControl	pon2/private/app/simulator/native/select.html#SelectControl	type SelectControl		18
-nim	newSelectControl	pon2/private/app/simulator/native/select.html#newSelectControl,Simulator,RequirementControl	proc newSelectControl(simulator: Simulator; reqControl: RequirementControl): SelectControl		88

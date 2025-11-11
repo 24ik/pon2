@@ -1,2 +1,0 @@
-nimTitle	share	pon2/gui/simulator/share.html	module src/pon2/gui/simulator/share		0
-nim	toShareVNode	pon2/gui/simulator/share.html#toShareVNode,ref.S,VNodeHelper	proc toShareVNode[S: Simulator or Studio or Marathon](self: ref S;\n    helper: VNodeHelper): VNode		70

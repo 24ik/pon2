@@ -1,6 +1,0 @@
-nimTitle	assign3	pon2/private/assign3.html	module src/pon2/private/assign3		0
-nim	assign	pon2/private/assign3.html#assign,seq[T],openArray[T]	proc assign[T](tgt: var seq[T]; src: openArray[T])		29
-nim	assign	pon2/private/assign3.html#assign,openArray[T],openArray[T]	proc assign[T](tgt: var openArray[T]; src: openArray[T])		31
-nim	assign	pon2/private/assign3.html#assign,T,T	proc assign[T](tgt: var T; src: T)		33
-nim	assign	pon2/private/assign3.html#assign,string,string	proc assign(tgt: var string; src: string)		82
-nimgrp	assign	pon2/private/assign3.html#assign-procs-all	proc		29

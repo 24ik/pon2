@@ -1,3 +1,0 @@
-nimTitle	controller	pon2/private/app/marathon/web/controller.html	module src/pon2/private/app/marathon/web/controller		0
-nim	newMarathonPlayControllerNode	pon2/private/app/marathon/web/controller.html#newMarathonPlayControllerNode,Marathon	proc newMarathonPlayControllerNode(marathon: Marathon): VNode		15
-nim	newMarathonFocusControllerNode	pon2/private/app/marathon/web/controller.html#newMarathonFocusControllerNode,Marathon	proc newMarathonFocusControllerNode(marathon: Marathon): VNode		32

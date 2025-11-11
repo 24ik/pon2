@@ -1,3 +1,0 @@
-nimTitle	fqdn	pon2/core/fqdn.html	module src/pon2/core/fqdn		0
-nim	SimulatorFqdn	pon2/core/fqdn.html#SimulatorFqdn	enum SimulatorFqdn		21
-nim	parseSimulatorFqdn	pon2/core/fqdn.html#parseSimulatorFqdn,string	proc parseSimulatorFqdn(str: string): Res[SimulatorFqdn]		35
