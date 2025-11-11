@@ -11,6 +11,10 @@ import ./[key, nazopuyowrap, permute, simulator, solve]
 import ../[core]
 import ../private/[assign3, utils]
 
+when defined(js) or defined(nimsuggest):
+  when not defined(pon2.build.worker):
+    import std/[jsconsole]
+
 type
   StudioReplayData* = object ## Data for the replay simulator.
     stepsSeq: seq[Steps]
@@ -178,19 +182,18 @@ func workPostProcess[F: TsuField or WaterField](
   else:
     self.focusReplay.assign false
 
-proc setAnswers(self: var Studio, answers: seq[SolveAnswer]) {.inline.} =
+proc setAnswers[F: TsuField or WaterField](
+    self: var Studio, originalNazo: NazoPuyo[F], answers: seq[SolveAnswer]
+) {.inline.} =
   ## Sets the answers.
-  let
-    originalSteps = unwrapNazoPuyo self.simulator.nazoPuyoWrap:
-      it.steps
-    stepsSeq = collect:
-      for ans in answers:
-        var steps = originalSteps
-        for stepIdx, optPlcmt in ans:
-          if originalSteps[stepIdx].kind == PairPlacement:
-            steps[stepIdx].optPlacement.assign optPlcmt
+  let stepsSeq = collect:
+    for ans in answers:
+      var steps = originalNazo.puyoPuyo.steps
+      for stepIdx, optPlcmt in ans:
+        if originalNazo.puyoPuyo.steps[stepIdx].kind == PairPlacement:
+          steps[stepIdx].optPlacement.assign optPlcmt
 
-        steps
+      steps
 
   self.replayData.stepsSeq.assign stepsSeq
 
@@ -204,7 +207,7 @@ proc solve*(self: var Studio) {.inline.} =
   self.replayData.stepsSeq.setLen 0
 
   unwrapNazoPuyo self.simulator.nazoPuyoWrap:
-    self.setAnswers itNazo.solve
+    self.setAnswers itNazo, itNazo.solve
     self.workPostProcess itNazo
 
   self.solving.assign false
@@ -221,15 +224,20 @@ when defined(js) or defined(nimsuggest):
       self.replayData.stepsSeq.setLen 0
 
       unwrapNazoPuyo self.simulator.nazoPuyoWrap:
+        let originalNazo = itNazo # NOTE: allow editing when working
+
         {.push warning[Uninit]: off.}
-        discard itNazo.asyncSolve(self[].progressRef).then(
+        discard originalNazo
+          .asyncSolve(self[].progressRef)
+          .then(
             (answers: seq[SolveAnswer]) => (
               block:
-                self[].setAnswers answers
-                self[].workPostProcess itNazo
+                self[].setAnswers originalNazo, answers
+                self[].workPostProcess originalNazo
                 self[].solving.assign false
             )
           )
+          .catch((e: Error) => console.error e)
         {.pop.}
 
 # ------------------------------------------------
@@ -271,18 +279,21 @@ when defined(js) or defined(nimsuggest):
       self.replayData.stepsSeq.setLen 0
 
       unwrapNazoPuyo self.simulator.nazoPuyoWrap:
+        let originalNazo = itNazo # NOTE: allow editing when working
+
         {.push warning[Uninit]: off.}
-        discard itNazo
+        discard originalNazo
           .asyncPermute(fixIndices, allowDblNotLast, allowDblLast, self[].progressRef)
           .then(
-            (nazos: seq[itNazo.type]) => (
+            (nazos: seq[originalNazo.type]) => (
               block:
                 for nazo in nazos:
                   self[].replayData.stepsSeq.add nazo.puyoPuyo.steps
-                self[].workPostProcess itNazo
+                self[].workPostProcess originalNazo
                 self[].permuting.assign false
             )
           )
+          .catch((e: Error) => console.error e)
         {.pop.}
 
 # ------------------------------------------------
@@ -297,13 +308,6 @@ proc operate*(self: ref Studio, key: KeyEvent): bool {.inline, discardable.} =
     if key == static(KeyEvent.init("Tab", shift = true)):
       self[].toggleFocus
       return true
-
-    # work
-    when defined(js) or defined(nimsuggest):
-      when not defined(pon2.build.worker):
-        if key == static(KeyEvent.init "Enter"):
-          self.asyncSolve
-          return true
 
     if self[].focusReplay:
       # next/prev replay

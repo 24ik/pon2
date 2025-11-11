@@ -67,9 +67,6 @@ when defined(js) or defined(nimsuggest):
               onclick = () => self.runSolve,
             ):
               text "解探索"
-              if not helper.mobile:
-                span(style = counterStyle):
-                  text "Enter"
           tdiv(class = "control"):
             button(
               class = (
