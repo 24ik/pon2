@@ -59,7 +59,6 @@ type
     nazoPuyoWrap: NazoPuyoWrap
     moveResult: MoveResult
     state: SimulatorState
-    operatingPlacement: Placement
     operatingIdx: int
 
   Simulator* = object ## Simulator for Puyo Puyo and Nazo Puyo.
@@ -115,7 +114,6 @@ func init(T: type SimulatorDequeElem, simulator: Simulator): T {.inline.} =
     moveResult: simulator.moveResult,
     state: simulator.state,
     operatingIdx: simulator.operatingIdx,
-    operatingPlacement: simulator.operatingPlacement,
   )
 
 func init*(T: type Simulator, wrap: NazoPuyoWrap, mode = DefaultMode): T {.inline.} =
@@ -168,7 +166,6 @@ func load(self: var Simulator, elem: SimulatorDequeElem) {.inline.} =
   self.moveResult.assign elem.moveResult
   self.state.assign elem.state
   self.operatingIdx.assign elem.operatingIdx
-  self.operatingPlacement.assign elem.operatingPlacement
 
 func undo*(self: var Simulator) {.inline.} =
   ## Performs undo.
@@ -869,12 +866,17 @@ func backward*(self: var Simulator, detail = false) {.inline.} =
     unwrapNazoPuyo self.nazoPuyoWrap:
       it.steps.assign steps
 
+  if self.mode in PlayModes and self.state in {Stable, AfterEdit}:
+    self.operatingPlacement.assign DefaultPlcmt
+
 func reset*(self: var Simulator) {.inline.} =
   ## Backwards the simulator to the pre-move state.
   unwrapNazoPuyo self.nazoPuyoWrap:
     let nowSteps = it.steps
     self.undoAll
     it.steps.assign nowSteps
+
+  self.operatingPlacement.assign DefaultPlcmt
 
 # ------------------------------------------------
 # Mark
