@@ -217,7 +217,7 @@ when defined(js) or defined(nimsuggest):
 
     proc asyncSolve*[F: TsuField or WaterField](
         nazo: NazoPuyo[F],
-        progressRef: ref tuple[now, total: int],
+        progressRef: ref tuple[now, total: int] = nil,
         calcAllAnswers: static bool = true,
     ): Future[seq[SolveAnswer]] {.inline, async.} =
       ## Solves the Nazo Puyo asynchronously with web workers.
@@ -225,7 +225,13 @@ when defined(js) or defined(nimsuggest):
       # NOTE: 2 and 3 show similar performance; 2 is chosen for faster `childrenAtDepth`
       const TargetDepth = 2
 
+      if not progressRef.isNil:
+        progressRef[] = (0, 0)
+
       if not nazo.goal.isSupported or nazo.puyoPuyo.steps.len == 0:
+        if not progressRef.isNil:
+          progressRef[] = (1, 1)
+
         return newSeq[SolveAnswer]()
 
       let rootNode = SolveNode[F].init nazo.puyoPuyo
@@ -244,12 +250,18 @@ when defined(js) or defined(nimsuggest):
 
       when not calcAllAnswers:
         if answers.len > 1:
+          if not progressRef.isNil:
+            progressRef[] = (1, 1)
+
           return answers
 
       let nodeCnt = nodes.len
       if not progressRef.isNil:
-        progressRef[].now.assign 0
-        progressRef[].total.assign nodeCnt
+        if nodeCnt == 0:
+          progressRef[] = (1, 1)
+        else:
+          progressRef[] = (0, nodeCnt)
+
       let answersSeqRef = new seq[seq[SolveAnswer]]
       answersSeqRef[] = collect:
         for _ in 1 .. nodeCnt:
@@ -269,13 +281,3 @@ when defined(js) or defined(nimsuggest):
         await future
 
       return answers & answersSeqRef[].concat
-
-    proc asyncSolve*[F: TsuField or WaterField](
-        nazo: NazoPuyo[F], calcAllAnswers: static bool = true
-    ): Future[seq[SolveAnswer]] {.inline.} =
-      ## Solves the Nazo Puyo asynchronously with web workers.
-      ## This function requires that the field is settled.
-      let progressRef = new tuple[now, total: int]
-      progressRef[] = (0, 0)
-
-      nazo.asyncSolve(progressRef, calcAllAnswers)

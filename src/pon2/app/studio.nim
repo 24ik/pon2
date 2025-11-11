@@ -162,10 +162,6 @@ func canWork(self: Studio): bool {.inline.} =
   if self.simulator.state notin {Stable, AfterEdit}:
     return false
 
-  unwrapNazoPuyo self.simulator.nazoPuyoWrap:
-    if it.steps.len == 0:
-      return false
-
   true
 
 func workPostProcess[F: TsuField or WaterField](
