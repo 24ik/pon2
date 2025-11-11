@@ -16,10 +16,10 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.4">
+<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.6">
 
 <!-- JS -->
-<script type="text/javascript" src="../../dochack.js?v=2.2.4"></script>
+<script type="text/javascript" src="../../dochack.js?v=2.2.6"></script>
 </head>
 <body>
   <div class="document" id="documentId">
@@ -82,7 +82,7 @@
 
 </ul>
 <ul class="simple nested-toc-section">operate
-  <li><a class="reference" href="#operate%2CStudio%2CKeyEvent" title="operate(self: var Studio; key: KeyEvent): bool">operate(self: var Studio; key: KeyEvent): bool</a></li>
+  <li><a class="reference" href="#operate%2Cref.Studio%2CKeyEvent" title="operate(self: ref Studio; key: KeyEvent): bool">operate(self: ref Studio; key: KeyEvent): bool</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">permute
@@ -91,8 +91,16 @@
         allowDblNotLast, allowDblLast: bool)</a></li>
 
 </ul>
+<ul class="simple nested-toc-section">permuting
+  <li><a class="reference" href="#permuting%2CStudio" title="permuting(self: Studio): bool">permuting(self: Studio): bool</a></li>
+
+</ul>
 <ul class="simple nested-toc-section">prevReplay
   <li><a class="reference" href="#prevReplay%2CStudio" title="prevReplay(self: var Studio)">prevReplay(self: var Studio)</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">progressRef
+  <li><a class="reference" href="#progressRef%2CStudio" title="progressRef(self: Studio): ref tuple[now, total: int]">progressRef(self: Studio): ref tuple[now, total: int]</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">replaySimulator
@@ -115,6 +123,10 @@
 </ul>
 <ul class="simple nested-toc-section">solve
   <li><a class="reference" href="#solve%2CStudio" title="solve(self: var Studio)">solve(self: var Studio)</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">solving
+  <li><a class="reference" href="#solving%2CStudio" title="solving(self: Studio): bool">solving(self: Studio): bool</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">toggleFocus
@@ -182,7 +194,7 @@
 </div>
 <div id="init-procs-all">
   <div id="init,typeStudio">
-  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeStudio"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">Studio</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#init%2CtypeStudio"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">Studio</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -190,7 +202,7 @@
   </dd>
 </div>
 <div id="init,typeStudio,Simulator">
-  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeStudio%2CSimulator"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">Studio</span><span class="Other">;</span> <span class="Identifier">simulator</span><span class="Other">:</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#init%2CtypeStudio%2CSimulator"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">Studio</span><span class="Other">;</span> <span class="Identifier">simulator</span><span class="Other">:</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -211,9 +223,9 @@
 
 </div>
 <div id="operate-procs-all">
-  <div id="operate,Studio,KeyEvent">
-  <dt><pre><span class="Keyword">proc</span> <a href="#operate%2CStudio%2CKeyEvent"><span class="Identifier">operate</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="studio.html#Studio"><span class="Identifier">Studio</span></a><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">:</span> <a href="key.html#KeyEvent"><span class="Identifier">KeyEvent</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">discardable</span><span class="Other">,</span>
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">TimeEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <div id="operate,ref.Studio,KeyEvent">
+  <dt><pre><span class="Keyword">proc</span> <a href="#operate%2Cref.Studio%2CKeyEvent"><span class="Identifier">operate</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">ref</span> <a href="studio.html#Studio"><span class="Identifier">Studio</span></a><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">:</span> <a href="key.html#KeyEvent"><span class="Identifier">KeyEvent</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">discardable</span><span class="Other">,</span>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Performs an action specified by the key. Returns <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt> if the key is handled.
@@ -229,7 +241,18 @@
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">TimeEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Permutes the nazo puyo.
+    Permutes the nazo puyo. This function requires that the field is settled.
+    
+  </dd>
+</div>
+
+</div>
+<div id="permuting-procs-all">
+  <div id="permuting,Studio">
+  <dt><pre><span class="Keyword">func</span> <a href="#permuting%2CStudio"><span class="Identifier">permuting</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="studio.html#Studio"><span class="Identifier">Studio</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Returns <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt> if the studio is permuting.
     
   </dd>
 </div>
@@ -241,6 +264,18 @@
   <dd>
     
     Shows the previous answer.
+    
+  </dd>
+</div>
+
+</div>
+<div id="progressRef-procs-all">
+  <div id="progressRef,Studio">
+  <dt><pre><span class="Keyword">func</span> <a href="#progressRef%2CStudio"><span class="Identifier">progressRef</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="studio.html#Studio"><span class="Identifier">Studio</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">ref</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">now</span><span class="Other">,</span> <span class="Identifier">total</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Returns the progress.
     
   </dd>
 </div>
@@ -318,7 +353,18 @@
                                <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Solves the nazo puyo.
+    Solves the nazo puyo. This function requires that the field is settled.
+    
+  </dd>
+</div>
+
+</div>
+<div id="solving-procs-all">
+  <div id="solving,Studio">
+  <dt><pre><span class="Keyword">func</span> <a href="#solving%2CStudio"><span class="Identifier">solving</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="studio.html#Studio"><span class="Identifier">Studio</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Returns <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt> if the studio is solving.
     
   </dd>
 </div>
@@ -356,7 +402,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-10-30 00:53:57 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-11 01:33:26 UTC</small>
       </div>
     </div>
   </div>

@@ -1,2 +1,0 @@
-nimTitle	msg	pon2/gui/simulator/msg.html	module src/pon2/gui/simulator/msg		0
-nim	toMsgVNode	pon2/gui/simulator/msg.html#toMsgVNode,ref.S,VNodeHelper	proc toMsgVNode[S: Simulator or Studio](self: ref S; helper: VNodeHelper): VNode		61

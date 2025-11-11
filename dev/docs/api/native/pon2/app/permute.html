@@ -16,10 +16,10 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.4">
+<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.6">
 
 <!-- JS -->
-<script type="text/javascript" src="../../dochack.js?v=2.2.4"></script>
+<script type="text/javascript" src="../../dochack.js?v=2.2.6"></script>
 </head>
 <body>
   <div class="document" id="documentId">
@@ -56,16 +56,16 @@
 </li>
 <li>
   <details open>
-    <summary><a class="reference reference-toplevel" href="#15" id="65">Iterators</a></summary>
+    <summary><a class="reference reference-toplevel" href="#12" id="62">Procs</a></summary>
     <ul class="simple simple-toc-section">
       <ul class="simple nested-toc-section">permute
-  <li><a class="reference" href="#permute.i%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D%2CopenArray%5Bint%5D%2Cbool%2Cbool" title="permute[F: TsuField or WaterField](nazo: NazoPuyo[F];
+  <li><a class="reference" href="#permute%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D%2CopenArray%5Bint%5D%2Cbool%2Cbool" title="permute[F: TsuField or WaterField](nazo: NazoPuyo[F];
                                    fixIndices: openArray[int];
-                                   allowDblNotLast, allowDblLast: bool): NazoPuyo[
-    F]">permute[F: TsuField or WaterField](nazo: NazoPuyo[F];
+                                   allowDblNotLast, allowDblLast: bool): seq[
+    NazoPuyo[F]]">permute[F: TsuField or WaterField](nazo: NazoPuyo[F];
                                    fixIndices: openArray[int];
-                                   allowDblNotLast, allowDblLast: bool): NazoPuyo[
-    F]</a></li>
+                                   allowDblNotLast, allowDblLast: bool): seq[
+    NazoPuyo[F]]</a></li>
 
 </ul>
 
@@ -87,17 +87,18 @@
     <a class="reference external" href="solve.html">solve</a>, <a class="reference external" href="../core.html">../core</a>, <a class="reference external" href="../private/assign3.html">../private/assign3</a>, <a class="reference external" href="../private/staticfor2.html">../private/staticfor2</a>
   </dl>
 </div>
-<div class="section" id="15">
-  <h1><a class="toc-backref" href="#15">Iterators</a></h1>
+<div class="section" id="12">
+  <h1><a class="toc-backref" href="#12">Procs</a></h1>
   <dl class="item">
-    <div id="permute-iterators-all">
-  <div id="permute.i,NazoPuyo[F: TsuField or WaterField],openArray[int],bool,bool">
-  <dt><pre><span class="Keyword">iterator</span> <a href="#permute.i%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D%2CopenArray%5Bint%5D%2Cbool%2Cbool"><span class="Identifier">permute</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">:</span> <a href="../core/field.html#TsuField"><span class="Identifier">TsuField</span></a> <span class="Keyword">or</span> <a href="../core/field.html#WaterField"><span class="Identifier">WaterField</span></a><span class="Other">]</span><span class="Other">(</span><span class="Identifier">nazo</span><span class="Other">:</span> <a href="../core/nazopuyo.html#NazoPuyo"><span class="Identifier">NazoPuyo</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">]</span><span class="Other">;</span>
-    <span class="Identifier">fixIndices</span><span class="Other">:</span> <span class="Identifier">openArray</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">allowDblNotLast</span><span class="Other">,</span> <span class="Identifier">allowDblLast</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">)</span><span class="Other">:</span> <a href="../core/nazopuyo.html#NazoPuyo"><span class="Identifier">NazoPuyo</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">]</span> {.
-    <span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+    <div id="permute-procs-all">
+  <div id="permute,NazoPuyo[F: TsuField or WaterField],openArray[int],bool,bool">
+  <dt><pre><span class="Keyword">proc</span> <a href="#permute%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D%2CopenArray%5Bint%5D%2Cbool%2Cbool"><span class="Identifier">permute</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">:</span> <a href="../core/field.html#TsuField"><span class="Identifier">TsuField</span></a> <span class="Keyword">or</span> <a href="../core/field.html#WaterField"><span class="Identifier">WaterField</span></a><span class="Other">]</span><span class="Other">(</span><span class="Identifier">nazo</span><span class="Other">:</span> <a href="../core/nazopuyo.html#NazoPuyo"><span class="Identifier">NazoPuyo</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">]</span><span class="Other">;</span>
+                                        <span class="Identifier">fixIndices</span><span class="Other">:</span> <span class="Identifier">openArray</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">;</span>
+                                        <span class="Identifier">allowDblNotLast</span><span class="Other">,</span> <span class="Identifier">allowDblLast</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span>
+    <a href="../core/nazopuyo.html#NazoPuyo"><span class="Identifier">NazoPuyo</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">]</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Yields Nazo Puyo that is obtained by permuting steps and has a unique answer.
+    Returns a sequence of Nazo Puyos that is obtained by permuting steps and has a unique answer.
     
   </dd>
 </div>
@@ -113,7 +114,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-10-30 00:53:55 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-11 01:33:25 UTC</small>
       </div>
     </div>
   </div>

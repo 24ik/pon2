@@ -1,4 +1,0 @@
-nimTitle	deref	pon2/private/gui/deref.html	module src/pon2/private/gui/deref		0
-nim	derefSimulator	pon2/private/gui/deref.html#derefSimulator,ref.Simulator,VNodeHelper	proc derefSimulator(self: ref Simulator; helper: VNodeHelper): var Simulator		17
-nim	derefSimulator	pon2/private/gui/deref.html#derefSimulator,ref.Studio,VNodeHelper	proc derefSimulator(self: ref Studio; helper: VNodeHelper): var Simulator		26
-nimgrp	derefsimulator	pon2/private/gui/deref.html#derefSimulator-procs-all	proc		17
