@@ -154,21 +154,11 @@
 <li><a class="reference external"
           data-doc-search-tag="permute: proc asyncPermute[F: TsuField or WaterField](nazo: NazoPuyo[F];
                                         fixIndices: openArray[int];
-                                        allowDblNotLast, allowDblLast: bool): Future[
-    seq[NazoPuyo[F]]]" href="pon2/app/permute.html#asyncPermute%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D%2CopenArray%5Bint%5D%2Cbool%2Cbool">permute: proc asyncPermute[F: TsuField or WaterField](nazo: NazoPuyo[F];
-                                        fixIndices: openArray[int];
-                                        allowDblNotLast, allowDblLast: bool): Future[
-    seq[NazoPuyo[F]]]</a></li>
-          <li><a class="reference external"
-          data-doc-search-tag="permute: proc asyncPermute[F: TsuField or WaterField](nazo: NazoPuyo[F];
+                                        allowDblNotLast, allowDblLast: bool;
+    progressRef: ref tuple[now, total: int] = nil): Future[seq[NazoPuyo[F]]]" href="pon2/app/permute.html#asyncPermute%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D%2CopenArray%5Bint%5D%2Cbool%2Cbool%2Cref.tuple%5Bint%2Cint%5D">permute: proc asyncPermute[F: TsuField or WaterField](nazo: NazoPuyo[F];
                                         fixIndices: openArray[int];
                                         allowDblNotLast, allowDblLast: bool;
-                                        progressRef: ref tuple[now, total: int]): Future[
-    seq[NazoPuyo[F]]]" href="pon2/app/permute.html#asyncPermute%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D%2CopenArray%5Bint%5D%2Cbool%2Cbool%2Cref.tuple%5Bint%2Cint%5D">permute: proc asyncPermute[F: TsuField or WaterField](nazo: NazoPuyo[F];
-                                        fixIndices: openArray[int];
-                                        allowDblNotLast, allowDblLast: bool;
-                                        progressRef: ref tuple[now, total: int]): Future[
-    seq[NazoPuyo[F]]]</a></li>
+    progressRef: ref tuple[now, total: int] = nil): Future[seq[NazoPuyo[F]]]</a></li>
           <li><a class="reference external"
           data-doc-search-tag="studio: proc asyncPermute(self: ref Studio; fixIndices: openArray[int];
              allowDblNotLast, allowDblLast: bool)" href="pon2/app/studio.html#asyncPermute%2Cref.Studio%2CopenArray%5Bint%5D%2Cbool%2Cbool">studio: proc asyncPermute(self: ref Studio; fixIndices: openArray[int];
@@ -176,18 +166,10 @@
           </ul></dd>
 <dt><a name="asyncSolve" href="#asyncSolve"><span>asyncSolve:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="solve: proc asyncSolve[F: TsuField or WaterField](nazo: NazoPuyo[F];
-                                      progressRef: ref tuple[now, total: int];
-                                      calcAllAnswers: static bool = true): Future[
-    seq[SolveAnswer]]" href="pon2/app/solve.html#asyncSolve%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D%2Cref.tuple%5Bint%2Cint%5D%2Cstaticbool">solve: proc asyncSolve[F: TsuField or WaterField](nazo: NazoPuyo[F];
-                                      progressRef: ref tuple[now, total: int];
-                                      calcAllAnswers: static bool = true): Future[
-    seq[SolveAnswer]]</a></li>
-          <li><a class="reference external"
-          data-doc-search-tag="solve: proc asyncSolve[F: TsuField or WaterField](nazo: NazoPuyo[F];
-                                      calcAllAnswers: static bool = true): Future[
-    seq[SolveAnswer]]" href="pon2/app/solve.html#asyncSolve%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D%2Cstaticbool">solve: proc asyncSolve[F: TsuField or WaterField](nazo: NazoPuyo[F];
-                                      calcAllAnswers: static bool = true): Future[
+          data-doc-search-tag="solve: proc asyncSolve[F: TsuField or WaterField](nazo: NazoPuyo[F]; progressRef: ref tuple[
+    now, total: int] = nil; calcAllAnswers: static bool = true): Future[
+    seq[SolveAnswer]]" href="pon2/app/solve.html#asyncSolve%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D%2Cref.tuple%5Bint%2Cint%5D%2Cstaticbool">solve: proc asyncSolve[F: TsuField or WaterField](nazo: NazoPuyo[F]; progressRef: ref tuple[
+    now, total: int] = nil; calcAllAnswers: static bool = true): Future[
     seq[SolveAnswer]]</a></li>
           <li><a class="reference external"
           data-doc-search-tag="studio: proc asyncSolve(self: ref Studio)" href="pon2/app/studio.html#asyncSolve%2Cref.Studio">studio: proc asyncSolve(self: ref Studio)</a></li>
@@ -2110,7 +2092,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-11 01:41:20 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-11 04:06:15 UTC</small>
       </div>
     </div>
   </div>

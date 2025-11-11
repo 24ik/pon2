@@ -17,11 +17,11 @@ nim	progressRef	pon2/app/studio.html#progressRef,Studio	proc progressRef(self: S
 nim	toggleFocus	pon2/app/studio.html#toggleFocus,Studio	proc toggleFocus(self: var Studio)		104
 nim	nextReplay	pon2/app/studio.html#nextReplay,Studio	proc nextReplay(self: var Studio)		113
 nim	prevReplay	pon2/app/studio.html#prevReplay,Studio	proc prevReplay(self: var Studio)		130
-nim	solve	pon2/app/studio.html#solve,Studio	proc solve(self: var Studio)		201
-nim	asyncSolve	pon2/app/studio.html#asyncSolve,ref.Studio	proc asyncSolve(self: ref Studio)		218
-nim	permute	pon2/app/studio.html#permute,Studio,openArray[int],bool,bool	proc permute(self: var Studio; fixIndices: openArray[int];\n        allowDblNotLast, allowDblLast: bool)		243
-nim	asyncPermute	pon2/app/studio.html#asyncPermute,ref.Studio,openArray[int],bool,bool	proc asyncPermute(self: ref Studio; fixIndices: openArray[int];\n             allowDblNotLast, allowDblLast: bool)		264
-nim	operate	pon2/app/studio.html#operate,ref.Studio,KeyEvent	proc operate(self: ref Studio; key: KeyEvent): bool		296
+nim	solve	pon2/app/studio.html#solve,Studio	proc solve(self: var Studio)		197
+nim	asyncSolve	pon2/app/studio.html#asyncSolve,ref.Studio	proc asyncSolve(self: ref Studio)		214
+nim	permute	pon2/app/studio.html#permute,Studio,openArray[int],bool,bool	proc permute(self: var Studio; fixIndices: openArray[int];\n        allowDblNotLast, allowDblLast: bool)		239
+nim	asyncPermute	pon2/app/studio.html#asyncPermute,ref.Studio,openArray[int],bool,bool	proc asyncPermute(self: ref Studio; fixIndices: openArray[int];\n             allowDblNotLast, allowDblLast: bool)		260
+nim	operate	pon2/app/studio.html#operate,ref.Studio,KeyEvent	proc operate(self: ref Studio; key: KeyEvent): bool		292
 nimgrp	init	pon2/app/studio.html#init-procs-all	proc		35
 nimgrp	simulator	pon2/app/studio.html#simulator-procs-all	proc		56
 nimgrp	replaysimulator	pon2/app/studio.html#replaySimulator-procs-all	proc		64
