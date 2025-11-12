@@ -38,7 +38,7 @@ func init[F: TsuField or WaterField](
     popColors: set[Cell],
     popCnt: int,
     fieldCnts, stepsCnts: array[Cell, int],
-): T {.inline.} =
+): T {.inline, noinit.} =
   T(
     depth: depth,
     field: field,
@@ -51,7 +51,7 @@ func init[F: TsuField or WaterField](
 
 func init*[F: TsuField or WaterField](
     T: type SolveNode[F], puyoPuyo: PuyoPuyo[F]
-): T {.inline.} =
+): T {.inline, noinit.} =
   var fieldCnts {.noinit.}, stepsCnts {.noinit.}: array[Cell, int]
   fieldCnts[Cell.None] = 0
   stepsCnts[Cell.None] = 0
@@ -166,7 +166,7 @@ func childPairPlcmt[F: TsuField or WaterField](
     color: static GoalColor,
     step: Step,
     plcmt: Placement,
-): SolveNode[F] {.inline.} =
+): SolveNode[F] {.inline, noinit.} =
   ## Returns the child node with the `step` edge.
   ## This function requires that the field is settled.
   self.childImpl(kind, color, step, PairPlacement):
@@ -176,7 +176,7 @@ func childPairPlcmt[F: TsuField or WaterField](
 
 func childGarbages[F: TsuField or WaterField](
     self: SolveNode[F], kind: static GoalKind, color: static GoalColor, step: Step
-): SolveNode[F] {.inline.} =
+): SolveNode[F] {.inline, noinit.} =
   ## Returns the child node with the `step` edge.
   ## This function requires that the field is settled.
   self.childImpl(kind, color, step, StepKind.Garbages):
@@ -186,7 +186,7 @@ func childGarbages[F: TsuField or WaterField](
 
 func childRotate[F: TsuField or WaterField](
     self: SolveNode[F], kind: static GoalKind, color: static GoalColor, step: Step
-): SolveNode[F] {.inline.} =
+): SolveNode[F] {.inline, noinit.} =
   ## Returns the child node with the `step` edge.
   self.childImpl(kind, color, step, Rotate):
     childField.move(
@@ -195,7 +195,7 @@ func childRotate[F: TsuField or WaterField](
 
 func children[F: TsuField or WaterField](
     self: SolveNode[F], kind: static GoalKind, color: static GoalColor, step: Step
-): seq[tuple[node: SolveNode[F], optPlacement: OptPlacement]] {.inline.} =
+): seq[tuple[node: SolveNode[F], optPlacement: OptPlacement]] {.inline, noinit.} =
   ## Returns the children of the node.
   ## This function requires that the field is settled.
   ## `optPlacement` is set to `NonePlacement` if the edge is non-`PairPlacement`.
@@ -216,18 +216,20 @@ func children[F: TsuField or WaterField](
 
 func cellCnt[F: TsuField or WaterField](
     self: SolveNode[F], cell: Cell
-): int {.inline.} =
+): int {.inline, noinit.} =
   ## Returns the number of `cell` in the node.
   self.fieldCnts[cell] + self.stepsCnts[cell]
 
-func garbagesCnt[F: TsuField or WaterField](self: SolveNode[F]): int {.inline.} =
+func garbagesCnt[F: TsuField or WaterField](
+    self: SolveNode[F]
+): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos in the node.
   (self.fieldCnts[Hard] + self.fieldCnts[Garbage]) +
     (self.stepsCnts[Hard] + self.stepsCnts[Garbage])
 
 func isAccepted[F: TsuField or WaterField](
     self: SolveNode[F], goal: Goal, kind: static GoalKind, color: static GoalColor
-): bool {.inline.} =
+): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   # check clear
   staticCase:
@@ -273,7 +275,7 @@ func isAccepted[F: TsuField or WaterField](
 # Prune
 # ------------------------------------------------
 
-func filter4Nim[T: SomeInteger](x: T): T {.inline.} =
+func filter4Nim[T: SomeInteger](x: T): T {.inline, noinit.} =
   ## Returns `x` if `x >= 4`; otherwise 0.
   x * (x >= 4).T
 
@@ -298,7 +300,7 @@ cmovl %2, %0
 
 func canPrune[F: TsuField or WaterField](
     self: SolveNode[F], goal: Goal, kind: static GoalKind, color: static GoalColor
-): bool {.inline.} =
+): bool {.inline, noinit.} =
   ## Returns `true` if the node is unsolvable.
   # clear
   staticCase:
@@ -542,7 +544,7 @@ func childrenAtDepth[F: TsuField or WaterField](
     kind: static GoalKind,
     color: static GoalColor,
     steps: Steps,
-) {.inline.} =
+) {.inline, noinit.} =
   ## Calculates nodes with the given depth and sets them to `nodes`.
   ## A sequence of edges to reach them is set to `optPlcmtsSeq`.
   ## Answers that have `targetDepth` or less steps are set to `answers` in reverse
@@ -624,7 +626,7 @@ func childrenAtDepth*[F: TsuField or WaterField](
     calcAllAnswers: static bool,
     goal: Goal,
     steps: Steps,
-) {.inline.} =
+) {.inline, noinit.} =
   ## Calculates nodes with the given depth and sets them to `nodes`.
   ## A sequence of edges to reach them is set to `optPlcmtsSeq`.
   ## Answers that have `TargetDepth` or less steps are set to `answers` in reverse
@@ -650,7 +652,7 @@ func solveSingleThread[F: TsuField or WaterField](
     color: static GoalColor,
     steps: Steps,
     checkPruneFirst: static bool = false,
-) {.inline.} =
+) {.inline, noinit.} =
   ## Solves the Nazo Puyo at the node with a single thread.
   ## This function requires that the field is settled and `answers` is empty.
   ## Answers in `answers` are set in reverse order.
@@ -705,7 +707,7 @@ func solveSingleThread*[F: TsuField or WaterField](
     goal: Goal,
     steps: Steps,
     checkPruneFirst: static bool = false,
-) {.inline.} =
+) {.inline, noinit.} =
   ## Solves the Nazo Puyo at the node with a single thread.
   ## This function requires that the field is settled and `answers` is empty.
   ## Answers in `answers` are set in reverse order.
@@ -725,7 +727,7 @@ when defined(js) or defined(nimsuggest):
     Sep4 = "|"
     ErrStr = "err"
 
-  func toStr(self: MoveResult): string {.inline.} =
+  func toStr(self: MoveResult): string {.inline, noinit.} =
     ## Returns the string representation of the move result.
     var strs = newSeqOfCap[string](6)
 
@@ -743,17 +745,17 @@ when defined(js) or defined(nimsuggest):
 
     strs.join Sep4
 
-  func toStr(self: set[Cell]): string {.inline.} =
+  func toStr(self: set[Cell]): string {.inline, noinit.} =
     ## Returns the string representation of the cells.
     self.mapIt($it).join
 
-  func toStr(self: array[Cell, int]): string {.inline.} =
+  func toStr(self: array[Cell, int]): string {.inline, noinit.} =
     ## Returns the string representation of the array.
     self.mapIt($it).join Sep1
 
   func toStrs*[F: TsuField or WaterField](
       self: SolveNode[F], goal: Goal, steps: Steps
-  ): seq[string] {.inline.} =
+  ): seq[string] {.inline, noinit.} =
     ## Returns the string representations of the node.
     var strs = newSeqOfCap[string](10)
 
@@ -774,7 +776,7 @@ when defined(js) or defined(nimsuggest):
 
     strs
 
-  func parseMoveResult(str: string): Res[MoveResult] {.inline.} =
+  func parseMoveResult(str: string): Res[MoveResult] {.inline, noinit.} =
     ## Returns the move result converted from the string representation.
     let errMsg = "Invalid move result: {str}".fmt
 
@@ -831,7 +833,7 @@ when defined(js) or defined(nimsuggest):
       fullPopCnts,
     )
 
-  func parseCells(str: string): Res[set[Cell]] {.inline.} =
+  func parseCells(str: string): Res[set[Cell]] {.inline, noinit.} =
     ## Returns the cells converted from the string representation.
     let errMsg = "Invalid cells: {str}".fmt
 
@@ -841,7 +843,7 @@ when defined(js) or defined(nimsuggest):
 
     ok cells
 
-  func parseCounts(str: string): Res[array[Cell, int]] {.inline.} =
+  func parseCounts(str: string): Res[array[Cell, int]] {.inline, noinit.} =
     ## Returns the counts converted from the string representation.
     let errMsg = "Invalid counts: {str}".fmt
 
@@ -857,7 +859,7 @@ when defined(js) or defined(nimsuggest):
 
   func parseSolveInfo*(
       strs: seq[string]
-  ): Res[tuple[rule: Rule, goal: Goal, steps: Steps]] {.inline.} =
+  ): Res[tuple[rule: Rule, goal: Goal, steps: Steps]] {.inline, noinit.} =
     ## Returns the rule of the solve node converted from the string representations.
     let errMsg = "Invalid solve info: {strs}".fmt
 
@@ -872,7 +874,7 @@ when defined(js) or defined(nimsuggest):
 
   func parseSolveNode*[F: TsuField or WaterField](
       strs: seq[string]
-  ): Res[SolveNode[F]] {.inline.} =
+  ): Res[SolveNode[F]] {.inline, noinit.} =
     ## Returns the solve node converted from the string representations.
     let errMsg = "Invalid node: {strs}".fmt
 
@@ -908,7 +910,7 @@ when defined(js) or defined(nimsuggest):
 when defined(js) or defined(nimsuggest):
   const NonePlcmtStr = ".."
 
-  func toStrs*(answers: seq[seq[OptPlacement]]): seq[string] {.inline.} =
+  func toStrs*(answers: seq[seq[OptPlacement]]): seq[string] {.inline, noinit.} =
     ## Returns the string representations of the answers.
     collect:
       for ans in answers:
@@ -921,7 +923,9 @@ when defined(js) or defined(nimsuggest):
           )
         ).join
 
-  func parseSolveAnswers*(strs: seq[string]): Res[seq[seq[OptPlacement]]] {.inline.} =
+  func parseSolveAnswers*(
+      strs: seq[string]
+  ): Res[seq[seq[OptPlacement]]] {.inline, noinit.} =
     ## Returns the answers converted from the run result.
     var answers = newSeqOfCap[seq[OptPlacement]](strs.len)
     for str in strs:

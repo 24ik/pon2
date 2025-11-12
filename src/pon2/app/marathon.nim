@@ -25,7 +25,9 @@ type Marathon* = object ## Marathon manager.
 # Constructor
 # ------------------------------------------------
 
-func load*(self: var Marathon, queries: openArray[string], isReady = false) {.inline.} =
+func load*(
+    self: var Marathon, queries: openArray[string], isReady = false
+) {.inline, noinit.} =
   ## Loads steps data.
   if self.isReady:
     return
@@ -39,7 +41,7 @@ func load*(self: var Marathon, queries: openArray[string], isReady = false) {.in
 
 func init*(
     T: type Marathon, rng: Rand, queries: openArray[string] = [], isReady = false
-): T {.inline.} =
+): T {.inline, noinit.} =
   var marathon = T(
     simulator: Simulator.init PuyoPuyo[TsuField].init,
     matchQueries: @[],
@@ -55,26 +57,26 @@ func init*(
 # Property
 # ------------------------------------------------
 
-func simulator*(self: Marathon): Simulator {.inline.} =
+func simulator*(self: Marathon): Simulator {.inline, noinit.} =
   ## Returns the simulator.
   self.simulator
 
-func simulator*(self: var Marathon): var Simulator {.inline.} =
+func simulator*(self: var Marathon): var Simulator {.inline, noinit.} =
   ## Returns the simulator.
   self.simulator
 
-func isReady*(self: Marathon): bool {.inline.} =
+func isReady*(self: Marathon): bool {.inline, noinit.} =
   ## Returns `true` if the marathon manager is ready.
   self.isReady
 
-func `isReady=`*(self: var Marathon, isReady: bool) {.inline.} =
+func `isReady=`*(self: var Marathon, isReady: bool) {.inline, noinit.} =
   self.isReady.assign self.isReady or isReady
 
-func matchQueryCnt*(self: Marathon): int {.inline.} =
+func matchQueryCnt*(self: Marathon): int {.inline, noinit.} =
   ## Returns the number of the matched queries.
   if self.isReady: self.matchQueries.len else: 0
 
-func allQueryCnt*(self: Marathon): int {.inline.} =
+func allQueryCnt*(self: Marathon): int {.inline, noinit.} =
   ## Returns the number of the all queries.
   if self.isReady: self.allQueries.len else: 0
 
@@ -82,7 +84,7 @@ func allQueryCnt*(self: Marathon): int {.inline.} =
 # Match
 # ------------------------------------------------
 
-func swappedPrefixes(prefix: string): seq[string] {.inline.} =
+func swappedPrefixes(prefix: string): seq[string] {.inline, noinit.} =
   ## Returns all prefixes with all pairs swapped.
   var
     lastIndices = initArrWith(6, 0) # AB, AC, AD, BC, BD, CD
@@ -151,7 +153,7 @@ func swappedPrefixes(prefix: string): seq[string] {.inline.} =
         @[c1 & c2, c2 & c1]
   pairsSeq.product2.mapIt it.join
 
-func initReplaceDataSeqArr(): array[4, seq[seq[(string, string)]]] {.inline.} =
+func initReplaceDataSeqArr(): array[4, seq[seq[(string, string)]]] {.inline, noinit.} =
   ## Returns `ReplaceDataSeqArr`.
   let
     replaceDataSeq1 = collect:
@@ -182,7 +184,7 @@ const
   ReplaceDataSeqArr = initReplaceDataSeqArr()
   ReplaceNeedKeysArr = ["a".toSet2, "ab".toSet2, "abc".toSet2, "abcd".toSet2]
 
-func match*(self: var Marathon, prefix: string) {.inline.} =
+func match*(self: var Marathon, prefix: string) {.inline, noinit.} =
   ## Searches queries that have specified prefixes and sets them to the marathon
   ## manager.
   if not self.isReady:
@@ -237,7 +239,7 @@ func match*(self: var Marathon, prefix: string) {.inline.} =
 # Simulator
 # ------------------------------------------------
 
-func loadSteps(self: var Marathon, query: string) {.inline.} =
+func loadSteps(self: var Marathon, query: string) {.inline, noinit.} =
   ## Applies the steps to the simulator.
   var steps = initDeque[Step](query.len div 2)
   for i in countup(0, query.len.pred, 2):
@@ -246,7 +248,7 @@ func loadSteps(self: var Marathon, query: string) {.inline.} =
 
   self.simulator.assign Simulator.init PuyoPuyo[TsuField].init(TsuField.init, steps)
 
-func selectQuery*(self: var Marathon, idx: int) {.inline.} =
+func selectQuery*(self: var Marathon, idx: int) {.inline, noinit.} =
   ## Applies the selected query to the simulator.
   if not self.isReady:
     return
@@ -254,7 +256,7 @@ func selectQuery*(self: var Marathon, idx: int) {.inline.} =
   if idx in 0 ..< self.matchQueries.len:
     self.loadSteps self.matchQueries[idx]
 
-func selectRandomQuery*(self: var Marathon, fromMatched = true) {.inline.} =
+func selectRandomQuery*(self: var Marathon, fromMatched = true) {.inline, noinit.} =
   ## Applies a random query to the simulator.
   if not self.isReady:
     return
@@ -270,7 +272,7 @@ func selectRandomQuery*(self: var Marathon, fromMatched = true) {.inline.} =
 # Keyboard
 # ------------------------------------------------
 
-proc operate*(self: var Marathon, key: KeyEvent): bool {.inline, discardable.} =
+proc operate*(self: var Marathon, key: KeyEvent): bool {.inline, noinit, discardable.} =
   ## Performs an action specified by the key.
   ## Returns `true` if the key is handled.
   if key == static(KeyEvent.init "Enter"):

@@ -40,12 +40,14 @@ const
   OkStr = "ok"
   ErrStr = "err"
 
-proc newWorkerObj(): JsObject {.inline, importjs: "new Worker('{WebWorkerPath}')".fmt.}
+proc newWorkerObj(): JsObject {.
+  inline, noinit, importjs: "new Worker('{WebWorkerPath}')".fmt
+.}
 
-proc init(T: type WebWorker): T {.inline.} =
+proc init(T: type WebWorker): T {.inline, noinit.} =
   T(workerObj: newWorkerObj(), running: false)
 
-proc init(T: type WebWorkerPool, workerCnt = 1): T {.inline.} =
+proc init(T: type WebWorkerPool, workerCnt = 1): T {.inline, noinit.} =
   let workerRefs = collect:
     for _ in 1 .. workerCnt:
       let workerRef = new WebWorker
@@ -60,7 +62,7 @@ proc init(T: type WebWorkerPool, workerCnt = 1): T {.inline.} =
 
 const PoolPollingMs = 100
 
-func parseRes(str: string): Res[seq[string]] {.inline.} =
+func parseRes(str: string): Res[seq[string]] {.inline, noinit.} =
   ## Returns the result of the web worker's task.
   let errMsg = "Invalid result: {str}".fmt
 
@@ -78,7 +80,7 @@ func parseRes(str: string): Res[seq[string]] {.inline.} =
 
 proc run(
     self: ref WebWorker, args: varargs[string]
-): Future[Res[seq[string]]] {.inline.} =
+): Future[Res[seq[string]]] {.inline, noinit.} =
   ## Runs the task.
   ## If the worker is running, returns an error.
   if self[].running:
@@ -120,16 +122,17 @@ proc run*(
 # Callee
 # ------------------------------------------------
 
-proc getSelf(): JsObject {.inline, importjs: "(self)".} ## Returns the web worker object.
+proc getSelf(): JsObject {.inline, noinit, importjs: "(self)".}
+  ## Returns the web worker object.
 
-func toStr(res: Res[seq[string]]): string {.inline.} =
+func toStr(res: Res[seq[string]]): string {.inline, noinit.} =
   ## Returns the string representation of the task result.
   if res.isOk:
     "{OkStr}{MsgSep}{res.unsafeValue.join MsgSep}".fmt
   else:
     "{ErrStr}{MsgSep}{res.error}".fmt
 
-proc register*(task: WebWorkerTask) {.inline.} =
+proc register*(task: WebWorkerTask) {.inline, noinit.} =
   ## Registers the task to the web worker.
   getSelf().onmessage =
     (event: JsObject) =>

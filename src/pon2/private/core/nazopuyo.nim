@@ -16,7 +16,7 @@ import ../../core/[cell, goal, moveresult]
 
 const ExactKinds = {AccColor, AccCnt, Chain, ClearChain, Color, Cnt, Place, Conn}
 
-func isSatisfied(goal: Goal, val: int, kind: static GoalKind): bool {.inline.} =
+func isSatisfied(goal: Goal, val: int, kind: static GoalKind): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   when kind in ExactKinds:
     val == goal.optVal.unsafeValue
@@ -25,7 +25,7 @@ func isSatisfied(goal: Goal, val: int, kind: static GoalKind): bool {.inline.} =
 
 func isSatisfied(
     goal: Goal, vals: openArray[int], kind: static GoalKind
-): bool {.inline.} =
+): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   when kind in ExactKinds:
     goal.optVal.unsafeValue in vals
@@ -59,7 +59,7 @@ template expandColor(
 
 func isSatisfiedAccColor*(
     goal: Goal, colors: set[Cell], kind: static GoalKind
-): bool {.inline.} =
+): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   goal.isSatisfied(colors.card, kind)
 
@@ -67,7 +67,9 @@ func isSatisfiedAccColor*(
 # AccCnt
 # ------------------------------------------------
 
-func isSatisfiedAccCnt*(goal: Goal, cnt: int, kind: static GoalKind): bool {.inline.} =
+func isSatisfiedAccCnt*(
+    goal: Goal, cnt: int, kind: static GoalKind
+): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   goal.isSatisfied(cnt, kind)
 
@@ -77,7 +79,7 @@ func isSatisfiedAccCnt*(goal: Goal, cnt: int, kind: static GoalKind): bool {.inl
 
 func isSatisfiedChain*(
     goal: Goal, moveRes: MoveResult, kind: static GoalKind
-): bool {.inline.} =
+): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   goal.isSatisfied(moveRes.chainCnt, kind)
 
@@ -87,7 +89,7 @@ func isSatisfiedChain*(
 
 func isSatisfiedColor*(
     goal: Goal, moveRes: MoveResult, kind: static GoalKind
-): bool {.inline.} =
+): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   goal.isSatisfied(moveRes.colorsSeq.mapIt it.card, kind)
 
@@ -104,7 +106,7 @@ const
 
 func isSatisfiedCnt*(
     goal: Goal, moveRes: MoveResult, kind: static GoalKind, color: static GoalColor
-): bool {.inline.} =
+): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   let cnts = staticCase:
     case color
@@ -121,7 +123,7 @@ func isSatisfiedCnt*(
 
 func isSatisfiedCnt*(
     goal: Goal, moveRes: MoveResult, kind: static GoalKind
-): bool {.inline.} =
+): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   isSatisfiedCnt.expandColor goal, moveRes, kind
 
@@ -131,7 +133,7 @@ func isSatisfiedCnt*(
 
 func isSatisfiedPlace*(
     goal: Goal, moveRes: MoveResult, kind: static GoalKind, color: static GoalColor
-): bool {.inline.} =
+): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   let places = staticCase:
     case color
@@ -144,7 +146,7 @@ func isSatisfiedPlace*(
 
 func isSatisfiedPlace*(
     goal: Goal, moveRes: MoveResult, kind: static GoalKind
-): bool {.inline.} =
+): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   isSatisfiedPlace.expandColor goal, moveRes, kind
 
@@ -154,7 +156,7 @@ func isSatisfiedPlace*(
 
 func isSatisfiedConn*(
     goal: Goal, moveRes: MoveResult, kind: static GoalKind, color: static GoalColor
-): bool {.inline.} =
+): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   let conns = staticCase:
     case color
@@ -167,6 +169,6 @@ func isSatisfiedConn*(
 
 func isSatisfiedConn*(
     goal: Goal, moveRes: MoveResult, kind: static GoalKind
-): bool {.inline.} =
+): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   isSatisfiedConn.expandColor goal, moveRes, kind

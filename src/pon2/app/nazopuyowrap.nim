@@ -26,40 +26,40 @@ type NazoPuyoWrap* = object ## Nazo puyo wrapper.
 
 func init(
     T: type NazoPuyoWrap, optGoal: Opt[Goal], puyoPuyo: PuyoPuyo[TsuField]
-): T {.inline.} =
+): T {.inline, noinit.} =
   T(optGoal: optGoal, rule: Tsu, tsu: puyoPuyo)
 
 func init(
     T: type NazoPuyoWrap, optGoal: Opt[Goal], puyoPuyo: PuyoPuyo[WaterField]
-): T {.inline.} =
+): T {.inline, noinit.} =
   T(optGoal: optGoal, rule: Water, water: puyoPuyo)
 
 func init*[F: TsuField or WaterField](
     T: type NazoPuyoWrap, nazo: NazoPuyo[F]
-): T {.inline.} =
+): T {.inline, noinit.} =
   T.init(Opt[Goal].ok nazo.goal, nazo.puyoPuyo)
 
 func init*[F: TsuField or WaterField](
     T: type NazoPuyoWrap, puyoPuyo: PuyoPuyo[F]
-): T {.inline.} =
+): T {.inline, noinit.} =
   T.init(Opt[Goal].err, puyoPuyo)
 
-func init*(T: type NazoPuyoWrap): T {.inline.} =
+func init*(T: type NazoPuyoWrap): T {.inline, noinit.} =
   T.init NazoPuyo[TsuField].init
 
 # ------------------------------------------------
 # Operator
 # ------------------------------------------------
 
-func `==`*(field1: TsuField, field2: WaterField): bool {.inline.} =
+func `==`*(field1: TsuField, field2: WaterField): bool {.inline, noinit.} =
   # NOTE: this function may be needed in `unwrapNazoPuyo`.
   false
 
-func `==`*(field1: WaterField, field2: TsuField): bool {.inline.} =
+func `==`*(field1: WaterField, field2: TsuField): bool {.inline, noinit.} =
   # NOTE: this function may be needed in `unwrapNazoPuyo`.
   false
 
-func `==`*(wrap1, wrap2: NazoPuyoWrap): bool {.inline.} =
+func `==`*(wrap1, wrap2: NazoPuyoWrap): bool {.inline, noinit.} =
   if wrap1.optGoal != wrap2.optGoal or wrap1.rule != wrap2.rule:
     return false
 
@@ -103,11 +103,11 @@ macro unwrapNazoPuyo*(self: untyped, body: untyped): untyped =
 # Property
 # ------------------------------------------------
 
-func rule*(self: NazoPuyoWrap): Rule {.inline.} =
+func rule*(self: NazoPuyoWrap): Rule {.inline, noinit.} =
   ## Returns the rule.
   self.rule
 
-func `rule=`*(self: var NazoPuyoWrap, rule: Rule) {.inline.} =
+func `rule=`*(self: var NazoPuyoWrap, rule: Rule) {.inline, noinit.} =
   ## Sets the rule.
   if rule == self.rule:
     return
@@ -127,7 +127,9 @@ func `rule=`*(self: var NazoPuyoWrap, rule: Rule) {.inline.} =
 # Nazo Puyo wrapper <-> URI
 # ------------------------------------------------
 
-func toUriQuery*(self: NazoPuyoWrap, fqdn: SimulatorFqdn): Res[string] {.inline.} =
+func toUriQuery*(
+    self: NazoPuyoWrap, fqdn: SimulatorFqdn
+): Res[string] {.inline, noinit.} =
   ## Returns the URI query converted from the Nazo Puyo wrapper.
   const ErrMsg = "Invalid Nazo Puyo wrapper"
 
@@ -140,7 +142,7 @@ func toUriQuery*(self: NazoPuyoWrap, fqdn: SimulatorFqdn): Res[string] {.inline.
 
 func parseNazoPuyoWrap*(
     query: string, fqdn: SimulatorFqdn
-): Res[NazoPuyoWrap] {.inline.} =
+): Res[NazoPuyoWrap] {.inline, noinit.} =
   ## Returns the Nazo Puyo wrapper converted from the URI query.
   let errMsg = "Invalid Nazo Puyo wrapper: {query}".fmt
 

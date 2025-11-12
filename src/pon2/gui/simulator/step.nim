@@ -49,7 +49,7 @@ when defined(js) or defined(nimsuggest):
       step: Step,
       stepIdx: int,
       editable, stepHasCursor, isPlaceholder, pivot: bool,
-  ): VNode {.inline.} =
+  ): VNode {.inline, noinit.} =
     ## Returns the cell node in the pair-placement step.
     let imgSrc =
       if isPlaceholder:
@@ -76,7 +76,7 @@ when defined(js) or defined(nimsuggest):
 
   proc pairPlcmtNode[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, step: Step, stepIdx: int, editable: bool
-  ): VNode {.inline.} =
+  ): VNode {.inline, noinit.} =
     ## Returns the pair-placement node.
     let
       stepHasCursor =
@@ -122,7 +122,7 @@ when defined(js) or defined(nimsuggest):
 
   proc garbagesNode[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, step: Step, stepIdx: int, editable: bool
-  ): VNode {.inline.} =
+  ): VNode {.inline, noinit.} =
     ## Returns the garbages node.
     let imgSrc = if step.dropHard: Hard.cellImgSrc else: Garbage.cellImgSrc
 
@@ -176,7 +176,7 @@ when defined(js) or defined(nimsuggest):
 
   proc rotateNode[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, step: Step, stepIdx: int, editable: bool
-  ): VNode {.inline.} =
+  ): VNode {.inline, noinit.} =
     ## Returns the rotate node.
     let icon = buildHtml span(class = "icon"):
       if step.cross:
@@ -202,7 +202,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toStepsVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, cameraReady = false
-  ): VNode {.inline.} =
+  ): VNode {.inline, noinit.} =
     ## Returns the steps view.
     const PlaceholderStep = Step.init
 

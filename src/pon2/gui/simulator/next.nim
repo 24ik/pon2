@@ -18,7 +18,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toNextCellVNode[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, dblNext: bool, pivot: bool
-  ): VNode {.inline.} =
+  ): VNode {.inline, noinit.} =
     ## Returns the node of the cell in the next or double-next step.
     let
       stepIdx = self.derefSimulator(helper).operatingIdx.succ 1 + dblNext.int
@@ -57,7 +57,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toNextVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
-  ): VNode {.inline.} =
+  ): VNode {.inline, noinit.} =
     ## Returns the next node.
     buildHtml table:
       tbody:

@@ -10,7 +10,9 @@ import std/[critbits]
 
 export critbits
 
-func toCritBitTree2*(items: sink openArray[string]): CritBitTree[void] {.inline.} =
+func toCritBitTree2*(
+    items: sink openArray[string]
+): CritBitTree[void] {.inline, noinit.} =
   try:
     items.toCritBitTree
   except Exception:

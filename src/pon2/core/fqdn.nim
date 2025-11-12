@@ -32,6 +32,6 @@ const StrToFqdn = collect:
   for fqdn in SimulatorFqdn:
     {$fqdn: fqdn}
 
-func parseSimulatorFqdn*(str: string): Res[SimulatorFqdn] {.inline.} =
+func parseSimulatorFqdn*(str: string): Res[SimulatorFqdn] {.inline, noinit.} =
   ## Returns the FQDN converted from the string representation.
   StrToFqdn.getRes(str).context "Invalid FQDN: {str}".fmt

@@ -16,7 +16,7 @@ export macros
 # ref: https://github.com/status-im/nim-stew/blob/master/stew/staticfor.nim
 # ------------------------------------------------
 # 
-func replaced*(node, before, after: NimNode): NimNode {.inline.} =
+func replaced*(node, before, after: NimNode): NimNode {.inline, noinit.} =
   ## Returns the nim node with `before` replaced by `after`.
   case node.kind
   of nnkIdent, nnkSym:
@@ -30,7 +30,7 @@ func replaced*(node, before, after: NimNode): NimNode {.inline.} =
 
     rTree
 
-func replace*(node: var NimNode, before, after: NimNode) {.inline.} =
+func replace*(node: var NimNode, before, after: NimNode) {.inline, noinit.} =
   ## Replaces `before` by `after` in the node.
   node = node.replaced(before, after)
 

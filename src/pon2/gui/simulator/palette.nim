@@ -38,7 +38,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toPaletteVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
-  ): VNode {.inline.} =
+  ): VNode {.inline, noinit.} =
     ## Returns the palette node.
     let
       editObj = self.derefSimulator(helper).editData.editObj

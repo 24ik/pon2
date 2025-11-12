@@ -20,7 +20,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toStudioVNode*(
       self: ref Studio, helper, replayHelper: VNodeHelper
-  ): VNode {.inline.} =
+  ): VNode {.inline, noinit.} =
     ## Returns the studio node.
     buildHtml tdiv(class = "columns"):
       tdiv(class = "column is-narrow"):

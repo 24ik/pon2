@@ -11,14 +11,14 @@ import ./[results2]
 
 export results2, strutils
 
-func parseIntRes*(str: string): Res[int] {.inline.} =
+func parseIntRes*(str: string): Res[int] {.inline, noinit.} =
   ## Returns the integer converted from the string.
   try:
     ok str.parseInt
   except ValueError as ex:
     err ex.msg
 
-func split2*(str, sep: string, maxsplit = -1): seq[string] {.inline.} =
+func split2*(str, sep: string, maxsplit = -1): seq[string] {.inline, noinit.} =
   ## Returns a sequence of substrings by splitting the string with the given separator.
   ## If the string is empty, returns an empty sequence.
   if str == "":

@@ -58,7 +58,7 @@ when defined(js) or defined(nimsuggest):
   # JS - Copy Button
   # ------------------------------------------------
 
-  proc showFlashMsg(elem: Element, html: cstring, showMs = 500) {.inline.} =
+  proc showFlashMsg(elem: Element, html: cstring, showMs = 500) {.inline, noinit.} =
     ## Shows the flash message `html` at `elem` for `showMs` milliseconds.
     let oldHtml = elem.innerHTML
     elem.innerHTML.assign html
@@ -66,7 +66,7 @@ when defined(js) or defined(nimsuggest):
 
   func addCopyBtnHandler*(
       btn: VNode, copyStrFn: () -> string, showFlashMsgMs = 500
-  ) {.inline.} =
+  ) {.inline, noinit.} =
     ## Adds the copying handler to the button.
     proc handler(ev: Event, target: VNode) =
       let btn = cast[Element](btn.dom)
@@ -84,7 +84,7 @@ when defined(js) or defined(nimsuggest):
   # JS - Image
   # ------------------------------------------------
 
-  func cellImgSrc*(cell: Cell): cstring {.inline.} =
+  func cellImgSrc*(cell: Cell): cstring {.inline, noinit.} =
     ## Returns the image source of cells.
     let stem =
       case cell
@@ -99,7 +99,7 @@ when defined(js) or defined(nimsuggest):
 
     "{AssetsDir}/puyo/{stem}.png".fmt.cstring
 
-  func noticeGarbageImgSrc*(notice: NoticeGarbage): cstring {.inline.} =
+  func noticeGarbageImgSrc*(notice: NoticeGarbage): cstring {.inline, noinit.} =
     ## Returns the image source of notice garbages.
     let stem =
       case notice
@@ -118,7 +118,7 @@ when defined(js) or defined(nimsuggest):
   # JS - Others
   # ------------------------------------------------
 
-  proc safeRedraw*() {.inline.} =
+  proc safeRedraw*() {.inline, noinit.} =
     ## Redraws the window.
     if not kxi.surpressRedraws:
       kxi.redraw

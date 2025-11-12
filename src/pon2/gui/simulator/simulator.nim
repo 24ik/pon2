@@ -20,7 +20,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toSimulatorVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
-  ): VNode {.inline.} =
+  ): VNode {.inline, noinit.} =
     ## Returns the simulator node.
     let
       mode = self.derefSimulator(helper).mode

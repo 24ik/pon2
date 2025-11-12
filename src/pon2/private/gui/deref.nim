@@ -16,7 +16,7 @@ when defined(js) or defined(nimsuggest):
 
   func derefSimulator*(
       self: ref Simulator, helper: VNodeHelper
-  ): var Simulator {.inline.} =
+  ): var Simulator {.inline, noinit.} =
     ## Dereferences the simulator.
     self[]
 
@@ -34,6 +34,6 @@ when defined(js) or defined(nimsuggest):
 
   proc derefSimulator*(
       self: ref Marathon, helper: VNodeHelper
-  ): var Simulator {.inline.} =
+  ): var Simulator {.inline, noinit.} =
     ## Dereferences the simulator.
     self[].simulator

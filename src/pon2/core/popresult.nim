@@ -28,7 +28,7 @@ type PopResult* = object ## Pop Results.
 func init*(
     T: type PopResult,
     red, green, blue, yellow, purple, hard, hardToGarbage, garbage, color: BinField,
-): T {.inline.} =
+): T {.inline, noinit.} =
   T(
     red: red,
     green: green,
@@ -41,7 +41,7 @@ func init*(
     color: color,
   )
 
-func init*(T: type PopResult): T {.inline.} =
+func init*(T: type PopResult): T {.inline, noinit.} =
   let zero = BinField.init
   T.init(zero, zero, zero, zero, zero, zero, zero, zero, zero)
 
@@ -49,7 +49,7 @@ func init*(T: type PopResult): T {.inline.} =
 # Property
 # ------------------------------------------------
 
-func isPopped*(self: PopResult): bool {.inline.} =
+func isPopped*(self: PopResult): bool {.inline, noinit.} =
   ## Returns `true` if any puyo popped.
   self.color != BinField.init
 
@@ -57,7 +57,7 @@ func isPopped*(self: PopResult): bool {.inline.} =
 # Count
 # ------------------------------------------------
 
-func cellCnt*(self: PopResult, cell: Cell): int {.inline.} =
+func cellCnt*(self: PopResult, cell: Cell): int {.inline, noinit.} =
   ## Returns the number of `cell` that popped.
   case cell
   of None: 0
@@ -69,19 +69,19 @@ func cellCnt*(self: PopResult, cell: Cell): int {.inline.} =
   of Yellow: self.yellow.popcnt
   of Purple: self.purple.popcnt
 
-func puyoCnt*(self: PopResult): int {.inline.} =
+func puyoCnt*(self: PopResult): int {.inline, noinit.} =
   ## Returns the number of puyos that popped.
   self.color.popcnt + self.hard.popcnt + self.garbage.popcnt
 
-func colorPuyoCnt*(self: PopResult): int {.inline.} =
+func colorPuyoCnt*(self: PopResult): int {.inline, noinit.} =
   ## Returns the number of color puyos that popped.
   self.color.popcnt
 
-func garbagesCnt*(self: PopResult): int {.inline.} =
+func garbagesCnt*(self: PopResult): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos that popped.
   self.hard.popcnt + self.garbage.popcnt
 
-func hardToGarbageCnt*(self: PopResult): int {.inline.} =
+func hardToGarbageCnt*(self: PopResult): int {.inline, noinit.} =
   ## Returns the number of hard puyos that becomes garbage puyos.
   self.hardToGarbage.popcnt
 
@@ -89,7 +89,7 @@ func hardToGarbageCnt*(self: PopResult): int {.inline.} =
 # Connection
 # ------------------------------------------------
 
-func connCnts(self: BinField): seq[int] {.inline.} =
+func connCnts(self: BinField): seq[int] {.inline, noinit.} =
   ## Returns an array of a sequence that represents the numbers of connections.
   const DefaultCcIdx = 0
 
@@ -133,7 +133,7 @@ func connCnts(self: BinField): seq[int] {.inline.} =
 
   conns.filterIt it > 0
 
-func connCnts*(self: PopResult): array[Cell, seq[int]] {.inline.} =
+func connCnts*(self: PopResult): array[Cell, seq[int]] {.inline, noinit.} =
   ## Returns an array of a sequence that represents the numbers of connections.
   [
     @[],

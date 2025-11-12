@@ -28,14 +28,16 @@ when defined(js) or defined(nimsuggest):
 
   func init(
       T: type StudioSetting, fixIndices: seq[int], allowDblNotLast, allowDblLast: bool
-  ): T {.inline.} =
+  ): T {.inline, noinit.} =
     T(
       fixIndices: fixIndices,
       allowDblNotLast: allowDblNotLast,
       allowDblLast: allowDblLast,
     )
 
-  proc toStudioSettingsVNode*(self: ref Studio, helper: VNodeHelper): VNode {.inline.} =
+  proc toStudioSettingsVNode*(
+      self: ref Studio, helper: VNodeHelper
+  ): VNode {.inline, noinit.} =
     ## Returns the studio settings node.
     let stepCnt = unwrapNazoPuyo self[].simulator.nazoPuyoWrap:
       it.steps.len
@@ -70,7 +72,7 @@ when defined(js) or defined(nimsuggest):
                   `type` = "checkbox",
                 )
 
-  proc getStudioSetting*(helper: VNodeHelper): StudioSetting {.inline.} =
+  proc getStudioSetting*(helper: VNodeHelper): StudioSetting {.inline, noinit.} =
     ## Returns the studio settings.
     var
       stepIdx = 0

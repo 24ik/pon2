@@ -31,7 +31,7 @@ func init*(
     hardToGarbageCnt: int,
     detailPopCnts: seq[array[Cell, int]],
     detailHardToGarbageCnt: seq[int],
-): T {.inline.} =
+): T {.inline, noinit.} =
   T(
     chainCnt: chainCnt,
     popCnts: popCnts,
@@ -49,7 +49,7 @@ func init*(
     detailPopCnts: seq[array[Cell, int]],
     detailHardToGarbageCnt: seq[int],
     fullPopCnts: seq[array[Cell, seq[int]]],
-): T {.inline.} =
+): T {.inline, noinit.} =
   T(
     chainCnt: chainCnt,
     popCnts: popCnts,
@@ -59,7 +59,9 @@ func init*(
     fullPopCnts: Opt[seq[array[Cell, seq[int]]]].ok fullPopCnts,
   )
 
-func init*(T: type MoveResult, includeFullPopCnts: static bool = false): T {.inline.} =
+func init*(
+    T: type MoveResult, includeFullPopCnts: static bool = false
+): T {.inline, noinit.} =
   when includeFullPopCnts:
     T.init(0, static(initArrWith[Cell, int](0)), 0, @[], @[], @[])
   else:
@@ -69,39 +71,39 @@ func init*(T: type MoveResult, includeFullPopCnts: static bool = false): T {.inl
 # Count
 # ------------------------------------------------
 
-func sumColor(arr: array[Cell, int]): int {.inline.} =
+func sumColor(arr: array[Cell, int]): int {.inline, noinit.} =
   ## Returns the total number of color puyos.
   (arr[Red] + arr[Green] + arr[Blue]) + (arr[Yellow] + arr[Purple])
 
-func cellCnt*(self: MoveResult, cell: Cell): int {.inline.} =
+func cellCnt*(self: MoveResult, cell: Cell): int {.inline, noinit.} =
   ## Returns the number of `cell` that popped.
   self.popCnts[cell]
 
-func puyoCnt*(self: MoveResult): int {.inline.} =
+func puyoCnt*(self: MoveResult): int {.inline, noinit.} =
   ## Returns the number of cells that popped.
   self.popCnts.sum2
 
-func colorPuyoCnt*(self: MoveResult): int {.inline.} =
+func colorPuyoCnt*(self: MoveResult): int {.inline, noinit.} =
   ## Returns the number of color puyos that popped.
   self.popCnts.sumColor
 
-func garbagesCnt*(self: MoveResult): int {.inline.} =
+func garbagesCnt*(self: MoveResult): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos that popped.
   self.popCnts[Hard] + self.popCnts[Garbage]
 
-func cellCnts*(self: MoveResult, cell: Cell): seq[int] {.inline.} =
+func cellCnts*(self: MoveResult, cell: Cell): seq[int] {.inline, noinit.} =
   ## Returns a sequence of the number of `cell` that popped in each chain.
   self.detailPopCnts.mapIt it[cell]
 
-func puyoCnts*(self: MoveResult): seq[int] {.inline.} =
+func puyoCnts*(self: MoveResult): seq[int] {.inline, noinit.} =
   ## Returns a sequence of the number of puyos that popped in each chain.
   self.detailPopCnts.mapIt it.sum2
 
-func colorPuyoCnts*(self: MoveResult): seq[int] {.inline.} =
+func colorPuyoCnts*(self: MoveResult): seq[int] {.inline, noinit.} =
   ## Returns a sequence of the number of color puyos that popped in each chain.
   self.detailPopCnts.mapIt it.sumColor
 
-func garbagesCnts*(self: MoveResult): seq[int] {.inline.} =
+func garbagesCnts*(self: MoveResult): seq[int] {.inline, noinit.} =
   ## Returns a sequence of the number of hard and garbage puyos that popped in
   ## each chain.
   self.detailPopCnts.mapIt it[Hard] + it[Garbage]
@@ -110,7 +112,7 @@ func garbagesCnts*(self: MoveResult): seq[int] {.inline.} =
 # Color
 # ------------------------------------------------
 
-func colors(arr: array[Cell, int]): set[Cell] {.inline.} =
+func colors(arr: array[Cell, int]): set[Cell] {.inline, noinit.} =
   ## Returns the set of colors that popped.
   var cells = set[Cell]({})
   for cell in Red .. Purple:
@@ -119,11 +121,11 @@ func colors(arr: array[Cell, int]): set[Cell] {.inline.} =
 
   cells
 
-func colors*(self: MoveResult): set[Cell] {.inline.} =
+func colors*(self: MoveResult): set[Cell] {.inline, noinit.} =
   ## Returns the set of colors that popped.
   self.popCnts.colors
 
-func colorsSeq*(self: MoveResult): seq[set[Cell]] {.inline.} =
+func colorsSeq*(self: MoveResult): seq[set[Cell]] {.inline, noinit.} =
   ## Returns a sequence of the set of colors that popped in each chain.
   self.detailPopCnts.mapIt it.colors
 
@@ -131,14 +133,14 @@ func colorsSeq*(self: MoveResult): seq[set[Cell]] {.inline.} =
 # Place
 # ------------------------------------------------
 
-func placeCnts*(self: MoveResult, cell: Cell): Res[seq[int]] {.inline.} =
+func placeCnts*(self: MoveResult, cell: Cell): Res[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of places where `cell` popped in each chain.
   if self.fullPopCnts.isOk:
     ok self.fullPopCnts.unsafeValue.mapIt it[cell].len
   else:
     err "`placeCnts` not supported: {self}".fmt
 
-func placeCnts*(self: MoveResult): Res[seq[int]] {.inline.} =
+func placeCnts*(self: MoveResult): Res[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of places where color puyos popped in each chain.
   if self.fullPopCnts.isOk:
     ok self.fullPopCnts.unsafeValue.mapIt (it[Red].len + it[Green].len + it[Blue].len) +
@@ -150,14 +152,14 @@ func placeCnts*(self: MoveResult): Res[seq[int]] {.inline.} =
 # Connect
 # ------------------------------------------------
 
-func connCnts*(self: MoveResult, cell: Cell): Res[seq[int]] {.inline.} =
+func connCnts*(self: MoveResult, cell: Cell): Res[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of connections of `cell` that popped.
   if self.fullPopCnts.isOk:
     ok concat self.fullPopCnts.unsafeValue.mapIt it[cell]
   else:
     err "`conns` not supported: {self}".fmt
 
-func connCnts*(self: MoveResult): Res[seq[int]] {.inline.} =
+func connCnts*(self: MoveResult): Res[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of connections of color puyos that popped.
   if self.fullPopCnts.isOk:
     ok concat self.fullPopCnts.unsafeValue.mapIt it[Red .. Purple].concat
@@ -192,11 +194,11 @@ const
       else:
         3 * 2 ^ (color - 2)
 
-func connBonus(cnts: seq[int]): int {.inline.} =
+func connBonus(cnts: seq[int]): int {.inline, noinit.} =
   ## Returns the connect bonus.
   sum2 cnts.mapIt ConnBonuses[it]
 
-func score*(self: MoveResult): Res[int] {.inline.} =
+func score*(self: MoveResult): Res[int] {.inline, noinit.} =
   ## Returns the score.
   if self.fullPopCnts.isErr:
     return err "`score` not supported: {self}".fmt
@@ -233,7 +235,7 @@ func score*(self: MoveResult): Res[int] {.inline.} =
 
 func noticeGarbageCnts*(
     self: MoveResult, rule: Rule, useComet = false
-): Res[array[NoticeGarbage, int]] {.inline.} =
+): Res[array[NoticeGarbage, int]] {.inline, noinit.} =
   ## Returns the number of notice garbages.
   (?self.score.context "`noticeGarbageCnts` not supported: {self}".fmt).noticeGarbageCnts(
     rule, useComet
