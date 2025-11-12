@@ -10,32 +10,34 @@ import suru
 
 export suru
 
-proc setup2*(pBar: var SuruBar) {.inline.} =
+proc setup2*(pBar: var SuruBar) {.inline, noinit.} =
   ## Sets up the progress bar.
   try:
     pBar.setup
   except:
     discard
 
-proc update2*(pBar: var SuruBar, delayNs = 8_000_000, idx: int = -1) {.inline.} =
+proc update2*(
+    pBar: var SuruBar, delayNs = 8_000_000, idx: int = -1
+) {.inline, noinit.} =
   ## Updates the progress bar.
   try:
     pBar.update delayNs, idx
   except:
     discard
 
-proc finish2*(pBar: var SuruBar) {.inline.} =
+proc finish2*(pBar: var SuruBar) {.inline, noinit.} =
   ## Cleans up the progress bar.
   try:
     pBar.finish
   except:
     discard
 
-proc fill*(pBar: var SingleSuruBar) {.inline.} =
+proc fill*(pBar: var SingleSuruBar) {.inline, noinit.} =
   ## Fills the progress bar.
   pBar.inc pBar.total - pBar.progress
 
-proc shutdown*(pBar: var SuruBar) {.inline.} =
+proc shutdown*(pBar: var SuruBar) {.inline, noinit.} =
   ## Completes the progress bar.
   for singleBar in pBar.mitems:
     singleBar.fill

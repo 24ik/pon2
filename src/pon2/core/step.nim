@@ -36,29 +36,29 @@ type
 # Constructor
 # ------------------------------------------------
 
-func init*(T: type Step, pair: Pair, optPlcmt: OptPlacement): T {.inline.} =
+func init*(T: type Step, pair: Pair, optPlcmt: OptPlacement): T {.inline, noinit.} =
   T(kind: PairPlacement, pair: pair, optPlacement: optPlcmt)
 
-func init*(T: type Step, pair: Pair): T {.inline.} =
+func init*(T: type Step, pair: Pair): T {.inline, noinit.} =
   T.init(pair, NonePlacement)
 
-func init*(T: type Step, pair: Pair, plcmt: Placement): T {.inline.} =
+func init*(T: type Step, pair: Pair, plcmt: Placement): T {.inline, noinit.} =
   T.init(pair, OptPlacement.ok plcmt)
 
-func init*(T: type Step, cnts: array[Col, int], dropHard: bool): T {.inline.} =
+func init*(T: type Step, cnts: array[Col, int], dropHard: bool): T {.inline, noinit.} =
   T(kind: Garbages, cnts: cnts, dropHard: dropHard)
 
-func init*(T: type Step, cross: bool): T {.inline.} =
+func init*(T: type Step, cross: bool): T {.inline, noinit.} =
   T(kind: Rotate, cross: cross)
 
-func init*(T: type Step): T {.inline.} =
+func init*(T: type Step): T {.inline, noinit.} =
   T.init Pair.init
 
 # ------------------------------------------------
 # Operator
 # ------------------------------------------------
 
-func `==`*(step1, step2: Step): bool {.inline.} =
+func `==`*(step1, step2: Step): bool {.inline, noinit.} =
   case step1.kind
   of PairPlacement:
     step2.kind == PairPlacement and step1.pair == step2.pair and
@@ -73,7 +73,7 @@ func `==`*(step1, step2: Step): bool {.inline.} =
 # Property
 # ------------------------------------------------
 
-func isValid*(self: Step, originalCompatible = false): bool {.inline.} =
+func isValid*(self: Step, originalCompatible = false): bool {.inline, noinit.} =
   ## Returns `true` if the step is valid.
   case self.kind
   of PairPlacement:
@@ -94,7 +94,7 @@ func isValid*(self: Step, originalCompatible = false): bool {.inline.} =
 # Count
 # ------------------------------------------------
 
-func cellCnt*(self: Step, cell: Cell): int {.inline.} =
+func cellCnt*(self: Step, cell: Cell): int {.inline, noinit.} =
   ## Returns the number of `cell` in the step.
   case self.kind
   of PairPlacement:
@@ -107,40 +107,40 @@ func cellCnt*(self: Step, cell: Cell): int {.inline.} =
   of Rotate:
     0
 
-func puyoCnt*(self: Step): int {.inline.} =
+func puyoCnt*(self: Step): int {.inline, noinit.} =
   ## Returns the number of puyos in the step.
   case self.kind
   of PairPlacement: 2
   of Garbages: self.cnts.sum2
   of Rotate: 0
 
-func colorPuyoCnt*(self: Step): int {.inline.} =
+func colorPuyoCnt*(self: Step): int {.inline, noinit.} =
   ## Returns the number of color puyos in the step.
   case self.kind
   of PairPlacement: 2
   of Garbages: 0
   of Rotate: 0
 
-func garbagesCnt*(self: Step): int {.inline.} =
+func garbagesCnt*(self: Step): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos in the step.
   case self.kind
   of PairPlacement: 0
   of Garbages: self.cnts.sum2
   of Rotate: 0
 
-func cellCnt*(steps: Steps, cell: Cell): int {.inline.} =
+func cellCnt*(steps: Steps, cell: Cell): int {.inline, noinit.} =
   ## Returns the number of `cell` in the steps.
   sum2 steps.mapIt it.cellCnt cell
 
-func puyoCnt*(steps: Steps): int {.inline.} =
+func puyoCnt*(steps: Steps): int {.inline, noinit.} =
   ## Returns the number of puyos in the steps.
   sum2 steps.mapIt it.puyoCnt
 
-func colorPuyoCnt*(steps: Steps): int {.inline.} =
+func colorPuyoCnt*(steps: Steps): int {.inline, noinit.} =
   ## Returns the number of color puyos in the steps.
   sum2 steps.mapIt it.colorPuyoCnt
 
-func garbagesCnt*(steps: Steps): int {.inline.} =
+func garbagesCnt*(steps: Steps): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos in the steps.
   sum2 steps.mapIt it.garbagesCnt
 
@@ -158,7 +158,7 @@ const
   RotateDesc = "O"
   CrossRotateDesc = "X"
 
-func `$`*(self: Step): string {.inline.} =
+func `$`*(self: Step): string {.inline, noinit.} =
   case self.kind
   of PairPlacement:
     "{self.pair}{PairPlcmtSep}{self.optPlacement}".fmt
@@ -177,7 +177,7 @@ func `$`*(self: Step): string {.inline.} =
   of Rotate:
     if self.cross: CrossRotateDesc else: RotateDesc
 
-func parseStep*(str: string): Res[Step] {.inline.} =
+func parseStep*(str: string): Res[Step] {.inline, noinit.} =
   ## Returns the step converted from the string representation.
   if str == RotateDesc:
     return ok Step.init(cross = false)
@@ -228,7 +228,7 @@ const
     for i, uri in IshikawaUriNumbers:
       {uri: i}
 
-func toUriQuery*(self: Step, fqdn = Pon2): Res[string] {.inline.} =
+func toUriQuery*(self: Step, fqdn = Pon2): Res[string] {.inline, noinit.} =
   ## Returns the URI query converted from the step.
   case self.kind
   of PairPlacement:
@@ -261,7 +261,7 @@ func toUriQuery*(self: Step, fqdn = Pon2): Res[string] {.inline.} =
     of Ishikawa, Ips:
       err "Not supported step with Ishikawa/Ips format: {self}".fmt
 
-func parseStep*(query: string, fqdn: SimulatorFqdn): Res[Step] {.inline.} =
+func parseStep*(query: string, fqdn: SimulatorFqdn): Res[Step] {.inline, noinit.} =
   ## Returns the step converted from the URI query.
   case fqdn
   of Pon2:
@@ -332,14 +332,14 @@ func parseStep*(query: string, fqdn: SimulatorFqdn): Res[Step] {.inline.} =
 
 const StepsSep = "\n"
 
-func `$`*(self: Steps): string {.inline.} =
+func `$`*(self: Steps): string {.inline, noinit.} =
   let strs = collect:
     for step in self:
       $step
 
   strs.join StepsSep
 
-func parseSteps*(str: string): Res[Steps] {.inline.} =
+func parseSteps*(str: string): Res[Steps] {.inline, noinit.} =
   ## Returns the steps converted from the string representation.
   if str == "":
     return ok Steps.init
@@ -354,7 +354,7 @@ func parseSteps*(str: string): Res[Steps] {.inline.} =
 # Steps <-> URI
 # ------------------------------------------------
 
-func toUriQuery*(self: Steps, fqdn = Pon2): Res[string] {.inline.} =
+func toUriQuery*(self: Steps, fqdn = Pon2): Res[string] {.inline, noinit.} =
   ## Returns the URI query converted from the steps.
   let strs = collect:
     for step in self:
@@ -362,7 +362,7 @@ func toUriQuery*(self: Steps, fqdn = Pon2): Res[string] {.inline.} =
 
   ok strs.join
 
-func parseSteps*(query: string, fqdn: SimulatorFqdn): Res[Steps] {.inline.} =
+func parseSteps*(query: string, fqdn: SimulatorFqdn): Res[Steps] {.inline, noinit.} =
   ## Returns the steps converted from the URI query.
   case fqdn
   of Pon2:

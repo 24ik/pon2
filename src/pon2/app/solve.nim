@@ -38,7 +38,7 @@ when not defined(js):
       goal: Goal,
       steps: Steps,
       calcAllAnswers: static bool,
-  ): bool {.inline.} =
+  ): bool {.inline, noinit.} =
     ## Solves the Nazo Puyo at the node with a single thread.
     ## This function requires that the field is settled and `answers` is empty.
     ## `answers` is set in reverse order.
@@ -56,7 +56,7 @@ when not defined(js):
       runningNodeIndices: var set[int16],
       optPlcmtsSeq: seq[seq[OptPlacement]],
       calcAllAnswers: static bool,
-  ): bool {.inline.} =
+  ): bool {.inline, noinit.} =
     ## Checks all the spawned threads and reflects results if they have finished.
     ## Returns `true` if early-returned.
     var finishNodeIndices = set[int16]({})
@@ -87,7 +87,7 @@ when not defined(js):
       calcAllAnswers: static bool,
       goal: Goal,
       steps: Steps,
-  ) {.inline.} =
+  ) {.inline, noinit.} =
     ## Solves the Nazo Puyo at the node with multiple threads.
     ## This function requires that the field is settled and `answers` is empty.
     const
@@ -151,7 +151,7 @@ when not defined(js):
 
 proc solve*[F: TsuField or WaterField](
     nazo: NazoPuyo[F], calcAllAnswers: static bool = true
-): seq[SolveAnswer] {.inline.} =
+): seq[SolveAnswer] {.inline, noinit.} =
   ## Solves the Nazo Puyo.
   ## A single thread is used on JS backend; otherwise multiple threads are used.
   ## This function requires that the field is settled.
@@ -219,7 +219,7 @@ when defined(js) or defined(nimsuggest):
         nazo: NazoPuyo[F],
         progressRef: ref tuple[now, total: int] = nil,
         calcAllAnswers: static bool = true,
-    ): Future[seq[SolveAnswer]] {.inline, async.} =
+    ): Future[seq[SolveAnswer]] {.inline, noinit, async.} =
       ## Solves the Nazo Puyo asynchronously with web workers.
       ## This function requires that the field is settled.
       # NOTE: 2 and 3 show similar performance; 2 is chosen for faster `childrenAtDepth`

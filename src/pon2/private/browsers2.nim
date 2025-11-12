@@ -11,7 +11,7 @@ import ./[results2]
 
 export browsers
 
-proc openDefaultBrowser*(uri: Uri): Res[void] {.inline.} =
+proc openDefaultBrowser*(uri: Uri): Res[void] {.inline, noinit.} =
   ## Opens the default web browser with the given URI.
   try:
     ($uri).openDefaultBrowser

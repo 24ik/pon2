@@ -26,30 +26,30 @@ const ValidMaskElem = 0x3ffe'u16
 
 func init(
     T: type XmmBinField, val0, val1, val2, val3, val4, val5: uint16
-): T {.inline.} =
+): T {.inline, noinit.} =
   mm_set_epi16(val0, val1, val2, val3, val4, val5, 0, 0)
 
-func init(T: type XmmBinField, val: uint16): T {.inline.} =
+func init(T: type XmmBinField, val: uint16): T {.inline, noinit.} =
   T.init(val, val, val, val, val, val)
 
-func init*(T: type XmmBinField): T {.inline.} =
+func init*(T: type XmmBinField): T {.inline, noinit.} =
   ## Returns the binary field with all elements zero.
   mm_setzero_si128()
 
-func initOne*(T: type XmmBinField): T {.inline.} =
+func initOne*(T: type XmmBinField): T {.inline, noinit.} =
   ## Returns the binary field with all valid elements one.
   T.init ValidMaskElem
 
-func initFloor*(T: type XmmBinField): T {.inline.} =
+func initFloor*(T: type XmmBinField): T {.inline, noinit.} =
   ## Returns the binary field with floor bits one.
   T.init 1
 
-func initLowerAir*(T: type XmmBinField): T {.inline.} =
+func initLowerAir*(T: type XmmBinField): T {.inline, noinit.} =
   ## Returns the binary field with lower air bits one.
   const LowerAirMaskElem = 1'u16 shl WaterHeight.succ
   T.init LowerAirMaskElem
 
-func initUpperWater*(T: type XmmBinField): T {.inline.} =
+func initUpperWater*(T: type XmmBinField): T {.inline, noinit.} =
   ## Returns the binary field with upper underwater bits one.
   const UpperWaterMaskElem = 1'u16 shl WaterHeight
   T.init UpperWaterMaskElem
@@ -58,57 +58,57 @@ func initUpperWater*(T: type XmmBinField): T {.inline.} =
 # Operator
 # ------------------------------------------------
 
-func `+`*(f1, f2: XmmBinField): XmmBinField {.inline.} =
+func `+`*(f1, f2: XmmBinField): XmmBinField {.inline, noinit.} =
   mm_or_si128(f1, f2)
 
-func `-`*(f1, f2: XmmBinField): XmmBinField {.inline.} =
+func `-`*(f1, f2: XmmBinField): XmmBinField {.inline, noinit.} =
   mm_andnot_si128(f2, f1)
 
-func `*`*(f1, f2: XmmBinField): XmmBinField {.inline.} =
+func `*`*(f1, f2: XmmBinField): XmmBinField {.inline, noinit.} =
   mm_and_si128(f1, f2)
 
-func `xor`*(f1, f2: XmmBinField): XmmBinField {.inline.} =
+func `xor`*(f1, f2: XmmBinField): XmmBinField {.inline, noinit.} =
   mm_xor_si128(f1, f2)
 
-func `+=`*(f1: var XmmBinField, f2: XmmBinField) {.inline.} =
+func `+=`*(f1: var XmmBinField, f2: XmmBinField) {.inline, noinit.} =
   f1.assign f1 + f2
 
-func `-=`*(f1: var XmmBinField, f2: XmmBinField) {.inline.} =
+func `-=`*(f1: var XmmBinField, f2: XmmBinField) {.inline, noinit.} =
   f1.assign f1 - f2
 
-func `*=`*(f1: var XmmBinField, f2: XmmBinField) {.inline.} =
+func `*=`*(f1: var XmmBinField, f2: XmmBinField) {.inline, noinit.} =
   f1.assign f1 * f2
 
-func sum*(f1, f2, f3: XmmBinField): XmmBinField {.inline.} =
+func sum*(f1, f2, f3: XmmBinField): XmmBinField {.inline, noinit.} =
   f1 + f2 + f3
 
-func sum*(f1, f2, f3, f4: XmmBinField): XmmBinField {.inline.} =
+func sum*(f1, f2, f3, f4: XmmBinField): XmmBinField {.inline, noinit.} =
   (f1 + f2) + (f3 + f4)
 
-func sum*(f1, f2, f3, f4, f5: XmmBinField): XmmBinField {.inline.} =
+func sum*(f1, f2, f3, f4, f5: XmmBinField): XmmBinField {.inline, noinit.} =
   (f1 + f2 + f3) + (f4 + f5)
 
-func sum*(f1, f2, f3, f4, f5, f6: XmmBinField): XmmBinField {.inline.} =
+func sum*(f1, f2, f3, f4, f5, f6: XmmBinField): XmmBinField {.inline, noinit.} =
   (f1 + f2) + (f3 + f4) + (f5 + f6)
 
-func sum*(f1, f2, f3, f4, f5, f6, f7: XmmBinField): XmmBinField {.inline.} =
+func sum*(f1, f2, f3, f4, f5, f6, f7: XmmBinField): XmmBinField {.inline, noinit.} =
   (f1 + f2) + (f3 + f4) + (f5 + f6 + f7)
 
-func sum*(f1, f2, f3, f4, f5, f6, f7, f8: XmmBinField): XmmBinField {.inline.} =
+func sum*(f1, f2, f3, f4, f5, f6, f7, f8: XmmBinField): XmmBinField {.inline, noinit.} =
   ((f1 + f2) + (f3 + f4)) + ((f5 + f6) + (f7 + f8))
 
-func prod*(f1, f2, f3: XmmBinField): XmmBinField {.inline.} =
+func prod*(f1, f2, f3: XmmBinField): XmmBinField {.inline, noinit.} =
   f1 * f2 * f3
 
 # ------------------------------------------------
 # Keep
 # ------------------------------------------------
 
-func initValidMask(): XmmBinField {.inline.} =
+func initValidMask(): XmmBinField {.inline, noinit.} =
   ## Returns the valid mask.
   XmmBinField.init ValidMaskElem
 
-func initAirMaskElem(): uint16 {.inline.} =
+func initAirMaskElem(): uint16 {.inline, noinit.} =
   ## Returns `AirMaskElem`.
   var mask = 0'u16
   for i in 0 ..< AirHeight:
@@ -118,7 +118,7 @@ func initAirMaskElem(): uint16 {.inline.} =
 
 const AirMaskElem = initAirMaskElem()
 
-func colMask(col: Col): XmmBinField {.inline.} =
+func colMask(col: Col): XmmBinField {.inline, noinit.} =
   ## Returns the mask corresponding to the column.
   case col
   of Col0:
@@ -134,27 +134,27 @@ func colMask(col: Col): XmmBinField {.inline.} =
   of Col5:
     XmmBinField.init(0, 0, 0, 0, 0, 0xffff'u16)
 
-func kept*(self: XmmBinField, row: Row): XmmBinField {.inline.} =
+func kept*(self: XmmBinField, row: Row): XmmBinField {.inline, noinit.} =
   ## Returns the binary field with only the given row.
   self * XmmBinField.init(0x2000'u16 shr row.ord)
 
-func kept*(self: XmmBinField, col: Col): XmmBinField {.inline.} =
+func kept*(self: XmmBinField, col: Col): XmmBinField {.inline, noinit.} =
   ## Returns the binary field with only the given column.
   self * col.colMask
 
-func keptValid*(self: XmmBinField): XmmBinField {.inline.} =
+func keptValid*(self: XmmBinField): XmmBinField {.inline, noinit.} =
   ## Returns the binary field with only the valid area.
   self * XmmBinField.initOne
 
-func keptVisible*(self: XmmBinField): XmmBinField {.inline.} =
+func keptVisible*(self: XmmBinField): XmmBinField {.inline, noinit.} =
   ## Returns the binary field with only the visible area.
   self * XmmBinField.init 0x1ffe'u16
 
-func keptAir*(self: XmmBinField): XmmBinField {.inline.} =
+func keptAir*(self: XmmBinField): XmmBinField {.inline, noinit.} =
   ## Returns the binary field with only the air area.
   self * XmmBinField.init AirMaskElem
 
-func keepValid*(self: var XmmBinField) {.inline.} =
+func keepValid*(self: var XmmBinField) {.inline, noinit.} =
   ## Keeps only the valid area.
   self *= initValidMask()
 
@@ -162,7 +162,7 @@ func keepValid*(self: var XmmBinField) {.inline.} =
 # Clear
 # ------------------------------------------------
 
-func clear*(self: var XmmBinField) {.inline.} =
+func clear*(self: var XmmBinField) {.inline, noinit.} =
   ## Clears the binary field.
   self.assign XmmBinField.init
 
@@ -170,7 +170,7 @@ func clear*(self: var XmmBinField) {.inline.} =
 # Replace
 # ------------------------------------------------
 
-func replace*(self: var XmmBinField, col: Col, after: XmmBinField) {.inline.} =
+func replace*(self: var XmmBinField, col: Col, after: XmmBinField) {.inline, noinit.} =
   ## Replaces the column of the binary field by `after`.
   let mask = col.colMask
   self.assign (self - mask) + (after * mask)
@@ -179,7 +179,7 @@ func replace*(self: var XmmBinField, col: Col, after: XmmBinField) {.inline.} =
 # Population Count
 # ------------------------------------------------
 
-func popcnt*(self: XmmBinField): int {.inline.} =
+func popcnt*(self: XmmBinField): int {.inline, noinit.} =
   ## Returns the population count.
   var arr {.noinit, align(16).}: array[2, uint64]
   arr.addr.mm_store_si128 self
@@ -192,35 +192,35 @@ func popcnt*(self: XmmBinField): int {.inline.} =
 # Shift - Out-place
 # ------------------------------------------------
 
-func shiftedUpRaw*(self: XmmBinField): XmmBinField {.inline.} =
+func shiftedUpRaw*(self: XmmBinField): XmmBinField {.inline, noinit.} =
   ## Returns the binary field shifted upward.
   self.mm_slli_epi16 1
 
-func shiftedUp*(self: XmmBinField): XmmBinField {.inline.} =
+func shiftedUp*(self: XmmBinField): XmmBinField {.inline, noinit.} =
   ## Returns the binary field shifted upward and extracted the valid area.
   self.shiftedUpRaw.keptValid
 
-func shiftedDownRaw*(self: XmmBinField): XmmBinField {.inline.} =
+func shiftedDownRaw*(self: XmmBinField): XmmBinField {.inline, noinit.} =
   ## Returns the binary field shifted downward.
   self.mm_srli_epi16 1
 
-func shiftedDown*(self: XmmBinField): XmmBinField {.inline.} =
+func shiftedDown*(self: XmmBinField): XmmBinField {.inline, noinit.} =
   ## Returns the binary field shifted downward and extracted the valid area.
   self.shiftedDownRaw.keptValid
 
-func shiftedRightRaw*(self: XmmBinField): XmmBinField {.inline.} =
+func shiftedRightRaw*(self: XmmBinField): XmmBinField {.inline, noinit.} =
   ## Returns the binary field shifted rightward.
   self.mm_srli_si128 2
 
-func shiftedRight*(self: XmmBinField): XmmBinField {.inline.} =
+func shiftedRight*(self: XmmBinField): XmmBinField {.inline, noinit.} =
   ## Returns the binary field shifted rightward and extracted the valid area.
   self.shiftedRightRaw.keptValid
 
-func shiftedLeftRaw*(self: XmmBinField): XmmBinField {.inline.} =
+func shiftedLeftRaw*(self: XmmBinField): XmmBinField {.inline, noinit.} =
   ## Returns the binary field shifted leftward.
   self.mm_slli_si128 2
 
-func shiftedLeft*(self: XmmBinField): XmmBinField {.inline.} =
+func shiftedLeft*(self: XmmBinField): XmmBinField {.inline, noinit.} =
   ## Returns the binary field shifted leftward and extracted the valid area.
   self.shiftedLeftRaw
 
@@ -228,35 +228,35 @@ func shiftedLeft*(self: XmmBinField): XmmBinField {.inline.} =
 # Shift - In-place
 # ------------------------------------------------
 
-func shiftUpRaw*(self: var XmmBinField) {.inline.} =
+func shiftUpRaw*(self: var XmmBinField) {.inline, noinit.} =
   ## Shifts the binary field upward.
   self.assign self.shiftedUpRaw
 
-func shiftUp*(self: var XmmBinField) {.inline.} =
+func shiftUp*(self: var XmmBinField) {.inline, noinit.} =
   ## Shifts the binary field upward and extracts the valid area.
   self.assign self.shiftedUp
 
-func shiftDownRaw*(self: var XmmBinField) {.inline.} =
+func shiftDownRaw*(self: var XmmBinField) {.inline, noinit.} =
   ## Shifts the binary field downward.
   self.assign self.shiftedDownRaw
 
-func shiftDown*(self: var XmmBinField) {.inline.} =
+func shiftDown*(self: var XmmBinField) {.inline, noinit.} =
   ## Shifts the binary field downward and extracts the valid area.
   self.assign self.shiftedDown
 
-func shiftRightRaw*(self: var XmmBinField) {.inline.} =
+func shiftRightRaw*(self: var XmmBinField) {.inline, noinit.} =
   ## Shifts the binary field rightward.
   self.assign self.shiftedRightRaw
 
-func shiftRight*(self: var XmmBinField) {.inline.} =
+func shiftRight*(self: var XmmBinField) {.inline, noinit.} =
   ## Shifts the binary field rightward and extracts the valid area.
   self.assign self.shiftedRight
 
-func shiftLeftRaw*(self: var XmmBinField) {.inline.} =
+func shiftLeftRaw*(self: var XmmBinField) {.inline, noinit.} =
   ## Shifts the binary field rightward.
   self.assign self.shiftedLeftRaw
 
-func shiftLeft*(self: var XmmBinField) {.inline.} =
+func shiftLeft*(self: var XmmBinField) {.inline, noinit.} =
   ## Shifts the binary field leftward and extracts the valid area.
   self.assign self.shiftedLeft
 
@@ -264,13 +264,13 @@ func shiftLeft*(self: var XmmBinField) {.inline.} =
 # Flip
 # ------------------------------------------------
 
-func flipVertical*(self: var XmmBinField) {.inline.} =
+func flipVertical*(self: var XmmBinField) {.inline, noinit.} =
   ## Flips the binary field vertically.
   self.assign self.reverseBits.mm_shuffle_epi8(
     mm_set_epi8(1, 0, 3, 2, 5, 4, 7, 6, 9, 8, 11, 10, -1, -1, -1, -1)
   ).shiftedDownRaw
 
-func flipHorizontal*(self: var XmmBinField) {.inline.} =
+func flipHorizontal*(self: var XmmBinField) {.inline, noinit.} =
   ## Flips the binary field horizontally.
   self.assign self.mm_shuffle_epi8(
     mm_set_epi8(5, 4, 7, 6, 9, 8, 11, 10, 13, 12, 15, 14, -1, -1, -1, -1)
@@ -280,14 +280,14 @@ func flipHorizontal*(self: var XmmBinField) {.inline.} =
 # Rotate
 # ------------------------------------------------
 
-func rotate*(self: var XmmBinField) {.inline.} =
+func rotate*(self: var XmmBinField) {.inline, noinit.} =
   ## Rotates the binary field by 180 degrees.
   ## Ghost cells are cleared before the rotation.
   self.assign self.keptVisible.reverseBits.mm_shuffle_epi8(
     mm_set_epi8(11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1, -1, -1, -1)
   ).mm_srli_epi16 2
 
-func crossRotate*(self: var XmmBinField) {.inline.} =
+func crossRotate*(self: var XmmBinField) {.inline, noinit.} =
   ## Rotates the binary field by 180 degrees in groups of three rows.
   ## Ghost cells are cleared before the rotation.
   self.assign self.keptVisible.reverseBits.mm_shuffle_epi8(
@@ -298,11 +298,13 @@ func crossRotate*(self: var XmmBinField) {.inline.} =
 # Indexer
 # ------------------------------------------------
 
-func idxFromMsb(row: Row, col: Col): int {.inline.} =
+func idxFromMsb(row: Row, col: Col): int {.inline, noinit.} =
   ## Returns the bit index for indexers.
   col.ord shl 4 + (row.ord + 2)
 
-func `[]`*(self: XmmBinField, row: static Row, col: static Col): bool {.inline.} =
+func `[]`*(
+    self: XmmBinField, row: static Row, col: static Col
+): bool {.inline, noinit.} =
   staticCase:
     case col
     of Col0 .. Col3:
@@ -310,14 +312,14 @@ func `[]`*(self: XmmBinField, row: static Row, col: static Col): bool {.inline.}
     of Col4, Col5:
       self.mm_extract_epi64(0).getBitBE static(idxFromMsb(row, col.pred 4))
 
-func `[]`*(self: XmmBinField, row: Row, col: Col): bool {.inline.} =
+func `[]`*(self: XmmBinField, row: Row, col: Col): bool {.inline, noinit.} =
   case col
   of Col0 .. Col3:
     self.mm_extract_epi64(1).getBitBE idxFromMsb(row, col)
   of Col4, Col5:
     self.mm_extract_epi64(0).getBitBE idxFromMsb(row, col.pred 4)
 
-func `[]=`*(self: var XmmBinField, row: Row, col: Col, val: bool) {.inline.} =
+func `[]=`*(self: var XmmBinField, row: Row, col: Col, val: bool) {.inline, noinit.} =
   var arr {.noinit, align(16).}: array[2, uint64]
   arr.addr.mm_store_si128 self
 
@@ -335,7 +337,7 @@ func `[]=`*(self: var XmmBinField, row: Row, col: Col, val: bool) {.inline.} =
 # Insert / Delete
 # ------------------------------------------------
 
-func isInWater(row: Row, rule: static Rule): bool {.inline.} =
+func isInWater(row: Row, rule: static Rule): bool {.inline, noinit.} =
   ## Returns `true` if the row is in the water.
   (static rule == Water) and row.ord + WaterHeight >= Height
 
@@ -346,7 +348,7 @@ func insert(
     val: bool,
     rule: static Rule,
     col0123: static bool,
-) {.inline.} =
+) {.inline, noinit.} =
   ## Inserts the value and shifts the binary field's element.
   ## If (row, col) is in the air, shifts the binary field's element upward above where
   ## inserted.
@@ -377,7 +379,7 @@ func insert(
 
 func insert*(
     self: var XmmBinField, row: Row, col: Col, val: bool, rule: static Rule
-) {.inline.} =
+) {.inline, noinit.} =
   ## Inserts the value and shifts the binary field.
   ## If (row, col) is in the air, shifts the binary field upward above where inserted.
   ## If it is in the water, shifts the binary field downward below where inserted.
@@ -396,7 +398,7 @@ func insert*(
 
 func delete(
     self: var uint64, col: Col, row: Row, rule: static Rule, col0123: static bool
-) {.inline.} =
+) {.inline, noinit.} =
   ## Deletes the value and shifts the binary field's element.
   ## If (row, col) is in the air, shifts the binary field's element downward above
   ## where deleted.
@@ -424,7 +426,9 @@ func delete(
 
   self.assign ((below or above) and colMask) or (self *~ colMask)
 
-func delete*(self: var XmmBinField, row: Row, col: Col, rule: static Rule) {.inline.} =
+func delete*(
+    self: var XmmBinField, row: Row, col: Col, rule: static Rule
+) {.inline, noinit.} =
   ## Deletes the value and shifts the binary field.
   ## If (row, col) is in the air, shifts the binary field downward above where deleted.
   ## If it is in the water, shifts the binary field upward below where deleted.
@@ -447,7 +451,7 @@ func delete*(self: var XmmBinField, row: Row, col: Col, rule: static Rule) {.inl
 
 func dropGarbagesTsu*(
     self: var XmmBinField, cnts: array[Col, int], existField: XmmBinField
-) {.inline.} =
+) {.inline, noinit.} =
   ## Drops cells by Tsu rule.
   ## This function requires that the mask is settled and the counts are non-negative.
   let notExist = XmmBinField.initOne - existField
@@ -466,7 +470,7 @@ func dropGarbagesWater*(
     self, other1, other2: var XmmBinField,
     cnts: array[Col, int],
     existField: XmmBinField,
-) {.inline.} =
+) {.inline, noinit.} =
   ## Drops cells by Water rule.
   ## `self` is shifted and is dropped garbages; `other1` and `other2` are only shifted.
   ## This function requires that the mask is settled and the counts are non-negative.
@@ -515,7 +519,9 @@ func dropGarbagesWater*(
 # Settle
 # ------------------------------------------------
 
-func write(self: out array[Col, PextMask[uint16]], existField: XmmBinField) {.inline.} =
+func write(
+    self: out array[Col, PextMask[uint16]], existField: XmmBinField
+) {.inline, noinit.} =
   ## Initializes the masks.
   var arr {.noinit, align(16).}: array[8, uint16]
   arr.addr.mm_store_si128 existField
@@ -525,7 +531,9 @@ func write(self: out array[Col, PextMask[uint16]], existField: XmmBinField) {.in
     self[col].assign PextMask[uint16].init arr[7 - col.ord]
     {.pop.}
 
-func settleTsu(self: var XmmBinField, masks: array[Col, PextMask[uint16]]) {.inline.} =
+func settleTsu(
+    self: var XmmBinField, masks: array[Col, PextMask[uint16]]
+) {.inline, noinit.} =
   ## Settles the binary field by Tsu rule.
   var arr {.noinit, align(16).}: array[8, uint16]
   arr.addr.mm_store_si128 self
@@ -539,7 +547,7 @@ func settleTsu(self: var XmmBinField, masks: array[Col, PextMask[uint16]]) {.inl
 
 func settleTsu*(
     field1, field2, field3: var XmmBinField, existField: XmmBinField
-) {.inline.} =
+) {.inline, noinit.} =
   ## Settles the binary fields by Tsu rule.
   var masks: array[Col, PextMask[uint16]]
   masks.write existField
@@ -550,7 +558,7 @@ func settleTsu*(
 
 func settleWater(
     self: var XmmBinField, masks: array[Col, PextMask[uint16]]
-) {.inline.} =
+) {.inline, noinit.} =
   ## Settles the binary field by Water rule.
   var arr {.noinit, align(16).}: array[8, uint16]
   arr.addr.mm_store_si128 self
@@ -567,7 +575,7 @@ func settleWater(
 
 func settleWater*(
     field1, field2, field3: var XmmBinField, existField: XmmBinField
-) {.inline.} =
+) {.inline, noinit.} =
   ## Settles the binary fields by Water rule.
   var masks: array[Col, PextMask[uint16]]
   masks.write existField
@@ -576,7 +584,9 @@ func settleWater*(
   field2.settleWater masks
   field3.settleWater masks
 
-func areSettledTsu*(field1, field2, field3, existField: XmmBinField): bool {.inline.} =
+func areSettledTsu*(
+    field1, field2, field3, existField: XmmBinField
+): bool {.inline, noinit.} =
   ## Returns `true` if all binary fields are settled by Tsu rule.
   ## Note that this function is only slightly lighter than `settleTsu`.
   var masks: array[Col, PextMask[uint16]]
@@ -587,7 +597,7 @@ func areSettledTsu*(field1, field2, field3, existField: XmmBinField): bool {.inl
 
 func areSettledWater*(
     field1, field2, field3, existField: XmmBinField
-): bool {.inline.} =
+): bool {.inline, noinit.} =
   ## Returns `true` if all binary fields are settled by Water rule.
   ## Note that this function is only slightly lighter than `settleWater`.
   var masks: array[Col, PextMask[uint16]]

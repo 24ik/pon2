@@ -29,12 +29,12 @@ func init*(
     ctrl = false,
     alt = false,
     meta = false,
-): T {.inline.} =
+): T {.inline, noinit.} =
   KeyEvent(code: code, shift: shift, ctrl: ctrl, alt: alt, meta: meta)
 
 func init*(
     T: type KeyEvent, c: char, shift = false, ctrl = false, alt = false, meta = false
-): T {.inline.} =
+): T {.inline, noinit.} =
   ## This constructor requires that `c` is digit or alphabet.
   ## `shift` is ignored if 'c' is alphabet.
   if c in '0' .. '9':
@@ -51,7 +51,7 @@ func init*(
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
-  func toKeyEvent*(event: KeyboardEvent): KeyEvent {.inline.} =
+  func toKeyEvent*(event: KeyboardEvent): KeyEvent {.inline, noinit.} =
     ## Returns the keyboard event converted from the `KeyboardEvent`.
     KeyEvent.init(
       $event.code, event.shiftKey, event.ctrlKey, event.altKey, event.metaKey

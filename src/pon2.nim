@@ -41,7 +41,7 @@ else:
 
   export gui
 
-proc getNimbleFile(): Path {.inline.} =
+proc getNimbleFile(): Path {.inline, noinit.} =
   ## Returns the path to `pon2.nimble`.
   let
     head = srcPath().splitPath2.head
@@ -78,7 +78,7 @@ when isMainModule:
     # ------------------------------------------------
 
     when not defined(pon2.build.worker):
-      proc initErrNode(msg: string): VNode {.inline.} =
+      proc initErrNode(msg: string): VNode {.inline, noinit.} =
         ## Returns the error node.
         buildHtml section(class = "section"):
           tdiv(class = "content"):
@@ -91,7 +91,7 @@ when isMainModule:
                 textarea(class = "textarea is-large", readonly = true):
                   text msg.cstring
 
-      proc initFooterNode(): VNode {.inline.} =
+      proc initFooterNode(): VNode {.inline, noinit.} =
         ## Returns the footer node.
         buildHtml footer(class = "footer"):
           tdiv(class = "content has-text-centered"):
@@ -128,7 +128,7 @@ when isMainModule:
       # JS - Main - Marathon
       # ------------------------------------------------
 
-      proc keyHandler(marathon: ref Marathon, event: Event) {.inline.} =
+      proc keyHandler(marathon: ref Marathon, event: Event) {.inline, noinit.} =
         ## Runs the keyboard event handler.
         let
           keyboardEvent = cast[KeyboardEvent](event)
@@ -193,7 +193,7 @@ when isMainModule:
       # JS - Main - Studio
       # ------------------------------------------------
 
-      proc keyHandler(studio: ref Studio, event: Event) {.inline.} =
+      proc keyHandler(studio: ref Studio, event: Event) {.inline, noinit.} =
         ## Runs the keyboard event handler.
         if studio.operate(cast[KeyboardEvent](event).toKeyEvent):
           safeRedraw()
@@ -258,7 +258,7 @@ when isMainModule:
 
     proc runSolver(
         urls: seq[string], openQuestion = false, openAnswer = false
-    ) {.inline.} =
+    ) {.inline, noinit.} =
       ## なぞぷよの解を求める．
       if urls.len != 1:
         echo "URLを一つ入力してください．"
@@ -313,7 +313,7 @@ when isMainModule:
         allowDblLast = false,
         openQuestion = false,
         openAnswer = false,
-    ) {.inline.} =
+    ) {.inline, noinit.} =
       ## なぞぷよのツモを並べ替える．
       if urls.len != 1:
         echo "URLを一つ入力してください．"
@@ -356,7 +356,7 @@ when isMainModule:
     # Native - Generate
     # ------------------------------------------------
 
-    func negToErr(val: int): Opt[int] {.inline.} =
+    func negToErr(val: int): Opt[int] {.inline, noinit.} =
       ## Returns `err` if `val` is negative; otherwise, returns `ok(val)`.
       if val < 0:
         err()
@@ -391,7 +391,7 @@ when isMainModule:
         openQuestion = false,
         openAnswer = false,
         seed = 0,
-    ) {.inline.} =
+    ) {.inline, noinit.} =
       ## なぞぷよを生成する．
       let
         puyoCntColor = pc

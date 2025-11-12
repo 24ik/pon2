@@ -49,7 +49,7 @@ type Pair* {.pure.} = enum
 # Constructor
 # ------------------------------------------------
 
-func init*(T: type Pair, pivot, rotor: Cell): T {.inline.} =
+func init*(T: type Pair, pivot, rotor: Cell): T {.inline, noinit.} =
   ## Note that the result is undefined if the pivot or rotor is no-color.
   # no-color cell is treated as Red
   let
@@ -58,20 +58,20 @@ func init*(T: type Pair, pivot, rotor: Cell): T {.inline.} =
 
   (pivotVal * ColorPuyos.card + rotorVal).T
 
-func init*(T: type Pair): T {.inline.} =
+func init*(T: type Pair): T {.inline, noinit.} =
   T.low
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-func pivot*(self: Pair): Cell {.inline.} = ## Returns the pivot-puyo.
+func pivot*(self: Pair): Cell {.inline, noinit.} = ## Returns the pivot-puyo.
   Red.succ self.ord div ColorPuyos.card
 
-func rotor*(self: Pair): Cell {.inline.} = ## Returns the rotor-puyo.
+func rotor*(self: Pair): Cell {.inline, noinit.} = ## Returns the rotor-puyo.
   Red.succ self.ord mod ColorPuyos.card
 
-func isDbl*(self: Pair): bool {.inline.} =
+func isDbl*(self: Pair): bool {.inline, noinit.} =
   ## Returns `true` if the pair is double (monochromatic).
   self in {RedRed, GreenGreen, BlueBlue, YellowYellow, PurplePurple}
 
@@ -79,13 +79,13 @@ func isDbl*(self: Pair): bool {.inline.} =
 # Operator
 # ------------------------------------------------
 
-func `pivot=`*(self: var Pair, colorPuyo: Cell) {.inline.} =
+func `pivot=`*(self: var Pair, colorPuyo: Cell) {.inline, noinit.} =
   ## Sets the pivot-puyo.
   ## If the `colorPuyo` is not color puyo, does nothing.
   if colorPuyo in ColorPuyos:
     self.inc (colorPuyo.ord - self.pivot.ord) * ColorPuyos.card
 
-func `rotor=`*(self: var Pair, colorPuyo: Cell) {.inline.} =
+func `rotor=`*(self: var Pair, colorPuyo: Cell) {.inline, noinit.} =
   ## Sets the rotor-puyo.
   ## If the `colorPuyo` is not color puyo, does nothing.
   if colorPuyo in ColorPuyos:
@@ -95,30 +95,30 @@ func `rotor=`*(self: var Pair, colorPuyo: Cell) {.inline.} =
 # Swap
 # ------------------------------------------------
 
-func swapped*(self: Pair): Pair {.inline.} =
+func swapped*(self: Pair): Pair {.inline, noinit.} =
   ## Returns the pair with pivot-puyo and rotor-puyo swapped.
   Pair.init(self.rotor, self.pivot)
 
-func swap*(self: var Pair) {.inline.} = ## Swaps the pivot-puyo and rotor-puyo.
+func swap*(self: var Pair) {.inline, noinit.} = ## Swaps the pivot-puyo and rotor-puyo.
   self.assign self.swapped
 
 # ------------------------------------------------
 # Count
 # ------------------------------------------------
 
-func cellCnt*(self: Pair, cell: Cell): int {.inline.} =
+func cellCnt*(self: Pair, cell: Cell): int {.inline, noinit.} =
   ## Returns the number of `cell` in the pair.
   (self.pivot == cell).int + (self.rotor == cell).int
 
-func puyoCnt*(self: Pair): int {.inline.} =
+func puyoCnt*(self: Pair): int {.inline, noinit.} =
   ## Returns the number of puyos in the pair.
   2
 
-func colorPuyoCnt*(self: Pair): int {.inline.} =
+func colorPuyoCnt*(self: Pair): int {.inline, noinit.} =
   ## Returns the number of color puyos in the pair.
   2
 
-func garbagesCnt*(self: Pair): int {.inline.} =
+func garbagesCnt*(self: Pair): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos in the pair.
   0
 
@@ -130,7 +130,7 @@ const StrToPair = collect:
   for pair in Pair:
     {$pair: pair}
 
-func parsePair*(str: string): Res[Pair] {.inline.} =
+func parsePair*(str: string): Res[Pair] {.inline, noinit.} =
   ## Returns the pair converted from the string representation.
   StrToPair.getRes(str).context "Invalid pair: {str}".fmt
 
@@ -144,7 +144,7 @@ const
     for pair in Pair:
       {$PairToIshikawaUri[pair.ord]: pair}
 
-func toUriQuery*(self: Pair, fqdn = Pon2): string {.inline.} =
+func toUriQuery*(self: Pair, fqdn = Pon2): string {.inline, noinit.} =
   ## Returns the URI query converted from the pair.
   case fqdn
   of Pon2:
@@ -152,7 +152,7 @@ func toUriQuery*(self: Pair, fqdn = Pon2): string {.inline.} =
   of Ishikawa, Ips:
     $PairToIshikawaUri[self.ord]
 
-func parsePair*(query: string, fqdn: SimulatorFqdn): Res[Pair] {.inline.} =
+func parsePair*(query: string, fqdn: SimulatorFqdn): Res[Pair] {.inline, noinit.} =
   ## Returns the pair converted from the URI query.
   case fqdn
   of Pon2:

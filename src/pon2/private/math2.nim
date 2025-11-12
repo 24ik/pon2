@@ -11,7 +11,7 @@ import ./[assign3, staticfor2]
 
 export math
 
-func sum2*[T: SomeNumber](arr: openArray[T]): T {.inline.} =
+func sum2*[T: SomeNumber](arr: openArray[T]): T {.inline, noinit.} =
   ## Returns a summation of the array.
   var res = 0.T
   for elem in arr:
@@ -21,7 +21,7 @@ func sum2*[T: SomeNumber](arr: openArray[T]): T {.inline.} =
 
 func sum2*[E: enum, T: SomeNumber](
     arr: array[E, T], slice: static Slice[E]
-): T {.inline.} =
+): T {.inline, noinit.} =
   ## Returns a summation of the array with the given slice.
   var res = 0.T
   staticFor(idx, slice):

@@ -30,12 +30,14 @@ func `==`*(f1, f2: TsuField): bool {.borrow.}
 
 func `==`*(f1, f2: WaterField): bool {.borrow.}
 
-func `[]`[I: Ordinal, F: TsuField or WaterField](self: F, idx: I): BinField {.inline.} =
+func `[]`[I: Ordinal, F: TsuField or WaterField](
+    self: F, idx: I
+): BinField {.inline, noinit.} =
   cast[array[3, BinField]](self)[idx]
 
 func `[]`[I: Ordinal, F: TsuField or WaterField](
     self: var F, idx: I
-): var BinField {.inline.} =
+): var BinField {.inline, noinit.} =
   cast[ptr array[3, BinField]](self.addr)[][idx]
 
 # ------------------------------------------------
@@ -44,29 +46,29 @@ func `[]`[I: Ordinal, F: TsuField or WaterField](
 
 func init[F: TsuField or WaterField](
     T: type F, bit0, bit1, bit2: BinField
-): F {.inline.} =
+): F {.inline, noinit.} =
   cast[F]([bit0, bit1, bit2])
 
-func init*[F: TsuField or WaterField](T: type F): F {.inline.} =
+func init*[F: TsuField or WaterField](T: type F): F {.inline, noinit.} =
   T.init(BinField.init, BinField.init, BinField.init)
 
 # ------------------------------------------------
 # Convert
 # ------------------------------------------------
 
-func toTsuField*(self: TsuField): TsuField {.inline.} =
+func toTsuField*(self: TsuField): TsuField {.inline, noinit.} =
   ## Returns the copy of the field.
   self
 
-func toTsuField*(self: WaterField): TsuField {.inline.} =
+func toTsuField*(self: WaterField): TsuField {.inline, noinit.} =
   ## Returns the Tsu field converted from the field.
   cast[TsuField](self)
 
-func toWaterField*(self: TsuField): WaterField {.inline.} =
+func toWaterField*(self: TsuField): WaterField {.inline, noinit.} =
   ## Returns the Water field converted from the field.
   cast[WaterField](self)
 
-func toWaterField*(self: WaterField): WaterField {.inline.} =
+func toWaterField*(self: WaterField): WaterField {.inline, noinit.} =
   ## Returns the copy of the field.
   self
 
@@ -74,26 +76,26 @@ func toWaterField*(self: WaterField): WaterField {.inline.} =
 # Operator
 # ------------------------------------------------
 
-func `*`[F: TsuField or WaterField](self: F, binField: BinField): F {.inline.} =
+func `*`[F: TsuField or WaterField](self: F, binField: BinField): F {.inline, noinit.} =
   F.init(self[0] * binField, self[1] * binField, self[2] * binField)
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-func rule*(self: TsuField): Rule {.inline.} =
+func rule*(self: TsuField): Rule {.inline, noinit.} =
   ## Returns the rule.
   Tsu
 
-func rule*(self: WaterField): Rule {.inline.} =
+func rule*(self: WaterField): Rule {.inline, noinit.} =
   ## Returns the rule.
   Water
 
-func exist[F: TsuField or WaterField](self: F): BinField {.inline.} =
+func exist[F: TsuField or WaterField](self: F): BinField {.inline, noinit.} =
   ## Returns the binary field where puyos exist.
   sum(self[0], self[1], self[2])
 
-func isDead*[F: TsuField or WaterField](self: F): bool {.inline.} =
+func isDead*[F: TsuField or WaterField](self: F): bool {.inline, noinit.} =
   ## Returns `true` if the field is in a defeated state.
   const FieldRule = when F is TsuField: Tsu else: Water
 
@@ -103,17 +105,21 @@ func isDead*[F: TsuField or WaterField](self: F): bool {.inline.} =
 # Placement
 # ------------------------------------------------
 
-func invalidPlacements*[F: TsuField or WaterField](self: F): set[Placement] {.inline.} =
+func invalidPlacements*[F: TsuField or WaterField](
+    self: F
+): set[Placement] {.inline, noinit.} =
   ## Returns the invalid placements.
   self.exist.invalidPlacements
 
-func validPlacements*[F: TsuField or WaterField](self: F): set[Placement] {.inline.} =
+func validPlacements*[F: TsuField or WaterField](
+    self: F
+): set[Placement] {.inline, noinit.} =
   ## Returns the valid placements.
   self.exist.validPlacements
 
 func validDblPlacements*[F: TsuField or WaterField](
     self: F
-): set[Placement] {.inline.} =
+): set[Placement] {.inline, noinit.} =
   ## Returns the valid placements for double pairs.
   self.exist.validDblPlacements
 
@@ -121,11 +127,13 @@ func validDblPlacements*[F: TsuField or WaterField](
 # Indexer
 # ------------------------------------------------
 
-func toCell(bit0, bit1, bit2: bool): Cell {.inline.} =
+func toCell(bit0, bit1, bit2: bool): Cell {.inline, noinit.} =
   ## Returns the cell converted from the bits.
   (bit0.int + (bit1.int shl 1) + (bit2.int shl 2)).Cell
 
-func `[]`*[F: TsuField or WaterField](self: F, row: Row, col: Col): Cell {.inline.} =
+func `[]`*[F: TsuField or WaterField](
+    self: F, row: Row, col: Col
+): Cell {.inline, noinit.} =
   toCell(self[0][row, col], self[1][row, col], self[2][row, col])
 
 template withBits(cell: Cell, body: untyped): untyped =
@@ -140,7 +148,7 @@ template withBits(cell: Cell, body: untyped): untyped =
 
 func `[]=`*[F: TsuField or WaterField](
     self: var F, row: Row, col: Col, cell: Cell
-) {.inline.} =
+) {.inline, noinit.} =
   cell.withBits:
     expand bit:
       self[_][row, col] = bit
@@ -151,7 +159,7 @@ func `[]=`*[F: TsuField or WaterField](
 
 func insert*[F: TsuField or WaterField](
     self: var F, row: Row, col: Col, cell: Cell
-) {.inline.} =
+) {.inline, noinit.} =
   ## Inserts the cell and shifts the field.
   ## If (row, col) is in the air, shifts the field upward above where inserted.
   ## If it is in the water, shifts the field downward below where inserted.
@@ -161,7 +169,9 @@ func insert*[F: TsuField or WaterField](
     expand bit:
       self[_].insert row, col, bit, FieldRule
 
-func delete*[F: TsuField or WaterField](self: var F, row: Row, col: Col) {.inline.} =
+func delete*[F: TsuField or WaterField](
+    self: var F, row: Row, col: Col
+) {.inline, noinit.} =
   ## Deletes the cell and shifts the field.
   ## If (row, col) is in the air, shifts the field downward above where deleted.
   ## If it is in the water, shifts the field upward below where deleted.
@@ -174,31 +184,31 @@ func delete*[F: TsuField or WaterField](self: var F, row: Row, col: Col) {.inlin
 # Puyo Extract
 # ------------------------------------------------
 
-func hard[F: TsuField or WaterField](self: F): BinField {.inline.} =
+func hard[F: TsuField or WaterField](self: F): BinField {.inline, noinit.} =
   ## Returns the binary field where hard puyos exist.
   self[0] - (self[1] + self[2])
 
-func garbage[F: TsuField or WaterField](self: F): BinField {.inline.} =
+func garbage[F: TsuField or WaterField](self: F): BinField {.inline, noinit.} =
   ## Returns the binary field where garbage puyos exist.
   self[1] - (self[0] + self[2])
 
-func red[F: TsuField or WaterField](self: F): BinField {.inline.} =
+func red[F: TsuField or WaterField](self: F): BinField {.inline, noinit.} =
   ## Returns the binary field where red puyos exist.
   self[0] * self[1] - self[2]
 
-func green[F: TsuField or WaterField](self: F): BinField {.inline.} =
+func green[F: TsuField or WaterField](self: F): BinField {.inline, noinit.} =
   ## Returns the binary field where green puyos exist.
   self[2] - (self[0] + self[1])
 
-func blue[F: TsuField or WaterField](self: F): BinField {.inline.} =
+func blue[F: TsuField or WaterField](self: F): BinField {.inline, noinit.} =
   ## Returns the binary field where blue puyos exist.
   self[0] * self[2] - self[1]
 
-func yellow[F: TsuField or WaterField](self: F): BinField {.inline.} =
+func yellow[F: TsuField or WaterField](self: F): BinField {.inline, noinit.} =
   ## Returns the binary field where yellow puyos exist.
   self[1] * self[2] - self[0]
 
-func purple[F: TsuField or WaterField](self: F): BinField {.inline.} =
+func purple[F: TsuField or WaterField](self: F): BinField {.inline, noinit.} =
   ## Returns the binary field where purple puyos exist.
   prod(self[0], self[1], self[2])
 
@@ -206,7 +216,7 @@ func purple[F: TsuField or WaterField](self: F): BinField {.inline.} =
 # Count
 # ------------------------------------------------
 
-func cellCnt*[F: TsuField or WaterField](self: F, cell: Cell): int {.inline.} =
+func cellCnt*[F: TsuField or WaterField](self: F, cell: Cell): int {.inline, noinit.} =
   ## Returns the number of `cell` in the field.
   case cell
   of None:
@@ -226,15 +236,15 @@ func cellCnt*[F: TsuField or WaterField](self: F, cell: Cell): int {.inline.} =
   of Purple:
     self.purple.popcnt
 
-func puyoCnt*[F: TsuField or WaterField](self: F): int {.inline.} =
+func puyoCnt*[F: TsuField or WaterField](self: F): int {.inline, noinit.} =
   ## Returns the number of puyos in the field.
   self.exist.popcnt
 
-func colorPuyoCnt*[F: TsuField or WaterField](self: F): int {.inline.} =
+func colorPuyoCnt*[F: TsuField or WaterField](self: F): int {.inline, noinit.} =
   ## Returns the number of color puyos in the field.
   (self[2] + self.red).popcnt
 
-func garbagesCnt*[F: TsuField or WaterField](self: F): int {.inline.} =
+func garbagesCnt*[F: TsuField or WaterField](self: F): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos in the field.
   ((self[0] xor self[1]) - self[2]).popcnt
 
@@ -242,7 +252,7 @@ func garbagesCnt*[F: TsuField or WaterField](self: F): int {.inline.} =
 # Connect - 2
 # ------------------------------------------------
 
-func conn2*[F: TsuField or WaterField](self: F): F {.inline.} =
+func conn2*[F: TsuField or WaterField](self: F): F {.inline, noinit.} =
   ## Returns the field where exactly two color puyos are connected.
   self *
     sum(
@@ -250,7 +260,7 @@ func conn2*[F: TsuField or WaterField](self: F): F {.inline.} =
       self.purple.conn2,
     )
 
-func conn2Vertical*[F: TsuField or WaterField](self: F): F {.inline.} =
+func conn2Vertical*[F: TsuField or WaterField](self: F): F {.inline, noinit.} =
   ## Returns the field where exactly two color puyos are connected vertically.
   self *
     sum(
@@ -258,7 +268,7 @@ func conn2Vertical*[F: TsuField or WaterField](self: F): F {.inline.} =
       self.yellow.conn2Vertical, self.purple.conn2Vertical,
     )
 
-func conn2Horizontal*[F: TsuField or WaterField](self: F): F {.inline.} =
+func conn2Horizontal*[F: TsuField or WaterField](self: F): F {.inline, noinit.} =
   ## Returns the field where exactly two color puyos are connected horizontally.
   self *
     sum(
@@ -270,7 +280,7 @@ func conn2Horizontal*[F: TsuField or WaterField](self: F): F {.inline.} =
 # Connect - 3
 # ------------------------------------------------
 
-func conn3*[F: TsuField or WaterField](self: F): F {.inline.} =
+func conn3*[F: TsuField or WaterField](self: F): F {.inline, noinit.} =
   ## Returns the field where exactly three color puyos are connected.
   self *
     sum(
@@ -278,7 +288,7 @@ func conn3*[F: TsuField or WaterField](self: F): F {.inline.} =
       self.purple.conn3,
     )
 
-func conn3Vertical*[F: TsuField or WaterField](self: F): F {.inline.} =
+func conn3Vertical*[F: TsuField or WaterField](self: F): F {.inline, noinit.} =
   ## Returns the field where exactly three color puyos are connected vertically.
   self *
     sum(
@@ -286,7 +296,7 @@ func conn3Vertical*[F: TsuField or WaterField](self: F): F {.inline.} =
       self.yellow.conn3Vertical, self.purple.conn3Vertical,
     )
 
-func conn3Horizontal*[F: TsuField or WaterField](self: F): F {.inline.} =
+func conn3Horizontal*[F: TsuField or WaterField](self: F): F {.inline, noinit.} =
   ## Returns the field where exactly three color puyos are connected horizontally.
   self *
     sum(
@@ -294,7 +304,7 @@ func conn3Horizontal*[F: TsuField or WaterField](self: F): F {.inline.} =
       self.yellow.conn3Horizontal, self.purple.conn3Horizontal,
     )
 
-func conn3LShape*[F: TsuField or WaterField](self: F): F {.inline.} =
+func conn3LShape*[F: TsuField or WaterField](self: F): F {.inline, noinit.} =
   ## Returns the field where exactly three color puyos are connected by L-shape.
   self *
     sum(
@@ -306,22 +316,22 @@ func conn3LShape*[F: TsuField or WaterField](self: F): F {.inline.} =
 # Shift
 # ------------------------------------------------
 
-func shiftUp*[F: TsuField or WaterField](self: var F) {.inline.} =
+func shiftUp*[F: TsuField or WaterField](self: var F) {.inline, noinit.} =
   ## Shifts the field upward.
   staticFor(i, 0 ..< 3):
     self[i].shiftUp
 
-func shiftDown*[F: TsuField or WaterField](self: var F) {.inline.} =
+func shiftDown*[F: TsuField or WaterField](self: var F) {.inline, noinit.} =
   ## Shifts the field downward.
   staticFor(i, 0 ..< 3):
     self[i].shiftDown
 
-func shiftRight*[F: TsuField or WaterField](self: var F) {.inline.} =
+func shiftRight*[F: TsuField or WaterField](self: var F) {.inline, noinit.} =
   ## Shifts the field rightward.
   staticFor(i, 0 ..< 3):
     self[i].shiftRight
 
-func shiftLeft*[F: TsuField or WaterField](self: var F) {.inline.} =
+func shiftLeft*[F: TsuField or WaterField](self: var F) {.inline, noinit.} =
   ## Shifts the field leftward.
   staticFor(i, 0 ..< 3):
     self[i].shiftLeft
@@ -330,12 +340,12 @@ func shiftLeft*[F: TsuField or WaterField](self: var F) {.inline.} =
 # Flip
 # ------------------------------------------------
 
-func flipVertical*[F: TsuField or WaterField](self: var F) {.inline.} =
+func flipVertical*[F: TsuField or WaterField](self: var F) {.inline, noinit.} =
   ## Flips the field vertically.
   staticFor(i, 0 ..< 3):
     self[i].flipVertical
 
-func flipHorizontal*[F: TsuField or WaterField](self: var F) {.inline.} =
+func flipHorizontal*[F: TsuField or WaterField](self: var F) {.inline, noinit.} =
   ## Flips the field horizontally.
   staticFor(i, 0 ..< 3):
     self[i].flipHorizontal
@@ -344,13 +354,13 @@ func flipHorizontal*[F: TsuField or WaterField](self: var F) {.inline.} =
 # Rotate
 # ------------------------------------------------
 
-func rotate*[F: TsuField or WaterField](self: var F) {.inline.} =
+func rotate*[F: TsuField or WaterField](self: var F) {.inline, noinit.} =
   ## Rotates the binary field by 180 degrees.
   ## Ghost cells are cleared before the rotation.
   staticFor(i, 0 ..< 3):
     self[i].rotate
 
-func crossRotate*[F: TsuField or WaterField](self: var F) {.inline.} =
+func crossRotate*[F: TsuField or WaterField](self: var F) {.inline, noinit.} =
   ## Rotates the binary field by 180 degrees in groups of three rows.
   ## Ghost cells are cleared before the rotation.
   staticFor(i, 0 ..< 3):
@@ -370,7 +380,7 @@ template withFills(cell: Cell, body: untyped): untyped =
 
     body
 
-func place*(self: var TsuField, pair: Pair, plcmt: Placement) {.inline.} =
+func place*(self: var TsuField, pair: Pair, plcmt: Placement) {.inline, noinit.} =
   ## Places the pair.
   ## This function requires that the field is settled.
   let
@@ -393,7 +403,7 @@ func place*(self: var TsuField, pair: Pair, plcmt: Placement) {.inline.} =
   expand pivot, rotor:
     self[_] += pivot + rotor
 
-func place*(self: var WaterField, pair: Pair, plcmt: Placement) {.inline.} =
+func place*(self: var WaterField, pair: Pair, plcmt: Placement) {.inline, noinit.} =
   ## Places the pair.
   ## This function requires that the field is settled.
   let
@@ -430,7 +440,7 @@ func place*(self: var WaterField, pair: Pair, plcmt: Placement) {.inline.} =
 
 func place*[F: TsuField or WaterField](
     self: var F, pair: Pair, optPlcmt: OptPlacement
-) {.inline.} =
+) {.inline, noinit.} =
   ## Places the pair.
   ## This function requires that the field is settled.
   if optPlcmt.isOk:
@@ -440,7 +450,7 @@ func place*[F: TsuField or WaterField](
 # Pop
 # ------------------------------------------------
 
-func pop*[F: TsuField or WaterField](self: var F): PopResult {.inline.} =
+func pop*[F: TsuField or WaterField](self: var F): PopResult {.inline, noinit.} =
   ## Removes puyos that should pop and returns the pop result.
   # NOTE: `ignoreHard` option can be introduced, but (somehow) the performance
   # was almost the same.
@@ -483,7 +493,7 @@ func pop*[F: TsuField or WaterField](self: var F): PopResult {.inline.} =
     poppedGarbage, poppedColor,
   )
 
-func canPop*[F: TsuField or WaterField](self: F): bool {.inline.} =
+func canPop*[F: TsuField or WaterField](self: F): bool {.inline, noinit.} =
   ## Returns `true` if any puyos can pop.
   ## Note that this function is only slightly lighter than `pop`.
   self.red.canPop or self.green.canPop or self.blue.canPop or self.yellow.canPop or
@@ -495,7 +505,7 @@ func canPop*[F: TsuField or WaterField](self: F): bool {.inline.} =
 
 func dropGarbages*[F: TsuField or WaterField](
     self: var F, cnts: array[Col, int], dropHard: bool
-) {.inline.} =
+) {.inline, noinit.} =
   ## Drops hard or garbage puyos.
   ## This function requires that the field is settled and the counts are non-negative.
   let
@@ -511,7 +521,7 @@ func dropGarbages*[F: TsuField or WaterField](
 # Apply
 # ------------------------------------------------
 
-func apply*[F: TsuField or WaterField](self: var F, step: Step) {.inline.} =
+func apply*[F: TsuField or WaterField](self: var F, step: Step) {.inline, noinit.} =
   ## Applies the step.
   ## This function requires that the field is settled.
   case step.kind
@@ -526,14 +536,14 @@ func apply*[F: TsuField or WaterField](self: var F, step: Step) {.inline.} =
 # Settle
 # ------------------------------------------------
 
-func settle*[F: TsuField or WaterField](self: var F) {.inline.} =
+func settle*[F: TsuField or WaterField](self: var F) {.inline, noinit.} =
   ## Settles the field.
   when F is TsuField:
     settleTsu(self[0], self[1], self[2], self.exist)
   else:
     settleWater(self[0], self[1], self[2], self.exist)
 
-func isSettled*[F: TsuField or WaterField](self: F): bool {.inline.} =
+func isSettled*[F: TsuField or WaterField](self: F): bool {.inline, noinit.} =
   ## Returns `true` if the field is settled.
   ## Note that this function is only slightly lighter than `settle`
   when F is TsuField:
@@ -604,7 +614,7 @@ template moveImpl[F: TsuField or WaterField](
 
 func move*[F: TsuField or WaterField](
     self: var F, pair: Pair, plcmt: Placement, calcConn: static bool = true
-): MoveResult {.inline.} =
+): MoveResult {.inline, noinit.} =
   ## Places the pair, advances the field until chains end, and returns a moving result.
   ## This function requires that the field is settled.
   self.moveImpl(settleAfterApply = false, calcConn = calcConn):
@@ -612,7 +622,7 @@ func move*[F: TsuField or WaterField](
 
 func move*[F: TsuField or WaterField](
     self: var F, cnts: array[Col, int], dropHard: bool, calcConn: static bool = true
-): MoveResult {.inline.} =
+): MoveResult {.inline, noinit.} =
   ## Drops hard or garbage puyos, advances the field until chains end, and returns a
   ## moving result.
   ## This function requires that the field is settled and the counts are non-negative.
@@ -621,7 +631,7 @@ func move*[F: TsuField or WaterField](
 
 func move*[F: TsuField or WaterField](
     self: var F, cross: bool, calcConn: static bool = true
-): MoveResult {.inline.} =
+): MoveResult {.inline, noinit.} =
   ## Rotates the field, advances the field until chains end, and returns a moving
   ## result.
   self.moveImpl(settleAfterApply = true, calcConn = calcConn):
@@ -629,7 +639,7 @@ func move*[F: TsuField or WaterField](
 
 func move*[F: TsuField or WaterField](
     self: var F, step: Step, calcConn = true
-): MoveResult {.inline.} =
+): MoveResult {.inline, noinit.} =
   ## Applies the step, advances the field until chains end, and returns a moving result.
   ## This function requires that the field is settled.
   if calcConn:
@@ -653,7 +663,7 @@ func move*[F: TsuField or WaterField](
 
 func toArr*[F: TsuField or WaterField](
     self: F
-): array[Row, array[Col, Cell]] {.inline.} =
+): array[Row, array[Col, Cell]] {.inline, noinit.} =
   ## Returns the array converted from the field.
   expand arr:
     let arr = self[_].toArr
@@ -669,7 +679,7 @@ func toArr*[F: TsuField or WaterField](
 
 func toField[F: TsuField or WaterField](
     arr: array[Row, array[Col, Cell]]
-): F {.inline.} =
+): F {.inline, noinit.} =
   ## Returns the field converted from the array.
   var arr0 {.noinit.}, arr1 {.noinit.}, arr2 {.noinit.}: array[Row, array[Col, bool]]
 
@@ -683,11 +693,11 @@ func toField[F: TsuField or WaterField](
 
   F.init(arr0.toBinField, arr1.toBinField, arr2.toBinField)
 
-func toTsuField*(arr: array[Row, array[Col, Cell]]): TsuField {.inline.} =
+func toTsuField*(arr: array[Row, array[Col, Cell]]): TsuField {.inline, noinit.} =
   ## Returns the Tsu field converted from the array.
   toField[TsuField](arr)
 
-func toWaterField*(arr: array[Row, array[Col, Cell]]): WaterField {.inline.} =
+func toWaterField*(arr: array[Row, array[Col, Cell]]): WaterField {.inline, noinit.} =
   ## Returns the Water field converted from the array.
   toField[WaterField](arr)
 
@@ -699,7 +709,7 @@ const
   WaterSep = "~~~~~~"
   LowerAirRow = AirHeight.pred.Row
 
-func toStrImpl[F: TsuField or WaterField](self: F): string {.inline.} =
+func toStrImpl[F: TsuField or WaterField](self: F): string {.inline, noinit.} =
   ## Returns the string representation.
   # NOTE: generics `$` does not work
   let arr = self.toArr
@@ -712,13 +722,13 @@ func toStrImpl[F: TsuField or WaterField](self: F): string {.inline.} =
 
   lines.join "\n"
 
-func `$`*(self: TsuField): string {.inline.} =
+func `$`*(self: TsuField): string {.inline, noinit.} =
   self.toStrImpl
 
-func `$`*(self: WaterField): string {.inline.} =
+func `$`*(self: WaterField): string {.inline, noinit.} =
   self.toStrImpl
 
-func parseField[F: TsuField or WaterField](str: string): Res[F] {.inline.} =
+func parseField[F: TsuField or WaterField](str: string): Res[F] {.inline, noinit.} =
   ## Returns the field converted from the string representation.
   var lines = str.split '\n'
   if lines.len != (when F is TsuField: Height else: Height.succ):
@@ -744,11 +754,11 @@ func parseField[F: TsuField or WaterField](str: string): Res[F] {.inline.} =
 
   ok toField[F](arr)
 
-func parseTsuField*(str: string): Res[TsuField] {.inline.} =
+func parseTsuField*(str: string): Res[TsuField] {.inline, noinit.} =
   ## Returns the Tsu field converted from the string representation.
   parseField[TsuField](str)
 
-func parseWaterField*(str: string): Res[WaterField] {.inline.} =
+func parseWaterField*(str: string): Res[WaterField] {.inline, noinit.} =
   ## Returns the Water field converted from the string representation.
   parseField[WaterField](str)
 
@@ -780,7 +790,9 @@ const
     for cell, str in CellToTildeIshikawaStr:
       {str[0]: cell}
 
-func toUriQueryPon2[F: TsuField or WaterField](self: F): Res[string] {.inline.} =
+func toUriQueryPon2[F: TsuField or WaterField](
+    self: F
+): Res[string] {.inline, noinit.} =
   ## Returns the URI query converted from the field.
   const
     AirLowerRow = when F is TsuField: Row.high else: AirHeight.pred.Row
@@ -810,7 +822,7 @@ func toUriQueryPon2[F: TsuField or WaterField](self: F): Res[string] {.inline.} 
 
     ok "{Water}{RuleFieldSep}{airStr}{AirWaterSep}{waterStr}".fmt
 
-func toUriQueryIshikawa(self: TsuField): Res[string] {.inline.} =
+func toUriQueryIshikawa(self: TsuField): Res[string] {.inline, noinit.} =
   ## Returns the URI query converted from the field.
   let arr = self.toArr
 
@@ -848,19 +860,21 @@ func toUriQueryIshikawa(self: TsuField): Res[string] {.inline.} =
 
     ok lines.join.strip(trailing = false, chars = {'0'})
 
-func toUriQueryIshikawa(self: WaterField): Res[string] {.inline.} =
+func toUriQueryIshikawa(self: WaterField): Res[string] {.inline, noinit.} =
   ## Returns the URI query converted from the field.
   err "Water field not supported on Ishikawa/Ips format: {self}".fmt
 
 func toUriQuery*[F: TsuField or WaterField](
     self: F, fqdn = Pon2
-): Res[string] {.inline.} =
+): Res[string] {.inline, noinit.} =
   ## Returns the URI query converted from the field.
   case fqdn
   of Pon2: self.toUriQueryPon2
   of Ishikawa, Ips: self.toUriQueryIshikawa
 
-func parseFieldPon2[F: TsuField or WaterField](query: string): Res[F] {.inline.} =
+func parseFieldPon2[F: TsuField or WaterField](
+    query: string
+): Res[F] {.inline, noinit.} =
   ## Returns the field converted from the URI query.
   let strs = query.split Pon2UriRuleFieldSep
   if strs.len != 2:
@@ -912,7 +926,7 @@ func parseFieldPon2[F: TsuField or WaterField](query: string): Res[F] {.inline.}
 
   ok toField[F](arr)
 
-func splitByLen(str: string, length: int): seq[string] {.inline.} =
+func splitByLen(str: string, length: int): seq[string] {.inline, noinit.} =
   ## Returns the strings split by the specified length.
   if str == "":
     @[""]
@@ -921,7 +935,7 @@ func splitByLen(str: string, length: int): seq[string] {.inline.} =
       for firstIdx in countup(0, str.len.pred, length):
         str.substr(firstIdx, min(firstIdx.succ length, str.len).pred)
 
-func parseTsuFieldIshikawa(query: string): Res[TsuField] {.inline.} =
+func parseTsuFieldIshikawa(query: string): Res[TsuField] {.inline, noinit.} =
   ## Returns the field converted from the URI query.
   if query.startsWith TildeIshikawaPrefix:
     let query2 = query[1 ..^ 1]
@@ -970,7 +984,9 @@ func parseTsuFieldIshikawa(query: string): Res[TsuField] {.inline.} =
 
     ok arr.toTsuField
 
-func parseTsuField*(query: string, fqdn: SimulatorFqdn): Res[TsuField] {.inline.} =
+func parseTsuField*(
+    query: string, fqdn: SimulatorFqdn
+): Res[TsuField] {.inline, noinit.} =
   ## Returns the Tsu field converted from the URI query.
   case fqdn
   of Pon2:
@@ -978,7 +994,9 @@ func parseTsuField*(query: string, fqdn: SimulatorFqdn): Res[TsuField] {.inline.
   of Ishikawa, Ips:
     query.parseTsuFieldIshikawa
 
-func parseWaterField*(query: string, fqdn: SimulatorFqdn): Res[WaterField] {.inline.} =
+func parseWaterField*(
+    query: string, fqdn: SimulatorFqdn
+): Res[WaterField] {.inline, noinit.} =
   ## Returns the Water field converted from the URI query.
   case fqdn
   of Pon2:

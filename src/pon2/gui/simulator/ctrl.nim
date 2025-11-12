@@ -19,7 +19,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toSideCtrlVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
-  ): VNode {.inline.} =
+  ): VNode {.inline, noinit.} =
     ## Returns the controller node replaced next the field.
     let
       insertBtnCls = (
@@ -276,7 +276,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toBottomCtrlVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
-  ): VNode {.inline.} =
+  ): VNode {.inline, noinit.} =
     ## Returns the controller node replaced bottom of the window.
     buildHtml tdiv(class = "card", style = translucentStyle):
       tdiv(class = "card-content p-1"):

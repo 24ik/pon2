@@ -8,7 +8,7 @@
 
 import ./[assign3]
 
-func initArrWith*[T](size: static int, val: T): array[size, T] {.inline.} =
+func initArrWith*[T](size: static int, val: T): array[size, T] {.inline, noinit.} =
   ## Returns the array with all elements the value.
   when size == 0: # NOTE: cpp backend needs branching
     []

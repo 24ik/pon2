@@ -19,7 +19,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toGoalVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, cameraReady = false
-  ): VNode {.inline.} =
+  ): VNode {.inline, noinit.} =
     ## Returns the goal node.
     let goal = self.derefSimulator(helper).nazoPuyoWrap.optGoal.unsafeValue
 

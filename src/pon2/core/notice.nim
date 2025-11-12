@@ -45,7 +45,7 @@ const NoticeUnits: array[NoticeGarbage, int] = [1, 6, 30, 180, 360, 720, 1440]
 
 func noticeGarbageCnts*(
     score: int, rule: Rule, useComet = false
-): Res[array[NoticeGarbage, int]] {.inline.} =
+): Res[array[NoticeGarbage, int]] {.inline, noinit.} =
   ## Returns the number of notice garbage puyos.
   if score < 0:
     return err "`score` should be non-negative, but got {score}".fmt

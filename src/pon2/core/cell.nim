@@ -33,6 +33,6 @@ const StrToCell = collect:
   for cell in Cell:
     {$cell: cell}
 
-func parseCell*(str: string): Res[Cell] {.inline.} =
+func parseCell*(str: string): Res[Cell] {.inline, noinit.} =
   ## Returns the cell converted from the string representation.
   StrToCell.getRes(str).context "Invalid cell: {str}".fmt

@@ -18,7 +18,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toMarathonSearchVNode*(
       self: ref Marathon, helper: VNodeHelper
-  ): VNode {.inline.} =
+  ): VNode {.inline, noinit.} =
     ## Returns the marathon search bar node.
     let rate =
       if self[].isReady:

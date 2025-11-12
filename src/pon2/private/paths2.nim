@@ -17,7 +17,7 @@ template srcPath*(): Path =
   ## Returns the file's path.
   instantiationInfo(-1, true).filename.Path
 
-func splitPath2*(path: Path): tuple[head, tail: Path] {.inline.} =
+func splitPath2*(path: Path): tuple[head, tail: Path] {.inline, noinit.} =
   ## Splits the path.
   when defined(js):
     if '\\' in $path:
@@ -28,7 +28,7 @@ func splitPath2*(path: Path): tuple[head, tail: Path] {.inline.} =
   else:
     path.splitPath
 
-func joinPath*(head, tail: Path): Path {.inline.} =
+func joinPath*(head, tail: Path): Path {.inline, noinit.} =
   ## Concatenates the paths.
   when defined(js):
     if '\\' in $head:

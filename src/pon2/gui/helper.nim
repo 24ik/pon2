@@ -34,13 +34,13 @@ when defined(js) or defined(nimsuggest):
       studioOpt*: Opt[StudioVNodeHelper]
       marathonOpt*: Opt[MarathonVNodeHelper]
 
-  proc isMobile(): bool {.inline.} =
+  proc isMobile(): bool {.inline, noinit.} =
     ## Returns `true` if a mobile device is detected.
     r"iPhone|Android.+Mobile".newRegExp in navigator.userAgent
 
   func init(
       T: type SimulatorVNodeHelper, simulator: Simulator, rootId: cstring
-  ): T {.inline.} =
+  ): T {.inline, noinit.} =
     T(
       goalId: "pon2-simulator-goal-" & rootId,
       cameraReadyId: "pon2-simulator-cameraready-" & rootId,
@@ -49,15 +49,15 @@ when defined(js) or defined(nimsuggest):
 
   func init(
       T: type StudioVNodeHelper, rootId: cstring, isReplaySimulator: bool
-  ): T {.inline.} =
+  ): T {.inline, noinit.} =
     T(settingId: "pon2-studio-setting-" & rootId, isReplaySimulator: isReplaySimulator)
 
-  func init(T: type MarathonVNodeHelper, rootId: cstring): T {.inline.} =
+  func init(T: type MarathonVNodeHelper, rootId: cstring): T {.inline, noinit.} =
     T(searchBarId: "pon2-marathon-searchbar-" & rootId)
 
   proc init*(
       T: type VNodeHelper, simulatorRef: ref Simulator, rootId: cstring
-  ): T {.inline.} =
+  ): T {.inline, noinit.} =
     VNodeHelper(
       mobile: isMobile(),
       simulator: SimulatorVNodeHelper.init(simulatorRef[], rootId),
@@ -67,7 +67,7 @@ when defined(js) or defined(nimsuggest):
 
   proc init2*(
       T: type VNodeHelper, studioRef: ref Studio, rootId: cstring
-  ): tuple[main, replay: VNodeHelper] {.inline.} =
+  ): tuple[main, replay: VNodeHelper] {.inline, noinit.} =
     let
       mobile = isMobile()
       mainRootId = "pon2-studio-main-" & rootId
@@ -94,7 +94,7 @@ when defined(js) or defined(nimsuggest):
 
   proc init*(
       T: type VNodeHelper, marathonRef: ref Marathon, rootId: cstring
-  ): T {.inline.} =
+  ): T {.inline, noinit.} =
     VNodeHelper(
       mobile: isMobile(),
       simulator: SimulatorVNodeHelper.init(marathonRef[].simulator, rootId),

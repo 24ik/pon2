@@ -68,32 +68,34 @@ const
 
 func init*(
     T: type Goal, kind: GoalKind, optColor: OptGoalColor, optVal: OptGoalVal
-): T {.inline.} =
+): T {.inline, noinit.} =
   T(kind: kind, optColor: optColor, optVal: optVal)
 
-func init*(T: type Goal, kind: GoalKind, color: GoalColor, val: GoalVal): T {.inline.} =
+func init*(
+    T: type Goal, kind: GoalKind, color: GoalColor, val: GoalVal
+): T {.inline, noinit.} =
   T.init(kind, OptGoalColor.ok color, OptGoalVal.ok val)
 
-func init*(T: type Goal, kind: GoalKind, color: GoalColor): T {.inline.} =
+func init*(T: type Goal, kind: GoalKind, color: GoalColor): T {.inline, noinit.} =
   T.init(kind, OptGoalColor.ok color, OptGoalVal.err)
 
-func init*(T: type Goal, kind: GoalKind, val: GoalVal): T {.inline.} =
+func init*(T: type Goal, kind: GoalKind, val: GoalVal): T {.inline, noinit.} =
   T.init(kind, OptGoalColor.err, OptGoalVal.ok val)
 
-func init*(T: type Goal): T {.inline.} =
+func init*(T: type Goal): T {.inline, noinit.} =
   T.init(Clear, All)
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-func isNormalForm*(self: Goal): bool {.inline.} =
+func isNormalForm*(self: Goal): bool {.inline, noinit.} =
   ## Returns `true` if the goal is normal form; color and value are set
   ## appropriately.
   (self.kind in ColorKinds == self.optColor.isOk) and
     (self.kind in ValKinds == self.optVal.isOk)
 
-func isSupported*(self: Goal): bool {.inline.} =
+func isSupported*(self: Goal): bool {.inline, noinit.} =
   ## Returns `true` if the goal is supported.
   if self.kind in ColorKinds and self.optColor.isErr:
     return false
@@ -113,7 +115,7 @@ const
   DefColor = All
   DefVal = 0.GoalVal
 
-func normalize*(self: var Goal) {.inline.} =
+func normalize*(self: var Goal) {.inline, noinit.} =
   ## Normalizes the goal; removes unnecessary color and value and compensates
   ## for missing color and value.
   if self.kind in ColorKinds:
@@ -130,7 +132,7 @@ func normalize*(self: var Goal) {.inline.} =
     self.optVal.isErrOr:
       self.optVal.err
 
-func normalized*(self: Goal): Goal {.inline.} =
+func normalized*(self: Goal): Goal {.inline, noinit.} =
   ## Returns the normalized goal.
   self.dup normalize
 
@@ -138,7 +140,7 @@ func normalized*(self: Goal): Goal {.inline.} =
 # Goal <-> string
 # ------------------------------------------------
 
-func initStrToKinds(): array[GoalColor, Table[string, GoalKind]] {.inline.} =
+func initStrToKinds(): array[GoalColor, Table[string, GoalKind]] {.inline, noinit.} =
   ## Returns `StrToKinds`.
   var strToKinds: array[GoalColor, Table[string, GoalKind]]
   staticFor(color, GoalColor):
@@ -153,7 +155,7 @@ func initStrToKinds(): array[GoalColor, Table[string, GoalKind]] {.inline.} =
 
 const StrToKinds = initStrToKinds()
 
-func `$`*(self: Goal): string {.inline.} =
+func `$`*(self: Goal): string {.inline, noinit.} =
   var replacements = newSeqOfCap[(string, string)](2)
   if self.optColor.isOk:
     replacements.add ("c", $self.optColor.unsafeValue)
@@ -162,7 +164,7 @@ func `$`*(self: Goal): string {.inline.} =
 
   ($self.kind).multiReplace replacements
 
-func parseGoal*(str: string): Res[Goal] {.inline.} =
+func parseGoal*(str: string): Res[Goal] {.inline, noinit.} =
   ## Returns the goal converted from the string representation.
   var
     goal = Goal.init(GoalKind.low, OptGoalColor.err, OptGoalVal.err)
@@ -227,7 +229,7 @@ const
     for i, uri in ValToIshikawaUri:
       {uri: i.GoalVal}
 
-func toUriQuery*(self: Goal, fqdn = Pon2): Res[string] {.inline.} =
+func toUriQuery*(self: Goal, fqdn = Pon2): Res[string] {.inline, noinit.} =
   ## Returns the URI query converted from the requirement.
   case fqdn
   of Pon2:
@@ -262,7 +264,7 @@ func toUriQuery*(self: Goal, fqdn = Pon2): Res[string] {.inline.} =
 
       ok "{kindChar}{colorChar}{valChar}".fmt
 
-func parseGoal*(query: string, fqdn: SimulatorFqdn): Res[Goal] {.inline.} =
+func parseGoal*(query: string, fqdn: SimulatorFqdn): Res[Goal] {.inline, noinit.} =
   ## Returns the goal converted from the URI query.
   var goal = Goal.init(GoalKind.low, OptGoalColor.err, OptGoalVal.err)
 
