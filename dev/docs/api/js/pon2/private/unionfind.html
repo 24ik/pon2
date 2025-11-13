@@ -122,7 +122,7 @@
     <div id="connected-procs-all">
   <div id="connected,UnionFind,UnionFindNode,UnionFindNode">
   <dt><pre><span class="Keyword">func</span> <a href="#connected%2CUnionFind%2CUnionFindNode%2CUnionFindNode"><span class="Identifier">connected</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="unionfind.html#UnionFind"><span class="Identifier">UnionFind</span></a><span class="Other">;</span> <span class="Identifier">node1</span><span class="Other">,</span> <span class="Identifier">node2</span><span class="Other">:</span> <a href="unionfind.html#UnionFindNode"><span class="Identifier">UnionFindNode</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+    <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt> if <tt class="docutils literal"><span class="pre"><span class="Identifier">node1</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">node2</span></span></tt> are connected.
@@ -133,7 +133,7 @@
 </div>
 <div id="init-procs-all">
   <div id="init,typeUnionFind,int">
-  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeUnionFind%2Cint"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">UnionFind</span><span class="Other">;</span> <span class="Identifier">size</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeUnionFind%2Cint"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">UnionFind</span><span class="Other">;</span> <span class="Identifier">size</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -144,7 +144,7 @@
 </div>
 <div id="merge-procs-all">
   <div id="merge,UnionFind,UnionFindNode,UnionFindNode">
-  <dt><pre><span class="Keyword">func</span> <a href="#merge%2CUnionFind%2CUnionFindNode%2CUnionFindNode"><span class="Identifier">merge</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="unionfind.html#UnionFind"><span class="Identifier">UnionFind</span></a><span class="Other">;</span> <span class="Identifier">node1</span><span class="Other">,</span> <span class="Identifier">node2</span><span class="Other">:</span> <a href="unionfind.html#UnionFindNode"><span class="Identifier">UnionFindNode</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#merge%2CUnionFind%2CUnionFindNode%2CUnionFindNode"><span class="Identifier">merge</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="unionfind.html#UnionFind"><span class="Identifier">UnionFind</span></a><span class="Other">;</span> <span class="Identifier">node1</span><span class="Other">,</span> <span class="Identifier">node2</span><span class="Other">:</span> <a href="unionfind.html#UnionFindNode"><span class="Identifier">UnionFindNode</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -157,7 +157,7 @@
 <div id="root-procs-all">
   <div id="root,UnionFind,UnionFindNode">
   <dt><pre><span class="Keyword">func</span> <a href="#root%2CUnionFind%2CUnionFindNode"><span class="Identifier">root</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="unionfind.html#UnionFind"><span class="Identifier">UnionFind</span></a><span class="Other">;</span> <span class="Identifier">node</span><span class="Other">:</span> <a href="unionfind.html#UnionFindNode"><span class="Identifier">UnionFindNode</span></a><span class="Other">)</span><span class="Other">:</span> <a href="unionfind.html#UnionFindNode"><span class="Identifier">UnionFindNode</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span>
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+    <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the root of the tree containing the node. Path compression is also performed.
@@ -176,7 +176,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-11 04:12:35 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-13 07:16:37 UTC</small>
       </div>
     </div>
   </div>

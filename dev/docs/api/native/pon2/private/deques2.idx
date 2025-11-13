@@ -1,6 +1,6 @@
 nimTitle	deques2	pon2/private/deques2.html	module src/pon2/private/deques2		0
 nim	init	pon2/private/deques2.html#init,typeDeque[E]	proc init[E](T: type Deque[E]; initialSize = defaultInitialSize): T:type		13
-nim	toDeque2	pon2/private/deques2.html#toDeque2,openArray[T]	proc toDeque2[T](arr: openArray[T]): Deque[T]		18
-nim	insert	pon2/private/deques2.html#insert,Deque[T],sinkT,int	proc insert[T](self: var Deque[T]; item: sink T; idx: int)		26
-nim	delete	pon2/private/deques2.html#delete,Deque[T],int	proc delete[T](self: var Deque[T]; idx: int)		37
-nim	mpairs	pon2/private/deques2.html#mpairs.i,Deque[T]	iterator mpairs[T](self: var Deque[T]): tuple[key: int, val: var T]		48
+nim	toDeque2	pon2/private/deques2.html#toDeque2,openArray[T]	proc toDeque2[T](arr: openArray[T]): Deque[T]		20
+nim	insert	pon2/private/deques2.html#insert,Deque[T],sinkT,int	proc insert[T](self: var Deque[T]; item: sink T; idx: int)		28
+nim	delete	pon2/private/deques2.html#delete,Deque[T],int	proc delete[T](self: var Deque[T]; idx: int)		39
+nim	mpairs	pon2/private/deques2.html#mpairs.i,Deque[T]	iterator mpairs[T](self: var Deque[T]): tuple[key: int, val: var T]		50

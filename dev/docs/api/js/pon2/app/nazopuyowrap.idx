@@ -1,15 +1,15 @@
 nimTitle	nazopuyowrap	pon2/app/nazopuyowrap.html	module src/pon2/app/nazopuyowrap		0
 nim	NazoPuyoWrap	pon2/app/nazopuyowrap.html#NazoPuyoWrap	object NazoPuyoWrap		15
-nim	init	pon2/app/nazopuyowrap.html#init,typeNazoPuyoWrap,NazoPuyo[F: TsuField or WaterField]	proc init[F: TsuField or WaterField](T: type NazoPuyoWrap; nazo: NazoPuyo[F]): T:type		37
-nim	init	pon2/app/nazopuyowrap.html#init,typeNazoPuyoWrap,PuyoPuyo[F: TsuField or WaterField]	proc init[F: TsuField or WaterField](T: type NazoPuyoWrap; puyoPuyo: PuyoPuyo[F]): T:type		42
-nim	init	pon2/app/nazopuyowrap.html#init,typeNazoPuyoWrap	proc init(T: type NazoPuyoWrap): T:type		47
-nim	`==`	pon2/app/nazopuyowrap.html#==,TsuField,WaterField	proc `==`(field1: TsuField; field2: WaterField): bool		54
-nim	`==`	pon2/app/nazopuyowrap.html#==,WaterField,TsuField	proc `==`(field1: WaterField; field2: TsuField): bool		58
-nim	`==`	pon2/app/nazopuyowrap.html#==,NazoPuyoWrap,NazoPuyoWrap	proc `==`(wrap1, wrap2: NazoPuyoWrap): bool		62
-nim	unwrapNazoPuyo	pon2/app/nazopuyowrap.html#unwrapNazoPuyo.m,untyped,untyped	macro unwrapNazoPuyo(self: untyped; body: untyped): untyped		76
-nim	rule	pon2/app/nazopuyowrap.html#rule,NazoPuyoWrap	proc rule(self: NazoPuyoWrap): Rule		106
-nim	rule=	pon2/app/nazopuyowrap.html#rule=,NazoPuyoWrap,Rule	proc rule=(self: var NazoPuyoWrap; rule: Rule)		110
-nim	toUriQuery	pon2/app/nazopuyowrap.html#toUriQuery,NazoPuyoWrap,SimulatorFqdn	proc toUriQuery(self: NazoPuyoWrap; fqdn: SimulatorFqdn): Res[string]		130
-nim	parseNazoPuyoWrap	pon2/app/nazopuyowrap.html#parseNazoPuyoWrap,string,SimulatorFqdn	proc parseNazoPuyoWrap(query: string; fqdn: SimulatorFqdn): Res[NazoPuyoWrap]		141
-nimgrp	==	pon2/app/nazopuyowrap.html#==-procs-all	proc		54
-nimgrp	init	pon2/app/nazopuyowrap.html#init-procs-all	proc		37
+nim	init	pon2/app/nazopuyowrap.html#init,typeNazoPuyoWrap,NazoPuyo[F: TsuField or WaterField]	proc init[F: TsuField or WaterField](T: type NazoPuyoWrap; nazo: NazoPuyo[F]): T:type		33
+nim	init	pon2/app/nazopuyowrap.html#init,typeNazoPuyoWrap,PuyoPuyo[F: TsuField or WaterField]	proc init[F: TsuField or WaterField](T: type NazoPuyoWrap; puyoPuyo: PuyoPuyo[F]): T:type		36
+nim	init	pon2/app/nazopuyowrap.html#init,typeNazoPuyoWrap	proc init(T: type NazoPuyoWrap): T:type		39
+nim	`==`	pon2/app/nazopuyowrap.html#==,TsuField,WaterField	proc `==`(field1: TsuField; field2: WaterField): bool		46
+nim	`==`	pon2/app/nazopuyowrap.html#==,WaterField,TsuField	proc `==`(field1: WaterField; field2: TsuField): bool		50
+nim	`==`	pon2/app/nazopuyowrap.html#==,NazoPuyoWrap,NazoPuyoWrap	proc `==`(wrap1, wrap2: NazoPuyoWrap): bool		54
+nim	unwrapNazoPuyo	pon2/app/nazopuyowrap.html#unwrapNazoPuyo.m,untyped,untyped	macro unwrapNazoPuyo(self: untyped; body: untyped): untyped		68
+nim	rule	pon2/app/nazopuyowrap.html#rule,NazoPuyoWrap	proc rule(self: NazoPuyoWrap): Rule		98
+nim	rule=	pon2/app/nazopuyowrap.html#rule=,NazoPuyoWrap,Rule	proc rule=(self: var NazoPuyoWrap; rule: Rule)		102
+nim	toUriQuery	pon2/app/nazopuyowrap.html#toUriQuery,NazoPuyoWrap,SimulatorFqdn	proc toUriQuery(self: NazoPuyoWrap; fqdn: SimulatorFqdn): Res[string]		122
+nim	parseNazoPuyoWrap	pon2/app/nazopuyowrap.html#parseNazoPuyoWrap,string,SimulatorFqdn	proc parseNazoPuyoWrap(query: string; fqdn: SimulatorFqdn): Res[NazoPuyoWrap]		133
+nimgrp	==	pon2/app/nazopuyowrap.html#==-procs-all	proc		46
+nimgrp	init	pon2/app/nazopuyowrap.html#init-procs-all	proc		33

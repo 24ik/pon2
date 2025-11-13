@@ -9,8 +9,8 @@ nim	getSelectedIdx	pon2/private/utils.html#getSelectedIdx,cstring	proc getSelect
 nim	getNavigator	pon2/private/utils.html#getNavigator	proc getNavigator(): JsObject		71
 nim	getClipboard	pon2/private/utils.html#getClipboard	proc getClipboard(): JsObject		74
 nim	getElemJsObjById	pon2/private/utils.html#getElemJsObjById,cstring	proc getElemJsObjById(id: cstring): JsObject		78
-nim	createElemJsObj	pon2/private/utils.html#createElemJsObj,cstring	proc createElemJsObj(id: cstring): JsObject		82
-nim	mobileDetected	pon2/private/utils.html#mobileDetected	proc mobileDetected(): bool		87
-nim	html2canvas	pon2/private/utils.html#html2canvas,JsObject	proc html2canvas(elem: JsObject): Future[JsObject]		93
-nim	html2canvas	pon2/private/utils.html#html2canvas,JsObject,int	proc html2canvas(elem: JsObject; scale: int): Future[JsObject]		98
-nimgrp	html2canvas	pon2/private/utils.html#html2canvas-procs-all	proc		91
+nim	createElemJsObj	pon2/private/utils.html#createElemJsObj,cstring	proc createElemJsObj(id: cstring): JsObject		83
+nim	mobileDetected	pon2/private/utils.html#mobileDetected	proc mobileDetected(): bool		88
+nim	html2canvas	pon2/private/utils.html#html2canvas,JsObject	proc html2canvas(elem: JsObject): Future[JsObject]		94
+nim	html2canvas	pon2/private/utils.html#html2canvas,JsObject,int	proc html2canvas(elem: JsObject; scale: int): Future[JsObject]		99
+nimgrp	html2canvas	pon2/private/utils.html#html2canvas-procs-all	proc		92

@@ -3,7 +3,7 @@ nim	SimulatorVNodeHelper	pon2/gui/helper.html#SimulatorVNodeHelper	object Simula
 nim	StudioVNodeHelper	pon2/gui/helper.html#StudioVNodeHelper	object StudioVNodeHelper		24
 nim	MarathonVNodeHelper	pon2/gui/helper.html#MarathonVNodeHelper	object MarathonVNodeHelper		28
 nim	VNodeHelper	pon2/gui/helper.html#VNodeHelper	object VNodeHelper		31
-nim	init	pon2/gui/helper.html#init,typeVNodeHelper,ref.Simulator,cstring	proc init(T: type VNodeHelper; simulatorRef: ref Simulator; rootId: cstring): T:type		58
-nim	init2	pon2/gui/helper.html#init2,typeVNodeHelper,ref.Studio,cstring	proc init2(T: type VNodeHelper; studioRef: ref Studio; rootId: cstring): tuple[\n    main, replay: VNodeHelper]		68
-nim	init	pon2/gui/helper.html#init,typeVNodeHelper,ref.Marathon,cstring	proc init(T: type VNodeHelper; marathonRef: ref Marathon; rootId: cstring): T:type		95
-nimgrp	init	pon2/gui/helper.html#init-procs-all	proc		58
+nim	init	pon2/gui/helper.html#init,typeVNodeHelper,ref.Simulator,cstring	proc init(T: type VNodeHelper; simulatorRef: ref Simulator; rootId: cstring): T:type		54
+nim	init2	pon2/gui/helper.html#init2,typeVNodeHelper,ref.Studio,cstring	proc init2(T: type VNodeHelper; studioRef: ref Studio; rootId: cstring): tuple[\n    main, replay: VNodeHelper]		62
+nim	init	pon2/gui/helper.html#init,typeVNodeHelper,ref.Marathon,cstring	proc init(T: type VNodeHelper; marathonRef: ref Marathon; rootId: cstring): T:type		89
+nimgrp	init	pon2/gui/helper.html#init-procs-all	proc		54

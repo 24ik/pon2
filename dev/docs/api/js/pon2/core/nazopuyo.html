@@ -155,7 +155,7 @@
   <dl class="item">
     <div id="$-procs-all">
   <div id="$,NazoPuyo[F: TsuField or WaterField]">
-  <dt><pre><span class="Keyword">func</span> <a href="#%24%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D"><span class="Identifier">`$`</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">:</span> <a href="field.html#TsuField"><span class="Identifier">TsuField</span></a> <span class="Keyword">or</span> <a href="field.html#WaterField"><span class="Identifier">WaterField</span></a><span class="Other">]</span><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="nazopuyo.html#NazoPuyo"><span class="Identifier">NazoPuyo</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#%24%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D"><span class="Identifier">`$`</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">:</span> <a href="field.html#TsuField"><span class="Identifier">TsuField</span></a> <span class="Keyword">or</span> <a href="field.html#WaterField"><span class="Identifier">WaterField</span></a><span class="Other">]</span><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="nazopuyo.html#NazoPuyo"><span class="Identifier">NazoPuyo</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -168,7 +168,7 @@
 <div id="init-procs-all">
   <div id="init,typeNazoPuyo[F: TsuField or WaterField]">
   <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D"><span class="Identifier">init</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">:</span> <a href="field.html#TsuField"><span class="Identifier">TsuField</span></a> <span class="Keyword">or</span> <a href="field.html#WaterField"><span class="Identifier">WaterField</span></a><span class="Other">]</span><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <a href="nazopuyo.html#NazoPuyo"><span class="Identifier">NazoPuyo</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+    <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -177,7 +177,8 @@
 </div>
 <div id="init,typeNazoPuyo[F: TsuField or WaterField],PuyoPuyo[F: TsuField or WaterField],Goal">
   <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D%2CPuyoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D%2CGoal"><span class="Identifier">init</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">:</span> <a href="field.html#TsuField"><span class="Identifier">TsuField</span></a> <span class="Keyword">or</span> <a href="field.html#WaterField"><span class="Identifier">WaterField</span></a><span class="Other">]</span><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <a href="nazopuyo.html#NazoPuyo"><span class="Identifier">NazoPuyo</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">puyoPuyo</span><span class="Other">:</span> <a href="puyopuyo.html#PuyoPuyo"><span class="Identifier">PuyoPuyo</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">]</span><span class="Other">;</span>
-                                     <span class="Identifier">goal</span><span class="Other">:</span> <a href="goal.html#Goal"><span class="Identifier">Goal</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+                                     <span class="Identifier">goal</span><span class="Other">:</span> <a href="goal.html#Goal"><span class="Identifier">Goal</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -189,7 +190,7 @@
 <div id="mark-procs-all">
   <div id="mark,NazoPuyo[F: TsuField or WaterField],int">
   <dt><pre><span class="Keyword">func</span> <a href="#mark%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D%2Cint"><span class="Identifier">mark</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">:</span> <a href="field.html#TsuField"><span class="Identifier">TsuField</span></a> <span class="Keyword">or</span> <a href="field.html#WaterField"><span class="Identifier">WaterField</span></a><span class="Other">]</span><span class="Other">(</span><span class="Identifier">nazo</span><span class="Other">:</span> <a href="nazopuyo.html#NazoPuyo"><span class="Identifier">NazoPuyo</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">endStepIdx</span> <span class="Other">=</span> <span class="DecNumber">-1</span><span class="Other">)</span><span class="Other">:</span> <a href="nazopuyo.html#MarkResult"><span class="Identifier">MarkResult</span></a> {.
-    <span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+    <span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Marks the steps in the Nazo Puyo. If <tt class="docutils literal"><span class="pre"><span class="Identifier">endStepIdx</span></span></tt> is negative, all steps are used. This function requires that the field is settled.
@@ -201,7 +202,7 @@
 <div id="parseNazoPuyo-procs-all">
   <div id="parseNazoPuyo,string,SimulatorFqdn">
   <dt><pre><span class="Keyword">func</span> <a href="#parseNazoPuyo%2Cstring%2CSimulatorFqdn"><span class="Identifier">parseNazoPuyo</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">:</span> <a href="field.html#TsuField"><span class="Identifier">TsuField</span></a> <span class="Keyword">or</span> <a href="field.html#WaterField"><span class="Identifier">WaterField</span></a><span class="Other">]</span><span class="Other">(</span><span class="Identifier">query</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">fqdn</span><span class="Other">:</span> <a href="fqdn.html#SimulatorFqdn"><span class="Identifier">SimulatorFqdn</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#Res"><span class="Identifier">Res</span></a><span class="Other">[</span>
-    <a href="nazopuyo.html#NazoPuyo"><span class="Identifier">NazoPuyo</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">]</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+    <a href="nazopuyo.html#NazoPuyo"><span class="Identifier">NazoPuyo</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">]</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the Nazo Puyo converted from the URI query.
@@ -210,7 +211,7 @@
 </div>
 <div id="parseNazoPuyo,string">
   <dt><pre><span class="Keyword">func</span> <a href="#parseNazoPuyo%2Cstring"><span class="Identifier">parseNazoPuyo</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">:</span> <a href="field.html#TsuField"><span class="Identifier">TsuField</span></a> <span class="Keyword">or</span> <a href="field.html#WaterField"><span class="Identifier">WaterField</span></a><span class="Other">]</span><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#Res"><span class="Identifier">Res</span></a><span class="Other">[</span><a href="nazopuyo.html#NazoPuyo"><span class="Identifier">NazoPuyo</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">]</span><span class="Other">]</span> {.
-    <span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+    <span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the Nazo Puyo converted from the string representation.
@@ -222,7 +223,7 @@
 <div id="toUriQuery-procs-all">
   <div id="toUriQuery,NazoPuyo[F: TsuField or WaterField]">
   <dt><pre><span class="Keyword">func</span> <a href="#toUriQuery%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D"><span class="Identifier">toUriQuery</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">:</span> <a href="field.html#TsuField"><span class="Identifier">TsuField</span></a> <span class="Keyword">or</span> <a href="field.html#WaterField"><span class="Identifier">WaterField</span></a><span class="Other">]</span><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="nazopuyo.html#NazoPuyo"><span class="Identifier">NazoPuyo</span></a><span class="Other">[</span><span class="Identifier">F</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">fqdn</span> <span class="Other">=</span> <span class="Identifier">Pon2</span><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#Res"><span class="Identifier">Res</span></a><span class="Other">[</span>
-    <span class="Identifier">string</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+    <span class="Identifier">string</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the URI query converted from the Nazo Puyo.
@@ -247,7 +248,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-11 04:12:36 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-13 07:16:38 UTC</small>
       </div>
     </div>
   </div>

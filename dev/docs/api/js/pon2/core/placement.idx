@@ -5,27 +5,27 @@ nim	OptPlacement	pon2/core/placement.html#OptPlacement	type OptPlacement		48
 nim	NonePlacement	pon2/core/placement.html#NonePlacement	const NonePlacement		51
 nim	DblPlacements	pon2/core/placement.html#DblPlacements	const DblPlacements		52
 nim	init	pon2/core/placement.html#init,typePlacement,Col,staticDir	proc init(T: type Placement; pivotCol: Col; rotorDir: static Dir): T:type		58
-nim	init	pon2/core/placement.html#init,typePlacement,Col,Dir	proc init(T: type Placement; pivotCol: Col; rotorDir: Dir): T:type		70
-nim	init	pon2/core/placement.html#init,typePlacement	proc init(T: type Placement): T:type		81
-nim	pivotCol	pon2/core/placement.html#pivotCol,Placement	proc pivotCol(self: Placement): Col		88
-nim	rotorCol	pon2/core/placement.html#rotorCol,Placement	proc rotorCol(self: Placement): Col		97
-nim	rotorDir	pon2/core/placement.html#rotorDir,Placement	proc rotorDir(self: Placement): Dir		107
-nim	moveRight	pon2/core/placement.html#moveRight,Placement	proc moveRight(self: var Placement)		119
-nim	moveLeft	pon2/core/placement.html#moveLeft,Placement	proc moveLeft(self: var Placement)		125
-nim	movedRight	pon2/core/placement.html#movedRight,Placement	proc movedRight(self: Placement): Placement		131
-nim	movedLeft	pon2/core/placement.html#movedLeft,Placement	proc movedLeft(self: Placement): Placement		135
-nim	rotateRight	pon2/core/placement.html#rotateRight,Placement	proc rotateRight(self: var Placement)		143
-nim	rotateLeft	pon2/core/placement.html#rotateLeft,Placement	proc rotateLeft(self: var Placement)		153
-nim	rotatedRight	pon2/core/placement.html#rotatedRight,Placement	proc rotatedRight(self: Placement): Placement		165
-nim	rotatedLeft	pon2/core/placement.html#rotatedLeft,Placement	proc rotatedLeft(self: Placement): Placement		169
-nim	`$`	pon2/core/placement.html#$,OptPlacement	proc `$`(self: OptPlacement): string		183
-nim	parsePlacement	pon2/core/placement.html#parsePlacement,string	proc parsePlacement(str: string): Res[Placement]		189
-nim	parseOptPlacement	pon2/core/placement.html#parseOptPlacement,string	proc parseOptPlacement(str: string): Res[OptPlacement]		193
-nim	toUriQuery	pon2/core/placement.html#toUriQuery,Placement	proc toUriQuery(self: Placement; fqdn = Pon2): string		211
-nim	toUriQuery	pon2/core/placement.html#toUriQuery,OptPlacement	proc toUriQuery(self: OptPlacement; fqdn = Pon2): string		219
-nim	parsePlacement	pon2/core/placement.html#parsePlacement,string,SimulatorFqdn	proc parsePlacement(query: string; fqdn: SimulatorFqdn): Res[Placement]		230
-nim	parseOptPlacement	pon2/core/placement.html#parseOptPlacement,string,SimulatorFqdn	proc parseOptPlacement(query: string; fqdn: SimulatorFqdn): Res[OptPlacement]		238
-nimgrp	touriquery	pon2/core/placement.html#toUriQuery-procs-all	proc		211
+nim	init	pon2/core/placement.html#init,typePlacement,Col,Dir	proc init(T: type Placement; pivotCol: Col; rotorDir: Dir): T:type		72
+nim	init	pon2/core/placement.html#init,typePlacement	proc init(T: type Placement): T:type		83
+nim	pivotCol	pon2/core/placement.html#pivotCol,Placement	proc pivotCol(self: Placement): Col		90
+nim	rotorCol	pon2/core/placement.html#rotorCol,Placement	proc rotorCol(self: Placement): Col		100
+nim	rotorDir	pon2/core/placement.html#rotorDir,Placement	proc rotorDir(self: Placement): Dir		110
+nim	moveRight	pon2/core/placement.html#moveRight,Placement	proc moveRight(self: var Placement)		122
+nim	moveLeft	pon2/core/placement.html#moveLeft,Placement	proc moveLeft(self: var Placement)		128
+nim	movedRight	pon2/core/placement.html#movedRight,Placement	proc movedRight(self: Placement): Placement		134
+nim	movedLeft	pon2/core/placement.html#movedLeft,Placement	proc movedLeft(self: Placement): Placement		138
+nim	rotateRight	pon2/core/placement.html#rotateRight,Placement	proc rotateRight(self: var Placement)		146
+nim	rotateLeft	pon2/core/placement.html#rotateLeft,Placement	proc rotateLeft(self: var Placement)		156
+nim	rotatedRight	pon2/core/placement.html#rotatedRight,Placement	proc rotatedRight(self: Placement): Placement		168
+nim	rotatedLeft	pon2/core/placement.html#rotatedLeft,Placement	proc rotatedLeft(self: Placement): Placement		172
+nim	`$`	pon2/core/placement.html#$,OptPlacement	proc `$`(self: OptPlacement): string		186
+nim	parsePlacement	pon2/core/placement.html#parsePlacement,string	proc parsePlacement(str: string): Res[Placement]		192
+nim	parseOptPlacement	pon2/core/placement.html#parseOptPlacement,string	proc parseOptPlacement(str: string): Res[OptPlacement]		196
+nim	toUriQuery	pon2/core/placement.html#toUriQuery,Placement	proc toUriQuery(self: Placement; fqdn = Pon2): string		214
+nim	toUriQuery	pon2/core/placement.html#toUriQuery,OptPlacement	proc toUriQuery(self: OptPlacement; fqdn = Pon2): string		222
+nim	parsePlacement	pon2/core/placement.html#parsePlacement,string,SimulatorFqdn	proc parsePlacement(query: string; fqdn: SimulatorFqdn): Res[Placement]		233
+nim	parseOptPlacement	pon2/core/placement.html#parseOptPlacement,string,SimulatorFqdn	proc parseOptPlacement(query: string; fqdn: SimulatorFqdn): Res[OptPlacement]		243
+nimgrp	touriquery	pon2/core/placement.html#toUriQuery-procs-all	proc		214
 nimgrp	init	pon2/core/placement.html#init-procs-all	proc		58
-nimgrp	parseoptplacement	pon2/core/placement.html#parseOptPlacement-procs-all	proc		193
-nimgrp	parseplacement	pon2/core/placement.html#parsePlacement-procs-all	proc		189
+nimgrp	parseoptplacement	pon2/core/placement.html#parseOptPlacement-procs-all	proc		196
+nimgrp	parseplacement	pon2/core/placement.html#parsePlacement-procs-all	proc		192
