@@ -23,7 +23,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toSettingsVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
-  ): VNode {.inline, noinit.} =
+  ): VNode =
     ## Returns the select node.
     let playBtnCls, editBtnCls: cstring
     if self.derefSimulator(helper).mode in PlayModes:

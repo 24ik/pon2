@@ -18,7 +18,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toOperatingCellVNode[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, idx: int, col: Col
-  ): VNode {.inline, noinit.} =
+  ): VNode =
     ## Returns the node of the cell in the operating area.
     var cross = false
     let cellOpt =
@@ -82,7 +82,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toOperatingVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
-  ): VNode {.inline, noinit.} =
+  ): VNode =
     ## Returns the operating node.
     buildHtml table:
       tbody:

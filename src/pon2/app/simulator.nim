@@ -102,13 +102,13 @@ const
     insert: false,
   )
 
-func init(T: type SimulatorEditObj, cell: Cell): T {.inline, noinit.} =
+func init(T: type SimulatorEditObj, cell: Cell): T =
   T(kind: EditCell, cell: cell)
 
-func init(T: type SimulatorEditObj, cross: bool): T {.inline, noinit.} =
+func init(T: type SimulatorEditObj, cross: bool): T =
   T(kind: EditRotate, cross: cross)
 
-func init(T: type SimulatorDequeElem, simulator: Simulator): T {.inline, noinit.} =
+func init(T: type SimulatorDequeElem, simulator: Simulator): T =
   T(
     nazoPuyoWrap: simulator.nazoPuyoWrap,
     moveResult: simulator.moveResult,
@@ -116,9 +116,7 @@ func init(T: type SimulatorDequeElem, simulator: Simulator): T {.inline, noinit.
     operatingIdx: simulator.operatingIdx,
   )
 
-func init*(
-    T: type Simulator, wrap: NazoPuyoWrap, mode = DefaultMode
-): T {.inline, noinit.} =
+func init*(T: type Simulator, wrap: NazoPuyoWrap, mode = DefaultMode): T =
   T(
     nazoPuyoWrap: wrap,
     moveResult: DefaultMoveRes,
@@ -133,22 +131,22 @@ func init*(
 
 func init*[F: TsuField or WaterField](
     T: type Simulator, nazo: NazoPuyo[F], mode = DefaultMode
-): T {.inline, noinit.} =
+): T =
   T.init(NazoPuyoWrap.init nazo, mode)
 
 func init*[F: TsuField or WaterField](
     T: type Simulator, puyoPuyo: PuyoPuyo[F], mode = DefaultMode
-): T {.inline, noinit.} =
+): T =
   T.init(NazoPuyoWrap.init puyoPuyo, mode)
 
-func init*(T: type Simulator, mode = DefaultMode): T {.inline, noinit.} =
+func init*(T: type Simulator, mode = DefaultMode): T =
   T.init(NazoPuyoWrap.init, mode)
 
 # ------------------------------------------------
 # Operator
 # ------------------------------------------------
 
-func `==`*(obj1, obj2: SimulatorEditObj): bool {.inline, noinit.} =
+func `==`*(obj1, obj2: SimulatorEditObj): bool =
   if obj1.kind != obj2.kind:
     return false
 
@@ -162,14 +160,14 @@ func `==`*(obj1, obj2: SimulatorEditObj): bool {.inline, noinit.} =
 # Undo / Redo
 # ------------------------------------------------
 
-func load(self: var Simulator, elem: SimulatorDequeElem) {.inline, noinit.} =
+func load(self: var Simulator, elem: SimulatorDequeElem) =
   ## Loads the deque elem.
   self.nazoPuyoWrap.assign elem.nazoPuyoWrap
   self.moveResult.assign elem.moveResult
   self.state.assign elem.state
   self.operatingIdx.assign elem.operatingIdx
 
-func undo*(self: var Simulator) {.inline, noinit.} =
+func undo*(self: var Simulator) =
   ## Performs undo.
   if self.mode notin EditModes:
     return
@@ -179,7 +177,7 @@ func undo*(self: var Simulator) {.inline, noinit.} =
   self.redoDeque.addLast SimulatorDequeElem.init self
   self.load self.undoDeque.popLast
 
-func redo*(self: var Simulator) {.inline, noinit.} =
+func redo*(self: var Simulator) =
   ## Performs redo.
   if self.mode notin EditModes:
     return
@@ -193,35 +191,35 @@ func redo*(self: var Simulator) {.inline, noinit.} =
 # Property - Getter
 # ------------------------------------------------
 
-func rule*(self: Simulator): Rule {.inline, noinit.} =
+func rule*(self: Simulator): Rule =
   ## Returns the rule of the Puyo Puyo or Nazo Puyo.
   self.nazoPuyoWrap.rule
 
-func nazoPuyoWrap*(self: Simulator): NazoPuyoWrap {.inline, noinit.} =
+func nazoPuyoWrap*(self: Simulator): NazoPuyoWrap =
   ## Returns the Nazo Puyo wrapper of the simulator.
   self.nazoPuyoWrap
 
-func moveResult*(self: Simulator): MoveResult {.inline, noinit.} =
+func moveResult*(self: Simulator): MoveResult =
   ## Returns the moving result of the simulator.
   self.moveResult
 
-func mode*(self: Simulator): SimulatorMode {.inline, noinit.} =
+func mode*(self: Simulator): SimulatorMode =
   ## Returns the mode of the simulator.
   self.mode
 
-func state*(self: Simulator): SimulatorState {.inline, noinit.} =
+func state*(self: Simulator): SimulatorState =
   ## Returns the state of the simulator.
   self.state
 
-func editData*(self: Simulator): SimulatorEditData {.inline, noinit.} =
+func editData*(self: Simulator): SimulatorEditData =
   ## Returns the edit information.
   self.editData
 
-func operatingPlacement*(self: Simulator): Placement {.inline, noinit.} =
+func operatingPlacement*(self: Simulator): Placement =
   ## Returns the operating placement of the simulator.
   self.operatingPlacement
 
-func operatingIdx*(self: Simulator): int {.inline, noinit.} =
+func operatingIdx*(self: Simulator): int =
   ## Returns the index of the step operated.
   self.operatingIdx
 
@@ -229,7 +227,7 @@ func operatingIdx*(self: Simulator): int {.inline, noinit.} =
 # Property - Setter
 # ------------------------------------------------
 
-func undoAll(self: var Simulator) {.inline, noinit.} =
+func undoAll(self: var Simulator) =
   ## Loads the data before any moves in the undo deque and clears it after the loaded
   ## step, and clears the redo deque.
   ## If the undo deque is empty, does nothing.
@@ -245,7 +243,7 @@ func undoAll(self: var Simulator) {.inline, noinit.} =
 
   self.redoDeque.clear
 
-func prepareEdit(self: var Simulator, clearRedoDeque = true) {.inline, noinit.} =
+func prepareEdit(self: var Simulator, clearRedoDeque = true) =
   ## Saves the current simulator to the undo deque and clears the redo deque.
   self.undoDeque.addLast SimulatorDequeElem.init self
   if clearRedoDeque:
@@ -259,7 +257,7 @@ template editBlock(self: var Simulator, body: untyped) =
   body
   self.state.assign AfterEdit
 
-func `rule=`*(self: var Simulator, rule: Rule) {.inline, noinit.} =
+func `rule=`*(self: var Simulator, rule: Rule) =
   ## Sets the rule of the simulator.
   if self.mode != EditorEdit:
     return
@@ -272,7 +270,7 @@ func `rule=`*(self: var Simulator, rule: Rule) {.inline, noinit.} =
   self.undoDeque.clear
   self.redoDeque.clear
 
-func `mode=`*(self: var Simulator, mode: SimulatorMode) {.inline, noinit.} =
+func `mode=`*(self: var Simulator, mode: SimulatorMode) =
   ## Sets the mode of the simulator.
   case self.mode
   of ViewerPlay:
@@ -297,14 +295,14 @@ func `mode=`*(self: var Simulator, mode: SimulatorMode) {.inline, noinit.} =
 
   self.undoDeque.clear
 
-func `editCell=`*(self: var Simulator, cell: Cell) {.inline, noinit.} =
+func `editCell=`*(self: var Simulator, cell: Cell) =
   ## Writes the cell to `editData.editObj`.
   if self.mode notin EditModes:
     return
 
   self.editData.editObj.assign SimulatorEditObj.init cell
 
-func `editCross=`*(self: var Simulator, cross: bool) {.inline, noinit.} =
+func `editCross=`*(self: var Simulator, cross: bool) =
   ## Writes the cell to `editData.editObj`.
   if self.mode notin EditModes:
     return
@@ -315,7 +313,7 @@ func `editCross=`*(self: var Simulator, cross: bool) {.inline, noinit.} =
 # Edit - Cursor
 # ------------------------------------------------
 
-func moveCursorUp*(self: var Simulator) {.inline, noinit.} =
+func moveCursorUp*(self: var Simulator) =
   ## Moves the cursor upward.
   if self.editData.focusField:
     if self.mode notin EditModes:
@@ -333,7 +331,7 @@ func moveCursorUp*(self: var Simulator) {.inline, noinit.} =
     else:
       self.editData.step.idx.dec
 
-func moveCursorDown*(self: var Simulator) {.inline, noinit.} =
+func moveCursorDown*(self: var Simulator) =
   ## Moves the cursor downward.
   if self.editData.focusField:
     if self.mode notin EditModes:
@@ -351,7 +349,7 @@ func moveCursorDown*(self: var Simulator) {.inline, noinit.} =
     else:
       self.editData.step.idx.inc
 
-func moveCursorRight*(self: var Simulator) {.inline, noinit.} =
+func moveCursorRight*(self: var Simulator) =
   ## Moves the cursor rightward.
   if self.editData.focusField:
     if self.mode notin EditModes:
@@ -370,7 +368,7 @@ func moveCursorRight*(self: var Simulator) {.inline, noinit.} =
       else:
         self.editData.step.col.incRot
 
-func moveCursorLeft*(self: var Simulator) {.inline, noinit.} =
+func moveCursorLeft*(self: var Simulator) =
   ## Moves the cursor leftward.
   if self.editData.focusField:
     if self.mode notin EditModes:
@@ -393,7 +391,7 @@ func moveCursorLeft*(self: var Simulator) {.inline, noinit.} =
 # Edit - Delete
 # ------------------------------------------------
 
-func deleteStep*(self: var Simulator, idx: int) {.inline, noinit.} =
+func deleteStep*(self: var Simulator, idx: int) =
   ## Deletes the step.
   if self.mode != EditorEdit:
     return
@@ -406,7 +404,7 @@ func deleteStep*(self: var Simulator, idx: int) {.inline, noinit.} =
       it.steps.delete idx
       self.editData.step.idx.assign min(self.editData.step.idx, it.steps.len)
 
-func deleteStep*(self: var Simulator) {.inline, noinit.} =
+func deleteStep*(self: var Simulator) =
   ## Deletes the step at selecting index.
   self.deleteStep self.editData.step.idx
 
@@ -414,7 +412,7 @@ func deleteStep*(self: var Simulator) {.inline, noinit.} =
 # Edit - Write
 # ------------------------------------------------
 
-func writeCell(self: var Simulator, row: Row, col: Col, cell: Cell) {.inline, noinit.} =
+func writeCell(self: var Simulator, row: Row, col: Col, cell: Cell) =
   ## Writes the cell to the field.
   if self.mode notin EditModes:
     return
@@ -429,7 +427,7 @@ func writeCell(self: var Simulator, row: Row, col: Col, cell: Cell) {.inline, no
       else:
         it.field[row, col] = cell
 
-func writeCell*(self: var Simulator, row: Row, col: Col) {.inline, noinit.} =
+func writeCell*(self: var Simulator, row: Row, col: Col) =
   ## Writes the selecting cell to the field.
   case self.editData.editObj.kind
   of EditCell:
@@ -437,9 +435,7 @@ func writeCell*(self: var Simulator, row: Row, col: Col) {.inline, noinit.} =
   of EditRotate:
     discard
 
-func writeCell(
-    self: var Simulator, idx: int, pivot: bool, cell: Cell
-) {.inline, noinit.} =
+func writeCell(self: var Simulator, idx: int, pivot: bool, cell: Cell) =
   ## Writes the cell to the step.
   const ZeroArr = initArrWith[Col, int](0)
 
@@ -493,9 +489,7 @@ func writeCell(
             of StepKind.Garbages, Rotate:
               it.steps[idx].assign Step.init Pair.init(cell, cell)
 
-func writeRotate(
-    self: var Simulator, idx: int, pivot: bool, cross: bool
-) {.inline, noinit.} =
+func writeRotate(self: var Simulator, idx: int, pivot: bool, cross: bool) =
   ## Writes the rotation to the step.
   if self.mode != EditorEdit:
     return
@@ -518,7 +512,7 @@ func writeRotate(
             self.editBlock:
               it.steps[idx].cross.toggle
 
-func writeCell*(self: var Simulator, idx: int, pivot: bool) {.inline, noinit.} =
+func writeCell*(self: var Simulator, idx: int, pivot: bool) =
   ## Writes the selecting cell to the step.
   case self.editData.editObj.kind
   of EditCell:
@@ -526,21 +520,21 @@ func writeCell*(self: var Simulator, idx: int, pivot: bool) {.inline, noinit.} =
   of EditRotate:
     self.writeRotate idx, pivot, self.editData.editObj.cross
 
-func writeCell*(self: var Simulator, cell: Cell) {.inline, noinit.} =
+func writeCell*(self: var Simulator, cell: Cell) =
   ## Writes the cell to the field or the step.
   if self.editData.focusField:
     self.writeCell self.editData.field.row, self.editData.field.col, cell
   else:
     self.writeCell self.editData.step.idx, self.editData.step.pivot, cell
 
-func writeRotate*(self: var Simulator, cross: bool) {.inline, noinit.} =
+func writeRotate*(self: var Simulator, cross: bool) =
   ## Writes the rotate to the field or the step.
   if self.editData.focusField:
     discard
   else:
     self.writeRotate self.editData.step.idx, self.editData.step.pivot, cross
 
-func writeCnt*(self: var Simulator, idx: int, col: Col, cnt: int) {.inline, noinit.} =
+func writeCnt*(self: var Simulator, idx: int, col: Col, cnt: int) =
   ## Writes the count to the step.
   if self.mode != EditorEdit:
     return
@@ -554,7 +548,7 @@ func writeCnt*(self: var Simulator, idx: int, col: Col, cnt: int) {.inline, noin
     self.editBlock:
       it.steps[idx].cnts[col].assign cnt
 
-func writeCnt*(self: var Simulator, cnt: int) {.inline, noinit.} =
+func writeCnt*(self: var Simulator, cnt: int) =
   ## Writes the count to the step.
   self.writeCnt self.editData.step.idx, self.editData.step.col, cnt
 
@@ -562,7 +556,7 @@ func writeCnt*(self: var Simulator, cnt: int) {.inline, noinit.} =
 # Edit - Shift
 # ------------------------------------------------
 
-func shiftFieldUp*(self: var Simulator) {.inline, noinit.} =
+func shiftFieldUp*(self: var Simulator) =
   ## Shifts the field upward.
   if self.mode != EditorEdit:
     return
@@ -571,7 +565,7 @@ func shiftFieldUp*(self: var Simulator) {.inline, noinit.} =
     unwrapNazoPuyo self.nazoPuyoWrap:
       it.field.shiftUp
 
-func shiftFieldDown*(self: var Simulator) {.inline, noinit.} =
+func shiftFieldDown*(self: var Simulator) =
   ## Shifts the field downward.
   if self.mode != EditorEdit:
     return
@@ -580,7 +574,7 @@ func shiftFieldDown*(self: var Simulator) {.inline, noinit.} =
     unwrapNazoPuyo self.nazoPuyoWrap:
       it.field.shiftDown
 
-func shiftFieldRight*(self: var Simulator) {.inline, noinit.} =
+func shiftFieldRight*(self: var Simulator) =
   ## Shifts the field rightward.
   if self.mode != EditorEdit:
     return
@@ -589,7 +583,7 @@ func shiftFieldRight*(self: var Simulator) {.inline, noinit.} =
     unwrapNazoPuyo self.nazoPuyoWrap:
       it.field.shiftRight
 
-func shiftFieldLeft*(self: var Simulator) {.inline, noinit.} =
+func shiftFieldLeft*(self: var Simulator) =
   ## Shifts the field leftward.
   if self.mode != EditorEdit:
     return
@@ -602,7 +596,7 @@ func shiftFieldLeft*(self: var Simulator) {.inline, noinit.} =
 # Edit - Flip
 # ------------------------------------------------
 
-func flipFieldVertical*(self: var Simulator) {.inline, noinit.} =
+func flipFieldVertical*(self: var Simulator) =
   ## Flips the field vertically.
   if self.mode != EditorEdit:
     return
@@ -611,7 +605,7 @@ func flipFieldVertical*(self: var Simulator) {.inline, noinit.} =
     unwrapNazoPuyo self.nazoPuyoWrap:
       it.field.flipVertical
 
-func flipFieldHorizontal*(self: var Simulator) {.inline, noinit.} =
+func flipFieldHorizontal*(self: var Simulator) =
   ## Flips the field horizontally.
   if self.mode != EditorEdit:
     return
@@ -620,7 +614,7 @@ func flipFieldHorizontal*(self: var Simulator) {.inline, noinit.} =
     unwrapNazoPuyo self.nazoPuyoWrap:
       it.field.flipHorizontal
 
-func flip*(self: var Simulator) {.inline, noinit.} =
+func flip*(self: var Simulator) =
   ## Flips the field or the step.
   if self.editData.focusField:
     self.flipFieldHorizontal
@@ -649,7 +643,7 @@ const
   DefaultColor = All
   DefaultVal = 0
 
-func `goalKind=`*(self: var Simulator, kind: GoalKind) {.inline, noinit.} =
+func `goalKind=`*(self: var Simulator, kind: GoalKind) =
   ## Sets the goal kind.
   if self.mode != EditorEdit:
     return
@@ -673,7 +667,7 @@ func `goalKind=`*(self: var Simulator, kind: GoalKind) {.inline, noinit.} =
       if self.nazoPuyoWrap.optGoal.unsafeValue.optVal.isOk:
         self.nazoPuyoWrap.optGoal.unsafeValue.optVal.err
 
-func `goalColor=`*(self: var Simulator, color: GoalColor) {.inline, noinit.} =
+func `goalColor=`*(self: var Simulator, color: GoalColor) =
   ## Sets the goal color.
   if self.mode != EditorEdit:
     return
@@ -687,7 +681,7 @@ func `goalColor=`*(self: var Simulator, color: GoalColor) {.inline, noinit.} =
   self.editBlock:
     self.nazoPuyoWrap.optGoal.unsafeValue.optColor.ok color
 
-func `goalVal=`*(self: var Simulator, val: GoalVal) {.inline, noinit.} =
+func `goalVal=`*(self: var Simulator, val: GoalVal) =
   ## Sets the goal value.
   if self.mode != EditorEdit:
     return
@@ -705,11 +699,11 @@ func `goalVal=`*(self: var Simulator, val: GoalVal) {.inline, noinit.} =
 # Edit - Other
 # ------------------------------------------------
 
-func toggleFocus*(self: var Simulator) {.inline, noinit.} =
+func toggleFocus*(self: var Simulator) =
   ## Toggles focusing field or not.
   self.editData.focusField.toggle
 
-func toggleInsert*(self: var Simulator) {.inline, noinit.} =
+func toggleInsert*(self: var Simulator) =
   ## Toggles inserting or not.
   self.editData.insert.toggle
 
@@ -717,19 +711,19 @@ func toggleInsert*(self: var Simulator) {.inline, noinit.} =
 # Play - Placement
 # ------------------------------------------------
 
-func movePlacementRight*(self: var Simulator) {.inline, noinit.} =
+func movePlacementRight*(self: var Simulator) =
   ## Moves the next placement right.
   self.operatingPlacement.moveRight
 
-func movePlacementLeft*(self: var Simulator) {.inline, noinit.} =
+func movePlacementLeft*(self: var Simulator) =
   ## Moves the next placement left.
   self.operatingPlacement.moveLeft
 
-func rotatePlacementRight*(self: var Simulator) {.inline, noinit.} =
+func rotatePlacementRight*(self: var Simulator) =
   ## Rotates the next placement right (clockwise).
   self.operatingPlacement.rotateRight
 
-func rotatePlacementLeft*(self: var Simulator) {.inline, noinit.} =
+func rotatePlacementLeft*(self: var Simulator) =
   ## Rotates the next placement left (counterclockwise).
   self.operatingPlacement.rotateLeft
 
@@ -737,9 +731,7 @@ func rotatePlacementLeft*(self: var Simulator) {.inline, noinit.} =
 # Forward / Backward
 # ------------------------------------------------
 
-func forwardApply(
-    self: var Simulator, replay = false, skip = false
-) {.inline, noinit.} =
+func forwardApply(self: var Simulator, replay = false, skip = false) =
   ## Forwards the simulator with `apply`.
   ## This functions requires that the initial field is settled.
   ## `skip` is prioritized over `replay`.
@@ -784,7 +776,7 @@ func forwardApply(
       self.operatingIdx.inc
       self.operatingPlacement.assign DefaultPlcmt
 
-func forwardPop(self: var Simulator) {.inline, noinit.} =
+func forwardPop(self: var Simulator) =
   ## Forwards the simulator with `pop`.
   self.prepareEdit(clearRedoDeque = self.mode in PlayModes)
 
@@ -817,7 +809,7 @@ func forwardPop(self: var Simulator) {.inline, noinit.} =
     else:
       self.state.assign WillSettle
 
-func forwardSettle(self: var Simulator) {.inline, noinit.} =
+func forwardSettle(self: var Simulator) =
   ## Forwards the simulator with `settle`.
   self.prepareEdit(clearRedoDeque = self.mode in PlayModes)
 
@@ -834,7 +826,7 @@ func forwardSettle(self: var Simulator) {.inline, noinit.} =
         self.operatingIdx.inc
         self.operatingPlacement.assign DefaultPlcmt
 
-func forward*(self: var Simulator, replay = false, skip = false) {.inline, noinit.} =
+func forward*(self: var Simulator, replay = false, skip = false) =
   ## Forwards the simulator.
   ## This functions requires that the initial field is settled.
   ## `skip` is prioritized over `replay`.
@@ -854,7 +846,7 @@ func forward*(self: var Simulator, replay = false, skip = false) {.inline, noini
       else:
         return
 
-func backward*(self: var Simulator, detail = false) {.inline, noinit.} =
+func backward*(self: var Simulator, detail = false) =
   ## Backwards the simulator.
   if self.undoDeque.len == 0:
     return
@@ -877,7 +869,7 @@ func backward*(self: var Simulator, detail = false) {.inline, noinit.} =
   if self.mode in PlayModes and self.state in {Stable, AfterEdit}:
     self.operatingPlacement.assign DefaultPlcmt
 
-func reset*(self: var Simulator) {.inline, noinit.} =
+func reset*(self: var Simulator) =
   ## Backwards the simulator to the pre-move state.
   unwrapNazoPuyo self.nazoPuyoWrap:
     let nowSteps = it.steps
@@ -890,7 +882,7 @@ func reset*(self: var Simulator) {.inline, noinit.} =
 # Mark
 # ------------------------------------------------
 
-func mark*(self: Simulator): Opt[MarkResult] {.inline, noinit.} =
+func mark*(self: Simulator): Opt[MarkResult] =
   ## Marks the steps in the Nazo Puyo in the simulator.
   if self.nazoPuyoWrap.optGoal.isErr:
     return err()
@@ -917,7 +909,7 @@ func mark*(self: Simulator): Opt[MarkResult] {.inline, noinit.} =
 # Keyboard
 # ------------------------------------------------
 
-func initDigitKeys(): seq[KeyEvent] {.inline, noinit.} =
+func initDigitKeys(): seq[KeyEvent] =
   ## Returns `DigitKeys`.
   collect:
     for c in '0' .. '9':
@@ -925,9 +917,7 @@ func initDigitKeys(): seq[KeyEvent] {.inline, noinit.} =
 
 const DigitKeys = initDigitKeys()
 
-func operate*(
-    self: var Simulator, key: KeyEvent
-): bool {.inline, noinit, discardable.} =
+func operate*(self: var Simulator, key: KeyEvent): bool {.discardable.} =
   ## Performs an action specified by the key.
   ## Returns `true` if the key is handled.
   var catched = true
@@ -1070,7 +1060,7 @@ const
     for mode in SimulatorMode:
       {$mode: mode}
 
-func initPon2Paths(): seq[string] {.inline, noinit.} =
+func initPon2Paths(): seq[string] =
   ## Returns `Pon2Paths`.
   var paths = @[Pon2Path]
 
@@ -1084,9 +1074,7 @@ func initPon2Paths(): seq[string] {.inline, noinit.} =
 
 const Pon2Paths = initPon2Paths()
 
-func toUri*(
-    self: Simulator, clearPlacements = false, fqdn = Pon2
-): Res[Uri] {.inline, noinit.} =
+func toUri*(self: Simulator, clearPlacements = false, fqdn = Pon2): Res[Uri] =
   ## Returns the URI converted from the simulator.
   var uri = initUri()
   uri.scheme = "https"
@@ -1121,7 +1109,7 @@ func toUri*(
 
   ok uri
 
-func parseSimulator*(uri: Uri): Res[Simulator] {.inline, noinit.} =
+func parseSimulator*(uri: Uri): Res[Simulator] =
   ## Returns the simulator converted from the URI.
   ## Viewer modes and play modes are set to the result simulator preferentially
   ## if the FQDN is `Ishikawa` or `Ips`.
@@ -1180,7 +1168,7 @@ func parseSimulator*(uri: Uri): Res[Simulator] {.inline, noinit.} =
 
 func toExportUri*(
     self: Simulator, viewer = true, clearPlacements = true, fqdn = Pon2
-): Res[Uri] {.inline, noinit.} =
+): Res[Uri] =
   ## Returns the URI of the simulator with any moves reset.
   var sim = self
 

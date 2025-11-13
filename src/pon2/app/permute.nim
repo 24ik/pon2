@@ -25,7 +25,7 @@ func allStepsSeq(
     fixIndices: openArray[int],
     allowDblNotLast, allowDblLast: bool,
     cellCnts: array[Cell, int],
-): seq[Steps] {.inline, noinit.} =
+): seq[Steps] =
   ## Returns all possible steps in ascending order that can be obtained by permuting
   ## puyos contained in the steps.
   ## Non-`PairPlacement` steps are left as they are.
@@ -85,7 +85,7 @@ func allStepsSeq(
 
 func allStepsSeq(
     steps: Steps, fixIndices: openArray[int], allowDblNotLast, allowDblLast: bool
-): seq[Steps] {.inline, noinit.} =
+): seq[Steps] =
   ## Returns all possible steps in ascending order that can be obtained by permuting
   ## puyos contained in the steps.
   ## Non-`PairPlacement` steps are left as they are.
@@ -103,7 +103,7 @@ func allStepsSeq(
 
 proc permute*[F: TsuField or WaterField](
     nazo: NazoPuyo[F], fixIndices: openArray[int], allowDblNotLast, allowDblLast: bool
-): seq[NazoPuyo[F]] {.inline, noinit.} =
+): seq[NazoPuyo[F]] =
   ## Returns a sequence of Nazo Puyos that is obtained by permuting steps and has a
   ## unique answer.
   collect:
@@ -132,7 +132,7 @@ when defined(js) or defined(nimsuggest):
         fixIndices: openArray[int],
         allowDblNotLast, allowDblLast: bool,
         progressRef: ref tuple[now, total: int] = nil,
-    ): Future[seq[NazoPuyo[F]]] {.inline, noinit, async.} =
+    ): Future[seq[NazoPuyo[F]]] {.async.} =
       ## Permutes the Nazo Puyo asynchronously with web workers.
       ## This function requires that the field is settled.
       let stepsSeq =

@@ -36,7 +36,7 @@ type
 # Constructor
 # ------------------------------------------------
 
-proc init*(T: type Studio, simulator: Simulator): T {.inline, noinit.} =
+proc init*(T: type Studio, simulator: Simulator): T =
   let progressRef = new tuple[now, total: int]
   progressRef[] = (0, 0)
 
@@ -50,54 +50,54 @@ proc init*(T: type Studio, simulator: Simulator): T {.inline, noinit.} =
     progressRef: progressRef,
   )
 
-proc init*(T: type Studio): T {.inline, noinit.} =
+proc init*(T: type Studio): T =
   T.init Simulator.init EditorEdit
 
 # ------------------------------------------------
 # Property - Getter
 # ------------------------------------------------
 
-func simulator*(self: Studio): Simulator {.inline, noinit.} =
+func simulator*(self: Studio): Simulator =
   ## Returns the simulator.
   self.simulator
 
-func simulator*(self: var Studio): var Simulator {.inline, noinit.} =
+func simulator*(self: var Studio): var Simulator =
   ## Returns the simulator.
   self.simulator
 
-func replaySimulator*(self: Studio): Simulator {.inline, noinit.} =
+func replaySimulator*(self: Studio): Simulator =
   ## Returns the replay simulator.
   self.replaySimulator
 
-func replaySimulator*(self: var Studio): var Simulator {.inline, noinit.} =
+func replaySimulator*(self: var Studio): var Simulator =
   ## Returns the replay simulator.
   self.replaySimulator
 
-func focusReplay*(self: Studio): bool {.inline, noinit.} =
+func focusReplay*(self: Studio): bool =
   ## Returns `true` if the replay simulator is focused.
   self.focusReplay
 
-func solving*(self: Studio): bool {.inline, noinit.} =
+func solving*(self: Studio): bool =
   ## Returns `true` if the studio is solving.
   self.solving
 
-func permuting*(self: Studio): bool {.inline, noinit.} =
+func permuting*(self: Studio): bool =
   ## Returns `true` if the studio is permuting.
   self.permuting
 
-func working*(self: Studio): bool {.inline, noinit.} =
+func working*(self: Studio): bool =
   ## Returns `true` if the studio is working.
   self.solving or self.permuting
 
-func replayStepsCnt*(self: Studio): int {.inline, noinit.} =
+func replayStepsCnt*(self: Studio): int =
   ## Returns the number of steps for the replay simulator.
   self.replayData.stepsSeq.len
 
-func replayStepsIdx*(self: Studio): int {.inline, noinit.} =
+func replayStepsIdx*(self: Studio): int =
   ## Returns the index of steps for the replay simulator.
   self.replayData.stepsIdx
 
-func progressRef*(self: Studio): ref tuple[now, total: int] {.inline, noinit.} =
+func progressRef*(self: Studio): ref tuple[now, total: int] =
   ## Returns the progress.
   self.progressRef
 
@@ -105,7 +105,7 @@ func progressRef*(self: Studio): ref tuple[now, total: int] {.inline, noinit.} =
 # Edit - Other
 # ------------------------------------------------
 
-func toggleFocus*(self: var Studio) {.inline, noinit.} =
+func toggleFocus*(self: var Studio) =
   ## Toggles focusing to replay simulator or not.
   if self.simulator.mode in EditorModes:
     self.focusReplay.toggle
@@ -114,7 +114,7 @@ func toggleFocus*(self: var Studio) {.inline, noinit.} =
 # Replay
 # ------------------------------------------------
 
-func nextReplay*(self: var Studio) {.inline, noinit.} =
+func nextReplay*(self: var Studio) =
   ## Shows the next answer.
   if self.simulator.mode notin EditorModes or self.replayData.stepsSeq.len == 0:
     return
@@ -131,7 +131,7 @@ func nextReplay*(self: var Studio) {.inline, noinit.} =
 
     self.replaySimulator.assign Simulator.init(nazo, Replay)
 
-func prevReplay*(self: var Studio) {.inline, noinit.} =
+func prevReplay*(self: var Studio) =
   ## Shows the previous answer.
   if self.simulator.mode notin EditorModes or self.replayData.stepsSeq.len == 0:
     return
@@ -152,7 +152,7 @@ func prevReplay*(self: var Studio) {.inline, noinit.} =
 # Solve
 # ------------------------------------------------
 
-func canWork(self: Studio): bool {.inline, noinit.} =
+func canWork(self: Studio): bool =
   ## Returns `true` if the studio is ready to work.
   if self.working:
     return false
@@ -168,9 +168,7 @@ func canWork(self: Studio): bool {.inline, noinit.} =
 
   true
 
-func workPostProcess[F: TsuField or WaterField](
-    self: var Studio, nazo: NazoPuyo[F]
-) {.inline, noinit.} =
+func workPostProcess[F: TsuField or WaterField](self: var Studio, nazo: NazoPuyo[F]) =
   ## Updates the replay simulator.
   if self.replayData.stepsSeq.len > 0:
     self.focusReplay.assign true
@@ -184,7 +182,7 @@ func workPostProcess[F: TsuField or WaterField](
 
 proc setAnswers[F: TsuField or WaterField](
     self: var Studio, originalNazo: NazoPuyo[F], answers: seq[SolveAnswer]
-) {.inline, noinit.} =
+) =
   ## Sets the answers.
   let stepsSeq = collect:
     for ans in answers:
@@ -197,7 +195,7 @@ proc setAnswers[F: TsuField or WaterField](
 
   self.replayData.stepsSeq.assign stepsSeq
 
-proc solve*(self: var Studio) {.inline, noinit.} =
+proc solve*(self: var Studio) =
   ## Solves the nazo puyo.
   ## This function requires that the field is settled.
   if not self.canWork:
@@ -214,7 +212,7 @@ proc solve*(self: var Studio) {.inline, noinit.} =
 
 when defined(js) or defined(nimsuggest):
   when not defined(pon2.build.worker):
-    proc asyncSolve*(self: ref Studio) {.inline, noinit.} =
+    proc asyncSolve*(self: ref Studio) =
       ## Solves the nazo puyo asynchronously with web workers.
       ## This function requires that the field is settled.
       if not self[].canWork:
@@ -246,7 +244,7 @@ when defined(js) or defined(nimsuggest):
 
 proc permute*(
     self: var Studio, fixIndices: openArray[int], allowDblNotLast, allowDblLast: bool
-) {.inline, noinit.} =
+) =
   ## Permutes the nazo puyo.
   ## This function requires that the field is settled.
   if not self.canWork:
@@ -269,7 +267,7 @@ when defined(js) or defined(nimsuggest):
         self: ref Studio,
         fixIndices: openArray[int],
         allowDblNotLast, allowDblLast: bool,
-    ) {.inline, noinit.} =
+    ) =
       ## Permutes the nazo puyo asynchronously with web workers.
       ## This function requires that the field is settled.
       if not self[].canWork:
@@ -300,7 +298,7 @@ when defined(js) or defined(nimsuggest):
 # Keyboard
 # ------------------------------------------------
 
-proc operate*(self: ref Studio, key: KeyEvent): bool {.inline, noinit, discardable.} =
+proc operate*(self: ref Studio, key: KeyEvent): bool {.discardable.} =
   ## Performs an action specified by the key.
   ## Returns `true` if the key is handled.
   if self[].simulator.mode in EditorModes:

@@ -17,9 +17,7 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
-  proc toStudioPaginationVNode*(
-      self: ref Studio, helper: VNodeHelper
-  ): VNode {.inline, noinit.} =
+  proc toStudioPaginationVNode*(self: ref Studio, helper: VNodeHelper): VNode =
     ## Returns the studio pagination node.
     let replayNum =
       if self[].replayStepsCnt == 0:
