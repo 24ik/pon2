@@ -21,7 +21,7 @@ when defined(js) or defined(nimsuggest):
 
   proc txtMsg[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
-  ): string {.inline, noinit.} =
+  ): string =
     ## Returns the text message.
     if self.derefSimulator(helper).nazoPuyoWrap.optGoal.isOk:
       $helper.simulator.markResultOpt.unsafeValue
@@ -35,13 +35,13 @@ when defined(js) or defined(nimsuggest):
 
   proc score[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
-  ): int {.inline, noinit.} =
+  ): int =
     ## Returns the score.
     self.derefSimulator(helper).moveResult.score.unsafeValue
 
   proc noticeGarbageCnts[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, score: int
-  ): array[NoticeGarbage, int] {.inline, noinit.} =
+  ): array[NoticeGarbage, int] =
     ## Returns the numbers of notice garbages.
     let originalNoticeGarbageCnts =
       score.noticeGarbageCnts(self.derefSimulator(helper).rule).unsafeValue
@@ -62,7 +62,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toMsgVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
-  ): VNode {.inline, noinit.} =
+  ): VNode =
     ## Returns the message node.
     let
       score = self.score helper

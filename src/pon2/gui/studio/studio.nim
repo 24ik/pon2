@@ -18,9 +18,7 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
-  proc toStudioVNode*(
-      self: ref Studio, helper, replayHelper: VNodeHelper
-  ): VNode {.inline, noinit.} =
+  proc toStudioVNode*(self: ref Studio, helper, replayHelper: VNodeHelper): VNode =
     ## Returns the studio node.
     buildHtml tdiv(class = "columns"):
       tdiv(class = "column is-narrow"):

@@ -14,9 +14,7 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../gui/[helper]
 
-  func derefSimulator*(
-      self: ref Simulator, helper: VNodeHelper
-  ): var Simulator {.inline, noinit.} =
+  func derefSimulator*(self: ref Simulator, helper: VNodeHelper): var Simulator =
     ## Dereferences the simulator.
     self[]
 
@@ -32,8 +30,6 @@ when defined(js) or defined(nimsuggest):
 
   {.push experimental: "views".}
 
-  proc derefSimulator*(
-      self: ref Marathon, helper: VNodeHelper
-  ): var Simulator {.inline, noinit.} =
+  proc derefSimulator*(self: ref Marathon, helper: VNodeHelper): var Simulator =
     ## Dereferences the simulator.
     self[].simulator

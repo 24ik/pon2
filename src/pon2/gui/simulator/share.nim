@@ -21,7 +21,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toXLink[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
-  ): Uri {.inline, noinit.} =
+  ): Uri =
     ## Returns the URI to post to X.
     var uri = initUri()
     uri.scheme = "https"
@@ -69,7 +69,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toShareVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
-  ): VNode {.inline, noinit.} =
+  ): VNode =
     ## Returns the share node.
     let
       noPlcmtsUriCopyBtn = buildHtml button(class = "button is-size-7"):

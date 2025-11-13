@@ -20,7 +20,7 @@ when defined(js) or defined(nimsuggest):
 
   proc cellBgColor[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, row: Row, col: Col, editable: bool
-  ): Color {.inline, noinit.} =
+  ): Color =
     ## Returns the cell's background color.
     if editable and not helper.mobile and self.derefSimulator(helper).editData.focusField and
         self.derefSimulator(helper).editData.field == (row, col):
@@ -42,7 +42,7 @@ when defined(js) or defined(nimsuggest):
 
   proc toFieldVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, cameraReady = false
-  ): VNode {.inline, noinit.} =
+  ): VNode =
     ## Returns the field node.
     let
       editable = not cameraReady and self.derefSimulator(helper).mode in EditModes

@@ -48,7 +48,7 @@ type
 
 func init*(
     T: type GenerateGoal, kind: GoalKind, color: GenerateGoalColor, val: GoalVal
-): T {.inline, noinit.} =
+): T =
   T(kind: kind, color: color, val: val)
 
 func init*(
@@ -62,7 +62,7 @@ func init*(
       tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int], lShape: Opt[int]],
     dropGarbagesIndices, dropHardsIndices, rotateIndices, crossRotateIndices: seq[int],
     allowDblNotLast, allowDblLast: bool,
-): T {.inline, noinit.} =
+): T =
   GenerateSettings(
     goal: goal,
     moveCnt: moveCnt,
@@ -83,16 +83,14 @@ func init*(
 # Split
 # ------------------------------------------------
 
-func round(rng: var Rand, x: float): int {.inline, noinit.} =
+func round(rng: var Rand, x: float): int =
   ## Probabilistic round function.
   ## For example, `rng.round(2.7)` becomes `2` with a 30% probability and
   ## `3` with a 70% probability.
   let floorX = x.int
   floorX + (rng.rand(1.0) < x - floorX.float).int
 
-func split(
-    rng: var Rand, total, chunkCnt: int, allowZeroChunk: bool
-): Res[seq[int]] {.inline, noinit.} =
+func split(rng: var Rand, total, chunkCnt: int, allowZeroChunk: bool): Res[seq[int]] =
   ## Splits the number `total` into `chunkCnt` chunks.
   if total < 0:
     return err "`total` cannot be negative"
@@ -128,9 +126,7 @@ func split(
       sepIndices[i.succ] - sepIndices[i]
   ok res
 
-func split(
-    rng: var Rand, total: int, weights: openArray[int]
-): Res[seq[int]] {.inline, noinit.} =
+func split(rng: var Rand, total: int, weights: openArray[int]): Res[seq[int]] =
   ## Splits the number `total` into chunks following the probability `weights`.
   ## If `weights` are all zero, splits randomly.
   ## Note that an infinite loop can occur.
@@ -165,9 +161,7 @@ func split(
 
   ok res
 
-func split(
-    rng: var Rand, total: int, positives: openArray[bool]
-): Res[seq[int]] {.inline, noinit.} =
+func split(rng: var Rand, total: int, positives: openArray[bool]): Res[seq[int]] =
   ## Splits the number `total` into chunks randomly.
   ## Elements of the result where `positives` are `true` are set to positive, and
   ## the others are set to zero.
@@ -202,7 +196,7 @@ func split(
 # Checker
 # ------------------------------------------------
 
-func isValid(self: GenerateSettings): Res[void] {.inline, noinit.} =
+func isValid(self: GenerateSettings): Res[void] =
   ## Returns `true` if the settings are valid.
   ## Note that this function is "weak" checker; a generation may be failed
   ## (entering infinite loop) even though this function returns `true`.
@@ -288,9 +282,7 @@ func isValid(self: GenerateSettings): Res[void] {.inline, noinit.} =
 # Puyo Puyo
 # ------------------------------------------------
 
-func generateGarbagesCnts(
-    rng: var Rand, total: int
-): array[Col, int] {.inline, noinit.} =
+func generateGarbagesCnts(rng: var Rand, total: int): array[Col, int] =
   ## Returns random garbage counts.
   let (baseCnt, diffCnt) = total.divmod Width
   var cnts = initArrWith[Col, int](baseCnt)
@@ -302,7 +294,7 @@ func generateGarbagesCnts(
 
 func generatePuyoPuyo[F: TsuField or WaterField](
     rng: var Rand, settings: GenerateSettings, useCells: seq[Cell]
-): Res[PuyoPuyo[F]] {.inline, noinit.} =
+): Res[PuyoPuyo[F]] =
   ## Returns a random Puyo Puyo.
   ## Note that an infinite loop can occur.
   ## This function requires the settings passes `isValid`.
@@ -459,7 +451,7 @@ const
 
 func generateGoal(
     rng: var Rand, settings: GenerateSettings, useCells: seq[Cell]
-): Goal {.inline, noinit.} =
+): Goal =
   ## Returns a random goal.
   var goal = Goal.init
   goal.kind.assign settings.goal.kind
@@ -488,7 +480,7 @@ func generateGoal(
 
 proc generate[F: TsuField or WaterField](
     rng: var Rand, settings: GenerateSettings
-): Res[NazoPuyo[F]] {.inline, noinit.} =
+): Res[NazoPuyo[F]] =
   ## Returns a random Nazo Puyo that has a unique solution.
   ?settings.isValid.context "Generation failed"
 
@@ -552,7 +544,7 @@ proc generate[F: TsuField or WaterField](
 
 proc generate*(
     rng: var Rand, settings: GenerateSettings, rule: Rule
-): Res[NazoPuyoWrap] {.inline, noinit.} =
+): Res[NazoPuyoWrap] =
   ## Returns a random Nazo Puyo that has a unique solution.
   case rule
   of Tsu:

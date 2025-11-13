@@ -20,9 +20,7 @@ when defined(js) or defined(nimsuggest):
 
   const CheckIntervalMs = 1000
 
-  func initCheckHandler(
-      self: ref Studio, interval: Interval
-  ): () -> void {.inline, noinit.} =
+  func initCheckHandler(self: ref Studio, interval: Interval): () -> void =
     ## Returns a handler to check the progress and redraw.
     () => (
       block:
@@ -32,7 +30,7 @@ when defined(js) or defined(nimsuggest):
         safeRedraw()
     )
 
-  proc runSolve(self: ref Studio) {.inline, noinit.} =
+  proc runSolve(self: ref Studio) =
     ## Solves the nazo puyo.
     ## This function requires that the field is settled.
     self.asyncSolve
@@ -42,7 +40,7 @@ when defined(js) or defined(nimsuggest):
     interval = setInterval(self.initCheckHandler interval, CheckIntervalMs)
     {.pop.}
 
-  proc runPermute(self: ref Studio, helper: VNodeHelper) {.inline, noinit.} =
+  proc runPermute(self: ref Studio, helper: VNodeHelper) =
     ## Permutes the nazo puyo.
     ## This function requires that the field is settled.
     let settings = helper.getStudioSetting
@@ -54,9 +52,7 @@ when defined(js) or defined(nimsuggest):
     interval = setInterval(self.initCheckHandler interval, CheckIntervalMs)
     {.pop.}
 
-  proc toStudioCtrlVNode*(
-      self: ref Studio, helper: VNodeHelper
-  ): VNode {.inline, noinit.} =
+  proc toStudioCtrlVNode*(self: ref Studio, helper: VNodeHelper): VNode =
     ## Returns the studio controller node.
     buildHtml tdiv:
       tdiv(class = "block"):
