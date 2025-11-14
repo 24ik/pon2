@@ -945,8 +945,6 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.discardable.} =
       self.forward
     elif key in static([KeyEvent.init 'x', KeyEvent.init 'w']):
       self.backward
-    elif key in static([KeyEvent.init 'X', KeyEvent.init 'W']):
-      self.backward(detail = true)
     elif key == static(KeyEvent.init 'z'):
       self.reset
     elif key == static(KeyEvent.init "Space"):
@@ -969,7 +967,7 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.discardable.} =
       of Water:
         self.`rule=` Tsu
     # toggle insert / focus
-    elif key == static(KeyEvent.init 'i'):
+    elif key == static(KeyEvent.init 'g'):
       self.toggleInsert
     elif key == static(KeyEvent.init "Tab"):
       self.toggleFocus
@@ -1022,15 +1020,13 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.discardable.} =
     # undo / redo
     elif key == static(KeyEvent.init 'Z'):
       self.undo
-    elif key == static(KeyEvent.init 'Y'):
+    elif key == static(KeyEvent.init 'X'):
       self.redo
     # forward / backward / reset
     elif key == static(KeyEvent.init 'c'):
       self.forward
     elif key == static(KeyEvent.init 'x'):
       self.backward
-    elif key == static(KeyEvent.init 'X'):
-      self.backward(detail = true)
     elif key == static(KeyEvent.init 'z'):
       self.reset
     else:
@@ -1039,9 +1035,7 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.discardable.} =
     # forward / backward / reset
     if key in static([KeyEvent.init 'x', KeyEvent.init 'w']):
       self.backward
-    elif key in static([KeyEvent.init 'X', KeyEvent.init 'W']):
-      self.backward(detail = true)
-    elif key == static(KeyEvent.init 'z'):
+    elif key in static([KeyEvent.init 'z', KeyEvent.init 'W']):
       self.reset
     elif key in static([KeyEvent.init 'c', KeyEvent.init 's']):
       self.forward(replay = true)

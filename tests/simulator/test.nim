@@ -1011,14 +1011,6 @@ pp|23"""
   check sim2.operate KeyEvent.init "Space"
   check sim1 == sim2
 
-  sim1.backward(detail = true)
-  check sim2.operate KeyEvent.init 'W'
-  check sim1 == sim2
-
-  sim1.backward(detail = true)
-  check sim2.operate KeyEvent.init 'X'
-  check sim1 == sim2
-
   sim1.backward
   check sim2.operate KeyEvent.init 'w'
   check sim1 == sim2
@@ -1039,7 +1031,7 @@ pp|23"""
   check sim1 == sim2
 
   sim1.toggleInsert
-  check sim2.operate KeyEvent.init 'i'
+  check sim2.operate KeyEvent.init 'g'
   check sim1 == sim2
 
   sim1.toggleFocus
@@ -1127,15 +1119,11 @@ pp|23"""
   check sim1 == sim2
 
   sim1.redo
-  check sim2.operate KeyEvent.init 'Y'
+  check sim2.operate KeyEvent.init 'X'
   check sim1 == sim2
 
   sim1.forward
   check sim2.operate KeyEvent.init 'c'
-  check sim1 == sim2
-
-  sim1.backward(detail = true)
-  check sim2.operate KeyEvent.init 'X'
   check sim1 == sim2
 
   sim1.backward
@@ -1162,16 +1150,12 @@ pp|23"""
   check sim4.operate KeyEvent.init 'c'
   check sim3 == sim4
 
-  sim3.forward(replay = true)
-  check sim4.operate KeyEvent.init 's'
-  check sim3 == sim4
-
-  sim3.backward(detail = true)
+  sim3.reset
   check sim4.operate KeyEvent.init 'W'
   check sim3 == sim4
 
-  sim3.backward(detail = true)
-  check sim4.operate KeyEvent.init 'X'
+  sim3.forward(replay = true)
+  check sim4.operate KeyEvent.init 's'
   check sim3 == sim4
 
   sim3.backward
