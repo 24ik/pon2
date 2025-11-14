@@ -21,7 +21,9 @@ func initArrayWith*[T](count: static int, val: T): array[count, T] {.inline, noi
     return arr
     {.pop.}
 
-func initArrayWith*[E: enum, T](t: typedesc[E], val: T): array[E, T] {.inline.} =
+func initArrayWith*[E: enum, T](
+    t: typedesc[E], val: T
+): array[E, T] {.inline, noinit.} =
   ## Returns the array with all elements the value.
   {.push warning[Uninit]: off.}
   var arr: array[E, T] # NOTE: `noinit` does not work if T has heap-allocated type
