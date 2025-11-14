@@ -137,19 +137,19 @@ func parseNazoPuyoWrap*(query: string, fqdn: SimulatorFqdn): Res[NazoPuyoWrap] =
   case fqdn
   of Pon2:
     let
-      isNazo = "goal=" in query
-      isTsu = "field={Tsu}_".fmt in query
+      isNazo = "goal" in query
+      isWater = "field={Water}_".fmt in query
 
-    if isTsu:
-      if isNazo:
-        ok NazoPuyoWrap.init ?parseNazoPuyo[TsuField](query, fqdn).context errMsg
-      else:
-        ok NazoPuyoWrap.init ?parsePuyoPuyo[TsuField](query, fqdn).context errMsg
-    else:
+    if isWater:
       if isNazo:
         ok NazoPuyoWrap.init ?parseNazoPuyo[WaterField](query, fqdn).context errMsg
       else:
         ok NazoPuyoWrap.init ?parsePuyoPuyo[WaterField](query, fqdn).context errMsg
+    else:
+      if isNazo:
+        ok NazoPuyoWrap.init ?parseNazoPuyo[TsuField](query, fqdn).context errMsg
+      else:
+        ok NazoPuyoWrap.init ?parsePuyoPuyo[TsuField](query, fqdn).context errMsg
   of Ishikawa, Ips:
     if "__" in query:
       ok NazoPuyoWrap.init ?parseNazoPuyo[TsuField](query, fqdn).context errMsg

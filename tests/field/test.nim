@@ -2320,3 +2320,7 @@ r.....
     check TsuField.init.toUriQuery(Ishikawa) == Res[string].ok ""
     check TsuField.init.toUriQuery(Ips) == Res[string].ok ""
     check WaterField.init.toUriQuery(Pon2) == Res[string].ok "w_~"
+
+  block: # empty query
+    check "".parseTsuField(Pon2) == Res[TsuField].ok TsuField.init
+    check "".parseWaterField(Pon2).isErr

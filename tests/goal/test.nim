@@ -145,3 +145,6 @@ block: # `$`, toUriQuery, parseGoal
     check goal.toUriQuery(Pon2) == Res[string].ok "15_4_-1"
     check goal.toUriQuery(Ishikawa).isErr
     check goal.toUriQuery(Ips).isErr
+
+  block: # empty query
+    check "".parseGoal(Pon2) == Res[Goal].ok Goal.init
