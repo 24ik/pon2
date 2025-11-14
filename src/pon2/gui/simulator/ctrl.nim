@@ -33,10 +33,11 @@ when defined(js) or defined(nimsuggest):
           style(StyleAttr.columnGap, "0.5em")
         else:
           style()
+      mode = self.derefSimulator(helper).mode
 
     buildHtml tdiv(class = "card", style = translucentStyle):
       tdiv(class = "card-content p-1"):
-        case self.derefSimulator(helper).mode
+        case mode
         of EditorEdit:
           tdiv(class = "field is-grouped is-grouped-centered", style = fieldStyle):
             tdiv(class = "control"):
@@ -50,7 +51,7 @@ when defined(js) or defined(nimsuggest):
                 text "Redo"
                 if not helper.mobile:
                   span(style = counterStyle):
-                    text "Sft+Y"
+                    text "Sft+X"
           tdiv(class = "field is-grouped is-grouped-centered", style = fieldStyle):
             tdiv(class = "control"):
               button(
@@ -89,7 +90,7 @@ when defined(js) or defined(nimsuggest):
                   italic(class = "fa-solid fa-indent")
                   if not helper.mobile:
                     span(style = counterStyle):
-                      text "I"
+                      text "G"
             tdiv(class = "control"):
               button(
                 class = "button",
@@ -151,7 +152,7 @@ when defined(js) or defined(nimsuggest):
                   italic(class = "fa-solid fa-backward-fast")
                   if not helper.mobile:
                     span(style = counterStyle):
-                      text "Z"
+                      text (if mode == ViewerEdit: "Z" else: "Sft+W").cstring
             tdiv(class = "control", style = fieldStyle):
               button(
                 class = "button", onclick = () => self.derefSimulator(helper).backward
@@ -160,7 +161,7 @@ when defined(js) or defined(nimsuggest):
                   italic(class = "fa-solid fa-backward-step")
                   if not helper.mobile:
                     span(style = counterStyle):
-                      text "X"
+                      text (if mode == ViewerEdit: "X" else: "W").cstring
             tdiv(class = "control", style = fieldStyle):
               button(
                 class = "button", onclick = () => self.derefSimulator(helper).forward
@@ -169,7 +170,7 @@ when defined(js) or defined(nimsuggest):
                   italic(class = "fa-solid fa-forward-step")
                   if not helper.mobile:
                     span(style = counterStyle):
-                      text "C"
+                      text (if mode == ViewerEdit: "C" else: "S").cstring
         of PlayModes:
           if helper.mobile:
             tdiv(class = "field is-grouped is-grouped-centered", style = fieldStyle):
