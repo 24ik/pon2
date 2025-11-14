@@ -270,6 +270,9 @@ func parseGoal*(query: string, fqdn: SimulatorFqdn): Res[Goal] {.inline, noinit.
 
   case fqdn
   of Pon2:
+    if query == "":
+      return ok Goal.init
+
     let strs = query.split QuerySep
     if strs.len != 3:
       return err "Invalid goal: {query}".fmt

@@ -1101,11 +1101,7 @@ func toUri*(self: Simulator, clearPlacements = false, fqdn = Pon2): Res[Uri] =
           step.optPlacement.err
   let wrapQuery =
     ?wrap.toUriQuery(fqdn).context "Simulator that does not support URI conversion"
-  uri.query =
-    if fqdn == Pon2 and self.mode != DefaultMode:
-      "{ModeKey}={self.mode}&{wrapQuery}".fmt
-    else:
-      wrapQuery
+  uri.query = if fqdn == Pon2: "{ModeKey}={self.mode}&{wrapQuery}".fmt else: wrapQuery
 
   ok uri
 

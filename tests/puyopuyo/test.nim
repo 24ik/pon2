@@ -266,6 +266,7 @@ rg|23"""
 
       queryPon2 = "field=t_r&steps"
       queryPon22 = "field=t_r&steps="
+      queryPon23 = "field=t_r"
       queryIshikawa = "1"
       queryIshikawa2 = "1_"
 
@@ -273,7 +274,7 @@ rg|23"""
     check puyoPuyo.toUriQuery(Ishikawa) == Res[string].ok queryIshikawa
     check puyoPuyo.toUriQuery(Ips) == Res[string].ok queryIshikawa
 
-    for query in [queryPon2, queryPon22]:
+    for query in [queryPon2, queryPon22, queryPon23]:
       check parsePuyoPuyo[TsuField](query, Pon2) == Res[PuyoPuyo[TsuField]].ok puyoPuyo
     for query in [queryIshikawa, queryIshikawa2]:
       check parsePuyoPuyo[TsuField](query, Ishikawa) ==
@@ -285,13 +286,15 @@ rg|23"""
       puyoPuyo = PuyoPuyo[TsuField].init(TsuField.init, [Step.init GreenBlue].toDeque2)
 
       queryPon2 = "field=t_&steps=gb"
+      queryPon22 = "steps=gb"
       queryIshikawa = "_q1"
 
     check puyoPuyo.toUriQuery(Pon2) == Res[string].ok queryPon2
     check puyoPuyo.toUriQuery(Ishikawa) == Res[string].ok queryIshikawa
     check puyoPuyo.toUriQuery(Ips) == Res[string].ok queryIshikawa
 
-    check parsePuyoPuyo[TsuField](queryPon2, Pon2) == Res[PuyoPuyo[TsuField]].ok puyoPuyo
+    for query in [queryPon2, queryPon22]:
+      check parsePuyoPuyo[TsuField](query, Pon2) == Res[PuyoPuyo[TsuField]].ok puyoPuyo
     check parsePuyoPuyo[TsuField](queryIshikawa, Ishikawa) ==
       Res[PuyoPuyo[TsuField]].ok puyoPuyo
     check parsePuyoPuyo[TsuField](queryIshikawa, Ips) ==
@@ -303,6 +306,10 @@ rg|23"""
 
       queryPon2 = "field=t_&steps"
       queryPon22 = "field=t_&steps="
+      queryPon23 = "field=t_"
+      queryPon24 = "steps"
+      queryPon25 = "steps="
+      queryPon26 = ""
       queryIshikawa = ""
       queryIshikawa2 = "_"
 
@@ -310,7 +317,7 @@ rg|23"""
     check puyoPuyo.toUriQuery(Ishikawa) == Res[string].ok queryIshikawa
     check puyoPuyo.toUriQuery(Ips) == Res[string].ok queryIshikawa
 
-    for query in [queryPon2, queryPon22]:
+    for query in [queryPon2, queryPon22, queryPon23, queryPon24, queryPon25, queryPon26]:
       check parsePuyoPuyo[TsuField](query, Pon2) == Res[PuyoPuyo[TsuField]].ok puyoPuyo
     for query in [queryIshikawa, queryIshikawa2]:
       check parsePuyoPuyo[TsuField](query, Ishikawa) ==

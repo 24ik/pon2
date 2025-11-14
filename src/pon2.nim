@@ -103,6 +103,10 @@ when isMainModule:
     # ------------------------------------------------
 
     when defined(pon2.build.worker):
+      # ------------------------------------------------
+      # JS - Main - Worker
+      # ------------------------------------------------
+
       proc task(args: seq[string]): Res[seq[string]] =
         let errMsg = "Invalid run args: {args}".fmt
 
@@ -210,22 +214,24 @@ when isMainModule:
       proc renderer(routerData: RouterData): VNode =
         ## Returns the root node.
         if not initialized:
-          if routerData.queryString == "":
-            globalStudioRef[] = Studio.init
-          else:
-            var uri = initUri()
-            uri.scheme.assign "https"
-            uri.hostname.assign $Pon2
-            uri.path.assign Pon2Path
+          var uri = initUri()
+          uri.scheme.assign "https"
+          uri.hostname.assign $Pon2
+          uri.path.assign Pon2Path
 
-            let routerQuery = $routerData.queryString
-            uri.query.assign routerQuery.substr(1, routerQuery.high)
-
-            let simRes = uri.parseSimulator
-            if simRes.isOk:
-              globalStudioRef[] = Studio.init simRes.unsafeValue
+          let rawQuery = $routerData.queryString
+          uri.query.assign (
+            if rawQuery in ["", "?"]:
+              "mode=ee&goal"
             else:
-              errMsg.assign simRes.error
+              rawQuery[1 ..^ 1]
+          )
+
+          let simRes = uri.parseSimulator
+          if simRes.isOk:
+            globalStudioRef[] = Studio.init simRes.unsafeValue
+          else:
+            errMsg.assign simRes.error
 
           initialized.assign true
 

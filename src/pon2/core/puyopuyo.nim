@@ -8,7 +8,7 @@
 
 import std/[strformat, typetraits, uri]
 import ./[cell, field, fqdn, moveresult, pair, placement, popresult, step]
-import ../private/[bitops3, macros2, strutils2, tables2]
+import ../private/[assign3, bitops3, macros2, strutils2, tables2]
 
 export results2
 
@@ -154,28 +154,33 @@ func parsePuyoPuyoPon2[F: TsuField or WaterField](
     of FieldKey:
       if fieldSet:
         return err "Invalid Puyo Puyo (multiple `{key}`): {query}".fmt
+      fieldSet.assign true
 
-      fieldSet = true
-      puyoPuyo.field =
+      # NOTE: somehow `assign` does not compile
+      puyoPuyo.field = (
         when F is TsuField:
           ?val.parseTsuField(Pon2).context "Invalid Puyo Puyo: {query}".fmt
         else:
           ?val.parseWaterField(Pon2).context "Invalid Puyo Puyo: {query}".fmt
+      )
     of StepsKey:
       if stepsSet:
         return err "Invalid Puyo Puyo (multiple `{key}`): {query}".fmt
+      stepsSet.assign true
 
-      stepsSet = true
-      puyoPuyo.steps = ?val.parseSteps(Pon2).context "Invalid Puyo Puyo: {query}".fmt
+      puyoPuyo.steps.assign ?val.parseSteps(Pon2).context "Invalid Puyo Puyo: {query}".fmt
     else:
       return err "Invalid Puyo Puyo (Invalid key: `{key}`): {query}".fmt
 
   if not fieldSet:
-    const FieldKey2 = FieldKey # strformat needs this
-    return err "Invalid Puyo Puyo (missing `{FieldKey2}`): {query}".fmt
+    when F is TsuField:
+      # NOTE: somehow `assign` does not compile
+      puyoPuyo.field =
+        ?"".parseTsuField(Pon2).context "Unexpected error (parsePuyoPuyoPon2)"
+    else:
+      return err "Invalid Puyo Puyo (missing key `field`)"
   if not stepsSet:
-    const StepsKey2 = StepsKey # strformat needs this
-    return err "Invalid Puyo Puyo (missing `{StepsKey2}`): {query}".fmt
+    puyoPuyo.steps.assign ?"".parseSteps(Pon2).context "Unexpected error (parsePuyoPuyoPon2)"
 
   ok puyoPuyo
 
@@ -190,7 +195,7 @@ func parsePuyoPuyoIshikawa[F: TsuField or WaterField](
   of 1:
     discard
   of 2:
-    steps = ?strs[1].parseSteps(Ishikawa).context "Invalid Puyo Puyo: {query}".fmt
+    steps.assign ?strs[1].parseSteps(Ishikawa).context "Invalid Puyo Puyo: {query}".fmt
   else:
     return err "Invalid Puyo Puyo: {query}".fmt
 

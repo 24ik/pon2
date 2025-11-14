@@ -876,6 +876,10 @@ func parseFieldPon2[F: TsuField or WaterField](
     query: string
 ): Res[F] {.inline, noinit.} =
   ## Returns the field converted from the URI query.
+  when F is TsuField:
+    if query == "":
+      return ok F.init
+
   let strs = query.split Pon2UriRuleFieldSep
   if strs.len != 2:
     return err "Invalid field: {query}".fmt

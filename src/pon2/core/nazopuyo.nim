@@ -256,18 +256,16 @@ func parseNazoPuyoPon2[F: TsuField or WaterField](
     of GoalKey:
       if goalSet:
         return err "Invalid Nazo Puyo (multiple `key`): {query}".fmt
+      goalSet.assign true
 
-      goalSet = true
-      nazoPuyo.goal = ?val.parseGoal(Pon2).context "Invalid Nazo Puyo: {query}".fmt
+      nazoPuyo.goal.assign ?val.parseGoal(Pon2).context "Invalid Nazo Puyo: {query}".fmt
     else:
       keyVals.add (key, val)
 
   if not goalSet:
-    const GoalKey2 = GoalKey # strformat needs this
-    return err "Invalid Nazo Puyo (missing `{GoalKey2}`): {query}".fmt
+    nazoPuyo.goal.assign ?"".parseGoal(Pon2).context "Unexpected error (parseNazoPuyoPon2)"
 
-  nazoPuyo.puyoPuyo =
-    ?parsePuyoPuyo[F](keyVals.encodeQuery, Pon2).context "Invalid Nazo Puyo: {query}".fmt
+  nazoPuyo.puyoPuyo.assign ?parsePuyoPuyo[F](keyVals.encodeQuery, Pon2).context "Invalid Nazo Puyo: {query}".fmt
 
   ok nazoPuyo
 
