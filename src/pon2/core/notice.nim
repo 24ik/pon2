@@ -14,9 +14,9 @@
 
 import std/[strformat]
 import ./[rule]
-import ../private/[assign3, results2]
+import ../private/[arrayops2, assign3, staticfor2]
 
-export notice, results2, rule
+export notice, rule
 
 type Notice* {.pure.} = enum
   ## Notice garbage puyo.
@@ -45,12 +45,16 @@ const NoticeUnits: array[Notice, int] = [1, 6, 30, 180, 360, 720, 1440]
 
 func noticeCnts*(
     score: int, rule: Rule, useComet = false
-): Res[array[Notice, int]] {.inline, noinit.} =
+): array[Notice, int] {.inline, noinit.} =
   ## Returns the number of notice garbage puyos.
-  if score < 0:
-    return err "`score` should be non-negative, but got {score}".fmt
-
   var cnts {.noinit.}: array[Notice, int]
+
+  if score < 0:
+    let posCnts = (-score).noticeCnts(rule, useComet)
+    staticFor(notice, Notice):
+      cnts[notice].assign -posCnts[notice]
+
+    return cnts
 
   let highestNotice: Notice
   if useComet:
@@ -66,6 +70,6 @@ func noticeCnts*(
       cnt = score2 div unit
 
     cnts[notice].assign cnt
-    score2.dec unit * cnt
+    score2.assign score2.pred unit * cnt
 
-  ok cnts
+  cnts

@@ -45,8 +45,7 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper, score: int
   ): array[Notice, int] =
     ## Returns the numbers of notice garbages.
-    let originalNoticeCnts =
-      score.noticeCnts(self.derefSimulator(helper).rule).unsafeValue
+    let originalNoticeCnts = score.noticeCnts(self.derefSimulator(helper).rule)
 
     var
       cnts = initArrWith[Notice, int](0)
