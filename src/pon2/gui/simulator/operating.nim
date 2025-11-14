@@ -16,6 +16,8 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui, results2]
 
+  export vdom
+
   proc toOperatingCellVNode[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, idx: int, col: Col
   ): VNode =

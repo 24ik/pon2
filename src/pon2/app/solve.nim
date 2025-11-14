@@ -8,8 +8,10 @@
 
 import std/[algorithm]
 import ../[core]
-import ../private/[core, macros2, utils]
+import ../private/[core, macros2]
 import ../private/app/[solve]
+
+export core
 
 when defined(js) or defined(nimsuggest):
   import std/[dom]
@@ -18,6 +20,8 @@ when defined(js) or defined(nimsuggest):
   when not defined(pon2.build.worker):
     import std/[asyncjs, jsconsole, sequtils, sugar]
     import ../private/[assign3, webworker]
+
+    export asyncjs
 
 when not defined(js):
   import std/[os, sequtils, sugar]

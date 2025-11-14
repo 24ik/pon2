@@ -18,7 +18,7 @@ import
   ../private/
     [arrayops2, assign3, deques2, results2, staticfor2, strutils2, tables2, utils]
 
-export deques2, results2, uri
+export core, nazopuyowrap, results2, uri
 
 type
   SimulatorMode* {.pure.} = enum

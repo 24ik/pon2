@@ -1,4 +1,4 @@
-## This module implements dereference functions used with helperes.
+## This module implements dereference functions used with helpers.
 ##
 
 {.push raises: [].}
@@ -13,6 +13,8 @@
 when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../gui/[helper]
+
+  export app
 
   func derefSimulator*(self: ref Simulator, helper: VNodeHelper): var Simulator =
     ## Dereferences the simulator.

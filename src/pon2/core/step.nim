@@ -10,7 +10,7 @@ import std/[bitops, sequtils, strformat, sugar]
 import ./[cell, common, fqdn, pair, placement]
 import ../private/[arrayops2, assign3, deques2, math2, results2, strutils2, tables2]
 
-export deques2, results2
+export deques2, pair, placement, results2
 
 type
   StepKind* {.pure.} = enum

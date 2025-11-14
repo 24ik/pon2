@@ -18,6 +18,8 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
+  export vdom
+
   proc toStudioVNode*(self: ref Studio, helper, replayHelper: VNodeHelper): VNode =
     ## Returns the studio node.
     buildHtml tdiv(class = "columns"):

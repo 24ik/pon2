@@ -17,6 +17,8 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui, tables2, utils]
 
+  export vdom
+
   const RuleDescs: array[Rule, string] = ["", "すいちゅう"]
 
   proc toXLink[S: Simulator or Studio or Marathon](

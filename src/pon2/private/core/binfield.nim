@@ -15,6 +15,8 @@ import std/[setutils]
 import ../[assign3, macros2, simd, staticfor2]
 import ../../core/[common, placement, rule]
 
+export common, placement
+
 when Sse42Available:
   import ./binfield/[xmm]
   export xmm

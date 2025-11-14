@@ -11,6 +11,8 @@ import ./[key, nazopuyowrap, simulator]
 import ../[core]
 import ../private/[arrayops2, assign3, critbits2, results2, strutils2, utils]
 
+export simulator
+
 type Marathon* = object ## Marathon manager.
   simulator: Simulator
 

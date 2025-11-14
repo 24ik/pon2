@@ -11,6 +11,8 @@ import ./[solve]
 import ../[core]
 import ../private/[assign3, staticfor2]
 
+export core
+
 when defined(js) or defined(nimsuggest):
   when not defined(pon2.build.worker):
     import std/[asyncjs]

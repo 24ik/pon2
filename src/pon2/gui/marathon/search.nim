@@ -16,6 +16,8 @@ when defined(js) or defined(nimsuggest):
   import ../[helper]
   import ../../[app]
 
+  export vdom
+
   proc toMarathonSearchVNode*(self: ref Marathon, helper: VNodeHelper): VNode =
     ## Returns the marathon search bar node.
     let rate =

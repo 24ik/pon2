@@ -11,7 +11,7 @@ import ./[nazopuyowrap, solve]
 import ../[core]
 import ../private/[arrayops2, assign3, deques2, math2, results2, staticfor2]
 
-export results2
+export nazopuyowrap, results2
 
 type
   GenerateGoalColor* {.pure.} = enum

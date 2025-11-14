@@ -14,7 +14,7 @@ import
     tables2,
   ]
 
-export results2
+export cell, common, moveresult, placement, popresult, results2, rule
 
 type
   TsuField* = distinct array[3, BinField] ## Puyo Puyo field for Tsu rule.

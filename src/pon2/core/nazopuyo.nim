@@ -11,7 +11,7 @@ import
   ./[cell, field, fqdn, goal, moveresult, pair, placement, popresult, puyopuyo, step]
 import ../private/[assign3, bitops3, core, macros2, results2, strutils2, tables2]
 
-export results2
+export goal, puyopuyo, results2
 
 type
   NazoPuyo*[F: TsuField or WaterField] = object ## Nazo Puyo.

@@ -16,7 +16,7 @@ import std/[strformat]
 import ./[rule]
 import ../private/[assign3, results2]
 
-export results2
+export notice, results2, rule
 
 type NoticeGarbage* {.pure.} = enum
   ## Notice garbage puyo.

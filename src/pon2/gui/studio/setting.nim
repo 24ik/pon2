@@ -21,6 +21,8 @@ when defined(js) or defined(nimsuggest):
   import ../[helper]
   import ../../[app]
 
+  export vdom
+
   const
     AllowDblNotLastIdPrefix = "pon2-studio-setting-dbl-"
     AllowDblLastIdPrefix = "pon2-studio-setting-lastdbl-"

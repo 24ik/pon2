@@ -10,7 +10,7 @@ import std/[strformat, sugar]
 import ./[common, fqdn]
 import ../private/[macros2, results2, tables2]
 
-export results2
+export common, results2
 
 type
   Dir* {.pure.} = enum

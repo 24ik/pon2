@@ -17,6 +17,8 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
+  export vdom
+
   const
     BtnCls = "button".cstring
     SelectBtnCls = "button is-primary is-selected".cstring

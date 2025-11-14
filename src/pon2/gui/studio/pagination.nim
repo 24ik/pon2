@@ -17,6 +17,8 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
+  export vdom
+
   proc toStudioPaginationVNode*(self: ref Studio, helper: VNodeHelper): VNode =
     ## Returns the studio pagination node.
     let replayNum =

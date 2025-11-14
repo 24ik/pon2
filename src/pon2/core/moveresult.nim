@@ -10,7 +10,7 @@ import std/[sequtils, strformat, sugar]
 import ./[cell, common, notice, rule]
 import ../private/[arrayops2, math2, results2, staticfor2]
 
-export results2
+export cell, notice, results2
 
 type MoveResult* = object ## Move result.
   chainCnt*: int
