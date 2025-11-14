@@ -13,16 +13,16 @@
 {.experimental: "views".}
 
 const
-  BmiLvl {.define: "pon2.bmi".} = 2
+  BmiLevel {.define: "pon2.bmi".} = 2
   ClmulUse {.define: "pon2.clmul".} = true
 
 static:
-  doAssert BmiLvl in 0 .. 2
+  doAssert BmiLevel in 0 .. 2
 
 const
   X86_64 = defined(amd64) or defined(i386)
-  Bmi1Available* = BmiLvl >= 1 and X86_64
-  Bmi2Available* = BmiLvl >= 2 and X86_64
+  Bmi1Available* = BmiLevel >= 1 and X86_64
+  Bmi2Available* = BmiLevel >= 2 and X86_64
   ClmulAvailable* = ClmulUse and X86_64
 
 import std/[bitops, typetraits]
@@ -217,9 +217,9 @@ func `*~`*[T: SomeSignedInt](x1, x2: T): T {.inline, noinit.} =
 
 func toMaskNim[T: SomeUnsignedInt](slice: Slice[int]): T {.inline, noinit.} =
   ## Returns the mask converted from the slice.
-  const MsbIdx = (T.sizeof shl 3).pred
+  const MsbIndex = (T.sizeof shl 3).pred
 
-  (T.high shr (MsbIdx - slice.b)) and (T.high shl slice.a)
+  (T.high shr (MsbIndex - slice.b)) and (T.high shl slice.a)
 
 when Bmi2Available:
   func toMaskImpl64(slice: Slice[int]): uint64 {.inline, noinit.} =
@@ -413,19 +413,19 @@ func tzcnt*[T: SomeSignedInt](val: T): int {.inline, noinit.} =
 # ------------------------------------------------
 
 const
-  BitCnt64 = 6
-  BitCnt32 = 5
-  BitCnt16 = 4
+  BitCount64 = 6
+  BitCount32 = 5
+  BitCount16 = 4
 
 type PextMaskNim[T: uint64 or uint32 or uint16] = object ## Mask used by PEXT.
   mask: T
   bits: array[
     when T is uint64:
-      BitCnt64
+      BitCount64
     elif T is uint32:
-      BitCnt32
+      BitCount32
     else:
-      BitCnt16,
+      BitCount16,
     T,
   ]
 
@@ -435,21 +435,21 @@ func initPureNim[T: uint64 or uint32 or uint16](
   ## Returns the PEXT mask.
   ## This function works on any context.
   const
-    BitCnt =
+    BitCount =
       when T is uint64:
-        BitCnt64
+        BitCount64
       elif T is uint32:
-        BitCnt32
+        BitCount32
       else:
-        BitCnt16
-    ZeroArr = BitCnt.initArrayWith 0.T
+        BitCount16
+    ZeroArray = BitCount.initArrayWith 0.T
 
   var
-    pextMask = M(mask: mask, bits: ZeroArr)
+    pextMask = M(mask: mask, bits: ZeroArray)
     lastMask = not mask
-  staticFor(i, 0 ..< BitCnt.pred):
+  staticFor(i, 0 ..< BitCount.pred):
     var bit = lastMask shl 1
-    staticFor(j, 0 ..< BitCnt):
+    staticFor(j, 0 ..< BitCount):
       bit.assign bit xor (bit shl (1 shl j))
 
     pextMask.bits[i].assign bit
@@ -460,22 +460,22 @@ func initPureNim[T: uint64 or uint32 or uint16](
   pextMask
 
 when ClmulAvailable:
-  func initIntrinNim[T: uint64 or uint32 or uint16](
+  func initIntrinsicNim[T: uint64 or uint32 or uint16](
       M: type PextMaskNim[T], mask: T
   ): M {.inline, noinit.} =
     ## Returns the PEXT mask.
     ## This function uses SSE2 and CLMUL.
     const
-      BitCnt =
+      BitCount =
         when T is uint64:
-          BitCnt64
+          BitCount64
         elif T is uint32:
-          BitCnt32
+          BitCount32
         else:
-          BitCnt16
-      ZeroArr = BitCnt.initArrayWith 0.T
+          BitCount16
+      ZeroArray = BitCount.initArrayWith 0.T
 
-    var pextMask = M(mask: mask, bits: ZeroArr)
+    var pextMask = M(mask: mask, bits: ZeroArray)
     when T is uint64:
       var mask2 = (not mask).mm_cvtsi64_si128
       let neg2 = (-2).mm_cvtsi64_si128
@@ -518,7 +518,7 @@ func initNim[T: uint64 or uint32 or uint16](
     M.initPureNim mask
   else:
     when ClmulAvailable:
-      M.initIntrinNim mask
+      M.initIntrinsicNim mask
     else:
       M.initPureNim mask
 
@@ -527,17 +527,17 @@ func pextNim[T: uint64 or uint32 or uint16](
 ): T {.inline, noinit.} =
   ## Parallel bits extract.
   ## This function is suitable for multiple PEXT callings with the same mask.
-  const BitCnt =
+  const BitCount =
     when T is uint64:
-      BitCnt64
+      BitCount64
     elif T is uint32:
-      BitCnt32
+      BitCount32
     else:
-      BitCnt16
+      BitCount16
 
   var res = a and mask.mask
 
-  staticFor(i, 0 ..< BitCnt):
+  staticFor(i, 0 ..< BitCount):
     let bit = mask.bits[i]
     res.assign (res *~ bit) or ((res and bit) shr (1 shl i))
 

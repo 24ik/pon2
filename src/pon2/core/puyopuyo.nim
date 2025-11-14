@@ -8,7 +8,7 @@
 
 import std/[strformat, typetraits, uri]
 import ./[cell, field, fqdn, moveresult, pair, placement, popresult, step]
-import ../private/[assign, bitops3, macros2, strutils2, tables2]
+import ../private/[assign, bitutils, macros2, strutils2, tables2]
 
 export field, moveresult, results2, step
 
