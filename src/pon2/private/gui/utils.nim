@@ -102,19 +102,19 @@ when defined(js) or defined(nimsuggest):
 
     "{AssetsDir}/puyo/{stem}.png".fmt.cstring
 
-  func noticeGarbageImgSrc*(notice: NoticeGarbage): cstring =
+  func noticeImgSrc*(notice: Notice): cstring =
     ## Returns the image source of notice garbages.
     let stem =
       case notice
       of Small: "small"
-      of Big: "big"
+      of Large: "large"
       of Rock: "rock"
       of Star: "star"
       of Moon: "moon"
       of Crown: "crown"
       of Comet: "comet"
 
-    "{AssetsDir}/noticegarbage/{stem}.png".fmt.cstring
+    "{AssetsDir}/notice/{stem}.png".fmt.cstring
   {.pop.}
 
   # ------------------------------------------------

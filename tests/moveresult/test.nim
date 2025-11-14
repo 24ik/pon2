@@ -5,7 +5,7 @@
 
 import std/[unittest]
 import ../../src/pon2/core/[cell, moveresult, notice, rule]
-import ../../src/pon2/private/[arrayops2]
+import ../../src/pon2/private/[arrayops2, results2]
 
 let
   chainCnt = 3
@@ -159,9 +159,10 @@ block: # score
 # Notice Garbage
 # ------------------------------------------------
 
-block: # noticeGarbageCnts
-  check moveRes1.noticeGarbageCnts(Tsu).isErr
-  check moveRes2.noticeGarbageCnts(Tsu) == scoreAns.noticeGarbageCnts Tsu
+block: # noticeCnts
+  check moveRes1.noticeCnts(Tsu).isErr
+  check moveRes2.noticeCnts(Tsu) == Res[array[Notice, int]].ok scoreAns.noticeCnts Tsu
 
-  check moveRes1.noticeGarbageCnts(Water).isErr
-  check moveRes2.noticeGarbageCnts(Water) == scoreAns.noticeGarbageCnts Water
+  check moveRes1.noticeCnts(Water).isErr
+  check moveRes2.noticeCnts(Water) ==
+    Res[array[Notice, int]].ok scoreAns.noticeCnts Water

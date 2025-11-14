@@ -233,10 +233,10 @@ func score*(self: MoveResult): Res[int] {.inline, noinit.} =
 # Notice Garbage
 # ------------------------------------------------
 
-func noticeGarbageCnts*(
+func noticeCnts*(
     self: MoveResult, rule: Rule, useComet = false
-): Res[array[NoticeGarbage, int]] {.inline, noinit.} =
+): Res[array[Notice, int]] {.inline, noinit.} =
   ## Returns the number of notice garbages.
-  (?self.score.context "`noticeGarbageCnts` not supported: {self}".fmt).noticeGarbageCnts(
-    rule, useComet
-  )
+  Res[array[Notice, int]].ok (
+    ?self.score.context "`noticeCnts` not supported: {self}".fmt
+  ).noticeCnts(rule, useComet)
