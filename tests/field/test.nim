@@ -7,7 +7,7 @@ import std/[sequtils, sugar, unittest]
 import
   ../../src/pon2/core/
     [cell, common, field, fqdn, moveresult, pair, placement, popresult, rule, step]
-import ../../src/pon2/private/[assign3, arrayops2, strutils2]
+import ../../src/pon2/private/[assign3, arrayutils, strutils2]
 import ../../src/pon2/private/core/[binfield]
 
 proc toBinField(str: string): BinField =

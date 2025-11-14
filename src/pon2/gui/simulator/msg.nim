@@ -14,7 +14,7 @@ when defined(js) or defined(nimsuggest):
   import karax/[karaxdsl, vdom]
   import ../[helper]
   import ../../[app]
-  import ../../private/[arrayops2, assign3, gui, math2]
+  import ../../private/[arrayutils, assign3, gui, math2]
 
   export vdom
 
@@ -48,7 +48,7 @@ when defined(js) or defined(nimsuggest):
     let originalNoticeCnts = score.noticeCnts(self.derefSimulator(helper).rule)
 
     var
-      cnts = initArrWith[Notice, int](0)
+      cnts = Notice.initArrayWith 0
       totalCnt = 0
     for notice in countdown(Comet, Small):
       cnts[notice].assign originalNoticeCnts[notice]

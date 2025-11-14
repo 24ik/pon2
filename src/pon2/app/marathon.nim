@@ -9,7 +9,7 @@
 import std/[sequtils, sugar, random]
 import ./[key, nazopuyowrap, simulator]
 import ../[core]
-import ../private/[arrayops2, assign3, critbits2, results2, strutils2, utils]
+import ../private/[arrayutils, assign3, critbits2, results2, strutils2, utils]
 
 export simulator
 
@@ -87,8 +87,8 @@ func allQueryCnt*(self: Marathon): int =
 func swappedPrefixes(prefix: string): seq[string] =
   ## Returns all prefixes with all pairs swapped.
   var
-    lastIndices = initArrWith(6, 0) # AB, AC, AD, BC, BD, CD
-    cnts = initArrWith(10, 0) # AB, AC, AD, BC, BD, CD, AA, BB, CC, DD
+    lastIndices = 6.initArrayWith 0 # AB, AC, AD, BC, BD, CD
+    cnts = 10.initArrayWith 0 # AB, AC, AD, BC, BD, CD, AA, BB, CC, DD
   for charIdx in countup(0, prefix.len.pred, 2):
     case prefix[charIdx .. charIdx.succ]
     of "AB", "BA":

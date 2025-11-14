@@ -5,7 +5,7 @@
 
 import std/[unittest]
 import ../../src/pon2/core/[cell, moveresult, notice, rule]
-import ../../src/pon2/private/[arrayops2, results2]
+import ../../src/pon2/private/[arrayutils, results2]
 
 let
   chainCnt = 3

@@ -8,7 +8,7 @@
 
 import std/[sequtils]
 import ./[cell, common]
-import ../private/[arrayops2, assign3, core, staticfor2, unionfind]
+import ../private/[arrayutils, assign3, core, staticfor2, unionfind]
 
 export cell
 
@@ -98,7 +98,8 @@ func connCnts(self: BinField): seq[int] {.inline, noinit.} =
   let arr = self.toArr
 
   var
-    ccIdxArr = static(initArrWith(Height + 2, initArrWith(Width + 2, DefaultCcIdx)))
+    ccIdxArr =
+      static((Height.succ 2).initArrayWith (Width.succ 2).initArrayWith DefaultCcIdx)
     uf = static(UnionFind.init Height * Width)
     nextCcIdx = DefaultCcIdx.succ
 

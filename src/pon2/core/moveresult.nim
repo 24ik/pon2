@@ -8,7 +8,7 @@
 
 import std/[sequtils, strformat, sugar]
 import ./[cell, common, notice, rule]
-import ../private/[arrayops2, math2, results2, staticfor2]
+import ../private/[arrayutils, math2, results2, staticfor2]
 
 export cell, notice, results2
 
@@ -63,9 +63,9 @@ func init*(
     T: type MoveResult, includeFullPopCnts: static bool = false
 ): T {.inline, noinit.} =
   when includeFullPopCnts:
-    T.init(0, static(initArrWith[Cell, int](0)), 0, @[], @[], @[])
+    T.init(0, static(Cell.initArrayWith 0), 0, @[], @[], @[])
   else:
-    T.init(0, static(initArrWith[Cell, int](0)), 0, @[], @[])
+    T.init(0, static(Cell.initArrayWith 0), 0, @[], @[])
 
 # ------------------------------------------------
 # Count

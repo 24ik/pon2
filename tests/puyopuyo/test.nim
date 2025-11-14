@@ -9,7 +9,7 @@ import
     cell, common, field, fqdn, moveresult, pair, placement, popresult, puyopuyo, rule,
     step,
   ]
-import ../../src/pon2/private/[assign3, arrayops2, strutils2]
+import ../../src/pon2/private/[assign3, arrayutils, strutils2]
 import ../../src/pon2/private/core/[binfield]
 
 # ------------------------------------------------

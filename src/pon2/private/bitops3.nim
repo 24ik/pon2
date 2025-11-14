@@ -27,7 +27,7 @@ const
 
 import std/[bitops, typetraits]
 import stew/[bitops2]
-import ./[arrayops2, assign3, staticfor2]
+import ./[arrayutils, assign3, staticfor2]
 
 export bitops, bitops2
 
@@ -442,7 +442,7 @@ func initPureNim[T: uint64 or uint32 or uint16](
         BitCnt32
       else:
         BitCnt16
-    ZeroArr = BitCnt.initArrWith 0.T
+    ZeroArr = BitCnt.initArrayWith 0.T
 
   var
     pextMask = M(mask: mask, bits: ZeroArr)
@@ -473,7 +473,7 @@ when ClmulAvailable:
           BitCnt32
         else:
           BitCnt16
-      ZeroArr = BitCnt.initArrWith 0.T
+      ZeroArr = BitCnt.initArrayWith 0.T
 
     var pextMask = M(mask: mask, bits: ZeroArr)
     when T is uint64:

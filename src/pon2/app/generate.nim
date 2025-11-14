@@ -9,7 +9,7 @@
 import std/[algorithm, random, sequtils, sets, sugar]
 import ./[nazopuyowrap, solve]
 import ../[core]
-import ../private/[arrayops2, assign3, deques2, math2, results2, staticfor2]
+import ../private/[arrayutils, assign3, deques2, math2, results2, staticfor2]
 
 export nazopuyowrap, results2
 
@@ -285,7 +285,7 @@ func isValid(self: GenerateSettings): Res[void] =
 func generateGarbagesCnts(rng: var Rand, total: int): array[Col, int] =
   ## Returns random garbage counts.
   let (baseCnt, diffCnt) = total.divmod Width
-  var cnts = initArrWith[Col, int](baseCnt)
+  var cnts = Col.initArrayWith baseCnt
 
   for colOrd, diff in rng.split(diffCnt, Width, allowZeroChunk = true).unsafeValue:
     cnts[Col.low.succ colOrd].inc diff
@@ -423,7 +423,7 @@ func generatePuyoPuyo[F: TsuField or WaterField](
 
   # field
   var
-    fieldArr = initArrWith[Row, array[Col, Cell]](initArrWith[Col, Cell](None))
+    fieldArr = Row.initArrayWith Col.initArrayWith None
     cellIdx = 0
   staticFor(col, Col):
     for i in 0 ..< cellCntsInField[col.ord]:

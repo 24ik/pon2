@@ -12,9 +12,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat]
 import ./[rule]
-import ../private/[arrayops2, assign3, staticfor2]
+import ../private/[assign3, staticfor2]
 
 export notice, rule
 

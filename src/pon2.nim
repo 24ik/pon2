@@ -256,7 +256,7 @@ when isMainModule:
   when not defined(js):
     import std/[random, sequtils, strformat, sugar, uri]
     import cligen
-    import ./pon2/private/[arrayops2, assign3, browsers2, strutils2]
+    import ./pon2/private/[arrayutils, assign3, browsers2, strutils2]
 
     # ------------------------------------------------
     # Native - Solve
@@ -439,14 +439,14 @@ when isMainModule:
         heightWeights: Opt[array[Col, int]]
         heightPositives: Opt[array[Col, bool]]
       if heights.allIt it.isDigit:
-        var weights = initArrWith[Col, int](0)
+        var weights = Col.initArrayWith 0
         for col in Col:
           weights[col].assign ($heights[col.ord]).parseIntRes.unsafeValue
 
         heightWeights = Opt[array[Col, int]].ok weights
         heightPositives = Opt[array[Col, bool]].err
       else:
-        var positives = initArrWith[Col, bool](false)
+        var positives = Col.initArrayWith false
         for col in Col:
           positives[col].assign heights[col.ord] != '0'
 

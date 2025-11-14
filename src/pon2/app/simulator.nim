@@ -16,7 +16,7 @@ import ./[key, nazopuyowrap]
 import ../[core]
 import
   ../private/
-    [arrayops2, assign3, deques2, results2, staticfor2, strutils2, tables2, utils]
+    [arrayutils, assign3, deques2, results2, staticfor2, strutils2, tables2, utils]
 
 export core, nazopuyowrap, results2, uri
 
@@ -437,7 +437,7 @@ func writeCell*(self: var Simulator, row: Row, col: Col) =
 
 func writeCell(self: var Simulator, idx: int, pivot: bool, cell: Cell) =
   ## Writes the cell to the step.
-  const ZeroArr = initArrWith[Col, int](0)
+  const ZeroArr = Col.initArrayWith 0
 
   if self.mode != EditorEdit:
     return

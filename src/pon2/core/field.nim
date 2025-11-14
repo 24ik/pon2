@@ -10,7 +10,7 @@ import std/[sequtils, strformat, sugar, typetraits]
 import ./[cell, common, fqdn, moveresult, pair, placement, popresult, rule, step]
 import
   ../private/[
-    arrayops2, assign3, bitops3, core, macros2, math2, results2, staticfor2, strutils2,
+    arrayutils, assign3, bitops3, core, macros2, math2, results2, staticfor2, strutils2,
     tables2,
   ]
 
@@ -565,7 +565,7 @@ template moveImpl[F: TsuField or WaterField](
   ## This function requires that the field is settled.
   var
     chainCnt = 0
-    popCnts = static(initArrWith[Cell, int](0))
+    popCnts = static(Cell.initArrayWith 0)
     hardToGarbageCnt = 0
     detailPopCnts = newSeqOfCap[array[Cell, int]](MaxChainCnt)
     detailHardToGarbageCnt = newSeqOfCap[int](MaxChainCnt)
@@ -956,7 +956,7 @@ func parseTsuFieldIshikawa(query: string): Res[TsuField] {.inline, noinit.} =
       return err "Invalid field: {query}".fmt
 
     let firstRow = (Height - strs.len).Row
-    var arr = static(initArrWith[Row, array[Col, Cell]](initArrWith[Col, Cell](None)))
+    var arr = static(Row.initArrayWith Col.initArrayWith None)
     for rowIdx, str in strs:
       for colIdx, c in str:
         arr[firstRow.succ rowIdx][Col.low.succ colIdx].assign ?TildeIshikawaCharToCell
