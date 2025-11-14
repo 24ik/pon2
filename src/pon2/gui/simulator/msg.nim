@@ -19,7 +19,7 @@ when defined(js) or defined(nimsuggest):
   export vdom
 
 when defined(js) or defined(nimsuggest):
-  const ShowNoticeGarbageCnt = 6
+  const ShowNoticeCnt = 6
 
   proc txtMsg[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
@@ -41,23 +41,21 @@ when defined(js) or defined(nimsuggest):
     ## Returns the score.
     self.derefSimulator(helper).moveResult.score.unsafeValue
 
-  proc noticeGarbageCnts[S: Simulator or Studio or Marathon](
+  proc noticeCnts[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, score: int
-  ): array[NoticeGarbage, int] =
+  ): array[Notice, int] =
     ## Returns the numbers of notice garbages.
-    let originalNoticeGarbageCnts =
-      score.noticeGarbageCnts(self.derefSimulator(helper).rule).unsafeValue
+    let originalNoticeCnts =
+      score.noticeCnts(self.derefSimulator(helper).rule).unsafeValue
 
     var
-      cnts = initArrWith[NoticeGarbage, int](0)
+      cnts = initArrWith[Notice, int](0)
       totalCnt = 0
     for notice in countdown(Comet, Small):
-      cnts[notice].assign originalNoticeGarbageCnts[notice]
-      totalCnt.inc min(
-        originalNoticeGarbageCnts[notice], ShowNoticeGarbageCnt - totalCnt
-      )
+      cnts[notice].assign originalNoticeCnts[notice]
+      totalCnt.inc min(originalNoticeCnts[notice], ShowNoticeCnt - totalCnt)
 
-      if totalCnt >= ShowNoticeGarbageCnt:
+      if totalCnt >= ShowNoticeCnt:
         break
 
     cnts
@@ -68,7 +66,7 @@ when defined(js) or defined(nimsuggest):
     ## Returns the message node.
     let
       score = self.score helper
-      noticeGarbageCnts = self.noticeGarbageCnts(helper, score)
+      noticeCnts = self.noticeCnts(helper, score)
 
     buildHtml tdiv:
       if self.derefSimulator(helper).nazoPuyoWrap.optGoal.isErr:
@@ -76,12 +74,12 @@ when defined(js) or defined(nimsuggest):
           tbody:
             tr:
               for notice in countdown(Comet, Small):
-                for _ in 1 .. noticeGarbageCnts[notice]:
+                for _ in 1 .. noticeCnts[notice]:
                   td:
                     figure(class = "image is-16x16"):
-                      img(src = notice.noticeGarbageImgSrc)
+                      img(src = notice.noticeImgSrc)
 
-              for _ in 1 .. ShowNoticeGarbageCnt - noticeGarbageCnts.sum2:
+              for _ in 1 .. ShowNoticeCnt - noticeCnts.sum2:
                 td:
                   figure(class = "image is-16x16"):
                     img(src = Cell.None.cellImgSrc)

@@ -18,10 +18,10 @@ import ../private/[assign3, results2]
 
 export notice, results2, rule
 
-type NoticeGarbage* {.pure.} = enum
+type Notice* {.pure.} = enum
   ## Notice garbage puyo.
   Small
-  Big
+  Large
   Rock
   Star
   Moon
@@ -41,18 +41,18 @@ static:
 # Notice Garbage
 # ------------------------------------------------
 
-const NoticeUnits: array[NoticeGarbage, int] = [1, 6, 30, 180, 360, 720, 1440]
+const NoticeUnits: array[Notice, int] = [1, 6, 30, 180, 360, 720, 1440]
 
-func noticeGarbageCnts*(
+func noticeCnts*(
     score: int, rule: Rule, useComet = false
-): Res[array[NoticeGarbage, int]] {.inline, noinit.} =
+): Res[array[Notice, int]] {.inline, noinit.} =
   ## Returns the number of notice garbage puyos.
   if score < 0:
     return err "`score` should be non-negative, but got {score}".fmt
 
-  var cnts {.noinit.}: array[NoticeGarbage, int]
+  var cnts {.noinit.}: array[Notice, int]
 
-  let highestNotice: NoticeGarbage
+  let highestNotice: Notice
   if useComet:
     highestNotice = Comet
   else:
@@ -60,7 +60,7 @@ func noticeGarbageCnts*(
     cnts[Comet].assign 0
 
   var score2 = score div GarbageRates[rule]
-  for notice in countdown(highestNotice, NoticeGarbage.low):
+  for notice in countdown(highestNotice, Notice.low):
     let
       unit = NoticeUnits[notice]
       cnt = score2 div unit
