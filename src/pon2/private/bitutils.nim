@@ -486,7 +486,7 @@ when ClmulAvailable:
       var mask2 = (not mask).uint32.mm_cvtsi32_si128
       let neg2 = (-2).mm_cvtsi32_si128
 
-    staticFor(i, 0 ..< BitCnt.pred):
+    staticFor(i, 0 ..< BitCount.pred):
       let bit = mm_clmulepi64_si128(mask2, neg2, 0)
       pextMask.bits[i].assign(
         when T is uint64:

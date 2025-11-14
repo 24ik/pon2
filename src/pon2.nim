@@ -256,7 +256,7 @@ when isMainModule:
   when not defined(js):
     import std/[random, sequtils, strformat, sugar, uri]
     import cligen
-    import ./pon2/private/[arrayutils, assign, browsers2, strutils2]
+    import ./pon2/private/[arrayutils, assign, browsers, strutils2]
 
     # ------------------------------------------------
     # Native - Solve
