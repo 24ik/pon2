@@ -9,7 +9,7 @@
 import std/[browsers, uri]
 import ./[results2]
 
-export browsers
+export browsers, results2
 
 proc openDefaultBrowser*(uri: Uri): Res[void] {.inline, noinit.} =
   ## Opens the default web browser with the given URI.

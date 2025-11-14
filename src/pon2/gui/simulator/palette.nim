@@ -17,6 +17,8 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
+  export vdom
+
   const Shortcuts: array[Cell, cstring] = [
     "Space".cstring, "P".cstring, "O".cstring, "H".cstring, "J".cstring, "K".cstring,
     "L".cstring, ";".cstring,

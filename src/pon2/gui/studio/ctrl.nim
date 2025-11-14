@@ -18,6 +18,8 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
+  export vdom
+
   const CheckIntervalMs = 1000
 
   func initCheckHandler(self: ref Studio, interval: Interval): () -> void =

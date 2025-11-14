@@ -16,6 +16,8 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[arrayops2, assign3, gui, math2]
 
+  export vdom
+
 when defined(js) or defined(nimsuggest):
   const ShowNoticeGarbageCnt = 6
 

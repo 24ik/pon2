@@ -11,6 +11,8 @@ import ./[key, nazopuyowrap, permute, simulator, solve]
 import ../[core]
 import ../private/[assign3, utils]
 
+export simulator
+
 when defined(js) or defined(nimsuggest):
   when not defined(pon2.build.worker):
     import std/[jsconsole]

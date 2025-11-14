@@ -19,6 +19,11 @@ when defined(js) or defined(nimsuggest):
   import ../[assign3, utils]
   import ../../[app]
 
+export chroma
+
+when defined(js) or defined(nimsuggest):
+  export vstyles
+
 const
   AssetsDir* {.define: "pon2.assets".} = "../assets"
 

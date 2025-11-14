@@ -10,6 +10,8 @@ import std/[sequtils]
 import ./[cell, common]
 import ../private/[arrayops2, assign3, core, staticfor2, unionfind]
 
+export cell
+
 type PopResult* = object ## Pop Results.
   red: BinField
   green: BinField

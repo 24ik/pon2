@@ -14,6 +14,8 @@ when defined(js) or defined(nimsuggest):
   import std/[strformat, sugar]
   import ../../private/[results2, strutils2]
 
+  export core, results2
+
 type SolveNode*[F: TsuField or WaterField] = object ## Node of solutions search tree.
   depth: int
 

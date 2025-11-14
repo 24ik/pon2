@@ -15,11 +15,6 @@ when defined(js) or defined(nimsuggest):
 
   export asyncjs, jsffi
 
-when not defined(js):
-  import chronos
-
-  export chronos
-
 func toggle*(b: var bool) {.inline, noinit.} =
   ## Toggles the bool variable.
   b.assign not b

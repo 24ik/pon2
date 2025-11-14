@@ -17,6 +17,8 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
+  export vdom
+
   proc toMarathonCtrlVNode*(self: ref Marathon, helper: VNodeHelper): VNode =
     ## Returns the marathon controller node.
     buildHtml tdiv:

@@ -10,7 +10,7 @@ import std/[strformat]
 import ../[core]
 import ../private/[assign3, macros2, results2, strutils2]
 
-export results2
+export core, results2
 
 type NazoPuyoWrap* = object ## Nazo puyo wrapper.
   optGoal*: Opt[Goal]

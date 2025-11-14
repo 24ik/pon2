@@ -18,6 +18,8 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
+  export vdom
+
   proc toSimulatorVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
   ): VNode =

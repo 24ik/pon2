@@ -18,6 +18,8 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui, utils]
 
+  export vdom
+
   const
     CellCls = "button p-0".cstring
     SelectCellCls = "button p-0 is-primary".cstring
