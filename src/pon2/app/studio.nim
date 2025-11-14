@@ -9,7 +9,7 @@
 import std/[deques, sequtils, sugar]
 import ./[key, nazopuyowrap, permute, simulator, solve]
 import ../[core]
-import ../private/[assign3, utils]
+import ../private/[assign, utils]
 
 export simulator
 

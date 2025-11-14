@@ -71,7 +71,7 @@ when isMainModule:
         import std/[asyncjs, jsfetch, random]
         import ./pon2/private/[strutils2]
       else:
-        import ./pon2/private/[assign3]
+        import ./pon2/private/[assign]
 
     # ------------------------------------------------
     # JS - Utils
@@ -256,7 +256,7 @@ when isMainModule:
   when not defined(js):
     import std/[random, sequtils, strformat, sugar, uri]
     import cligen
-    import ./pon2/private/[arrayutils, assign3, browsers2, strutils2]
+    import ./pon2/private/[arrayutils, assign, browsers2, strutils2]
 
     # ------------------------------------------------
     # Native - Solve

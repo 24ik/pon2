@@ -6,7 +6,7 @@
 import std/[importutils, unittest]
 import ../../src/pon2/[core]
 import ../../src/pon2/app/[key, nazopuyowrap, simulator, studio]
-import ../../src/pon2/private/[assign3]
+import ../../src/pon2/private/[assign]
 
 func `==`(progressRef1, progressRef2: ref tuple[now, total: int]): bool =
   progressRef1[] == progressRef2[]

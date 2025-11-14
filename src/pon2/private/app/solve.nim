@@ -8,7 +8,7 @@
 
 import std/[sequtils, typetraits]
 import ../../[core]
-import ../../private/[assign3, core, macros2, math2, staticfor2]
+import ../../private/[assign, core, macros2, math2, staticfor2]
 
 when defined(js) or defined(nimsuggest):
   import std/[strformat, sugar]

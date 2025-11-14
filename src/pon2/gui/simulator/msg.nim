@@ -14,7 +14,7 @@ when defined(js) or defined(nimsuggest):
   import karax/[karaxdsl, vdom]
   import ../[helper]
   import ../../[app]
-  import ../../private/[arrayutils, assign3, gui, math2]
+  import ../../private/[arrayutils, assign, gui, math2]
 
   export vdom
 

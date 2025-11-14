@@ -7,7 +7,7 @@
 {.experimental: "views".}
 
 import std/[math]
-import ./[assign3, staticfor2]
+import ./[assign, staticfor2]
 
 export math
 

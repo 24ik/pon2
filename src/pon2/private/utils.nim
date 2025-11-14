@@ -7,7 +7,7 @@
 {.experimental: "views".}
 
 import std/[algorithm, sequtils, typetraits]
-import ./[assign3]
+import ./[assign]
 
 when defined(js) or defined(nimsuggest):
   import std/[asyncjs, dom, jsffi, jsre, sugar]

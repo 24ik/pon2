@@ -12,7 +12,7 @@
 {.experimental: "views".}
 
 import std/[asyncjs, jsffi, sequtils, strformat, sugar]
-import ./[assign3, deques2, results2, strutils2, utils]
+import ./[assign, deques2, results2, strutils2, utils]
 
 when not defined(pon2.build.worker):
   import ./[math2]

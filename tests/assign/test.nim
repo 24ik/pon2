@@ -4,7 +4,7 @@
 {.experimental: "views".}
 
 import std/[sugar, unittest]
-import ../../src/pon2/private/[assign3]
+import ../../src/pon2/private/[assign]
 
 block: # regular type
   let

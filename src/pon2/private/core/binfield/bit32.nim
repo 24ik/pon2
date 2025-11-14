@@ -7,7 +7,7 @@
 {.experimental: "views".}
 
 import std/[sugar]
-import ../../[assign3, bitops3, macros2, staticfor2]
+import ../../[assign, bitops3, macros2, staticfor2]
 import ../../../core/[common, rule]
 
 type Bit32BinField* = array[3, uint32] ## Binary field with 32bit operations.

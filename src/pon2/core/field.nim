@@ -10,7 +10,7 @@ import std/[sequtils, strformat, sugar, typetraits]
 import ./[cell, common, fqdn, moveresult, pair, placement, popresult, rule, step]
 import
   ../private/[
-    arrayutils, assign3, bitops3, core, macros2, math2, results2, staticfor2, strutils2,
+    arrayutils, assign, bitops3, core, macros2, math2, results2, staticfor2, strutils2,
     tables2,
   ]
 

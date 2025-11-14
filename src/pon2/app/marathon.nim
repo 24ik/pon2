@@ -9,7 +9,7 @@
 import std/[sequtils, sugar, random]
 import ./[key, nazopuyowrap, simulator]
 import ../[core]
-import ../private/[arrayutils, assign3, critbits2, results2, strutils2, utils]
+import ../private/[arrayutils, assign, critbits2, results2, strutils2, utils]
 
 export simulator
 

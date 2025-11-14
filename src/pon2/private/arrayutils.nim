@@ -6,7 +6,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./[assign3]
+import ./[assign]
 
 func initArrayWith*[T](count: static int, val: T): array[count, T] {.inline, noinit.} =
   ## Returns the array with all elements the value.

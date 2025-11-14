@@ -19,7 +19,7 @@ when defined(js) or defined(nimsuggest):
 
   when not defined(pon2.build.worker):
     import std/[asyncjs, jsconsole, sequtils, sugar]
-    import ../private/[assign3, webworker]
+    import ../private/[assign, webworker]
 
     export asyncjs
 

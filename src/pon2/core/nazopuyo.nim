@@ -9,7 +9,7 @@
 import std/[strformat, typetraits, uri]
 import
   ./[cell, field, fqdn, goal, moveresult, pair, placement, popresult, puyopuyo, step]
-import ../private/[assign3, bitops3, core, macros2, results2, strutils2, tables2]
+import ../private/[assign, bitops3, core, macros2, results2, strutils2, tables2]
 
 export goal, puyopuyo, results2
 

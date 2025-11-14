@@ -4,7 +4,7 @@
 {.experimental: "views".}
 
 import std/[sequtils, sugar, unittest]
-import ../../src/pon2/private/[assign3, strutils2]
+import ../../src/pon2/private/[assign, strutils2]
 import ../../src/pon2/private/core/[binfield]
 import ../../src/pon2/core/[common, placement, rule]
 

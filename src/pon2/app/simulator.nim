@@ -16,7 +16,7 @@ import ./[key, nazopuyowrap]
 import ../[core]
 import
   ../private/
-    [arrayutils, assign3, deques2, results2, staticfor2, strutils2, tables2, utils]
+    [arrayutils, assign, deques2, results2, staticfor2, strutils2, tables2, utils]
 
 export core, nazopuyowrap, results2, uri
 

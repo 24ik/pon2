@@ -9,7 +9,7 @@
 import std/[sequtils, sugar]
 import ./[solve]
 import ../[core]
-import ../private/[assign3, staticfor2]
+import ../private/[assign, staticfor2]
 
 export core
 

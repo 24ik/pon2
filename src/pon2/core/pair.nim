@@ -8,7 +8,7 @@
 
 import std/[strformat, sugar]
 import ./[cell, fqdn]
-import ../private/[assign3, results2, tables2]
+import ../private/[assign, results2, tables2]
 
 export cell, results2
 
