@@ -9,7 +9,8 @@
 import std/[sequtils, sugar, random]
 import ./[key, nazopuyowrap, simulator]
 import ../[core]
-import ../private/[arrayutils, assign, critbits, results2, strutils, utils]
+import
+  ../private/[algorithm, arrayutils, assign, critbits, results2, setutils, strutils]
 
 export simulator
 
@@ -182,7 +183,7 @@ func initReplaceDataSeqArr(): array[4, seq[seq[(string, string)]]] =
 
 const
   ReplaceDataSeqArr = initReplaceDataSeqArr()
-  ReplaceNeedKeysArr = ["a".toSet2, "ab".toSet2, "abc".toSet2, "abcd".toSet2]
+  ReplaceNeedKeysArr = ["a".toSet, "ab".toSet, "abc".toSet, "abcd".toSet]
 
 func match*(self: var Marathon, prefix: string) =
   ## Searches queries that have specified prefixes and sets them to the marathon
@@ -194,7 +195,7 @@ func match*(self: var Marathon, prefix: string) =
     self.matchQueries.setLen 0
     return
 
-  let chars = prefix.toSet2
+  let chars = prefix.toSet
   if chars in ReplaceNeedKeysArr:
     if prefix.len mod 2 == 1:
       return

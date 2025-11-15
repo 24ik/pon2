@@ -6,8 +6,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, typetraits]
-import ./[algorithm, assign]
+import ./[assign]
 
 when defined(js) or defined(nimsuggest):
   import std/[asyncjs, dom, jsffi, jsre, sugar]
@@ -33,14 +32,6 @@ func rotateDec*[T: Ordinal](x: var T) {.inline, noinit.} =
     x.assign T.high
   else:
     x.dec
-
-template toSet2*(iter: untyped): untyped =
-  ## Converts the iterable to a built-in set type.
-  var res: set[iter.elementType] = {}
-  for e in iter:
-    res.incl e
-
-  res
 
 when defined(js) or defined(nimsuggest):
   proc sleep*(ms: int): Future[void] {.inline, noinit.} =

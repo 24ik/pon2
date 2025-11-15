@@ -24,6 +24,3 @@ block: # rotateInc, rotateDec
 
   x.rotateDec
   check x == int.high
-
-block: # toSet2
-  check ['a', 'b', 'c'].toSet2 == {'a', 'b', 'c'}
