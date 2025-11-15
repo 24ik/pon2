@@ -8,7 +8,7 @@
 
 import std/[bitops, sequtils, strformat, sugar]
 import ./[cell, common, fqdn, pair, placement]
-import ../private/[arrayutils, assign, deques, math2, results2, strutils2, tables2]
+import ../private/[arrayutils, assign, deques, math, results2, strutils2, tables2]
 
 export deques, pair, placement, results2
 
@@ -101,7 +101,7 @@ func cellCnt*(self: Step, cell: Cell): int {.inline, noinit.} =
     self.pair.cellCnt cell
   of Garbages:
     if (cell == Hard and self.dropHard) or (cell == Garbage and not self.dropHard):
-      self.cnts.sum2
+      self.cnts.sum
     else:
       0
   of Rotate:
@@ -111,7 +111,7 @@ func puyoCnt*(self: Step): int {.inline, noinit.} =
   ## Returns the number of puyos in the step.
   case self.kind
   of PairPlacement: 2
-  of Garbages: self.cnts.sum2
+  of Garbages: self.cnts.sum
   of Rotate: 0
 
 func colorPuyoCnt*(self: Step): int {.inline, noinit.} =
@@ -125,24 +125,24 @@ func garbagesCnt*(self: Step): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos in the step.
   case self.kind
   of PairPlacement: 0
-  of Garbages: self.cnts.sum2
+  of Garbages: self.cnts.sum
   of Rotate: 0
 
 func cellCnt*(steps: Steps, cell: Cell): int {.inline, noinit.} =
   ## Returns the number of `cell` in the steps.
-  sum2 steps.mapIt it.cellCnt cell
+  sum steps.mapIt it.cellCnt cell
 
 func puyoCnt*(steps: Steps): int {.inline, noinit.} =
   ## Returns the number of puyos in the steps.
-  sum2 steps.mapIt it.puyoCnt
+  sum steps.mapIt it.puyoCnt
 
 func colorPuyoCnt*(steps: Steps): int {.inline, noinit.} =
   ## Returns the number of color puyos in the steps.
-  sum2 steps.mapIt it.colorPuyoCnt
+  sum steps.mapIt it.colorPuyoCnt
 
 func garbagesCnt*(steps: Steps): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos in the steps.
-  sum2 steps.mapIt it.garbagesCnt
+  sum steps.mapIt it.garbagesCnt
 
 # ------------------------------------------------
 # Step <-> string
@@ -250,8 +250,7 @@ func toUriQuery*(self: Step, fqdn = Pon2): Res[string] {.inline, noinit.} =
 
       let
         diffs = self.cnts.mapIt it - maxGarbageCnt + 1
-        diffVal =
-          sum2 (0 ..< Width).toSeq.mapIt diffs[it] * 2 ^ (Width - it - 1).Natural
+        diffVal = sum (0 ..< Width).toSeq.mapIt diffs[it] * 2 ^ (Width - it - 1).Natural
 
       ok MaxGarbageToIshikawaUri[maxGarbageCnt] & IshikawaUriNumbers[diffVal]
   of Rotate:

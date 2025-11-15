@@ -14,7 +14,7 @@ when defined(js) or defined(nimsuggest):
   import karax/[karaxdsl, vdom]
   import ../[helper]
   import ../../[app]
-  import ../../private/[arrayutils, assign, gui, math2]
+  import ../../private/[arrayutils, assign, gui, math]
 
   export vdom
 
@@ -78,7 +78,7 @@ when defined(js) or defined(nimsuggest):
                     figure(class = "image is-16x16"):
                       img(src = notice.noticeImgSrc)
 
-              for _ in 1 .. ShowNoticeCnt - noticeCnts.sum2:
+              for _ in 1 .. ShowNoticeCnt - noticeCnts.sum:
                 td:
                   figure(class = "image is-16x16"):
                     img(src = Cell.None.cellImgSrc)

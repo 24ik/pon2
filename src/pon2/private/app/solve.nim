@@ -8,7 +8,7 @@
 
 import std/[sequtils, typetraits]
 import ../../[core]
-import ../../private/[assign, core, macros, math2, staticfor2]
+import ../../private/[assign, core, macros, math, staticfor2]
 
 when defined(js) or defined(nimsuggest):
   import std/[strformat, sugar]
@@ -240,9 +240,9 @@ func isAccepted[F: TsuField or WaterField](
       let fieldCnt = staticCase:
         case color
         of All:
-          self.fieldCnts.sum2
+          self.fieldCnts.sum
         of Colors:
-          self.fieldCnts.sum2 Cell.Red .. Cell.Purple
+          self.fieldCnts.sum Cell.Red .. Cell.Purple
         of GoalColor.Garbages:
           self.fieldCnts[Hard] + self.fieldCnts[Garbage]
         else:
@@ -367,14 +367,14 @@ func canPrune[F: TsuField or WaterField](
     of Clear:
       false
     of AccColor, AccColorMore:
-      let possibleVal = sum2It[Cell, int](Cell.Red .. Cell.Purple):
+      let possibleVal = sumIt[Cell, int](Cell.Red .. Cell.Purple):
         (self.cellCnt(it) >= 4).int
       possibleVal < goal.optVal.unsafeValue
     of AccCnt, AccCntMore, Cnt, CntMore, Conn, ConnMore:
       let nowPossibleCnt = staticCase:
         case color
         of All, Colors, GoalColor.Garbages:
-          let colorPossibleCnt = sum2It[Cell, int](Cell.Red .. Cell.Purple):
+          let colorPossibleCnt = sumIt[Cell, int](Cell.Red .. Cell.Purple):
             self.cellCnt(it).filter4
           staticCase:
             case color
@@ -400,18 +400,18 @@ func canPrune[F: TsuField or WaterField](
 
       possibleCnt < goal.optVal.unsafeValue
     of Chain, ChainMore, ClearChain, ClearChainMore:
-      let possibleChain = sum2It[Cell, int](Cell.Red .. Cell.Purple):
+      let possibleChain = sumIt[Cell, int](Cell.Red .. Cell.Purple):
         self.cellCnt(it) div 4
       possibleChain < goal.optVal.unsafeValue
     of Color, ColorMore:
-      let possibleColorCnt = sum2It[Cell, int](Cell.Red .. Cell.Purple):
+      let possibleColorCnt = sumIt[Cell, int](Cell.Red .. Cell.Purple):
         (self.cellCnt(it) >= 4).int
       possibleColorCnt < goal.optVal.unsafeValue
     of Place, PlaceMore:
       let possiblePlace = staticCase:
         case color
         of All, Colors:
-          sum2It[Cell, int](Cell.Red .. Cell.Purple):
+          sumIt[Cell, int](Cell.Red .. Cell.Purple):
             self.cellCnt(it) div 4
         of GoalColor.Garbages:
           0 # dummy

@@ -8,7 +8,7 @@
 
 import std/[sequtils, strformat, sugar]
 import ./[cell, common, notice, rule]
-import ../private/[arrayutils, math2, results2, staticfor2]
+import ../private/[arrayutils, math, results2, staticfor2]
 
 export cell, notice, results2
 
@@ -81,7 +81,7 @@ func cellCnt*(self: MoveResult, cell: Cell): int {.inline, noinit.} =
 
 func puyoCnt*(self: MoveResult): int {.inline, noinit.} =
   ## Returns the number of cells that popped.
-  self.popCnts.sum2
+  self.popCnts.sum
 
 func colorPuyoCnt*(self: MoveResult): int {.inline, noinit.} =
   ## Returns the number of color puyos that popped.
@@ -97,7 +97,7 @@ func cellCnts*(self: MoveResult, cell: Cell): seq[int] {.inline, noinit.} =
 
 func puyoCnts*(self: MoveResult): seq[int] {.inline, noinit.} =
   ## Returns a sequence of the number of puyos that popped in each chain.
-  self.detailPopCnts.mapIt it.sum2
+  self.detailPopCnts.mapIt it.sum
 
 func colorPuyoCnts*(self: MoveResult): seq[int] {.inline, noinit.} =
   ## Returns a sequence of the number of color puyos that popped in each chain.
@@ -196,7 +196,7 @@ const
 
 func connBonus(cnts: seq[int]): int {.inline, noinit.} =
   ## Returns the connect bonus.
-  sum2 cnts.mapIt ConnBonuses[it]
+  sum cnts.mapIt ConnBonuses[it]
 
 func score*(self: MoveResult): Res[int] {.inline, noinit.} =
   ## Returns the score.

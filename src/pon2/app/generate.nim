@@ -9,7 +9,7 @@
 import std/[algorithm, random, sequtils, sets, sugar]
 import ./[nazopuyowrap, solve]
 import ../[core]
-import ../private/[arrayutils, assign, deques, math2, results2, staticfor2]
+import ../private/[arrayutils, assign, deques, math, results2, staticfor2]
 
 export nazopuyowrap, results2
 
@@ -142,7 +142,7 @@ func split(rng: var Rand, total: int, weights: openArray[int]): Res[seq[int]] =
   if weights.anyIt it < 0:
     return err "`weights` cannot have negative element"
 
-  let weightSum = weights.sum2
+  let weightSum = weights.sum
   if weightSum == 0:
     return rng.split(total, weights.len, allowZeroChunk = true)
 

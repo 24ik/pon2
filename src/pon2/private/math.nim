@@ -9,27 +9,27 @@
 import std/[math]
 import ./[assign, staticfor2]
 
-export math
+export math except sum
 
-func sum2*[T: SomeNumber](arr: openArray[T]): T {.inline, noinit.} =
+func sum*[T: SomeNumber](items: openArray[T]): T {.inline, noinit.} =
   ## Returns a summation of the array.
   var res = 0.T
-  for elem in arr:
-    res.assign res + elem
+  for item in items:
+    res.assign res + item
 
   res
 
-func sum2*[E: enum, T: SomeNumber](
-    arr: array[E, T], slice: static Slice[E]
+func sum*[E: enum, T: SomeNumber](
+    items: array[E, T], slice: static Slice[E]
 ): T {.inline, noinit.} =
   ## Returns a summation of the array with the given slice.
   var res = 0.T
   staticFor(idx, slice):
-    res.assign res + arr[idx]
+    res.assign res + items[idx]
 
   res
 
-template sum2It*[E: enum, T: SomeNumber](slice: static Slice[E], body: untyped): T =
+template sumIt*[E: enum, T: SomeNumber](slice: static Slice[E], body: untyped): T =
   ## Returns a summation of the `body` with `it` injected.
   var res = 0.T
   staticFor(idx, slice):

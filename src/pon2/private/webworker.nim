@@ -15,7 +15,7 @@ import std/[asyncjs, jsffi, sequtils, strformat, sugar]
 import ./[assign, results2, strutils2, utils]
 
 when not defined(pon2.build.worker):
-  import ./[math2]
+  import ./[math]
 
 type
   WebWorkerTask* = ((args: seq[string]) {.raises: [], gcsafe.} -> Res[seq[string]])
