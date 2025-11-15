@@ -31,13 +31,13 @@ block: # unwrapNazoPuyo
     check it.field.rule == Tsu
 
     it.field[Row1, Col3] = Hard
-    check it.garbagesCnt == 1
+    check it.garbagesCount == 1
 
     check itNazo.puyoPuyo.field.rule == Tsu
 
-  let stepCnt = nazoWrap.unwrapNazoPuyo:
+  let stepCount = nazoWrap.unwrapNazoPuyo:
     it.steps.len
-  check stepCnt == 0
+  check stepCount == 0
 
 # ------------------------------------------------
 # Property

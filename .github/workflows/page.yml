@@ -43,14 +43,14 @@ jobs:
           echo "DIR_NAME=$DIR_NAME" >> $GITHUB_ENV
         if: github.ref_type == 'tag'
 
-      - run: nimble -y -d:pon2.path="/pon2/${{ env.DIR_NAME }}/studio/" page
+      - run: nimble -y -d:pon2.path="/pon2/${{ env.DIR_NAME }}/studio/" pages
 
       - uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: pages
           target-folder: ${{ env.DIR_NAME }}
 
-      - run: nimble -y page
+      - run: nimble -y pages
         if: github.ref_type == 'tag'
 
       - uses: JamesIves/github-pages-deploy-action@v4
