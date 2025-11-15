@@ -1,0 +1,5 @@
+nimTitle	math	pon2/private/math.html	module src/pon2/private/math		0
+nim	sum	pon2/private/math.html#sum,openArray[T]	proc sum[T: SomeNumber](items: openArray[T]): T		14
+nim	sum	pon2/private/math.html#sum,array[E,T],staticSlice[E: enum]	proc sum[E: enum; T: SomeNumber](items: array[E, T]; slice: static Slice[E]): T		22
+nim	sumIt	pon2/private/math.html#sumIt.t,staticSlice[E: enum],untyped	template sumIt[E: enum; T: SomeNumber](slice: static Slice[E]; body: untyped): T		32
+nimgrp	sum	pon2/private/math.html#sum-procs-all	proc		14

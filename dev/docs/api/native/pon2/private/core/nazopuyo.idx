@@ -1,14 +1,14 @@
 nimTitle	nazopuyo	pon2/private/core/nazopuyo.html	module src/pon2/private/core/nazopuyo		0
-nim	isSatisfiedAccColor	pon2/private/core/nazopuyo.html#isSatisfiedAccColor,Goal,set[Cell],staticGoalKind	proc isSatisfiedAccColor(goal: Goal; colors: set[Cell]; kind: static GoalKind): bool		60
-nim	isSatisfiedAccCnt	pon2/private/core/nazopuyo.html#isSatisfiedAccCnt,Goal,int,staticGoalKind	proc isSatisfiedAccCnt(goal: Goal; cnt: int; kind: static GoalKind): bool		70
-nim	isSatisfiedChain	pon2/private/core/nazopuyo.html#isSatisfiedChain,Goal,MoveResult,staticGoalKind	proc isSatisfiedChain(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool		80
-nim	isSatisfiedColor	pon2/private/core/nazopuyo.html#isSatisfiedColor,Goal,MoveResult,staticGoalKind	proc isSatisfiedColor(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool		90
-nim	isSatisfiedCnt	pon2/private/core/nazopuyo.html#isSatisfiedCnt,Goal,MoveResult,staticGoalKind,staticGoalColor	proc isSatisfiedCnt(goal: Goal; moveRes: MoveResult; kind: static GoalKind;\n               color: static GoalColor): bool		107
-nim	isSatisfiedCnt	pon2/private/core/nazopuyo.html#isSatisfiedCnt,Goal,MoveResult,staticGoalKind	proc isSatisfiedCnt(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool		124
-nim	isSatisfiedPlace	pon2/private/core/nazopuyo.html#isSatisfiedPlace,Goal,MoveResult,staticGoalKind,staticGoalColor	proc isSatisfiedPlace(goal: Goal; moveRes: MoveResult; kind: static GoalKind;\n                 color: static GoalColor): bool		134
-nim	isSatisfiedPlace	pon2/private/core/nazopuyo.html#isSatisfiedPlace,Goal,MoveResult,staticGoalKind	proc isSatisfiedPlace(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool		147
-nim	isSatisfiedConn	pon2/private/core/nazopuyo.html#isSatisfiedConn,Goal,MoveResult,staticGoalKind,staticGoalColor	proc isSatisfiedConn(goal: Goal; moveRes: MoveResult; kind: static GoalKind;\n                color: static GoalColor): bool		157
-nim	isSatisfiedConn	pon2/private/core/nazopuyo.html#isSatisfiedConn,Goal,MoveResult,staticGoalKind	proc isSatisfiedConn(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool		170
-nimgrp	issatisfiedconn	pon2/private/core/nazopuyo.html#isSatisfiedConn-procs-all	proc		157
-nimgrp	issatisfiedplace	pon2/private/core/nazopuyo.html#isSatisfiedPlace-procs-all	proc		134
-nimgrp	issatisfiedcnt	pon2/private/core/nazopuyo.html#isSatisfiedCnt-procs-all	proc		107
+nim	isSatisfiedAccumColor	pon2/private/core/nazopuyo.html#isSatisfiedAccumColor,Goal,set[Cell],staticGoalKind	proc isSatisfiedAccumColor(goal: Goal; colors: set[Cell]; kind: static GoalKind): bool		61
+nim	isSatisfiedAccumCount	pon2/private/core/nazopuyo.html#isSatisfiedAccumCount,Goal,int,staticGoalKind	proc isSatisfiedAccumCount(goal: Goal; count: int; kind: static GoalKind): bool		71
+nim	isSatisfiedChain	pon2/private/core/nazopuyo.html#isSatisfiedChain,Goal,MoveResult,staticGoalKind	proc isSatisfiedChain(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool		81
+nim	isSatisfiedColor	pon2/private/core/nazopuyo.html#isSatisfiedColor,Goal,MoveResult,staticGoalKind	proc isSatisfiedColor(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool		91
+nim	isSatisfiedCount	pon2/private/core/nazopuyo.html#isSatisfiedCount,Goal,MoveResult,staticGoalKind,staticGoalColor	proc isSatisfiedCount(goal: Goal; moveRes: MoveResult; kind: static GoalKind;\n                 color: static GoalColor): bool		108
+nim	isSatisfiedCount	pon2/private/core/nazopuyo.html#isSatisfiedCount,Goal,MoveResult,staticGoalKind	proc isSatisfiedCount(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool		125
+nim	isSatisfiedPlace	pon2/private/core/nazopuyo.html#isSatisfiedPlace,Goal,MoveResult,staticGoalKind,staticGoalColor	proc isSatisfiedPlace(goal: Goal; moveRes: MoveResult; kind: static GoalKind;\n                 color: static GoalColor): bool		135
+nim	isSatisfiedPlace	pon2/private/core/nazopuyo.html#isSatisfiedPlace,Goal,MoveResult,staticGoalKind	proc isSatisfiedPlace(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool		148
+nim	isSatisfiedConnection	pon2/private/core/nazopuyo.html#isSatisfiedConnection,Goal,MoveResult,staticGoalKind,staticGoalColor	proc isSatisfiedConnection(goal: Goal; moveRes: MoveResult; kind: static GoalKind;\n                      color: static GoalColor): bool		158
+nim	isSatisfiedConnection	pon2/private/core/nazopuyo.html#isSatisfiedConnection,Goal,MoveResult,staticGoalKind	proc isSatisfiedConnection(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool		171
+nimgrp	issatisfiedplace	pon2/private/core/nazopuyo.html#isSatisfiedPlace-procs-all	proc		135
+nimgrp	issatisfiedcount	pon2/private/core/nazopuyo.html#isSatisfiedCount-procs-all	proc		108
+nimgrp	issatisfiedconnection	pon2/private/core/nazopuyo.html#isSatisfiedConnection-procs-all	proc		158

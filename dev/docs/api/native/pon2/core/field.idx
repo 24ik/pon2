@@ -8,64 +8,64 @@ nim	toTsuField	pon2/core/field.html#toTsuField,TsuField	proc toTsuField(self: Ts
 nim	toTsuField	pon2/core/field.html#toTsuField,WaterField	proc toTsuField(self: WaterField): TsuField		63
 nim	toWaterField	pon2/core/field.html#toWaterField,TsuField	proc toWaterField(self: TsuField): WaterField		67
 nim	toWaterField	pon2/core/field.html#toWaterField,WaterField	proc toWaterField(self: WaterField): WaterField		71
-nim	rule	pon2/core/field.html#rule,TsuField	proc rule(self: TsuField): Rule		86
-nim	rule	pon2/core/field.html#rule,WaterField	proc rule(self: WaterField): Rule		90
-nim	isDead	pon2/core/field.html#isDead,F	proc isDead[F: TsuField or WaterField](self: F): bool		98
-nim	invalidPlacements	pon2/core/field.html#invalidPlacements,F	proc invalidPlacements[F: TsuField or WaterField](self: F): set[Placement]		108
-nim	validPlacements	pon2/core/field.html#validPlacements,F	proc validPlacements[F: TsuField or WaterField](self: F): set[Placement]		114
-nim	validDblPlacements	pon2/core/field.html#validDblPlacements,F	proc validDblPlacements[F: TsuField or WaterField](self: F): set[Placement]		120
-nim	`[]`	pon2/core/field.html#[],F,Row,Col	proc `[]`[F: TsuField or WaterField](self: F; row: Row; col: Col): Cell		134
-nim	`[]=`	pon2/core/field.html#[]=,F,Row,Col,Cell	proc `[]=`[F: TsuField or WaterField](self: var F; row: Row; col: Col; cell: Cell)		149
-nim	insert	pon2/core/field.html#insert,F,Row,Col,Cell	proc insert[F: TsuField or WaterField](self: var F; row: Row; col: Col; cell: Cell)		160
-nim	delete	pon2/core/field.html#delete,F,Row,Col	proc delete[F: TsuField or WaterField](self: var F; row: Row; col: Col)		172
-nim	cellCnt	pon2/core/field.html#cellCnt,F,Cell	proc cellCnt[F: TsuField or WaterField](self: F; cell: Cell): int		219
-nim	puyoCnt	pon2/core/field.html#puyoCnt,F	proc puyoCnt[F: TsuField or WaterField](self: F): int		239
-nim	colorPuyoCnt	pon2/core/field.html#colorPuyoCnt,F	proc colorPuyoCnt[F: TsuField or WaterField](self: F): int		243
-nim	garbagesCnt	pon2/core/field.html#garbagesCnt,F	proc garbagesCnt[F: TsuField or WaterField](self: F): int		247
-nim	conn2	pon2/core/field.html#conn2,F	proc conn2[F: TsuField or WaterField](self: F): F		255
-nim	conn2Vertical	pon2/core/field.html#conn2Vertical,F	proc conn2Vertical[F: TsuField or WaterField](self: F): F		263
-nim	conn2Horizontal	pon2/core/field.html#conn2Horizontal,F	proc conn2Horizontal[F: TsuField or WaterField](self: F): F		271
-nim	conn3	pon2/core/field.html#conn3,F	proc conn3[F: TsuField or WaterField](self: F): F		283
-nim	conn3Vertical	pon2/core/field.html#conn3Vertical,F	proc conn3Vertical[F: TsuField or WaterField](self: F): F		291
-nim	conn3Horizontal	pon2/core/field.html#conn3Horizontal,F	proc conn3Horizontal[F: TsuField or WaterField](self: F): F		299
-nim	conn3LShape	pon2/core/field.html#conn3LShape,F	proc conn3LShape[F: TsuField or WaterField](self: F): F		307
-nim	shiftUp	pon2/core/field.html#shiftUp,F	proc shiftUp[F: TsuField or WaterField](self: var F)		319
-nim	shiftDown	pon2/core/field.html#shiftDown,F	proc shiftDown[F: TsuField or WaterField](self: var F)		324
-nim	shiftRight	pon2/core/field.html#shiftRight,F	proc shiftRight[F: TsuField or WaterField](self: var F)		329
-nim	shiftLeft	pon2/core/field.html#shiftLeft,F	proc shiftLeft[F: TsuField or WaterField](self: var F)		334
-nim	flipVertical	pon2/core/field.html#flipVertical,F	proc flipVertical[F: TsuField or WaterField](self: var F)		343
-nim	flipHorizontal	pon2/core/field.html#flipHorizontal,F	proc flipHorizontal[F: TsuField or WaterField](self: var F)		348
-nim	rotate	pon2/core/field.html#rotate,F	proc rotate[F: TsuField or WaterField](self: var F)		357
-nim	crossRotate	pon2/core/field.html#crossRotate,F	proc crossRotate[F: TsuField or WaterField](self: var F)		363
-nim	place	pon2/core/field.html#place,TsuField,Pair,Placement	proc place(self: var TsuField; pair: Pair; plcmt: Placement)		383
-nim	place	pon2/core/field.html#place,WaterField,Pair,Placement	proc place(self: var WaterField; pair: Pair; plcmt: Placement)		406
-nim	place	pon2/core/field.html#place,F,Pair,OptPlacement	proc place[F: TsuField or WaterField](self: var F; pair: Pair; optPlcmt: OptPlacement)		441
-nim	pop	pon2/core/field.html#pop,F	proc pop[F: TsuField or WaterField](self: var F): PopResult		453
-nim	canPop	pon2/core/field.html#canPop,F	proc canPop[F: TsuField or WaterField](self: F): bool		496
-nim	dropGarbages	pon2/core/field.html#dropGarbages,F,array[Col,int],bool	proc dropGarbages[F: TsuField or WaterField](self: var F; cnts: array[Col, int];\n                                        dropHard: bool)		506
-nim	apply	pon2/core/field.html#apply,F,Step	proc apply[F: TsuField or WaterField](self: var F; step: Step)		524
-nim	settle	pon2/core/field.html#settle,F	proc settle[F: TsuField or WaterField](self: var F)		539
-nim	isSettled	pon2/core/field.html#isSettled,F	proc isSettled[F: TsuField or WaterField](self: F): bool		546
-nim	move	pon2/core/field.html#move,F,Pair,Placement,staticbool	proc move[F: TsuField or WaterField](self: var F; pair: Pair; plcmt: Placement;\n                                calcConn: static bool = true): MoveResult		615
-nim	move	pon2/core/field.html#move,F,array[Col,int],bool,staticbool	proc move[F: TsuField or WaterField](self: var F; cnts: array[Col, int];\n                                dropHard: bool; calcConn: static bool = true): MoveResult		623
-nim	move	pon2/core/field.html#move,F,bool,staticbool	proc move[F: TsuField or WaterField](self: var F; cross: bool;\n                                calcConn: static bool = true): MoveResult		632
-nim	move	pon2/core/field.html#move,F,Step	proc move[F: TsuField or WaterField](self: var F; step: Step; calcConn = true): MoveResult		640
-nim	toArr	pon2/core/field.html#toArr,F	proc toArr[F: TsuField or WaterField](self: F): array[Row, array[Col, Cell]]		664
-nim	toTsuField	pon2/core/field.html#toTsuField,array[Row,array[Col,Cell]]	proc toTsuField(arr: array[Row, array[Col, Cell]]): TsuField		696
-nim	toWaterField	pon2/core/field.html#toWaterField,array[Row,array[Col,Cell]]	proc toWaterField(arr: array[Row, array[Col, Cell]]): WaterField		700
-nim	`$`	pon2/core/field.html#$,TsuField	proc `$`(self: TsuField): string		725
-nim	`$`	pon2/core/field.html#$,WaterField	proc `$`(self: WaterField): string		728
-nim	parseTsuField	pon2/core/field.html#parseTsuField,string	proc parseTsuField(str: string): Res[TsuField]		757
-nim	parseWaterField	pon2/core/field.html#parseWaterField,string	proc parseWaterField(str: string): Res[WaterField]		761
-nim	toUriQuery	pon2/core/field.html#toUriQuery,F	proc toUriQuery[F: TsuField or WaterField](self: F; fqdn = Pon2): Res[string]		867
-nim	parseTsuField	pon2/core/field.html#parseTsuField,string,SimulatorFqdn	proc parseTsuField(query: string; fqdn: SimulatorFqdn): Res[TsuField]		987
-nim	parseWaterField	pon2/core/field.html#parseWaterField,string,SimulatorFqdn	proc parseWaterField(query: string; fqdn: SimulatorFqdn): Res[WaterField]		997
-nimgrp	place	pon2/core/field.html#place-procs-all	proc		383
+nim	rule	pon2/core/field.html#rule,TsuField	proc rule(self: TsuField): Rule		88
+nim	rule	pon2/core/field.html#rule,WaterField	proc rule(self: WaterField): Rule		92
+nim	isDead	pon2/core/field.html#isDead,F	proc isDead[F: TsuField or WaterField](self: F): bool		100
+nim	invalidPlacements	pon2/core/field.html#invalidPlacements,F	proc invalidPlacements[F: TsuField or WaterField](self: F): set[Placement]		110
+nim	validPlacements	pon2/core/field.html#validPlacements,F	proc validPlacements[F: TsuField or WaterField](self: F): set[Placement]		116
+nim	validDoublePlacements	pon2/core/field.html#validDoublePlacements,F	proc validDoublePlacements[F: TsuField or WaterField](self: F): set[Placement]		122
+nim	`[]`	pon2/core/field.html#[],F,Row,Col	proc `[]`[F: TsuField or WaterField](self: F; row: Row; col: Col): Cell		136
+nim	`[]=`	pon2/core/field.html#[]=,F,Row,Col,Cell	proc `[]=`[F: TsuField or WaterField](self: var F; row: Row; col: Col; cell: Cell)		151
+nim	insert	pon2/core/field.html#insert,F,Row,Col,Cell	proc insert[F: TsuField or WaterField](self: var F; row: Row; col: Col; cell: Cell)		162
+nim	del	pon2/core/field.html#del,F,Row,Col	proc del[F: TsuField or WaterField](self: var F; row: Row; col: Col)		174
+nim	cellCount	pon2/core/field.html#cellCount,F,Cell	proc cellCount[F: TsuField or WaterField](self: F; cell: Cell): int		221
+nim	puyoCount	pon2/core/field.html#puyoCount,F	proc puyoCount[F: TsuField or WaterField](self: F): int		243
+nim	colorPuyoCount	pon2/core/field.html#colorPuyoCount,F	proc colorPuyoCount[F: TsuField or WaterField](self: F): int		247
+nim	garbagesCount	pon2/core/field.html#garbagesCount,F	proc garbagesCount[F: TsuField or WaterField](self: F): int		251
+nim	connection2	pon2/core/field.html#connection2,F	proc connection2[F: TsuField or WaterField](self: F): F		259
+nim	connection2Vertical	pon2/core/field.html#connection2Vertical,F	proc connection2Vertical[F: TsuField or WaterField](self: F): F		267
+nim	connection2Horizontal	pon2/core/field.html#connection2Horizontal,F	proc connection2Horizontal[F: TsuField or WaterField](self: F): F		276
+nim	connection3	pon2/core/field.html#connection3,F	proc connection3[F: TsuField or WaterField](self: F): F		289
+nim	connection3Vertical	pon2/core/field.html#connection3Vertical,F	proc connection3Vertical[F: TsuField or WaterField](self: F): F		297
+nim	connection3Horizontal	pon2/core/field.html#connection3Horizontal,F	proc connection3Horizontal[F: TsuField or WaterField](self: F): F		306
+nim	connection3LShape	pon2/core/field.html#connection3LShape,F	proc connection3LShape[F: TsuField or WaterField](self: F): F		315
+nim	shiftUp	pon2/core/field.html#shiftUp,F	proc shiftUp[F: TsuField or WaterField](self: var F)		328
+nim	shiftDown	pon2/core/field.html#shiftDown,F	proc shiftDown[F: TsuField or WaterField](self: var F)		333
+nim	shiftRight	pon2/core/field.html#shiftRight,F	proc shiftRight[F: TsuField or WaterField](self: var F)		338
+nim	shiftLeft	pon2/core/field.html#shiftLeft,F	proc shiftLeft[F: TsuField or WaterField](self: var F)		343
+nim	flipVertical	pon2/core/field.html#flipVertical,F	proc flipVertical[F: TsuField or WaterField](self: var F)		352
+nim	flipHorizontal	pon2/core/field.html#flipHorizontal,F	proc flipHorizontal[F: TsuField or WaterField](self: var F)		357
+nim	rotate	pon2/core/field.html#rotate,F	proc rotate[F: TsuField or WaterField](self: var F)		366
+nim	crossRotate	pon2/core/field.html#crossRotate,F	proc crossRotate[F: TsuField or WaterField](self: var F)		372
+nim	place	pon2/core/field.html#place,TsuField,Pair,Placement	proc place(self: var TsuField; pair: Pair; placement: Placement)		392
+nim	place	pon2/core/field.html#place,WaterField,Pair,Placement	proc place(self: var WaterField; pair: Pair; placement: Placement)		414
+nim	place	pon2/core/field.html#place,F,Pair,OptPlacement	proc place[F: TsuField or WaterField](self: var F; pair: Pair;\n                                 optPlacement: OptPlacement)		449
+nim	pop	pon2/core/field.html#pop,F	proc pop[F: TsuField or WaterField](self: var F): PopResult		461
+nim	canPop	pon2/core/field.html#canPop,F	proc canPop[F: TsuField or WaterField](self: F): bool		504
+nim	dropGarbages	pon2/core/field.html#dropGarbages,F,array[Col,int],bool	proc dropGarbages[F: TsuField or WaterField](self: var F; counts: array[Col, int];\n                                        dropHard: bool)		514
+nim	apply	pon2/core/field.html#apply,F,Step	proc apply[F: TsuField or WaterField](self: var F; step: Step)		533
+nim	settle	pon2/core/field.html#settle,F	proc settle[F: TsuField or WaterField](self: var F)		548
+nim	isSettled	pon2/core/field.html#isSettled,F	proc isSettled[F: TsuField or WaterField](self: F): bool		555
+nim	move	pon2/core/field.html#move,F,Pair,Placement,staticbool	proc move[F: TsuField or WaterField](self: var F; pair: Pair; placement: Placement;\n                                calcConnection: static bool = true): MoveResult		625
+nim	move	pon2/core/field.html#move,F,array[Col,int],bool,staticbool	proc move[F: TsuField or WaterField](self: var F; counts: array[Col, int];\n                                dropHard: bool;\n                                calcConnection: static bool = true): MoveResult		633
+nim	move	pon2/core/field.html#move,F,bool,staticbool	proc move[F: TsuField or WaterField](self: var F; cross: bool;\n                                calcConnection: static bool = true): MoveResult		645
+nim	move	pon2/core/field.html#move,F,Step	proc move[F: TsuField or WaterField](self: var F; step: Step; calcConnection = true): MoveResult		653
+nim	toArray	pon2/core/field.html#toArray,F	proc toArray[F: TsuField or WaterField](self: F): array[Row, array[Col, Cell]]		677
+nim	toTsuField	pon2/core/field.html#toTsuField,array[Row,array[Col,Cell]]	proc toTsuField(arr: array[Row, array[Col, Cell]]): TsuField		709
+nim	toWaterField	pon2/core/field.html#toWaterField,array[Row,array[Col,Cell]]	proc toWaterField(arr: array[Row, array[Col, Cell]]): WaterField		713
+nim	`$`	pon2/core/field.html#$,TsuField	proc `$`(self: TsuField): string		738
+nim	`$`	pon2/core/field.html#$,WaterField	proc `$`(self: WaterField): string		741
+nim	parseTsuField	pon2/core/field.html#parseTsuField,string	proc parseTsuField(str: string): StrErrorResult[TsuField]		770
+nim	parseWaterField	pon2/core/field.html#parseWaterField,string	proc parseWaterField(str: string): StrErrorResult[WaterField]		774
+nim	toUriQuery	pon2/core/field.html#toUriQuery,F	proc toUriQuery[F: TsuField or WaterField](self: F; fqdn = Pon2): StrErrorResult[\n    string]		880
+nim	parseTsuField	pon2/core/field.html#parseTsuField,string,SimulatorFqdn	proc parseTsuField(query: string; fqdn: SimulatorFqdn): StrErrorResult[TsuField]		996
+nim	parseWaterField	pon2/core/field.html#parseWaterField,string,SimulatorFqdn	proc parseWaterField(query: string; fqdn: SimulatorFqdn): StrErrorResult[WaterField]		1006
+nimgrp	place	pon2/core/field.html#place-procs-all	proc		392
 nimgrp	towaterfield	pon2/core/field.html#toWaterField-procs-all	proc		67
-nimgrp	parsewaterfield	pon2/core/field.html#parseWaterField-procs-all	proc		761
+nimgrp	parsewaterfield	pon2/core/field.html#parseWaterField-procs-all	proc		774
 nimgrp	totsufield	pon2/core/field.html#toTsuField-procs-all	proc		59
-nimgrp	rule	pon2/core/field.html#rule-procs-all	proc		86
+nimgrp	rule	pon2/core/field.html#rule-procs-all	proc		88
 nimgrp	==	pon2/core/field.html#==-procs-all	proc		29
-nimgrp	$	pon2/core/field.html#$-procs-all	proc		725
-nimgrp	move	pon2/core/field.html#move-procs-all	proc		615
-nimgrp	parsetsufield	pon2/core/field.html#parseTsuField-procs-all	proc		757
+nimgrp	$	pon2/core/field.html#$-procs-all	proc		738
+nimgrp	move	pon2/core/field.html#move-procs-all	proc		625
+nimgrp	parsetsufield	pon2/core/field.html#parseTsuField-procs-all	proc		770

@@ -19,8 +19,8 @@ nim	isSupported	pon2/core/goal.html#isSupported,Goal	proc isSupported(self: Goal
 nim	normalize	pon2/core/goal.html#normalize,Goal	proc normalize(self: var Goal)		118
 nim	normalized	pon2/core/goal.html#normalized,Goal	proc normalized(self: Goal): Goal		135
 nim	`$`	pon2/core/goal.html#$,Goal	proc `$`(self: Goal): string		158
-nim	parseGoal	pon2/core/goal.html#parseGoal,string	proc parseGoal(str: string): Res[Goal]		167
-nim	toUriQuery	pon2/core/goal.html#toUriQuery,Goal	proc toUriQuery(self: Goal; fqdn = Pon2): Res[string]		232
-nim	parseGoal	pon2/core/goal.html#parseGoal,string,SimulatorFqdn	proc parseGoal(query: string; fqdn: SimulatorFqdn): Res[Goal]		267
+nim	parseGoal	pon2/core/goal.html#parseGoal,string	proc parseGoal(str: string): StrErrorResult[Goal]		167
+nim	toUriQuery	pon2/core/goal.html#toUriQuery,Goal	proc toUriQuery(self: Goal; fqdn = Pon2): StrErrorResult[string]		232
+nim	parseGoal	pon2/core/goal.html#parseGoal,string,SimulatorFqdn	proc parseGoal(query: string; fqdn: SimulatorFqdn): StrErrorResult[Goal]		267
 nimgrp	parsegoal	pon2/core/goal.html#parseGoal-procs-all	proc		167
 nimgrp	init	pon2/core/goal.html#init-procs-all	proc		69

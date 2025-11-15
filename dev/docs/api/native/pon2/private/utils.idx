@@ -1,6 +1,4 @@
 nimTitle	utils	pon2/private/utils.html	module src/pon2/private/utils		0
-nim	toggle	pon2/private/utils.html#toggle,bool	proc toggle(b: var bool)		23
-nim	incRot	pon2/private/utils.html#incRot,T	proc incRot[T: Ordinal](x: var T)		27
-nim	decRot	pon2/private/utils.html#decRot,T	proc decRot[T: Ordinal](x: var T)		35
-nim	product2	pon2/private/utils.html#product2,openArray[seq[T]]	proc product2[T](seqs: openArray[seq[T]]): seq[seq[T]]		43
-nim	toSet2	pon2/private/utils.html#toSet2.t,untyped	template toSet2(iter: untyped): untyped		53
+nim	toggle	pon2/private/utils.html#toggle,bool	proc toggle(x: var bool)		16
+nim	rotateInc	pon2/private/utils.html#rotateInc,T	proc rotateInc[T: Ordinal](x: var T)		20
+nim	rotateDec	pon2/private/utils.html#rotateDec,T	proc rotateDec[T: Ordinal](x: var T)		28

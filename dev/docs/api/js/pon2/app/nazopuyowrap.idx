@@ -9,7 +9,7 @@ nim	`==`	pon2/app/nazopuyowrap.html#==,NazoPuyoWrap,NazoPuyoWrap	proc `==`(wrap1
 nim	unwrapNazoPuyo	pon2/app/nazopuyowrap.html#unwrapNazoPuyo.m,untyped,untyped	macro unwrapNazoPuyo(self: untyped; body: untyped): untyped		68
 nim	rule	pon2/app/nazopuyowrap.html#rule,NazoPuyoWrap	proc rule(self: NazoPuyoWrap): Rule		98
 nim	rule=	pon2/app/nazopuyowrap.html#rule=,NazoPuyoWrap,Rule	proc rule=(self: var NazoPuyoWrap; rule: Rule)		102
-nim	toUriQuery	pon2/app/nazopuyowrap.html#toUriQuery,NazoPuyoWrap,SimulatorFqdn	proc toUriQuery(self: NazoPuyoWrap; fqdn: SimulatorFqdn): Res[string]		122
-nim	parseNazoPuyoWrap	pon2/app/nazopuyowrap.html#parseNazoPuyoWrap,string,SimulatorFqdn	proc parseNazoPuyoWrap(query: string; fqdn: SimulatorFqdn): Res[NazoPuyoWrap]		133
+nim	toUriQuery	pon2/app/nazopuyowrap.html#toUriQuery,NazoPuyoWrap,SimulatorFqdn	proc toUriQuery(self: NazoPuyoWrap; fqdn: SimulatorFqdn): StrErrorResult[string]		122
+nim	parseNazoPuyoWrap	pon2/app/nazopuyowrap.html#parseNazoPuyoWrap,string,SimulatorFqdn	proc parseNazoPuyoWrap(query: string; fqdn: SimulatorFqdn): StrErrorResult[\n    NazoPuyoWrap]		133
 nimgrp	==	pon2/app/nazopuyowrap.html#==-procs-all	proc		46
 nimgrp	init	pon2/app/nazopuyowrap.html#init-procs-all	proc		33
