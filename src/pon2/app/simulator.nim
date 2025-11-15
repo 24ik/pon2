@@ -11,11 +11,15 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[algorithm, strformat, sugar, uri]
+import std/[strformat, sugar, uri]
 import ./[key, nazopuyowrap]
 import ../[core]
 import
-  ../private/[arrayutils, assign, deques, results2, staticfor, strutils, tables, utils]
+  ../private/
+    [
+      algorithm, arrayutils, assign, deques, results2, staticfor, strutils, tables,
+      utils,
+    ]
 
 export core, nazopuyowrap, results2, uri
 

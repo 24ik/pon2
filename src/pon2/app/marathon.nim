@@ -151,7 +151,7 @@ func swappedPrefixes(prefix: string): seq[string] =
         @[c1 & c2]
       else:
         @[c1 & c2, c2 & c1]
-  pairsSeq.product2.mapIt it.join
+  pairsSeq.product.mapIt it.join
 
 func initReplaceDataSeqArr(): array[4, seq[seq[(string, string)]]] =
   ## Returns `ReplaceDataSeqArr`.

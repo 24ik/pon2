@@ -6,9 +6,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[algorithm]
 import ../[core]
-import ../private/[core, macros]
+import ../private/[algorithm, core, macros]
 import ../private/app/[solve]
 
 export core

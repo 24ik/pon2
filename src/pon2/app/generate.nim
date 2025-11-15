@@ -6,10 +6,10 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[algorithm, random, sequtils, sets, sugar]
+import std/[random, sequtils, sets, sugar]
 import ./[nazopuyowrap, solve]
 import ../[core]
-import ../private/[arrayutils, assign, deques, math, results2, staticfor]
+import ../private/[algorithm, arrayutils, assign, deques, math, results2, staticfor]
 
 export nazopuyowrap, results2
 

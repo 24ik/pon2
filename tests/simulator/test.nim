@@ -3,10 +3,10 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[algorithm, unittest, uri]
+import std/[unittest, uri]
 import ../../src/pon2/[core]
 import ../../src/pon2/app/[key, nazopuyowrap, simulator]
-import ../../src/pon2/private/[assign, utils]
+import ../../src/pon2/private/[algorithm, assign, utils]
 
 # ------------------------------------------------
 # Constructor

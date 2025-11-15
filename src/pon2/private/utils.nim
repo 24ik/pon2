@@ -6,8 +6,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[algorithm, sequtils, typetraits]
-import ./[assign]
+import std/[sequtils, typetraits]
+import ./[algorithm, assign]
 
 when defined(js) or defined(nimsuggest):
   import std/[asyncjs, dom, jsffi, jsre, sugar]
@@ -33,16 +33,6 @@ func rotateDec*[T: Ordinal](x: var T) {.inline, noinit.} =
     x.assign T.high
   else:
     x.dec
-
-func product2*[T](seqs: openArray[seq[T]]): seq[seq[T]] {.inline, noinit.} =
-  ## Returns a cartesian product.
-  case seqs.len
-  of 0:
-    @[newSeq[T]()]
-  of 1:
-    seqs[0].mapIt @[it]
-  else:
-    seqs.product
 
 template toSet2*(iter: untyped): untyped =
   ## Converts the iterable to a built-in set type.
