@@ -8,7 +8,7 @@
 
 import std/[setutils, strformat, sugar]
 import ./[fqdn]
-import ../private/[assign, results2, staticfor, strutils, tables2]
+import ../private/[assign, results2, staticfor, strutils, tables]
 
 export results2
 
@@ -193,7 +193,7 @@ func parseGoal*(str: string): Res[Goal] {.inline, noinit.} =
     if str2 in strToKind:
       kindFound = true
       goal.optColor.ok c
-      goal.kind.assign strToKind.getRes(str2).unsafeValue
+      goal.kind.assign strToKind[str2].unsafeValue
 
       break
   if not kindFound:
@@ -295,9 +295,9 @@ func parseGoal*(query: string, fqdn: SimulatorFqdn): Res[Goal] {.inline, noinit.
     if query.len != 3:
       return err "Invalid goal: {query}".fmt
 
-    goal.kind.assign ?IshikawaUriToKind.getRes(query[0]).context "Invalid goal (kind): {query}".fmt
-    goal.optColor.ok ?IshikawaUriToColor.getRes(query[1]).context "Invalid goal (color): {query}".fmt
-    goal.optVal.ok ?IshikawaUriToVal.getRes(query[2]).context "Invalid goal (val): {query}".fmt
+    goal.kind.assign ?IshikawaUriToKind[query[0]].context "Invalid goal (kind): {query}".fmt
+    goal.optColor.ok ?IshikawaUriToColor[query[1]].context "Invalid goal (color): {query}".fmt
+    goal.optVal.ok ?IshikawaUriToVal[query[2]].context "Invalid goal (val): {query}".fmt
 
     # we cannot distinguish '0' between the valid color/val and the empty,
     # so postprocesses here just like a normalization

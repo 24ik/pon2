@@ -15,7 +15,7 @@ import std/[algorithm, strformat, sugar, uri]
 import ./[key, nazopuyowrap]
 import ../[core]
 import
-  ../private/[arrayutils, assign, deques, results2, staticfor, strutils, tables2, utils]
+  ../private/[arrayutils, assign, deques, results2, staticfor, strutils, tables, utils]
 
 export core, nazopuyowrap, results2, uri
 
@@ -1130,7 +1130,7 @@ func parseSimulator*(uri: Uri): Res[Simulator] =
         if mode.isOk:
           return err "Invalid simulator (multiple mode detected): {uri}".fmt
         else:
-          mode.ok ?StrToMode.getRes(keyVal.value).context "Invalid mode: {keyVal.value}".fmt
+          mode.ok ?StrToMode[keyVal.value].context "Invalid mode: {keyVal.value}".fmt
       else:
         keyVals.add keyVal
 

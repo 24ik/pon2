@@ -8,7 +8,7 @@
 
 import std/[bitops, sequtils, strformat, sugar]
 import ./[cell, common, fqdn, pair, placement]
-import ../private/[arrayutils, assign, deques, math, results2, strutils, tables2]
+import ../private/[arrayutils, assign, deques, math, results2, strutils, tables]
 
 export deques, pair, placement, results2
 
@@ -303,12 +303,10 @@ func parseStep*(query: string, fqdn: SimulatorFqdn): Res[Step] {.inline, noinit.
     if query.len != 2:
       return err "Invalid step: {query}".fmt
 
-    let maxGarbageCntRes = IshikawaUriToMaxGarbage.getRes query[0]
+    let maxGarbageCntRes = IshikawaUriToMaxGarbage[query[0]]
     if maxGarbageCntRes.isOk:
       let num =
-        ?IshikawaUriToNum.getRes(query[1]).context(
-          "Invalid step (garbage count): {query}".fmt
-        )
+        ?IshikawaUriToNum[query[1]].context("Invalid step (garbage count): {query}".fmt)
 
       var garbageCnts = Col.initArrayWith maxGarbageCntRes.value.pred
       for col in Col:

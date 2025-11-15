@@ -12,7 +12,7 @@
 {.experimental: "views".}
 
 import std/[strformat, sugar]
-import ../private/[results2, tables2]
+import ../private/[results2, tables]
 
 export results2
 
@@ -34,4 +34,4 @@ const StrToFqdn = collect:
 
 func parseSimulatorFqdn*(str: string): Res[SimulatorFqdn] {.inline, noinit.} =
   ## Returns the FQDN converted from the string representation.
-  StrToFqdn.getRes(str).context "Invalid FQDN: {str}".fmt
+  StrToFqdn[str].context "Invalid FQDN: {str}".fmt

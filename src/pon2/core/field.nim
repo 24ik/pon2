@@ -10,7 +10,7 @@ import std/[sequtils, strformat, sugar, typetraits]
 import ./[cell, common, fqdn, moveresult, pair, placement, popresult, rule, step]
 import
   ../private/
-    [arrayutils, assign, bitutils, core, macros, results2, staticfor, strutils, tables2]
+    [arrayutils, assign, bitutils, core, macros, results2, staticfor, strutils, tables]
 
 export cell, common, moveresult, placement, popresult, results2, rule
 
@@ -882,7 +882,7 @@ func parseFieldPon2[F: TsuField or WaterField](
   if strs.len != 2:
     return err "Invalid field: {query}".fmt
 
-  let rule = ?Pon2UriToRule.getRes(strs[0]).context "Invalid field: {query}".fmt
+  let rule = ?Pon2UriToRule[strs[0]].context "Invalid field: {query}".fmt
 
   var arr {.noinit.}: array[Row, array[Col, Cell]]
   when F is TsuField:
@@ -957,9 +957,9 @@ func parseTsuFieldIshikawa(query: string): Res[TsuField] {.inline, noinit.} =
     var arr = static(Row.initArrayWith Col.initArrayWith None)
     for rowIdx, str in strs:
       for colIdx, c in str:
-        arr[firstRow.succ rowIdx][Col.low.succ colIdx].assign ?TildeIshikawaCharToCell
-        .getRes(c)
-        .context("Invalid field: {query}".fmt)
+        arr[firstRow.succ rowIdx][Col.low.succ colIdx].assign ?TildeIshikawaCharToCell[
+          c
+        ].context("Invalid field: {query}".fmt)
 
     ok arr.toTsuField
   else:
@@ -969,13 +969,13 @@ func parseTsuFieldIshikawa(query: string): Res[TsuField] {.inline, noinit.} =
     var arr {.noinit.}: array[Row, array[Col, Cell]]
     for i, c in '0'.repeat(Height * Width div 2 - query.len) & query:
       let
-        idx = ?IshikawaUriCharToIdx.getRes(c).context("Invalid field: {query}".fmt)
+        idx = ?IshikawaUriCharToIdx[c].context("Invalid field: {query}".fmt)
         cell1 =
-          ?IshikawaIdxToCell.getRes(idx div static(Cell.enumLen)).context(
+          ?IshikawaIdxToCell[idx div static(Cell.enumLen)].context(
             "Invalid field: {query}".fmt
           )
         cell2 =
-          ?IshikawaIdxToCell.getRes(idx mod static(Cell.enumLen)).context(
+          ?IshikawaIdxToCell[idx mod static(Cell.enumLen)].context(
             "Invalid field: {query}".fmt
           )
         row = (i div (Width div 2)).Row

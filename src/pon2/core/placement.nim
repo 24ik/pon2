@@ -8,7 +8,7 @@
 
 import std/[strformat, sugar]
 import ./[common, fqdn]
-import ../private/[macros, results2, tables2]
+import ../private/[macros, results2, tables]
 
 export common, results2
 
@@ -191,7 +191,7 @@ func `$`*(self: OptPlacement): string {.inline, noinit.} =
 
 func parsePlacement*(str: string): Res[Placement] {.inline, noinit.} =
   ## Returns the placement converted from the string representation.
-  StrToPlcmt.getRes(str).context "Invalid placement: {str}".fmt
+  StrToPlcmt[str].context "Invalid placement: {str}".fmt
 
 func parseOptPlacement*(str: string): Res[OptPlacement] {.inline, noinit.} =
   ## Returns the optional placement converted from the string representation.
@@ -238,7 +238,7 @@ func parsePlacement*(
   of Pon2:
     query.parsePlacement
   of Ishikawa, Ips:
-    IshikawaUriToPlcmt.getRes(query).context "Invalid placement: {query}".fmt
+    IshikawaUriToPlcmt[query].context "Invalid placement: {query}".fmt
 
 func parseOptPlacement*(
     query: string, fqdn: SimulatorFqdn

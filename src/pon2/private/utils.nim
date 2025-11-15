@@ -11,7 +11,6 @@ import ./[assign]
 
 when defined(js) or defined(nimsuggest):
   import std/[asyncjs, dom, jsffi, jsre, sugar]
-  import ./[tables2]
 
   export asyncjs, jsffi
 

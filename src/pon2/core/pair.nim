@@ -8,7 +8,7 @@
 
 import std/[strformat, sugar]
 import ./[cell, fqdn]
-import ../private/[assign, results2, tables2]
+import ../private/[assign, results2, tables]
 
 export cell, results2
 
@@ -132,7 +132,7 @@ const StrToPair = collect:
 
 func parsePair*(str: string): Res[Pair] {.inline, noinit.} =
   ## Returns the pair converted from the string representation.
-  StrToPair.getRes(str).context "Invalid pair: {str}".fmt
+  StrToPair[str].context "Invalid pair: {str}".fmt
 
 # ------------------------------------------------
 # Pair <-> URI
@@ -158,4 +158,4 @@ func parsePair*(query: string, fqdn: SimulatorFqdn): Res[Pair] {.inline, noinit.
   of Pon2:
     query.parsePair
   of Ishikawa, Ips:
-    IshikawaUriToPair.getRes(query).context "Invalid pair: {query}".fmt
+    IshikawaUriToPair[query].context "Invalid pair: {query}".fmt
