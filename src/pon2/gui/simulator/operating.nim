@@ -16,9 +16,11 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui, results2]
 
+  export vdom
+
   proc toOperatingCellVNode[S: Simulator or Studio or Marathon](
-      self: ref S, helper: VNodeHelper, idx: int, col: Col
-  ): VNode {.inline.} =
+      self: ref S, helper: VNodeHelper, index: int, col: Col
+  ): VNode =
     ## Returns the node of the cell in the operating area.
     var cross = false
     let cellOpt =
@@ -31,24 +33,24 @@ when defined(js) or defined(nimsuggest):
           steps = nazoWrap.unwrapNazoPuyo:
             it.steps
 
-        if self.derefSimulator(helper).operatingIdx >= steps.len:
+        if self.derefSimulator(helper).operatingIndex >= steps.len:
           Opt[Cell].ok Cell.None
         else:
-          let step = steps[self.derefSimulator(helper).operatingIdx]
+          let step = steps[self.derefSimulator(helper).operatingIndex]
           case step.kind
           of PairPlacement:
             # pivot
-            if idx == 1 and
+            if index == 1 and
                 col == self.derefSimulator(helper).operatingPlacement.pivotCol:
               Opt[Cell].ok step.pair.pivot
             # rotor
             elif col == self.derefSimulator(helper).operatingPlacement.rotorCol:
-              if idx == 1:
+              if index == 1:
                 Opt[Cell].ok step.pair.rotor
-              elif idx == 0 and
+              elif index == 0 and
                   self.derefSimulator(helper).operatingPlacement.rotorDir == Up:
                 Opt[Cell].ok step.pair.rotor
-              elif idx == 2 and
+              elif index == 2 and
                   self.derefSimulator(helper).operatingPlacement.rotorDir == Down:
                 Opt[Cell].ok step.pair.rotor
               else:
@@ -56,14 +58,14 @@ when defined(js) or defined(nimsuggest):
             else:
               Opt[Cell].ok Cell.None
           of StepKind.Garbages:
-            if idx == 2 and step.cnts[col] > 0:
+            if index == 2 and step.counts[col] > 0:
               Opt[Cell].ok (if step.dropHard: Hard else: Garbage)
             else:
               Opt[Cell].ok Cell.None
           of Rotate:
             cross = step.cross
 
-            if idx == 2 and col == Col2:
+            if index == 2 and col == Col2:
               Opt[Cell].err
             else:
               Opt[Cell].ok Cell.None
@@ -82,12 +84,12 @@ when defined(js) or defined(nimsuggest):
 
   proc toOperatingVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
-  ): VNode {.inline.} =
+  ): VNode =
     ## Returns the operating node.
     buildHtml table:
       tbody:
-        for idx in 0 ..< 3:
+        for index in 0 ..< 3:
           tr:
             for col in Col:
               td:
-                self.toOperatingCellVNode(helper, idx, col)
+                self.toOperatingCellVNode(helper, index, col)

@@ -31,10 +31,10 @@ block: # init
 
   block:
     let
-      cnts = [Col0: 1, 0, 1, 1, 0, 0]
-      step = Step.init(cnts, true)
+      counts = [Col0: 1, 0, 1, 1, 0, 0]
+      step = Step.init(counts, true)
     check step.kind == Garbages
-    check step.cnts == cnts
+    check step.counts == counts
     check step.dropHard
 
   block:
@@ -73,46 +73,45 @@ block: # isValid
 # Count
 # ------------------------------------------------
 
-block: # cellCnt, puyoCnt, colorPuyoCnt, garbagesCnt
+block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
   block:
     let step = Step.init YellowPurple
-    check step.cellCnt(Red) == 0
-    check step.cellCnt(Yellow) == 1
-    check step.cellCnt(Garbage) == 0
-    check step.puyoCnt == 2
-    check step.colorPuyoCnt == 2
-    check step.garbagesCnt == 0
+    check step.cellCount(Red) == 0
+    check step.cellCount(Yellow) == 1
+    check step.cellCount(Garbage) == 0
+    check step.puyoCount == 2
+    check step.colorPuyoCount == 2
+    check step.garbagesCount == 0
 
   block:
     let step = Step.init([Col0: 2, 1, 0, 1, 0, 1], true)
-    check step.cellCnt(Red) == 0
-    check step.cellCnt(Yellow) == 0
-    check step.cellCnt(Hard) == 5
-    check step.cellCnt(Garbage) == 0
-    check step.puyoCnt == 5
-    check step.colorPuyoCnt == 0
-    check step.garbagesCnt == 5
+    check step.cellCount(Red) == 0
+    check step.cellCount(Yellow) == 0
+    check step.cellCount(Hard) == 5
+    check step.cellCount(Garbage) == 0
+    check step.puyoCount == 5
+    check step.colorPuyoCount == 0
+    check step.garbagesCount == 5
 
   block:
-    let steps =
-      [Step.init RedGreen, Step.init([Col0: 5, 4, 5, 5, 5, 4], false)].toDeque2
-    check steps.cellCnt(Red) == 1
-    check steps.cellCnt(Yellow) == 0
-    check steps.cellCnt(Garbage) == 28
-    check steps.cellCnt(Hard) == 0
-    check steps.puyoCnt == 30
-    check steps.colorPuyoCnt == 2
-    check steps.garbagesCnt == 28
+    let steps = [Step.init RedGreen, Step.init([Col0: 5, 4, 5, 5, 5, 4], false)].toDeque
+    check steps.cellCount(Red) == 1
+    check steps.cellCount(Yellow) == 0
+    check steps.cellCount(Garbage) == 28
+    check steps.cellCount(Hard) == 0
+    check steps.puyoCount == 30
+    check steps.colorPuyoCount == 2
+    check steps.garbagesCount == 28
 
   block:
     let steps = Step.init(cross = false)
-    check steps.cellCnt(Red) == 0
-    check steps.cellCnt(Yellow) == 0
-    check steps.cellCnt(Garbage) == 0
-    check steps.cellCnt(Hard) == 0
-    check steps.puyoCnt == 0
-    check steps.colorPuyoCnt == 0
-    check steps.garbagesCnt == 0
+    check steps.cellCount(Red) == 0
+    check steps.cellCount(Yellow) == 0
+    check steps.cellCount(Garbage) == 0
+    check steps.cellCount(Hard) == 0
+    check steps.puyoCount == 0
+    check steps.colorPuyoCount == 0
+    check steps.garbagesCount == 0
 
 # ------------------------------------------------
 # Step <-> string / URI
@@ -122,54 +121,54 @@ block: # `$`, parseStep, toUriQuery
   let step = Step.init(BluePurple, Left3)
 
   check $step == "bp|43"
-  check "bp|43".parseStep == Res[Step].ok step
+  check "bp|43".parseStep == StrErrorResult[Step].ok step
 
-  check step.toUriQuery(Pon2) == Res[string].ok "bp43"
-  check step.toUriQuery(Ishikawa) == Res[string].ok "QG"
-  check step.toUriQuery(Ips) == Res[string].ok "QG"
+  check step.toUriQuery(Pon2) == StrErrorResult[string].ok "bp43"
+  check step.toUriQuery(Ishikawa) == StrErrorResult[string].ok "QG"
+  check step.toUriQuery(Ips) == StrErrorResult[string].ok "QG"
 
-  check "bp43".parseStep(Pon2) == Res[Step].ok step
-  check "QG".parseStep(Ishikawa) == Res[Step].ok step
-  check "QG".parseStep(Ips) == Res[Step].ok step
+  check "bp43".parseStep(Pon2) == StrErrorResult[Step].ok step
+  check "QG".parseStep(Ishikawa) == StrErrorResult[Step].ok step
+  check "QG".parseStep(Ips) == StrErrorResult[Step].ok step
 
 block: # garbages
   block: # Garbage
     let step = Step.init([Col0: 2, 3, 3, 2, 2, 3], false)
     check $step == "(2,3,3,2,2,3)"
-    check "(2,3,3,2,2,3)".parseStep == Res[Step].ok step
+    check "(2,3,3,2,2,3)".parseStep == StrErrorResult[Step].ok step
 
-    check step.toUriQuery(Pon2) == Res[string].ok "o2_3_3_2_2_3o"
-    check step.toUriQuery(Ishikawa) == Res[string].ok "yp"
-    check step.toUriQuery(Ips) == Res[string].ok "yp"
+    check step.toUriQuery(Pon2) == StrErrorResult[string].ok "o2_3_3_2_2_3o"
+    check step.toUriQuery(Ishikawa) == StrErrorResult[string].ok "yp"
+    check step.toUriQuery(Ips) == StrErrorResult[string].ok "yp"
 
-    check "o2_3_3_2_2_3o".parseStep(Pon2) == Res[Step].ok step
-    check "yp".parseStep(Ishikawa) == Res[Step].ok step
-    check "yp".parseStep(Ips) == Res[Step].ok step
+    check "o2_3_3_2_2_3o".parseStep(Pon2) == StrErrorResult[Step].ok step
+    check "yp".parseStep(Ishikawa) == StrErrorResult[Step].ok step
+    check "yp".parseStep(Ips) == StrErrorResult[Step].ok step
 
   block: # Hard
     let step = Step.init([Col0: 0, 0, 0, -1, 0, 0], true)
     check $step == "[0,0,0,-1,0,0]"
-    check "[0,0,0,-1,0,0]".parseStep == Res[Step].ok step
+    check "[0,0,0,-1,0,0]".parseStep == StrErrorResult[Step].ok step
 
-    check step.toUriQuery(Pon2) == Res[string].ok "h0_0_0_-1_0_0h"
+    check step.toUriQuery(Pon2) == StrErrorResult[string].ok "h0_0_0_-1_0_0h"
     check step.toUriQuery(Ishikawa).isErr
     check step.toUriQuery(Ips).isErr
 
   block: # rotate
     let step = Step.init(cross = false)
     check $step == "O"
-    check "O".parseStep == Res[Step].ok step
+    check "O".parseStep == StrErrorResult[Step].ok step
 
-    check step.toUriQuery(Pon2) == Res[string].ok "O"
+    check step.toUriQuery(Pon2) == StrErrorResult[string].ok "O"
     check step.toUriQuery(Ishikawa).isErr
     check step.toUriQuery(Ips).isErr
 
   block: # cross rotate
     let step = Step.init(cross = true)
     check $step == "X"
-    check "X".parseStep == Res[Step].ok step
+    check "X".parseStep == StrErrorResult[Step].ok step
 
-    check step.toUriQuery(Pon2) == Res[string].ok "X"
+    check step.toUriQuery(Pon2) == StrErrorResult[string].ok "X"
     check step.toUriQuery(Ishikawa).isErr
     check step.toUriQuery(Ips).isErr
 
@@ -183,56 +182,56 @@ block: # `$`, parseSteps, toUriQuery
       Step.init RedGreen,
       Step.init([Col0: 1, 0, 0, 0, 0, 1], false),
       Step.init(YellowYellow, Up2),
-    ].toDeque2
+    ].toDeque
 
     let str = "rg|\n(1,0,0,0,0,1)\nyy|3N"
     check $steps == str
-    check str.parseSteps == Res[Steps].ok steps
+    check str.parseSteps == StrErrorResult[Steps].ok steps
 
     let query = "rgo1_0_0_0_0_1oyy3N"
-    check steps.toUriQuery(Pon2) == Res[string].ok query
-    check steps.toUriQuery(Ishikawa) == Res[string].ok "c1axG4"
-    check steps.toUriQuery(Ips) == Res[string].ok "c1axG4"
+    check steps.toUriQuery(Pon2) == StrErrorResult[string].ok query
+    check steps.toUriQuery(Ishikawa) == StrErrorResult[string].ok "c1axG4"
+    check steps.toUriQuery(Ips) == StrErrorResult[string].ok "c1axG4"
 
-    check query.parseSteps(Pon2) == Res[Steps].ok steps
-    check "c1axG4".parseSteps(Ishikawa) == Res[Steps].ok steps
-    check "c1axG4".parseSteps(Ips) == Res[Steps].ok steps
+    check query.parseSteps(Pon2) == StrErrorResult[Steps].ok steps
+    check "c1axG4".parseSteps(Ishikawa) == StrErrorResult[Steps].ok steps
+    check "c1axG4".parseSteps(Ips) == StrErrorResult[Steps].ok steps
 
   block: # Hard
     let steps =
-      [Step.init([Col0: 0, 0, 2, 0, 1, 3], true), Step.init PurpleBlue].toDeque2
+      [Step.init([Col0: 0, 0, 2, 0, 1, 3], true), Step.init PurpleBlue].toDeque
 
     let str = "[0,0,2,0,1,3]\npb|"
     check $steps == str
-    check str.parseSteps == Res[Steps].ok steps
+    check str.parseSteps == StrErrorResult[Steps].ok steps
 
     let query = "h0_0_2_0_1_3hpb"
-    check steps.toUriQuery(Pon2) == Res[string].ok query
+    check steps.toUriQuery(Pon2) == StrErrorResult[string].ok query
     check steps.toUriQuery(Ishikawa).isErr
     check steps.toUriQuery(Ips).isErr
 
-    check query.parseSteps(Pon2) == Res[Steps].ok steps
+    check query.parseSteps(Pon2) == StrErrorResult[Steps].ok steps
 
   block: # rotate
-    let steps = [Step.init(cross = true), Step.init(cross = false)].toDeque2
+    let steps = [Step.init(cross = true), Step.init(cross = false)].toDeque
 
     let str = "X\nO"
     check $steps == str
-    check str.parseSteps == Res[Steps].ok steps
+    check str.parseSteps == StrErrorResult[Steps].ok steps
 
     let query = "XO"
-    check steps.toUriQuery(Pon2) == Res[string].ok query
+    check steps.toUriQuery(Pon2) == StrErrorResult[string].ok query
     check steps.toUriQuery(Ishikawa).isErr
     check steps.toUriQuery(Ips).isErr
 
-    check query.parseSteps(Pon2) == Res[Steps].ok steps
+    check query.parseSteps(Pon2) == StrErrorResult[Steps].ok steps
 
   block: # empty steps
     let steps = Steps.init
 
     check $steps == ""
-    check "".parseSteps == Res[Steps].ok steps
+    check "".parseSteps == StrErrorResult[Steps].ok steps
 
     for fqdn in SimulatorFqdn:
-      check steps.toUriQuery(fqdn) == Res[string].ok ""
-      check "".parseSteps(fqdn) == Res[Steps].ok steps
+      check steps.toUriQuery(fqdn) == StrErrorResult[string].ok ""
+      check "".parseSteps(fqdn) == StrErrorResult[Steps].ok steps

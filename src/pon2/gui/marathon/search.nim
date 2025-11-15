@@ -16,13 +16,13 @@ when defined(js) or defined(nimsuggest):
   import ../[helper]
   import ../../[app]
 
-  proc toMarathonSearchVNode*(
-      self: ref Marathon, helper: VNodeHelper
-  ): VNode {.inline.} =
+  export vdom
+
+  proc toMarathonSearchVNode*(self: ref Marathon, helper: VNodeHelper): VNode =
     ## Returns the marathon search bar node.
     let rate =
       if self[].isReady:
-        self[].matchQueryCnt / self[].allQueryCnt
+        self[].matchQueryCount / self[].allQueryCount
       else:
         0.0
 

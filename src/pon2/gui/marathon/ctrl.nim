@@ -17,7 +17,9 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
-  proc toMarathonCtrlVNode*(self: ref Marathon, helper: VNodeHelper): VNode {.inline.} =
+  export vdom
+
+  proc toMarathonCtrlVNode*(self: ref Marathon, helper: VNodeHelper): VNode =
     ## Returns the marathon controller node.
     buildHtml tdiv:
       p:
@@ -38,7 +40,7 @@ when defined(js) or defined(nimsuggest):
           button(
             class = "button",
             onclick = () => self[].selectRandomQuery,
-            disabled = self[].matchQueryCnt == 0,
+            disabled = self[].matchQueryCount == 0,
           ):
             text "指定ツモ"
             if not helper.mobile:

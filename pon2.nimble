@@ -1,6 +1,6 @@
 # Package
 
-version = "0.24.5"
+version = "0.25.0"
 author = "Keisuke Izumiya"
 description = "Application of Puyo Puyo and Nazo Puyo"
 license = "Apache-2.0"
@@ -30,7 +30,7 @@ requires "unittest2 ^= 0.2.5"
 
 import std/[os, sequtils, strformat, strutils]
 
-task page, "Generate Web Pages":
+task pages, "Generate Web Pages":
   const
     Pon2Path {.define: "pon2.path".} = ""
     danger {.booldefine.} = true

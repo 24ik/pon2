@@ -12,15 +12,17 @@
 
 when defined(js) or defined(nimsuggest):
   import std/[sugar]
-  import karax/[karax, karaxdsl, kdom, vdom]
+  import karax/[karax, karaxdsl, vdom]
   import ./[setting]
   import ../[helper]
   import ../../[app]
-  import ../../private/[gui]
+  import ../../private/[dom, gui]
+
+  export vdom
 
   const CheckIntervalMs = 1000
 
-  func initCheckHandler(self: ref Studio, interval: Interval): () -> void {.inline.} =
+  func initCheckHandler(self: ref Studio, interval: Interval): () -> void =
     ## Returns a handler to check the progress and redraw.
     () => (
       block:
@@ -30,7 +32,7 @@ when defined(js) or defined(nimsuggest):
         safeRedraw()
     )
 
-  proc runSolve(self: ref Studio) {.inline.} =
+  proc runSolve(self: ref Studio) =
     ## Solves the nazo puyo.
     ## This function requires that the field is settled.
     self.asyncSolve
@@ -40,19 +42,19 @@ when defined(js) or defined(nimsuggest):
     interval = setInterval(self.initCheckHandler interval, CheckIntervalMs)
     {.pop.}
 
-  proc runPermute(self: ref Studio, helper: VNodeHelper) {.inline.} =
+  proc runPermute(self: ref Studio, helper: VNodeHelper) =
     ## Permutes the nazo puyo.
     ## This function requires that the field is settled.
     let settings = helper.getStudioSetting
     self.asyncPermute settings.fixIndices,
-      settings.allowDblNotLast, settings.allowDblLast
+      settings.allowDoubleNotLast, settings.allowDoubleLast
 
     var interval: Interval
     {.push warning[Uninit]: off.}
     interval = setInterval(self.initCheckHandler interval, CheckIntervalMs)
     {.pop.}
 
-  proc toStudioCtrlVNode*(self: ref Studio, helper: VNodeHelper): VNode {.inline.} =
+  proc toStudioCtrlVNode*(self: ref Studio, helper: VNodeHelper): VNode =
     ## Returns the studio controller node.
     buildHtml tdiv:
       tdiv(class = "block"):

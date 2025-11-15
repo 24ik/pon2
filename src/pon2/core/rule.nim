@@ -7,7 +7,7 @@
 {.experimental: "views".}
 
 import std/[strformat, sugar]
-import ../private/[results2, tables2]
+import ../private/[results2, tables]
 
 export results2
 
@@ -24,6 +24,6 @@ const StrToRule = collect:
   for rule in Rule:
     {$rule: rule}
 
-func parseRule*(str: string): Res[Rule] {.inline.} =
+func parseRule*(str: string): StrErrorResult[Rule] {.inline, noinit.} =
   ## Returns the rule converted from the string representation.
-  StrToRule.getRes(str).context "Invalid rule: {str}".fmt
+  StrToRule[str].context "Invalid rule: {str}".fmt

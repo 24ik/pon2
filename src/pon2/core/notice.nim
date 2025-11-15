@@ -12,16 +12,15 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat]
 import ./[rule]
-import ../private/[assign3, results2]
+import ../private/[assign, staticfor]
 
-export results2
+export notice, rule
 
-type NoticeGarbage* {.pure.} = enum
+type Notice* {.pure.} = enum
   ## Notice garbage puyo.
   Small
-  Big
+  Large
   Rock
   Star
   Moon
@@ -41,31 +40,35 @@ static:
 # Notice Garbage
 # ------------------------------------------------
 
-const NoticeUnits: array[NoticeGarbage, int] = [1, 6, 30, 180, 360, 720, 1440]
+const NoticeUnits: array[Notice, int] = [1, 6, 30, 180, 360, 720, 1440]
 
-func noticeGarbageCnts*(
+func noticeCounts*(
     score: int, rule: Rule, useComet = false
-): Res[array[NoticeGarbage, int]] {.inline.} =
+): array[Notice, int] {.inline, noinit.} =
   ## Returns the number of notice garbage puyos.
+  var counts {.noinit.}: array[Notice, int]
+
   if score < 0:
-    return err "`score` should be non-negative, but got {score}".fmt
+    let invCounts = (-score).noticeCounts(rule, useComet)
+    staticFor(notice, Notice):
+      counts[notice].assign -invCounts[notice]
 
-  var cnts {.noinit.}: array[NoticeGarbage, int]
+    return counts
 
-  let highestNotice: NoticeGarbage
+  let highestNotice: Notice
   if useComet:
     highestNotice = Comet
   else:
     highestNotice = Crown
-    cnts[Comet].assign 0
+    counts[Comet].assign 0
 
   var score2 = score div GarbageRates[rule]
-  for notice in countdown(highestNotice, NoticeGarbage.low):
+  for notice in countdown(highestNotice, Notice.low):
     let
       unit = NoticeUnits[notice]
-      cnt = score2 div unit
+      count = score2 div unit
 
-    cnts[notice].assign cnt
-    score2.dec unit * cnt
+    counts[notice].assign count
+    score2.assign score2.pred unit * count
 
-  ok cnts
+  counts

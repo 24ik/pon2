@@ -5,10 +5,10 @@
 
 import std/[sequtils, unittest]
 import ../../src/pon2/core/[cell, common, popresult]
-import ../../src/pon2/private/[assign3, strutils2]
-import ../../src/pon2/private/core/[binfield]
+import ../../src/pon2/private/[assign, strutils]
+import ../../src/pon2/private/core/[binaryfield]
 
-proc toBinField(str: string): BinField =
+proc toBinaryField(str: string): BinaryField =
   ## Returns the binary field converted from the string representation.
   let strs = str.split "\n"
 
@@ -17,14 +17,14 @@ proc toBinField(str: string): BinField =
     for col in Col:
       arr[row][col].assign strs[row.ord][col.ord] == 'x'
 
-  return arr.toBinField
+  return arr.toBinaryField
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
 block: # init
-  let zero = BinField.init
+  let zero = BinaryField.init
   check PopResult.init(zero, zero, zero, zero, zero, zero, zero, zero, zero) ==
     PopResult.init
 
@@ -33,10 +33,10 @@ block: # init
 # ------------------------------------------------
 
 block: # isPopped
-  let zero = BinField.init
+  let zero = BinaryField.init
 
   block:
-    var red = BinField.init
+    var red = BinaryField.init
     red[Row6, Col3] = true
 
     check PopResult.init(red, zero, zero, zero, zero, zero, zero, zero, red).isPopped
@@ -48,13 +48,13 @@ block: # isPopped
 # Count
 # ------------------------------------------------
 
-block: # cellCnt, puyoCnt, colorPuyoCnt, garbagesCnt
+block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
   var
-    red = BinField.init
-    yellow = BinField.init
-    hard = BinField.init
-    hardToGarbage = BinField.init
-    garbage = BinField.init
+    red = BinaryField.init
+    yellow = BinaryField.init
+    hard = BinaryField.init
+    hardToGarbage = BinaryField.init
+    garbage = BinaryField.init
   red[Row1, Col3] = true
   red[Row5, Col2] = true
   yellow[Row0, Col0] = true
@@ -64,23 +64,23 @@ block: # cellCnt, puyoCnt, colorPuyoCnt, garbagesCnt
   garbage[Row2, Col3] = true
 
   let
-    zero = BinField.init
+    zero = BinaryField.init
     popRes = PopResult.init(
       red, zero, zero, yellow, zero, hard, hardToGarbage, garbage, red + yellow
     )
 
-  check popRes.cellCnt(Red) == 2
-  check popRes.cellCnt(Green) == 0
-  check popRes.puyoCnt == 6
-  check popRes.colorPuyoCnt == 3
-  check popRes.garbagesCnt == 3
-  check popRes.hardToGarbageCnt == 1
+  check popRes.cellCount(Red) == 2
+  check popRes.cellCount(Green) == 0
+  check popRes.puyoCount == 6
+  check popRes.colorPuyoCount == 3
+  check popRes.garbagesCount == 3
+  check popRes.hardToGarbageCount == 1
 
 # ------------------------------------------------
 # Connection
 # ------------------------------------------------
 
-block: # connCnts
+block: # connectionCounts
   let
     red =
       """
@@ -96,7 +96,7 @@ x.....
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
     green =
       """
 ......
@@ -111,9 +111,10 @@ x.....
 .x....
 .x..x.
 .xxxx.
-......""".toBinField
+......""".toBinaryField
 
-    zero = BinField.init
+    zero = BinaryField.init
     popRes = PopResult.init(red, green, zero, zero, zero, zero, zero, zero, zero)
 
-  check popRes.connCnts == [@[], @[], @[], @[3, 1, 2, 4, 2], @[21], @[], @[], @[]]
+  check popRes.connectionCounts ==
+    [@[], @[], @[], @[3, 1, 2, 4, 2], @[21], @[], @[], @[]]

@@ -18,9 +18,11 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
+  export vdom
+
   proc toSimulatorVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
-  ): VNode {.inline.} =
+  ): VNode =
     ## Returns the simulator node.
     let
       mode = self.derefSimulator(helper).mode

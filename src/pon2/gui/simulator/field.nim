@@ -18,9 +18,11 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
-  proc cellBgColor[S: Simulator or Studio or Marathon](
+  export vdom
+
+  proc cellBackgroundColor[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, row: Row, col: Col, editable: bool
-  ): Color {.inline.} =
+  ): Color =
     ## Returns the cell's background color.
     if editable and not helper.mobile and self.derefSimulator(helper).editData.focusField and
         self.derefSimulator(helper).editData.field == (row, col):
@@ -42,13 +44,13 @@ when defined(js) or defined(nimsuggest):
 
   proc toFieldVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, cameraReady = false
-  ): VNode {.inline.} =
+  ): VNode =
     ## Returns the field node.
     let
       editable = not cameraReady and self.derefSimulator(helper).mode in EditModes
       nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
       arr = nazoWrap.unwrapNazoPuyo:
-        it.field.toArr
+        it.field.toArray
       tableBorder = (StyleAttr.border, "1px gray solid".cstring)
       tableStyle =
         if editable:
@@ -69,7 +71,7 @@ when defined(js) or defined(nimsuggest):
                 imgSrc = arr[row][col].cellImgSrc
                 cellStyle = style(
                   StyleAttr.backgroundColor,
-                  self.cellBgColor(helper, row, col, editable).toHtmlRgba.cstring,
+                  self.cellBackgroundColor(helper, row, col, editable).toHtmlRgba.cstring,
                 )
 
               td:

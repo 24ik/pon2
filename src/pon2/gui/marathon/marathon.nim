@@ -18,7 +18,9 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
-  proc toMarathonVNode*(self: ref Marathon, helper: VNodeHelper): VNode {.inline.} =
+  export vdom
+
+  proc toMarathonVNode*(self: ref Marathon, helper: VNodeHelper): VNode =
     ## Returns the marathon node.
     buildHtml tdiv:
       tdiv(class = "block"):

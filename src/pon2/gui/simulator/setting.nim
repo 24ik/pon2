@@ -17,21 +17,23 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
+  export vdom
+
   const
-    BtnCls = "button".cstring
-    SelectBtnCls = "button is-primary is-selected".cstring
+    BtnClass = "button".cstring
+    SelectBtnClass = "button is-primary is-selected".cstring
 
   proc toSettingsVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
-  ): VNode {.inline.} =
+  ): VNode =
     ## Returns the select node.
-    let playBtnCls, editBtnCls: cstring
+    let playBtnClass, editBtnClass: cstring
     if self.derefSimulator(helper).mode in PlayModes:
-      playBtnCls = SelectBtnCls
-      editBtnCls = BtnCls
+      playBtnClass = SelectBtnClass
+      editBtnClass = BtnClass
     else:
-      playBtnCls = BtnCls
-      editBtnCls = SelectBtnCls
+      playBtnClass = BtnClass
+      editBtnClass = SelectBtnClass
 
     let playMode, editMode: SimulatorMode
     if self.derefSimulator(helper).mode in ViewerModes:
@@ -45,7 +47,7 @@ when defined(js) or defined(nimsuggest):
       tdiv(class = "field has-addons"):
         tdiv(class = "control"):
           button(
-            class = playBtnCls,
+            class = playBtnClass,
             onclick = () => (self.derefSimulator(helper).mode = playMode),
           ):
             span(class = "icon"):
@@ -55,7 +57,7 @@ when defined(js) or defined(nimsuggest):
                   text "T"
         tdiv(class = "control"):
           button(
-            class = editBtnCls,
+            class = editBtnClass,
             onclick = () => (self.derefSimulator(helper).mode = editMode),
           ):
             span(class = "icon"):
@@ -64,19 +66,19 @@ when defined(js) or defined(nimsuggest):
                 span(style = counterStyle):
                   text "T"
       if self.derefSimulator(helper).mode == EditorEdit:
-        let tsuBtnCls, waterBtnCls: cstring
+        let tsuBtnClass, waterBtnClass: cstring
         case self.derefSimulator(helper).rule
         of Tsu:
-          tsuBtnCls = SelectBtnCls
-          waterBtnCls = BtnCls
+          tsuBtnClass = SelectBtnClass
+          waterBtnClass = BtnClass
         else:
-          tsuBtnCls = BtnCls
-          waterBtnCls = SelectBtnCls
+          tsuBtnClass = BtnClass
+          waterBtnClass = SelectBtnClass
 
         tdiv(class = "field has-addons"):
           tdiv(class = "control"):
             button(
-              class = tsuBtnCls,
+              class = tsuBtnClass,
               onclick = () => (self.derefSimulator(helper).rule = Tsu),
             ):
               span(class = "icon"):
@@ -86,7 +88,7 @@ when defined(js) or defined(nimsuggest):
                     text "R"
           tdiv(class = "control"):
             button(
-              class = waterBtnCls,
+              class = waterBtnClass,
               onclick = () => (self.derefSimulator(helper).rule = Water),
             ):
               span(class = "icon"):

@@ -17,15 +17,15 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
-  proc toStudioPaginationVNode*(
-      self: ref Studio, helper: VNodeHelper
-  ): VNode {.inline.} =
+  export vdom
+
+  proc toStudioPaginationVNode*(self: ref Studio, helper: VNodeHelper): VNode =
     ## Returns the studio pagination node.
     let replayNum =
-      if self[].replayStepsCnt == 0:
+      if self[].replayStepsCount == 0:
         0
       else:
-        self[].replayStepsIdx.succ
+        self[].replayStepsIndex.succ
 
     buildHtml nav(class = "pagination"):
       button(class = "button pagination-link", onclick = () => self[].prevReplay):
@@ -35,7 +35,7 @@ when defined(js) or defined(nimsuggest):
             span(style = counterStyle):
               text "A"
       button(class = "button pagination-link is-static"):
-        text "{replayNum} / {self[].replayStepsCnt}".fmt
+        text "{replayNum} / {self[].replayStepsCount}".fmt
       button(class = "button pagination-link", onclick = () => self[].nextReplay):
         span(class = "icon"):
           italic(class = "fa-solid fa-forward-step")

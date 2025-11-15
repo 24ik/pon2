@@ -11,14 +11,14 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-const SimdLvl {.define: "pon2.simd".} = 1
+const SimdLevel {.define: "pon2.simd".} = 1
 
 static:
-  doAssert SimdLvl in 0 .. 1
+  doAssert SimdLevel in 0 .. 1
 
 const
   X86_64 = defined(amd64) or defined(i386)
-  Sse42Available* = SimdLvl >= 1 and X86_64
+  Sse42Available* = SimdLevel >= 1 and X86_64
 
 when Sse42Available:
   import nimsimd/[sse42]
@@ -45,7 +45,7 @@ when Sse42Available:
   # XMM - Operator
   # ------------------------------------------------
 
-  func `$`*(self: M128i): string {.inline.} =
+  func `$`*(self: M128i): string {.inline, noinit.} =
     var arr {.noinit, align(16).}: array[8, uint16]
     arr.addr.mm_store_si128 self
 
@@ -53,19 +53,19 @@ when Sse42Available:
     return "M128i{arr}".fmt
     {.pop.}
 
-  func `==`*(x1, x2: M128i): bool {.inline.} =
+  func `==`*(x1, x2: M128i): bool {.inline, noinit.} =
     let diff = mm_xor_si128(x1, x2)
     mm_testz_si128(diff, diff).bool
 
-  func assign*(tgt: var M128i, src: M128i) {.inline.} =
-    ## Assigns the source to the target.
-    tgt = src
+  func assign*(dst: var M128i, src: M128i) {.inline, noinit.} =
+    ## Assigns the source to the destination.
+    dst = src
 
   # ------------------------------------------------
   # XMM - reverse
   # ------------------------------------------------
 
-  func reverseBits*(x: M128i): M128i {.inline.} =
+  func reverseBits*(x: M128i): M128i {.inline, noinit.} =
     ## Returns the bit reversal of x.
     var y = mm_or_si128(
       mm_and_si128(mm_set1_epi8 0x55'u8, x).mm_slli_epi64 1,

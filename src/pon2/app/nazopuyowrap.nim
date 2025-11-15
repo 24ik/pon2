@@ -8,9 +8,9 @@
 
 import std/[strformat]
 import ../[core]
-import ../private/[assign3, macros2, results2, strutils2]
+import ../private/[assign, macros, results2, strutils]
 
-export results2
+export core, results2
 
 type NazoPuyoWrap* = object ## Nazo puyo wrapper.
   optGoal*: Opt[Goal]
@@ -24,42 +24,34 @@ type NazoPuyoWrap* = object ## Nazo puyo wrapper.
 # Constructor
 # ------------------------------------------------
 
-func init(
-    T: type NazoPuyoWrap, optGoal: Opt[Goal], puyoPuyo: PuyoPuyo[TsuField]
-): T {.inline.} =
+func init(T: type NazoPuyoWrap, optGoal: Opt[Goal], puyoPuyo: PuyoPuyo[TsuField]): T =
   T(optGoal: optGoal, rule: Tsu, tsu: puyoPuyo)
 
-func init(
-    T: type NazoPuyoWrap, optGoal: Opt[Goal], puyoPuyo: PuyoPuyo[WaterField]
-): T {.inline.} =
+func init(T: type NazoPuyoWrap, optGoal: Opt[Goal], puyoPuyo: PuyoPuyo[WaterField]): T =
   T(optGoal: optGoal, rule: Water, water: puyoPuyo)
 
-func init*[F: TsuField or WaterField](
-    T: type NazoPuyoWrap, nazo: NazoPuyo[F]
-): T {.inline.} =
+func init*[F: TsuField or WaterField](T: type NazoPuyoWrap, nazo: NazoPuyo[F]): T =
   T.init(Opt[Goal].ok nazo.goal, nazo.puyoPuyo)
 
-func init*[F: TsuField or WaterField](
-    T: type NazoPuyoWrap, puyoPuyo: PuyoPuyo[F]
-): T {.inline.} =
+func init*[F: TsuField or WaterField](T: type NazoPuyoWrap, puyoPuyo: PuyoPuyo[F]): T =
   T.init(Opt[Goal].err, puyoPuyo)
 
-func init*(T: type NazoPuyoWrap): T {.inline.} =
+func init*(T: type NazoPuyoWrap): T =
   T.init NazoPuyo[TsuField].init
 
 # ------------------------------------------------
 # Operator
 # ------------------------------------------------
 
-func `==`*(field1: TsuField, field2: WaterField): bool {.inline.} =
+func `==`*(field1: TsuField, field2: WaterField): bool =
   # NOTE: this function may be needed in `unwrapNazoPuyo`.
   false
 
-func `==`*(field1: WaterField, field2: TsuField): bool {.inline.} =
+func `==`*(field1: WaterField, field2: TsuField): bool =
   # NOTE: this function may be needed in `unwrapNazoPuyo`.
   false
 
-func `==`*(wrap1, wrap2: NazoPuyoWrap): bool {.inline.} =
+func `==`*(wrap1, wrap2: NazoPuyoWrap): bool =
   if wrap1.optGoal != wrap2.optGoal or wrap1.rule != wrap2.rule:
     return false
 
@@ -103,11 +95,11 @@ macro unwrapNazoPuyo*(self: untyped, body: untyped): untyped =
 # Property
 # ------------------------------------------------
 
-func rule*(self: NazoPuyoWrap): Rule {.inline.} =
+func rule*(self: NazoPuyoWrap): Rule =
   ## Returns the rule.
   self.rule
 
-func `rule=`*(self: var NazoPuyoWrap, rule: Rule) {.inline.} =
+func `rule=`*(self: var NazoPuyoWrap, rule: Rule) =
   ## Sets the rule.
   if rule == self.rule:
     return
@@ -127,7 +119,7 @@ func `rule=`*(self: var NazoPuyoWrap, rule: Rule) {.inline.} =
 # Nazo Puyo wrapper <-> URI
 # ------------------------------------------------
 
-func toUriQuery*(self: NazoPuyoWrap, fqdn: SimulatorFqdn): Res[string] {.inline.} =
+func toUriQuery*(self: NazoPuyoWrap, fqdn: SimulatorFqdn): StrErrorResult[string] =
   ## Returns the URI query converted from the Nazo Puyo wrapper.
   const ErrMsg = "Invalid Nazo Puyo wrapper"
 
@@ -140,26 +132,26 @@ func toUriQuery*(self: NazoPuyoWrap, fqdn: SimulatorFqdn): Res[string] {.inline.
 
 func parseNazoPuyoWrap*(
     query: string, fqdn: SimulatorFqdn
-): Res[NazoPuyoWrap] {.inline.} =
+): StrErrorResult[NazoPuyoWrap] =
   ## Returns the Nazo Puyo wrapper converted from the URI query.
   let errMsg = "Invalid Nazo Puyo wrapper: {query}".fmt
 
   case fqdn
   of Pon2:
     let
-      isNazo = "goal=" in query
-      isTsu = "field={Tsu}_".fmt in query
+      isNazo = "goal" in query
+      isWater = "field={Water}_".fmt in query
 
-    if isTsu:
-      if isNazo:
-        ok NazoPuyoWrap.init ?parseNazoPuyo[TsuField](query, fqdn).context errMsg
-      else:
-        ok NazoPuyoWrap.init ?parsePuyoPuyo[TsuField](query, fqdn).context errMsg
-    else:
+    if isWater:
       if isNazo:
         ok NazoPuyoWrap.init ?parseNazoPuyo[WaterField](query, fqdn).context errMsg
       else:
         ok NazoPuyoWrap.init ?parsePuyoPuyo[WaterField](query, fqdn).context errMsg
+    else:
+      if isNazo:
+        ok NazoPuyoWrap.init ?parseNazoPuyo[TsuField](query, fqdn).context errMsg
+      else:
+        ok NazoPuyoWrap.init ?parsePuyoPuyo[TsuField](query, fqdn).context errMsg
   of Ishikawa, Ips:
     if "__" in query:
       ok NazoPuyoWrap.init ?parseNazoPuyo[TsuField](query, fqdn).context errMsg

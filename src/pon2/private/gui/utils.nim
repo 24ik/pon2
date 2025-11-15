@@ -15,9 +15,14 @@ import chroma
 
 when defined(js) or defined(nimsuggest):
   import std/[jsffi, strformat, sugar]
-  import karax/[karax, kdom, vdom, vstyles]
-  import ../[assign3, utils]
+  import karax/[karax, vdom, vstyles]
+  import ../[assign, dom, utils]
   import ../../[app]
+
+export chroma
+
+when defined(js) or defined(nimsuggest):
+  export vstyles
 
 const
   AssetsDir* {.define: "pon2.assets".} = "../assets"
@@ -58,21 +63,19 @@ when defined(js) or defined(nimsuggest):
   # JS - Copy Button
   # ------------------------------------------------
 
-  proc showFlashMsg(elem: Element, html: cstring, showMs = 500) {.inline.} =
+  proc showFlashMsg(elem: Element, html: cstring, showMs = 500) =
     ## Shows the flash message `html` at `elem` for `showMs` milliseconds.
     let oldHtml = elem.innerHTML
     elem.innerHTML.assign html
     runLater () => (elem.innerHTML.assign oldHtml), showMs
 
-  func addCopyBtnHandler*(
-      btn: VNode, copyStrFn: () -> string, showFlashMsgMs = 500
-  ) {.inline.} =
+  func addCopyBtnHandler*(btn: VNode, copyStrProc: () -> string, showFlashMsgMs = 500) =
     ## Adds the copying handler to the button.
     proc handler(ev: Event, target: VNode) =
       let btn = cast[Element](btn.dom)
       btn.disabled = true
 
-      getClipboard().writeText copyStrFn().cstring
+      getClipboard().writeText copyStrProc().cstring
       btn.showFlashMsg "<span class='icon'><i class='fa-solid fa-check'></i></span><span>コピー</span>",
         showFlashMsgMs
 
@@ -84,7 +87,7 @@ when defined(js) or defined(nimsuggest):
   # JS - Image
   # ------------------------------------------------
 
-  func cellImgSrc*(cell: Cell): cstring {.inline.} =
+  func cellImgSrc*(cell: Cell): cstring =
     ## Returns the image source of cells.
     let stem =
       case cell
@@ -99,26 +102,26 @@ when defined(js) or defined(nimsuggest):
 
     "{AssetsDir}/puyo/{stem}.png".fmt.cstring
 
-  func noticeGarbageImgSrc*(notice: NoticeGarbage): cstring {.inline.} =
+  func noticeImgSrc*(notice: Notice): cstring =
     ## Returns the image source of notice garbages.
     let stem =
       case notice
       of Small: "small"
-      of Big: "big"
+      of Large: "large"
       of Rock: "rock"
       of Star: "star"
       of Moon: "moon"
       of Crown: "crown"
       of Comet: "comet"
 
-    "{AssetsDir}/noticegarbage/{stem}.png".fmt.cstring
+    "{AssetsDir}/notice/{stem}.png".fmt.cstring
   {.pop.}
 
   # ------------------------------------------------
   # JS - Others
   # ------------------------------------------------
 
-  proc safeRedraw*() {.inline.} =
+  proc safeRedraw*() =
     ## Redraws the window.
     if not kxi.surpressRedraws:
       kxi.redraw

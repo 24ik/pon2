@@ -6,7 +6,7 @@
 import std/[importutils, unittest]
 import ../../src/pon2/[core]
 import ../../src/pon2/app/[key, nazopuyowrap, simulator, studio]
-import ../../src/pon2/private/[assign3]
+import ../../src/pon2/private/[assign]
 
 func `==`(progressRef1, progressRef2: ref tuple[now, total: int]): bool =
   progressRef1[] == progressRef2[]
@@ -24,7 +24,7 @@ block: # init
 
 block:
   # simulator, replaySimulator, focusReplay, solving, permuting, working,
-  # replayStepsCnt, replayStepsIdx, progressRef
+  # replayStepsCount, replayStepsIndex, progressRef
   let studio = Studio.init
 
   check studio.simulator == Simulator.init EditorEdit
@@ -33,8 +33,8 @@ block:
   check not studio.solving
   check not studio.permuting
   check not studio.working
-  check studio.replayStepsCnt == 0
-  check studio.replayStepsIdx == 0
+  check studio.replayStepsCount == 0
+  check studio.replayStepsIndex == 0
   check studio.progressRef[] == (0, 0)
 
 block: # simulator (var), replaySimulator (var)
@@ -105,18 +105,18 @@ bg|"""
 
   studio.solve
   check studio == studioAns
-  check studio.replayStepsCnt == 1
-  check studio.replayStepsIdx == 0
+  check studio.replayStepsCount == 1
+  check studio.replayStepsIndex == 0
 
   studio.nextReplay
   check studio == studioAns
-  check studio.replayStepsCnt == 1
-  check studio.replayStepsIdx == 0
+  check studio.replayStepsCount == 1
+  check studio.replayStepsIndex == 0
 
   studio.prevReplay
   check studio == studioAns
-  check studio.replayStepsCnt == 1
-  check studio.replayStepsIdx == 0
+  check studio.replayStepsCount == 1
+  check studio.replayStepsIndex == 0
 
   var nazoPermute1 = nazo
   nazoPermute1.puyoPuyo.steps[0].pair.assign GreenGreen
@@ -142,7 +142,7 @@ bg|"""
     Studio.privateAccess
     StudioReplayData.privateAccess
     studioPermute2.replaySimulator.assign simPermute2
-    studioPermute2.replayData.stepsIdx.assign 1
+    studioPermute2.replayData.stepsIndex.assign 1
 
   block:
     Studio.privateAccess
@@ -151,30 +151,30 @@ bg|"""
     studioPermute1.replayData.stepsSeq.assign stepsSeq
     studioPermute2.replayData.stepsSeq.assign stepsSeq
 
-  studio.permute(@[], allowDblNotLast = true, allowDblLast = true)
+  studio.permute(@[], allowDoubleNotLast = true, allowDoubleLast = true)
   check studio == studioPermute1
-  check studio.replayStepsCnt == 2
-  check studio.replayStepsIdx == 0
+  check studio.replayStepsCount == 2
+  check studio.replayStepsIndex == 0
 
   studio.nextReplay
   check studio == studioPermute2
-  check studio.replayStepsCnt == 2
-  check studio.replayStepsIdx == 1
+  check studio.replayStepsCount == 2
+  check studio.replayStepsIndex == 1
 
   studio.nextReplay
   check studio == studioPermute1
-  check studio.replayStepsCnt == 2
-  check studio.replayStepsIdx == 0
+  check studio.replayStepsCount == 2
+  check studio.replayStepsIndex == 0
 
   studio.prevReplay
   check studio == studioPermute2
-  check studio.replayStepsCnt == 2
-  check studio.replayStepsIdx == 1
+  check studio.replayStepsCount == 2
+  check studio.replayStepsIndex == 1
 
   studio.prevReplay
   check studio == studioPermute1
-  check studio.replayStepsCnt == 2
-  check studio.replayStepsIdx == 0
+  check studio.replayStepsCount == 2
+  check studio.replayStepsIndex == 0
 
 # ------------------------------------------------
 # Keyboard

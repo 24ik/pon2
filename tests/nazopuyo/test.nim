@@ -7,7 +7,7 @@ import std/[sugar, unittest]
 import
   ../../src/pon2/core/
     [common, field, fqdn, goal, nazopuyo, placement, popresult, puyopuyo, rule, step]
-import ../../src/pon2/private/[strutils2]
+import ../../src/pon2/private/[strutils]
 
 func mark2[F: TsuField or WaterField](
     nazo: NazoPuyo[F], plcmts: varargs[Placement]
@@ -35,7 +35,7 @@ block: # init
   let
     puyoPuyoT = PuyoPuyo[TsuField].init
     puyoPuyoW = PuyoPuyo[WaterField].init
-    goal = Goal.init(Cnt, Colors, 10)
+    goal = Goal.init(Count, Colors, 10)
 
   check NazoPuyo[TsuField].init(puyoPuyoT, goal) ==
     NazoPuyo[TsuField](puyoPuyo: puyoPuyoT, goal: goal)
@@ -78,7 +78,7 @@ by|"""
     check nazo.mark2(Left3, Down2) == Accept
     check nazo.mark2(OptPlacement.ok Left3, NonePlacement) == WrongAnswer
 
-  block: # AccColor
+  block: # AccumColor
     let nazo = parseNazoPuyo[TsuField](
       """
 3色消すべし
@@ -104,7 +104,7 @@ rg|"""
     check nazo.mark2(Down2, Left5) == Accept
     check nazo.mark2(Left3, Left5) == WrongAnswer
 
-  block: # AccColorMore
+  block: # AccumColorMore
     let nazo = parseNazoPuyo[TsuField](
       """
 3色以上消すべし
@@ -130,7 +130,7 @@ rg|"""
     check nazo.mark2(Down2, Left5) == Accept
     check nazo.mark2(Left3, Left5) == WrongAnswer
 
-  block: # AccCnt
+  block: # AccumCount
     let nazo = parseNazoPuyo[TsuField](
       """
 ぷよ18個消すべし
@@ -156,7 +156,7 @@ yg|"""
     check nazo.mark2(Up0, Down1) == Accept
     check nazo.mark2(Right3, Down3) == WrongAnswer
 
-  block: # AccCntMore
+  block: # AccumCountMore
     let nazo = parseNazoPuyo[TsuField](
       """
 ぷよ18個以上消すべし
@@ -340,7 +340,7 @@ gp|"""
     check nazo.mark2(Left5, Down5) == Accept
     check nazo.mark2(Down5, Up4) == WrongAnswer
 
-  block: # Cnt
+  block: # Count
     let nazo = parseNazoPuyo[TsuField](
       """
 ぷよ12個同時に消すべし
@@ -365,7 +365,7 @@ rg|"""
     check nazo.mark2(Down2, Left2) == Accept
     check nazo.mark2(Down5, Down1) == WrongAnswer
 
-  block: # CntMore
+  block: # CountMore
     let nazo = parseNazoPuyo[TsuField](
       """
 ぷよ12個以上同時に消すべし
@@ -685,15 +685,16 @@ rg|23"""
       queryPon2 = "field=t_op......yg....b.r&steps=byo0_1_0_0_0_1org23&goal=5__2"
       queryIshikawa = "6E004g031_E1ahce__u02"
 
-    check nazoPuyo.toUriQuery(Pon2) == Res[string].ok queryPon2
-    check nazoPuyo.toUriQuery(Ishikawa) == Res[string].ok queryIshikawa
-    check nazoPuyo.toUriQuery(Ips) == Res[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
+    check nazoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
 
-    check parseNazoPuyo[TsuField](queryPon2, Pon2) == Res[NazoPuyo[TsuField]].ok nazoPuyo
+    check parseNazoPuyo[TsuField](queryPon2, Pon2) ==
+      StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo
     check parseNazoPuyo[TsuField](queryIshikawa, Ishikawa) ==
-      Res[NazoPuyo[TsuField]].ok nazoPuyo
+      StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo
     check parseNazoPuyo[TsuField](queryIshikawa, Ips) ==
-      Res[NazoPuyo[TsuField]].ok nazoPuyo
+      StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo
 
   block: # empty steps
     let
@@ -721,15 +722,16 @@ g.....
       queryPon2 = "field=t_g.....&steps&goal=0_1_"
       queryIshikawa = "g00___210"
 
-    check nazoPuyo.toUriQuery(Pon2) == Res[string].ok queryPon2
-    check nazoPuyo.toUriQuery(Ishikawa) == Res[string].ok queryIshikawa
-    check nazoPuyo.toUriQuery(Ips) == Res[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
+    check nazoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
 
-    check parseNazoPuyo[TsuField](queryPon2, Pon2) == Res[NazoPuyo[TsuField]].ok nazoPuyo
+    check parseNazoPuyo[TsuField](queryPon2, Pon2) ==
+      StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo
     check parseNazoPuyo[TsuField](queryIshikawa, Ishikawa) ==
-      Res[NazoPuyo[TsuField]].ok nazoPuyo
+      StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo
     check parseNazoPuyo[TsuField](queryIshikawa, Ips) ==
-      Res[NazoPuyo[TsuField]].ok nazoPuyo
+      StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo
 
   block: # empty field and steps
     let
@@ -757,12 +759,46 @@ g.....
       queryPon2 = "field=t_&steps&goal=9__3"
       queryIshikawa = "___E03"
 
-    check nazoPuyo.toUriQuery(Pon2) == Res[string].ok queryPon2
-    check nazoPuyo.toUriQuery(Ishikawa) == Res[string].ok queryIshikawa
-    check nazoPuyo.toUriQuery(Ips) == Res[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
+    check nazoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
 
-    check parseNazoPuyo[TsuField](queryPon2, Pon2) == Res[NazoPuyo[TsuField]].ok nazoPuyo
+    check parseNazoPuyo[TsuField](queryPon2, Pon2) ==
+      StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo
     check parseNazoPuyo[TsuField](queryIshikawa, Ishikawa) ==
-      Res[NazoPuyo[TsuField]].ok nazoPuyo
+      StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo
     check parseNazoPuyo[TsuField](queryIshikawa, Ips) ==
-      Res[NazoPuyo[TsuField]].ok nazoPuyo
+      StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo
+
+  block: # empty query
+    let
+      str =
+        """
+ぷよ全て消すべし
+======
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+------
+"""
+      nazoPuyo = parseNazoPuyo[TsuField](str).unsafeValue
+
+      queryPon2 = "field=t_&steps&goal=0_0_"
+      queryPon22 = "field=t_&steps&goal="
+      queryPon23 = "field=t_&steps"
+
+    check nazoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
+
+    for query in [queryPon2, queryPon22, queryPon23]:
+      check parseNazoPuyo[TsuField](query, Pon2) ==
+        StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo

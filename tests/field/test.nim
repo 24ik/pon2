@@ -7,10 +7,10 @@ import std/[sequtils, sugar, unittest]
 import
   ../../src/pon2/core/
     [cell, common, field, fqdn, moveresult, pair, placement, popresult, rule, step]
-import ../../src/pon2/private/[assign3, arrayops2, strutils2]
-import ../../src/pon2/private/core/[binfield]
+import ../../src/pon2/private/[assign, arrayutils, strutils]
+import ../../src/pon2/private/core/[binaryfield]
 
-proc toBinField(str: string): BinField =
+proc toBinaryField(str: string): BinaryField =
   ## Returns the binary field converted from the string representation.
   let strs = str.split "\n"
 
@@ -19,7 +19,7 @@ proc toBinField(str: string): BinField =
     for col in Col:
       arr[row][col] = strs[row.ord][col.ord] == 'x'
 
-  return arr.toBinField
+  return arr.toBinaryField
 
 func toTsuField(str: string): TsuField =
   ## Returns the Tsu field converted from the string representation.
@@ -188,13 +188,13 @@ hhhhhh""".toWaterField.isDead
 # Placement
 # ------------------------------------------------
 
-block: # invalidPlacements, validPlacements, validDblPlacements
+block: # invalidPlacements, validPlacements, validDoublePlacements
   block: # Tsu
     block:
       let field = TsuField.init
       check field.invalidPlacements == {}
       check field.validPlacements == {Placement.low .. Placement.high}
-      check field.validDblPlacements == DblPlacements
+      check field.validDoublePlacements == DoublePlacements
 
     block:
       let field =
@@ -218,7 +218,7 @@ block: # invalidPlacements, validPlacements, validDblPlacements
         Up2, Up3, Up4, Up5, Right2, Right3, Right4, Down2, Down3, Down4, Down5, Left3,
         Left4, Left5,
       }
-      check field.validDblPlacements == {Up2, Up3, Up4, Up5, Right2, Right3, Right4}
+      check field.validDoublePlacements == {Up2, Up3, Up4, Up5, Right2, Right3, Right4}
 
     block:
       let field =
@@ -299,7 +299,7 @@ block: # invalidPlacements, validPlacements, validDblPlacements
       let field = WaterField.init
       check field.invalidPlacements == {}
       check field.validPlacements == {Placement.low .. Placement.high}
-      check field.validDblPlacements == DblPlacements
+      check field.validDoublePlacements == DoublePlacements
 
     block:
       let field =
@@ -324,7 +324,7 @@ block: # invalidPlacements, validPlacements, validDblPlacements
         Up2, Up3, Up4, Up5, Right2, Right3, Right4, Down2, Down3, Down4, Down5, Left3,
         Left4, Left5,
       }
-      check field.validDblPlacements == {Up2, Up3, Up4, Up5, Right2, Right3, Right4}
+      check field.validDoublePlacements == {Up2, Up3, Up4, Up5, Right2, Right3, Right4}
 
     block:
       let field =
@@ -457,7 +457,7 @@ h.....
 # Insert / Delete
 # ------------------------------------------------
 
-block: # insert, delete
+block: # insert, del
   block: # Tsu
     var field =
       """
@@ -509,7 +509,7 @@ p.....
 .o....
 .o....""".toTsuField
 
-    field.delete Row9, Col0
+    field.del Row9, Col0
     check field ==
       """
 .....g
@@ -634,7 +634,7 @@ p.....
 ......
 .o....""".toWaterField
 
-    field.delete Row4, Col0
+    field.del Row4, Col0
     check field ==
       """
 ......
@@ -652,7 +652,7 @@ p.....
 ......
 .o....""".toWaterField
 
-    field.delete Row5, Col0
+    field.del Row5, Col0
     check field ==
       """
 ......
@@ -670,7 +670,7 @@ py....
 ......
 .o....""".toWaterField
 
-    field.delete Row12, Col5
+    field.del Row12, Col5
     check field ==
       """
 ......
@@ -692,7 +692,7 @@ py....
 # Count
 # ------------------------------------------------
 
-block: # cellCnt, puyoCnt, colorPuyoCnt, garbagesCnt
+block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
   let
     fieldT =
       """
@@ -726,25 +726,25 @@ h..o..
 ......
 ......""".toWaterField
 
-  check fieldT.cellCnt(Red) == 3
-  check fieldT.cellCnt(Blue) == 0
-  check fieldW.cellCnt(Garbage) == 5
-  check fieldW.cellCnt(Red) == 0
+  check fieldT.cellCount(Red) == 3
+  check fieldT.cellCount(Blue) == 0
+  check fieldW.cellCount(Garbage) == 5
+  check fieldW.cellCount(Red) == 0
 
-  check fieldT.puyoCnt == 13
-  check fieldW.puyoCnt == 13
+  check fieldT.puyoCount == 13
+  check fieldW.puyoCount == 13
 
-  check fieldT.colorPuyoCnt == 7
-  check fieldW.colorPuyoCnt == 7
+  check fieldT.colorPuyoCount == 7
+  check fieldW.colorPuyoCount == 7
 
-  check fieldT.garbagesCnt == 6
-  check fieldW.garbagesCnt == 6
+  check fieldT.garbagesCount == 6
+  check fieldW.garbagesCount == 6
 
 # ------------------------------------------------
 # Connect - 2
 # ------------------------------------------------
 
-block: # conn2, conn2Vertical, conn2Horizontal
+block: # connection2, connection2Vertical, connection2Horizontal
   let
     fieldT =
       """
@@ -778,7 +778,7 @@ ggrbbb
 .....h
 oo...h""".toWaterField
 
-  check fieldT.conn2 ==
+  check fieldT.connection2 ==
     """
 ...rry
 .....y
@@ -793,7 +793,7 @@ ggr...
 ......
 ......
 ......""".toTsuField
-  check fieldW.conn2 ==
+  check fieldW.connection2 ==
     """
 ...rry
 .....y
@@ -810,7 +810,7 @@ ggr...
 ......
 ......""".toWaterField
 
-  check fieldT.conn2Vertical ==
+  check fieldT.connection2Vertical ==
     """
 .....y
 .....y
@@ -825,7 +825,7 @@ ggr...
 ......
 ......
 ......""".toTsuField
-  check fieldW.conn2Vertical ==
+  check fieldW.connection2Vertical ==
     """
 .....y
 .....y
@@ -842,7 +842,7 @@ ggr...
 ......
 ......""".toWaterField
 
-  check fieldT.conn2Horizontal ==
+  check fieldT.connection2Horizontal ==
     """
 ...rr.
 ......
@@ -857,7 +857,7 @@ gg....
 ......
 ......
 ......""".toTsuField
-  check fieldW.conn2Horizontal ==
+  check fieldW.connection2Horizontal ==
     """
 ...rr.
 ......
@@ -878,7 +878,7 @@ gg....
 # Connect - 3
 # ------------------------------------------------
 
-block: # conn3, conn3Vertical, conn3Horizontal, conn3LShape
+block: # connection3, connection3Vertical, connection3Horizontal, connection3LShape
   let
     fieldT =
       """
@@ -912,7 +912,7 @@ grrbbb
 .....h
 ooo..h""".toWaterField
 
-  check fieldT.conn3 ==
+  check fieldT.connection3 ==
     """
 bbb...
 ygg.g.
@@ -927,7 +927,7 @@ y.....
 ......
 ......
 ......""".toTsuField
-  check fieldW.conn3 ==
+  check fieldW.connection3 ==
     """
 bbb...
 ygg.g.
@@ -944,7 +944,7 @@ y.....
 ......
 ......""".toWaterField
 
-  check fieldT.conn3Vertical ==
+  check fieldT.connection3Vertical ==
     """
 ......
 y.....
@@ -959,7 +959,7 @@ y.....
 ......
 ......
 ......""".toTsuField
-  check fieldW.conn3Vertical ==
+  check fieldW.connection3Vertical ==
     """
 ......
 y.....
@@ -976,7 +976,7 @@ y.....
 ......
 ......""".toWaterField
 
-  check fieldT.conn3Horizontal ==
+  check fieldT.connection3Horizontal ==
     """
 bbb...
 ......
@@ -991,7 +991,7 @@ bbb...
 ......
 ......
 ......""".toTsuField
-  check fieldW.conn3Horizontal ==
+  check fieldW.connection3Horizontal ==
     """
 bbb...
 ......
@@ -1008,7 +1008,7 @@ bbb...
 ......
 ......""".toWaterField
 
-  check fieldT.conn3LShape ==
+  check fieldT.connection3LShape ==
     """
 ......
 .gg.g.
@@ -1023,7 +1023,7 @@ bbb...
 ......
 ......
 ......""".toTsuField
-  check fieldW.conn3LShape ==
+  check fieldW.connection3LShape ==
     """
 ......
 .gg.g.
@@ -1469,7 +1469,7 @@ xx....
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
     purple =
       """
 ......
@@ -1484,7 +1484,7 @@ xx....
 ..xx..
 ..x...
 ......
-......""".toBinField
+......""".toBinaryField
     hard =
       """
 ......
@@ -1499,7 +1499,7 @@ xx....
 ......
 ...x..
 ......
-......""".toBinField
+......""".toBinaryField
     hardToGarbage =
       """
 ......
@@ -1514,7 +1514,7 @@ xx....
 ....x.
 ......
 ..x...
-......""".toBinField
+......""".toBinaryField
     garbage =
       """
 ......
@@ -1529,8 +1529,8 @@ xx....
 ......
 ......
 ......
-......""".toBinField
-    zero = BinField.init
+......""".toBinaryField
+    zero = BinaryField.init
     popResAns = PopResult.init(
       zero, zero, zero, yellow, purple, hard, hardToGarbage, garbage, yellow + purple
     )
@@ -1854,17 +1854,17 @@ block: # apply
   let
     pair = RedGreen
     plcmt = Left3
-    cnts = [Col0: 1, 2, 3, 4, 5, 6]
+    counts = [Col0: 1, 2, 3, 4, 5, 6]
     dropHard = false
 
     step1 = Step.init(pair, plcmt)
-    step2 = Step.init(cnts, dropHard)
+    step2 = Step.init(counts, dropHard)
     step3 = Step.init(cross = true)
     step4 = Step.init(cross = false)
 
   check TsuField.init.dup(apply(_, step1)) == TsuField.init.dup(place(_, pair, plcmt))
   check WaterField.init.dup(apply(_, step2)) ==
-    WaterField.init.dup(dropGarbages(cnts, dropHard))
+    WaterField.init.dup(dropGarbages(counts, dropHard))
 
   let field = TsuField.init.dup(apply(_, step2))
   check field.dup(apply(_, step3)) == field.dup(crossRotate)
@@ -1996,44 +1996,45 @@ block: # move
       pair = RedBlue
       plcmt = Down3
 
-      chainCnt = 3
-      popCnts = [None: 0, 0, 2, 4, 10, 5, 0, 4]
-      hardToGarbageCnt = 0
-      detailHardToGarbageCnt = @[0, 0, 0]
+      chainCount = 3
+      popCounts = [None: 0, 0, 2, 4, 10, 5, 0, 4]
+      hardToGarbageCount = 0
+      detailHardToGarbageCount = @[0, 0, 0]
 
-      garbagesCnt = [Col0: 0, 1, 2, 0, 2, 1]
+      garbagesCount = [Col0: 0, 1, 2, 0, 2, 1]
 
       detailArr1: array[Cell, int] = [0, 0, 1, 0, 0, 5, 0, 0]
       detailArr2: array[Cell, int] = [0, 0, 0, 0, 10, 0, 0, 0]
       detailArr3: array[Cell, int] = [0, 0, 1, 4, 0, 0, 0, 4]
-      detailPopCnts = @[detailArr1, detailArr2, detailArr3]
+      detailPopCounts = @[detailArr1, detailArr2, detailArr3]
 
       fullArr1: array[Cell, seq[int]] = [@[], @[], @[], @[], @[], @[5], @[], @[]]
       fullArr2: array[Cell, seq[int]] = [@[], @[], @[], @[], @[4, 6], @[], @[], @[]]
       fullArr3: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[], @[], @[], @[4]]
-      fullPopCnts = @[fullArr1, fullArr2, fullArr3]
+      fullPopCounts = @[fullArr1, fullArr2, fullArr3]
 
-    block: # calc conn
+    block: # calc connection
       var field2 = fieldBefore
       check field2.move(Step.init(pair, plcmt)) ==
         MoveResult.init(
-          chainCnt, popCnts, hardToGarbageCnt, detailPopCnts, detailHardToGarbageCnt,
-          fullPopCnts,
+          chainCount, popCounts, hardToGarbageCount, detailPopCounts,
+          detailHardToGarbageCount, fullPopCounts,
         )
       check field2 == fieldAfter
 
-    block: # not calcConn
+    block: # not calcConnection
       var field2 = fieldBefore
       check field2.move(pair, plcmt, false) ==
         MoveResult.init(
-          chainCnt, popCnts, hardToGarbageCnt, detailPopCnts, detailHardToGarbageCnt
+          chainCount, popCounts, hardToGarbageCount, detailPopCounts,
+          detailHardToGarbageCount,
         )
       check field2 == fieldAfter
 
     block: # drop garbage
       var field2 = fieldBefore
-      check field2.move(garbagesCnt, false, false) ==
-        MoveResult.init(0, initArrWith[Cell, int](0), 0, @[], @[])
+      check field2.move(garbagesCount, false, false) ==
+        MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
       check field2 ==
         """
 ....g.
@@ -2052,8 +2053,8 @@ block: # move
 
     block: # drop hard
       var field2 = fieldBefore
-      check field2.move(Step.init(garbagesCnt, true), false) ==
-        MoveResult.init(0, initArrWith[Cell, int](0), 0, @[], @[])
+      check field2.move(Step.init(garbagesCount, true), false) ==
+        MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
       check field2 ==
         """
 ....g.
@@ -2103,16 +2104,16 @@ block: # move
 ......
 ...o..""".toTsuField
       var field2 = fieldBefore2
-      let popCnts: array[Cell, int] = [0, 0, 3, 4, 0, 0, 0, 0]
+      let popCounts: array[Cell, int] = [0, 0, 3, 4, 0, 0, 0, 0]
       check field2.move(Step.init(cross = false), false) ==
-        MoveResult.init(1, popCnts, 0, @[popCnts], @[0])
+        MoveResult.init(1, popCounts, 0, @[popCounts], @[0])
       check field2 == fieldAfter2
 
 # ------------------------------------------------
 # Field <-> array
 # ------------------------------------------------
 
-block: # toArr, toTsuField, toWaterField
+block: # toArray, toTsuField, toWaterField
   let
     fieldT =
       """
@@ -2146,8 +2147,8 @@ r.....
 ......
 ......""".toWaterField
 
-    arrT = fieldT.toArr
-    arrW = fieldW.toArr
+    arrT = fieldT.toArray
+    arrW = fieldW.toArray
 
     arrAns = [
       [Red, None, None, None, None, None],
@@ -2215,8 +2216,8 @@ r.....
   check $fieldT == strT
   check $fieldW == strW
 
-  check strT.parseTsuField == Res[TsuField].ok fieldT
-  check strW.parseWaterField == Res[WaterField].ok fieldW
+  check strT.parseTsuField == StrErrorResult[TsuField].ok fieldT
+  check strW.parseWaterField == StrErrorResult[WaterField].ok fieldW
 
   check strT.parseWaterField.isErr
   check strW.parseTsuField.isErr
@@ -2265,15 +2266,16 @@ r.....
       queryWRes = fieldW.toUriQuery Pon2
 
     check queryTRes ==
-      Res[string].ok "t_r......g......b......y......p......o....h......."
-    check queryWRes == Res[string].ok "w_r.....~.g......b......y......p......o....h"
+      StrErrorResult[string].ok "t_r......g......b......y......p......o....h......."
+    check queryWRes ==
+      StrErrorResult[string].ok "w_r.....~.g......b......y......p......o....h"
 
     let
       queryT = queryTRes.unsafeValue
       queryW = queryWRes.unsafeValue
 
-    check queryT.parseTsuField(Pon2) == Res[TsuField].ok fieldT
-    check queryW.parseWaterField(Pon2) == Res[WaterField].ok fieldW
+    check queryT.parseTsuField(Pon2) == StrErrorResult[TsuField].ok fieldT
+    check queryW.parseWaterField(Pon2) == StrErrorResult[WaterField].ok fieldW
 
     check queryW.parseTsuField(Pon2).isErr
     check queryT.parseWaterField(Pon2).isErr
@@ -2284,12 +2286,12 @@ r.....
         queryTRes = fieldT.toUriQuery fqdn
         queryWRes = fieldW.toUriQuery fqdn
 
-      check queryTRes == Res[string].ok "~1.02.003.0004.00005.00000600009."
+      check queryTRes == StrErrorResult[string].ok "~1.02.003.0004.00005.00000600009."
       check queryWRes.isErr
 
       let queryT = queryTRes.unsafeValue
 
-      check queryT.parseTsuField(fqdn) == Res[TsuField].ok fieldT
+      check queryT.parseTsuField(fqdn) == StrErrorResult[TsuField].ok fieldT
 
       check "t-r".parseTsuField(fqdn).isErr
 
@@ -2312,11 +2314,15 @@ r.....
 
     for fqdn in [Ishikawa, Ips]:
       let queryRes = field.toUriQuery(fqdn)
-      check queryRes == Res[string].ok "10g"
-      check queryRes.unsafeValue.parseTsuField(fqdn) == Res[TsuField].ok field
+      check queryRes == StrErrorResult[string].ok "10g"
+      check queryRes.unsafeValue.parseTsuField(fqdn) == StrErrorResult[TsuField].ok field
 
   block: # empty field
-    check TsuField.init.toUriQuery(Pon2) == Res[string].ok "t_"
-    check TsuField.init.toUriQuery(Ishikawa) == Res[string].ok ""
-    check TsuField.init.toUriQuery(Ips) == Res[string].ok ""
-    check WaterField.init.toUriQuery(Pon2) == Res[string].ok "w_~"
+    check TsuField.init.toUriQuery(Pon2) == StrErrorResult[string].ok "t_"
+    check TsuField.init.toUriQuery(Ishikawa) == StrErrorResult[string].ok ""
+    check TsuField.init.toUriQuery(Ips) == StrErrorResult[string].ok ""
+    check WaterField.init.toUriQuery(Pon2) == StrErrorResult[string].ok "w_~"
+
+  block: # empty query
+    check "".parseTsuField(Pon2) == StrErrorResult[TsuField].ok TsuField.init
+    check "".parseWaterField(Pon2).isErr

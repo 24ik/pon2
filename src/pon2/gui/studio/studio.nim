@@ -18,9 +18,9 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
-  proc toStudioVNode*(
-      self: ref Studio, helper, replayHelper: VNodeHelper
-  ): VNode {.inline.} =
+  export vdom
+
+  proc toStudioVNode*(self: ref Studio, helper, replayHelper: VNodeHelper): VNode =
     ## Returns the studio node.
     buildHtml tdiv(class = "columns"):
       tdiv(class = "column is-narrow"):
@@ -34,6 +34,6 @@ when defined(js) or defined(nimsuggest):
             self.toStudioSettingsVNode helper
           tdiv(class = "block"):
             self.toStudioPaginationVNode helper
-          if self[].replayStepsCnt > 0:
+          if self[].replayStepsCount > 0:
             tdiv(class = "block"):
               self.toSimulatorVNode replayHelper

@@ -3,10 +3,10 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[algorithm, unittest, uri]
+import std/[unittest, uri]
 import ../../src/pon2/[core]
 import ../../src/pon2/app/[key, nazopuyowrap, simulator]
-import ../../src/pon2/private/[assign3, utils]
+import ../../src/pon2/private/[algorithm, assign, utils]
 
 # ------------------------------------------------
 # Constructor
@@ -44,7 +44,7 @@ block: # undo, redo
 
 block:
   # rule, nazoPuyoWrap, moveResult, mode, state, editData,
-  # operatingPlacement, operatingIdx
+  # operatingPlacement, operatingIndex
   let sim = Simulator.init
 
   check sim.rule == Tsu
@@ -61,7 +61,7 @@ block:
       insert: false,
     )
   check sim.operatingPlacement == Up2
-  check sim.operatingIdx == 0
+  check sim.operatingIndex == 0
 
 # ------------------------------------------------
 # Property - Setter
@@ -229,7 +229,7 @@ py|"""
 # Edit - Delete
 # ------------------------------------------------
 
-block: # deleteStep
+block: # delStep
   let nazo = parseNazoPuyo[TsuField](
     """
 3連鎖するべし
@@ -256,17 +256,17 @@ py|"""
     steps = nazo.puyoPuyo.steps
     sim = Simulator.init(nazo, EditorEdit)
 
-  sim.deleteStep
-  steps.delete 0
+  sim.delStep
+  steps.del 0
   sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
-  sim.deleteStep 1
-  steps.delete 1
+  sim.delStep 1
+  steps.del 1
   sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
-  sim.deleteStep 1
+  sim.delStep 1
   sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
@@ -329,7 +329,7 @@ X"""
 
   sim.editCell = Cell.None
   sim.writeCell Row8, Col4
-  field.delete Row8, Col4
+  field.del Row8, Col4
   sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.field == field
 
@@ -341,7 +341,7 @@ X"""
     check it.steps == steps
 
   sim.writeCell Cell.None
-  steps.delete 0
+  steps.del 0
   sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
@@ -473,7 +473,7 @@ O"""
 
   sim.moveCursorDown
   sim.flip
-  steps[1].cnts.reverse
+  steps[1].counts.reverse
   sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
@@ -504,14 +504,14 @@ block: # `goalKind=`, `goalColor=`, `goalVal=`
   sim.goalVal = 3
   check sim.nazoPuyoWrap.optGoal == Opt[Goal].ok Goal.init(Chain, 3)
 
-  sim.goalKind = AccCnt
-  check sim.nazoPuyoWrap.optGoal == Opt[Goal].ok Goal.init(AccCnt, All, 3)
+  sim.goalKind = AccumCount
+  check sim.nazoPuyoWrap.optGoal == Opt[Goal].ok Goal.init(AccumCount, All, 3)
 
   sim.goalColor = GoalColor.Red
-  check sim.nazoPuyoWrap.optGoal == Opt[Goal].ok Goal.init(AccCnt, GoalColor.Red, 3)
+  check sim.nazoPuyoWrap.optGoal == Opt[Goal].ok Goal.init(AccumCount, GoalColor.Red, 3)
 
   sim.goalVal = 1
-  check sim.nazoPuyoWrap.optGoal == Opt[Goal].ok Goal.init(AccCnt, GoalColor.Red, 1)
+  check sim.nazoPuyoWrap.optGoal == Opt[Goal].ok Goal.init(AccumCount, GoalColor.Red, 1)
 
 # ------------------------------------------------
 # Edit - Other
@@ -540,25 +540,25 @@ block:
   # movePlacementRight, movePlacementLeft, rotatePlacementRight, rotatePlacementLeft
   var
     sim = Simulator.init
-    plcmt = Up2
+    placement = Up2
 
-  check sim.operatingPlacement == plcmt
+  check sim.operatingPlacement == placement
 
   sim.movePlacementRight
-  plcmt.moveRight
-  check sim.operatingPlacement == plcmt
+  placement.moveRight
+  check sim.operatingPlacement == placement
 
   sim.movePlacementLeft
-  plcmt.moveLeft
-  check sim.operatingPlacement == plcmt
+  placement.moveLeft
+  check sim.operatingPlacement == placement
 
   sim.rotatePlacementRight
-  plcmt.rotateRight
-  check sim.operatingPlacement == plcmt
+  placement.rotateRight
+  check sim.operatingPlacement == placement
 
   sim.rotatePlacementLeft
-  plcmt.rotateLeft
-  check sim.operatingPlacement == plcmt
+  placement.rotateLeft
+  check sim.operatingPlacement == placement
 
 # ------------------------------------------------
 # Forward / Backward
@@ -715,11 +715,11 @@ rb|6N
 O"""
       ).unsafeValue
 
-      cnts: array[Cell, int] = [0, 0, 2, 4, 0, 0, 0, 0]
+      counts: array[Cell, int] = [0, 0, 2, 4, 0, 0, 0, 0]
       full: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[], @[], @[], @[]]
       moveRes0 = MoveResult.init true
       moveRes1 = MoveResult.init true
-      moveRes2 = MoveResult.init(1, cnts, 0, @[cnts], @[0], @[full])
+      moveRes2 = MoveResult.init(1, counts, 0, @[counts], @[0], @[full])
       moveRes3 = moveRes2
       moveRes4 = MoveResult.init true
       moveRes5 = MoveResult.init true
@@ -1011,14 +1011,6 @@ pp|23"""
   check sim2.operate KeyEvent.init "Space"
   check sim1 == sim2
 
-  sim1.backward(detail = true)
-  check sim2.operate KeyEvent.init 'W'
-  check sim1 == sim2
-
-  sim1.backward(detail = true)
-  check sim2.operate KeyEvent.init 'X'
-  check sim1 == sim2
-
   sim1.backward
   check sim2.operate KeyEvent.init 'w'
   check sim1 == sim2
@@ -1039,7 +1031,7 @@ pp|23"""
   check sim1 == sim2
 
   sim1.toggleInsert
-  check sim2.operate KeyEvent.init 'i'
+  check sim2.operate KeyEvent.init 'g'
   check sim1 == sim2
 
   sim1.toggleFocus
@@ -1127,15 +1119,11 @@ pp|23"""
   check sim1 == sim2
 
   sim1.redo
-  check sim2.operate KeyEvent.init 'Y'
+  check sim2.operate KeyEvent.init 'X'
   check sim1 == sim2
 
   sim1.forward
   check sim2.operate KeyEvent.init 'c'
-  check sim1 == sim2
-
-  sim1.backward(detail = true)
-  check sim2.operate KeyEvent.init 'X'
   check sim1 == sim2
 
   sim1.backward
@@ -1162,16 +1150,12 @@ pp|23"""
   check sim4.operate KeyEvent.init 'c'
   check sim3 == sim4
 
-  sim3.forward(replay = true)
-  check sim4.operate KeyEvent.init 's'
-  check sim3 == sim4
-
-  sim3.backward(detail = true)
+  sim3.reset
   check sim4.operate KeyEvent.init 'W'
   check sim3 == sim4
 
-  sim3.backward(detail = true)
-  check sim4.operate KeyEvent.init 'X'
+  sim3.forward(replay = true)
+  check sim4.operate KeyEvent.init 's'
   check sim3 == sim4
 
   sim3.backward
@@ -1211,7 +1195,7 @@ pp|23"""
   check sim5 == sim6
 
   for i in 0 .. 9:
-    sim5.writeCnt i
+    sim5.writeCount i
     check sim6.operate KeyEvent.init '0'.succ i
     check sim5 == sim6
 
@@ -1224,47 +1208,48 @@ block: # toUri, parseSimulator
     let
       sim = Simulator.init
       uriPon2 =
-        "https://24ik.github.io/pon2/stable/studio/?field=t_&steps&goal=0_0_".parseUri
+        "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps&goal=0_0_".parseUri
       uriIshikawa = "https://ishikawapuyo.net/simu/pn.html?___200".parseUri
       uriIps = "https://ips.karou.jp/simu/pn.html?___200".parseUri
       uriPon22 =
-        "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps&goal=0_0_".parseUri
+        "https://24ik.github.io/pon2/stable/studio/?field=t_&steps&goal=0_0_".parseUri
       uriPon23 =
-        "http://24ik.github.io/pon2/stable/studio/?field=t_&steps&goal=0_0_".parseUri
+        "http://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps&goal=0_0_".parseUri
       uriPon24 =
-        "https://24ik.github.io/pon2/stable/studio/index.html?field=t_&steps&goal=0_0_".parseUri
+        "https://24ik.github.io/pon2/stable/studio/index.html?mode=vp&field=t_&steps&goal=0_0_".parseUri
       uriIshikawa2 = "http://ishikawapuyo.net/simu/pn.html?___200".parseUri
       uriIps2 = "http://ishikawapuyo.net/simu/pn.html?___200".parseUri
 
-    check sim.toUri(fqdn = Pon2) == Res[Uri].ok uriPon2
-    check sim.toUri(fqdn = Ishikawa) == Res[Uri].ok uriIshikawa
-    check sim.toUri(fqdn = Ips) == Res[Uri].ok uriIps
+    check sim.toUri(fqdn = Pon2) == StrErrorResult[Uri].ok uriPon2
+    check sim.toUri(fqdn = Ishikawa) == StrErrorResult[Uri].ok uriIshikawa
+    check sim.toUri(fqdn = Ips) == StrErrorResult[Uri].ok uriIps
 
-    check uriPon2.parseSimulator == Res[Simulator].ok sim
-    check uriIshikawa.parseSimulator == Res[Simulator].ok sim
-    check uriIps.parseSimulator == Res[Simulator].ok sim
-    check uriPon22.parseSimulator == Res[Simulator].ok sim
-    check uriPon23.parseSimulator == Res[Simulator].ok sim
-    check uriPon24.parseSimulator == Res[Simulator].ok sim
-    check uriIshikawa2.parseSimulator == Res[Simulator].ok sim
-    check uriIps2.parseSimulator == Res[Simulator].ok sim
+    check uriPon2.parseSimulator == StrErrorResult[Simulator].ok sim
+    check uriIshikawa.parseSimulator == StrErrorResult[Simulator].ok sim
+    check uriIps.parseSimulator == StrErrorResult[Simulator].ok sim
+    check uriPon22.parseSimulator == StrErrorResult[Simulator].ok sim
+    check uriPon23.parseSimulator == StrErrorResult[Simulator].ok sim
+    check uriPon24.parseSimulator == StrErrorResult[Simulator].ok sim
+    check uriIshikawa2.parseSimulator == StrErrorResult[Simulator].ok sim
+    check uriIps2.parseSimulator == StrErrorResult[Simulator].ok sim
 
   block: # Puyo Puyo
     let
       sim = Simulator.init PuyoPuyo[TsuField].init
-      uriPon2 = "https://24ik.github.io/pon2/stable/studio/?field=t_&steps".parseUri
+      uriPon2 =
+        "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps".parseUri
       uriIshikawa = "https://ishikawapuyo.net/simu/ps.html".parseUri
       uriIps = "https://ips.karou.jp/simu/ps.html".parseUri
       uriIshikawa2 = "https://ishikawapuyo.net/simu/ps.html?".parseUri
 
-    check sim.toUri(fqdn = Pon2) == Res[Uri].ok uriPon2
-    check sim.toUri(fqdn = Ishikawa) == Res[Uri].ok uriIshikawa
-    check sim.toUri(fqdn = Ips) == Res[Uri].ok uriIps
+    check sim.toUri(fqdn = Pon2) == StrErrorResult[Uri].ok uriPon2
+    check sim.toUri(fqdn = Ishikawa) == StrErrorResult[Uri].ok uriIshikawa
+    check sim.toUri(fqdn = Ips) == StrErrorResult[Uri].ok uriIps
 
-    check uriPon2.parseSimulator == Res[Simulator].ok sim
-    check uriIshikawa.parseSimulator == Res[Simulator].ok sim
-    check uriIps.parseSimulator == Res[Simulator].ok sim
-    check uriIshikawa2.parseSimulator == Res[Simulator].ok sim
+    check uriPon2.parseSimulator == StrErrorResult[Simulator].ok sim
+    check uriIshikawa.parseSimulator == StrErrorResult[Simulator].ok sim
+    check uriIps.parseSimulator == StrErrorResult[Simulator].ok sim
+    check uriIshikawa2.parseSimulator == StrErrorResult[Simulator].ok sim
 
   block: # clearPlacements
     let nazo = parseNazoPuyo[TsuField](
@@ -1291,7 +1276,7 @@ gy|23"""
     ).unsafeValue
 
     check Simulator.init(nazo).toUri(clearPlacements = true) ==
-      Res[Uri].ok "https://24ik.github.io/pon2/stable/studio/?field=t_b..&steps=rbppgy&goal=5__6".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_b..&steps=rbppgy&goal=5__6".parseUri
 
 block: # toExportUri
   # EditorEdit
@@ -1304,11 +1289,11 @@ block: # toExportUri
     sim.forward
 
     check sim.toUri ==
-      Res[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=ee&field=t_g&steps&goal=0_0_".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=ee&field=t_g&steps&goal=0_0_".parseUri
     check sim.toExportUri ==
-      Res[Uri].ok "https://24ik.github.io/pon2/stable/studio/?field=t_g......&steps&goal=0_0_".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_g......&steps&goal=0_0_".parseUri
     check sim.toExportUri(viewer = false) ==
-      Res[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=ep&field=t_g......&steps&goal=0_0_".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=ep&field=t_g......&steps&goal=0_0_".parseUri
 
   # ViewerEdit
   block:
@@ -1320,7 +1305,7 @@ block: # toExportUri
     sim.forward
 
     check sim.toExportUri ==
-      Res[Uri].ok "https://24ik.github.io/pon2/stable/studio/?field=t_&steps&goal=0_0_".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps&goal=0_0_".parseUri
 
   # ViewerPlay
   block:
@@ -1350,6 +1335,6 @@ rb|"""
     sim.forward
 
     check sim.toUri ==
-      Res[Uri].ok "https://24ik.github.io/pon2/stable/studio/?field=t_rb..&steps=rb34&goal=5__1".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_rb..&steps=rb34&goal=5__1".parseUri
     check sim.toExportUri ==
-      Res[Uri].ok "https://24ik.github.io/pon2/stable/studio/?field=t_&steps=rb&goal=5__1".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps=rb&goal=5__1".parseUri

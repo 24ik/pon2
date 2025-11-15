@@ -17,32 +17,32 @@ func `==`(tree1, tree2: CritBitTree[void]): bool =
 # Load / Property
 # ------------------------------------------------
 
-block: # load, isReady, `isReady=`, allQueryCnt
+block: # load, isReady, `isReady=`, allQueryCount
   var
     rng = 123.initRand
     marathon = Marathon.init rng
   check not marathon.isReady
-  check marathon.allQueryCnt == 0
+  check marathon.allQueryCount == 0
 
   marathon.load @["rr"]
   check not marathon.isReady
-  check marathon.allQueryCnt == 0
+  check marathon.allQueryCount == 0
 
   marathon.load @["rg"]
   check not marathon.isReady
-  check marathon.allQueryCnt == 0
+  check marathon.allQueryCount == 0
 
   marathon.isReady = true
   check marathon.isReady
-  check marathon.allQueryCnt == 2
+  check marathon.allQueryCount == 2
 
   marathon.isReady = false
   check marathon.isReady
-  check marathon.allQueryCnt == 2
+  check marathon.allQueryCount == 2
 
   marathon.load @["ry"]
   check marathon.isReady
-  check marathon.allQueryCnt == 2
+  check marathon.allQueryCount == 2
 
   check Marathon.init(rng, ["rr", "rg"], isReady = true) == marathon
   check Marathon.init(rng, @["rr", "rg"], isReady = true) == marathon
@@ -63,57 +63,57 @@ block: # simulator
 # Match
 # ------------------------------------------------
 
-block: # matchQueryCnt, match
+block: # matchQueryCount, match
   var
     rng = 123.initRand
     marathon = Marathon.init(rng, ["rrgg", "rgrg", "byby", "rgrb", "grrb", "bgyy"])
 
   marathon.match "r"
-  check marathon.matchQueryCnt == 0
+  check marathon.matchQueryCount == 0
 
   marathon.isReady = true
 
   marathon.match ""
-  check marathon.matchQueryCnt == 0
+  check marathon.matchQueryCount == 0
 
   marathon.match "r"
-  check marathon.matchQueryCnt == 3
+  check marathon.matchQueryCount == 3
 
   marathon.match "y"
-  check marathon.matchQueryCnt == 0
+  check marathon.matchQueryCount == 0
 
   marathon.match "rr"
-  check marathon.matchQueryCnt == 1
+  check marathon.matchQueryCount == 1
 
   marathon.match "rg"
-  check marathon.matchQueryCnt == 2
+  check marathon.matchQueryCount == 2
 
   marathon.match "gr"
-  check marathon.matchQueryCnt == 1
+  check marathon.matchQueryCount == 1
 
   marathon.match ""
-  check marathon.matchQueryCnt == 0
+  check marathon.matchQueryCount == 0
 
   marathon.match "a"
-  check marathon.matchQueryCnt == 0
+  check marathon.matchQueryCount == 0
 
   marathon.match "ab"
-  check marathon.matchQueryCnt == 5
+  check marathon.matchQueryCount == 5
 
   marathon.match "bc"
-  check marathon.matchQueryCnt == 0
+  check marathon.matchQueryCount == 0
 
   marathon.match "abac"
-  check marathon.matchQueryCnt == 2
+  check marathon.matchQueryCount == 2
 
   marathon.match "abc"
-  check marathon.matchQueryCnt == 2
+  check marathon.matchQueryCount == 2
 
   marathon.match "abcc"
-  check marathon.matchQueryCnt == 1
+  check marathon.matchQueryCount == 1
 
   marathon.match "cabb"
-  check marathon.matchQueryCnt == 1
+  check marathon.matchQueryCount == 1
 
 # ------------------------------------------------
 # Simulator
@@ -138,16 +138,16 @@ block: # selectQuery, selectRandomQuery
   for i in 0 ..< 2:
     marathon.selectQuery i
     unwrapNazoPuyo marathon.simulator.nazoPuyoWrap:
-      check not it.steps[0].pair.isDbl
+      check not it.steps[0].pair.isDouble
 
   for _ in 1 .. 5:
     marathon.selectRandomQuery
     unwrapNazoPuyo marathon.simulator.nazoPuyoWrap:
-      check not it.steps[0].pair.isDbl
+      check not it.steps[0].pair.isDouble
 
   let stepsSeq = queries.mapIt(it.parseSteps(Pon2).unsafeValue).mapIt it.toSeq.map(
     (step: Step) => Step.init step.pair.swapped
-  ).toDeque2
+  ).toDeque
   for _ in 1 .. 5:
     marathon.selectRandomQuery(fromMatched = false)
     unwrapNazoPuyo marathon.simulator.nazoPuyoWrap:
