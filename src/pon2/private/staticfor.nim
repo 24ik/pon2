@@ -3,16 +3,16 @@ import stew/[staticfor]
 export staticfor
 
 template staticFor*[E: enum](
-    idx: untyped{nkIdent}, slice: static Slice[E], body: untyped
+    index: untyped{nkIdent}, slice: static Slice[E], body: untyped
 ): untyped =
   ## Unrolled `for` loop over the given slice.
-  staticFor(idx2, slice.a.ord .. slice.b.ord):
-    const `idx` = idx2.E
+  staticFor(index2, slice.a.ord .. slice.b.ord):
+    const `index` = index2.E
     body
 
 template staticFor*(
-    idx: untyped{nkIdent}, enumType: typedesc[enum], body: untyped
+    index: untyped{nkIdent}, enumType: typedesc[enum], body: untyped
 ): untyped =
   ## Unrolled `for` loop over the all value in the given enum type.
-  staticFor(idx, enumType.low .. enumType.high):
+  staticFor(index, enumType.low .. enumType.high):
     body

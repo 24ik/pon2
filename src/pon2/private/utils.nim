@@ -13,9 +13,9 @@ when defined(js) or defined(nimsuggest):
 
   export asyncjs, jsffi
 
-func toggle*(b: var bool) {.inline, noinit.} =
+func toggle*(x: var bool) {.inline, noinit.} =
   ## Toggles the bool variable.
-  b.assign not b
+  x.assign not x
 
 func rotateInc*[T: Ordinal](x: var T) {.inline, noinit.} =
   ## Increments `x`.

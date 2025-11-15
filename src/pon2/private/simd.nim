@@ -57,9 +57,9 @@ when Sse42Available:
     let diff = mm_xor_si128(x1, x2)
     mm_testz_si128(diff, diff).bool
 
-  func assign*(tgt: var M128i, src: M128i) {.inline, noinit.} =
-    ## Assigns the source to the target.
-    tgt = src
+  func assign*(dst: var M128i, src: M128i) {.inline, noinit.} =
+    ## Assigns the source to the destination.
+    dst = src
 
   # ------------------------------------------------
   # XMM - reverse

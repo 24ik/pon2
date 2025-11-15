@@ -25,26 +25,26 @@ func toDeque*[T](items: openArray[T]): Deque[T] {.inline, noinit.} =
 
   deque
 
-func insert*[T](self: var Deque[T], item: sink T, idx: int) {.inline, noinit.} =
-  ## Inserts the item at the index `idx`.
-  var elems = Deque[T].init idx
-  for _ in 1 .. idx:
+func insert*[T](self: var Deque[T], item: sink T, index: int) {.inline, noinit.} =
+  ## Inserts the item at the index.
+  var elems = Deque[T].init index
+  for _ in 1 .. index:
     elems.addLast self.popFirst
 
   self.addFirst item
 
-  for _ in 1 .. idx:
+  for _ in 1 .. index:
     self.addFirst elems.popLast
 
-func del*[T](self: var Deque[T], idx: int) {.inline, noinit.} =
-  ## Deletes `idx`-th element of the deque.
-  var elems = Deque[T].init idx
-  for _ in 1 .. idx:
+func del*[T](self: var Deque[T], index: int) {.inline, noinit.} =
+  ## Deletes `index`-th element of the deque.
+  var elems = Deque[T].init index
+  for _ in 1 .. index:
     elems.addLast self.popFirst
 
   self.popFirst
 
-  for _ in 1 .. idx:
+  for _ in 1 .. index:
     self.addFirst elems.popLast
 
 iterator mpairs*[T](self: var Deque[T]): tuple[key: int, val: var T] {.inline.} =
