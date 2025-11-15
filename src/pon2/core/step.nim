@@ -8,9 +8,9 @@
 
 import std/[bitops, sequtils, strformat, sugar]
 import ./[cell, common, fqdn, pair, placement]
-import ../private/[arrayutils, assign, deques2, math2, results2, strutils2, tables2]
+import ../private/[arrayutils, assign, deques, math2, results2, strutils2, tables2]
 
-export deques2, pair, placement, results2
+export deques, pair, placement, results2
 
 type
   StepKind* {.pure.} = enum
@@ -348,7 +348,7 @@ func parseSteps*(str: string): Res[Steps] {.inline, noinit.} =
     for s in str.split StepsSep:
       ?s.parseStep.context "Invalid steps: {str}".fmt
 
-  return ok steps.toDeque2
+  return ok steps.toDeque
 
 # ------------------------------------------------
 # Steps <-> URI
@@ -409,4 +409,4 @@ func parseSteps*(query: string, fqdn: SimulatorFqdn): Res[Steps] {.inline, noini
       for i in countup(0, query.len.pred, 2):
         ?query[i .. i.succ].parseStep(fqdn).context "Invalid steps: {query}".fmt
 
-    ok steps.toDeque2
+    ok steps.toDeque

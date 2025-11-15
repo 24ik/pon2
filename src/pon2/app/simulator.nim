@@ -16,7 +16,7 @@ import ./[key, nazopuyowrap]
 import ../[core]
 import
   ../private/
-    [arrayutils, assign, deques2, results2, staticfor2, strutils2, tables2, utils]
+    [arrayutils, assign, deques, results2, staticfor2, strutils2, tables2, utils]
 
 export core, nazopuyowrap, results2, uri
 
@@ -401,7 +401,7 @@ func deleteStep*(self: var Simulator, idx: int) =
       return
 
     self.editBlock:
-      it.steps.delete idx
+      it.steps.del idx
       self.editData.step.idx.assign min(self.editData.step.idx, it.steps.len)
 
 func deleteStep*(self: var Simulator) =

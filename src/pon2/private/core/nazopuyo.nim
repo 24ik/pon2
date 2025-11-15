@@ -7,7 +7,7 @@
 {.experimental: "views".}
 
 import std/[sequtils]
-import ../[macros2, results2]
+import ../[macros, results2]
 import ../../core/[cell, goal, moveresult]
 
 # ------------------------------------------------

@@ -8,7 +8,7 @@
 
 import std/[strformat, sugar]
 import ./[common, fqdn]
-import ../private/[macros2, results2, tables2]
+import ../private/[macros, results2, tables2]
 
 export common, results2
 

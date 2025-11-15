@@ -9,7 +9,7 @@
 import std/[algorithm, random, sequtils, sets, sugar]
 import ./[nazopuyowrap, solve]
 import ../[core]
-import ../private/[arrayutils, assign, deques2, math2, results2, staticfor2]
+import ../private/[arrayutils, assign, deques, math2, results2, staticfor2]
 
 export nazopuyowrap, results2
 

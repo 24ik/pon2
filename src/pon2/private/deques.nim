@@ -8,7 +8,7 @@
 
 import std/[deques]
 
-export deques
+export deques except toDeque
 
 func init*[E](
     T: type Deque[E], initialSize = defaultInitialSize
@@ -17,11 +17,11 @@ func init*[E](
   return initDeque[E](initialSize)
   {.pop.}
 
-func toDeque2*[T](arr: openArray[T]): Deque[T] {.inline, noinit.} =
+func toDeque*[T](items: openArray[T]): Deque[T] {.inline, noinit.} =
   ## Returns the deque converted from the array.
-  var deque = Deque[T].init arr.len
-  for elem in arr:
-    deque.addLast elem
+  var deque = Deque[T].init items.len
+  for item in items:
+    deque.addLast item
 
   deque
 
@@ -36,7 +36,7 @@ func insert*[T](self: var Deque[T], item: sink T, idx: int) {.inline, noinit.} =
   for _ in 1 .. idx:
     self.addFirst elems.popLast
 
-func delete*[T](self: var Deque[T], idx: int) {.inline, noinit.} =
+func del*[T](self: var Deque[T], idx: int) {.inline, noinit.} =
   ## Deletes `idx`-th element of the deque.
   var elems = Deque[T].init idx
   for _ in 1 .. idx:
@@ -49,7 +49,5 @@ func delete*[T](self: var Deque[T], idx: int) {.inline, noinit.} =
 
 iterator mpairs*[T](self: var Deque[T]): tuple[key: int, val: var T] {.inline.} =
   ## Yields and index-value pair in the deque.
-  var idx = 0
-  for val in self.mitems:
-    yield (idx, val)
-    idx.inc
+  for i in 0 ..< self.len:
+    yield (i, self[i])

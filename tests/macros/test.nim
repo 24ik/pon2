@@ -4,7 +4,7 @@
 {.experimental: "views".}
 
 import std/[sugar, unittest]
-import ../../src/pon2/private/[macros2]
+import ../../src/pon2/private/[macros]
 
 # ------------------------------------------------
 # Replace

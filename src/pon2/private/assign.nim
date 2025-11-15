@@ -10,7 +10,7 @@
 
 when not defined(js):
   import std/[typetraits]
-  import ./[macros2]
+  import ./[macros]
 
 when defined(js):
   func assign*[T](tgt: var T, src: T) {.inline, noinit.} =

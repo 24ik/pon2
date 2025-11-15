@@ -8,7 +8,7 @@
 
 import std/[algorithm]
 import ../[core]
-import ../private/[core, macros2]
+import ../private/[core, macros]
 import ../private/app/[solve]
 
 export core

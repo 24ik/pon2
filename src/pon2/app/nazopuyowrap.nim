@@ -8,7 +8,7 @@
 
 import std/[strformat]
 import ../[core]
-import ../private/[assign, macros2, results2, strutils2]
+import ../private/[assign, macros, results2, strutils2]
 
 export core, results2
 

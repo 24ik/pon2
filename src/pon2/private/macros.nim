@@ -63,23 +63,21 @@ macro defineExpand*(
     suffixes = collect:
       for suffix in expandSuffixes:
         suffix.strVal
-    cmnt =
-      """
-Runs in sequence with the body (the last argument) changed to the specified
-identifiers (the rest arguments) with the suffix """ &
+    comment =
+      "Runs in sequence with the body (the last argument) changed to the specified\nidentifiers (the rest arguments) with the suffix " &
       suffixes.join(", ") &
       ".\nUnderscore in the body is replaced by the index of the suffix."
-    macroBody = newStmtList cmnt.newCommentStmtNode
+    macroBody = newStmtList comment.newCommentStmtNode
   macroBody.add quote do:
     let
       `bodyIdent` = `identsAndBodyIdent`[^1]
       `identsIdent` = `identsAndBodyIdent`[0 ..^ 2]
       `stmtsIdent` = nnkStmtList.newNimNode `bodyIdent`
-  for suffixIdx, suffix in suffixes:
+  for suffixIndex, suffix in suffixes:
     let expandedBodyIdent = ("body" & suffix).ident
 
     macroBody.add quote do:
-      var `expandedBodyIdent` = `bodyIdent`.replaced("_".ident, `suffixIdx`.newLit)
+      var `expandedBodyIdent` = `bodyIdent`.replaced("_".ident, `suffixIndex`.newLit)
 
     let idIdent = "id".ident
     macroBody.add nnkForStmt.newTree(
