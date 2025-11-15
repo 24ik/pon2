@@ -25,5 +25,4 @@
 import ./[core]
 import ./app/[generate, key, marathon, nazopuyowrap, permute, simulator, solve, studio]
 
-export core
-export generate, key, marathon, nazopuyowrap, permute, simulator, solve, studio
+export core, generate, key, marathon, nazopuyowrap, permute, simulator, solve, studio

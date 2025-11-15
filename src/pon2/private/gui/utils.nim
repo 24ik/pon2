@@ -15,8 +15,8 @@ import chroma
 
 when defined(js) or defined(nimsuggest):
   import std/[jsffi, strformat, sugar]
-  import karax/[karax, kdom, vdom, vstyles]
-  import ../[assign, utils]
+  import karax/[karax, vdom, vstyles]
+  import ../[assign, dom, utils]
   import ../../[app]
 
 export chroma

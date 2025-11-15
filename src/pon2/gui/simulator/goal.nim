@@ -14,8 +14,8 @@ when defined(js) or defined(nimsuggest):
   import std/[jsffi, sugar]
   import karax/[karaxdsl, vdom]
   import ../[helper]
-  import ../../[app]
-  import ../../private/[gui, utils]
+  import ../../[app, core]
+  import ../../private/[dom, gui, utils]
 
   export vdom
 

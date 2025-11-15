@@ -12,11 +12,11 @@
 
 when defined(js) or defined(nimsuggest):
   import std/[sugar]
-  import karax/[karax, karaxdsl, kdom, vdom]
+  import karax/[karax, karaxdsl, vdom]
   import ./[setting]
   import ../[helper]
   import ../../[app]
-  import ../../private/[gui]
+  import ../../private/[dom, gui]
 
   export vdom
 

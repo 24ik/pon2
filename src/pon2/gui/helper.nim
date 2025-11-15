@@ -12,9 +12,9 @@
 
 when defined(js) or defined(nimsuggest):
   import std/[jsffi]
-  import karax/[kdom, vdom]
+  import karax/[vdom]
   import ../[app]
-  import ../private/[results2, utils]
+  import ../private/[dom, results2, utils]
 
   export results2
 

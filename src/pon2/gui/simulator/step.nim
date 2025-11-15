@@ -16,7 +16,7 @@ when defined(js) or defined(nimsuggest):
   import karax/[karaxdsl, vdom, vstyles]
   import ../[helper]
   import ../../[app]
-  import ../../private/[gui, utils]
+  import ../../private/[dom, gui, utils]
 
   export vdom
 

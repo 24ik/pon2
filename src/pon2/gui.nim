@@ -21,5 +21,4 @@
 import ./[app]
 import ./gui/[helper, marathon, simulator, studio]
 
-export app
-export helper, marathon, simulator, studio
+export app, helper, marathon, simulator, studio
