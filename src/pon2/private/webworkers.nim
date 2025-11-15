@@ -38,7 +38,7 @@ const
 
 const
   OkStr = "ok"
-  ErrStr = "err"
+  ErrorStr = "error"
 
 proc newWorkerObj(): JsObject {.
   inline, noinit, importjs: "new Worker('{WebWorkerPath}')".fmt
@@ -47,9 +47,9 @@ proc newWorkerObj(): JsObject {.
 proc init(T: type WebWorker): T {.inline, noinit.} =
   T(workerObj: newWorkerObj(), running: false)
 
-proc init(T: type WebWorkerPool, workerCnt = 1): T {.inline, noinit.} =
+proc init(T: type WebWorkerPool, workerCount = 1): T {.inline, noinit.} =
   let workerRefs = collect:
-    for _ in 1 .. workerCnt:
+    for _ in 1 .. workerCount:
       let workerRef = new WebWorker
       workerRef[] = WebWorker.init
       workerRef
@@ -62,21 +62,21 @@ proc init(T: type WebWorkerPool, workerCnt = 1): T {.inline, noinit.} =
 
 const PoolPollingMs = 100
 
-func parseRes(str: string): Res[seq[string]] {.inline, noinit.} =
+func parseResult(str: string): Res[seq[string]] {.inline, noinit.} =
   ## Returns the result of the web worker's task.
-  let errMsg = "Invalid result: {str}".fmt
+  let errorMsg = "Invalid result: {str}".fmt
 
   let strs = str.split2(MsgSep, 1)
   if strs.len != 2:
-    return err errMsg
+    return err errorMsg
 
   case strs[0]
   of OkStr:
     ok strs[1].split2 MsgSep
-  of ErrStr:
+  of ErrorStr:
     err strs[1].split2(MsgSep).join "\n"
   else:
-    err errMsg
+    err errorMsg
 
 proc run(
     self: ref WebWorker, args: varargs[string]
@@ -94,7 +94,7 @@ proc run(
     self[].workerObj.onmessage =
       (ev: JsObject) => (
         block:
-          ($ev.data.to cstring).parseRes.resolve
+          ($ev.data.to cstring).parseResult.resolve
           self[].running.assign false
       )
 
@@ -106,17 +106,17 @@ proc run*(
     self: WebWorkerPool, args: varargs[string]
 ): Future[Res[seq[string]]] {.async.} =
   ## Runs the task.
-  var freeWorkerIdx = -1
+  var freeWorkerIndex = -1
   block waiting:
-    while freeWorkerIdx < 0:
-      for workerIdx, workerRef in self.workerRefs:
+    while freeWorkerIndex < 0:
+      for workerIndex, workerRef in self.workerRefs:
         if not workerRef[].running:
-          freeWorkerIdx.assign workerIdx
+          freeWorkerIndex.assign workerIndex
           break waiting
 
       await sleep PoolPollingMs
 
-  return await self.workerRefs[freeWorkerIdx].run args
+  return await self.workerRefs[freeWorkerIndex].run args
 
 # ------------------------------------------------
 # Callee
@@ -130,7 +130,7 @@ func toStr(res: Res[seq[string]]): string {.inline, noinit.} =
   if res.isOk:
     "{OkStr}{MsgSep}{res.unsafeValue.join MsgSep}".fmt
   else:
-    "{ErrStr}{MsgSep}{res.error}".fmt
+    "{ErrorStr}{MsgSep}{res.error}".fmt
 
 proc register*(task: WebWorkerTask) {.inline, noinit.} =
   ## Registers the task to the web worker.

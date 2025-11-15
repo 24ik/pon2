@@ -62,7 +62,7 @@ when isMainModule:
     import std/[strformat]
 
     when defined(pon2.build.worker):
-      import ./pon2/private/[app, results2, webworker]
+      import ./pon2/private/[app, results2, webworkers]
     else:
       import std/[sugar]
       import karax/[karax, karaxdsl, kdom, vdom]
