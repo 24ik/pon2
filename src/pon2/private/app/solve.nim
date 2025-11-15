@@ -786,16 +786,16 @@ when defined(js) or defined(nimsuggest):
     if strs.len != 6:
       return err errMsg & "debug1"
 
-    let chainCnt = ?strs[0].parseIntRes.context errMsg
+    let chainCnt = ?strs[0].parseInt.context errMsg
 
     let popCntsStrs = strs[1].split2 Sep1
     if popCntsStrs.len != static(Cell.enumLen):
       return err errMsg & "debug2"
     var popCnts {.noinit.}: array[Cell, int]
     for i, s in popCntsStrs:
-      popCnts[Cell.low.succ i].assign ?s.parseIntRes.context errMsg
+      popCnts[Cell.low.succ i].assign ?s.parseInt.context errMsg
 
-    let hardToGarbageCnt = ?strs[2].parseIntRes.context errMsg
+    let hardToGarbageCnt = ?strs[2].parseInt.context errMsg
 
     let detailPopCnts = collect:
       for detailPopCntsStrSeqSeq in strs[3].split2 Sep2:
@@ -805,13 +805,13 @@ when defined(js) or defined(nimsuggest):
 
         var popCnts {.noinit.}: array[Cell, int]
         for i, s in detailPopCntsStrSeq:
-          popCnts[Cell.low.succ i].assign ?s.parseIntRes.context errMsg
+          popCnts[Cell.low.succ i].assign ?s.parseInt.context errMsg
 
         popCnts
 
     let detailHardToGarbageCnt = collect:
       for s in strs[4].split2 Sep1:
-        ?s.parseIntRes.context errMsg
+        ?s.parseInt.context errMsg
 
     if strs[5] == ErrStr:
       return ok MoveResult.init(
@@ -826,7 +826,7 @@ when defined(js) or defined(nimsuggest):
 
         var cnts {.noinit.}: array[Cell, seq[int]]
         for cellOrd, fullPopCntsStrSeq in fullPopCntsStrSeqs:
-          cnts[Cell.low.succ cellOrd].assign fullPopCntsStrSeq.split2(Sep1).mapIt ?it.parseIntRes.context errMsg
+          cnts[Cell.low.succ cellOrd].assign fullPopCntsStrSeq.split2(Sep1).mapIt ?it.parseInt.context errMsg
 
         cnts
 
@@ -855,7 +855,7 @@ when defined(js) or defined(nimsuggest):
 
     var arr {.noinit.}: array[Cell, int]
     for i, s in strs:
-      arr[Cell.low.succ i].assign ?s.parseIntRes.context errMsg
+      arr[Cell.low.succ i].assign ?s.parseInt.context errMsg
 
     ok arr
 
@@ -883,7 +883,7 @@ when defined(js) or defined(nimsuggest):
     if strs.len != 10:
       return err errMsg
 
-    let depth = ?strs[3].parseIntRes.context errMsg
+    let depth = ?strs[3].parseInt.context errMsg
 
     let
       field =
@@ -895,7 +895,7 @@ when defined(js) or defined(nimsuggest):
 
     let
       popColors = ?strs[6].parseCells.context errMsg
-      popCnt = ?strs[7].parseIntRes.context errMsg
+      popCnt = ?strs[7].parseInt.context errMsg
 
     let
       fieldCnts = ?strs[8].parseCounts.context errMsg

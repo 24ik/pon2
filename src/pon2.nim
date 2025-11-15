@@ -441,7 +441,7 @@ when isMainModule:
       if heights.allIt it.isDigit:
         var weights = Col.initArrayWith 0
         for col in Col:
-          weights[col].assign ($heights[col.ord]).parseIntRes.unsafeValue
+          weights[col].assign ($heights[col.ord]).parseInt.unsafeValue
 
         heightWeights = Opt[array[Col, int]].ok weights
         heightPositives = Opt[array[Col, bool]].err

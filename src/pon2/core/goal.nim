@@ -182,7 +182,7 @@ func parseGoal*(str: string): Res[Goal] {.inline, noinit.} =
       i.inc
 
     let valStr = str2[charIdx ..< i]
-    goal.optVal.ok ?valStr.parseIntRes.context "Invalid goal (val): {str}".fmt
+    goal.optVal.ok ?valStr.parseInt.context "Invalid goal (val): {str}".fmt
     str2.assign str2.replace(valStr, "n")
     break
 
@@ -277,19 +277,19 @@ func parseGoal*(query: string, fqdn: SimulatorFqdn): Res[Goal] {.inline, noinit.
     if strs.len != 3:
       return err "Invalid goal: {query}".fmt
 
-    let kindInt = ?strs[0].parseIntRes.context "Invalid goal (kind): {query}".fmt
+    let kindInt = ?strs[0].parseInt.context "Invalid goal (kind): {query}".fmt
     if kindInt notin GoalKind.low.ord .. GoalKind.high.ord:
       return err "Invalid goal (kind): {query}".fmt
     goal.kind.assign kindInt.GoalKind
 
     if strs[1] != EmptyColor:
-      let colorInt = ?strs[1].parseIntRes.context "Invalid goal (color): {query}".fmt
+      let colorInt = ?strs[1].parseInt.context "Invalid goal (color): {query}".fmt
       if colorInt notin GoalColor.low.ord .. GoalColor.high.ord:
         return err "Invalid goal (color): {query}".fmt
       goal.optColor.ok colorInt.GoalColor
 
     if strs[2] != EmptyVal:
-      let valInt = ?strs[2].parseIntRes.context "Invalid goal (val): {query}".fmt
+      let valInt = ?strs[2].parseInt.context "Invalid goal (val): {query}".fmt
       goal.optVal.ok valInt.GoalVal
   of Ishikawa, Ips:
     if query.len != 3:

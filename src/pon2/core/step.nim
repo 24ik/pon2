@@ -194,7 +194,7 @@ func parseStep*(str: string): Res[Step] {.inline, noinit.} =
 
     let cnts = collect:
       for s in strs:
-        ?s.parseIntRes.context "Invalid step (garbages): {str}".fmt
+        ?s.parseInt.context "Invalid step (garbages): {str}".fmt
     return ok Step.init(
       [Col0: cnts[0], cnts[1], cnts[2], cnts[3], cnts[4], cnts[5]], dropHard
     )
@@ -284,7 +284,7 @@ func parseStep*(query: string, fqdn: SimulatorFqdn): Res[Step] {.inline, noinit.
 
       let cnts = collect:
         for s in strs:
-          ?s.parseIntRes.context "Invalid step (garbages): {query}".fmt
+          ?s.parseInt.context "Invalid step (garbages): {query}".fmt
       ok Step.init(
         [Col0: cnts[0], cnts[1], cnts[2], cnts[3], cnts[4], cnts[5]], dropHard
       )
