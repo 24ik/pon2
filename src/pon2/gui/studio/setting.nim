@@ -8,8 +8,8 @@
 
 type StudioSetting* = object ## Studio settings.
   fixIndices*: seq[int]
-  allowDblNotLast*: bool
-  allowDblLast*: bool
+  allowDoubleNotLast*: bool
+  allowDoubleLast*: bool
 
 # ------------------------------------------------
 # JS backend
@@ -25,22 +25,24 @@ when defined(js) or defined(nimsuggest):
   export vdom
 
   const
-    AllowDblNotLastIdPrefix = "pon2-studio-setting-dbl-"
-    AllowDblLastIdPrefix = "pon2-studio-setting-lastdbl-"
+    AllowDoubleNotLastIdPrefix = "pon2-studio-setting-double-"
+    AllowDoubleLastIdPrefix = "pon2-studio-setting-lastdouble-"
     FixIndicesIdPrefix = "pon2-studio-setting-fix-"
 
   func init(
-      T: type StudioSetting, fixIndices: seq[int], allowDblNotLast, allowDblLast: bool
+      T: type StudioSetting,
+      fixIndices: seq[int],
+      allowDoubleNotLast, allowDoubleLast: bool,
   ): T =
     T(
       fixIndices: fixIndices,
-      allowDblNotLast: allowDblNotLast,
-      allowDblLast: allowDblLast,
+      allowDoubleNotLast: allowDoubleNotLast,
+      allowDoubleLast: allowDoubleLast,
     )
 
   proc toStudioSettingsVNode*(self: ref Studio, helper: VNodeHelper): VNode =
     ## Returns the studio settings node.
-    let stepCnt = unwrapNazoPuyo self[].simulator.nazoPuyoWrap:
+    let stepCount = unwrapNazoPuyo self[].simulator.nazoPuyoWrap:
       it.steps.len
 
     buildHtml tdiv:
@@ -52,46 +54,47 @@ when defined(js) or defined(nimsuggest):
             label(class = "checkbox"):
               text "ゾロ"
               input(
-                id = AllowDblNotLastIdPrefix & helper.studioOpt.unsafeValue.settingId,
+                id = AllowDoubleNotLastIdPrefix & helper.studioOpt.unsafeValue.settingId,
                 `type` = "checkbox",
                 checked = true,
               )
             label(class = "checkbox"):
               text "　最終手ゾロ"
               input(
-                id = AllowDblLastIdPrefix & helper.studioOpt.unsafeValue.settingId,
+                id = AllowDoubleLastIdPrefix & helper.studioOpt.unsafeValue.settingId,
                 `type` = "checkbox",
               )
             text "　N手目を固定:"
-            for stepIdx in 0 ..< stepCnt:
+            for stepIndex in 0 ..< stepCount:
               label(class = "checkbox"):
-                text "　{stepIdx.succ}".fmt.cstring
+                text "　{stepIndex.succ}".fmt.cstring
                 input(
                   id =
                     FixIndicesIdPrefix & helper.studioOpt.unsafeValue.settingId &
-                    ($stepIdx).cstring,
+                    ($stepIndex).cstring,
                   `type` = "checkbox",
                 )
 
   proc getStudioSetting*(helper: VNodeHelper): StudioSetting =
     ## Returns the studio settings.
     var
-      stepIdx = 0
+      stepIndex = 0
       fixIndices = newSeq[int]()
     while true:
       let checkbox = (
-        FixIndicesIdPrefix & helper.studioOpt.unsafeValue.settingId & ($stepIdx).cstring
+        FixIndicesIdPrefix & helper.studioOpt.unsafeValue.settingId &
+        ($stepIndex).cstring
       ).getElementById
       if checkbox.isNil:
         break
 
       if checkbox.checked:
-        fixIndices.add(stepIdx)
+        fixIndices.add(stepIndex)
 
-      stepIdx.inc
+      stepIndex.inc
 
     StudioSetting.init(
       fixIndices,
-      (AllowDblNotLastIdPrefix & helper.studioOpt.unsafeValue.settingId).getElementById.checked,
-      (AllowDblLastIdPrefix & helper.studioOpt.unsafeValue.settingId).getElementById.checked,
+      (AllowDoubleNotLastIdPrefix & helper.studioOpt.unsafeValue.settingId).getElementById.checked,
+      (AllowDoubleLastIdPrefix & helper.studioOpt.unsafeValue.settingId).getElementById.checked,
     )

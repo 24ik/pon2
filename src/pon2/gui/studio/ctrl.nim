@@ -47,7 +47,7 @@ when defined(js) or defined(nimsuggest):
     ## This function requires that the field is settled.
     let settings = helper.getStudioSetting
     self.asyncPermute settings.fixIndices,
-      settings.allowDblNotLast, settings.allowDblLast
+      settings.allowDoubleNotLast, settings.allowDoubleLast
 
     var interval: Interval
     {.push warning[Uninit]: off.}

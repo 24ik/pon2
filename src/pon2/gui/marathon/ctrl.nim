@@ -40,7 +40,7 @@ when defined(js) or defined(nimsuggest):
           button(
             class = "button",
             onclick = () => self[].selectRandomQuery,
-            disabled = self[].matchQueryCnt == 0,
+            disabled = self[].matchQueryCount == 0,
           ):
             text "指定ツモ"
             if not helper.mobile:

@@ -15,7 +15,7 @@ when defined(js) or defined(nimsuggest):
   import karax/[karaxdsl, vdom]
   import ../[helper]
   import ../../[app]
-  import ../../private/[dom, gui, utils]
+  import ../../private/[assign, dom, gui, utils]
 
   export vdom
 
@@ -26,9 +26,10 @@ when defined(js) or defined(nimsuggest):
   ): Uri =
     ## Returns the URI to post to X.
     var uri = initUri()
-    uri.scheme = "https"
-    uri.hostname = "x.com"
-    uri.path = "/intent/tweet" # NOTE: "/intent/post" does not work correctly on mobile
+    uri.scheme.assign "https"
+    uri.hostname.assign "x.com"
+    uri.path.assign "/intent/tweet"
+      # NOTE: "/intent/post" does not work correctly on mobile
 
     var queries = newSeqOfCap[(string, string)](3)
     queries.add ("url", $self.derefSimulator(helper).toExportUri.unsafeValue)
@@ -38,13 +39,13 @@ when defined(js) or defined(nimsuggest):
       nazoWrap.unwrapNazoPuyo:
         let
           ruleDesc = RuleDescs[it.field.rule]
-          moveCnt = it.steps.len
+          moveCount = it.steps.len
           goalDesc = $self.derefSimulator(helper).nazoPuyoWrap.optGoal.unsafeValue
 
-        queries.add ("text", "{ruleDesc}{moveCnt}手・{goalDesc}".fmt)
+        queries.add ("text", "{ruleDesc}{moveCount}手・{goalDesc}".fmt)
         queries.add ("hashtags", "なぞぷよ")
 
-    uri.query = queries.encodeQuery
+    uri.query.assign queries.encodeQuery
 
     uri
 
@@ -62,7 +63,7 @@ when defined(js) or defined(nimsuggest):
 
             let elem = "a".createElemJsObj
             elem.href = canvas.toDataURL()
-            elem.download = "pon2sim.png".cstring
+            elem.download = "pon2.png".cstring
             elem.target = "_blank".cstring
             elem.click()
         )
@@ -74,31 +75,31 @@ when defined(js) or defined(nimsuggest):
   ): VNode =
     ## Returns the share node.
     let
-      noPlcmtsUriCopyBtn = buildHtml button(class = "button is-size-7"):
+      noPlacementsUriCopyBtn = buildHtml button(class = "button is-size-7"):
         text "操作無"
       uriCopyBtn = buildHtml button(class = "button is-size-7"):
         text "操作有"
 
-    noPlcmtsUriCopyBtn.addCopyBtnHandler () =>
+    noPlacementsUriCopyBtn.addCopyBtnHandler () =>
       $self.derefSimulator(helper).toExportUri.unsafeValue
     uriCopyBtn.addCopyBtnHandler () =>
       $self.derefSimulator(helper).toExportUri(clearPlacements = false).unsafeValue
 
-    let noPlcmtsEditorUriCopyBtn, editorUriCopyBtn: VNode
+    let noPlacementsEditorUriCopyBtn, editorUriCopyBtn: VNode
     if self.derefSimulator(helper).mode in EditorModes:
-      noPlcmtsEditorUriCopyBtn = buildHtml button(class = "button is-size-7"):
+      noPlacementsEditorUriCopyBtn = buildHtml button(class = "button is-size-7"):
         text "操作無"
       editorUriCopyBtn = buildHtml button(class = "button is-size-7"):
         text "操作有"
 
-      noPlcmtsEditorUriCopyBtn.addCopyBtnHandler () =>
+      noPlacementsEditorUriCopyBtn.addCopyBtnHandler () =>
         $self.derefSimulator(helper).toExportUri(viewer = false).unsafeValue
       editorUriCopyBtn.addCopyBtnHandler () =>
         $self
         .derefSimulator(helper)
         .toExportUri(viewer = false, clearPlacements = false).unsafeValue
     else:
-      noPlcmtsEditorUriCopyBtn = nil
+      noPlacementsEditorUriCopyBtn = nil
       editorUriCopyBtn = nil
 
     buildHtml tdiv:
@@ -127,7 +128,7 @@ when defined(js) or defined(nimsuggest):
         text "URLコピー"
         tdiv(class = "field is-grouped"):
           tdiv(class = "control"):
-            noPlcmtsUriCopyBtn
+            noPlacementsUriCopyBtn
           tdiv(class = "control"):
             uriCopyBtn
       if self.derefSimulator(helper).mode in EditorModes:
@@ -135,6 +136,6 @@ when defined(js) or defined(nimsuggest):
           text "編集者URLコピー"
           tdiv(class = "field is-grouped"):
             tdiv(class = "control"):
-              noPlcmtsEditorUriCopyBtn
+              noPlacementsEditorUriCopyBtn
             tdiv(class = "control"):
               editorUriCopyBtn

@@ -34,6 +34,6 @@ when defined(js) or defined(nimsuggest):
             self.toStudioSettingsVNode helper
           tdiv(class = "block"):
             self.toStudioPaginationVNode helper
-          if self[].replayStepsCnt > 0:
+          if self[].replayStepsCount > 0:
             tdiv(class = "block"):
               self.toSimulatorVNode replayHelper

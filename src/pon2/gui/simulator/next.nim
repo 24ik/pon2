@@ -19,17 +19,17 @@ when defined(js) or defined(nimsuggest):
   export vdom
 
   proc toNextCellVNode[S: Simulator or Studio or Marathon](
-      self: ref S, helper: VNodeHelper, dblNext: bool, pivot: bool
+      self: ref S, helper: VNodeHelper, doubleNext: bool, pivot: bool
   ): VNode =
     ## Returns the node of the cell in the next or double-next step.
     let
-      stepIdx = self.derefSimulator(helper).operatingIdx.succ 1 + dblNext.int
+      stepIndex = self.derefSimulator(helper).operatingIndex.succ 1 + doubleNext.int
       nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
 
     var cross = false
     let cellOpt = nazoWrap.unwrapNazoPuyo:
-      if stepIdx < it.steps.len:
-        let step = it.steps[stepIdx]
+      if stepIndex < it.steps.len:
+        let step = it.steps[stepIndex]
         case step.kind
         of PairPlacement:
           Opt[Cell].ok if pivot: step.pair.pivot else: step.pair.rotor
@@ -73,10 +73,10 @@ when defined(js) or defined(nimsuggest):
         # next
         tr:
           td:
-            self.toNextCellVNode(helper, dblNext = false, pivot = false)
+            self.toNextCellVNode(helper, doubleNext = false, pivot = false)
         tr:
           td:
-            self.toNextCellVNode(helper, dblNext = false, pivot = true)
+            self.toNextCellVNode(helper, doubleNext = false, pivot = true)
 
         # separator
         tr:
@@ -87,7 +87,7 @@ when defined(js) or defined(nimsuggest):
         # double next
         tr:
           td:
-            self.toNextCellVNode(helper, dblNext = true, pivot = false)
+            self.toNextCellVNode(helper, doubleNext = true, pivot = false)
         tr:
           td:
-            self.toNextCellVNode(helper, dblNext = true, pivot = true)
+            self.toNextCellVNode(helper, doubleNext = true, pivot = true)

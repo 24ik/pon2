@@ -44,8 +44,8 @@ when defined(js) or defined(nimsuggest):
     ## Returns the palette node.
     let
       editObj = self.derefSimulator(helper).editData.editObj
-      btnCls = (if helper.mobile: "button is-large px-2" else: "button px-2").cstring
-      selectBtnCls = (
+      btnClass = (if helper.mobile: "button is-large px-2" else: "button px-2").cstring
+      selectBtnClass = (
         if helper.mobile: "button is-large is-primary px-2"
         else: "button px-2 is-primary"
       ).cstring
@@ -65,7 +65,7 @@ when defined(js) or defined(nimsuggest):
                   let cellSelected = editObj.kind == EditCell and editObj.cell == cell
                   td:
                     button(
-                      class = if cellSelected: selectBtnCls else: btnCls,
+                      class = if cellSelected: selectBtnClass else: btnClass,
                       onclick = self.initBtnHandler(helper, cell),
                     ):
                       figure(
@@ -81,7 +81,7 @@ when defined(js) or defined(nimsuggest):
                     cross = row.bool
                     selected = editObj.kind == EditRotate and editObj.cross == cross
                   button(
-                    class = if selected: selectBtnCls else: btnCls,
+                    class = if selected: selectBtnClass else: btnClass,
                     onclick = self.initBtnHandler(helper, cross),
                   ):
                     figure(
