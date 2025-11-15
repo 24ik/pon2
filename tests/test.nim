@@ -2,8 +2,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[appdirs, dirs, os, osproc, paths, random, sequtils, strformat, strutils]
-import ../src/pon2/private/[bitutils, math]
+import std/[appdirs, dirs, os, osproc, random, sequtils, strformat, strutils]
+import ../src/pon2/private/[bitutils, math, paths]
 import unittest2
 
 const

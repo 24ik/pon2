@@ -11,25 +11,25 @@ import std/[paths]
 when defined(js):
   import std/[strformat, strutils]
 
-export paths
+export paths except splitPath
 
 template srcPath*(): Path =
   ## Returns the file's path.
   instantiationInfo(-1, true).filename.Path
 
-func splitPath2*(path: Path): tuple[head, tail: Path] {.inline, noinit.} =
-  ## Splits the path.
+func splitPath*(path: Path): tuple[head, tail: Path] {.inline, noinit.} =
+  ## Returns the split paths.
   when defined(js):
     if '\\' in $path:
       let paths = ($path).rsplit('\\', 1)
       (head: paths[0].Path, tail: paths[1].Path)
     else:
-      path.splitPath
+      paths.splitPath path
   else:
-    path.splitPath
+    paths.splitPath path
 
 func joinPath*(head, tail: Path): Path {.inline, noinit.} =
-  ## Concatenates the paths.
+  ## Returns the concatenated path.
   when defined(js):
     if '\\' in $head:
       "{head}\\{tail}".fmt.Path

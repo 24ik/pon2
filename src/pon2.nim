@@ -32,7 +32,7 @@
 {.experimental: "views".}
 
 import std/[parsecfg, streams]
-import ./pon2/private/[paths2]
+import ./pon2/private/[paths]
 
 when defined(pon2.build.worker):
   import ./pon2/[app]
@@ -44,8 +44,8 @@ else:
 proc getNimbleFile(): Path =
   ## Returns the path to `pon2.nimble`.
   let
-    head = srcPath().splitPath2.head
-    (head2, tail2) = head.splitPath2
+    head = srcPath().splitPath.head
+    (head2, tail2) = head.splitPath
 
   (if tail2 == "src".Path: head2 else: head).joinPath "pon2.nimble".Path
 

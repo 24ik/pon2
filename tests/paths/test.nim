@@ -4,13 +4,13 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2/private/[paths2]
+import ../../src/pon2/private/[paths]
 
-block: # srcPath, splitPath2, joinPath2
+block: # srcPath, splitPath, joinPath
   let
     src = srcPath()
-    (head, tail) = src.splitPath2
+    (head, tail) = src.splitPath
   check tail == "test.nim".Path
-  check head.splitPath2.tail == "paths2".Path
+  check head.splitPath.tail == "paths".Path
 
   check head.joinPath(tail) == src
