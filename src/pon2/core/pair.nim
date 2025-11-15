@@ -71,7 +71,7 @@ func pivot*(self: Pair): Cell {.inline, noinit.} = ## Returns the pivot-puyo.
 func rotor*(self: Pair): Cell {.inline, noinit.} = ## Returns the rotor-puyo.
   Red.succ self.ord mod ColorPuyos.card
 
-func isDbl*(self: Pair): bool {.inline, noinit.} =
+func isDouble*(self: Pair): bool {.inline, noinit.} =
   ## Returns `true` if the pair is double (monochromatic).
   self in {RedRed, GreenGreen, BlueBlue, YellowYellow, PurplePurple}
 

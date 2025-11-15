@@ -24,9 +24,9 @@ block: # pivot, rotor
   check BlueRed.pivot == Blue
   check BlueRed.rotor == Red
 
-block: # isDbl
-  check not PurpleRed.isDbl
-  check YellowYellow.isDbl
+block: # isDouble
+  check not PurpleRed.isDouble
+  check YellowYellow.isDouble
 
 # ------------------------------------------------
 # Operator
