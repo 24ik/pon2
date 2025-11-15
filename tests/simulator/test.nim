@@ -44,7 +44,7 @@ block: # undo, redo
 
 block:
   # rule, nazoPuyoWrap, moveResult, mode, state, editData,
-  # operatingPlacement, operatingIdx
+  # operatingPlacement, operatingIndex
   let sim = Simulator.init
 
   check sim.rule == Tsu
@@ -61,7 +61,7 @@ block:
       insert: false,
     )
   check sim.operatingPlacement == Up2
-  check sim.operatingIdx == 0
+  check sim.operatingIndex == 0
 
 # ------------------------------------------------
 # Property - Setter
@@ -473,7 +473,7 @@ O"""
 
   sim.moveCursorDown
   sim.flip
-  steps[1].cnts.reverse
+  steps[1].counts.reverse
   sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
@@ -504,14 +504,14 @@ block: # `goalKind=`, `goalColor=`, `goalVal=`
   sim.goalVal = 3
   check sim.nazoPuyoWrap.optGoal == Opt[Goal].ok Goal.init(Chain, 3)
 
-  sim.goalKind = AccCnt
-  check sim.nazoPuyoWrap.optGoal == Opt[Goal].ok Goal.init(AccCnt, All, 3)
+  sim.goalKind = AccumCount
+  check sim.nazoPuyoWrap.optGoal == Opt[Goal].ok Goal.init(AccumCount, All, 3)
 
   sim.goalColor = GoalColor.Red
-  check sim.nazoPuyoWrap.optGoal == Opt[Goal].ok Goal.init(AccCnt, GoalColor.Red, 3)
+  check sim.nazoPuyoWrap.optGoal == Opt[Goal].ok Goal.init(AccumCount, GoalColor.Red, 3)
 
   sim.goalVal = 1
-  check sim.nazoPuyoWrap.optGoal == Opt[Goal].ok Goal.init(AccCnt, GoalColor.Red, 1)
+  check sim.nazoPuyoWrap.optGoal == Opt[Goal].ok Goal.init(AccumCount, GoalColor.Red, 1)
 
 # ------------------------------------------------
 # Edit - Other
@@ -540,25 +540,25 @@ block:
   # movePlacementRight, movePlacementLeft, rotatePlacementRight, rotatePlacementLeft
   var
     sim = Simulator.init
-    plcmt = Up2
+    placement = Up2
 
-  check sim.operatingPlacement == plcmt
+  check sim.operatingPlacement == placement
 
   sim.movePlacementRight
-  plcmt.moveRight
-  check sim.operatingPlacement == plcmt
+  placement.moveRight
+  check sim.operatingPlacement == placement
 
   sim.movePlacementLeft
-  plcmt.moveLeft
-  check sim.operatingPlacement == plcmt
+  placement.moveLeft
+  check sim.operatingPlacement == placement
 
   sim.rotatePlacementRight
-  plcmt.rotateRight
-  check sim.operatingPlacement == plcmt
+  placement.rotateRight
+  check sim.operatingPlacement == placement
 
   sim.rotatePlacementLeft
-  plcmt.rotateLeft
-  check sim.operatingPlacement == plcmt
+  placement.rotateLeft
+  check sim.operatingPlacement == placement
 
 # ------------------------------------------------
 # Forward / Backward
@@ -715,11 +715,11 @@ rb|6N
 O"""
       ).unsafeValue
 
-      cnts: array[Cell, int] = [0, 0, 2, 4, 0, 0, 0, 0]
+      counts: array[Cell, int] = [0, 0, 2, 4, 0, 0, 0, 0]
       full: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[], @[], @[], @[]]
       moveRes0 = MoveResult.init true
       moveRes1 = MoveResult.init true
-      moveRes2 = MoveResult.init(1, cnts, 0, @[cnts], @[0], @[full])
+      moveRes2 = MoveResult.init(1, counts, 0, @[counts], @[0], @[full])
       moveRes3 = moveRes2
       moveRes4 = MoveResult.init true
       moveRes5 = MoveResult.init true
@@ -1195,7 +1195,7 @@ pp|23"""
   check sim5 == sim6
 
   for i in 0 .. 9:
-    sim5.writeCnt i
+    sim5.writeCount i
     check sim6.operate KeyEvent.init '0'.succ i
     check sim5 == sim6
 

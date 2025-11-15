@@ -73,11 +73,11 @@ func isReady*(self: Marathon): bool =
 func `isReady=`*(self: var Marathon, isReady: bool) =
   self.isReady.assign self.isReady or isReady
 
-func matchQueryCnt*(self: Marathon): int =
+func matchQueryCount*(self: Marathon): int =
   ## Returns the number of the matched queries.
   if self.isReady: self.matchQueries.len else: 0
 
-func allQueryCnt*(self: Marathon): int =
+func allQueryCount*(self: Marathon): int =
   ## Returns the number of the all queries.
   if self.isReady: self.allQueries.len else: 0
 
@@ -89,73 +89,73 @@ func swappedPrefixes(prefix: string): seq[string] =
   ## Returns all prefixes with all pairs swapped.
   var
     lastIndices = 6.initArrayWith 0 # AB, AC, AD, BC, BD, CD
-    cnts = 10.initArrayWith 0 # AB, AC, AD, BC, BD, CD, AA, BB, CC, DD
-  for charIdx in countup(0, prefix.len.pred, 2):
-    case prefix[charIdx .. charIdx.succ]
+    counts = 10.initArrayWith 0 # AB, AC, AD, BC, BD, CD, AA, BB, CC, DD
+  for charIndex in countup(0, prefix.len.pred, 2):
+    case prefix[charIndex .. charIndex.succ]
     of "AB", "BA":
-      cnts[0].inc
-      lastIndices[0].assign charIdx
+      counts[0].inc
+      lastIndices[0].assign charIndex
     of "AC", "CA":
-      cnts[1].inc
-      lastIndices[1].assign charIdx
+      counts[1].inc
+      lastIndices[1].assign charIndex
     of "AD", "DA":
-      cnts[2].inc
-      lastIndices[2].assign charIdx
+      counts[2].inc
+      lastIndices[2].assign charIndex
     of "BC", "CB":
-      cnts[3].inc
-      lastIndices[3].assign charIdx
+      counts[3].inc
+      lastIndices[3].assign charIndex
     of "BD", "DB":
-      cnts[4].inc
-      lastIndices[4].assign charIdx
+      counts[4].inc
+      lastIndices[4].assign charIndex
     of "CD", "DC":
-      cnts[5].inc
-      lastIndices[5].assign charIdx
+      counts[5].inc
+      lastIndices[5].assign charIndex
     of "AA":
-      cnts[6].inc
+      counts[6].inc
     of "BB":
-      cnts[7].inc
+      counts[7].inc
     of "CC":
-      cnts[8].inc
+      counts[8].inc
     of "DD":
-      cnts[9].inc
+      counts[9].inc
 
   # If a non-double pair (e.g. AB) exists and cells in the pair (e.g. A and B) only
   # appear as the ones, one of them is not need to swap.
   let
-    cntAbAc = cnts[0] + cnts[1]
-    cntAbAd = cnts[0] + cnts[2]
-    cntAcAd = cnts[1] + cnts[2]
-    cntBcBd = cnts[3] + cnts[4]
-    cntBcCd = cnts[3] + cnts[5]
-    cntBdCd = cnts[4] + cnts[5]
+    countAbAc = counts[0] + counts[1]
+    countAbAd = counts[0] + counts[2]
+    countAcAd = counts[1] + counts[2]
+    countBcBd = counts[3] + counts[4]
+    countBcCd = counts[3] + counts[5]
+    countBdCd = counts[4] + counts[5]
   var fixIndices = newSeqOfCap[int](2)
-  if cnts[0] > 0 and cntAcAd + cntBcBd + (cnts[6] + cnts[7]) == 0: # AB
+  if counts[0] > 0 and countAcAd + countBcBd + (counts[6] + counts[7]) == 0: # AB
     fixIndices.add lastIndices[0]
-  if cnts[1] > 0 and cntAbAd + cntBcCd + (cnts[6] + cnts[8]) == 0: # AC
+  if counts[1] > 0 and countAbAd + countBcCd + (counts[6] + counts[8]) == 0: # AC
     fixIndices.add lastIndices[1]
-  if cnts[2] > 0 and cntAbAc + cntBdCd + (cnts[6] + cnts[9]) == 0: # AD
+  if counts[2] > 0 and countAbAc + countBdCd + (counts[6] + counts[9]) == 0: # AD
     fixIndices.add lastIndices[2]
-  if cnts[3] > 0 and cntAbAc + cntBdCd + (cnts[7] + cnts[8]) == 0: # BC
+  if counts[3] > 0 and countAbAc + countBdCd + (counts[7] + counts[8]) == 0: # BC
     fixIndices.add lastIndices[3]
-  if cnts[4] > 0 and cntAbAd + cntBcCd + (cnts[7] + cnts[9]) == 0: # BD
+  if counts[4] > 0 and countAbAd + countBcCd + (counts[7] + counts[9]) == 0: # BD
     fixIndices.add lastIndices[4]
-  if cnts[5] > 0 and cntAcAd + cntBcBd + (cnts[8] + cnts[9]) == 0: # CD
+  if counts[5] > 0 and countAcAd + countBcBd + (counts[8] + counts[9]) == 0: # CD
     fixIndices.add lastIndices[5]
 
   let pairsSeq = collect:
-    for charIdx in countup(0, prefix.len.pred, 2):
+    for charIndex in countup(0, prefix.len.pred, 2):
       let
-        c1 = prefix[charIdx]
-        c2 = prefix[charIdx.succ]
+        c1 = prefix[charIndex]
+        c2 = prefix[charIndex.succ]
 
-      if c1 == c2 or charIdx in fixIndices:
+      if c1 == c2 or charIndex in fixIndices:
         @[c1 & c2]
       else:
         @[c1 & c2, c2 & c1]
   pairsSeq.product.mapIt it.join
 
-func initReplaceDataSeqArr(): array[4, seq[seq[(string, string)]]] =
-  ## Returns `ReplaceDataSeqArr`.
+func initReplaceDataSeqArray(): array[4, seq[seq[(string, string)]]] =
+  ## Returns `ReplaceDataSeqArray`.
   let
     replaceDataSeq1 = collect:
       for c0 in Cell.Red .. Cell.Purple:
@@ -182,8 +182,8 @@ func initReplaceDataSeqArr(): array[4, seq[seq[(string, string)]]] =
   [replaceDataSeq1, replaceDataSeq2, replaceDataSeq3, replaceDataSeq4]
 
 const
-  ReplaceDataSeqArr = initReplaceDataSeqArr()
-  ReplaceNeedKeysArr = ["a".toSet, "ab".toSet, "abc".toSet, "abcd".toSet]
+  ReplaceDataSeqArray = initReplaceDataSeqArray()
+  ReplaceNeedKeysArray = ["a".toSet, "ab".toSet, "abc".toSet, "abcd".toSet]
 
 func match*(self: var Marathon, prefix: string) =
   ## Searches queries that have specified prefixes and sets them to the marathon
@@ -196,12 +196,12 @@ func match*(self: var Marathon, prefix: string) =
     return
 
   let chars = prefix.toSet
-  if chars in ReplaceNeedKeysArr:
+  if chars in ReplaceNeedKeysArray:
     if prefix.len mod 2 == 1:
       return
 
     # ref: https://sengiken.web.fc2.com/tsumo/
-    let matchCntMax =
+    let matchCountMax =
       case prefix.len
       of 2:
         45000 # AB
@@ -211,8 +211,8 @@ func match*(self: var Marathon, prefix: string) =
         2600 # ABABAC
       else:
         400 # ABABACBD
-    self.matchQueries.assign newSeqOfCap[string](matchCntMax)
-    for replaceData in ReplaceDataSeqArr[chars.card.pred]:
+    self.matchQueries.assign newSeqOfCap[string](matchCountMax)
+    for replaceData in ReplaceDataSeqArray[chars.card.pred]:
       for pre in prefix.toUpperAscii.swappedPrefixes:
         {.push warning[ProveInit]: off.}
         for query in self.critBitTree.itemsWithPrefix pre.multiReplace replaceData:
@@ -220,7 +220,7 @@ func match*(self: var Marathon, prefix: string) =
         {.pop.}
   else:
     # ref: https://sengiken.web.fc2.com/tsumo/
-    let matchCntMax =
+    let matchCountMax =
       case prefix.len
       of 1:
         14000 # R
@@ -230,7 +230,7 @@ func match*(self: var Marathon, prefix: string) =
         1500 # YYY
       else:
         410 # YYYY
-    self.matchQueries.assign newSeqOfCap[string](matchCntMax)
+    self.matchQueries.assign newSeqOfCap[string](matchCountMax)
     for query in self.critBitTree.itemsWithPrefix prefix:
       self.matchQueries &= query
 
@@ -242,20 +242,20 @@ func match*(self: var Marathon, prefix: string) =
 
 func loadSteps(self: var Marathon, query: string) =
   ## Applies the steps to the simulator.
-  var steps = initDeque[Step](query.len div 2)
+  var steps = Steps.init query.len div 2
   for i in countup(0, query.len.pred, 2):
     (query[i.succ] & query[i]).parseStep(Pon2).isErrOr:
       steps.addLast value
 
   self.simulator.assign Simulator.init PuyoPuyo[TsuField].init(TsuField.init, steps)
 
-func selectQuery*(self: var Marathon, idx: int) =
+func selectQuery*(self: var Marathon, index: int) =
   ## Applies the selected query to the simulator.
   if not self.isReady:
     return
 
-  if idx in 0 ..< self.matchQueries.len:
-    self.loadSteps self.matchQueries[idx]
+  if index in 0 ..< self.matchQueries.len:
+    self.loadSteps self.matchQueries[index]
 
 func selectRandomQuery*(self: var Marathon, fromMatched = true) =
   ## Applies a random query to the simulator.
@@ -263,10 +263,10 @@ func selectRandomQuery*(self: var Marathon, fromMatched = true) =
     return
 
   if fromMatched:
-    if self.matchQueryCnt > 0:
+    if self.matchQueryCount > 0:
       self.loadSteps self.rng.sample self.matchQueries
   else:
-    if self.allQueryCnt > 0:
+    if self.allQueryCount > 0:
       self.loadSteps self.rng.sample self.allQueries
 
 # ------------------------------------------------
