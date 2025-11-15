@@ -6,7 +6,7 @@ import std/[sugar, unittest]
 import ../../src/pon2/private/[strutils]
 
 block: # parseInt
-  check "123".parseInt == Res[int].ok 123
+  check "123".parseInt == StrErrorResult[int].ok 123
   check "xyz".parseInt.isErr
 
 block: # split2

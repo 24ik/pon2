@@ -130,7 +130,7 @@ const StrToPair = collect:
   for pair in Pair:
     {$pair: pair}
 
-func parsePair*(str: string): Res[Pair] {.inline, noinit.} =
+func parsePair*(str: string): StrErrorResult[Pair] {.inline, noinit.} =
   ## Returns the pair converted from the string representation.
   StrToPair[str].context "Invalid pair: {str}".fmt
 
@@ -152,7 +152,9 @@ func toUriQuery*(self: Pair, fqdn = Pon2): string {.inline, noinit.} =
   of Ishikawa, Ips:
     $PairToIshikawaUri[self.ord]
 
-func parsePair*(query: string, fqdn: SimulatorFqdn): Res[Pair] {.inline, noinit.} =
+func parsePair*(
+    query: string, fqdn: SimulatorFqdn
+): StrErrorResult[Pair] {.inline, noinit.} =
   ## Returns the pair converted from the URI query.
   case fqdn
   of Pon2:

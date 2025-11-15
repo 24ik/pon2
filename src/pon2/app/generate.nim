@@ -90,7 +90,9 @@ func round(rng: var Rand, x: float): int =
   let floorX = x.int
   floorX + (rng.rand(1.0) < x - floorX.float).int
 
-func split(rng: var Rand, total, chunkCnt: int, allowZeroChunk: bool): Res[seq[int]] =
+func split(
+    rng: var Rand, total, chunkCnt: int, allowZeroChunk: bool
+): StrErrorResult[seq[int]] =
   ## Splits the number `total` into `chunkCnt` chunks.
   if total < 0:
     return err "`total` cannot be negative"
@@ -126,7 +128,9 @@ func split(rng: var Rand, total, chunkCnt: int, allowZeroChunk: bool): Res[seq[i
       sepIndices[i.succ] - sepIndices[i]
   ok res
 
-func split(rng: var Rand, total: int, weights: openArray[int]): Res[seq[int]] =
+func split(
+    rng: var Rand, total: int, weights: openArray[int]
+): StrErrorResult[seq[int]] =
   ## Splits the number `total` into chunks following the probability `weights`.
   ## If `weights` are all zero, splits randomly.
   ## Note that an infinite loop can occur.
@@ -161,7 +165,9 @@ func split(rng: var Rand, total: int, weights: openArray[int]): Res[seq[int]] =
 
   ok res
 
-func split(rng: var Rand, total: int, positives: openArray[bool]): Res[seq[int]] =
+func split(
+    rng: var Rand, total: int, positives: openArray[bool]
+): StrErrorResult[seq[int]] =
   ## Splits the number `total` into chunks randomly.
   ## Elements of the result where `positives` are `true` are set to positive, and
   ## the others are set to zero.
@@ -196,7 +202,7 @@ func split(rng: var Rand, total: int, positives: openArray[bool]): Res[seq[int]]
 # Checker
 # ------------------------------------------------
 
-func isValid(self: GenerateSettings): Res[void] =
+func isValid(self: GenerateSettings): StrErrorResult[void] =
   ## Returns `true` if the settings are valid.
   ## Note that this function is "weak" checker; a generation may be failed
   ## (entering infinite loop) even though this function returns `true`.
@@ -276,7 +282,7 @@ func isValid(self: GenerateSettings): Res[void] =
   if notPairPlacementIndexSet.card >= self.moveCnt:
     return err "at least one pair-step is required"
 
-  Res[void].ok
+  StrErrorResult[void].ok
 
 # ------------------------------------------------
 # Puyo Puyo
@@ -294,7 +300,7 @@ func generateGarbagesCnts(rng: var Rand, total: int): array[Col, int] =
 
 func generatePuyoPuyo[F: TsuField or WaterField](
     rng: var Rand, settings: GenerateSettings, useCells: seq[Cell]
-): Res[PuyoPuyo[F]] =
+): StrErrorResult[PuyoPuyo[F]] =
   ## Returns a random Puyo Puyo.
   ## Note that an infinite loop can occur.
   ## This function requires the settings passes `isValid`.
@@ -480,7 +486,7 @@ func generateGoal(
 
 proc generate[F: TsuField or WaterField](
     rng: var Rand, settings: GenerateSettings
-): Res[NazoPuyo[F]] =
+): StrErrorResult[NazoPuyo[F]] =
   ## Returns a random Nazo Puyo that has a unique solution.
   ?settings.isValid.context "Generation failed"
 
@@ -544,7 +550,7 @@ proc generate[F: TsuField or WaterField](
 
 proc generate*(
     rng: var Rand, settings: GenerateSettings, rule: Rule
-): Res[NazoPuyoWrap] =
+): StrErrorResult[NazoPuyoWrap] =
   ## Returns a random Nazo Puyo that has a unique solution.
   case rule
   of Tsu:

@@ -177,7 +177,7 @@ func `$`*(self: Step): string {.inline, noinit.} =
   of Rotate:
     if self.cross: CrossRotateDesc else: RotateDesc
 
-func parseStep*(str: string): Res[Step] {.inline, noinit.} =
+func parseStep*(str: string): StrErrorResult[Step] {.inline, noinit.} =
   ## Returns the step converted from the string representation.
   if str == RotateDesc:
     return ok Step.init(cross = false)
@@ -228,7 +228,7 @@ const
     for i, uri in IshikawaUriNumbers:
       {uri: i}
 
-func toUriQuery*(self: Step, fqdn = Pon2): Res[string] {.inline, noinit.} =
+func toUriQuery*(self: Step, fqdn = Pon2): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the step.
   case self.kind
   of PairPlacement:
@@ -260,7 +260,9 @@ func toUriQuery*(self: Step, fqdn = Pon2): Res[string] {.inline, noinit.} =
     of Ishikawa, Ips:
       err "Not supported step with Ishikawa/Ips format: {self}".fmt
 
-func parseStep*(query: string, fqdn: SimulatorFqdn): Res[Step] {.inline, noinit.} =
+func parseStep*(
+    query: string, fqdn: SimulatorFqdn
+): StrErrorResult[Step] {.inline, noinit.} =
   ## Returns the step converted from the URI query.
   case fqdn
   of Pon2:
@@ -336,7 +338,7 @@ func `$`*(self: Steps): string {.inline, noinit.} =
 
   strs.join StepsSep
 
-func parseSteps*(str: string): Res[Steps] {.inline, noinit.} =
+func parseSteps*(str: string): StrErrorResult[Steps] {.inline, noinit.} =
   ## Returns the steps converted from the string representation.
   if str == "":
     return ok Steps.init
@@ -351,7 +353,7 @@ func parseSteps*(str: string): Res[Steps] {.inline, noinit.} =
 # Steps <-> URI
 # ------------------------------------------------
 
-func toUriQuery*(self: Steps, fqdn = Pon2): Res[string] {.inline, noinit.} =
+func toUriQuery*(self: Steps, fqdn = Pon2): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the steps.
   let strs = collect:
     for step in self:
@@ -359,7 +361,9 @@ func toUriQuery*(self: Steps, fqdn = Pon2): Res[string] {.inline, noinit.} =
 
   ok strs.join
 
-func parseSteps*(query: string, fqdn: SimulatorFqdn): Res[Steps] {.inline, noinit.} =
+func parseSteps*(
+    query: string, fqdn: SimulatorFqdn
+): StrErrorResult[Steps] {.inline, noinit.} =
   ## Returns the steps converted from the URI query.
   case fqdn
   of Pon2:

@@ -107,7 +107,7 @@ when isMainModule:
       # JS - Main - Worker
       # ------------------------------------------------
 
-      proc task(args: seq[string]): Res[seq[string]] =
+      proc task(args: seq[string]): StrErrorResult[seq[string]] =
         let errMsg = "Invalid run args: {args}".fmt
 
         if args.len == 0:

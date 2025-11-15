@@ -778,7 +778,7 @@ when defined(js) or defined(nimsuggest):
 
     strs
 
-  func parseMoveResult(str: string): Res[MoveResult] {.inline, noinit.} =
+  func parseMoveResult(str: string): StrErrorResult[MoveResult] {.inline, noinit.} =
     ## Returns the move result converted from the string representation.
     let errMsg = "Invalid move result: {str}".fmt
 
@@ -835,7 +835,7 @@ when defined(js) or defined(nimsuggest):
       fullPopCnts,
     )
 
-  func parseCells(str: string): Res[set[Cell]] {.inline, noinit.} =
+  func parseCells(str: string): StrErrorResult[set[Cell]] {.inline, noinit.} =
     ## Returns the cells converted from the string representation.
     let errMsg = "Invalid cells: {str}".fmt
 
@@ -845,7 +845,7 @@ when defined(js) or defined(nimsuggest):
 
     ok cells
 
-  func parseCounts(str: string): Res[array[Cell, int]] {.inline, noinit.} =
+  func parseCounts(str: string): StrErrorResult[array[Cell, int]] {.inline, noinit.} =
     ## Returns the counts converted from the string representation.
     let errMsg = "Invalid counts: {str}".fmt
 
@@ -861,7 +861,7 @@ when defined(js) or defined(nimsuggest):
 
   func parseSolveInfo*(
       strs: seq[string]
-  ): Res[tuple[rule: Rule, goal: Goal, steps: Steps]] {.inline, noinit.} =
+  ): StrErrorResult[tuple[rule: Rule, goal: Goal, steps: Steps]] {.inline, noinit.} =
     ## Returns the rule of the solve node converted from the string representations.
     let errMsg = "Invalid solve info: {strs}".fmt
 
@@ -876,7 +876,7 @@ when defined(js) or defined(nimsuggest):
 
   func parseSolveNode*[F: TsuField or WaterField](
       strs: seq[string]
-  ): Res[SolveNode[F]] {.inline, noinit.} =
+  ): StrErrorResult[SolveNode[F]] {.inline, noinit.} =
     ## Returns the solve node converted from the string representations.
     let errMsg = "Invalid node: {strs}".fmt
 
@@ -927,7 +927,7 @@ when defined(js) or defined(nimsuggest):
 
   func parseSolveAnswers*(
       strs: seq[string]
-  ): Res[seq[seq[OptPlacement]]] {.inline, noinit.} =
+  ): StrErrorResult[seq[seq[OptPlacement]]] {.inline, noinit.} =
     ## Returns the answers converted from the run result.
     var answers = newSeqOfCap[seq[OptPlacement]](strs.len)
     for str in strs:

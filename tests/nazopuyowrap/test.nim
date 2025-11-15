@@ -102,8 +102,8 @@ block: # toUriQuery, parseNazoPuyoWrap
   for fqdn in SimulatorFqdn:
     check wrapT.toUriQuery(fqdn) == nazoT.toUriQuery fqdn
     check nazoT.toUriQuery(fqdn).unsafeValue.parseNazoPuyoWrap(fqdn) ==
-      Res[NazoPuyoWrap].ok wrapT
+      StrErrorResult[NazoPuyoWrap].ok wrapT
 
   check wrapW.toUriQuery(Pon2) == puyoW.toUriQuery Pon2
   check puyoW.toUriQuery(Pon2).unsafeValue.parseNazoPuyoWrap(Pon2) ==
-    Res[NazoPuyoWrap].ok wrapW
+    StrErrorResult[NazoPuyoWrap].ok wrapW

@@ -125,12 +125,12 @@ block: # colors, colorsSeq
 
 block: # placeCnts
   check moveRes1.placeCnts(Purple).isErr
-  check moveRes2.placeCnts(Purple) == Res[seq[int]].ok @[2, 0, 1]
+  check moveRes2.placeCnts(Purple) == StrErrorResult[seq[int]].ok @[2, 0, 1]
   check moveRes1.placeCnts(Yellow).isErr
-  check moveRes2.placeCnts(Yellow) == Res[seq[int]].ok @[0, 0, 0]
+  check moveRes2.placeCnts(Yellow) == StrErrorResult[seq[int]].ok @[0, 0, 0]
 
   check moveRes1.placeCnts.isErr
-  check moveRes2.placeCnts == Res[seq[int]].ok @[4, 2, 3]
+  check moveRes2.placeCnts == StrErrorResult[seq[int]].ok @[4, 2, 3]
 
 # ------------------------------------------------
 # Connect
@@ -138,12 +138,12 @@ block: # placeCnts
 
 block: # connCnts
   check moveRes1.connCnts(Purple).isErr
-  check moveRes2.connCnts(Purple) == Res[seq[int]].ok @[4, 5, 6]
+  check moveRes2.connCnts(Purple) == StrErrorResult[seq[int]].ok @[4, 5, 6]
   check moveRes1.connCnts(Yellow).isErr
-  check moveRes2.connCnts(Yellow) == Res[seq[int]].ok @[]
+  check moveRes2.connCnts(Yellow) == StrErrorResult[seq[int]].ok @[]
 
   check moveRes1.connCnts.isErr
-  check moveRes2.connCnts == Res[seq[int]].ok @[4, 5, 4, 5, 4, 4, 4, 5, 6]
+  check moveRes2.connCnts == StrErrorResult[seq[int]].ok @[4, 5, 4, 5, 4, 4, 4, 5, 6]
 
 # ------------------------------------------------
 # Score
@@ -153,7 +153,7 @@ let scoreAns = 8660
 
 block: # score
   check moveRes1.score.isErr
-  check moveRes2.score == Res[int].ok scoreAns
+  check moveRes2.score == StrErrorResult[int].ok scoreAns
 
 # ------------------------------------------------
 # Notice Garbage
@@ -161,8 +161,9 @@ block: # score
 
 block: # noticeCnts
   check moveRes1.noticeCnts(Tsu).isErr
-  check moveRes2.noticeCnts(Tsu) == Res[array[Notice, int]].ok scoreAns.noticeCnts Tsu
+  check moveRes2.noticeCnts(Tsu) ==
+    StrErrorResult[array[Notice, int]].ok scoreAns.noticeCnts Tsu
 
   check moveRes1.noticeCnts(Water).isErr
   check moveRes2.noticeCnts(Water) ==
-    Res[array[Notice, int]].ok scoreAns.noticeCnts Water
+    StrErrorResult[array[Notice, int]].ok scoreAns.noticeCnts Water

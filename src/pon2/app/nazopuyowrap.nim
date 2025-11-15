@@ -119,7 +119,7 @@ func `rule=`*(self: var NazoPuyoWrap, rule: Rule) =
 # Nazo Puyo wrapper <-> URI
 # ------------------------------------------------
 
-func toUriQuery*(self: NazoPuyoWrap, fqdn: SimulatorFqdn): Res[string] =
+func toUriQuery*(self: NazoPuyoWrap, fqdn: SimulatorFqdn): StrErrorResult[string] =
   ## Returns the URI query converted from the Nazo Puyo wrapper.
   const ErrMsg = "Invalid Nazo Puyo wrapper"
 
@@ -130,7 +130,9 @@ func toUriQuery*(self: NazoPuyoWrap, fqdn: SimulatorFqdn): Res[string] =
     self.unwrapNazoPuyo:
       it.toUriQuery(fqdn).context ErrMsg
 
-func parseNazoPuyoWrap*(query: string, fqdn: SimulatorFqdn): Res[NazoPuyoWrap] =
+func parseNazoPuyoWrap*(
+    query: string, fqdn: SimulatorFqdn
+): StrErrorResult[NazoPuyoWrap] =
   ## Returns the Nazo Puyo wrapper converted from the URI query.
   let errMsg = "Invalid Nazo Puyo wrapper: {query}".fmt
 

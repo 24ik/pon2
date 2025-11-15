@@ -73,7 +73,7 @@ block: # Pair <-> string
   check $RedGreen == "rg"
 
   let pairRes = "rg".parsePair
-  check pairRes == Res[Pair].ok RedGreen
+  check pairRes == StrErrorResult[Pair].ok RedGreen
 
   check "RG".parsePair.isErr
 
@@ -83,11 +83,11 @@ block: # Pair <-> URI
     check RedGreen.toUriQuery(fqdn) == "c"
 
   let pairRes = "rg".parsePair(Pon2)
-  check pairRes == Res[Pair].ok RedGreen
+  check pairRes == StrErrorResult[Pair].ok RedGreen
 
   for fqdn in [Ishikawa, Ips]:
     let pairRes2 = "c".parsePair(fqdn)
-    check pairRes2 == Res[Pair].ok RedGreen
+    check pairRes2 == StrErrorResult[Pair].ok RedGreen
 
   check "c".parsePair(Pon2).isErr
   check "rg".parsePair(Ishikawa).isErr

@@ -187,7 +187,7 @@ func `$`*[F: TsuField or WaterField](self: NazoPuyo[F]): string {.inline, noinit
 
 func parseNazoPuyo*[F: TsuField or WaterField](
     str: string
-): Res[NazoPuyo[F]] {.inline, noinit.} =
+): StrErrorResult[NazoPuyo[F]] {.inline, noinit.} =
   ## Returns the Nazo Puyo converted from the string representation.
   let
     errMsg = "Invalid Nazo Puyo: {str}".fmt
@@ -211,7 +211,7 @@ const
 
 func toUriQueryPon2[F: TsuField or WaterField](
     self: NazoPuyo[F]
-): Res[string] {.inline, noinit.} =
+): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the Nazo Puyo.
   let errMsg = "Nazo Puyo that does not support URI conversion: {self}".fmt
 
@@ -220,7 +220,7 @@ func toUriQueryPon2[F: TsuField or WaterField](
 
 func toUriQueryIshikawa[F: TsuField or WaterField](
     self: NazoPuyo[F]
-): Res[string] {.inline, noinit.} =
+): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the Nazo Puyo.
   let
     errMsg = "Nazo Puyo that does not support URI conversion: {self}".fmt
@@ -236,7 +236,7 @@ func toUriQueryIshikawa[F: TsuField or WaterField](
 
 func toUriQuery*[F: TsuField or WaterField](
     self: NazoPuyo[F], fqdn = Pon2
-): Res[string] {.inline, noinit.} =
+): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the Nazo Puyo.
   case fqdn
   of Pon2: self.toUriQueryPon2
@@ -244,7 +244,7 @@ func toUriQuery*[F: TsuField or WaterField](
 
 func parseNazoPuyoPon2[F: TsuField or WaterField](
     query: string
-): Res[NazoPuyo[F]] {.inline, noinit.} =
+): StrErrorResult[NazoPuyo[F]] {.inline, noinit.} =
   ## Returns the Nazo Puyo converted from the URI query.
   var
     nazoPuyo = NazoPuyo[F].init
@@ -271,7 +271,7 @@ func parseNazoPuyoPon2[F: TsuField or WaterField](
 
 func parseNazoPuyoIshikawa[F: TsuField or WaterField](
     query: string
-): Res[NazoPuyo[F]] {.inline, noinit.} =
+): StrErrorResult[NazoPuyo[F]] {.inline, noinit.} =
   ## Returns the Nazo Puyo converted from the URI query.
   let
     errMsg = "Invalid Nazo Puyo: {query}".fmt
@@ -286,7 +286,7 @@ func parseNazoPuyoIshikawa[F: TsuField or WaterField](
 
 func parseNazoPuyo*[F: TsuField or WaterField](
     query: string, fqdn: SimulatorFqdn
-): Res[NazoPuyo[F]] {.inline, noinit.} =
+): StrErrorResult[NazoPuyo[F]] {.inline, noinit.} =
   ## Returns the Nazo Puyo converted from the URI query.
   case fqdn
   of Pon2:

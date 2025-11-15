@@ -79,7 +79,7 @@ func `$`*[F: TsuField or WaterField](self: PuyoPuyo[F]): string {.inline, noinit
 
 func parsePuyoPuyo*[F: TsuField or WaterField](
     str: string
-): Res[PuyoPuyo[F]] {.inline, noinit.} =
+): StrErrorResult[PuyoPuyo[F]] {.inline, noinit.} =
   ## Returns the game converted from the string representation.
   let strs = str.split FieldStepsSep
   if strs.len != 2:
@@ -108,7 +108,7 @@ const
 
 func toUriQueryPon2[F: TsuField or WaterField](
     self: PuyoPuyo[F]
-): Res[string] {.inline, noinit.} =
+): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the game.
   let errMsg = "Puyo Puyo that does not support URI conversion: {self}".fmt
 
@@ -119,7 +119,7 @@ func toUriQueryPon2[F: TsuField or WaterField](
 
 func toUriQueryIshikawa[F: TsuField or WaterField](
     self: PuyoPuyo[F]
-): Res[string] {.inline, noinit.} =
+): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the game.
   let
     errMsg = "Puyo Puyo that does not support URI conversion: {self}".fmt
@@ -134,7 +134,7 @@ func toUriQueryIshikawa[F: TsuField or WaterField](
 
 func toUriQuery*[F: TsuField or WaterField](
     self: PuyoPuyo[F], fqdn = Pon2
-): Res[string] {.inline, noinit.} =
+): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the game.
   case fqdn
   of Pon2: self.toUriQueryPon2
@@ -142,7 +142,7 @@ func toUriQuery*[F: TsuField or WaterField](
 
 func parsePuyoPuyoPon2[F: TsuField or WaterField](
     query: string
-): Res[PuyoPuyo[F]] {.inline, noinit.} =
+): StrErrorResult[PuyoPuyo[F]] {.inline, noinit.} =
   ## Returns the game converted from the URI query.
   var
     puyoPuyo = PuyoPuyo[F].init
@@ -186,7 +186,7 @@ func parsePuyoPuyoPon2[F: TsuField or WaterField](
 
 func parsePuyoPuyoIshikawa[F: TsuField or WaterField](
     query: string
-): Res[PuyoPuyo[F]] {.inline, noinit.} =
+): StrErrorResult[PuyoPuyo[F]] {.inline, noinit.} =
   ## Returns the game converted from the URI query.
   let strs = query.split FieldStepsSepIshikawaUri
 
@@ -209,7 +209,7 @@ func parsePuyoPuyoIshikawa[F: TsuField or WaterField](
 
 func parsePuyoPuyo*[F: TsuField or WaterField](
     query: string, fqdn: SimulatorFqdn
-): Res[PuyoPuyo[F]] {.inline, noinit.} =
+): StrErrorResult[PuyoPuyo[F]] {.inline, noinit.} =
   ## Returns the game converted from the URI query.
   case fqdn
   of Pon2:

@@ -133,14 +133,16 @@ func colorsSeq*(self: MoveResult): seq[set[Cell]] {.inline, noinit.} =
 # Place
 # ------------------------------------------------
 
-func placeCnts*(self: MoveResult, cell: Cell): Res[seq[int]] {.inline, noinit.} =
+func placeCnts*(
+    self: MoveResult, cell: Cell
+): StrErrorResult[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of places where `cell` popped in each chain.
   if self.fullPopCnts.isOk:
     ok self.fullPopCnts.unsafeValue.mapIt it[cell].len
   else:
     err "`placeCnts` not supported: {self}".fmt
 
-func placeCnts*(self: MoveResult): Res[seq[int]] {.inline, noinit.} =
+func placeCnts*(self: MoveResult): StrErrorResult[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of places where color puyos popped in each chain.
   if self.fullPopCnts.isOk:
     ok self.fullPopCnts.unsafeValue.mapIt (it[Red].len + it[Green].len + it[Blue].len) +
@@ -152,14 +154,16 @@ func placeCnts*(self: MoveResult): Res[seq[int]] {.inline, noinit.} =
 # Connect
 # ------------------------------------------------
 
-func connCnts*(self: MoveResult, cell: Cell): Res[seq[int]] {.inline, noinit.} =
+func connCnts*(
+    self: MoveResult, cell: Cell
+): StrErrorResult[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of connections of `cell` that popped.
   if self.fullPopCnts.isOk:
     ok concat self.fullPopCnts.unsafeValue.mapIt it[cell]
   else:
     err "`conns` not supported: {self}".fmt
 
-func connCnts*(self: MoveResult): Res[seq[int]] {.inline, noinit.} =
+func connCnts*(self: MoveResult): StrErrorResult[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of connections of color puyos that popped.
   if self.fullPopCnts.isOk:
     ok concat self.fullPopCnts.unsafeValue.mapIt it[Red .. Purple].concat
@@ -198,7 +202,7 @@ func connBonus(cnts: seq[int]): int {.inline, noinit.} =
   ## Returns the connect bonus.
   sum cnts.mapIt ConnBonuses[it]
 
-func score*(self: MoveResult): Res[int] {.inline, noinit.} =
+func score*(self: MoveResult): StrErrorResult[int] {.inline, noinit.} =
   ## Returns the score.
   if self.fullPopCnts.isErr:
     return err "`score` not supported: {self}".fmt
@@ -235,8 +239,8 @@ func score*(self: MoveResult): Res[int] {.inline, noinit.} =
 
 func noticeCnts*(
     self: MoveResult, rule: Rule, useComet = false
-): Res[array[Notice, int]] {.inline, noinit.} =
+): StrErrorResult[array[Notice, int]] {.inline, noinit.} =
   ## Returns the number of notice garbages.
-  Res[array[Notice, int]].ok (
+  StrErrorResult[array[Notice, int]].ok (
     ?self.score.context "`noticeCnts` not supported: {self}".fmt
   ).noticeCnts(rule, useComet)

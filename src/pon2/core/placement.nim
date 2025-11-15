@@ -189,11 +189,11 @@ func `$`*(self: OptPlacement): string {.inline, noinit.} =
   else:
     NonePlcmtStr
 
-func parsePlacement*(str: string): Res[Placement] {.inline, noinit.} =
+func parsePlacement*(str: string): StrErrorResult[Placement] {.inline, noinit.} =
   ## Returns the placement converted from the string representation.
   StrToPlcmt[str].context "Invalid placement: {str}".fmt
 
-func parseOptPlacement*(str: string): Res[OptPlacement] {.inline, noinit.} =
+func parseOptPlacement*(str: string): StrErrorResult[OptPlacement] {.inline, noinit.} =
   ## Returns the optional placement converted from the string representation.
   if str == NonePlcmtStr:
     ok NonePlacement
@@ -232,7 +232,7 @@ func toUriQuery*(self: OptPlacement, fqdn = Pon2): string {.inline, noinit.} =
 
 func parsePlacement*(
     query: string, fqdn: SimulatorFqdn
-): Res[Placement] {.inline, noinit.} =
+): StrErrorResult[Placement] {.inline, noinit.} =
   ## Returns the placement converted from the URI query.
   case fqdn
   of Pon2:
@@ -242,7 +242,7 @@ func parsePlacement*(
 
 func parseOptPlacement*(
     query: string, fqdn: SimulatorFqdn
-): Res[OptPlacement] {.inline, noinit.} =
+): StrErrorResult[OptPlacement] {.inline, noinit.} =
   ## Returns the optional placement converted from the URI query.
   case fqdn
   of Pon2:

@@ -726,7 +726,9 @@ func `$`*(self: TsuField): string {.inline, noinit.} =
 func `$`*(self: WaterField): string {.inline, noinit.} =
   self.toStrImpl
 
-func parseField[F: TsuField or WaterField](str: string): Res[F] {.inline, noinit.} =
+func parseField[F: TsuField or WaterField](
+    str: string
+): StrErrorResult[F] {.inline, noinit.} =
   ## Returns the field converted from the string representation.
   var lines = str.split '\n'
   if lines.len != (when F is TsuField: Height else: Height.succ):
@@ -752,11 +754,11 @@ func parseField[F: TsuField or WaterField](str: string): Res[F] {.inline, noinit
 
   ok toField[F](arr)
 
-func parseTsuField*(str: string): Res[TsuField] {.inline, noinit.} =
+func parseTsuField*(str: string): StrErrorResult[TsuField] {.inline, noinit.} =
   ## Returns the Tsu field converted from the string representation.
   parseField[TsuField](str)
 
-func parseWaterField*(str: string): Res[WaterField] {.inline, noinit.} =
+func parseWaterField*(str: string): StrErrorResult[WaterField] {.inline, noinit.} =
   ## Returns the Water field converted from the string representation.
   parseField[WaterField](str)
 
@@ -790,7 +792,7 @@ const
 
 func toUriQueryPon2[F: TsuField or WaterField](
     self: F
-): Res[string] {.inline, noinit.} =
+): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the field.
   const
     AirLowerRow = when F is TsuField: Row.high else: AirHeight.pred.Row
@@ -820,7 +822,7 @@ func toUriQueryPon2[F: TsuField or WaterField](
 
     ok "{Water}{RuleFieldSep}{airStr}{AirWaterSep}{waterStr}".fmt
 
-func toUriQueryIshikawa(self: TsuField): Res[string] {.inline, noinit.} =
+func toUriQueryIshikawa(self: TsuField): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the field.
   let arr = self.toArr
 
@@ -858,13 +860,13 @@ func toUriQueryIshikawa(self: TsuField): Res[string] {.inline, noinit.} =
 
     ok lines.join.strip(trailing = false, chars = {'0'})
 
-func toUriQueryIshikawa(self: WaterField): Res[string] {.inline, noinit.} =
+func toUriQueryIshikawa(self: WaterField): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the field.
   err "Water field not supported on Ishikawa/Ips format: {self}".fmt
 
 func toUriQuery*[F: TsuField or WaterField](
     self: F, fqdn = Pon2
-): Res[string] {.inline, noinit.} =
+): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the field.
   case fqdn
   of Pon2: self.toUriQueryPon2
@@ -872,7 +874,7 @@ func toUriQuery*[F: TsuField or WaterField](
 
 func parseFieldPon2[F: TsuField or WaterField](
     query: string
-): Res[F] {.inline, noinit.} =
+): StrErrorResult[F] {.inline, noinit.} =
   ## Returns the field converted from the URI query.
   when F is TsuField:
     if query == "":
@@ -937,7 +939,7 @@ func splitByLen(str: string, length: int): seq[string] {.inline, noinit.} =
       for firstIdx in countup(0, str.len.pred, length):
         str.substr(firstIdx, min(firstIdx.succ length, str.len).pred)
 
-func parseTsuFieldIshikawa(query: string): Res[TsuField] {.inline, noinit.} =
+func parseTsuFieldIshikawa(query: string): StrErrorResult[TsuField] {.inline, noinit.} =
   ## Returns the field converted from the URI query.
   if query.startsWith TildeIshikawaPrefix:
     let query2 = query[1 ..^ 1]
@@ -988,7 +990,7 @@ func parseTsuFieldIshikawa(query: string): Res[TsuField] {.inline, noinit.} =
 
 func parseTsuField*(
     query: string, fqdn: SimulatorFqdn
-): Res[TsuField] {.inline, noinit.} =
+): StrErrorResult[TsuField] {.inline, noinit.} =
   ## Returns the Tsu field converted from the URI query.
   case fqdn
   of Pon2:
@@ -998,7 +1000,7 @@ func parseTsuField*(
 
 func parseWaterField*(
     query: string, fqdn: SimulatorFqdn
-): Res[WaterField] {.inline, noinit.} =
+): StrErrorResult[WaterField] {.inline, noinit.} =
   ## Returns the Water field converted from the URI query.
   case fqdn
   of Pon2:

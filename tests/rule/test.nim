@@ -13,7 +13,7 @@ import ../../src/pon2/core/[rule]
 block: # parseRule
   for rule in Rule:
     let ruleRes = parseRule $rule
-    check ruleRes == Res[Rule].ok rule
+    check ruleRes == StrErrorResult[Rule].ok rule
 
   check "".parseRule.isErr
   check "T".parseRule.isErr

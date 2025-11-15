@@ -24,6 +24,6 @@ const StrToRule = collect:
   for rule in Rule:
     {$rule: rule}
 
-func parseRule*(str: string): Res[Rule] {.inline, noinit.} =
+func parseRule*(str: string): StrErrorResult[Rule] {.inline, noinit.} =
   ## Returns the rule converted from the string representation.
   StrToRule[str].context "Invalid rule: {str}".fmt

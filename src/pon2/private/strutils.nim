@@ -12,7 +12,7 @@ import ./[results2]
 export results2
 export strutils except parseInt
 
-func parseInt*(str: string): Res[int] {.inline, noinit.} =
+func parseInt*(str: string): StrErrorResult[int] {.inline, noinit.} =
   ## Returns the integer converted from the string.
   try:
     ok strutils.parseInt str

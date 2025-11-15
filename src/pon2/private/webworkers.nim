@@ -18,7 +18,8 @@ when not defined(pon2.build.worker):
   import ./[math]
 
 type
-  WebWorkerTask* = ((args: seq[string]) {.raises: [], gcsafe.} -> Res[seq[string]])
+  WebWorkerTask* =
+    ((args: seq[string]) {.raises: [], gcsafe.} -> StrErrorResult[seq[string]])
     ## Task executed by web workers.
 
   WebWorker = object ## Web worker.
@@ -62,7 +63,7 @@ proc init(T: type WebWorkerPool, workerCount = 1): T {.inline, noinit.} =
 
 const PoolPollingMs = 100
 
-func parseResult(str: string): Res[seq[string]] {.inline, noinit.} =
+func parseResult(str: string): StrErrorResult[seq[string]] {.inline, noinit.} =
   ## Returns the result of the web worker's task.
   let errorMsg = "Invalid result: {str}".fmt
 
@@ -80,17 +81,17 @@ func parseResult(str: string): Res[seq[string]] {.inline, noinit.} =
 
 proc run(
     self: ref WebWorker, args: varargs[string]
-): Future[Res[seq[string]]] {.inline, noinit.} =
+): Future[StrErrorResult[seq[string]]] {.inline, noinit.} =
   ## Runs the task.
   ## If the worker is running, returns an error.
   if self[].running:
-    return newPromise (resolve: (response: Res[seq[string]]) -> void) =>
-      Res[seq[string]].err("Worker is running").resolve
+    return newPromise (resolve: (response: StrErrorResult[seq[string]]) -> void) =>
+      StrErrorResult[seq[string]].err("Worker is running").resolve
 
   self[].running.assign true
 
   let argsSeq = args.toSeq
-  proc handler(resolve: (response: Res[seq[string]]) -> void) =
+  proc handler(resolve: (response: StrErrorResult[seq[string]]) -> void) =
     self[].workerObj.onmessage =
       (ev: JsObject) => (
         block:
@@ -104,7 +105,7 @@ proc run(
 
 proc run*(
     self: WebWorkerPool, args: varargs[string]
-): Future[Res[seq[string]]] {.async.} =
+): Future[StrErrorResult[seq[string]]] {.async.} =
   ## Runs the task.
   var freeWorkerIndex = -1
   block waiting:
@@ -125,7 +126,7 @@ proc run*(
 proc getSelf(): JsObject {.inline, noinit, importjs: "(self)".}
   ## Returns the web worker object.
 
-func toStr(res: Res[seq[string]]): string {.inline, noinit.} =
+func toStr(res: StrErrorResult[seq[string]]): string {.inline, noinit.} =
   ## Returns the string representation of the task result.
   if res.isOk:
     "{OkStr}{MsgSep}{res.unsafeValue.join MsgSep}".fmt

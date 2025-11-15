@@ -164,7 +164,7 @@ func `$`*(self: Goal): string {.inline, noinit.} =
 
   ($self.kind).multiReplace replacements
 
-func parseGoal*(str: string): Res[Goal] {.inline, noinit.} =
+func parseGoal*(str: string): StrErrorResult[Goal] {.inline, noinit.} =
   ## Returns the goal converted from the string representation.
   var
     goal = Goal.init(GoalKind.low, OptGoalColor.err, OptGoalVal.err)
@@ -229,7 +229,7 @@ const
     for i, uri in ValToIshikawaUri:
       {uri: i.GoalVal}
 
-func toUriQuery*(self: Goal, fqdn = Pon2): Res[string] {.inline, noinit.} =
+func toUriQuery*(self: Goal, fqdn = Pon2): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the requirement.
   case fqdn
   of Pon2:
@@ -264,7 +264,9 @@ func toUriQuery*(self: Goal, fqdn = Pon2): Res[string] {.inline, noinit.} =
 
       ok "{kindChar}{colorChar}{valChar}".fmt
 
-func parseGoal*(query: string, fqdn: SimulatorFqdn): Res[Goal] {.inline, noinit.} =
+func parseGoal*(
+    query: string, fqdn: SimulatorFqdn
+): StrErrorResult[Goal] {.inline, noinit.} =
   ## Returns the goal converted from the URI query.
   var goal = Goal.init(GoalKind.low, OptGoalColor.err, OptGoalVal.err)
 

@@ -2215,8 +2215,8 @@ r.....
   check $fieldT == strT
   check $fieldW == strW
 
-  check strT.parseTsuField == Res[TsuField].ok fieldT
-  check strW.parseWaterField == Res[WaterField].ok fieldW
+  check strT.parseTsuField == StrErrorResult[TsuField].ok fieldT
+  check strW.parseWaterField == StrErrorResult[WaterField].ok fieldW
 
   check strT.parseWaterField.isErr
   check strW.parseTsuField.isErr
@@ -2265,15 +2265,16 @@ r.....
       queryWRes = fieldW.toUriQuery Pon2
 
     check queryTRes ==
-      Res[string].ok "t_r......g......b......y......p......o....h......."
-    check queryWRes == Res[string].ok "w_r.....~.g......b......y......p......o....h"
+      StrErrorResult[string].ok "t_r......g......b......y......p......o....h......."
+    check queryWRes ==
+      StrErrorResult[string].ok "w_r.....~.g......b......y......p......o....h"
 
     let
       queryT = queryTRes.unsafeValue
       queryW = queryWRes.unsafeValue
 
-    check queryT.parseTsuField(Pon2) == Res[TsuField].ok fieldT
-    check queryW.parseWaterField(Pon2) == Res[WaterField].ok fieldW
+    check queryT.parseTsuField(Pon2) == StrErrorResult[TsuField].ok fieldT
+    check queryW.parseWaterField(Pon2) == StrErrorResult[WaterField].ok fieldW
 
     check queryW.parseTsuField(Pon2).isErr
     check queryT.parseWaterField(Pon2).isErr
@@ -2284,12 +2285,12 @@ r.....
         queryTRes = fieldT.toUriQuery fqdn
         queryWRes = fieldW.toUriQuery fqdn
 
-      check queryTRes == Res[string].ok "~1.02.003.0004.00005.00000600009."
+      check queryTRes == StrErrorResult[string].ok "~1.02.003.0004.00005.00000600009."
       check queryWRes.isErr
 
       let queryT = queryTRes.unsafeValue
 
-      check queryT.parseTsuField(fqdn) == Res[TsuField].ok fieldT
+      check queryT.parseTsuField(fqdn) == StrErrorResult[TsuField].ok fieldT
 
       check "t-r".parseTsuField(fqdn).isErr
 
@@ -2312,15 +2313,15 @@ r.....
 
     for fqdn in [Ishikawa, Ips]:
       let queryRes = field.toUriQuery(fqdn)
-      check queryRes == Res[string].ok "10g"
-      check queryRes.unsafeValue.parseTsuField(fqdn) == Res[TsuField].ok field
+      check queryRes == StrErrorResult[string].ok "10g"
+      check queryRes.unsafeValue.parseTsuField(fqdn) == StrErrorResult[TsuField].ok field
 
   block: # empty field
-    check TsuField.init.toUriQuery(Pon2) == Res[string].ok "t_"
-    check TsuField.init.toUriQuery(Ishikawa) == Res[string].ok ""
-    check TsuField.init.toUriQuery(Ips) == Res[string].ok ""
-    check WaterField.init.toUriQuery(Pon2) == Res[string].ok "w_~"
+    check TsuField.init.toUriQuery(Pon2) == StrErrorResult[string].ok "t_"
+    check TsuField.init.toUriQuery(Ishikawa) == StrErrorResult[string].ok ""
+    check TsuField.init.toUriQuery(Ips) == StrErrorResult[string].ok ""
+    check WaterField.init.toUriQuery(Pon2) == StrErrorResult[string].ok "w_~"
 
   block: # empty query
-    check "".parseTsuField(Pon2) == Res[TsuField].ok TsuField.init
+    check "".parseTsuField(Pon2) == StrErrorResult[TsuField].ok TsuField.init
     check "".parseWaterField(Pon2).isErr
