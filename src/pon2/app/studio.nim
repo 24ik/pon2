@@ -20,7 +20,7 @@ when defined(js) or defined(nimsuggest):
 type
   StudioReplayData* = object ## Data for the replay simulator.
     stepsSeq: seq[Steps]
-    stepsIdx: int
+    stepsIndex: int
 
   Studio* = object ## Studio for Puyo Puyo and Nazo Puyo.
     simulator: Simulator
@@ -48,7 +48,7 @@ proc init*(T: type Studio, simulator: Simulator): T =
     focusReplay: false,
     solving: false,
     permuting: false,
-    replayData: StudioReplayData(stepsSeq: @[], stepsIdx: 0),
+    replayData: StudioReplayData(stepsSeq: @[], stepsIndex: 0),
     progressRef: progressRef,
   )
 
@@ -91,13 +91,13 @@ func working*(self: Studio): bool =
   ## Returns `true` if the studio is working.
   self.solving or self.permuting
 
-func replayStepsCnt*(self: Studio): int =
+func replayStepsCount*(self: Studio): int =
   ## Returns the number of steps for the replay simulator.
   self.replayData.stepsSeq.len
 
-func replayStepsIdx*(self: Studio): int =
+func replayStepsIndex*(self: Studio): int =
   ## Returns the index of steps for the replay simulator.
-  self.replayData.stepsIdx
+  self.replayData.stepsIndex
 
 func progressRef*(self: Studio): ref tuple[now, total: int] =
   ## Returns the progress.
@@ -121,15 +121,15 @@ func nextReplay*(self: var Studio) =
   if self.simulator.mode notin EditorModes or self.replayData.stepsSeq.len == 0:
     return
 
-  if self.replayData.stepsIdx == self.replayData.stepsSeq.len.pred:
-    self.replayData.stepsIdx.assign 0
+  if self.replayData.stepsIndex == self.replayData.stepsSeq.len.pred:
+    self.replayData.stepsIndex.assign 0
   else:
-    self.replayData.stepsIdx.inc
+    self.replayData.stepsIndex.inc
 
   self.replaySimulator.reset
   unwrapNazoPuyo self.replaySimulator.nazoPuyoWrap:
     var nazo = itNazo
-    nazo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIdx]
+    nazo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIndex]
 
     self.replaySimulator.assign Simulator.init(nazo, Replay)
 
@@ -138,15 +138,15 @@ func prevReplay*(self: var Studio) =
   if self.simulator.mode notin EditorModes or self.replayData.stepsSeq.len == 0:
     return
 
-  if self.replayData.stepsIdx == 0:
-    self.replayData.stepsIdx.assign self.replayData.stepsSeq.len.pred
+  if self.replayData.stepsIndex == 0:
+    self.replayData.stepsIndex.assign self.replayData.stepsSeq.len.pred
   else:
-    self.replayData.stepsIdx.dec
+    self.replayData.stepsIndex.dec
 
   self.replaySimulator.reset
   unwrapNazoPuyo self.replaySimulator.nazoPuyoWrap:
     var nazo = itNazo
-    nazo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIdx]
+    nazo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIndex]
 
     self.replaySimulator.assign Simulator.init(nazo, Replay)
 
@@ -174,10 +174,10 @@ func workPostProcess[F: TsuField or WaterField](self: var Studio, nazo: NazoPuyo
   ## Updates the replay simulator.
   if self.replayData.stepsSeq.len > 0:
     self.focusReplay.assign true
-    self.replayData.stepsIdx.assign 0
+    self.replayData.stepsIndex.assign 0
 
     var nazo2 = nazo
-    nazo2.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIdx]
+    nazo2.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIndex]
     self.replaySimulator.assign Simulator.init(nazo2, Replay)
   else:
     self.focusReplay.assign false
@@ -187,11 +187,11 @@ proc setAnswers[F: TsuField or WaterField](
 ) =
   ## Sets the answers.
   let stepsSeq = collect:
-    for ans in answers:
+    for answer in answers:
       var steps = originalNazo.puyoPuyo.steps
-      for stepIdx, optPlcmt in ans:
-        if originalNazo.puyoPuyo.steps[stepIdx].kind == PairPlacement:
-          steps[stepIdx].optPlacement.assign optPlcmt
+      for stepIndex, optPlacement in answer:
+        if originalNazo.puyoPuyo.steps[stepIndex].kind == PairPlacement:
+          steps[stepIndex].optPlacement.assign optPlacement
 
       steps
 
@@ -237,7 +237,7 @@ when defined(js) or defined(nimsuggest):
                 self[].solving.assign false
             )
           )
-          .catch((e: Error) => console.error e)
+          .catch((error: Error) => console.error error)
         {.pop.}
 
 # ------------------------------------------------
@@ -245,7 +245,9 @@ when defined(js) or defined(nimsuggest):
 # ------------------------------------------------
 
 proc permute*(
-    self: var Studio, fixIndices: openArray[int], allowDblNotLast, allowDblLast: bool
+    self: var Studio,
+    fixIndices: openArray[int],
+    allowDoubleNotLast, allowDoubleLast: bool,
 ) =
   ## Permutes the nazo puyo.
   ## This function requires that the field is settled.
@@ -256,7 +258,7 @@ proc permute*(
   self.replayData.stepsSeq.setLen 0
 
   unwrapNazoPuyo self.simulator.nazoPuyoWrap:
-    for nazo in itNazo.permute(fixIndices, allowDblNotLast, allowDblLast):
+    for nazo in itNazo.permute(fixIndices, allowDoubleNotLast, allowDoubleLast):
       self.replayData.stepsSeq.add nazo.puyoPuyo.steps
 
     self.workPostProcess itNazo
@@ -268,7 +270,7 @@ when defined(js) or defined(nimsuggest):
     proc asyncPermute*(
         self: ref Studio,
         fixIndices: openArray[int],
-        allowDblNotLast, allowDblLast: bool,
+        allowDoubleNotLast, allowDoubleLast: bool,
     ) =
       ## Permutes the nazo puyo asynchronously with web workers.
       ## This function requires that the field is settled.
@@ -283,7 +285,9 @@ when defined(js) or defined(nimsuggest):
 
         {.push warning[Uninit]: off.}
         discard originalNazo
-          .asyncPermute(fixIndices, allowDblNotLast, allowDblLast, self[].progressRef)
+          .asyncPermute(
+            fixIndices, allowDoubleNotLast, allowDoubleLast, self[].progressRef
+          )
           .then(
             (nazos: seq[originalNazo.type]) => (
               block:
@@ -293,7 +297,7 @@ when defined(js) or defined(nimsuggest):
                 self[].permuting.assign false
             )
           )
-          .catch((e: Error) => console.error e)
+          .catch((error: Error) => console.error error)
         {.pop.}
 
 # ------------------------------------------------
