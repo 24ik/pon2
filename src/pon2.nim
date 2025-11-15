@@ -69,7 +69,7 @@ when isMainModule:
       import ./pon2/private/[gui]
       when defined(pon2.build.marathon):
         import std/[asyncjs, jsfetch, random]
-        import ./pon2/private/[strutils2]
+        import ./pon2/private/[strutils]
       else:
         import ./pon2/private/[assign]
 
@@ -256,7 +256,7 @@ when isMainModule:
   when not defined(js):
     import std/[random, sequtils, strformat, sugar, uri]
     import cligen
-    import ./pon2/private/[arrayutils, assign, browsers, strutils2]
+    import ./pon2/private/[arrayutils, assign, browsers, strutils]
 
     # ------------------------------------------------
     # Native - Solve

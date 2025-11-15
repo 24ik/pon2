@@ -15,7 +15,7 @@ export core
 
 when defined(js) or defined(nimsuggest):
   import std/[dom]
-  import ../private/[strutils2]
+  import ../private/[strutils]
 
   when not defined(pon2.build.worker):
     import std/[asyncjs, jsconsole, sequtils, sugar]

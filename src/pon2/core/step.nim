@@ -8,7 +8,7 @@
 
 import std/[bitops, sequtils, strformat, sugar]
 import ./[cell, common, fqdn, pair, placement]
-import ../private/[arrayutils, assign, deques, math, results2, strutils2, tables2]
+import ../private/[arrayutils, assign, deques, math, results2, strutils, tables2]
 
 export deques, pair, placement, results2
 

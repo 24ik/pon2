@@ -7,7 +7,7 @@
 {.experimental: "views".}
 
 import std/[macros, strformat, sugar]
-import ./[strutils2]
+import ./[strutils]
 
 export macros
 

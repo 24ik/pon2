@@ -7,7 +7,7 @@ import std/[sugar, unittest]
 import
   ../../src/pon2/core/
     [common, field, fqdn, goal, nazopuyo, placement, popresult, puyopuyo, rule, step]
-import ../../src/pon2/private/[strutils2]
+import ../../src/pon2/private/[strutils]
 
 func mark2[F: TsuField or WaterField](
     nazo: NazoPuyo[F], plcmts: varargs[Placement]

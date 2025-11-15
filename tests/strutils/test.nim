@@ -3,11 +3,11 @@
 {.experimental: "views".}
 
 import std/[sugar, unittest]
-import ../../src/pon2/private/[strutils2]
+import ../../src/pon2/private/[strutils]
 
-block: # parseIntRes
-  check "123".parseIntRes == Res[int].ok 123
-  check "xyz".parseIntRes.isErr
+block: # parseInt
+  check "123".parseInt == Res[int].ok 123
+  check "xyz".parseInt.isErr
 
 block: # split2
   proc checkSplit2(str, sep: string, res: seq[string], maxsplit = -1) =

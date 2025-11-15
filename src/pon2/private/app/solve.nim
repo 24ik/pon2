@@ -12,7 +12,7 @@ import ../../private/[assign, core, macros, math, staticfor]
 
 when defined(js) or defined(nimsuggest):
   import std/[strformat, sugar]
-  import ../../private/[results2, strutils2]
+  import ../../private/[results2, strutils]
 
   export core, results2
 

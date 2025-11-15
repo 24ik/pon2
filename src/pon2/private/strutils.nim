@@ -9,12 +9,13 @@
 import std/[strutils]
 import ./[results2]
 
-export results2, strutils
+export results2
+export strutils except parseInt
 
-func parseIntRes*(str: string): Res[int] {.inline, noinit.} =
+func parseInt*(str: string): Res[int] {.inline, noinit.} =
   ## Returns the integer converted from the string.
   try:
-    ok str.parseInt
+    ok strutils.parseInt str
   except ValueError as ex:
     err ex.msg
 
