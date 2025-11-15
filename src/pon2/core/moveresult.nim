@@ -8,7 +8,7 @@
 
 import std/[sequtils, strformat, sugar]
 import ./[cell, common, notice, rule]
-import ../private/[arrayutils, math, results2, staticfor2]
+import ../private/[arrayutils, math, results2, staticfor]
 
 export cell, notice, results2
 

@@ -7,7 +7,7 @@
 {.experimental: "views".}
 
 import std/[math]
-import ./[assign, staticfor2]
+import ./[assign, staticfor]
 
 export math except sum
 

@@ -7,7 +7,7 @@
 {.experimental: "views".}
 
 import std/[sugar]
-import ../../[assign, bitutils, macros, simd, staticfor2]
+import ../../[assign, bitutils, macros, simd, staticfor]
 import ../../../core/[common, rule]
 
 export simd

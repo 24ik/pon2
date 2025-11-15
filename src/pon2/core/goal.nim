@@ -8,7 +8,7 @@
 
 import std/[setutils, strformat, sugar]
 import ./[fqdn]
-import ../private/[assign, results2, staticfor2, strutils2, tables2]
+import ../private/[assign, results2, staticfor, strutils2, tables2]
 
 export results2
 

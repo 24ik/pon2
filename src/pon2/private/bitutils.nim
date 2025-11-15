@@ -27,7 +27,7 @@ const
 
 import std/[bitops, typetraits]
 import stew/[bitops2]
-import ./[arrayutils, assign, staticfor2]
+import ./[arrayutils, assign, staticfor]
 
 export bitops, bitops2
 

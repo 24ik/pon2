@@ -4,7 +4,7 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2/private/[staticfor2]
+import ../../src/pon2/private/[staticfor]
 
 type MyEnum {.pure.} = enum
   Elem0

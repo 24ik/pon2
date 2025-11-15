@@ -13,7 +13,7 @@
 {.experimental: "views".}
 
 import ./[rule]
-import ../private/[assign, staticfor2]
+import ../private/[assign, staticfor]
 
 export notice, rule
 

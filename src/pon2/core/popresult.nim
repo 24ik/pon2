@@ -8,7 +8,7 @@
 
 import std/[sequtils]
 import ./[cell, common]
-import ../private/[arrayutils, assign, core, staticfor2, unionfind]
+import ../private/[arrayutils, assign, core, staticfor, unionfind]
 
 export cell
 
