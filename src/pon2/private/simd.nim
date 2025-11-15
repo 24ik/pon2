@@ -11,14 +11,14 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-const SimdLvl {.define: "pon2.simd".} = 1
+const SimdLevel {.define: "pon2.simd".} = 1
 
 static:
-  doAssert SimdLvl in 0 .. 1
+  doAssert SimdLevel in 0 .. 1
 
 const
   X86_64 = defined(amd64) or defined(i386)
-  Sse42Available* = SimdLvl >= 1 and X86_64
+  Sse42Available* = SimdLevel >= 1 and X86_64
 
 when Sse42Available:
   import nimsimd/[sse42]
