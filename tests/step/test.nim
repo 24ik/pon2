@@ -31,10 +31,10 @@ block: # init
 
   block:
     let
-      cnts = [Col0: 1, 0, 1, 1, 0, 0]
-      step = Step.init(cnts, true)
+      counts = [Col0: 1, 0, 1, 1, 0, 0]
+      step = Step.init(counts, true)
     check step.kind == Garbages
-    check step.cnts == cnts
+    check step.counts == counts
     check step.dropHard
 
   block:
@@ -73,46 +73,45 @@ block: # isValid
 # Count
 # ------------------------------------------------
 
-block: # cellCnt, puyoCnt, colorPuyoCnt, garbagesCnt
+block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
   block:
     let step = Step.init YellowPurple
-    check step.cellCnt(Red) == 0
-    check step.cellCnt(Yellow) == 1
-    check step.cellCnt(Garbage) == 0
-    check step.puyoCnt == 2
-    check step.colorPuyoCnt == 2
-    check step.garbagesCnt == 0
+    check step.cellCount(Red) == 0
+    check step.cellCount(Yellow) == 1
+    check step.cellCount(Garbage) == 0
+    check step.puyoCount == 2
+    check step.colorPuyoCount == 2
+    check step.garbagesCount == 0
 
   block:
     let step = Step.init([Col0: 2, 1, 0, 1, 0, 1], true)
-    check step.cellCnt(Red) == 0
-    check step.cellCnt(Yellow) == 0
-    check step.cellCnt(Hard) == 5
-    check step.cellCnt(Garbage) == 0
-    check step.puyoCnt == 5
-    check step.colorPuyoCnt == 0
-    check step.garbagesCnt == 5
+    check step.cellCount(Red) == 0
+    check step.cellCount(Yellow) == 0
+    check step.cellCount(Hard) == 5
+    check step.cellCount(Garbage) == 0
+    check step.puyoCount == 5
+    check step.colorPuyoCount == 0
+    check step.garbagesCount == 5
 
   block:
-    let steps =
-      [Step.init RedGreen, Step.init([Col0: 5, 4, 5, 5, 5, 4], false)].toDeque2
-    check steps.cellCnt(Red) == 1
-    check steps.cellCnt(Yellow) == 0
-    check steps.cellCnt(Garbage) == 28
-    check steps.cellCnt(Hard) == 0
-    check steps.puyoCnt == 30
-    check steps.colorPuyoCnt == 2
-    check steps.garbagesCnt == 28
+    let steps = [Step.init RedGreen, Step.init([Col0: 5, 4, 5, 5, 5, 4], false)].toDeque
+    check steps.cellCount(Red) == 1
+    check steps.cellCount(Yellow) == 0
+    check steps.cellCount(Garbage) == 28
+    check steps.cellCount(Hard) == 0
+    check steps.puyoCount == 30
+    check steps.colorPuyoCount == 2
+    check steps.garbagesCount == 28
 
   block:
     let steps = Step.init(cross = false)
-    check steps.cellCnt(Red) == 0
-    check steps.cellCnt(Yellow) == 0
-    check steps.cellCnt(Garbage) == 0
-    check steps.cellCnt(Hard) == 0
-    check steps.puyoCnt == 0
-    check steps.colorPuyoCnt == 0
-    check steps.garbagesCnt == 0
+    check steps.cellCount(Red) == 0
+    check steps.cellCount(Yellow) == 0
+    check steps.cellCount(Garbage) == 0
+    check steps.cellCount(Hard) == 0
+    check steps.puyoCount == 0
+    check steps.colorPuyoCount == 0
+    check steps.garbagesCount == 0
 
 # ------------------------------------------------
 # Step <-> string / URI
@@ -183,7 +182,7 @@ block: # `$`, parseSteps, toUriQuery
       Step.init RedGreen,
       Step.init([Col0: 1, 0, 0, 0, 0, 1], false),
       Step.init(YellowYellow, Up2),
-    ].toDeque2
+    ].toDeque
 
     let str = "rg|\n(1,0,0,0,0,1)\nyy|3N"
     check $steps == str
@@ -200,7 +199,7 @@ block: # `$`, parseSteps, toUriQuery
 
   block: # Hard
     let steps =
-      [Step.init([Col0: 0, 0, 2, 0, 1, 3], true), Step.init PurpleBlue].toDeque2
+      [Step.init([Col0: 0, 0, 2, 0, 1, 3], true), Step.init PurpleBlue].toDeque
 
     let str = "[0,0,2,0,1,3]\npb|"
     check $steps == str
@@ -214,7 +213,7 @@ block: # `$`, parseSteps, toUriQuery
     check query.parseSteps(Pon2) == StrErrorResult[Steps].ok steps
 
   block: # rotate
-    let steps = [Step.init(cross = true), Step.init(cross = false)].toDeque2
+    let steps = [Step.init(cross = true), Step.init(cross = false)].toDeque
 
     let str = "X\nO"
     check $steps == str

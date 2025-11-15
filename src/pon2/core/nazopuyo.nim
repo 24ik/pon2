@@ -51,28 +51,28 @@ const
   ]
 
 func mark*[F: TsuField or WaterField](
-    nazo: NazoPuyo[F], endStepIdx = -1
+    nazo: NazoPuyo[F], endStepIndex = -1
 ): MarkResult {.inline, noinit.} =
   ## Marks the steps in the Nazo Puyo.
-  ## If `endStepIdx` is negative, all steps are used.
+  ## If `endStepIndex` is negative, all steps are used.
   ## This function requires that the field is settled.
   if not nazo.goal.isSupported:
     return NotSupport
 
   let
-    calcConn = nazo.goal.kind in {Place, PlaceMore, Conn, ConnMore}
-    loopCnt =
-      if endStepIdx in 0 .. nazo.puyoPuyo.steps.len:
-        endStepIdx
+    calcConnection = nazo.goal.kind in {Place, PlaceMore, Connection, ConnectionMore}
+    loopCount =
+      if endStepIndex in 0 .. nazo.puyoPuyo.steps.len:
+        endStepIndex
       else:
         nazo.puyoPuyo.steps.len
   var
     puyoPuyo = nazo.puyoPuyo
     skipped = false
-    popColors = set[Cell]({}) # used by AccColor[More]
-    popCnt = 0 # used by AccCnt[More]
+    popColors = set[Cell]({}) # used by AccumColor[More]
+    popCount = 0 # used by AccumCount[More]
 
-  for _ in 1 .. loopCnt:
+  for _ in 1 .. loopCount:
     let step = puyoPuyo.steps.peekFirst
 
     # check skip, invalid
@@ -88,43 +88,43 @@ func mark*[F: TsuField or WaterField](
     of StepKind.Garbages, Rotate:
       discard
 
-    let moveRes = puyoPuyo.move calcConn
+    let moveRes = puyoPuyo.move calcConnection
 
     # update accumulative results
     case nazo.goal.kind
-    of AccColor, AccColorMore:
+    of AccumColor, AccumColorMore:
       popColors.incl moveRes.colors
-    of AccCnt, AccCntMore:
-      let addCnt =
+    of AccumCount, AccumCountMore:
+      let addCount =
         case nazo.goal.optColor.unsafeValue
         of All:
-          moveRes.puyoCnt
+          moveRes.puyoCount
         of GoalColor.Garbages:
-          moveRes.garbagesCnt
+          moveRes.garbagesCount
         of Colors:
-          moveRes.colorPuyoCnt
+          moveRes.colorPuyoCount
         else:
-          moveRes.cellCnt GoalColorToCell[nazo.goal.optColor.unsafeValue]
+          moveRes.cellCount GoalColorToCell[nazo.goal.optColor.unsafeValue]
 
-      popCnt.inc addCnt
+      popCount.inc addCount
     else:
       discard
 
     # check clear
     var satisfied =
       if nazo.goal.kind in {Clear, ClearChain, ClearChainMore}:
-        let fieldCnt =
+        let fieldCount =
           case nazo.goal.optColor.unsafeValue
           of All:
-            puyoPuyo.field.puyoCnt
+            puyoPuyo.field.puyoCount
           of GoalColor.Garbages:
-            puyoPuyo.field.garbagesCnt
+            puyoPuyo.field.garbagesCount
           of Colors:
-            puyoPuyo.field.colorPuyoCnt
+            puyoPuyo.field.colorPuyoCount
           else:
-            puyoPuyo.field.cellCnt GoalColorToCell[nazo.goal.optColor.unsafeValue]
+            puyoPuyo.field.cellCount GoalColorToCell[nazo.goal.optColor.unsafeValue]
 
-        fieldCnt == 0
+        fieldCount == 0
       else:
         true
 
@@ -133,14 +133,14 @@ func mark*[F: TsuField or WaterField](
       case nazo.goal.kind
       of Clear:
         true
-      of AccColor:
-        nazo.goal.isSatisfiedAccColor(popColors, AccColor)
-      of AccColorMore:
-        nazo.goal.isSatisfiedAccColor(popColors, AccColorMore)
-      of AccCnt:
-        nazo.goal.isSatisfiedAccCnt(popCnt, AccCnt)
-      of AccCntMore:
-        nazo.goal.isSatisfiedAccCnt(popCnt, AccCntMore)
+      of AccumColor:
+        nazo.goal.isSatisfiedAccumColor(popColors, AccumColor)
+      of AccumColorMore:
+        nazo.goal.isSatisfiedAccumColor(popColors, AccumColorMore)
+      of AccumCount:
+        nazo.goal.isSatisfiedAccumCount(popCount, AccumCount)
+      of AccumCountMore:
+        nazo.goal.isSatisfiedAccumCount(popCount, AccumCountMore)
       of Chain:
         nazo.goal.isSatisfiedChain(moveRes, Chain)
       of ChainMore:
@@ -153,18 +153,18 @@ func mark*[F: TsuField or WaterField](
         nazo.goal.isSatisfiedColor(moveRes, Color)
       of ColorMore:
         nazo.goal.isSatisfiedColor(moveRes, ColorMore)
-      of Cnt:
-        nazo.goal.isSatisfiedCnt(moveRes, Cnt)
-      of CntMore:
-        nazo.goal.isSatisfiedCnt(moveRes, CntMore)
+      of Count:
+        nazo.goal.isSatisfiedCount(moveRes, Count)
+      of CountMore:
+        nazo.goal.isSatisfiedCount(moveRes, CountMore)
       of Place:
         nazo.goal.isSatisfiedPlace(moveRes, Place)
       of PlaceMore:
         nazo.goal.isSatisfiedPlace(moveRes, PlaceMore)
-      of Conn:
-        nazo.goal.isSatisfiedConn(moveRes, Conn)
-      of ConnMore:
-        nazo.goal.isSatisfiedConn(moveRes, ConnMore)
+      of Connection:
+        nazo.goal.isSatisfiedConnection(moveRes, Connection)
+      of ConnectionMore:
+        nazo.goal.isSatisfiedConnection(moveRes, ConnectionMore)
     )
 
     if satisfied:
@@ -190,14 +190,14 @@ func parseNazoPuyo*[F: TsuField or WaterField](
 ): StrErrorResult[NazoPuyo[F]] {.inline, noinit.} =
   ## Returns the Nazo Puyo converted from the string representation.
   let
-    errMsg = "Invalid Nazo Puyo: {str}".fmt
+    errorMsg = "Invalid Nazo Puyo: {str}".fmt
     strs = str.split GoalPuyoPuyoSep
   if strs.len != 2:
     return err "Invalid Nazo Puyo: {str}".fmt
 
   let
-    goal = ?strs[0].parseGoal.context errMsg
-    puyoPuyo = ?parsePuyoPuyo[F](strs[1]).context errMsg
+    goal = ?strs[0].parseGoal.context errorMsg
+    puyoPuyo = ?parsePuyoPuyo[F](strs[1]).context errorMsg
 
   ok NazoPuyo[F].init(puyoPuyo, goal)
 
@@ -213,18 +213,18 @@ func toUriQueryPon2[F: TsuField or WaterField](
     self: NazoPuyo[F]
 ): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the Nazo Puyo.
-  let errMsg = "Nazo Puyo that does not support URI conversion: {self}".fmt
+  let errorMsg = "Nazo Puyo that does not support URI conversion: {self}".fmt
 
-  ok (?self.puyoPuyo.toUriQuery(Pon2).context errMsg) & '&' &
-    [(GoalKey, ?self.goal.toUriQuery(Pon2).context errMsg)].encodeQuery
+  ok (?self.puyoPuyo.toUriQuery(Pon2).context errorMsg) & '&' &
+    [(GoalKey, ?self.goal.toUriQuery(Pon2).context errorMsg)].encodeQuery
 
 func toUriQueryIshikawa[F: TsuField or WaterField](
     self: NazoPuyo[F]
 ): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the Nazo Puyo.
   let
-    errMsg = "Nazo Puyo that does not support URI conversion: {self}".fmt
-    puyoPuyoQueryRaw = ?self.puyoPuyo.toUriQuery(Ishikawa).context errMsg
+    errorMsg = "Nazo Puyo that does not support URI conversion: {self}".fmt
+    puyoPuyoQueryRaw = ?self.puyoPuyo.toUriQuery(Ishikawa).context errorMsg
     puyoPuyoQuery =
       if '_' in puyoPuyoQueryRaw:
         puyoPuyoQueryRaw
@@ -232,7 +232,7 @@ func toUriQueryIshikawa[F: TsuField or WaterField](
         puyoPuyoQueryRaw & '_'
 
   ok puyoPuyoQuery & PuyoPuyoGoalIshikawaSep &
-    ?self.goal.toUriQuery(Ishikawa).context errMsg
+    ?self.goal.toUriQuery(Ishikawa).context errorMsg
 
 func toUriQuery*[F: TsuField or WaterField](
     self: NazoPuyo[F], fqdn = Pon2
@@ -274,14 +274,14 @@ func parseNazoPuyoIshikawa[F: TsuField or WaterField](
 ): StrErrorResult[NazoPuyo[F]] {.inline, noinit.} =
   ## Returns the Nazo Puyo converted from the URI query.
   let
-    errMsg = "Invalid Nazo Puyo: {query}".fmt
+    errorMsg = "Invalid Nazo Puyo: {query}".fmt
     strs = query.rsplit(PuyoPuyoGoalIshikawaSep, 1)
   if strs.len != 2:
-    return err errMsg
+    return err errorMsg
 
   ok NazoPuyo[F].init(
-    ?parsePuyoPuyo[F](strs[0], Ishikawa).context errMsg,
-    ?strs[1].parseGoal(Ishikawa).context errMsg,
+    ?parsePuyoPuyo[F](strs[0], Ishikawa).context errorMsg,
+    ?strs[1].parseGoal(Ishikawa).context errorMsg,
   )
 
 func parseNazoPuyo*[F: TsuField or WaterField](

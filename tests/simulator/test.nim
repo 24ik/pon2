@@ -229,7 +229,7 @@ py|"""
 # Edit - Delete
 # ------------------------------------------------
 
-block: # deleteStep
+block: # delStep
   let nazo = parseNazoPuyo[TsuField](
     """
 3連鎖するべし
@@ -256,17 +256,17 @@ py|"""
     steps = nazo.puyoPuyo.steps
     sim = Simulator.init(nazo, EditorEdit)
 
-  sim.deleteStep
-  steps.delete 0
+  sim.delStep
+  steps.del 0
   sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
-  sim.deleteStep 1
-  steps.delete 1
+  sim.delStep 1
+  steps.del 1
   sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
-  sim.deleteStep 1
+  sim.delStep 1
   sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 
@@ -329,7 +329,7 @@ X"""
 
   sim.editCell = Cell.None
   sim.writeCell Row8, Col4
-  field.delete Row8, Col4
+  field.del Row8, Col4
   sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.field == field
 
@@ -341,7 +341,7 @@ X"""
     check it.steps == steps
 
   sim.writeCell Cell.None
-  steps.delete 0
+  steps.del 0
   sim.nazoPuyoWrap.unwrapNazoPuyo:
     check it.steps == steps
 

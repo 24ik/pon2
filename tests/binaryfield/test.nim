@@ -5,10 +5,10 @@
 
 import std/[sequtils, sugar, unittest]
 import ../../src/pon2/private/[assign, strutils]
-import ../../src/pon2/private/core/[binfield]
+import ../../src/pon2/private/core/[binaryfield]
 import ../../src/pon2/core/[common, placement, rule]
 
-proc toBinField(str: string): BinField =
+proc toBinaryField(str: string): BinaryField =
   ## Returns the binary field converted from the string representation.
   let strs = str.split "\n"
 
@@ -17,14 +17,14 @@ proc toBinField(str: string): BinField =
     for col in Col:
       arr[row][col].assign strs[row.ord][col.ord] == 'x'
 
-  return arr.toBinField
+  return arr.toBinaryField
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
 block: # init
-  check BinField.init ==
+  check BinaryField.init ==
     """
 ......
 ......
@@ -38,10 +38,10 @@ block: # init
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
 
 block: # initOne
-  check BinField.initOne ==
+  check BinaryField.initOne ==
     """
 xxxxxx
 xxxxxx
@@ -55,10 +55,10 @@ xxxxxx
 xxxxxx
 xxxxxx
 xxxxxx
-xxxxxx""".toBinField
+xxxxxx""".toBinaryField
 
 block: # initFloor
-  check BinField.initFloor ==
+  check BinaryField.initFloor ==
     """
 ......
 ......
@@ -72,10 +72,10 @@ block: # initFloor
 ......
 ......
 ......
-xxxxxx""".toBinField.shiftedDownRaw
+xxxxxx""".toBinaryField.shiftedDownRaw
 
 block: # initLowerAir
-  check BinField.initLowerAir ==
+  check BinaryField.initLowerAir ==
     """
 ......
 ......
@@ -89,10 +89,10 @@ xxxxxx
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
 
 block: # initUpperWater
-  check BinField.initUpperWater ==
+  check BinaryField.initUpperWater ==
     """
 ......
 ......
@@ -106,7 +106,7 @@ xxxxxx
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
 
 # ------------------------------------------------
 # Operator
@@ -128,7 +128,7 @@ x.....
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
     f2 =
       """
 x.....
@@ -143,7 +143,7 @@ xxxxxx
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
     fSum =
       """
 xxxxxx
@@ -158,7 +158,7 @@ xxxxxx
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
     fDiff =
       """
 .xxxxx
@@ -173,7 +173,7 @@ xxxxxx
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
     fProd =
       """
 x.....
@@ -188,7 +188,7 @@ x.....
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
     fXor =
       """
 .xxxxx
@@ -203,7 +203,7 @@ x.....
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
 
   check f1 + f2 == fSum
   check f1 - f2 == fDiff
@@ -226,10 +226,10 @@ x.....
   check sum(f1, f2, fProd, fDiff) == f1 + f2 + fProd + fDiff
   check sum(f1, f2, fProd, fDiff, fXor) == f1 + f2 + fProd + fDiff + fXor
   check sum(f1, f2, fProd, fDiff, fXor, f3) == f1 + f2 + fProd + fDiff + fXor + f3
-  check sum(f1, f2, fProd, fDiff, fXor, f3, BinField.init) ==
-    f1 + f2 + fProd + fDiff + fXor + f3 + BinField.init
-  check sum(f1, f2, fProd, fDiff, fXor, f3, BinField.init, BinField.initFloor) ==
-    f1 + f2 + fProd + fDiff + fXor + f3 + BinField.init + BinField.initFloor
+  check sum(f1, f2, fProd, fDiff, fXor, f3, BinaryField.init) ==
+    f1 + f2 + fProd + fDiff + fXor + f3 + BinaryField.init
+  check sum(f1, f2, fProd, fDiff, fXor, f3, BinaryField.init, BinaryField.initFloor) ==
+    f1 + f2 + fProd + fDiff + fXor + f3 + BinaryField.init + BinaryField.initFloor
 
   check prod(f1, f2, fXor) == f1 * f2 * fXor
 
@@ -252,7 +252,7 @@ x..x..
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
 
   check field.kept(Row1) ==
     """
@@ -268,7 +268,7 @@ x..x..
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
   check field.kept(Col5) ==
     """
 ......
@@ -283,8 +283,8 @@ x..x..
 ......
 ......
 ......
-......""".toBinField
-  check BinField.initOne.keptValid ==
+......""".toBinaryField
+  check BinaryField.initOne.keptValid ==
     """
 xxxxxx
 xxxxxx
@@ -298,7 +298,7 @@ xxxxxx
 xxxxxx
 xxxxxx
 xxxxxx
-xxxxxx""".toBinField
+xxxxxx""".toBinaryField
   check field.keptVisible ==
     """
 ......
@@ -313,7 +313,7 @@ x..x..
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
   check field.keptAir ==
     """
 x..x..
@@ -328,16 +328,16 @@ x..x..
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
 
-  check BinField.initOne.dup(keepValid) == BinField.initOne.keptValid
+  check BinaryField.initOne.dup(keepValid) == BinaryField.initOne.keptValid
 
 # ------------------------------------------------
 # Clear
 # ------------------------------------------------
 
 block: # clear
-  check BinField.initOne.dup(clear) == BinField.init
+  check BinaryField.initOne.dup(clear) == BinaryField.init
 
 # ------------------------------------------------
 # Replace
@@ -358,7 +358,7 @@ x.....
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
   let fieldAfter =
     """
 ......
@@ -373,7 +373,7 @@ x.....
 ...x..
 ..x...
 .x....
-x.....""".toBinField
+x.....""".toBinaryField
 
   field.replace Col1, fieldAfter
 
@@ -391,16 +391,16 @@ x.....
 ......
 ......
 .x....
-......""".toBinField
+......""".toBinaryField
 
 # ------------------------------------------------
 # Population Count
 # ------------------------------------------------
 
-block: # cntOne
-  check BinField.initOne.keptValid.popcnt == Height * Width
-  check BinField.init.popcnt == 0
-  check BinField.initFloor.popcnt == Width
+block: # popcnt
+  check BinaryField.initOne.keptValid.popcnt == Height * Width
+  check BinaryField.init.popcnt == 0
+  check BinaryField.initFloor.popcnt == Width
 
 # ------------------------------------------------
 # Shift
@@ -426,7 +426,7 @@ x....x
 ......
 ......
 .....x
-xx..x.""".toBinField
+xx..x.""".toBinaryField
     fieldU =
       """
 .x...x
@@ -441,7 +441,7 @@ xx..x.""".toBinField
 ......
 .....x
 xx..x.
-......""".toBinField
+......""".toBinaryField
     fieldD =
       """
 ......
@@ -456,7 +456,7 @@ x....x
 ......
 ......
 ......
-.....x""".toBinField
+.....x""".toBinaryField
     fieldR =
       """
 .x....
@@ -471,7 +471,7 @@ x....x
 ......
 ......
 ......
-.xx..x""".toBinField
+.xx..x""".toBinaryField
     fieldL =
       """
 ....x.
@@ -486,7 +486,7 @@ x...x.
 ......
 ......
 ....x.
-x..x..""".toBinField
+x..x..""".toBinaryField
 
   check field.shiftedUpRaw.keptValid == fieldU
   check field.shiftedDownRaw.keptValid == fieldD
@@ -528,7 +528,7 @@ block: # flipVertical, flipHorizontal
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
     fieldV =
       """
 ......
@@ -543,7 +543,7 @@ block: # flipVertical, flipHorizontal
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
     fieldH =
       """
 ......
@@ -558,7 +558,7 @@ block: # flipVertical, flipHorizontal
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
 
   check field.dup(flipVertical) == fieldV
   check field.dup(flipHorizontal) == fieldH
@@ -583,7 +583,7 @@ x.....
 ......
 ......
 ......
-....x.""".toBinField
+....x.""".toBinaryField
     fieldR =
       """
 ......
@@ -598,7 +598,7 @@ x.....
 ......
 ....x.
 ......
-.....x""".toBinField
+.....x""".toBinaryField
     fieldCR =
       """
 ......
@@ -613,7 +613,7 @@ x.....
 ......
 .x....
 ......
-..x...""".toBinField
+..x...""".toBinaryField
 
   check field.dup(rotate) == fieldR
   check field.dup(crossRotate) == fieldCR
@@ -637,7 +637,7 @@ block: # `[]`, `[]=`
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
 
   check field[Row2, Col1]
   check not field[Row1, Col2]
@@ -657,7 +657,7 @@ block: # `[]`, `[]=`
 # Insert / Delete
 # ------------------------------------------------
 
-block: # insert, delete
+block: # insert, del
   var field =
     """
 ......
@@ -672,7 +672,7 @@ x.....
 ......
 ......
 x.....
-x.....""".toBinField
+x.....""".toBinaryField
 
   field.insert Row3, Col1, true, Tsu
   check field ==
@@ -689,7 +689,7 @@ xx....
 ......
 ......
 x.....
-x.....""".toBinField
+x.....""".toBinaryField
 
   field.insert Row4, Col1, false, Tsu
   check field ==
@@ -706,9 +706,9 @@ x.....
 ......
 ......
 x.....
-x.....""".toBinField
+x.....""".toBinaryField
 
-  field.delete Row5, Col1, Tsu
+  field.del Row5, Col1, Tsu
   check field ==
     """
 ......
@@ -723,7 +723,7 @@ xx....
 ......
 ......
 x.....
-x.....""".toBinField
+x.....""".toBinaryField
 
   field.insert Row4, Col0, true, Water
   check field ==
@@ -740,7 +740,7 @@ x...x.
 ......
 ......
 x.....
-x.....""".toBinField
+x.....""".toBinaryField
 
   field.insert Row5, Col0, false, Water
   check field ==
@@ -757,9 +757,9 @@ x...x.
 ......
 ......
 ......
-x.....""".toBinField
+x.....""".toBinaryField
 
-  field.delete Row4, Col0, Water
+  field.del Row4, Col0, Water
   check field ==
     """
 ......
@@ -774,9 +774,9 @@ xx....
 ......
 ......
 ......
-x.....""".toBinField
+x.....""".toBinaryField
 
-  field.delete Row5, Col0, Water
+  field.del Row5, Col0, Water
   check field ==
     """
 ......
@@ -791,7 +791,7 @@ xx....
 ......
 ......
 x.....
-......""".toBinField
+......""".toBinaryField
 
 # ------------------------------------------------
 # Drop Garbages
@@ -813,7 +813,7 @@ block: # dropGarbagesTsu
 ......
 .x..x.
 .....x
-.xx.xx""".toBinField
+.xx.xx""".toBinaryField
     existField =
       """
 ......
@@ -828,7 +828,7 @@ block: # dropGarbagesTsu
 ....xx
 .x..xx
 .x..xx
-.xx.xx""".toBinField
+.xx.xx""".toBinaryField
 
   check field.dup(dropGarbagesTsu(_, [Col0: 0, 0, 1, 1, 8, 24], existField)) ==
     """
@@ -844,7 +844,7 @@ block: # dropGarbagesTsu
 ......
 .x..x.
 ..x..x
-.xxxxx""".toBinField
+.xxxxx""".toBinaryField
 
 block: # dropGarbagesWater
   block: # test1
@@ -863,7 +863,7 @@ block: # dropGarbagesWater
 ....x.
 ......
 ......
-......""".toBinField
+......""".toBinaryField
       other1 =
         """
 ......
@@ -878,8 +878,8 @@ block: # dropGarbagesWater
 .....x
 ......
 ......
-......""".toBinField
-      other2 = BinField.init
+......""".toBinaryField
+      other2 = BinaryField.init
 
     dropGarbagesWater(
       field, other1, other2, [Col0: 0, 0, 1, 1, 5, 24], field + other1 + other2
@@ -899,7 +899,7 @@ block: # dropGarbagesWater
 .....x
 ....x.
 .....x
-....x.""".toBinField
+....x.""".toBinaryField
     check other1 ==
       """
 ......
@@ -914,8 +914,8 @@ block: # dropGarbagesWater
 ....x.
 .....x
 ....x.
-.....x""".toBinField
-    check other2 == BinField.init
+.....x""".toBinaryField
+    check other2 == BinaryField.init
 
   block: # test2 (full water)
     var
@@ -933,7 +933,7 @@ x.x..x
 x.x..x
 .x.xx.
 x.x..x
-.x.xx.""".toBinField
+.x.xx.""".toBinaryField
       other1 =
         """
 .....x
@@ -948,8 +948,8 @@ x.x..x
 .x.xx.
 x.x..x
 .x.xx.
-x.x..x""".toBinField
-      other2 = BinField.init
+x.x..x""".toBinaryField
+      other2 = BinaryField.init
 
     dropGarbagesWater(
       field, other1, other2, [Col0: 0, 1, 0, 2, 0, 24], field + other1 + other2
@@ -969,7 +969,7 @@ x.x..x
 x.x..x
 .x.xx.
 x.x..x
-.x.xx.""".toBinField
+.x.xx.""".toBinaryField
     check other1 ==
       """
 .....x
@@ -984,8 +984,8 @@ x.x..x
 .x.xx.
 x.x..x
 .x.xx.
-x.x..x""".toBinField
-    check other2 == BinField.init
+x.x..x""".toBinaryField
+    check other2 == BinaryField.init
 
 # ------------------------------------------------
 # Settle
@@ -1007,7 +1007,7 @@ xx..x.
 .x.xx.
 ...x..
 .x.x..
-.x.xx.""".toBinField
+.x.xx.""".toBinaryField
     field2 =
       """
 ......
@@ -1022,8 +1022,8 @@ x..x..
 ......
 .x..x.
 ....x.
-x.....""".toBinField
-    field3 = BinField.init
+x.....""".toBinaryField
+    field3 = BinaryField.init
 
   block: # Tsu
     var
@@ -1049,7 +1049,7 @@ x..xx.
 xxxxx.
 x.xx..
 xxxx..
-.x.xx.""".toBinField
+.x.xx.""".toBinaryField
 
     check f2 ==
       """
@@ -1065,9 +1065,9 @@ x..x..
 ......
 .x..x.
 ....x.
-x.x...""".toBinField
+x.x...""".toBinaryField
 
-    check f3 == BinField.init
+    check f3 == BinaryField.init
 
   block: # Water
     var
@@ -1093,7 +1093,7 @@ xx..x.
 xx.xx.
 ...x..
 .x.x..
-.x.xx.""".toBinField
+.x.xx.""".toBinaryField
 
     check f2 ==
       """
@@ -1109,9 +1109,9 @@ x.....
 ......
 xx..x.
 ....x.
-......""".toBinField
+......""".toBinaryField
 
-    check f3 == BinField.init
+    check f3 == BinaryField.init
 
 # ------------------------------------------------
 # Property
@@ -1119,14 +1119,14 @@ xx..x.
 
 block: # isDead
   block: # Tsu
-    var field = BinField.initOne.keptValid
+    var field = BinaryField.initOne.keptValid
     check field.isDead Tsu
 
     field[Row1, Col2] = false
     check not field.isDead Tsu
 
   block: # Water
-    var field = BinField.init
+    var field = BinaryField.init
     check not field.isDead Water
 
     field[Row4, Col5] = true
@@ -1136,12 +1136,12 @@ block: # isDead
 # Placement
 # ------------------------------------------------
 
-block: # invalidPlacements, validPlacements, validDblPlacements
+block: # invalidPlacements, validPlacements, validDoublePlacements
   block:
-    let field = BinField.init
+    let field = BinaryField.init
     check field.invalidPlacements == {}
     check field.validPlacements == {Placement.low .. Placement.high}
-    check field.validDblPlacements == DblPlacements
+    check field.validDoublePlacements == DoublePlacements
 
   block:
     let field =
@@ -1158,7 +1158,7 @@ block: # invalidPlacements, validPlacements, validDblPlacements
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
     check field.invalidPlacements ==
       {Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2}
 
@@ -1177,7 +1177,7 @@ block: # invalidPlacements, validPlacements, validDblPlacements
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
     check field.invalidPlacements == {Down1}
 
   block:
@@ -1195,7 +1195,7 @@ block: # invalidPlacements, validPlacements, validDblPlacements
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
     check field.invalidPlacements == {Down1, Down3}
 
   block:
@@ -1213,7 +1213,7 @@ block: # invalidPlacements, validPlacements, validDblPlacements
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
     check field.invalidPlacements ==
       {Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2, Down3}
 
@@ -1232,7 +1232,7 @@ block: # invalidPlacements, validPlacements, validDblPlacements
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
     check field.invalidPlacements ==
       {Down1, Right3, Down3, Up4, Right4, Down4, Left4, Up5, Down5, Left5}
 
@@ -1255,7 +1255,7 @@ xx..x.
 ...xx.
 xxx.x.
 xx....
-..xxxx""".toBinField
+..xxxx""".toBinaryField
 
   check field.extractedPop ==
     """
@@ -1271,15 +1271,15 @@ xx..x.
 ...xx.
 xxx.x.
 xx....
-..xxxx""".toBinField
+..xxxx""".toBinaryField
   check field.canPop
-  check not BinField.init.canPop
+  check not BinaryField.init.canPop
 
 # ------------------------------------------------
 # Connect - 2
 # ------------------------------------------------
 
-block: # conn2, conn2Vertical, conn2Horizontal
+block: # connection2, connection2Vertical, connection2Horizontal
   let field =
     """
 x...xx
@@ -1294,9 +1294,9 @@ xx.x..
 .x....
 ...xxx
 x.....
-..xxxx""".toBinField
+..xxxx""".toBinaryField
 
-  check field.conn2 ==
+  check field.connection2 ==
     """
 x...xx
 x.....
@@ -1310,9 +1310,9 @@ xx....
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
 
-  check field.conn2Vertical ==
+  check field.connection2Vertical ==
     """
 x.....
 x.....
@@ -1326,9 +1326,9 @@ x.....
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
 
-  check field.conn2Horizontal ==
+  check field.connection2Horizontal ==
     """
 ....xx
 ......
@@ -1342,13 +1342,13 @@ xx....
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
 
 # ------------------------------------------------
 # Connect - 3
 # ------------------------------------------------
 
-block: # conn3, conn3Vertical, conn3Horizontal, conn3LShape
+block: # connection3, connection3Vertical, connection3Horizontal, connection3LShape
   let field =
     """
 xxx.x.
@@ -1363,9 +1363,9 @@ xx.x..
 ....xx
 xxx..x
 ....x.
-xx.xxx""".toBinField
+xx.xxx""".toBinaryField
 
-  check field.conn3 ==
+  check field.connection3 ==
     """
 xxx...
 ......
@@ -1379,9 +1379,9 @@ xx.x..
 ....xx
 xxx..x
 ......
-......""".toBinField
+......""".toBinaryField
 
-  check field.conn3Vertical ==
+  check field.connection3Vertical ==
     """
 ......
 ......
@@ -1395,9 +1395,9 @@ x.....
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
 
-  check field.conn3Horizontal ==
+  check field.connection3Horizontal ==
     """
 xxx...
 ......
@@ -1411,9 +1411,9 @@ xxx...
 ......
 xxx...
 ......
-......""".toBinField
+......""".toBinaryField
 
-  check field.conn3LShape ==
+  check field.connection3LShape ==
     """
 ......
 ......
@@ -1427,13 +1427,13 @@ xx.x..
 ....xx
 .....x
 ......
-......""".toBinField
+......""".toBinaryField
 
 # ------------------------------------------------
 # BinaryField <-> array
 # ------------------------------------------------
 
-block: # toArr, toBinField
+block: # toArray, toBinaryField
   let field =
     """
 .x....
@@ -1448,6 +1448,6 @@ block: # toArr, toBinField
 ......
 ......
 ......
-......""".toBinField
+......""".toBinaryField
 
-  check field.toArr.toBinField == field
+  check field.toArray.toBinaryField == field

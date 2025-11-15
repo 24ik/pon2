@@ -35,7 +35,7 @@ block: # init
   let
     puyoPuyoT = PuyoPuyo[TsuField].init
     puyoPuyoW = PuyoPuyo[WaterField].init
-    goal = Goal.init(Cnt, Colors, 10)
+    goal = Goal.init(Count, Colors, 10)
 
   check NazoPuyo[TsuField].init(puyoPuyoT, goal) ==
     NazoPuyo[TsuField](puyoPuyo: puyoPuyoT, goal: goal)
@@ -78,7 +78,7 @@ by|"""
     check nazo.mark2(Left3, Down2) == Accept
     check nazo.mark2(OptPlacement.ok Left3, NonePlacement) == WrongAnswer
 
-  block: # AccColor
+  block: # AccumColor
     let nazo = parseNazoPuyo[TsuField](
       """
 3色消すべし
@@ -104,7 +104,7 @@ rg|"""
     check nazo.mark2(Down2, Left5) == Accept
     check nazo.mark2(Left3, Left5) == WrongAnswer
 
-  block: # AccColorMore
+  block: # AccumColorMore
     let nazo = parseNazoPuyo[TsuField](
       """
 3色以上消すべし
@@ -130,7 +130,7 @@ rg|"""
     check nazo.mark2(Down2, Left5) == Accept
     check nazo.mark2(Left3, Left5) == WrongAnswer
 
-  block: # AccCnt
+  block: # AccumCount
     let nazo = parseNazoPuyo[TsuField](
       """
 ぷよ18個消すべし
@@ -156,7 +156,7 @@ yg|"""
     check nazo.mark2(Up0, Down1) == Accept
     check nazo.mark2(Right3, Down3) == WrongAnswer
 
-  block: # AccCntMore
+  block: # AccumCountMore
     let nazo = parseNazoPuyo[TsuField](
       """
 ぷよ18個以上消すべし
@@ -340,7 +340,7 @@ gp|"""
     check nazo.mark2(Left5, Down5) == Accept
     check nazo.mark2(Down5, Up4) == WrongAnswer
 
-  block: # Cnt
+  block: # Count
     let nazo = parseNazoPuyo[TsuField](
       """
 ぷよ12個同時に消すべし
@@ -365,7 +365,7 @@ rg|"""
     check nazo.mark2(Down2, Left2) == Accept
     check nazo.mark2(Down5, Down1) == WrongAnswer
 
-  block: # CntMore
+  block: # CountMore
     let nazo = parseNazoPuyo[TsuField](
       """
 ぷよ12個以上同時に消すべし

@@ -106,19 +106,19 @@ func swap*(self: var Pair) {.inline, noinit.} = ## Swaps the pivot-puyo and roto
 # Count
 # ------------------------------------------------
 
-func cellCnt*(self: Pair, cell: Cell): int {.inline, noinit.} =
+func cellCount*(self: Pair, cell: Cell): int {.inline, noinit.} =
   ## Returns the number of `cell` in the pair.
   (self.pivot == cell).int + (self.rotor == cell).int
 
-func puyoCnt*(self: Pair): int {.inline, noinit.} =
+func puyoCount*(self: Pair): int {.inline, noinit.} =
   ## Returns the number of puyos in the pair.
   2
 
-func colorPuyoCnt*(self: Pair): int {.inline, noinit.} =
+func colorPuyoCount*(self: Pair): int {.inline, noinit.} =
   ## Returns the number of color puyos in the pair.
   2
 
-func garbagesCnt*(self: Pair): int {.inline, noinit.} =
+func garbagesCount*(self: Pair): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos in the pair.
   0
 

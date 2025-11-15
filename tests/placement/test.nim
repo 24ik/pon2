@@ -17,6 +17,7 @@ block: # init
   check Placement.init(Col2, dir) == Down2
 
   check Placement.init == Placement.low
+  check OptPlacement.init == NonePlacement
 
 # ------------------------------------------------
 # Property

@@ -16,22 +16,22 @@ type
   GoalKind* {.pure.} = enum
     ## Kind of the goal to clear the nazo puyo.
     Clear = "cぷよ全て消すべし"
-    AccColor = "n色消すべし"
-    AccColorMore = "n色以上消すべし"
-    AccCnt = "cぷよn個消すべし"
-    AccCntMore = "cぷよn個以上消すべし"
+    AccumColor = "n色消すべし"
+    AccumColorMore = "n色以上消すべし"
+    AccumCount = "cぷよn個消すべし"
+    AccumCountMore = "cぷよn個以上消すべし"
     Chain = "n連鎖するべし"
     ChainMore = "n連鎖以上するべし"
     ClearChain = "n連鎖&cぷよ全て消すべし"
     ClearChainMore = "n連鎖以上&cぷよ全て消すべし"
     Color = "n色同時に消すべし"
     ColorMore = "n色以上同時に消すべし"
-    Cnt = "cぷよn個同時に消すべし"
-    CntMore = "cぷよn個以上同時に消すべし"
+    Count = "cぷよn個同時に消すべし"
+    CountMore = "cぷよn個以上同時に消すべし"
     Place = "cぷよn箇所同時に消すべし"
     PlaceMore = "cぷよn箇所以上同時に消すべし"
-    Conn = "cぷよn連結で消すべし"
-    ConnMore = "cぷよn連結以上で消すべし"
+    Connection = "cぷよn連結で消すべし"
+    ConnectionMore = "cぷよn連結以上で消すべし"
 
   GoalColor* {.pure.} = enum
     ## 'c' in the `GoalKind`.
@@ -55,7 +55,7 @@ type
     optVal*: OptGoalVal
 
 const
-  NoColorKinds* = {AccColor, AccColorMore, Chain, ChainMore, Color, ColorMore}
+  NoColorKinds* = {AccumColor, AccumColorMore, Chain, ChainMore, Color, ColorMore}
     ## All goal kinds not containing 'c'.
   NoValKinds* = {Clear} ## All goal kinds not containing 'n'.
 
@@ -103,7 +103,7 @@ func isSupported*(self: Goal): bool {.inline, noinit.} =
     return false
 
   not (
-    self.kind in {Place, PlaceMore, Conn, ConnMore} and
+    self.kind in {Place, PlaceMore, Connection, ConnectionMore} and
     self.optColor.unsafeValue == Garbages
   )
 
@@ -112,22 +112,22 @@ func isSupported*(self: Goal): bool {.inline, noinit.} =
 # ------------------------------------------------
 
 const
-  DefColor = All
-  DefVal = 0.GoalVal
+  DefaultColor = All
+  DefaultVal = 0.GoalVal
 
 func normalize*(self: var Goal) {.inline, noinit.} =
   ## Normalizes the goal; removes unnecessary color and value and compensates
   ## for missing color and value.
   if self.kind in ColorKinds:
     self.optColor.isOkOr:
-      self.optColor.ok DefColor
+      self.optColor.ok DefaultColor
   else:
     self.optColor.isErrOr:
       self.optColor.err
 
   if self.kind in ValKinds:
     self.optVal.isOkOr:
-      self.optVal.ok DefVal
+      self.optVal.ok DefaultVal
   else:
     self.optVal.isErrOr:
       self.optVal.err

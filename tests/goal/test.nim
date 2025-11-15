@@ -14,8 +14,8 @@ block: # init
   check Goal.init(Clear, OptGoalColor.ok Red, OptGoalVal.err) == Goal.init(Clear, Red)
   check Goal.init(ChainMore, OptGoalColor.err, OptGoalVal.ok 5) ==
     Goal.init(ChainMore, 5)
-  check Goal.init(Conn, OptGoalColor.ok Colors, OptGoalVal.ok 10) ==
-    Goal.init(Conn, Colors, 10)
+  check Goal.init(Connection, OptGoalColor.ok Colors, OptGoalVal.ok 10) ==
+    Goal.init(Connection, Colors, 10)
   check Goal.init == Goal.init(Clear, All)
 
 # ------------------------------------------------
@@ -112,7 +112,7 @@ block: # `$`, toUriQuery, parseGoal
 
   block: # w/ val
     let
-      goal = Goal.init(AccColor, 2)
+      goal = Goal.init(AccumColor, 2)
       str = "2色消すべし"
       pon2Uri = "1__2"
       ishikawaUri = "a02"
@@ -141,7 +141,7 @@ block: # `$`, toUriQuery, parseGoal
     check ishikawaUri.parseGoal(Ishikawa) == StrErrorResult[Goal].ok goal
 
   block: # invalid with Ishikawa/Ips
-    let goal = Goal.init(Conn, Yellow, -1)
+    let goal = Goal.init(Connection, Yellow, -1)
     check goal.toUriQuery(Pon2) == StrErrorResult[string].ok "15_4_-1"
     check goal.toUriQuery(Ishikawa).isErr
     check goal.toUriQuery(Ips).isErr

@@ -24,12 +24,12 @@ when defined(js) or defined(nimsuggest):
     CellCls = "button p-0".cstring
     SelectCellCls = "button p-0 is-primary".cstring
 
-  func initDeleteBtnHandler[S: Simulator or Studio or Marathon](
+  func initDelBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, stepIdx: int
   ): () -> void =
-    ## Returns the handler for clicking delete buttons.
+    ## Returns the handler for clicking del buttons.
     # NOTE: cannot inline due to karax's limitation
-    () => self.derefSimulator(helper).deleteStep stepIdx
+    () => self.derefSimulator(helper).delStep stepIdx
 
   func initWriteBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, idx: int, pivot: bool
@@ -232,7 +232,7 @@ when defined(js) or defined(nimsuggest):
                   tdiv(class = "column is-narrow"):
                     button(
                       class = "button is-size-7",
-                      onclick = self.initDeleteBtnHandler(helper, stepIdx),
+                      onclick = self.initDelBtnHandler(helper, stepIdx),
                     ):
                       span(class = "icon"):
                         italic(class = "fa-solid fa-trash")

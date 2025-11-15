@@ -14,7 +14,8 @@ import ../../core/[cell, goal, moveresult]
 # Common
 # ------------------------------------------------
 
-const ExactKinds = {AccColor, AccCnt, Chain, ClearChain, Color, Cnt, Place, Conn}
+const ExactKinds =
+  {AccumColor, AccumCount, Chain, ClearChain, Color, Count, Place, Connection}
 
 func isSatisfied(goal: Goal, val: int, kind: static GoalKind): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
@@ -54,24 +55,24 @@ template expandColor(
     goal.isSatisfiedIdent(moveRes, kind, Colors)
 
 # ------------------------------------------------
-# AccColor
+# AccumColor
 # ------------------------------------------------
 
-func isSatisfiedAccColor*(
+func isSatisfiedAccumColor*(
     goal: Goal, colors: set[Cell], kind: static GoalKind
 ): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   goal.isSatisfied(colors.card, kind)
 
 # ------------------------------------------------
-# AccCnt
+# AccumCount
 # ------------------------------------------------
 
-func isSatisfiedAccCnt*(
-    goal: Goal, cnt: int, kind: static GoalKind
+func isSatisfiedAccumCount*(
+    goal: Goal, count: int, kind: static GoalKind
 ): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
-  goal.isSatisfied(cnt, kind)
+  goal.isSatisfied(count, kind)
 
 # ------------------------------------------------
 # Chain
@@ -81,7 +82,7 @@ func isSatisfiedChain*(
     goal: Goal, moveRes: MoveResult, kind: static GoalKind
 ): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
-  goal.isSatisfied(moveRes.chainCnt, kind)
+  goal.isSatisfied(moveRes.chainCount, kind)
 
 # ------------------------------------------------
 # Color
@@ -94,7 +95,7 @@ func isSatisfiedColor*(
   goal.isSatisfied(moveRes.colorsSeq.mapIt it.card, kind)
 
 # ------------------------------------------------
-# Cnt
+# Count
 # ------------------------------------------------
 
 const
@@ -104,28 +105,28 @@ const
     DummyCell,
   ]
 
-func isSatisfiedCnt*(
+func isSatisfiedCount*(
     goal: Goal, moveRes: MoveResult, kind: static GoalKind, color: static GoalColor
 ): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
-  let cnts = staticCase:
+  let counts = staticCase:
     case color
     of All:
-      moveRes.puyoCnts
+      moveRes.puyoCounts
     of Garbages:
-      moveRes.garbagesCnts
+      moveRes.garbagesCounts
     of Colors:
-      moveRes.colorPuyoCnts
+      moveRes.colorPuyoCounts
     else:
-      moveRes.cellCnts GoalColorToCell[color]
+      moveRes.cellCounts GoalColorToCell[color]
 
-  goal.isSatisfied(cnts, kind)
+  goal.isSatisfied(counts, kind)
 
-func isSatisfiedCnt*(
+func isSatisfiedCount*(
     goal: Goal, moveRes: MoveResult, kind: static GoalKind
 ): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
-  isSatisfiedCnt.expandColor goal, moveRes, kind
+  isSatisfiedCount.expandColor goal, moveRes, kind
 
 # ------------------------------------------------
 # Place
@@ -138,9 +139,9 @@ func isSatisfiedPlace*(
   let places = staticCase:
     case color
     of All, Colors:
-      moveRes.placeCnts
+      moveRes.placeCounts
     else:
-      moveRes.placeCnts GoalColorToCell[color]
+      moveRes.placeCounts GoalColorToCell[color]
 
   goal.isSatisfied(places.unsafeValue, kind)
 
@@ -151,24 +152,24 @@ func isSatisfiedPlace*(
   isSatisfiedPlace.expandColor goal, moveRes, kind
 
 # ------------------------------------------------
-# Conn
+# Connection
 # ------------------------------------------------
 
-func isSatisfiedConn*(
+func isSatisfiedConnection*(
     goal: Goal, moveRes: MoveResult, kind: static GoalKind, color: static GoalColor
 ): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
-  let conns = staticCase:
+  let connections = staticCase:
     case color
     of All, Colors:
-      moveRes.connCnts
+      moveRes.connectionCounts
     else:
-      moveRes.connCnts GoalColorToCell[color]
+      moveRes.connectionCounts GoalColorToCell[color]
 
-  goal.isSatisfied(conns.unsafeValue, kind)
+  goal.isSatisfied(connections.unsafeValue, kind)
 
-func isSatisfiedConn*(
+func isSatisfiedConnection*(
     goal: Goal, moveRes: MoveResult, kind: static GoalKind
 ): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
-  isSatisfiedConn.expandColor goal, moveRes, kind
+  isSatisfiedConnection.expandColor goal, moveRes, kind

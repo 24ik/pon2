@@ -1,9 +1,9 @@
 ## This module implements binary fields.
 ##
 ## Low-level Implementation Documentations:
-## - [xmm](./binfield/xmm.html)
-## - [bit64](./binfield/bit64.html)
-## - [bit32](./binfield/bit32.html)
+## - [xmm](./binaryfield/xmm.html)
+## - [bit64](./binaryfield/bit64.html)
+## - [bit32](./binaryfield/bit32.html)
 ##
 
 {.push raises: [].}
@@ -18,33 +18,33 @@ import ../../core/[common, placement, rule]
 export common, placement
 
 when Sse42Available:
-  import ./binfield/[xmm]
+  import ./binaryfield/[xmm]
   export xmm
 
-  type BinField* = XmmBinField ## Binary field.
+  type BinaryField* = XmmBinaryField ## Binary field.
 elif defined(cpu32):
-  import ./binfield/[bit32]
+  import ./binaryfield/[bit32]
   export bit32
 
-  type BinField* = Bit32BinField ## Binary field.
+  type BinaryField* = Bit32BinaryField ## Binary field.
 else:
-  import ./binfield/[bit64]
+  import ./binaryfield/[bit64]
   export bit64
 
-  type BinField* = Bit64BinField ## Binary field.
+  type BinaryField* = Bit64BinaryField ## Binary field.
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-func isDead*(self: BinField, rule: static Rule): bool {.inline, noinit.} =
+func isDead*(self: BinaryField, rule: static Rule): bool {.inline, noinit.} =
   ## Returns `true` if the binary field is in a defeated state.
   staticCase:
     case rule
     of Tsu:
       self[Row1, Col2]
     of Water:
-      self * BinField.initLowerAir != BinField.init
+      self * BinaryField.initLowerAir != BinaryField.init
 
 # ------------------------------------------------
 # Placement
@@ -54,7 +54,7 @@ const
   AllCols = {Col.low .. Col.high}
   OuterCols: array[Col, set[Col]] =
     [{Col0}, {Col0, Col1}, AllCols, {Col3, Col4, Col5}, {Col4, Col5}, {Col5}]
-  InvalidPlcmts: array[Col, set[Placement]] = [
+  InvalidPlacements: array[Col, set[Placement]] = [
     {Up0, Right0, Down0, Left1},
     {Up1, Right1, Down1, Left1, Right0, Left2},
     {Up2, Right2, Down2, Left2, Right1, Left3},
@@ -63,10 +63,10 @@ const
     {Up5, Down5, Left5, Right4},
   ]
 
-func invalidPlacements*(self: BinField): set[Placement] {.inline, noinit.} =
+func invalidPlacements*(self: BinaryField): set[Placement] {.inline, noinit.} =
   ## Returns the invalid placements.
   var
-    invalidPlcmts = set[Placement]({})
+    invalidPlacements = set[Placement]({})
     availableCols = AllCols
 
   # If puyo exists at 12th row, that column and outer ones are unavailable,
@@ -74,7 +74,7 @@ func invalidPlacements*(self: BinField): set[Placement] {.inline, noinit.} =
   staticFor(col, Col):
     if self[Row1, col]:
       availableCols.excl OuterCols[col]
-      invalidPlcmts.incl Placement.init(col, Down)
+      invalidPlacements.incl Placement.init(col, Down)
 
   # If there is an available column with height 11, or the heights of the 2nd and
   # 4th columns are both 12, all columns are available.
@@ -90,34 +90,34 @@ func invalidPlacements*(self: BinField): set[Placement] {.inline, noinit.} =
       availableCols.excl OuterCols[col]
 
   for col in availableCols.complement:
-    invalidPlcmts.incl InvalidPlcmts[col]
+    invalidPlacements.incl InvalidPlacements[col]
 
-  invalidPlcmts
+  invalidPlacements
 
-func validPlacements*(self: BinField): set[Placement] {.inline, noinit.} =
+func validPlacements*(self: BinaryField): set[Placement] {.inline, noinit.} =
   ## Returns the valid placements.
   self.invalidPlacements.complement
 
-func validDblPlacements*(self: BinField): set[Placement] {.inline, noinit.} =
+func validDoublePlacements*(self: BinaryField): set[Placement] {.inline, noinit.} =
   ## Returns the valid placements for double pairs.
-  DblPlacements - self.invalidPlacements
+  DoublePlacements - self.invalidPlacements
 
 # ------------------------------------------------
 # Dilate
 # ------------------------------------------------
 
-func dilated(self: BinField): BinField {.inline, noinit.} =
+func dilated(self: BinaryField): BinaryField {.inline, noinit.} =
   ## Dilates the binary field.
   sum(
     self, self.shiftedUpRaw, self.shiftedDownRaw, self.shiftedRightRaw,
     self.shiftedLeftRaw,
   )
 
-func dilatedVertical(self: BinField): BinField {.inline, noinit.} =
+func dilatedVertical(self: BinaryField): BinaryField {.inline, noinit.} =
   ## Dilates the binary field vertically.
   sum(self, self.shiftedUpRaw, self.shiftedDownRaw)
 
-func dilatedHorizontal(self: BinField): BinField {.inline, noinit.} =
+func dilatedHorizontal(self: BinaryField): BinaryField {.inline, noinit.} =
   ## Dilates the binary field horizontally.
   sum(self, self.shiftedRightRaw, self.shiftedLeftRaw)
 
@@ -125,55 +125,58 @@ func dilatedHorizontal(self: BinField): BinField {.inline, noinit.} =
 # Pop
 # ------------------------------------------------
 
-template withConn(self: BinField, body: untyped): untyped =
-  ## Calculates the connection data and runs the body with `connVisible`,
-  ## `connHas3`, and `connHas2` exposed.
+template withConnection(self: BinaryField, body: untyped): untyped =
+  ## Calculates the connection data and runs the body with `connectionVisible`,
+  ## `connectionHas3`, and `connectionHas2` exposed.
   ## This function ignores ghost puyos.
   block:
     let
-      connVisible {.inject.} = self.keptVisible
+      connectionVisible {.inject.} = self.keptVisible
 
-      hasU = connVisible * connVisible.shiftedDownRaw
-      hasD = connVisible * self.shiftedUpRaw
-      hasR = connVisible * self.shiftedLeftRaw
-      hasL = connVisible * self.shiftedRightRaw
+      hasU = connectionVisible * connectionVisible.shiftedDownRaw
+      hasD = connectionVisible * self.shiftedUpRaw
+      hasR = connectionVisible * self.shiftedLeftRaw
+      hasL = connectionVisible * self.shiftedRightRaw
 
       hasUD = hasU * hasD
       hasRL = hasR * hasL
       hasUorD = hasU + hasD
       hasRorL = hasR + hasL
 
-      connHas3 {.inject.} = hasUD * hasRorL + hasRL * hasUorD
-      connHas2 {.inject.} = sum(hasUD, hasRL, hasUorD * hasRorL)
+      connectionHas3 {.inject.} = hasUD * hasRorL + hasRL * hasUorD
+      connectionHas2 {.inject.} = sum(hasUD, hasRL, hasUorD * hasRorL)
 
     body
 
-func extractedPop*(self: BinField): BinField {.inline, noinit.} =
+func extractedPop*(self: BinaryField): BinaryField {.inline, noinit.} =
   ## Returns the binary field with cells that will pop.
-  self.withConn:
+  self.withConnection:
     let
-      hasHas2U = connHas2 * connHas2.shiftedDownRaw
-      hasHas2D = connHas2 * connHas2.shiftedUpRaw
-      hasHas2R = connHas2 * connHas2.shiftedLeftRaw
-      hasHas2L = connHas2 * connHas2.shiftedRightRaw
+      hasHas2U = connectionHas2 * connectionHas2.shiftedDownRaw
+      hasHas2D = connectionHas2 * connectionHas2.shiftedUpRaw
+      hasHas2R = connectionHas2 * connectionHas2.shiftedLeftRaw
+      hasHas2L = connectionHas2 * connectionHas2.shiftedRightRaw
 
-    connVisible * sum(connHas3, hasHas2U, hasHas2D, hasHas2R, hasHas2L).dilated
+    connectionVisible *
+      sum(connectionHas3, hasHas2U, hasHas2D, hasHas2R, hasHas2L).dilated
 
-func canPop*(self: BinField): bool {.inline, noinit.} =
+func canPop*(self: BinaryField): bool {.inline, noinit.} =
   ## Returns `true` if any cell can pop.
   ## Note that this function is only slightly lighter than `extractedPop`.
-  self.withConn:
+  self.withConnection:
     let
-      hasHas2U = connHas2 * connHas2.shiftedDownRaw
-      hasHas2R = connHas2 * connHas2.shiftedLeftRaw
+      hasHas2U = connectionHas2 * connectionHas2.shiftedDownRaw
+      hasHas2R = connectionHas2 * connectionHas2.shiftedLeftRaw
 
-    sum(connHas3, hasHas2U, hasHas2R) != BinField.init
+    sum(connectionHas3, hasHas2U, hasHas2R) != BinaryField.init
 
 # ------------------------------------------------
 # Connect - 2
 # ------------------------------------------------
 
-func conn2(self: BinField, inclV, inclH: static bool): BinField {.inline, noinit.} =
+func connection2(
+    self: BinaryField, inclV, inclH: static bool
+): BinaryField {.inline, noinit.} =
   ## Returns the binary field where exactly two cells are connected.
   let
     existU = self.shiftedDownRaw
@@ -188,7 +191,7 @@ func conn2(self: BinField, inclV, inclH: static bool): BinField {.inline, noinit
       existDL = existD.shiftedRightRaw
       hasD = self * existD
       hasExactD = hasD - sum(existU, existR, existL, existDD, existDR, existDL)
-      conn2V = hasExactD + hasExactD.shiftedDownRaw
+      connection2V = hasExactD + hasExactD.shiftedDownRaw
 
   when inclH:
     let
@@ -196,34 +199,36 @@ func conn2(self: BinField, inclV, inclH: static bool): BinField {.inline, noinit
       existRU = existR.shiftedDownRaw
       hasR = self * existR
       hasExactR = hasR - sum(existL, existU, existD, existRR, existRU, existDR)
-      conn2H = hasExactR + hasExactR.shiftedRightRaw
+      connection2H = hasExactR + hasExactR.shiftedRightRaw
 
   when inclV and inclH:
-    conn2V + conn2H
+    connection2V + connection2H
   elif inclV:
-    conn2V
+    connection2V
   elif inclH:
-    conn2H
+    connection2H
   else:
-    BinField.init # dummy
+    BinaryField.init # dummy
 
-func conn2*(self: BinField): BinField {.inline, noinit.} =
+func connection2*(self: BinaryField): BinaryField {.inline, noinit.} =
   ## Returns the binary field where exactly two cells are connected.
-  self.conn2(inclV = true, inclH = true)
+  self.connection2(inclV = true, inclH = true)
 
-func conn2Vertical*(self: BinField): BinField {.inline, noinit.} =
+func connection2Vertical*(self: BinaryField): BinaryField {.inline, noinit.} =
   ## Returns the binary field where exactly two cells are connected vertically.
-  self.conn2(inclV = true, inclH = false)
+  self.connection2(inclV = true, inclH = false)
 
-func conn2Horizontal*(self: BinField): BinField {.inline, noinit.} =
+func connection2Horizontal*(self: BinaryField): BinaryField {.inline, noinit.} =
   ## Returns the binary field where exactly two cells are connected horizontally.
-  self.conn2(inclV = false, inclH = true)
+  self.connection2(inclV = false, inclH = true)
 
 # ------------------------------------------------
 # Connect - 3
 # ------------------------------------------------
 
-func conn3Impl(self: BinField, onlyL: static bool): BinField {.inline, noinit.} =
+func connection3Impl(
+    self: BinaryField, onlyL: static bool
+): BinaryField {.inline, noinit.} =
   ## Returns the binary field where exactly three cells are connected.
   let
     hasU = self * self.shiftedDownRaw
@@ -253,11 +258,11 @@ func conn3Impl(self: BinField, onlyL: static bool): BinField {.inline, noinit.} 
 
   has2.dilated * self - exclude
 
-func conn3*(self: BinField): BinField {.inline, noinit.} =
+func connection3*(self: BinaryField): BinaryField {.inline, noinit.} =
   ## Returns the binary field where exactly three cells are connected.
-  self.conn3Impl false
+  self.connection3Impl false
 
-func conn3Vertical*(self: BinField): BinField {.inline, noinit.} =
+func connection3Vertical*(self: BinaryField): BinaryField {.inline, noinit.} =
   ## Returns the binary field where exactly three cells are connected vertically.
   let
     existU = self.shiftedDownRaw
@@ -281,7 +286,7 @@ func conn3Vertical*(self: BinField): BinField {.inline, noinit.} =
 
   hasExactUD.dilatedVertical
 
-func conn3Horizontal*(self: BinField): BinField {.inline, noinit.} =
+func connection3Horizontal*(self: BinaryField): BinaryField {.inline, noinit.} =
   ## Returns the binary field where exactly three cells are connected horizontally.
   let
     existU = self.shiftedDownRaw
@@ -305,15 +310,15 @@ func conn3Horizontal*(self: BinField): BinField {.inline, noinit.} =
 
   hasExactRL.dilatedHorizontal
 
-func conn3LShape*(self: BinField): BinField {.inline, noinit.} =
+func connection3LShape*(self: BinaryField): BinaryField {.inline, noinit.} =
   ## Returns the binary field where exactly three cells are connected by L-shape.
-  self.conn3Impl true
+  self.connection3Impl true
 
 # ------------------------------------------------
 # BinaryField <-> array
 # ------------------------------------------------
 
-func toArr*(self: BinField): array[Row, array[Col, bool]] {.inline, noinit.} =
+func toArray*(self: BinaryField): array[Row, array[Col, bool]] {.inline, noinit.} =
   ## Returns the array converted from the binary field.
   var arr {.noinit.}: array[Row, array[Col, bool]]
   staticFor(row, Row):
@@ -324,11 +329,13 @@ func toArr*(self: BinField): array[Row, array[Col, bool]] {.inline, noinit.} =
 
   arr
 
-func toBinField*(arr: array[Row, array[Col, bool]]): BinField {.inline, noinit.} =
+func toBinaryField*(
+    valArray: array[Row, array[Col, bool]]
+): BinaryField {.inline, noinit.} =
   ## Returns the binary field converted from the array.
-  var binField = BinField.init
+  var binaryField = BinaryField.init
   staticFor(row, Row):
     staticFor(col, Col):
-      binField[row, col] = arr[row][col]
+      binaryField[row, col] = valArray[row][col]
 
-  binField
+  binaryField

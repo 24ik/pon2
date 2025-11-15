@@ -10,7 +10,7 @@ import
     step,
   ]
 import ../../src/pon2/private/[assign, arrayutils, strutils]
-import ../../src/pon2/private/core/[binfield]
+import ../../src/pon2/private/core/[binaryfield]
 
 # ------------------------------------------------
 # Constructor
@@ -20,7 +20,7 @@ block: # init
   let
     fieldT = TsuField.init
     fieldW = WaterField.init
-    steps = [Step.init RedGreen].toDeque2
+    steps = [Step.init RedGreen].toDeque
 
   check PuyoPuyo[TsuField].init(fieldT, steps) ==
     PuyoPuyo[TsuField](field: fieldT, steps: steps)
@@ -35,7 +35,7 @@ block: # init
 # Count
 # ------------------------------------------------
 
-block: # cellCnt, puyoCnt, colorPuyoCnt, garbagesCnt
+block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
   let
     fieldT =
       """
@@ -75,22 +75,22 @@ rgo...
       Step.init([Col0: 0, 0, 0, 0, 1, 0], false),
       Step.init(cross = false),
       Step.init(cross = true),
-    ].toDeque2
+    ].toDeque
 
     puyoT = PuyoPuyo[TsuField].init(fieldT, steps)
     puyoW = PuyoPuyo[WaterField].init(fieldW, steps)
 
-  check puyoT.cellCnt(Red) == 2
-  check puyoT.cellCnt(Garbage) == 4
-  check puyoT.puyoCnt == 15
-  check puyoT.colorPuyoCnt == 7
-  check puyoT.garbagesCnt == 8
+  check puyoT.cellCount(Red) == 2
+  check puyoT.cellCount(Garbage) == 4
+  check puyoT.puyoCount == 15
+  check puyoT.colorPuyoCount == 7
+  check puyoT.garbagesCount == 8
 
-  check puyoW.cellCnt(Purple) == 3
-  check puyoW.cellCnt(Hard) == 6
-  check puyoW.puyoCnt == 14
-  check puyoW.colorPuyoCnt == 7
-  check puyoW.garbagesCnt == 7
+  check puyoW.cellCount(Purple) == 3
+  check puyoW.cellCount(Hard) == 6
+  check puyoW.puyoCount == 14
+  check puyoW.colorPuyoCount == 7
+  check puyoW.garbagesCount == 7
 
 # ------------------------------------------------
 # Move
@@ -98,7 +98,7 @@ rgo...
 
 block: # move
   let
-    stepsBefore = [Step.init(BlueGreen, Right1)].toDeque2
+    stepsBefore = [Step.init(BlueGreen, Right1)].toDeque
     stepsAfter = Deque[Step].init
     fieldBefore =
       """
@@ -134,16 +134,16 @@ o..ro.""".parseTsuField.unsafeValue
 
   let
     moveRes = puyoPuyo.move false
-    popCnts: array[Cell, int] = [0, 0, 1, 0, 4, 4, 0, 0]
+    popCounts: array[Cell, int] = [0, 0, 1, 0, 4, 4, 0, 0]
 
   check puyoPuyo.field == fieldAfter
   check puyoPuyo.steps == stepsAfter
-  check moveRes == MoveResult.init(1, popCnts, 1, @[popCnts], @[1])
+  check moveRes == MoveResult.init(1, popCounts, 1, @[popCounts], @[1])
 
   let moveRes2 = puyoPuyo.move
   check puyoPuyo.field == fieldAfter
   check puyoPuyo.steps == stepsAfter
-  check moveRes2 == MoveResult.init(0, initArrWith[Cell, int](0), 0, @[], @[])
+  check moveRes2 == MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
 
 # ------------------------------------------------
 # Puyo Puyo <-> string
@@ -286,7 +286,7 @@ rg|23"""
 
   block: # empty field
     let
-      puyoPuyo = PuyoPuyo[TsuField].init(TsuField.init, [Step.init GreenBlue].toDeque2)
+      puyoPuyo = PuyoPuyo[TsuField].init(TsuField.init, [Step.init GreenBlue].toDeque)
 
       queryPon2 = "field=t_&steps=gb"
       queryPon22 = "steps=gb"

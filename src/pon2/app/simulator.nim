@@ -394,7 +394,7 @@ func moveCursorLeft*(self: var Simulator) =
 # Edit - Delete
 # ------------------------------------------------
 
-func deleteStep*(self: var Simulator, idx: int) =
+func delStep*(self: var Simulator, idx: int) =
   ## Deletes the step.
   if self.mode != EditorEdit:
     return
@@ -407,9 +407,9 @@ func deleteStep*(self: var Simulator, idx: int) =
       it.steps.del idx
       self.editData.step.idx.assign min(self.editData.step.idx, it.steps.len)
 
-func deleteStep*(self: var Simulator) =
+func delStep*(self: var Simulator) =
   ## Deletes the step at selecting index.
-  self.deleteStep self.editData.step.idx
+  self.delStep self.editData.step.idx
 
 # ------------------------------------------------
 # Edit - Write
@@ -424,7 +424,7 @@ func writeCell(self: var Simulator, row: Row, col: Col, cell: Cell) =
     unwrapNazoPuyo self.nazoPuyoWrap:
       if self.editData.insert:
         if cell == Cell.None:
-          it.field.delete row, col
+          it.field.del row, col
         else:
           it.field.insert row, col, cell
       else:
@@ -458,7 +458,7 @@ func writeCell(self: var Simulator, idx: int, pivot: bool, cell: Cell) =
           it.steps.addLast Step.init Pair.init(cell, cell)
     else:
       if cell == Cell.None:
-        self.deleteStep idx
+        self.delStep idx
         return
 
       if self.editData.insert:

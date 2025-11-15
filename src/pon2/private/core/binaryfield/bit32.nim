@@ -10,7 +10,7 @@ import std/[sugar]
 import ../../[assign, bitutils, macros, staticfor]
 import ../../../core/[common, rule]
 
-type Bit32BinField* = array[3, uint32] ## Binary field with 32bit operations.
+type Bit32BinaryField* = array[3, uint32] ## Binary field with 32bit operations.
 
 defineExpand "6", "0", "1", "2", "3", "4", "5"
 defineExpand "3", "0", "1", "2"
@@ -21,25 +21,25 @@ defineExpand "3", "0", "1", "2"
 
 const ValidMask = 0x3ffe_3ffe'u32
 
-func init*(T: type Bit32BinField): T {.inline, noinit.} =
+func init*(T: type Bit32BinaryField): T {.inline, noinit.} =
   ## Returns the binary field with all elements zero.
   [0, 0, 0]
 
-func initOne*(T: type Bit32BinField): T {.inline, noinit.} =
+func initOne*(T: type Bit32BinaryField): T {.inline, noinit.} =
   ## Returns the binary field with all valid elements one.
   [ValidMask, ValidMask, ValidMask]
 
-func initFloor*(T: type Bit32BinField): T {.inline, noinit.} =
+func initFloor*(T: type Bit32BinaryField): T {.inline, noinit.} =
   ## Returns the binary field with floor bits one.
   const Initializer = 0x0001_0001'u32
   [Initializer, Initializer, Initializer]
 
-func initLowerAir*(T: type Bit32BinField): T {.inline, noinit.} =
+func initLowerAir*(T: type Bit32BinaryField): T {.inline, noinit.} =
   ## Returns the binary field with lower air bits one.
   const Initializer = 0x0001_0001'u32 shl WaterHeight.succ
   [Initializer, Initializer, Initializer]
 
-func initUpperWater*(T: type Bit32BinField): T {.inline, noinit.} =
+func initUpperWater*(T: type Bit32BinaryField): T {.inline, noinit.} =
   ## Returns the binary field with upper underwater bits one.
   const Initializer = 0x0001_0001'u32 shl WaterHeight
   [Initializer, Initializer, Initializer]
@@ -48,66 +48,70 @@ func initUpperWater*(T: type Bit32BinField): T {.inline, noinit.} =
 # Operator
 # ------------------------------------------------
 
-func `+`*(f1, f2: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func `+`*(f1, f2: Bit32BinaryField): Bit32BinaryField {.inline, noinit.} =
   [f1[0] or f2[0], f1[1] or f2[1], f1[2] or f2[2]]
 
-func `-`*(f1, f2: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func `-`*(f1, f2: Bit32BinaryField): Bit32BinaryField {.inline, noinit.} =
   [f1[0] *~ f2[0], f1[1] *~ f2[1], f1[2] *~ f2[2]]
 
-func `*`*(f1, f2: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func `*`*(f1, f2: Bit32BinaryField): Bit32BinaryField {.inline, noinit.} =
   [f1[0] and f2[0], f1[1] and f2[1], f1[2] and f2[2]]
 
-func `*`(self: Bit32BinField, val: uint32): Bit32BinField {.inline, noinit.} =
+func `*`(self: Bit32BinaryField, val: uint32): Bit32BinaryField {.inline, noinit.} =
   [self[0] and val, self[1] and val, self[2] and val]
 
-func `xor`*(f1, f2: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func `xor`*(f1, f2: Bit32BinaryField): Bit32BinaryField {.inline, noinit.} =
   [f1[0] xor f2[0], f1[1] xor f2[1], f1[2] xor f2[2]]
 
-func `+=`*(f1: var Bit32BinField, f2: Bit32BinField) {.inline, noinit.} =
+func `+=`*(f1: var Bit32BinaryField, f2: Bit32BinaryField) {.inline, noinit.} =
   staticFor(i, 0 ..< 3):
     f1[i].assign f1[i] or f2[i]
 
-func `-=`*(f1: var Bit32BinField, f2: Bit32BinField) {.inline, noinit.} =
+func `-=`*(f1: var Bit32BinaryField, f2: Bit32BinaryField) {.inline, noinit.} =
   staticFor(i, 0 ..< 3):
     f1[i].assign f1[i] *~ f2[i]
 
-func `*=`*(f1: var Bit32BinField, f2: Bit32BinField) {.inline, noinit.} =
+func `*=`*(f1: var Bit32BinaryField, f2: Bit32BinaryField) {.inline, noinit.} =
   staticFor(i, 0 ..< 3):
     f1[i].assign f1[i] and f2[i]
 
-func `*=`(self: var Bit32BinField, val: uint32) {.inline, noinit.} =
+func `*=`(self: var Bit32BinaryField, val: uint32) {.inline, noinit.} =
   staticFor(i, 0 ..< 3):
     self[i].assign self[i] and val
 
-func sum*(f1, f2, f3: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func sum*(f1, f2, f3: Bit32BinaryField): Bit32BinaryField {.inline, noinit.} =
   [
     bitor2(f1[0], f2[0], f3[0]),
     bitor2(f1[1], f2[1], f3[1]),
     bitor2(f1[2], f2[2], f3[2]),
   ]
 
-func sum*(f1, f2, f3, f4: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func sum*(f1, f2, f3, f4: Bit32BinaryField): Bit32BinaryField {.inline, noinit.} =
   [
     bitor2(f1[0], f2[0], f3[0], f4[0]),
     bitor2(f1[1], f2[1], f3[1], f4[1]),
     bitor2(f1[2], f2[2], f3[2], f4[2]),
   ]
 
-func sum*(f1, f2, f3, f4, f5: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func sum*(f1, f2, f3, f4, f5: Bit32BinaryField): Bit32BinaryField {.inline, noinit.} =
   [
     bitor2(f1[0], f2[0], f3[0], f4[0], f5[0]),
     bitor2(f1[1], f2[1], f3[1], f4[1], f5[1]),
     bitor2(f1[2], f2[2], f3[2], f4[2], f5[2]),
   ]
 
-func sum*(f1, f2, f3, f4, f5, f6: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func sum*(
+    f1, f2, f3, f4, f5, f6: Bit32BinaryField
+): Bit32BinaryField {.inline, noinit.} =
   [
     bitor2(f1[0], f2[0], f3[0], f4[0], f5[0], f6[0]),
     bitor2(f1[1], f2[1], f3[1], f4[1], f5[1], f6[1]),
     bitor2(f1[2], f2[2], f3[2], f4[2], f5[2], f6[2]),
   ]
 
-func sum*(f1, f2, f3, f4, f5, f6, f7: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func sum*(
+    f1, f2, f3, f4, f5, f6, f7: Bit32BinaryField
+): Bit32BinaryField {.inline, noinit.} =
   [
     bitor2(f1[0], f2[0], f3[0], f4[0], f5[0], f6[0], f7[0]),
     bitor2(f1[1], f2[1], f3[1], f4[1], f5[1], f6[1], f7[1]),
@@ -115,15 +119,15 @@ func sum*(f1, f2, f3, f4, f5, f6, f7: Bit32BinField): Bit32BinField {.inline, no
   ]
 
 func sum*(
-    f1, f2, f3, f4, f5, f6, f7, f8: Bit32BinField
-): Bit32BinField {.inline, noinit.} =
+    f1, f2, f3, f4, f5, f6, f7, f8: Bit32BinaryField
+): Bit32BinaryField {.inline, noinit.} =
   [
     bitor2(f1[0], f2[0], f3[0], f4[0], f5[0], f6[0], f7[0], f8[0]),
     bitor2(f1[1], f2[1], f3[1], f4[1], f5[1], f6[1], f7[1], f8[1]),
     bitor2(f1[2], f2[2], f3[2], f4[2], f5[2], f6[2], f7[2], f8[2]),
   ]
 
-func prod*(f1, f2, f3: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func prod*(f1, f2, f3: Bit32BinaryField): Bit32BinaryField {.inline, noinit.} =
   [
     bitand2(f1[0], f2[0], f3[0]),
     bitand2(f1[1], f2[1], f3[1]),
@@ -172,28 +176,28 @@ template withColMasks(col: Col, body: untyped): untyped =
 
     body
 
-func kept*(self: Bit32BinField, row: Row): Bit32BinField {.inline, noinit.} =
+func kept*(self: Bit32BinaryField, row: Row): Bit32BinaryField {.inline, noinit.} =
   ## Returns the binary field with only the given row.
   self * (0x2000_2000'u32 shr row.ord)
 
-func kept*(self: Bit32BinField, col: Col): Bit32BinField {.inline, noinit.} =
+func kept*(self: Bit32BinaryField, col: Col): Bit32BinaryField {.inline, noinit.} =
   ## Returns the binary field with only the given column.
   col.withColMasks:
     [self[0] and mask0, self[1] and mask1, self[2] and mask2]
 
-func keptValid*(self: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func keptValid*(self: Bit32BinaryField): Bit32BinaryField {.inline, noinit.} =
   ## Returns the binary field with only the valid area.
   self * ValidMask
 
-func keptVisible*(self: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func keptVisible*(self: Bit32BinaryField): Bit32BinaryField {.inline, noinit.} =
   ## Returns the binary field with only the visible area.
   self * 0x1ffe_1ffe'u32
 
-func keptAir*(self: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func keptAir*(self: Bit32BinaryField): Bit32BinaryField {.inline, noinit.} =
   ## Returns the binary field with only the air area.
   self * AirMask
 
-func keepValid*(self: var Bit32BinField) {.inline, noinit.} =
+func keepValid*(self: var Bit32BinaryField) {.inline, noinit.} =
   ## Keeps only the valid area.
   self *= ValidMask
 
@@ -205,7 +209,7 @@ func keptValid(self: uint32): uint32 {.inline, noinit.} =
 # Clear
 # ------------------------------------------------
 
-func clear*(self: var Bit32BinField) {.inline, noinit.} =
+func clear*(self: var Bit32BinaryField) {.inline, noinit.} =
   ## Clears the binary field.
   staticFor(i, 0 ..< 3):
     self[i].assign 0
@@ -215,7 +219,7 @@ func clear*(self: var Bit32BinField) {.inline, noinit.} =
 # ------------------------------------------------
 
 func replace*(
-    self: var Bit32BinField, col: Col, after: Bit32BinField
+    self: var Bit32BinaryField, col: Col, after: Bit32BinaryField
 ) {.inline, noinit.} =
   ## Replaces the column of the binary field by `after`.
   col.withColMasks:
@@ -226,7 +230,7 @@ func replace*(
 # Population Count
 # ------------------------------------------------
 
-func popcnt*(self: Bit32BinField): int {.inline, noinit.} =
+func popcnt*(self: Bit32BinaryField): int {.inline, noinit.} =
   ## Returns the population count.
   self[0].countOnes + self[1].countOnes + self[2].countOnes
 
@@ -235,7 +239,7 @@ func popcnt*(self: Bit32BinField): int {.inline, noinit.} =
 # NOTE: `sugar.dup` decreases the performance.
 # ------------------------------------------------
 
-template shiftedUpRawImpl(self: Bit32BinField, body: untyped): untyped =
+template shiftedUpRawImpl(self: Bit32BinaryField, body: untyped): untyped =
   ## Runs `body` with `after0`, `after1`, and `after2` exposed.
   let
     after0 {.inject.} = self[0] shl 1
@@ -244,7 +248,7 @@ template shiftedUpRawImpl(self: Bit32BinField, body: untyped): untyped =
 
   body
 
-template shiftedUpImpl(self: Bit32BinField, body: untyped): untyped =
+template shiftedUpImpl(self: Bit32BinaryField, body: untyped): untyped =
   ## Runs `body` with `after0`, `after1`, and `after2` exposed.
   let
     after0 {.inject.} = (self[0] shl 1).keptValid
@@ -253,7 +257,7 @@ template shiftedUpImpl(self: Bit32BinField, body: untyped): untyped =
 
   body
 
-template shiftedDownRawImpl(self: Bit32BinField, body: untyped): untyped =
+template shiftedDownRawImpl(self: Bit32BinaryField, body: untyped): untyped =
   ## Runs `body` with `after0`, `after1`, and `after2` exposed.
   let
     after0 {.inject.} = self[0] shr 1
@@ -262,7 +266,7 @@ template shiftedDownRawImpl(self: Bit32BinField, body: untyped): untyped =
 
   body
 
-template shiftedDownImpl(self: Bit32BinField, body: untyped): untyped =
+template shiftedDownImpl(self: Bit32BinaryField, body: untyped): untyped =
   ## Runs `body` with `after0`, `after1`, and `after2` exposed.
   let
     after0 {.inject.} = (self[0] shr 1).keptValid
@@ -271,7 +275,7 @@ template shiftedDownImpl(self: Bit32BinField, body: untyped): untyped =
 
   body
 
-template shiftedRightImpl(self: Bit32BinField, body: untyped): untyped =
+template shiftedRightImpl(self: Bit32BinaryField, body: untyped): untyped =
   ## Runs `body` with `after0`, `after1`, and `after2` exposed.
   let
     after0 {.inject.} = self[0] shr 16
@@ -280,7 +284,7 @@ template shiftedRightImpl(self: Bit32BinField, body: untyped): untyped =
 
   body
 
-template shiftedLeftImpl(self: Bit32BinField, body: untyped): untyped =
+template shiftedLeftImpl(self: Bit32BinaryField, body: untyped): untyped =
   ## Runs `body` with `after0`, `after1`, and `after2` exposed.
   let
     after0 {.inject.} = (self[0] shl 16) or (self[1] shr 16)
@@ -289,42 +293,42 @@ template shiftedLeftImpl(self: Bit32BinField, body: untyped): untyped =
 
   body
 
-func shiftedUpRaw*(self: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func shiftedUpRaw*(self: Bit32BinaryField): Bit32BinaryField {.inline, noinit.} =
   ## Returns the binary field shifted upward.
   self.shiftedUpRawImpl:
     [after0, after1, after2]
 
-func shiftedUp*(self: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func shiftedUp*(self: Bit32BinaryField): Bit32BinaryField {.inline, noinit.} =
   ## Returns the binary field shifted upward and extracted the valid area.
   self.shiftedUpImpl:
     [after0, after1, after2]
 
-func shiftedDownRaw*(self: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func shiftedDownRaw*(self: Bit32BinaryField): Bit32BinaryField {.inline, noinit.} =
   ## Returns the binary field shifted downward.
   self.shiftedDownRawImpl:
     [after0, after1, after2]
 
-func shiftedDown*(self: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func shiftedDown*(self: Bit32BinaryField): Bit32BinaryField {.inline, noinit.} =
   ## Returns the binary field shifted downward and extracted the valid area.
   self.shiftedDownImpl:
     [after0, after1, after2]
 
-func shiftedRightRaw*(self: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func shiftedRightRaw*(self: Bit32BinaryField): Bit32BinaryField {.inline, noinit.} =
   ## Returns the binary field shifted rightward.
   self.shiftedRightImpl:
     [after0, after1, after2]
 
-func shiftedRight*(self: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func shiftedRight*(self: Bit32BinaryField): Bit32BinaryField {.inline, noinit.} =
   ## Returns the binary field shifted rightward and extracted the valid area.
   self.shiftedRightImpl:
     [after0, after1, after2]
 
-func shiftedLeftRaw*(self: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func shiftedLeftRaw*(self: Bit32BinaryField): Bit32BinaryField {.inline, noinit.} =
   ## Returns the binary field shifted leftward.
   self.shiftedLeftImpl:
     [after0, after1, after2]
 
-func shiftedLeft*(self: Bit32BinField): Bit32BinField {.inline, noinit.} =
+func shiftedLeft*(self: Bit32BinaryField): Bit32BinaryField {.inline, noinit.} =
   ## Returns the binary field shifted leftward and extracted the valid area.
   self.shiftedLeftImpl:
     [after0, after1, after2]
@@ -333,49 +337,49 @@ func shiftedLeft*(self: Bit32BinField): Bit32BinField {.inline, noinit.} =
 # Shift - In-place
 # ------------------------------------------------
 
-func shiftUpRaw*(self: var Bit32BinField) {.inline, noinit.} =
+func shiftUpRaw*(self: var Bit32BinaryField) {.inline, noinit.} =
   ## Shifts the binary field upward.
   self.shiftedUpRawImpl:
     expand3 after:
       self[_].assign after
 
-func shiftUp*(self: var Bit32BinField) {.inline, noinit.} =
+func shiftUp*(self: var Bit32BinaryField) {.inline, noinit.} =
   ## Shifts the binary field upward and extracts the valid area.
   self.shiftedUpImpl:
     expand3 after:
       self[_].assign after
 
-func shiftDownRaw*(self: var Bit32BinField) {.inline, noinit.} =
+func shiftDownRaw*(self: var Bit32BinaryField) {.inline, noinit.} =
   ## Shifts the binary field downward.
   self.shiftedDownRawImpl:
     expand3 after:
       self[_].assign after
 
-func shiftDown*(self: var Bit32BinField) {.inline, noinit.} =
+func shiftDown*(self: var Bit32BinaryField) {.inline, noinit.} =
   ## Shifts the binary field downward and extracts the valid area.
   self.shiftedDownImpl:
     expand3 after:
       self[_].assign after
 
-func shiftRightRaw*(self: var Bit32BinField) {.inline, noinit.} =
+func shiftRightRaw*(self: var Bit32BinaryField) {.inline, noinit.} =
   ## Shifts the binary field rightward.
   self.shiftedRightImpl:
     expand3 after:
       self[_].assign after
 
-func shiftRight*(self: var Bit32BinField) {.inline, noinit.} =
+func shiftRight*(self: var Bit32BinaryField) {.inline, noinit.} =
   ## Shifts the binary field rightward and extracts the valid area.
   self.shiftedRightImpl:
     expand3 after:
       self[_].assign after
 
-func shiftLeftRaw*(self: var Bit32BinField) {.inline, noinit.} =
+func shiftLeftRaw*(self: var Bit32BinaryField) {.inline, noinit.} =
   ## Shifts the binary field leftward.
   self.shiftedLeftImpl:
     expand3 after:
       self[_].assign after
 
-func shiftLeft*(self: var Bit32BinField) {.inline, noinit.} =
+func shiftLeft*(self: var Bit32BinaryField) {.inline, noinit.} =
   ## Shifts the binary field leftward and extracts the valid area.
   self.shiftedLeftImpl:
     expand3 after:
@@ -389,12 +393,12 @@ func flipped(val: uint32): uint32 {.inline, noinit.} =
   ## Returns the value two columns flipped.
   (val shr 16) or (val shl 16)
 
-func flipVertical*(self: var Bit32BinField) {.inline, noinit.} =
+func flipVertical*(self: var Bit32BinaryField) {.inline, noinit.} =
   ## Flips the binary field vertically.
   staticFor(i, 0 ..< 2):
     self[i].assign (self[i].reverseBits shr 1).flipped
 
-func flipHorizontal*(self: var Bit32BinField) {.inline, noinit.} =
+func flipHorizontal*(self: var Bit32BinaryField) {.inline, noinit.} =
   ## Flips the binary field horizontally.
   let
     after2 = self[0].flipped
@@ -408,7 +412,7 @@ func flipHorizontal*(self: var Bit32BinField) {.inline, noinit.} =
 # Rotate
 # ------------------------------------------------
 
-func rotate*(self: var Bit32BinField) {.inline, noinit.} =
+func rotate*(self: var Bit32BinaryField) {.inline, noinit.} =
   ## Rotates the binary field by 180 degrees.
   ## Ghost cells are cleared before the rotation.
   let
@@ -421,7 +425,7 @@ func rotate*(self: var Bit32BinField) {.inline, noinit.} =
   expand3 after:
     self[_].assign after
 
-func crossRotate*(self: var Bit32BinField) {.inline, noinit.} =
+func crossRotate*(self: var Bit32BinaryField) {.inline, noinit.} =
   ## Rotates the binary field by 180 degrees in groups of three rows.
   ## Ghost cells are cleared before the rotation.
   let
@@ -442,39 +446,41 @@ func crossRotate*(self: var Bit32BinField) {.inline, noinit.} =
 # Indexer
 # ------------------------------------------------
 
-func idxFromMsb(row: Row, col: Col): int {.inline, noinit.} =
+func indexFromMsb(row: Row, col: Col): int {.inline, noinit.} =
   ## Returns the bit index for indexers.
   col.ord shl 4 + (row.ord + 2)
 
 func `[]`*(
-    self: Bit32BinField, row: static Row, col: static Col
+    self: Bit32BinaryField, row: static Row, col: static Col
 ): bool {.inline, noinit.} =
   staticCase:
     case col
     of Col0, Col1:
-      self[0].getBitBE static(idxFromMsb(row, col))
+      self[0].getBitBE static(indexFromMsb(row, col))
     of Col2, Col3:
-      self[1].getBitBE static(idxFromMsb(row, col.pred 2))
+      self[1].getBitBE static(indexFromMsb(row, col.pred 2))
     of Col4, Col5:
-      self[2].getBitBE static(idxFromMsb(row, col.pred 4))
+      self[2].getBitBE static(indexFromMsb(row, col.pred 4))
 
-func `[]`*(self: Bit32BinField, row: Row, col: Col): bool {.inline, noinit.} =
+func `[]`*(self: Bit32BinaryField, row: Row, col: Col): bool {.inline, noinit.} =
   case col
   of Col0, Col1:
-    self[0].getBitBE idxFromMsb(row, col)
+    self[0].getBitBE indexFromMsb(row, col)
   of Col2, Col3:
-    self[1].getBitBE idxFromMsb(row, col.pred 2)
+    self[1].getBitBE indexFromMsb(row, col.pred 2)
   of Col4, Col5:
-    self[2].getBitBE idxFromMsb(row, col.pred 4)
+    self[2].getBitBE indexFromMsb(row, col.pred 4)
 
-func `[]=`*(self: var Bit32BinField, row: Row, col: Col, val: bool) {.inline, noinit.} =
+func `[]=`*(
+    self: var Bit32BinaryField, row: Row, col: Col, val: bool
+) {.inline, noinit.} =
   case col
   of Col0, Col1:
-    self[0].changeBitBE idxFromMsb(row, col), val
+    self[0].changeBitBE indexFromMsb(row, col), val
   of Col2, Col3:
-    self[1].changeBitBE idxFromMsb(row, col.pred 2), val
+    self[1].changeBitBE indexFromMsb(row, col.pred 2), val
   of Col4, Col5:
-    self[2].changeBitBE idxFromMsb(row, col.pred 4), val
+    self[2].changeBitBE indexFromMsb(row, col.pred 4), val
 
 # ------------------------------------------------
 # Insert / Delete
@@ -513,7 +519,7 @@ func insert(
   self.changeBitBE rowColShift + 2, val
 
 func insert*(
-    self: var Bit32BinField, row: Row, col: Col, val: bool, rule: static Rule
+    self: var Bit32BinaryField, row: Row, col: Col, val: bool, rule: static Rule
 ) {.inline, noinit.} =
   ## Inserts the value and shifts the binary field.
   ## If (row, col) is in the air, shifts the binary field upward above where inserted.
@@ -526,9 +532,7 @@ func insert*(
   of Col4, Col5:
     self[2].insert col.pred 4, row, val, rule
 
-func delete(
-    self: var uint32, col: Col, row: Row, rule: static Rule
-) {.inline, noinit.} =
+func del(self: var uint32, col: Col, row: Row, rule: static Rule) {.inline, noinit.} =
   ## Deletes the value and shifts the binary field's element.
   ## If (row, col) is in the air, shifts the binary field's element downward above
   ## where deleted.
@@ -553,19 +557,19 @@ func delete(
 
   self.assign ((below or above) and colMask) or (self *~ colMask)
 
-func delete*(
-    self: var Bit32BinField, row: Row, col: Col, rule: static Rule
+func del*(
+    self: var Bit32BinaryField, row: Row, col: Col, rule: static Rule
 ) {.inline, noinit.} =
   ## Deletes the value and shifts the binary field.
   ## If (row, col) is in the air, shifts the binary field downward above where deleted.
   ## If it is in the water, shifts the binary field upward below where deleted.
   case col
   of Col0, Col1:
-    self[0].delete col, row, rule
+    self[0].del col, row, rule
   of Col2, Col3:
-    self[1].delete col.pred 2, row, rule
+    self[1].del col.pred 2, row, rule
   of Col4, Col5:
-    self[2].delete col.pred 4, row, rule
+    self[2].del col.pred 4, row, rule
 
 # ------------------------------------------------
 # Drop Garbages
@@ -575,7 +579,7 @@ const
   MaskL = 0x3ffe_0000'u32
   MaskR = 0x0000_3ffe'u32
 
-func extracted(self: Bit32BinField, col: static Col): uint32 {.inline, noinit.} =
+func extracted(self: Bit32BinaryField, col: static Col): uint32 {.inline, noinit.} =
   ## Returns the value corresponding to the column.
   staticCase:
     case col
@@ -593,7 +597,7 @@ func extracted(self: Bit32BinField, col: static Col): uint32 {.inline, noinit.} 
       self[2] and MaskR
 
 func dropGarbagesTsu*(
-    self: var Bit32BinField, cnts: array[Col, int], existField: Bit32BinField
+    self: var Bit32BinaryField, counts: array[Col, int], existField: Bit32BinaryField
 ) {.inline, noinit.} =
   ## Drops cells by Tsu rule.
   ## This function requires that the mask is settled and the counts are non-negative.
@@ -610,16 +614,16 @@ func dropGarbagesTsu*(
     notExist5 = notExist45 and MaskR
 
   expand6 garbages, notExist, Col:
-    let garbages = notExist *~ (notExist shl cnts[Col])
+    let garbages = notExist *~ (notExist shl counts[Col])
 
   self[0].assign bitor2(self[0], garbages0, garbages1)
   self[1].assign bitor2(self[1], garbages2, garbages3)
   self[2].assign bitor2(self[2], garbages4, garbages5)
 
 func dropGarbagesWater*(
-    self, other1, other2: var Bit32BinField,
-    cnts: array[Col, int],
-    existField: Bit32BinField,
+    self, other1, other2: var Bit32BinaryField,
+    counts: array[Col, int],
+    existField: Bit32BinaryField,
 ) {.inline, noinit.} =
   ## Drops cells by Water rule.
   ## `self` is shifted and is dropped garbages; `other1` and `other2` are only shifted.
@@ -644,7 +648,7 @@ func dropGarbagesWater*(
         MaskW = WaterMask and Mask
 
       let
-        cnt = cnts[Col]
+        cnt = counts[Col]
         exist = existField.extracted Col
 
       if exist == 0:
@@ -687,7 +691,7 @@ func dropGarbagesWater*(
 # ------------------------------------------------
 
 func write(
-    self: out array[Col, PextMask[uint32]], existField: Bit32BinField
+    self: out array[Col, PextMask[uint32]], existField: Bit32BinaryField
 ) {.inline, noinit.} =
   ## Initializes the masks.
   staticFor(col, Col):
@@ -695,29 +699,29 @@ func write(
     self[col].assign PextMask[uint32].init existField.extracted col
     {.pop.}
 
-func shiftAmt(col: Col): int {.inline, noinit.} =
+func shiftAmount(col: Col): int {.inline, noinit.} =
   ## Returns the shift amount.
   case col
   of Col0, Col2, Col4: 17
   of Col1, Col3, Col5: 1
 
 func settleTsu(
-    self: var Bit32BinField, masks: array[Col, PextMask[uint32]]
+    self: var Bit32BinaryField, masks: array[Col, PextMask[uint32]]
 ) {.inline, noinit.} =
   ## Settles the binary field by Tsu rule.
   expand6 after, Col:
     let after: uint32
 
     block:
-      const ShiftAmt = Col.shiftAmt
-      after = self.extracted(Col).pext(masks[Col]) shl ShiftAmt
+      const ShiftAmount = Col.shiftAmount
+      after = self.extracted(Col).pext(masks[Col]) shl ShiftAmount
 
   self[0].assign after0 or after1
   self[1].assign after2 or after3
   self[2].assign after4 or after5
 
 func settleTsu*(
-    field1, field2, field3: var Bit32BinField, existField: Bit32BinField
+    field1, field2, field3: var Bit32BinaryField, existField: Bit32BinaryField
 ) {.inline, noinit.} =
   ## Settles the binary fields by Tsu rule.
   var masks: array[Col, PextMask[uint32]]
@@ -728,24 +732,24 @@ func settleTsu*(
   field3.settleTsu masks
 
 func settleWater(
-    self: var Bit32BinField, masks: array[Col, PextMask[uint32]]
+    self: var Bit32BinaryField, masks: array[Col, PextMask[uint32]]
 ) {.inline, noinit.} =
   ## Settles the binary field by Water rule.
   expand6 after, Col:
     let after: uint32
 
     block:
-      const ShiftAmt = Col.shiftAmt
+      const ShiftAmount = Col.shiftAmount
       after =
         self.extracted(Col).pext(masks[Col]) shl
-        max(ShiftAmt, ShiftAmt + WaterHeight - masks[Col].popcnt)
+        max(ShiftAmount, ShiftAmount + WaterHeight - masks[Col].popcnt)
 
   self[0].assign after0 or after1
   self[1].assign after2 or after3
   self[2].assign after4 or after5
 
 func settleWater*(
-    field1, field2, field3: var Bit32BinField, existField: Bit32BinField
+    field1, field2, field3: var Bit32BinaryField, existField: Bit32BinaryField
 ) {.inline, noinit.} =
   ## Settles the binary fields by Water rule.
   var masks: array[Col, PextMask[uint32]]
@@ -756,7 +760,7 @@ func settleWater*(
   field3.settleWater masks
 
 func areSettledTsu*(
-    field1, field2, field3, existField: Bit32BinField
+    field1, field2, field3, existField: Bit32BinaryField
 ): bool {.inline, noinit.} =
   ## Returns `true` if all binary fields are settled by Tsu rule.
   ## Note that this function is only slightly lighter than `settleTsu`.
@@ -767,7 +771,7 @@ func areSettledTsu*(
     field3.dup(settleTsu(_, masks)) == field3
 
 func areSettledWater*(
-    field1, field2, field3, existField: Bit32BinField
+    field1, field2, field3, existField: Bit32BinaryField
 ): bool {.inline, noinit.} =
   ## Returns `true` if all binary fields are settled by Water rule.
   ## Note that this function is only slightly lighter than `settleWater`.
