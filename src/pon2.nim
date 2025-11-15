@@ -32,7 +32,7 @@
 {.experimental: "views".}
 
 import std/[parsecfg, streams]
-import ./pon2/private/[paths2]
+import ./pon2/private/[paths]
 
 when defined(pon2.build.worker):
   import ./pon2/[app]
@@ -44,12 +44,12 @@ else:
 proc getNimbleFile(): Path =
   ## Returns the path to `pon2.nimble`.
   let
-    head = srcPath().splitPath2.head
-    (head2, tail2) = head.splitPath2
+    head = srcPath().splitPath.head
+    (head2, tail2) = head.splitPath
 
   (if tail2 == "src".Path: head2 else: head).joinPath "pon2.nimble".Path
 
-const Pon2Version* = ($getNimbleFile()).staticRead.newStringStream.loadConfig.getSectionValue(
+const Pon2Ver* = ($getNimbleFile()).staticRead.newStringStream.loadConfig.getSectionValue(
   "", "version"
 )
 
@@ -62,23 +62,23 @@ when isMainModule:
     import std/[strformat]
 
     when defined(pon2.build.worker):
-      import ./pon2/private/[app, results2, webworker]
+      import ./pon2/private/[app, results2, webworkers]
     else:
       import std/[sugar]
-      import karax/[karax, karaxdsl, kdom, vdom]
-      import ./pon2/private/[gui]
+      import karax/[karax, karaxdsl, vdom]
+      import ./pon2/private/[dom, gui]
       when defined(pon2.build.marathon):
         import std/[asyncjs, jsfetch, random]
-        import ./pon2/private/[strutils2]
+        import ./pon2/private/[strutils]
       else:
-        import ./pon2/private/[assign3]
+        import ./pon2/private/[assign]
 
     # ------------------------------------------------
     # JS - Utils
     # ------------------------------------------------
 
     when not defined(pon2.build.worker):
-      proc initErrNode(msg: string): VNode =
+      proc initErrorNode(msg: string): VNode =
         ## Returns the error node.
         buildHtml section(class = "section"):
           tdiv(class = "content"):
@@ -96,7 +96,7 @@ when isMainModule:
         buildHtml footer(class = "footer"):
           tdiv(class = "content has-text-centered"):
             p:
-              text "Pon!通 Version {Pon2Version}".fmt
+              text "Pon!通 Version {Pon2Ver}".fmt
 
     # ------------------------------------------------
     # JS - Main
@@ -107,21 +107,21 @@ when isMainModule:
       # JS - Main - Worker
       # ------------------------------------------------
 
-      proc task(args: seq[string]): Res[seq[string]] =
-        let errMsg = "Invalid run args: {args}".fmt
+      proc task(args: seq[string]): StrErrorResult[seq[string]] =
+        let errorMsg = "Invalid run args: {args}".fmt
 
         if args.len == 0:
-          return err errMsg
+          return err errorMsg
 
-        let (rule, goal, steps) = ?args.parseSolveInfo.context errMsg
+        let (rule, goal, steps) = ?args.parseSolveInfo.context errorMsg
 
         var answers = newSeq[SolveAnswer]()
         case rule
         of Tsu:
-          let node = ?parseSolveNode[TsuField](args).context errMsg
+          let node = ?parseSolveNode[TsuField](args).context errorMsg
           node.solveSingleThread answers, steps.len, true, goal, steps
         of Water:
-          let node = ?parseSolveNode[WaterField](args).context errMsg
+          let node = ?parseSolveNode[WaterField](args).context errorMsg
           node.solveSingleThread answers, steps.len, true, goal, steps
 
         ok answers.toStrs
@@ -149,27 +149,29 @@ when isMainModule:
       let globalMarathonRef = new Marathon
       globalMarathonRef[] = Marathon.init rng
 
-      const ChunkCnt = 16
+      const ChunkCount = 16
       var
-        errMsgs = newSeqOfCap[string](ChunkCnt)
-        completes = newSeqOfCap[bool](ChunkCnt)
+        errorMsgs = newSeqOfCap[string](ChunkCount)
+        completes = newSeqOfCap[bool](ChunkCount)
 
-      for chunkIdx in 0 ..< ChunkCnt:
+      for chunkIndex in 0 ..< ChunkCount:
         {.push warning[Uninit]: off.}
         {.push warning[ProveInit]: off.}
-        discard "{AssetsDir}/marathon/swap{chunkIdx:02}.txt".fmt.cstring.fetch
+        discard "{AssetsDir}/marathon/swap{chunkIndex:02}.txt".fmt.cstring.fetch
           .then((r: Response) => r.text)
           .then(
             (s: cstring) => (
               block:
                 globalMarathonRef[].load ($s).splitLines
                 completes.add true
-                if completes.len == ChunkCnt:
+                if completes.len == ChunkCount:
                   globalMarathonRef[].isReady = true
                   safeRedraw()
             )
           )
-          .catch((e: Error) => errMsgs.add "[Chunk {chunkIdx}] {e.message}".fmt)
+          .catch(
+            (error: Error) => errorMsgs.add "[Chunk {chunkIndex}] {error.message}".fmt
+          )
         {.pop.}
         {.pop.}
 
@@ -177,17 +179,17 @@ when isMainModule:
 
       proc renderer(): VNode =
         ## Returns the root node.
-        let errMsg = errMsgs.join "\n"
+        let errorMsg = errorMsgs.join "\n"
 
         buildHtml tdiv:
-          if errMsg == "":
+          if errorMsg == "":
             let helper = VNodeHelper.init(globalMarathonRef, "pon2-main")
             section(
               class = (if helper.mobile: "section pt-3 pl-3" else: "section").cstring
             ):
               globalMarathonRef.toMarathonVNode helper
           else:
-            errMsg.initErrNode
+            errorMsg.initErrorNode
 
           initFooterNode()
 
@@ -206,7 +208,7 @@ when isMainModule:
       let globalStudioRef = new Studio
 
       var
-        errMsg = ""
+        errorMsg = ""
         initialized = false
 
       document.onkeydown = (event: Event) => globalStudioRef.keyHandler event
@@ -231,19 +233,19 @@ when isMainModule:
           if simRes.isOk:
             globalStudioRef[] = Studio.init simRes.unsafeValue
           else:
-            errMsg.assign simRes.error
+            errorMsg.assign simRes.error
 
           initialized.assign true
 
         buildHtml tdiv:
-          if errMsg == "":
+          if errorMsg == "":
             let (helper, replayHelper) = VNodeHelper.init2(globalStudioRef, "pon2-main")
             section(
               class = (if helper.mobile: "section pt-3 pl-3" else: "section").cstring
             ):
               globalStudioRef.toStudioVNode(helper, replayHelper)
           else:
-            errMsg.initErrNode
+            errorMsg.initErrorNode
 
           initFooterNode()
 
@@ -256,7 +258,7 @@ when isMainModule:
   when not defined(js):
     import std/[random, sequtils, strformat, sugar, uri]
     import cligen
-    import ./pon2/private/[arrayops2, assign3, browsers2, strutils2]
+    import ./pon2/private/[arrayutils, assign, browsers, strutils]
 
     # ------------------------------------------------
     # Native - Solve
@@ -287,23 +289,23 @@ when isMainModule:
         let
           answers = itNazo.solve
           stepsSeq = collect:
-            for ans in answers:
+            for answer in answers:
               var steps = it.steps
-              for stepIdx, optPlcmt in ans:
-                if it.steps[stepIdx].kind == PairPlacement:
-                  steps[stepIdx].optPlacement.assign optPlcmt
+              for stepIndex, optPlcmt in answer:
+                if it.steps[stepIndex].kind == PairPlacement:
+                  steps[stepIndex].optPlacement.assign optPlcmt
 
               steps
 
-        for ansIdx, steps in stepsSeq:
+        for answerIndex, steps in stepsSeq:
           var nazo = itNazo
           nazo.puyoPuyo.steps.assign steps
 
-          let ansUri = Simulator.init(nazo, EditorEdit).toUri.unsafeValue
-          echo "({ansIdx.succ}) {ansUri}".fmt
+          let answerUri = Simulator.init(nazo, EditorEdit).toUri.unsafeValue
+          echo "({answerIndex.succ}) {answerUri}".fmt
 
           if openAnswer:
-            ansUri.openDefaultBrowser.isOkOr:
+            answerUri.openDefaultBrowser.isOkOr:
               echo "ブラウザの起動に失敗しました．"
 
     # ------------------------------------------------
@@ -313,8 +315,8 @@ when isMainModule:
     proc runPermuter(
         urls: seq[string],
         fixMoves = newSeq[int](),
-        allowDblNotLast = true,
-        allowDblLast = false,
+        allowDoubleNotLast = true,
+        allowDoubleLast = false,
         openQuestion = false,
         openAnswer = false,
     ) =
@@ -336,31 +338,31 @@ when isMainModule:
 
       let fixIndices = fixMoves.mapIt it.pred
       unwrapNazoPuyo sim.nazoPuyoWrap:
-        var idx = 0
-        for nazo in itNazo.permute(fixIndices, allowDblNotLast, allowDblLast):
+        var index = 0
+        for nazo in itNazo.permute(fixIndices, allowDoubleNotLast, allowDoubleLast):
           let
             sim = Simulator.init(nazo, EditorEdit)
             questionUri = sim.toUri(clearPlacements = true).unsafeValue
-            ansUri = sim.toUri.unsafeValue
+            answerUri = sim.toUri.unsafeValue
 
-          echo "(Q{idx.succ}) {questionUri}".fmt
-          echo "(A{idx.succ}) {ansUri}".fmt
+          echo "(Q{index.succ}) {questionUri}".fmt
+          echo "(A{index.succ}) {answerUri}".fmt
           echo ""
 
           if openQuestion:
             questionUri.openDefaultBrowser.isOkOr:
               echo "ブラウザの起動に失敗しました．"
           if openAnswer:
-            ansUri.openDefaultBrowser.isOkOr:
+            answerUri.openDefaultBrowser.isOkOr:
               echo "ブラウザの起動に失敗しました．"
 
-          idx.inc
+          index.inc
 
     # ------------------------------------------------
     # Native - Generate
     # ------------------------------------------------
 
-    func negToErr(val: int): Opt[int] =
+    func negToError(val: int): Opt[int] =
       ## Returns `err` if `val` is negative; otherwise, returns `ok(val)`.
       if val < 0:
         err()
@@ -368,13 +370,13 @@ when isMainModule:
         ok val
 
     proc runGenerator(
-        cnt = 5,
+        count = 5,
         rule = 0,
         goalKind = 5,
         goalColor = 0,
         goalVal = 3,
-        moveCnt = 2,
-        colorCnt = 2,
+        moveCount = 2,
+        colorCount = 2,
         heights = "0++++0",
         pc = -1,
         pg = 2,
@@ -386,8 +388,8 @@ when isMainModule:
         c3v = 0,
         c3h = -1,
         c3l = -1,
-        allowDblNotLast = true,
-        allowDblLast = false,
+        allowDoubleNotLast = true,
+        allowDoubleLast = false,
         sg = newSeq[int](),
         sh = newSeq[int](),
         sr = newSeq[int](),
@@ -398,24 +400,24 @@ when isMainModule:
     ) =
       ## なぞぷよを生成する．
       let
-        puyoCntColor = pc
-        puyoCntGarbage = pg
-        puyoCntHard = ph
+        puyoCountColor = pc
+        puyoCountGarbage = pg
+        puyoCountHard = ph
 
-        conn2Cnt = c2
-        conn2CntV = c2v
-        conn2CntH = c2h
-        conn3Cnt = c3
-        conn3CntV = c3v
-        conn3CntH = c3h
-        conn3CntL = c3l
+        connection2Count = c2
+        connection2CountV = c2v
+        connection2CountH = c2h
+        connection3Count = c3
+        connection3CountV = c3v
+        connection3CountH = c3h
+        connection3CountL = c3l
 
         stepGarbages = sg.mapIt it.pred
         stepHards = sh.mapIt it.pred
         stepRotate = sr.mapIt it.pred
         stepCrossRotate = sc.mapIt it.pred
 
-      let errMsg =
+      let errorMsg =
         if rule notin 0 .. Rule.high.ord:
           "ルールが不正です．"
         elif goalKind notin 0 .. GoalKind.high.ord:
@@ -426,27 +428,27 @@ when isMainModule:
           "クリア条件の色が不正です．"
         elif heights.len != Width:
           "高さ指定が不正です．"
-        elif puyoCntColor < 0 and
+        elif puyoCountColor < 0 and
           goalKind.GoalKind notin {Chain, ChainMore, ClearChain, ClearChainMore}:
           "連鎖問題でない場合は色ぷよ数の指定が必要です．"
         else:
           ""
-      if errMsg != "":
-        echo errMsg
+      if errorMsg != "":
+        echo errorMsg
         return
 
       let
         heightWeights: Opt[array[Col, int]]
         heightPositives: Opt[array[Col, bool]]
       if heights.allIt it.isDigit:
-        var weights = initArrWith[Col, int](0)
+        var weights = Col.initArrayWith 0
         for col in Col:
-          weights[col].assign ($heights[col.ord]).parseIntRes.unsafeValue
+          weights[col].assign ($heights[col.ord]).parseInt.unsafeValue
 
         heightWeights = Opt[array[Col, int]].ok weights
         heightPositives = Opt[array[Col, bool]].err
       else:
-        var positives = initArrWith[Col, bool](false)
+        var positives = Col.initArrayWith false
         for col in Col:
           positives[col].assign heights[col.ord] != '0'
 
@@ -455,40 +457,40 @@ when isMainModule:
 
       let
         rule2 = rule.Rule
-        puyoCntColor2 =
-          if puyoCntColor < 0:
+        puyoCountColor2 =
+          if puyoCountColor < 0:
             goalVal * 4
           else:
-            puyoCntColor
+            puyoCountColor
 
-        conn2Cnts = (
-          total: conn2Cnt.negToErr,
-          vertical: conn2CntV.negToErr,
-          horizontal: conn2CntH.negToErr,
+        connection2Counts = (
+          total: connection2Count.negToError,
+          vertical: connection2CountV.negToError,
+          horizontal: connection2CountH.negToError,
         )
-        conn3Cnts = (
-          total: conn3Cnt.negToErr,
-          vertical: conn3CntV.negToErr,
-          horizontal: conn3CntH.negToErr,
-          lShape: conn3CntL.negToErr,
+        connection3Counts = (
+          total: connection3Count.negToError,
+          vertical: connection3CountV.negToError,
+          horizontal: connection3CountH.negToError,
+          lShape: connection3CountL.negToError,
         )
 
         settings = GenerateSettings.init(
           GenerateGoal.init(
             goalKind.GoalKind, goalColor.GenerateGoalColor, goalVal.GoalVal
           ),
-          moveCnt,
-          colorCnt,
+          moveCount,
+          colorCount,
           (weights: heightWeights, positives: heightPositives),
-          (colors: puyoCntColor2, garbage: puyoCntGarbage, hard: puyoCntHard),
-          conn2Cnts,
-          conn3Cnts,
+          (colors: puyoCountColor2, garbage: puyoCountGarbage, hard: puyoCountHard),
+          connection2Counts,
+          connection3Counts,
           stepGarbages,
           stepHards,
           stepRotate,
           stepCrossRotate,
-          allowDblNotLast,
-          allowDblLast,
+          allowDoubleNotLast,
+          allowDoubleLast,
         )
 
       let seed2: int64
@@ -499,7 +501,7 @@ when isMainModule:
         seed2 = seed.int64
       var rng = seed2.initRand
 
-      for idx in 0 ..< cnt:
+      for index in 0 ..< count:
         let nazoRes = rng.generate(settings, rule2)
         if nazoRes.isErr:
           echo "生成に失敗しました．エラー内容："
@@ -509,17 +511,17 @@ when isMainModule:
         let
           sim = Simulator.init(nazoRes.unsafeValue, EditorEdit)
           questionUri = sim.toUri(clearPlacements = true).unsafeValue
-          ansUri = sim.toUri.unsafeValue
+          answerUri = sim.toUri.unsafeValue
 
-        echo "(Q{idx.succ}) {questionUri}".fmt
-        echo "(A{idx.succ}) {ansUri}".fmt
+        echo "(Q{index.succ}) {questionUri}".fmt
+        echo "(A{index.succ}) {answerUri}".fmt
         echo ""
 
         if openQuestion:
           questionUri.openDefaultBrowser.isOkOr:
             echo "ブラウザの起動に失敗しました．"
         if openAnswer:
-          ansUri.openDefaultBrowser.isOkOr:
+          answerUri.openDefaultBrowser.isOkOr:
             echo "ブラウザの起動に失敗しました．"
 
     # ------------------------------------------------
@@ -530,7 +532,7 @@ when isMainModule:
     {.push warning[ProveInit]: off.}
     dispatchMulti [
       "multi",
-      doc = "Pon!通 Ver. {Pon2Version}".fmt,
+      doc = "Pon!通 Ver. {Pon2Ver}".fmt,
       usage =
         """${doc}
 
@@ -555,15 +557,15 @@ $subcmds""",
         cmdName = "p",
         short = {
           "fixMoves": 'f',
-          "allowDblNotLast": 'D',
-          "allowDblLast": 'd',
+          "allowDoubleNotLast": 'D',
+          "allowDoubleLast": 'd',
           "openQuestion": 'B',
           "openAnswer": 'b',
         },
         help = {
           "fixMoves": "何手目を固定するか",
-          "allowDblNotLast": "最終手以外のゾロを許可",
-          "allowDblLast": "最終手のゾロを許可",
+          "allowDoubleNotLast": "最終手以外のゾロを許可",
+          "allowDoubleLast": "最終手のゾロを許可",
           "openQuestion": "問題をブラウザで開く",
           "openAnswer": "解をブラウザで開く",
           "urls": "{なぞぷよのURL}",
@@ -573,30 +575,30 @@ $subcmds""",
         runGenerator,
         cmdName = "g",
         short = {
-          "cnt": 'n',
+          "count": 'n',
           "rule": 'r',
           "goalKind": 'K',
           "goalColor": 'C',
           "goalVal": 'V',
-          "moveCnt": 'm',
-          "colorCnt": 'c',
+          "moveCount": 'm',
+          "colorCount": 'c',
           "heights": 'H',
-          "allowDblNotLast": 'D',
-          "allowDblLast": 'd',
+          "allowDoubleNotLast": 'D',
+          "allowDoubleLast": 'd',
           "openQuestion": 'B',
           "openAnswer": 'b',
           "seed": 's',
         },
         help = {
-          "cnt": "生成数",
+          "count": "生成数",
           "rule": "ルール（0:通 1:水中）",
           "goalKind":
             "クリア条件の種類（0:cぷよ全て消すべし 1:n色消すべし 2:n色以上消すべし 3:cぷよn個消すべし 4:cぷよn個以上消すべし 5:n連鎖するべし 6:n連鎖以上するべし 7:n連鎖&cぷよ全て消すべし 8:n連鎖以上&cぷよ全て消すべし 9:n色同時に消すべし 10:n色以上同時に消すべし 11:cぷよn個同時に消すべし 12:cぷよn個以上同時に消すべし 13:cぷよn箇所同時に消すべし 14:cぷよn箇所以上同時に消すべし 15:cぷよn連結で消すべし 16:cぷよn連結以上で消すべし）",
           "goalColor":
             "クリア条件の色（0:全 1:どれか1色 2:お邪魔 3:色ぷよ）",
           "goalVal": "クリア条件の数",
-          "moveCnt": "手数",
-          "colorCnt": "色数",
+          "moveCount": "手数",
+          "colorCount": "色数",
           "heights": "高さ比率（例：「012210」「0---00」）",
           "pc": "色ぷよ数（飽和連鎖問題では省略可）",
           "pg": "お邪魔ぷよ数",
@@ -612,8 +614,8 @@ $subcmds""",
           "sh": "何手目で固ぷよを落下させるか",
           "sr": "何手目で大回転させるか",
           "sc": "何手目でクロス回転させるか",
-          "allowDblNotLast": "最終手以外のゾロを許可",
-          "allowDblLast": "最終手のゾロを許可",
+          "allowDoubleNotLast": "最終手以外のゾロを許可",
+          "allowDoubleLast": "最終手のゾロを許可",
           "openQuestion": "問題をブラウザで開く",
           "openAnswer": "解をブラウザで開く",
           "seed": "シード",

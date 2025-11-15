@@ -10,6 +10,6 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./core/[binfield, nazopuyo]
+import ./core/[binaryfield, nazopuyo]
 
-export binfield, nazopuyo
+export binaryfield, nazopuyo

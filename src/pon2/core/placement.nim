@@ -8,7 +8,7 @@
 
 import std/[strformat, sugar]
 import ./[common, fqdn]
-import ../private/[macros2, results2, tables2]
+import ../private/[macros, results2, tables]
 
 export common, results2
 
@@ -49,7 +49,7 @@ type
 
 const
   NonePlacement* = OptPlacement.err
-  DblPlacements* = {Up0 .. Right4}
+  DoublePlacements* = {Up0 .. Right4}
 
 # ------------------------------------------------
 # Constructor
@@ -82,6 +82,9 @@ func init*(T: type Placement, pivotCol: Col, rotorDir: Dir): T {.inline, noinit.
 
 func init*(T: type Placement): T {.inline, noinit.} =
   T.low
+
+func init*(T: type OptPlacement): T {.inline, noinit.} =
+  NonePlacement
 
 # ------------------------------------------------
 # Property
@@ -178,24 +181,24 @@ func rotatedLeft*(self: Placement): Placement {.inline, noinit.} =
 # ------------------------------------------------
 
 const
-  NonePlcmtStr = ""
-  StrToPlcmt = collect:
-    for plcmt in Placement:
-      {$plcmt: plcmt}
+  NonePlacementStr = ""
+  StrToPlacement = collect:
+    for placement in Placement:
+      {$placement: placement}
 
 func `$`*(self: OptPlacement): string {.inline, noinit.} =
   if self.isOk:
     $self.unsafeValue
   else:
-    NonePlcmtStr
+    NonePlacementStr
 
-func parsePlacement*(str: string): Res[Placement] {.inline, noinit.} =
+func parsePlacement*(str: string): StrErrorResult[Placement] {.inline, noinit.} =
   ## Returns the placement converted from the string representation.
-  StrToPlcmt.getRes(str).context "Invalid placement: {str}".fmt
+  StrToPlacement[str].context "Invalid placement: {str}".fmt
 
-func parseOptPlacement*(str: string): Res[OptPlacement] {.inline, noinit.} =
+func parseOptPlacement*(str: string): StrErrorResult[OptPlacement] {.inline, noinit.} =
   ## Returns the optional placement converted from the string representation.
-  if str == NonePlcmtStr:
+  if str == NonePlacementStr:
     ok NonePlacement
   else:
     ok OptPlacement.ok ?str.parsePlacement
@@ -205,11 +208,11 @@ func parseOptPlacement*(str: string): Res[OptPlacement] {.inline, noinit.} =
 # ------------------------------------------------
 
 const
-  PlcmtToIshikawaUri = "02468acegikoqsuwyCEGIK"
-  NonePlcmtIshikawaUri = "1"
-  IshikawaUriToPlcmt = collect:
-    for plcmt in Placement:
-      {$PlcmtToIshikawaUri[plcmt.ord]: plcmt}
+  PlacementToIshikawaUri = "02468acegikoqsuwyCEGIK"
+  NonePlacementIshikawaUri = "1"
+  IshikawaUriToPlacement = collect:
+    for placement in Placement:
+      {$PlacementToIshikawaUri[placement.ord]: placement}
 
 func toUriQuery*(self: Placement, fqdn = Pon2): string {.inline, noinit.} =
   ## Returns the URI query converted from the placement.
@@ -217,7 +220,7 @@ func toUriQuery*(self: Placement, fqdn = Pon2): string {.inline, noinit.} =
   of Pon2:
     $self
   of Ishikawa, Ips:
-    $PlcmtToIshikawaUri[self.ord]
+    $PlacementToIshikawaUri[self.ord]
 
 func toUriQuery*(self: OptPlacement, fqdn = Pon2): string {.inline, noinit.} =
   ## Returns the URI query converted from the optional placement.
@@ -226,29 +229,29 @@ func toUriQuery*(self: OptPlacement, fqdn = Pon2): string {.inline, noinit.} =
     $self
   of Ishikawa, Ips:
     if self.isOk:
-      $PlcmtToIshikawaUri[self.value.ord]
+      $PlacementToIshikawaUri[self.value.ord]
     else:
-      NonePlcmtIshikawaUri
+      NonePlacementIshikawaUri
 
 func parsePlacement*(
     query: string, fqdn: SimulatorFqdn
-): Res[Placement] {.inline, noinit.} =
+): StrErrorResult[Placement] {.inline, noinit.} =
   ## Returns the placement converted from the URI query.
   case fqdn
   of Pon2:
     query.parsePlacement
   of Ishikawa, Ips:
-    IshikawaUriToPlcmt.getRes(query).context "Invalid placement: {query}".fmt
+    IshikawaUriToPlacement[query].context "Invalid placement: {query}".fmt
 
 func parseOptPlacement*(
     query: string, fqdn: SimulatorFqdn
-): Res[OptPlacement] {.inline, noinit.} =
+): StrErrorResult[OptPlacement] {.inline, noinit.} =
   ## Returns the optional placement converted from the URI query.
   case fqdn
   of Pon2:
     query.parseOptPlacement
   of Ishikawa, Ips:
-    if query == NonePlcmtIshikawaUri:
+    if query == NonePlacementIshikawaUri:
       ok NonePlacement
     else:
       ok OptPlacement.ok ?query.parsePlacement fqdn

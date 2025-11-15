@@ -20,7 +20,7 @@ when defined(js) or defined(nimsuggest):
 
   export vdom
 
-  proc cellBgColor[S: Simulator or Studio or Marathon](
+  proc cellBackgroundColor[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, row: Row, col: Col, editable: bool
   ): Color =
     ## Returns the cell's background color.
@@ -50,7 +50,7 @@ when defined(js) or defined(nimsuggest):
       editable = not cameraReady and self.derefSimulator(helper).mode in EditModes
       nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
       arr = nazoWrap.unwrapNazoPuyo:
-        it.field.toArr
+        it.field.toArray
       tableBorder = (StyleAttr.border, "1px gray solid".cstring)
       tableStyle =
         if editable:
@@ -71,7 +71,7 @@ when defined(js) or defined(nimsuggest):
                 imgSrc = arr[row][col].cellImgSrc
                 cellStyle = style(
                   StyleAttr.backgroundColor,
-                  self.cellBgColor(helper, row, col, editable).toHtmlRgba.cstring,
+                  self.cellBackgroundColor(helper, row, col, editable).toHtmlRgba.cstring,
                 )
 
               td:

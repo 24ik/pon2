@@ -11,10 +11,10 @@
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
-  import std/[jsffi, jsre]
-  import karax/[kdom, vdom]
+  import std/[jsffi]
+  import karax/[vdom]
   import ../[app]
-  import ../private/[results2]
+  import ../private/[dom, results2, utils]
 
   export results2
 
@@ -37,10 +37,6 @@ when defined(js) or defined(nimsuggest):
       studioOpt*: Opt[StudioVNodeHelper]
       marathonOpt*: Opt[MarathonVNodeHelper]
 
-  proc isMobile(): bool =
-    ## Returns `true` if a mobile device is detected.
-    r"iPhone|Android.+Mobile".newRegExp in navigator.userAgent
-
   func init(T: type SimulatorVNodeHelper, simulator: Simulator, rootId: cstring): T =
     T(
       goalId: "pon2-simulator-goal-" & rootId,
@@ -56,7 +52,7 @@ when defined(js) or defined(nimsuggest):
 
   proc init*(T: type VNodeHelper, simulatorRef: ref Simulator, rootId: cstring): T =
     VNodeHelper(
-      mobile: isMobile(),
+      mobile: mobileDetected(),
       simulator: SimulatorVNodeHelper.init(simulatorRef[], rootId),
       studioOpt: Opt[StudioVNodeHelper].err,
       marathonOpt: Opt[MarathonVNodeHelper].err,
@@ -66,7 +62,7 @@ when defined(js) or defined(nimsuggest):
       T: type VNodeHelper, studioRef: ref Studio, rootId: cstring
   ): tuple[main, replay: VNodeHelper] =
     let
-      mobile = isMobile()
+      mobile = mobileDetected()
       mainRootId = "pon2-studio-main-" & rootId
       replayRootId = "pon2-studio-replay-" & rootId
 
@@ -91,7 +87,7 @@ when defined(js) or defined(nimsuggest):
 
   proc init*(T: type VNodeHelper, marathonRef: ref Marathon, rootId: cstring): T =
     VNodeHelper(
-      mobile: isMobile(),
+      mobile: mobileDetected(),
       simulator: SimulatorVNodeHelper.init(marathonRef[].simulator, rootId),
       studioOpt: Opt[StudioVNodeHelper].err,
       marathonOpt: Opt[MarathonVNodeHelper].ok MarathonVNodeHelper.init rootId,

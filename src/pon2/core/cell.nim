@@ -7,7 +7,7 @@
 {.experimental: "views".}
 
 import std/[strformat, sugar]
-import ../private/[results2, tables2]
+import ../private/[results2, tables]
 
 export results2
 
@@ -33,6 +33,6 @@ const StrToCell = collect:
   for cell in Cell:
     {$cell: cell}
 
-func parseCell*(str: string): Res[Cell] {.inline, noinit.} =
+func parseCell*(str: string): StrErrorResult[Cell] {.inline, noinit.} =
   ## Returns the cell converted from the string representation.
-  StrToCell.getRes(str).context "Invalid cell: {str}".fmt
+  StrToCell[str].context "Invalid cell: {str}".fmt

@@ -13,7 +13,7 @@ type
 
   UnionFind* = object ## Union-find tree.
     parents: seq[UnionFindNode]
-    subtreeSizes: seq[int]
+    subtreeNodeCounts: seq[int]
 
 # ------------------------------------------------
 # Constructor
@@ -24,7 +24,7 @@ func init*(T: type UnionFind, size: int): T {.inline, noinit.} =
     for i in 0 ..< size:
       i.UnionFindNode
 
-  UnionFind(parents: parents, subtreeSizes: 1.repeat size)
+  UnionFind(parents: parents, subtreeNodeCounts: 1.repeat size)
 
 # ------------------------------------------------
 # Operation
@@ -54,13 +54,13 @@ func merge*(self: var UnionFind, node1, node2: UnionFindNode) {.inline, noinit.}
   let
     bigRoot: UnionFindNode
     smallRoot: UnionFindNode
-  if self.subtreeSizes[root1] >= self.subtreeSizes[root2]:
+  if self.subtreeNodeCounts[root1] >= self.subtreeNodeCounts[root2]:
     bigRoot = root1
     smallRoot = root2
   else:
     bigRoot = root2
     smallRoot = root1
-  self.subtreeSizes[bigRoot].inc self.subtreeSizes[smallRoot]
+  self.subtreeNodeCounts[bigRoot].inc self.subtreeNodeCounts[smallRoot]
   self.parents[smallRoot] = bigRoot
 
 func connected*(

@@ -12,9 +12,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat]
 import ./[rule]
-import ../private/[arrayops2, assign3, staticfor2]
+import ../private/[assign, staticfor]
 
 export notice, rule
 
@@ -43,33 +42,33 @@ static:
 
 const NoticeUnits: array[Notice, int] = [1, 6, 30, 180, 360, 720, 1440]
 
-func noticeCnts*(
+func noticeCounts*(
     score: int, rule: Rule, useComet = false
 ): array[Notice, int] {.inline, noinit.} =
   ## Returns the number of notice garbage puyos.
-  var cnts {.noinit.}: array[Notice, int]
+  var counts {.noinit.}: array[Notice, int]
 
   if score < 0:
-    let posCnts = (-score).noticeCnts(rule, useComet)
+    let invCounts = (-score).noticeCounts(rule, useComet)
     staticFor(notice, Notice):
-      cnts[notice].assign -posCnts[notice]
+      counts[notice].assign -invCounts[notice]
 
-    return cnts
+    return counts
 
   let highestNotice: Notice
   if useComet:
     highestNotice = Comet
   else:
     highestNotice = Crown
-    cnts[Comet].assign 0
+    counts[Comet].assign 0
 
   var score2 = score div GarbageRates[rule]
   for notice in countdown(highestNotice, Notice.low):
     let
       unit = NoticeUnits[notice]
-      cnt = score2 div unit
+      count = score2 div unit
 
-    cnts[notice].assign cnt
-    score2.assign score2.pred unit * cnt
+    counts[notice].assign count
+    score2.assign score2.pred unit * count
 
-  cnts
+  counts

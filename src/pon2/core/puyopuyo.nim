@@ -8,7 +8,7 @@
 
 import std/[strformat, typetraits, uri]
 import ./[cell, field, fqdn, moveresult, pair, placement, popresult, step]
-import ../private/[assign3, bitops3, macros2, strutils2, tables2]
+import ../private/[assign, bitutils, macros, strutils, tables]
 
 export field, moveresult, results2, step
 
@@ -32,27 +32,27 @@ func init*[F: TsuField or WaterField](T: type PuyoPuyo[F]): T {.inline, noinit.}
 # Count
 # ------------------------------------------------
 
-func cellCnt*[F: TsuField or WaterField](
+func cellCount*[F: TsuField or WaterField](
     self: PuyoPuyo[F], cell: Cell
 ): int {.inline, noinit.} =
   ## Returns the number of `cell` in the game.
-  self.field.cellCnt(cell) + self.steps.cellCnt(cell)
+  self.field.cellCount(cell) + self.steps.cellCount(cell)
 
-func puyoCnt*[F: TsuField or WaterField](self: PuyoPuyo[F]): int {.inline, noinit.} =
+func puyoCount*[F: TsuField or WaterField](self: PuyoPuyo[F]): int {.inline, noinit.} =
   ## Returns the number of puyos in the game.
-  self.field.puyoCnt + self.steps.puyoCnt
+  self.field.puyoCount + self.steps.puyoCount
 
-func colorPuyoCnt*[F: TsuField or WaterField](
+func colorPuyoCount*[F: TsuField or WaterField](
     self: PuyoPuyo[F]
 ): int {.inline, noinit.} =
   ## Returns the number of color puyos in the game.
-  self.field.colorPuyoCnt + self.steps.colorPuyoCnt
+  self.field.colorPuyoCount + self.steps.colorPuyoCount
 
-func garbagesCnt*[F: TsuField or WaterField](
+func garbagesCount*[F: TsuField or WaterField](
     self: PuyoPuyo[F]
 ): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos in the game.
-  self.field.garbagesCnt + self.steps.garbagesCnt
+  self.field.garbagesCount + self.steps.garbagesCount
 
 # ------------------------------------------------
 # Move
@@ -79,20 +79,20 @@ func `$`*[F: TsuField or WaterField](self: PuyoPuyo[F]): string {.inline, noinit
 
 func parsePuyoPuyo*[F: TsuField or WaterField](
     str: string
-): Res[PuyoPuyo[F]] {.inline, noinit.} =
+): StrErrorResult[PuyoPuyo[F]] {.inline, noinit.} =
   ## Returns the game converted from the string representation.
   let strs = str.split FieldStepsSep
   if strs.len != 2:
     return err "Invalid Puyo Puyo: {str}".fmt
 
   let
-    errMsg = "Invalid Puyo Puyo: {str}".fmt
+    errorMsg = "Invalid Puyo Puyo: {str}".fmt
     field =
       when F is TsuField:
-        ?strs[0].parseTsuField.context errMsg
+        ?strs[0].parseTsuField.context errorMsg
       else:
-        ?strs[0].parseWaterField.context errMsg
-    steps = ?strs[1].parseSteps.context errMsg
+        ?strs[0].parseWaterField.context errorMsg
+    steps = ?strs[1].parseSteps.context errorMsg
 
   ok PuyoPuyo[F].init(field, steps)
 
@@ -108,24 +108,24 @@ const
 
 func toUriQueryPon2[F: TsuField or WaterField](
     self: PuyoPuyo[F]
-): Res[string] {.inline, noinit.} =
+): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the game.
-  let errMsg = "Puyo Puyo that does not support URI conversion: {self}".fmt
+  let errorMsg = "Puyo Puyo that does not support URI conversion: {self}".fmt
 
   ok [
-    (FieldKey, ?self.field.toUriQuery(Pon2).context errMsg),
-    (StepsKey, ?self.steps.toUriQuery(Pon2).context errMsg),
+    (FieldKey, ?self.field.toUriQuery(Pon2).context errorMsg),
+    (StepsKey, ?self.steps.toUriQuery(Pon2).context errorMsg),
   ].encodeQuery
 
 func toUriQueryIshikawa[F: TsuField or WaterField](
     self: PuyoPuyo[F]
-): Res[string] {.inline, noinit.} =
+): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the game.
   let
-    errMsg = "Puyo Puyo that does not support URI conversion: {self}".fmt
+    errorMsg = "Puyo Puyo that does not support URI conversion: {self}".fmt
 
-    fieldQuery = ?self.field.toUriQuery(Ishikawa).context errMsg
-    stepsQuery = ?self.steps.toUriQuery(Ishikawa).context errMsg
+    fieldQuery = ?self.field.toUriQuery(Ishikawa).context errorMsg
+    stepsQuery = ?self.steps.toUriQuery(Ishikawa).context errorMsg
 
   ok (
     if stepsQuery == "": fieldQuery
@@ -134,7 +134,7 @@ func toUriQueryIshikawa[F: TsuField or WaterField](
 
 func toUriQuery*[F: TsuField or WaterField](
     self: PuyoPuyo[F], fqdn = Pon2
-): Res[string] {.inline, noinit.} =
+): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the game.
   case fqdn
   of Pon2: self.toUriQueryPon2
@@ -142,7 +142,7 @@ func toUriQuery*[F: TsuField or WaterField](
 
 func parsePuyoPuyoPon2[F: TsuField or WaterField](
     query: string
-): Res[PuyoPuyo[F]] {.inline, noinit.} =
+): StrErrorResult[PuyoPuyo[F]] {.inline, noinit.} =
   ## Returns the game converted from the URI query.
   var
     puyoPuyo = PuyoPuyo[F].init
@@ -186,7 +186,7 @@ func parsePuyoPuyoPon2[F: TsuField or WaterField](
 
 func parsePuyoPuyoIshikawa[F: TsuField or WaterField](
     query: string
-): Res[PuyoPuyo[F]] {.inline, noinit.} =
+): StrErrorResult[PuyoPuyo[F]] {.inline, noinit.} =
   ## Returns the game converted from the URI query.
   let strs = query.split FieldStepsSepIshikawaUri
 
@@ -209,7 +209,7 @@ func parsePuyoPuyoIshikawa[F: TsuField or WaterField](
 
 func parsePuyoPuyo*[F: TsuField or WaterField](
     query: string, fqdn: SimulatorFqdn
-): Res[PuyoPuyo[F]] {.inline, noinit.} =
+): StrErrorResult[PuyoPuyo[F]] {.inline, noinit.} =
   ## Returns the game converted from the URI query.
   case fqdn
   of Pon2:

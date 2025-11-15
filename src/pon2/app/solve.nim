@@ -6,20 +6,18 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[algorithm]
 import ../[core]
-import ../private/[core, macros2]
+import ../private/[algorithm, core, macros]
 import ../private/app/[solve]
 
 export core
 
 when defined(js) or defined(nimsuggest):
-  import std/[dom]
-  import ../private/[strutils2]
+  import ../private/[dom, strutils]
 
   when not defined(pon2.build.worker):
     import std/[asyncjs, jsconsole, sequtils, sugar]
-    import ../private/[assign3, webworker]
+    import ../private/[assign, webworkers]
 
     export asyncjs
 
@@ -38,7 +36,7 @@ when not defined(js):
   proc solveSingleThread[F: TsuField or WaterField](
       self: SolveNode[F],
       answers: ptr seq[SolveAnswer],
-      moveCnt: int,
+      moveCount: int,
       goal: Goal,
       steps: Steps,
       calcAllAnswers: static bool,
@@ -49,7 +47,7 @@ when not defined(js):
     ## `result` has no meanings; only used to get FlowVar.
     # NOTE: non-static arguments should be placed before static ones due to `spawn` bug.
     self.solveSingleThread(
-      answers[], moveCnt, calcAllAnswers, goal, steps, checkPruneFirst = false
+      answers[], moveCount, calcAllAnswers, goal, steps, checkPruneFirst = false
     )
     true
 
@@ -58,26 +56,26 @@ when not defined(js):
       answers: var seq[SolveAnswer],
       answersSeq: var seq[seq[SolveAnswer]],
       runningNodeIndices: var set[int16],
-      optPlcmtsSeq: seq[seq[OptPlacement]],
+      optPlacementsSeq: seq[seq[OptPlacement]],
       calcAllAnswers: static bool,
   ): bool =
     ## Checks all the spawned threads and reflects results if they have finished.
     ## Returns `true` if early-returned.
     var finishNodeIndices = set[int16]({})
 
-    for runningNodeIdx in runningNodeIndices:
-      if not futures[runningNodeIdx].isReady:
+    for runningNodeIndex in runningNodeIndices:
+      if not futures[runningNodeIndex].isReady:
         continue
 
-      finishNodeIndices.incl runningNodeIdx
+      finishNodeIndices.incl runningNodeIndex
 
-      let optPlcmts = optPlcmtsSeq[runningNodeIdx]
-      for ans in answersSeq[runningNodeIdx].mitems:
-        ans &= optPlcmts
-        ans.reverse
+      let optPlacements = optPlacementsSeq[runningNodeIndex]
+      for answer in answersSeq[runningNodeIndex].mitems:
+        answer &= optPlacements
+        answer.reverse
 
       when not calcAllAnswers:
-        if answers.len + answersSeq[runningNodeIdx].len > 1:
+        if answers.len + answersSeq[runningNodeIndex].len > 1:
           runningNodeIndices.excl finishNodeIndices
           return true
 
@@ -87,7 +85,7 @@ when not defined(js):
   proc solveMultiThread[F: TsuField or WaterField](
       self: SolveNode[F],
       answers: var seq[SolveAnswer],
-      moveCnt: int,
+      moveCount: int,
       calcAllAnswers: static bool,
       goal: Goal,
       steps: Steps,
@@ -105,39 +103,39 @@ when not defined(js):
 
     var
       nodes = newSeq[SolveNode[F]]()
-      optPlcmtsSeq = newSeq[seq[OptPlacement]]()
+      optPlacementsSeq = newSeq[seq[OptPlacement]]()
     self.childrenAtDepth TargetDepth,
-      nodes, optPlcmtsSeq, answers, moveCnt, calcAllAnswers, goal, steps
+      nodes, optPlacementsSeq, answers, moveCount, calcAllAnswers, goal, steps
 
-    for ans in answers.mitems:
-      ans.reverse
+    for answer in answers.mitems:
+      answer.reverse
 
     when not calcAllAnswers:
       if answers.len > 1:
         return
 
-    let nodeCnt = nodes.len
+    let nodeCount = nodes.len
     var
       answersSeq = collect:
-        for _ in 1 .. nodeCnt:
+        for _ in 1 .. nodeCount:
           newSeq[SolveAnswer]()
-      futures = newSeqOfCap[FlowVar[bool]](nodeCnt)
+      futures = newSeqOfCap[FlowVar[bool]](nodeCount)
       runningNodeIndices = set[int16]({})
 
-    var nodeIdx = 0'i16
-    while nodeIdx < nodeCnt:
+    var nodeIndex = 0'i16
+    while nodeIndex < nodeCount:
       if preferSpawn():
-        futures.add spawn nodes[nodeIdx].solveSingleThread(
-          answersSeq[nodeIdx].addr, moveCnt, goal, steps, calcAllAnswers
+        futures.add spawn nodes[nodeIndex].solveSingleThread(
+          answersSeq[nodeIndex].addr, moveCount, goal, steps, calcAllAnswers
         )
 
-        runningNodeIndices.incl nodeIdx
-        nodeIdx.inc
+        runningNodeIndices.incl nodeIndex
+        nodeIndex.inc
 
         continue
 
       let earlyReturned {.used.} = futures.checkSpawnFinished(
-        answers, answersSeq, runningNodeIndices, optPlcmtsSeq, calcAllAnswers
+        answers, answersSeq, runningNodeIndices, optPlacementsSeq, calcAllAnswers
       )
       when not calcAllAnswers:
         if earlyReturned:
@@ -147,7 +145,7 @@ when not defined(js):
 
     while runningNodeIndices.card > 0:
       discard futures.checkSpawnFinished(
-        answers, answersSeq, runningNodeIndices, optPlcmtsSeq, calcAllAnswers
+        answers, answersSeq, runningNodeIndices, optPlacementsSeq, calcAllAnswers
       )
       sleep SolveWaitMs
 
@@ -164,24 +162,24 @@ proc solve*[F: TsuField or WaterField](
 
   let
     root = SolveNode[F].init nazo.puyoPuyo
-    moveCnt = nazo.puyoPuyo.steps.len
+    moveCount = nazo.puyoPuyo.steps.len
   var answers = newSeq[SolveAnswer]()
 
   when defined(js):
     root.solveSingleThread(
       answers,
-      moveCnt,
+      moveCount,
       calcAllAnswers,
       nazo.goal,
       nazo.puyoPuyo.steps,
       checkPruneFirst = true,
     )
 
-    for ans in answers.mitems:
-      ans.reverse
+    for answer in answers.mitems:
+      answer.reverse
   else:
     root.solveMultiThread(
-      answers, moveCnt, calcAllAnswers, nazo.goal, nazo.puyoPuyo.steps
+      answers, moveCount, calcAllAnswers, nazo.goal, nazo.puyoPuyo.steps
     )
 
   answers
@@ -193,23 +191,23 @@ proc solve*[F: TsuField or WaterField](
 when defined(js) or defined(nimsuggest):
   when not defined(pon2.build.worker):
     func initCompleteHandler(
-        nodeIdx: int,
-        optPlcmtsSeq: seq[seq[OptPlacement]],
+        nodeIndex: int,
+        optPlacementsSeq: seq[seq[OptPlacement]],
         answersSeqRef: ref seq[seq[SolveAnswer]],
         progressRef: ref tuple[now, total: int],
-    ): Res[seq[string]] -> void =
+    ): StrErrorResult[seq[string]] -> void =
       ## Returns a handler called after a web worker job completes.
-      (res: Res[seq[string]]) => (
+      (res: StrErrorResult[seq[string]]) => (
         block:
           if res.isOk:
             let answersRes = res.unsafeValue.parseSolveAnswers
             if answersRes.isOk:
               var answers = answersRes.unsafeValue
-              for ans in answers.mitems:
-                ans &= optPlcmtsSeq[nodeIdx]
-                ans.reverse
+              for answer in answers.mitems:
+                answer &= optPlacementsSeq[nodeIndex]
+                answer.reverse
 
-              answersSeqRef[][nodeIdx].assign answers
+              answersSeqRef[][nodeIndex].assign answers
             else:
               console.error answersRes.error.cstring
           else:
@@ -242,15 +240,15 @@ when defined(js) or defined(nimsuggest):
 
       var
         nodes = newSeq[SolveNode[F]]()
-        optPlcmtsSeq = newSeq[seq[OptPlacement]]()
+        optPlacementsSeq = newSeq[seq[OptPlacement]]()
         answers = newSeq[SolveAnswer]()
 
       rootNode.childrenAtDepth TargetDepth,
-        nodes, optPlcmtsSeq, answers, nazo.puyoPuyo.steps.len, calcAllAnswers,
+        nodes, optPlacementsSeq, answers, nazo.puyoPuyo.steps.len, calcAllAnswers,
         nazo.goal, nazo.puyoPuyo.steps
 
-      for ans in answers.mitems:
-        ans.reverse
+      for answer in answers.mitems:
+        answer.reverse
 
       when not calcAllAnswers:
         if answers.len > 1:
@@ -259,26 +257,28 @@ when defined(js) or defined(nimsuggest):
 
           return answers
 
-      let nodeCnt = nodes.len
+      let nodeCount = nodes.len
       if not progressRef.isNil:
-        if nodeCnt == 0:
+        if nodeCount == 0:
           progressRef[] = (1, 1)
         else:
-          progressRef[] = (0, nodeCnt)
+          progressRef[] = (0, nodeCount)
 
       let answersSeqRef = new seq[seq[SolveAnswer]]
       answersSeqRef[] = collect:
-        for _ in 1 .. nodeCnt:
+        for _ in 1 .. nodeCount:
           newSeq[SolveAnswer]()
 
       {.push warning[Uninit]: off.}
       {.push warning[ProveInit]: off.}
       let futures = collect:
-        for nodeIdx, node in nodes:
+        for nodeIndex, node in nodes:
           webWorkerPool
           .run(node.toStrs(nazo.goal, nazo.puyoPuyo.steps))
-          .then(initCompleteHandler(nodeIdx, optPlcmtsSeq, answersSeqRef, progressRef))
-          .catch((e: Error) => console.error e)
+          .then(
+            initCompleteHandler(nodeIndex, optPlacementsSeq, answersSeqRef, progressRef)
+          )
+          .catch((error: Error) => console.error error)
       {.pop.}
       {.pop.}
       for future in futures:

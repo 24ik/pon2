@@ -8,7 +8,7 @@
 
 import std/[setutils, strformat, sugar]
 import ./[fqdn]
-import ../private/[assign3, results2, staticfor2, strutils2, tables2]
+import ../private/[assign, results2, staticfor, strutils, tables]
 
 export results2
 
@@ -16,22 +16,22 @@ type
   GoalKind* {.pure.} = enum
     ## Kind of the goal to clear the nazo puyo.
     Clear = "cぷよ全て消すべし"
-    AccColor = "n色消すべし"
-    AccColorMore = "n色以上消すべし"
-    AccCnt = "cぷよn個消すべし"
-    AccCntMore = "cぷよn個以上消すべし"
+    AccumColor = "n色消すべし"
+    AccumColorMore = "n色以上消すべし"
+    AccumCount = "cぷよn個消すべし"
+    AccumCountMore = "cぷよn個以上消すべし"
     Chain = "n連鎖するべし"
     ChainMore = "n連鎖以上するべし"
     ClearChain = "n連鎖&cぷよ全て消すべし"
     ClearChainMore = "n連鎖以上&cぷよ全て消すべし"
     Color = "n色同時に消すべし"
     ColorMore = "n色以上同時に消すべし"
-    Cnt = "cぷよn個同時に消すべし"
-    CntMore = "cぷよn個以上同時に消すべし"
+    Count = "cぷよn個同時に消すべし"
+    CountMore = "cぷよn個以上同時に消すべし"
     Place = "cぷよn箇所同時に消すべし"
     PlaceMore = "cぷよn箇所以上同時に消すべし"
-    Conn = "cぷよn連結で消すべし"
-    ConnMore = "cぷよn連結以上で消すべし"
+    Connection = "cぷよn連結で消すべし"
+    ConnectionMore = "cぷよn連結以上で消すべし"
 
   GoalColor* {.pure.} = enum
     ## 'c' in the `GoalKind`.
@@ -55,7 +55,7 @@ type
     optVal*: OptGoalVal
 
 const
-  NoColorKinds* = {AccColor, AccColorMore, Chain, ChainMore, Color, ColorMore}
+  NoColorKinds* = {AccumColor, AccumColorMore, Chain, ChainMore, Color, ColorMore}
     ## All goal kinds not containing 'c'.
   NoValKinds* = {Clear} ## All goal kinds not containing 'n'.
 
@@ -103,7 +103,7 @@ func isSupported*(self: Goal): bool {.inline, noinit.} =
     return false
 
   not (
-    self.kind in {Place, PlaceMore, Conn, ConnMore} and
+    self.kind in {Place, PlaceMore, Connection, ConnectionMore} and
     self.optColor.unsafeValue == Garbages
   )
 
@@ -112,22 +112,22 @@ func isSupported*(self: Goal): bool {.inline, noinit.} =
 # ------------------------------------------------
 
 const
-  DefColor = All
-  DefVal = 0.GoalVal
+  DefaultColor = All
+  DefaultVal = 0.GoalVal
 
 func normalize*(self: var Goal) {.inline, noinit.} =
   ## Normalizes the goal; removes unnecessary color and value and compensates
   ## for missing color and value.
   if self.kind in ColorKinds:
     self.optColor.isOkOr:
-      self.optColor.ok DefColor
+      self.optColor.ok DefaultColor
   else:
     self.optColor.isErrOr:
       self.optColor.err
 
   if self.kind in ValKinds:
     self.optVal.isOkOr:
-      self.optVal.ok DefVal
+      self.optVal.ok DefaultVal
   else:
     self.optVal.isErrOr:
       self.optVal.err
@@ -164,7 +164,7 @@ func `$`*(self: Goal): string {.inline, noinit.} =
 
   ($self.kind).multiReplace replacements
 
-func parseGoal*(str: string): Res[Goal] {.inline, noinit.} =
+func parseGoal*(str: string): StrErrorResult[Goal] {.inline, noinit.} =
   ## Returns the goal converted from the string representation.
   var
     goal = Goal.init(GoalKind.low, OptGoalColor.err, OptGoalVal.err)
@@ -182,7 +182,7 @@ func parseGoal*(str: string): Res[Goal] {.inline, noinit.} =
       i.inc
 
     let valStr = str2[charIdx ..< i]
-    goal.optVal.ok ?valStr.parseIntRes.context "Invalid goal (val): {str}".fmt
+    goal.optVal.ok ?valStr.parseInt.context "Invalid goal (val): {str}".fmt
     str2.assign str2.replace(valStr, "n")
     break
 
@@ -193,7 +193,7 @@ func parseGoal*(str: string): Res[Goal] {.inline, noinit.} =
     if str2 in strToKind:
       kindFound = true
       goal.optColor.ok c
-      goal.kind.assign strToKind.getRes(str2).unsafeValue
+      goal.kind.assign strToKind[str2].unsafeValue
 
       break
   if not kindFound:
@@ -229,7 +229,7 @@ const
     for i, uri in ValToIshikawaUri:
       {uri: i.GoalVal}
 
-func toUriQuery*(self: Goal, fqdn = Pon2): Res[string] {.inline, noinit.} =
+func toUriQuery*(self: Goal, fqdn = Pon2): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the requirement.
   case fqdn
   of Pon2:
@@ -264,7 +264,9 @@ func toUriQuery*(self: Goal, fqdn = Pon2): Res[string] {.inline, noinit.} =
 
       ok "{kindChar}{colorChar}{valChar}".fmt
 
-func parseGoal*(query: string, fqdn: SimulatorFqdn): Res[Goal] {.inline, noinit.} =
+func parseGoal*(
+    query: string, fqdn: SimulatorFqdn
+): StrErrorResult[Goal] {.inline, noinit.} =
   ## Returns the goal converted from the URI query.
   var goal = Goal.init(GoalKind.low, OptGoalColor.err, OptGoalVal.err)
 
@@ -277,27 +279,27 @@ func parseGoal*(query: string, fqdn: SimulatorFqdn): Res[Goal] {.inline, noinit.
     if strs.len != 3:
       return err "Invalid goal: {query}".fmt
 
-    let kindInt = ?strs[0].parseIntRes.context "Invalid goal (kind): {query}".fmt
+    let kindInt = ?strs[0].parseInt.context "Invalid goal (kind): {query}".fmt
     if kindInt notin GoalKind.low.ord .. GoalKind.high.ord:
       return err "Invalid goal (kind): {query}".fmt
     goal.kind.assign kindInt.GoalKind
 
     if strs[1] != EmptyColor:
-      let colorInt = ?strs[1].parseIntRes.context "Invalid goal (color): {query}".fmt
+      let colorInt = ?strs[1].parseInt.context "Invalid goal (color): {query}".fmt
       if colorInt notin GoalColor.low.ord .. GoalColor.high.ord:
         return err "Invalid goal (color): {query}".fmt
       goal.optColor.ok colorInt.GoalColor
 
     if strs[2] != EmptyVal:
-      let valInt = ?strs[2].parseIntRes.context "Invalid goal (val): {query}".fmt
+      let valInt = ?strs[2].parseInt.context "Invalid goal (val): {query}".fmt
       goal.optVal.ok valInt.GoalVal
   of Ishikawa, Ips:
     if query.len != 3:
       return err "Invalid goal: {query}".fmt
 
-    goal.kind.assign ?IshikawaUriToKind.getRes(query[0]).context "Invalid goal (kind): {query}".fmt
-    goal.optColor.ok ?IshikawaUriToColor.getRes(query[1]).context "Invalid goal (color): {query}".fmt
-    goal.optVal.ok ?IshikawaUriToVal.getRes(query[2]).context "Invalid goal (val): {query}".fmt
+    goal.kind.assign ?IshikawaUriToKind[query[0]].context "Invalid goal (kind): {query}".fmt
+    goal.optColor.ok ?IshikawaUriToColor[query[1]].context "Invalid goal (color): {query}".fmt
+    goal.optVal.ok ?IshikawaUriToVal[query[2]].context "Invalid goal (val): {query}".fmt
 
     # we cannot distinguish '0' between the valid color/val and the empty,
     # so postprocesses here just like a normalization

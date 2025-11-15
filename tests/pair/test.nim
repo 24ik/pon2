@@ -24,9 +24,9 @@ block: # pivot, rotor
   check BlueRed.pivot == Blue
   check BlueRed.rotor == Red
 
-block: # isDbl
-  check not PurpleRed.isDbl
-  check YellowYellow.isDbl
+block: # isDouble
+  check not PurpleRed.isDouble
+  check YellowYellow.isDouble
 
 # ------------------------------------------------
 # Operator
@@ -57,13 +57,13 @@ block: # swapped, swap
 # Count
 # ------------------------------------------------
 
-block: # cellCnt, puyoCnt, colorPuyoCnt, garbagesCnt
-  check YellowGreen.cellCnt(Yellow) == 1
-  check YellowGreen.cellCnt(Green) == 1
-  check YellowGreen.cellCnt(Purple) == 0
-  check YellowGreen.puyoCnt == 2
-  check YellowGreen.colorPuyoCnt == 2
-  check YellowGreen.garbagesCnt == 0
+block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
+  check YellowGreen.cellCount(Yellow) == 1
+  check YellowGreen.cellCount(Green) == 1
+  check YellowGreen.cellCount(Purple) == 0
+  check YellowGreen.puyoCount == 2
+  check YellowGreen.colorPuyoCount == 2
+  check YellowGreen.garbagesCount == 0
 
 # ------------------------------------------------
 # Pair <-> string / URI
@@ -73,7 +73,7 @@ block: # Pair <-> string
   check $RedGreen == "rg"
 
   let pairRes = "rg".parsePair
-  check pairRes == Res[Pair].ok RedGreen
+  check pairRes == StrErrorResult[Pair].ok RedGreen
 
   check "RG".parsePair.isErr
 
@@ -83,11 +83,11 @@ block: # Pair <-> URI
     check RedGreen.toUriQuery(fqdn) == "c"
 
   let pairRes = "rg".parsePair(Pon2)
-  check pairRes == Res[Pair].ok RedGreen
+  check pairRes == StrErrorResult[Pair].ok RedGreen
 
   for fqdn in [Ishikawa, Ips]:
     let pairRes2 = "c".parsePair(fqdn)
-    check pairRes2 == Res[Pair].ok RedGreen
+    check pairRes2 == StrErrorResult[Pair].ok RedGreen
 
   check "c".parsePair(Pon2).isErr
   check "rg".parsePair(Ishikawa).isErr

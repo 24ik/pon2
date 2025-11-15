@@ -14,8 +14,8 @@ when defined(js) or defined(nimsuggest):
   import std/[jsffi, sugar]
   import karax/[karaxdsl, vdom]
   import ../[helper]
-  import ../../[app]
-  import ../../private/[gui, utils]
+  import ../../[app, core]
+  import ../../private/[dom, gui, utils]
 
   export vdom
 
@@ -50,7 +50,7 @@ when defined(js) or defined(nimsuggest):
             id = kindId,
             onchange =
               () =>
-              (self.derefSimulator(helper).goalKind = kindId.getSelectedIdx.GoalKind),
+              (self.derefSimulator(helper).goalKind = kindId.getSelectedIndex.GoalKind),
           ):
             for kind in GoalKind:
               option(selected = kind == goal.kind):
@@ -65,7 +65,7 @@ when defined(js) or defined(nimsuggest):
               onchange =
                 () => (
                   self.derefSimulator(helper).goalColor =
-                    colorId.getSelectedIdx.GoalColor
+                    colorId.getSelectedIndex.GoalColor
                 ),
             ):
               option(selected = goal.optColor.unsafeValue == All):
@@ -81,7 +81,7 @@ when defined(js) or defined(nimsuggest):
               id = valId,
               onchange =
                 () =>
-                (self.derefSimulator(helper).goalVal = valId.getSelectedIdx.GoalVal),
+                (self.derefSimulator(helper).goalVal = valId.getSelectedIndex.GoalVal),
             ):
               for val in 0 .. 99:
                 option(selected = val == goal.optVal.unsafeValue):

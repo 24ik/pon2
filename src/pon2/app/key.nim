@@ -6,10 +6,10 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ../private/[strutils2]
+import ../private/[strutils]
 
 when defined(js) or defined(nimsuggest):
-  import std/[dom]
+  import ../private/[dom]
 
 type KeyEvent* = object ## Keyboard Event.
   code: string

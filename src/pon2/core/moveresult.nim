@@ -8,17 +8,17 @@
 
 import std/[sequtils, strformat, sugar]
 import ./[cell, common, notice, rule]
-import ../private/[arrayops2, math2, results2, staticfor2]
+import ../private/[arrayutils, math, results2, staticfor]
 
 export cell, notice, results2
 
 type MoveResult* = object ## Move result.
-  chainCnt*: int
-  popCnts*: array[Cell, int]
-  hardToGarbageCnt*: int
-  detailPopCnts*: seq[array[Cell, int]]
-  detailHardToGarbageCnt*: seq[int]
-  fullPopCnts*: Opt[seq[array[Cell, seq[int]]]]
+  chainCount*: int
+  popCounts*: array[Cell, int]
+  hardToGarbageCount*: int
+  detailPopCounts*: seq[array[Cell, int]]
+  detailHardToGarbageCount*: seq[int]
+  fullPopCounts*: Opt[seq[array[Cell, seq[int]]]]
 
 # ------------------------------------------------
 # Constructor
@@ -26,46 +26,46 @@ type MoveResult* = object ## Move result.
 
 func init*(
     T: type MoveResult,
-    chainCnt: int,
-    popCnts: array[Cell, int],
-    hardToGarbageCnt: int,
-    detailPopCnts: seq[array[Cell, int]],
-    detailHardToGarbageCnt: seq[int],
+    chainCount: int,
+    popCounts: array[Cell, int],
+    hardToGarbageCount: int,
+    detailPopCounts: seq[array[Cell, int]],
+    detailHardToGarbageCount: seq[int],
 ): T {.inline, noinit.} =
   T(
-    chainCnt: chainCnt,
-    popCnts: popCnts,
-    hardToGarbageCnt: hardToGarbageCnt,
-    detailPopCnts: detailPopCnts,
-    detailHardToGarbageCnt: detailHardToGarbageCnt,
-    fullPopCnts: Opt[seq[array[Cell, seq[int]]]].err,
+    chainCount: chainCount,
+    popCounts: popCounts,
+    hardToGarbageCount: hardToGarbageCount,
+    detailPopCounts: detailPopCounts,
+    detailHardToGarbageCount: detailHardToGarbageCount,
+    fullPopCounts: Opt[seq[array[Cell, seq[int]]]].err,
   )
 
 func init*(
     T: type MoveResult,
-    chainCnt: int,
-    popCnts: array[Cell, int],
-    hardToGarbageCnt: int,
-    detailPopCnts: seq[array[Cell, int]],
-    detailHardToGarbageCnt: seq[int],
-    fullPopCnts: seq[array[Cell, seq[int]]],
+    chainCount: int,
+    popCounts: array[Cell, int],
+    hardToGarbageCount: int,
+    detailPopCounts: seq[array[Cell, int]],
+    detailHardToGarbageCount: seq[int],
+    fullPopCounts: seq[array[Cell, seq[int]]],
 ): T {.inline, noinit.} =
   T(
-    chainCnt: chainCnt,
-    popCnts: popCnts,
-    hardToGarbageCnt: hardToGarbageCnt,
-    detailPopCnts: detailPopCnts,
-    detailHardToGarbageCnt: detailHardToGarbageCnt,
-    fullPopCnts: Opt[seq[array[Cell, seq[int]]]].ok fullPopCnts,
+    chainCount: chainCount,
+    popCounts: popCounts,
+    hardToGarbageCount: hardToGarbageCount,
+    detailPopCounts: detailPopCounts,
+    detailHardToGarbageCount: detailHardToGarbageCount,
+    fullPopCounts: Opt[seq[array[Cell, seq[int]]]].ok fullPopCounts,
   )
 
 func init*(
-    T: type MoveResult, includeFullPopCnts: static bool = false
+    T: type MoveResult, includeFullPopCounts: static bool = false
 ): T {.inline, noinit.} =
-  when includeFullPopCnts:
-    T.init(0, static(initArrWith[Cell, int](0)), 0, @[], @[], @[])
+  when includeFullPopCounts:
+    T.init(0, static(Cell.initArrayWith 0), 0, @[], @[], @[])
   else:
-    T.init(0, static(initArrWith[Cell, int](0)), 0, @[], @[])
+    T.init(0, static(Cell.initArrayWith 0), 0, @[], @[])
 
 # ------------------------------------------------
 # Count
@@ -75,38 +75,38 @@ func sumColor(arr: array[Cell, int]): int {.inline, noinit.} =
   ## Returns the total number of color puyos.
   (arr[Red] + arr[Green] + arr[Blue]) + (arr[Yellow] + arr[Purple])
 
-func cellCnt*(self: MoveResult, cell: Cell): int {.inline, noinit.} =
+func cellCount*(self: MoveResult, cell: Cell): int {.inline, noinit.} =
   ## Returns the number of `cell` that popped.
-  self.popCnts[cell]
+  self.popCounts[cell]
 
-func puyoCnt*(self: MoveResult): int {.inline, noinit.} =
+func puyoCount*(self: MoveResult): int {.inline, noinit.} =
   ## Returns the number of cells that popped.
-  self.popCnts.sum2
+  self.popCounts.sum
 
-func colorPuyoCnt*(self: MoveResult): int {.inline, noinit.} =
+func colorPuyoCount*(self: MoveResult): int {.inline, noinit.} =
   ## Returns the number of color puyos that popped.
-  self.popCnts.sumColor
+  self.popCounts.sumColor
 
-func garbagesCnt*(self: MoveResult): int {.inline, noinit.} =
+func garbagesCount*(self: MoveResult): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos that popped.
-  self.popCnts[Hard] + self.popCnts[Garbage]
+  self.popCounts[Hard] + self.popCounts[Garbage]
 
-func cellCnts*(self: MoveResult, cell: Cell): seq[int] {.inline, noinit.} =
+func cellCounts*(self: MoveResult, cell: Cell): seq[int] {.inline, noinit.} =
   ## Returns a sequence of the number of `cell` that popped in each chain.
-  self.detailPopCnts.mapIt it[cell]
+  self.detailPopCounts.mapIt it[cell]
 
-func puyoCnts*(self: MoveResult): seq[int] {.inline, noinit.} =
+func puyoCounts*(self: MoveResult): seq[int] {.inline, noinit.} =
   ## Returns a sequence of the number of puyos that popped in each chain.
-  self.detailPopCnts.mapIt it.sum2
+  self.detailPopCounts.mapIt it.sum
 
-func colorPuyoCnts*(self: MoveResult): seq[int] {.inline, noinit.} =
+func colorPuyoCounts*(self: MoveResult): seq[int] {.inline, noinit.} =
   ## Returns a sequence of the number of color puyos that popped in each chain.
-  self.detailPopCnts.mapIt it.sumColor
+  self.detailPopCounts.mapIt it.sumColor
 
-func garbagesCnts*(self: MoveResult): seq[int] {.inline, noinit.} =
+func garbagesCounts*(self: MoveResult): seq[int] {.inline, noinit.} =
   ## Returns a sequence of the number of hard and garbage puyos that popped in
   ## each chain.
-  self.detailPopCnts.mapIt it[Hard] + it[Garbage]
+  self.detailPopCounts.mapIt it[Hard] + it[Garbage]
 
 # ------------------------------------------------
 # Color
@@ -123,60 +123,64 @@ func colors(arr: array[Cell, int]): set[Cell] {.inline, noinit.} =
 
 func colors*(self: MoveResult): set[Cell] {.inline, noinit.} =
   ## Returns the set of colors that popped.
-  self.popCnts.colors
+  self.popCounts.colors
 
 func colorsSeq*(self: MoveResult): seq[set[Cell]] {.inline, noinit.} =
   ## Returns a sequence of the set of colors that popped in each chain.
-  self.detailPopCnts.mapIt it.colors
+  self.detailPopCounts.mapIt it.colors
 
 # ------------------------------------------------
 # Place
 # ------------------------------------------------
 
-func placeCnts*(self: MoveResult, cell: Cell): Res[seq[int]] {.inline, noinit.} =
+func placeCounts*(
+    self: MoveResult, cell: Cell
+): StrErrorResult[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of places where `cell` popped in each chain.
-  if self.fullPopCnts.isOk:
-    ok self.fullPopCnts.unsafeValue.mapIt it[cell].len
+  if self.fullPopCounts.isOk:
+    ok self.fullPopCounts.unsafeValue.mapIt it[cell].len
   else:
-    err "`placeCnts` not supported: {self}".fmt
+    err "`placeCounts` not supported: {self}".fmt
 
-func placeCnts*(self: MoveResult): Res[seq[int]] {.inline, noinit.} =
+func placeCounts*(self: MoveResult): StrErrorResult[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of places where color puyos popped in each chain.
-  if self.fullPopCnts.isOk:
-    ok self.fullPopCnts.unsafeValue.mapIt (it[Red].len + it[Green].len + it[Blue].len) +
+  if self.fullPopCounts.isOk:
+    ok self.fullPopCounts.unsafeValue.mapIt (it[Red].len + it[Green].len + it[Blue].len) +
       (it[Yellow].len + it[Purple].len)
   else:
-    err "`placeCnts` not supported: {self}".fmt
+    err "`placeCounts` not supported: {self}".fmt
 
 # ------------------------------------------------
 # Connect
 # ------------------------------------------------
 
-func connCnts*(self: MoveResult, cell: Cell): Res[seq[int]] {.inline, noinit.} =
+func connectionCounts*(
+    self: MoveResult, cell: Cell
+): StrErrorResult[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of connections of `cell` that popped.
-  if self.fullPopCnts.isOk:
-    ok concat self.fullPopCnts.unsafeValue.mapIt it[cell]
+  if self.fullPopCounts.isOk:
+    ok concat self.fullPopCounts.unsafeValue.mapIt it[cell]
   else:
-    err "`conns` not supported: {self}".fmt
+    err "`connectionCounts` not supported: {self}".fmt
 
-func connCnts*(self: MoveResult): Res[seq[int]] {.inline, noinit.} =
+func connectionCounts*(self: MoveResult): StrErrorResult[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of connections of color puyos that popped.
-  if self.fullPopCnts.isOk:
-    ok concat self.fullPopCnts.unsafeValue.mapIt it[Red .. Purple].concat
+  if self.fullPopCounts.isOk:
+    ok concat self.fullPopCounts.unsafeValue.mapIt it[Red .. Purple].concat
   else:
-    err "`conns` not supported: {self}".fmt
+    err "`connectionCounts` not supported: {self}".fmt
 
 # ------------------------------------------------
 # Score
 # ------------------------------------------------
 
 const
-  ConnBonuses = collect:
-    for conn in 0 .. Height.pred * Width:
-      if conn <= 4:
+  ConnectionBonuses = collect:
+    for connection in 0 .. Height.pred * Width:
+      if connection <= 4:
         0
-      elif conn in 5 .. 10:
-        conn - 3
+      elif connection in 5 .. 10:
+        connection - 3
       else:
         10
   ChainBonuses = collect:
@@ -194,38 +198,38 @@ const
       else:
         3 * 2 ^ (color - 2)
 
-func connBonus(cnts: seq[int]): int {.inline, noinit.} =
+func connectionBonus(counts: seq[int]): int {.inline, noinit.} =
   ## Returns the connect bonus.
-  sum2 cnts.mapIt ConnBonuses[it]
+  sum counts.mapIt ConnectionBonuses[it]
 
-func score*(self: MoveResult): Res[int] {.inline, noinit.} =
+func score*(self: MoveResult): StrErrorResult[int] {.inline, noinit.} =
   ## Returns the score.
-  if self.fullPopCnts.isErr:
+  if self.fullPopCounts.isErr:
     return err "`score` not supported: {self}".fmt
 
   var totalScore = 0
-  for chainIdx, cntsArr in self.fullPopCnts.unsafeValue:
+  for chainIndex, countsArray in self.fullPopCounts.unsafeValue:
     var
-      connBonus = 0
-      totalPuyoCnt = 0
-      colorCnt = 0
+      connectionBonus = 0
+      totalPuyoCount = 0
+      colorCount = 0
 
     staticFor(cell, Red .. Purple):
-      connBonus.inc cntsArr[cell].connBonus
+      connectionBonus.inc countsArray[cell].connectionBonus
 
-      let puyoCnt = self.detailPopCnts[chainIdx][cell]
-      totalPuyoCnt.inc puyoCnt
+      let puyoCount = self.detailPopCounts[chainIndex][cell]
+      totalPuyoCount.inc puyoCount
 
-      if puyoCnt > 0:
-        colorCnt.inc
+      if puyoCount > 0:
+        colorCount.inc
 
     let
-      hardCnt = self.detailPopCnts[chainIdx][Hard]
-      hardToGarbageCnt = self.detailHardToGarbageCnt[chainIdx]
-      colorBonus = ColorBonuses[colorCnt]
+      hardCount = self.detailPopCounts[chainIndex][Hard]
+      hardToGarbageCount = self.detailHardToGarbageCount[chainIndex]
+      colorBonus = ColorBonuses[colorCount]
 
-    totalScore.inc ((totalPuyoCnt + hardToGarbageCnt) * 10 + hardCnt * 80) *
-      max(ChainBonuses[chainIdx.succ] + connBonus + colorBonus, 1)
+    totalScore.inc ((totalPuyoCount + hardToGarbageCount) * 10 + hardCount * 80) *
+      max(ChainBonuses[chainIndex.succ] + connectionBonus + colorBonus, 1)
 
   ok totalScore
 
@@ -233,10 +237,10 @@ func score*(self: MoveResult): Res[int] {.inline, noinit.} =
 # Notice Garbage
 # ------------------------------------------------
 
-func noticeCnts*(
+func noticeCounts*(
     self: MoveResult, rule: Rule, useComet = false
-): Res[array[Notice, int]] {.inline, noinit.} =
+): StrErrorResult[array[Notice, int]] {.inline, noinit.} =
   ## Returns the number of notice garbages.
-  Res[array[Notice, int]].ok (
-    ?self.score.context "`noticeCnts` not supported: {self}".fmt
-  ).noticeCnts(rule, useComet)
+  StrErrorResult[array[Notice, int]].ok (
+    ?self.score.context "`noticeCounts` not supported: {self}".fmt
+  ).noticeCounts(rule, useComet)

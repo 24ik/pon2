@@ -8,9 +8,9 @@
 
 import std/[bitops, sequtils, strformat, sugar]
 import ./[cell, common, fqdn, pair, placement]
-import ../private/[arrayops2, assign3, deques2, math2, results2, strutils2, tables2]
+import ../private/[arrayutils, assign, deques, math, results2, strutils, tables]
 
-export deques2, pair, placement, results2
+export deques, pair, placement, results2
 
 type
   StepKind* {.pure.} = enum
@@ -25,7 +25,7 @@ type
       pair*: Pair
       optPlacement*: OptPlacement
     of Garbages:
-      cnts*: array[Col, int]
+      counts*: array[Col, int]
       dropHard*: bool
     of Rotate:
       cross*: bool
@@ -36,17 +36,19 @@ type
 # Constructor
 # ------------------------------------------------
 
-func init*(T: type Step, pair: Pair, optPlcmt: OptPlacement): T {.inline, noinit.} =
-  T(kind: PairPlacement, pair: pair, optPlacement: optPlcmt)
+func init*(T: type Step, pair: Pair, optPlacement: OptPlacement): T {.inline, noinit.} =
+  T(kind: PairPlacement, pair: pair, optPlacement: optPlacement)
 
 func init*(T: type Step, pair: Pair): T {.inline, noinit.} =
   T.init(pair, NonePlacement)
 
-func init*(T: type Step, pair: Pair, plcmt: Placement): T {.inline, noinit.} =
-  T.init(pair, OptPlacement.ok plcmt)
+func init*(T: type Step, pair: Pair, placement: Placement): T {.inline, noinit.} =
+  T.init(pair, OptPlacement.ok placement)
 
-func init*(T: type Step, cnts: array[Col, int], dropHard: bool): T {.inline, noinit.} =
-  T(kind: Garbages, cnts: cnts, dropHard: dropHard)
+func init*(
+    T: type Step, counts: array[Col, int], dropHard: bool
+): T {.inline, noinit.} =
+  T(kind: Garbages, counts: counts, dropHard: dropHard)
 
 func init*(T: type Step, cross: bool): T {.inline, noinit.} =
   T(kind: Rotate, cross: cross)
@@ -64,7 +66,7 @@ func `==`*(step1, step2: Step): bool {.inline, noinit.} =
     step2.kind == PairPlacement and step1.pair == step2.pair and
       step1.optPlacement == step2.optPlacement
   of Garbages:
-    step2.kind == Garbages and step1.cnts == step2.cnts and
+    step2.kind == Garbages and step1.counts == step2.counts and
       step1.dropHard == step2.dropHard
   of Rotate:
     step2.kind == Rotate and step1.cross == step2.cross
@@ -81,12 +83,12 @@ func isValid*(self: Step, originalCompatible = false): bool {.inline, noinit.} =
   of Garbages:
     if originalCompatible:
       let
-        maxCnt = self.cnts.max
-        minCnt = self.cnts.min
+        maxCount = self.counts.max
+        minCount = self.counts.min
 
-      0 <= minCnt and maxCnt <= 5 and maxCnt - minCnt <= 1
+      0 <= minCount and maxCount <= 5 and maxCount - minCount <= 1
     else:
-      self.cnts.min >= 0
+      self.counts.min >= 0
   of Rotate:
     true
 
@@ -94,62 +96,62 @@ func isValid*(self: Step, originalCompatible = false): bool {.inline, noinit.} =
 # Count
 # ------------------------------------------------
 
-func cellCnt*(self: Step, cell: Cell): int {.inline, noinit.} =
+func cellCount*(self: Step, cell: Cell): int {.inline, noinit.} =
   ## Returns the number of `cell` in the step.
   case self.kind
   of PairPlacement:
-    self.pair.cellCnt cell
+    self.pair.cellCount cell
   of Garbages:
     if (cell == Hard and self.dropHard) or (cell == Garbage and not self.dropHard):
-      self.cnts.sum2
+      self.counts.sum
     else:
       0
   of Rotate:
     0
 
-func puyoCnt*(self: Step): int {.inline, noinit.} =
+func puyoCount*(self: Step): int {.inline, noinit.} =
   ## Returns the number of puyos in the step.
   case self.kind
   of PairPlacement: 2
-  of Garbages: self.cnts.sum2
+  of Garbages: self.counts.sum
   of Rotate: 0
 
-func colorPuyoCnt*(self: Step): int {.inline, noinit.} =
+func colorPuyoCount*(self: Step): int {.inline, noinit.} =
   ## Returns the number of color puyos in the step.
   case self.kind
   of PairPlacement: 2
   of Garbages: 0
   of Rotate: 0
 
-func garbagesCnt*(self: Step): int {.inline, noinit.} =
+func garbagesCount*(self: Step): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos in the step.
   case self.kind
   of PairPlacement: 0
-  of Garbages: self.cnts.sum2
+  of Garbages: self.counts.sum
   of Rotate: 0
 
-func cellCnt*(steps: Steps, cell: Cell): int {.inline, noinit.} =
+func cellCount*(steps: Steps, cell: Cell): int {.inline, noinit.} =
   ## Returns the number of `cell` in the steps.
-  sum2 steps.mapIt it.cellCnt cell
+  sum steps.mapIt it.cellCount cell
 
-func puyoCnt*(steps: Steps): int {.inline, noinit.} =
+func puyoCount*(steps: Steps): int {.inline, noinit.} =
   ## Returns the number of puyos in the steps.
-  sum2 steps.mapIt it.puyoCnt
+  sum steps.mapIt it.puyoCount
 
-func colorPuyoCnt*(steps: Steps): int {.inline, noinit.} =
+func colorPuyoCount*(steps: Steps): int {.inline, noinit.} =
   ## Returns the number of color puyos in the steps.
-  sum2 steps.mapIt it.colorPuyoCnt
+  sum steps.mapIt it.colorPuyoCount
 
-func garbagesCnt*(steps: Steps): int {.inline, noinit.} =
+func garbagesCount*(steps: Steps): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos in the steps.
-  sum2 steps.mapIt it.garbagesCnt
+  sum steps.mapIt it.garbagesCount
 
 # ------------------------------------------------
 # Step <-> string
 # ------------------------------------------------
 
 const
-  PairPlcmtSep = '|'
+  PairPlacementSep = '|'
   GarbagePrefix = '('
   GarbageSuffix = ')'
   HardPrefix = '['
@@ -161,10 +163,10 @@ const
 func `$`*(self: Step): string {.inline, noinit.} =
   case self.kind
   of PairPlacement:
-    "{self.pair}{PairPlcmtSep}{self.optPlacement}".fmt
+    "{self.pair}{PairPlacementSep}{self.optPlacement}".fmt
   of Garbages:
     let
-      joined = self.cnts.mapIt($it).join GarbagesSep
+      joined = self.counts.mapIt($it).join GarbagesSep
       prefix, suffix: char
     if self.dropHard:
       prefix = HardPrefix
@@ -177,7 +179,7 @@ func `$`*(self: Step): string {.inline, noinit.} =
   of Rotate:
     if self.cross: CrossRotateDesc else: RotateDesc
 
-func parseStep*(str: string): Res[Step] {.inline, noinit.} =
+func parseStep*(str: string): StrErrorResult[Step] {.inline, noinit.} =
   ## Returns the step converted from the string representation.
   if str == RotateDesc:
     return ok Step.init(cross = false)
@@ -192,22 +194,22 @@ func parseStep*(str: string): Res[Step] {.inline, noinit.} =
     if strs.len != Width:
       return err "Invalid step (garbages): {str}".fmt
 
-    let cnts = collect:
+    let counts = collect:
       for s in strs:
-        ?s.parseIntRes.context "Invalid step (garbages): {str}".fmt
+        ?s.parseInt.context "Invalid step (garbages): {str}".fmt
     return ok Step.init(
-      [Col0: cnts[0], cnts[1], cnts[2], cnts[3], cnts[4], cnts[5]], dropHard
+      [Col0: counts[0], counts[1], counts[2], counts[3], counts[4], counts[5]], dropHard
     )
 
-  let strs = str.split PairPlcmtSep
+  let strs = str.split PairPlacementSep
   if strs.len != 2:
     return err "Invalid step: {str}".fmt
 
   let
     pair = ?strs[0].parsePair.context "Invalid step: {str}".fmt
-    optPlcmt = ?strs[1].parseOptPlacement.context "Invalid step: {str}".fmt
+    optPlacement = ?strs[1].parseOptPlacement.context "Invalid step: {str}".fmt
 
-  ok Step.init(pair, optPlcmt)
+  ok Step.init(pair, optPlacement)
 
 # ------------------------------------------------
 # Step <-> URI
@@ -228,7 +230,7 @@ const
     for i, uri in IshikawaUriNumbers:
       {uri: i}
 
-func toUriQuery*(self: Step, fqdn = Pon2): Res[string] {.inline, noinit.} =
+func toUriQuery*(self: Step, fqdn = Pon2): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the step.
   case self.kind
   of PairPlacement:
@@ -238,22 +240,21 @@ func toUriQuery*(self: Step, fqdn = Pon2): Res[string] {.inline, noinit.} =
     of Pon2:
       let
         wrapper = if self.dropHard: HardWrapUri else: GarbageWrapUri
-        joined = self.cnts.mapIt($it).join GarbagesSepUri
+        joined = self.counts.mapIt($it).join GarbagesSepUri
       ok "{wrapper}{joined}{wrapper}".fmt
     of Ishikawa, Ips:
       if not self.isValid(originalCompatible = true) or self.dropHard:
         return err "Not supported step with Ishikawa/Ips format: {self}".fmt
 
-      let maxGarbageCnt = self.cnts.max
-      if maxGarbageCnt == 0:
+      let maxGarbageCount = self.counts.max
+      if maxGarbageCount == 0:
         return ok "a0"
 
       let
-        diffs = self.cnts.mapIt it - maxGarbageCnt + 1
-        diffVal =
-          sum2 (0 ..< Width).toSeq.mapIt diffs[it] * 2 ^ (Width - it - 1).Natural
+        diffs = self.counts.mapIt it - maxGarbageCount + 1
+        diffVal = sum (0 ..< Width).toSeq.mapIt diffs[it] * 2 ^ (Width - it - 1).Natural
 
-      ok MaxGarbageToIshikawaUri[maxGarbageCnt] & IshikawaUriNumbers[diffVal]
+      ok MaxGarbageToIshikawaUri[maxGarbageCount] & IshikawaUriNumbers[diffVal]
   of Rotate:
     case fqdn
     of Pon2:
@@ -261,7 +262,9 @@ func toUriQuery*(self: Step, fqdn = Pon2): Res[string] {.inline, noinit.} =
     of Ishikawa, Ips:
       err "Not supported step with Ishikawa/Ips format: {self}".fmt
 
-func parseStep*(query: string, fqdn: SimulatorFqdn): Res[Step] {.inline, noinit.} =
+func parseStep*(
+    query: string, fqdn: SimulatorFqdn
+): StrErrorResult[Step] {.inline, noinit.} =
   ## Returns the step converted from the URI query.
   case fqdn
   of Pon2:
@@ -283,11 +286,12 @@ func parseStep*(query: string, fqdn: SimulatorFqdn): Res[Step] {.inline, noinit.
       if strs.len != Width:
         return err "Invalid step (garbages): {query}".fmt
 
-      let cnts = collect:
+      let counts = collect:
         for s in strs:
-          ?s.parseIntRes.context "Invalid step (garbages): {query}".fmt
+          ?s.parseInt.context "Invalid step (garbages): {query}".fmt
       ok Step.init(
-        [Col0: cnts[0], cnts[1], cnts[2], cnts[3], cnts[4], cnts[5]], dropHard
+        [Col0: counts[0], counts[1], counts[2], counts[3], counts[4], counts[5]],
+        dropHard,
       )
     elif query.len == 2:
       ok Step.init ?query.parsePair(fqdn).context "Invalid step (pair): {query}".fmt
@@ -304,27 +308,25 @@ func parseStep*(query: string, fqdn: SimulatorFqdn): Res[Step] {.inline, noinit.
     if query.len != 2:
       return err "Invalid step: {query}".fmt
 
-    let maxGarbageCntRes = IshikawaUriToMaxGarbage.getRes query[0]
-    if maxGarbageCntRes.isOk:
+    let maxGarbageCountRes = IshikawaUriToMaxGarbage[query[0]]
+    if maxGarbageCountRes.isOk:
       let num =
-        ?IshikawaUriToNum.getRes(query[1]).context(
-          "Invalid step (garbage count): {query}".fmt
-        )
+        ?IshikawaUriToNum[query[1]].context("Invalid step (garbage count): {query}".fmt)
 
-      var garbageCnts = initArrWith[Col, int](maxGarbageCntRes.value.pred)
+      var garbageCounts = Col.initArrayWith maxGarbageCountRes.value.pred
       for col in Col:
-        garbageCnts[col].inc num.testBit(Width.pred - col.ord).int
+        garbageCounts[col].inc num.testBit(Width.pred - col.ord).int
 
-      return ok Step.init(garbageCnts, false)
+      return ok Step.init(garbageCounts, false)
 
     let
       pair = ?query[0 .. 0].parsePair(fqdn).context "Invalid step (pair): {query}".fmt
-      optPlcmt =
+      optPlacement =
         ?query[1 .. 1].parseOptPlacement(fqdn).context(
           "Invalid step (placement): {query}".fmt
         )
 
-    ok Step.init(pair, optPlcmt)
+    ok Step.init(pair, optPlacement)
 
 # ------------------------------------------------
 # Steps <-> string
@@ -339,7 +341,7 @@ func `$`*(self: Steps): string {.inline, noinit.} =
 
   strs.join StepsSep
 
-func parseSteps*(str: string): Res[Steps] {.inline, noinit.} =
+func parseSteps*(str: string): StrErrorResult[Steps] {.inline, noinit.} =
   ## Returns the steps converted from the string representation.
   if str == "":
     return ok Steps.init
@@ -348,13 +350,13 @@ func parseSteps*(str: string): Res[Steps] {.inline, noinit.} =
     for s in str.split StepsSep:
       ?s.parseStep.context "Invalid steps: {str}".fmt
 
-  return ok steps.toDeque2
+  return ok steps.toDeque
 
 # ------------------------------------------------
 # Steps <-> URI
 # ------------------------------------------------
 
-func toUriQuery*(self: Steps, fqdn = Pon2): Res[string] {.inline, noinit.} =
+func toUriQuery*(self: Steps, fqdn = Pon2): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the steps.
   let strs = collect:
     for step in self:
@@ -362,43 +364,45 @@ func toUriQuery*(self: Steps, fqdn = Pon2): Res[string] {.inline, noinit.} =
 
   ok strs.join
 
-func parseSteps*(query: string, fqdn: SimulatorFqdn): Res[Steps] {.inline, noinit.} =
+func parseSteps*(
+    query: string, fqdn: SimulatorFqdn
+): StrErrorResult[Steps] {.inline, noinit.} =
   ## Returns the steps converted from the URI query.
   case fqdn
   of Pon2:
     var
-      idx = 0
+      index = 0
       steps = Steps.init
-    while idx < query.len:
-      if query[idx] in {RotateDesc[0], CrossRotateDesc[0]}:
-        steps.addLast ?query[idx .. idx].parseStep(fqdn).context(
+    while index < query.len:
+      if query[index] in {RotateDesc[0], CrossRotateDesc[0]}:
+        steps.addLast ?query[index .. index].parseStep(fqdn).context(
           "Invalid steps: {query}".fmt
         )
-        idx.inc
-      elif query[idx] in {HardWrapUri, GarbageWrapUri}:
-        let garbageLastIdx = query.find(query[idx], start = idx.succ)
-        if garbageLastIdx == -1:
+        index.inc
+      elif query[index] in {HardWrapUri, GarbageWrapUri}:
+        let garbageLastIndex = query.find(query[index], start = index.succ)
+        if garbageLastIndex == -1:
           return err "Invalid steps (gabrages area does not close): {query}".fmt
 
-        steps.addLast ?query[idx .. garbageLastIdx].parseStep(fqdn).context(
+        steps.addLast ?query[index .. garbageLastIndex].parseStep(fqdn).context(
           "Invalid steps: {query}".fmt
         )
-        idx.assign garbageLastIdx.succ
+        index.assign garbageLastIndex.succ
       else:
-        if idx.succ(4) <= query.len:
-          let stepRes = query[idx ..< idx.succ 4].parseStep fqdn
+        if index.succ(4) <= query.len:
+          let stepRes = query[index ..< index.succ 4].parseStep fqdn
           if stepRes.isOk:
             steps.addLast stepRes.unsafeValue
-            idx.inc 4
+            index.inc 4
             continue
 
-        if idx.succ(2) > query.len:
+        if index.succ(2) > query.len:
           return err "Invalid steps: {query}".fmt
 
-        steps.addLast ?query[idx ..< idx.succ 2].parseStep(fqdn).context(
+        steps.addLast ?query[index ..< index.succ 2].parseStep(fqdn).context(
           "Invalid steps: {query}".fmt
         )
-        idx.inc 2
+        index.inc 2
 
     ok steps
   of Ishikawa, Ips:
@@ -409,4 +413,4 @@ func parseSteps*(query: string, fqdn: SimulatorFqdn): Res[Steps] {.inline, noini
       for i in countup(0, query.len.pred, 2):
         ?query[i .. i.succ].parseStep(fqdn).context "Invalid steps: {query}".fmt
 
-    ok steps.toDeque2
+    ok steps.toDeque

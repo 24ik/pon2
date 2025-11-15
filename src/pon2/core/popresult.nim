@@ -8,20 +8,20 @@
 
 import std/[sequtils]
 import ./[cell, common]
-import ../private/[arrayops2, assign3, core, staticfor2, unionfind]
+import ../private/[arrayutils, assign, core, staticfor, unionfind]
 
 export cell
 
 type PopResult* = object ## Pop Results.
-  red: BinField
-  green: BinField
-  blue: BinField
-  yellow: BinField
-  purple: BinField
-  hard: BinField
-  hardToGarbage: BinField
-  garbage: BinField
-  color: BinField
+  red: BinaryField
+  green: BinaryField
+  blue: BinaryField
+  yellow: BinaryField
+  purple: BinaryField
+  hard: BinaryField
+  hardToGarbage: BinaryField
+  garbage: BinaryField
+  color: BinaryField
 
 # ------------------------------------------------
 # Constructor
@@ -29,7 +29,7 @@ type PopResult* = object ## Pop Results.
 
 func init*(
     T: type PopResult,
-    red, green, blue, yellow, purple, hard, hardToGarbage, garbage, color: BinField,
+    red, green, blue, yellow, purple, hard, hardToGarbage, garbage, color: BinaryField,
 ): T {.inline, noinit.} =
   T(
     red: red,
@@ -44,7 +44,7 @@ func init*(
   )
 
 func init*(T: type PopResult): T {.inline, noinit.} =
-  let zero = BinField.init
+  let zero = BinaryField.init
   T.init(zero, zero, zero, zero, zero, zero, zero, zero, zero)
 
 # ------------------------------------------------
@@ -53,13 +53,13 @@ func init*(T: type PopResult): T {.inline, noinit.} =
 
 func isPopped*(self: PopResult): bool {.inline, noinit.} =
   ## Returns `true` if any puyo popped.
-  self.color != BinField.init
+  self.color != BinaryField.init
 
 # ------------------------------------------------
 # Count
 # ------------------------------------------------
 
-func cellCnt*(self: PopResult, cell: Cell): int {.inline, noinit.} =
+func cellCount*(self: PopResult, cell: Cell): int {.inline, noinit.} =
   ## Returns the number of `cell` that popped.
   case cell
   of None: 0
@@ -71,19 +71,19 @@ func cellCnt*(self: PopResult, cell: Cell): int {.inline, noinit.} =
   of Yellow: self.yellow.popcnt
   of Purple: self.purple.popcnt
 
-func puyoCnt*(self: PopResult): int {.inline, noinit.} =
+func puyoCount*(self: PopResult): int {.inline, noinit.} =
   ## Returns the number of puyos that popped.
   self.color.popcnt + self.hard.popcnt + self.garbage.popcnt
 
-func colorPuyoCnt*(self: PopResult): int {.inline, noinit.} =
+func colorPuyoCount*(self: PopResult): int {.inline, noinit.} =
   ## Returns the number of color puyos that popped.
   self.color.popcnt
 
-func garbagesCnt*(self: PopResult): int {.inline, noinit.} =
+func garbagesCount*(self: PopResult): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos that popped.
   self.hard.popcnt + self.garbage.popcnt
 
-func hardToGarbageCnt*(self: PopResult): int {.inline, noinit.} =
+func hardToGarbageCount*(self: PopResult): int {.inline, noinit.} =
   ## Returns the number of hard puyos that becomes garbage puyos.
   self.hardToGarbage.popcnt
 
@@ -91,59 +91,60 @@ func hardToGarbageCnt*(self: PopResult): int {.inline, noinit.} =
 # Connection
 # ------------------------------------------------
 
-func connCnts(self: BinField): seq[int] {.inline, noinit.} =
+func connectionCounts(self: BinaryField): seq[int] {.inline, noinit.} =
   ## Returns an array of a sequence that represents the numbers of connections.
-  const DefaultCcIdx = 0
+  const DefaultCcIndex = 0
 
-  let arr = self.toArr
+  let arr = self.toArray
 
   var
-    ccIdxArr = static(initArrWith(Height + 2, initArrWith(Width + 2, DefaultCcIdx)))
+    ccIndexArray =
+      static((Height.succ 2).initArrayWith (Width.succ 2).initArrayWith DefaultCcIndex)
     uf = static(UnionFind.init Height * Width)
-    nextCcIdx = DefaultCcIdx.succ
+    nextCcIndex = DefaultCcIndex.succ
 
   staticFor(row, Row):
     staticFor(col, Col):
       if arr[row][col]:
         let
           rowOrd = row.ord
-          arrRowIdx = rowOrd.succ
+          arrRowIndex = rowOrd.succ
           colOrd = col.ord
-          arrColIdx = colOrd.succ
+          arrColIndex = colOrd.succ
 
-          ccIdxU = ccIdxArr[rowOrd][arrColIdx]
-          ccIdxL = ccIdxArr[arrRowIdx][colOrd]
+          ccIndexU = ccIndexArray[rowOrd][arrColIndex]
+          ccIndexL = ccIndexArray[arrRowIndex][colOrd]
 
-        if ccIdxU == DefaultCcIdx:
-          if ccIdxL == DefaultCcIdx:
-            ccIdxArr[arrRowIdx][arrColIdx].assign nextCcIdx
-            nextCcIdx.inc
+        if ccIndexU == DefaultCcIndex:
+          if ccIndexL == DefaultCcIndex:
+            ccIndexArray[arrRowIndex][arrColIndex].assign nextCcIndex
+            nextCcIndex.inc
           else:
-            ccIdxArr[arrRowIdx][arrColIdx].assign ccIdxL
+            ccIndexArray[arrRowIndex][arrColIndex].assign ccIndexL
         else:
-          ccIdxArr[arrRowIdx][arrColIdx].assign ccIdxU
+          ccIndexArray[arrRowIndex][arrColIndex].assign ccIndexU
 
-          if ccIdxL != DefaultCcIdx:
-            uf.merge ccIdxU, ccIdxL
+          if ccIndexL != DefaultCcIndex:
+            uf.merge ccIndexU, ccIndexL
 
-  var conns = 0.repeat nextCcIdx
+  var connections = 0.repeat nextCcIndex
   staticFor(row, Row):
     staticFor(col, Col):
-      let ccIdx = ccIdxArr[row.ord.succ][col.ord.succ]
-      if ccIdx != DefaultCcIdx:
-        conns[uf.root ccIdx].inc
+      let ccIndex = ccIndexArray[row.ord.succ][col.ord.succ]
+      if ccIndex != DefaultCcIndex:
+        connections[uf.root ccIndex].inc
 
-  conns.filterIt it > 0
+  connections.filterIt it > 0
 
-func connCnts*(self: PopResult): array[Cell, seq[int]] {.inline, noinit.} =
+func connectionCounts*(self: PopResult): array[Cell, seq[int]] {.inline, noinit.} =
   ## Returns an array of a sequence that represents the numbers of connections.
   [
     @[],
     @[],
     @[],
-    self.red.connCnts,
-    self.green.connCnts,
-    self.blue.connCnts,
-    self.yellow.connCnts,
-    self.purple.connCnts,
+    self.red.connectionCounts,
+    self.green.connectionCounts,
+    self.blue.connectionCounts,
+    self.yellow.connectionCounts,
+    self.purple.connectionCounts,
   ]

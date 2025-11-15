@@ -8,11 +8,11 @@
 
 import std/[sequtils, typetraits]
 import ../../[core]
-import ../../private/[assign3, core, macros2, math2, staticfor2]
+import ../../private/[assign, core, macros, math, staticfor]
 
 when defined(js) or defined(nimsuggest):
   import std/[strformat, sugar]
-  import ../../private/[results2, strutils2]
+  import ../../private/[results2, strutils]
 
   export core, results2
 
@@ -23,10 +23,10 @@ type SolveNode*[F: TsuField or WaterField] = object ## Node of solutions search 
   moveResult: MoveResult
 
   popColors: set[Cell]
-  popCnt: int
+  popCount: int
 
-  fieldCnts: array[Cell, int]
-  stepsCnts: array[Cell, int]
+  fieldCounts: array[Cell, int]
+  stepsCounts: array[Cell, int]
 
 # ------------------------------------------------
 # Constructor
@@ -38,30 +38,30 @@ func init[F: TsuField or WaterField](
     field: F,
     moveRes: MoveResult,
     popColors: set[Cell],
-    popCnt: int,
-    fieldCnts, stepsCnts: array[Cell, int],
+    popCount: int,
+    fieldCounts, stepsCounts: array[Cell, int],
 ): T {.inline, noinit.} =
   T(
     depth: depth,
     field: field,
     moveResult: moveRes,
     popColors: popColors,
-    popCnt: popCnt,
-    fieldCnts: fieldCnts,
-    stepsCnts: stepsCnts,
+    popCount: popCount,
+    fieldCounts: fieldCounts,
+    stepsCounts: stepsCounts,
   )
 
 func init*[F: TsuField or WaterField](
     T: type SolveNode[F], puyoPuyo: PuyoPuyo[F]
 ): T {.inline, noinit.} =
-  var fieldCnts {.noinit.}, stepsCnts {.noinit.}: array[Cell, int]
-  fieldCnts[Cell.None] = 0
-  stepsCnts[Cell.None] = 0
+  var fieldCounts {.noinit.}, stepsCounts {.noinit.}: array[Cell, int]
+  fieldCounts[Cell.None] = 0
+  stepsCounts[Cell.None] = 0
   staticFor(cell2, Hard .. Cell.Purple):
-    fieldCnts[cell2].assign puyoPuyo.field.cellCnt cell2
-    stepsCnts[cell2].assign puyoPuyo.steps.cellCnt cell2
+    fieldCounts[cell2].assign puyoPuyo.field.cellCount cell2
+    stepsCounts[cell2].assign puyoPuyo.steps.cellCount cell2
 
-  T.init(0, puyoPuyo.field, static(MoveResult.init), {}, 0, fieldCnts, stepsCnts)
+  T.init(0, puyoPuyo.field, static(MoveResult.init), {}, 0, fieldCounts, stepsCounts)
 
 # ------------------------------------------------
 # Child
@@ -91,89 +91,92 @@ template childImpl[F: TsuField or WaterField](
 
   let childPopColors = staticCase:
     case kind
-    of AccColor, AccColorMore:
+    of AccumColor, AccumColorMore:
       self.popColors + moveRes.colors
     else:
       set[Cell]({})
 
-  let childPopCnt = staticCase:
+  let childPopCount = staticCase:
     case kind
-    of AccCnt, AccCntMore:
-      let newCnt = staticCase:
+    of AccumCount, AccumCountMore:
+      let newCount = staticCase:
         case color
         of All:
-          moveRes.puyoCnt
+          moveRes.puyoCount
         of Colors:
-          moveRes.colorPuyoCnt
+          moveRes.colorPuyoCount
         of GoalColor.Garbages:
-          moveRes.garbagesCnt
+          moveRes.garbagesCount
         else:
-          moveRes.cellCnt static(GoalColorToCell[color])
-      self.popCnt.succ newCnt
+          moveRes.cellCount static(GoalColorToCell[color])
+      self.popCount.succ newCount
     else:
       0
 
-  var childFieldCnts = self.fieldCnts
+  var childFieldCounts = self.fieldCounts
   when kind in ColorKinds and color in GoalColor.Red .. GoalColor.Purple:
     const GoalCell = GoalColorToCell[color]
-    childFieldCnts[GoalCell].assign self.fieldCnts[GoalCell].pred moveRes.cellCnt GoalCell
+    childFieldCounts[GoalCell].assign self.fieldCounts[GoalCell].pred moveRes.cellCount GoalCell
   else:
     staticFor(cell2, Cell.Red .. Cell.Purple):
-      childFieldCnts[cell2].dec moveRes.cellCnt cell2
+      childFieldCounts[cell2].dec moveRes.cellCount cell2
 
-  var childStepsCnts = self.stepsCnts
+  var childStepsCounts = self.stepsCounts
   when stepKind == PairPlacement:
     let
       pivotCell = step.pair.pivot
       rotorCell = step.pair.rotor
 
-    childFieldCnts[pivotCell].inc
-    childFieldCnts[rotorCell].inc
-    childStepsCnts[pivotCell].dec
-    childStepsCnts[rotorCell].dec
+    childFieldCounts[pivotCell].inc
+    childFieldCounts[rotorCell].inc
+    childStepsCounts[pivotCell].dec
+    childStepsCounts[rotorCell].dec
 
-  when kind in {Clear, AccCnt, AccCntMore, ClearChain, ClearChainMore, Cnt, CntMore} and
+  when kind in
+      {Clear, AccumCount, AccumCountMore, ClearChain, ClearChainMore, Count, CountMore} and
       color in {All, GoalColor.Garbages}:
-    let stepGarbageHardCnt, isHard, isGarbage: int
+    let stepGarbageHardCount, isHard, isGarbage: int
     when stepKind == StepKind.Garbages:
-      stepGarbageHardCnt = step.garbagesCnt
+      stepGarbageHardCount = step.garbagesCount
       isHard = step.dropHard.int
       isGarbage = (not step.dropHard).int
     else:
-      stepGarbageHardCnt = 0
+      stepGarbageHardCount = 0
       isHard = 0
       isGarbage = 0
 
-    childFieldCnts[Hard].dec moveRes.popCnts[Hard] + moveRes.hardToGarbageCnt -
-      stepGarbageHardCnt * isHard
-    childFieldCnts[Garbage].dec moveRes.popCnts[Garbage] - moveRes.hardToGarbageCnt -
-      stepGarbageHardCnt * isGarbage
+    childFieldCounts[Hard].dec moveRes.popCounts[Hard] + moveRes.hardToGarbageCount -
+      stepGarbageHardCount * isHard
+    childFieldCounts[Garbage].dec moveRes.popCounts[Garbage] - moveRes.hardToGarbageCount -
+      stepGarbageHardCount * isGarbage
 
     when stepKind == StepKind.Garbages:
-      childStepsCnts[Garbage.pred isHard].dec stepGarbageHardCnt
+      childStepsCounts[Garbage.pred isHard].dec stepGarbageHardCount
 
   when stepKind == Rotate:
     staticFor(col, Col):
       let cell = self.field[Row0, col]
-      childFieldCnts[cell].dec (cell != Cell.None).int
+      childFieldCounts[cell].dec (cell != Cell.None).int
 
   SolveNode[F].init(
-    self.depth.succ, childField, moveRes, childPopColors, childPopCnt, childFieldCnts,
-    childStepsCnts,
+    self.depth.succ, childField, moveRes, childPopColors, childPopCount,
+    childFieldCounts, childStepsCounts,
   )
 
-func childPairPlcmt[F: TsuField or WaterField](
+func childPairPlacement[F: TsuField or WaterField](
     self: SolveNode[F],
     kind: static GoalKind,
     color: static GoalColor,
     step: Step,
-    plcmt: Placement,
+    placement: Placement,
 ): SolveNode[F] {.inline, noinit.} =
   ## Returns the child node with the `step` edge.
   ## This function requires that the field is settled.
   self.childImpl(kind, color, step, PairPlacement):
     childField.move(
-      step.pair, plcmt, static(kind in {Place, PlaceMore, Conn, ConnMore})
+      step.pair,
+      placement,
+      static(kind in {Place, PlaceMore, Connection, ConnectionMore}),
     )
 
 func childGarbages[F: TsuField or WaterField](
@@ -183,7 +186,9 @@ func childGarbages[F: TsuField or WaterField](
   ## This function requires that the field is settled.
   self.childImpl(kind, color, step, StepKind.Garbages):
     childField.move(
-      step.cnts, step.dropHard, static(kind in {Place, PlaceMore, Conn, ConnMore})
+      step.counts,
+      step.dropHard,
+      static(kind in {Place, PlaceMore, Connection, ConnectionMore}),
     )
 
 func childRotate[F: TsuField or WaterField](
@@ -192,7 +197,7 @@ func childRotate[F: TsuField or WaterField](
   ## Returns the child node with the `step` edge.
   self.childImpl(kind, color, step, Rotate):
     childField.move(
-      cross = step.cross, static(kind in {Place, PlaceMore, Conn, ConnMore})
+      cross = step.cross, static(kind in {Place, PlaceMore, Connection, ConnectionMore})
     )
 
 func children[F: TsuField or WaterField](
@@ -203,10 +208,15 @@ func children[F: TsuField or WaterField](
   ## `optPlacement` is set to `NonePlacement` if the edge is non-`PairPlacement`.
   case step.kind
   of PairPlacement:
-    let plcmts =
-      if step.pair.isDbl: self.field.validDblPlacements else: self.field.validPlacements
+    let placements =
+      if step.pair.isDouble:
+        self.field.validDoublePlacements
+      else:
+        self.field.validPlacements
 
-    plcmts.mapIt (self.childPairPlcmt(kind, color, step, it), OptPlacement.ok it)
+    placements.mapIt (
+      self.childPairPlacement(kind, color, step, it), OptPlacement.ok it
+    )
   of StepKind.Garbages:
     @[(self.childGarbages(kind, color, step), NonePlacement)]
   of Rotate:
@@ -216,18 +226,18 @@ func children[F: TsuField or WaterField](
 # Accept
 # ------------------------------------------------
 
-func cellCnt[F: TsuField or WaterField](
+func cellCount[F: TsuField or WaterField](
     self: SolveNode[F], cell: Cell
 ): int {.inline, noinit.} =
   ## Returns the number of `cell` in the node.
-  self.fieldCnts[cell] + self.stepsCnts[cell]
+  self.fieldCounts[cell] + self.stepsCounts[cell]
 
-func garbagesCnt[F: TsuField or WaterField](
+func garbagesCount[F: TsuField or WaterField](
     self: SolveNode[F]
 ): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos in the node.
-  (self.fieldCnts[Hard] + self.fieldCnts[Garbage]) +
-    (self.stepsCnts[Hard] + self.stepsCnts[Garbage])
+  (self.fieldCounts[Hard] + self.fieldCounts[Garbage]) +
+    (self.stepsCounts[Hard] + self.stepsCounts[Garbage])
 
 func isAccepted[F: TsuField or WaterField](
     self: SolveNode[F], goal: Goal, kind: static GoalKind, color: static GoalColor
@@ -237,18 +247,18 @@ func isAccepted[F: TsuField or WaterField](
   staticCase:
     case kind
     of Clear, ClearChain, ClearChainMore:
-      let fieldCnt = staticCase:
+      let fieldCount = staticCase:
         case color
         of All:
-          self.fieldCnts.sum2
+          self.fieldCounts.sum
         of Colors:
-          self.fieldCnts.sum2 Cell.Red .. Cell.Purple
+          self.fieldCounts.sum Cell.Red .. Cell.Purple
         of GoalColor.Garbages:
-          self.fieldCnts[Hard] + self.fieldCnts[Garbage]
+          self.fieldCounts[Hard] + self.fieldCounts[Garbage]
         else:
-          self.fieldCnts[static(GoalColorToCell[color])]
+          self.fieldCounts[static(GoalColorToCell[color])]
 
-      if fieldCnt > 0:
+      if fieldCount > 0:
         return false
     else:
       discard
@@ -258,20 +268,20 @@ func isAccepted[F: TsuField or WaterField](
     case kind
     of Clear:
       true
-    of AccColor, AccColorMore:
-      goal.isSatisfiedAccColor(self.popColors, kind)
-    of AccCnt, AccCntMore:
-      goal.isSatisfiedAccCnt(self.popCnt, kind)
+    of AccumColor, AccumColorMore:
+      goal.isSatisfiedAccumColor(self.popColors, kind)
+    of AccumCount, AccumCountMore:
+      goal.isSatisfiedAccumCount(self.popCount, kind)
     of Chain, ChainMore, ClearChain, ClearChainMore:
       goal.isSatisfiedChain(self.moveResult, kind)
     of Color, ColorMore:
       goal.isSatisfiedColor(self.moveResult, kind)
-    of Cnt, CntMore:
-      goal.isSatisfiedCnt(self.moveResult, kind, color)
+    of Count, CountMore:
+      goal.isSatisfiedCount(self.moveResult, kind, color)
     of Place, PlaceMore:
       goal.isSatisfiedPlace(self.moveResult, kind, color)
-    of Conn, ConnMore:
-      goal.isSatisfiedConn(self.moveResult, kind, color)
+    of Connection, ConnectionMore:
+      goal.isSatisfiedConnection(self.moveResult, kind, color)
 
 # ------------------------------------------------
 # Prune
@@ -317,44 +327,44 @@ func canPrune[F: TsuField or WaterField](
 
           staticFor(cell2, Cell.Red .. Cell.Purple):
             let
-              fieldCnt = self.fieldCnts[cell2]
-              cnt = fieldCnt + self.stepsCnts[cell2]
-              cntLt4 = cnt < 4
+              fieldCount = self.fieldCounts[cell2]
+              count = fieldCount + self.stepsCounts[cell2]
+              countLt4 = count < 4
 
-            poppableColorNotExist.assign poppableColorNotExist and cntLt4
-            unpoppableColorExist.assign unpoppableColorExist or (
-              fieldCnt > 0 and cntLt4
-            )
+            poppableColorNotExist.assign poppableColorNotExist and countLt4
+            unpoppableColorExist.assign unpoppableColorExist or
+              (fieldCount > 0 and countLt4)
 
           unpoppableColorExist or (
             poppableColorNotExist and
-            (self.fieldCnts[Hard] + self.fieldCnts[Garbage] > 0)
+            (self.fieldCounts[Hard] + self.fieldCounts[Garbage] > 0)
           )
         of GoalColor.Garbages:
           var poppableColorNotExist = true
 
           staticFor(cell2, Cell.Red .. Cell.Purple):
             poppableColorNotExist.assign poppableColorNotExist and
-              self.cellCnt(cell2) < 4
+              self.cellCount(cell2) < 4
 
-          poppableColorNotExist and (self.fieldCnts[Hard] + self.fieldCnts[Garbage] > 0)
+          poppableColorNotExist and
+            (self.fieldCounts[Hard] + self.fieldCounts[Garbage] > 0)
         of Colors:
           var unpoppableColorExist = false
 
           staticFor(cell2, Cell.Red .. Cell.Purple):
             let
-              fieldCnt = self.fieldCnts[cell2]
-              cnt = fieldCnt + self.stepsCnts[cell2]
+              fieldCount = self.fieldCounts[cell2]
+              count = fieldCount + self.stepsCounts[cell2]
 
             unpoppableColorExist.assign unpoppableColorExist or
-              (fieldCnt > 0 and cnt < 4)
+              (fieldCount > 0 and count < 4)
 
           unpoppableColorExist
         else:
           const GoalCell = GoalColorToCell[color]
-          let fieldCnt = self.fieldCnts[GoalCell]
+          let fieldCount = self.fieldCounts[GoalCell]
 
-          fieldCnt > 0 and fieldCnt + self.stepsCnts[GoalCell] < 4
+          fieldCount > 0 and fieldCount + self.stepsCounts[GoalCell] < 4
 
       if canPrune:
         return true
@@ -366,57 +376,57 @@ func canPrune[F: TsuField or WaterField](
     case kind
     of Clear:
       false
-    of AccColor, AccColorMore:
-      let possibleVal = sum2It[Cell, int](Cell.Red .. Cell.Purple):
-        (self.cellCnt(it) >= 4).int
+    of AccumColor, AccumColorMore:
+      let possibleVal = sumIt[Cell, int](Cell.Red .. Cell.Purple):
+        (self.cellCount(it) >= 4).int
       possibleVal < goal.optVal.unsafeValue
-    of AccCnt, AccCntMore, Cnt, CntMore, Conn, ConnMore:
-      let nowPossibleCnt = staticCase:
+    of AccumCount, AccumCountMore, Count, CountMore, Connection, ConnectionMore:
+      let nowPossibleCount = staticCase:
         case color
         of All, Colors, GoalColor.Garbages:
-          let colorPossibleCnt = sum2It[Cell, int](Cell.Red .. Cell.Purple):
-            self.cellCnt(it).filter4
+          let colorPossibleCount = sumIt[Cell, int](Cell.Red .. Cell.Purple):
+            self.cellCount(it).filter4
           staticCase:
             case color
             of All:
-              colorPossibleCnt + (colorPossibleCnt > 0).int * self.garbagesCnt
+              colorPossibleCount + (colorPossibleCount > 0).int * self.garbagesCount
             of Colors:
-              colorPossibleCnt
+              colorPossibleCount
             of GoalColor.Garbages:
-              (colorPossibleCnt > 0).int * self.garbagesCnt
+              (colorPossibleCount > 0).int * self.garbagesCount
             else:
               0 # dummy
         else:
-          self.cellCnt(static(GoalColorToCell[color])).filter4
+          self.cellCount(static(GoalColorToCell[color])).filter4
 
-      let possibleCnt = staticCase:
+      let possibleCount = staticCase:
         case kind
-        of AccCnt, AccCntMore:
-          self.popCnt + nowPossibleCnt
-        of Cnt, CntMore, Conn, ConnMore:
-          nowPossibleCnt
+        of AccumCount, AccumCountMore:
+          self.popCount + nowPossibleCount
+        of Count, CountMore, Connection, ConnectionMore:
+          nowPossibleCount
         else:
           0 # dummy
 
-      possibleCnt < goal.optVal.unsafeValue
+      possibleCount < goal.optVal.unsafeValue
     of Chain, ChainMore, ClearChain, ClearChainMore:
-      let possibleChain = sum2It[Cell, int](Cell.Red .. Cell.Purple):
-        self.cellCnt(it) div 4
+      let possibleChain = sumIt[Cell, int](Cell.Red .. Cell.Purple):
+        self.cellCount(it) div 4
       possibleChain < goal.optVal.unsafeValue
     of Color, ColorMore:
-      let possibleColorCnt = sum2It[Cell, int](Cell.Red .. Cell.Purple):
-        (self.cellCnt(it) >= 4).int
-      possibleColorCnt < goal.optVal.unsafeValue
+      let possibleColorCount = sumIt[Cell, int](Cell.Red .. Cell.Purple):
+        (self.cellCount(it) >= 4).int
+      possibleColorCount < goal.optVal.unsafeValue
     of Place, PlaceMore:
       let possiblePlace = staticCase:
         case color
         of All, Colors:
-          sum2It[Cell, int](Cell.Red .. Cell.Purple):
-            self.cellCnt(it) div 4
+          sumIt[Cell, int](Cell.Red .. Cell.Purple):
+            self.cellCount(it) div 4
         of GoalColor.Garbages:
           0 # dummy
         else:
-          self.cellCnt(static(GoalColorToCell[color])) div 4
+          self.cellCount(static(GoalColorToCell[color])) div 4
 
       possiblePlace < goal.optVal.unsafeValue
 
@@ -459,22 +469,22 @@ template withStaticKindColor(goal: Goal, body: untyped): untyped =
     const StaticKind {.inject.} = Clear
     goal.withStaticColor:
       body
-  of AccColor:
+  of AccumColor:
     const
-      StaticKind {.inject.} = AccColor
+      StaticKind {.inject.} = AccumColor
       StaticColor {.inject.} = GoalColor.low
     body
-  of AccColorMore:
+  of AccumColorMore:
     const
-      StaticKind {.inject.} = AccColorMore
+      StaticKind {.inject.} = AccumColorMore
       StaticColor {.inject.} = GoalColor.low
     body
-  of AccCnt:
-    const StaticKind {.inject.} = AccCnt
+  of AccumCount:
+    const StaticKind {.inject.} = AccumCount
     goal.withStaticColor:
       body
-  of AccCntMore:
-    const StaticKind {.inject.} = AccCntMore
+  of AccumCountMore:
+    const StaticKind {.inject.} = AccumCountMore
     goal.withStaticColor:
       body
   of Chain:
@@ -505,12 +515,12 @@ template withStaticKindColor(goal: Goal, body: untyped): untyped =
       StaticKind {.inject.} = ColorMore
       StaticColor {.inject.} = GoalColor.low
     body
-  of Cnt:
-    const StaticKind {.inject.} = Cnt
+  of Count:
+    const StaticKind {.inject.} = Count
     goal.withStaticColor:
       body
-  of CntMore:
-    const StaticKind {.inject.} = CntMore
+  of CountMore:
+    const StaticKind {.inject.} = CountMore
     goal.withStaticColor:
       body
   of Place:
@@ -521,12 +531,12 @@ template withStaticKindColor(goal: Goal, body: untyped): untyped =
     const StaticKind {.inject.} = PlaceMore
     goal.withStaticColor:
       body
-  of Conn:
-    const StaticKind {.inject.} = Conn
+  of Connection:
+    const StaticKind {.inject.} = Connection
     goal.withStaticColor:
       body
-  of ConnMore:
-    const StaticKind {.inject.} = ConnMore
+  of ConnectionMore:
+    const StaticKind {.inject.} = ConnectionMore
     goal.withStaticColor:
       body
 
@@ -538,9 +548,9 @@ func childrenAtDepth[F: TsuField or WaterField](
     self: SolveNode[F],
     targetDepth: int,
     nodes: var seq[SolveNode[F]],
-    optPlcmtsSeq: var seq[seq[OptPlacement]],
+    optPlacementsSeq: var seq[seq[OptPlacement]],
     answers: var seq[seq[OptPlacement]],
-    moveCnt: int,
+    moveCount: int,
     calcAllAnswers: static bool,
     goal: Goal,
     kind: static GoalKind,
@@ -548,31 +558,31 @@ func childrenAtDepth[F: TsuField or WaterField](
     steps: Steps,
 ) {.inline, noinit.} =
   ## Calculates nodes with the given depth and sets them to `nodes`.
-  ## A sequence of edges to reach them is set to `optPlcmtsSeq`.
+  ## A sequence of edges to reach them is set to `optPlacementsSeq`.
   ## Answers that have `targetDepth` or less steps are set to `answers` in reverse
   ## order.
-  ## This function requires that the field is settled and `nodes`, `optPlcmtsSeq`, and
+  ## This function requires that the field is settled and `nodes`, `optPlacementsSeq`, and
   ## `answers` are empty.
   let
     step = steps[self.depth]
     childDepth = self.depth.succ
     childIsSpawned = childDepth == targetDepth
-    childIsLeaf = childDepth == moveCnt
+    childIsLeaf = childDepth == moveCount
     children = self.children(kind, color, step)
 
   var
     nodesSeq = newSeqOfCap[seq[SolveNode[F]]](children.len)
-    optPlcmtsSeqSeq = newSeqOfCap[seq[seq[OptPlacement]]](children.len)
+    optPlacementsSeqSeq = newSeqOfCap[seq[seq[OptPlacement]]](children.len)
     answersSeq = newSeqOfCap[seq[seq[OptPlacement]]](children.len)
   for _ in 1 .. children.len:
     nodesSeq.add newSeqOfCap[SolveNode[F]](static(Placement.enumLen))
-    optPlcmtsSeqSeq.add newSeqOfCap[seq[OptPlacement]](static(Placement.enumLen))
+    optPlacementsSeqSeq.add newSeqOfCap[seq[OptPlacement]](static(Placement.enumLen))
     answersSeq.add newSeqOfCap[seq[OptPlacement]](static(Placement.enumLen))
 
-  for childIdx, (child, optPlcmt) in children.pairs:
+  for childIndex, (child, optPlacement) in children.pairs:
     if child.isAccepted(goal, kind, color):
       var ans = newSeqOfCap[OptPlacement](childDepth)
-      ans.add optPlcmt
+      ans.add optPlacement
 
       answers.add ans
 
@@ -586,58 +596,58 @@ func childrenAtDepth[F: TsuField or WaterField](
       continue
 
     if childIsSpawned:
-      nodesSeq[childIdx].add child
+      nodesSeq[childIndex].add child
 
-      var optPlcmts = newSeqOfCap[OptPlacement](childDepth)
-      optPlcmts.add optPlcmt
-      optPlcmtsSeqSeq[childIdx].add optPlcmts
+      var optPlacements = newSeqOfCap[OptPlacement](childDepth)
+      optPlacements.add optPlacement
+      optPlacementsSeqSeq[childIndex].add optPlacements
     else:
       child.childrenAtDepth targetDepth,
-        nodesSeq[childIdx],
-        optPlcmtsSeqSeq[childIdx],
-        answersSeq[childIdx],
-        moveCnt,
+        nodesSeq[childIndex],
+        optPlacementsSeqSeq[childIndex],
+        answersSeq[childIndex],
+        moveCount,
         calcAllAnswers,
         goal,
         kind,
         color,
         steps
 
-      for optPlcmts in optPlcmtsSeqSeq[childIdx].mitems:
-        optPlcmts.add optPlcmt
+      for optPlacements in optPlacementsSeqSeq[childIndex].mitems:
+        optPlacements.add optPlacement
 
-    for ans in answersSeq[childIdx].mitems:
-      ans.add optPlcmt
+    for ans in answersSeq[childIndex].mitems:
+      ans.add optPlacement
 
     when not calcAllAnswers:
-      if answers.len + answersSeq[childIdx].len > 1:
-        answers &= answersSeq[childIdx]
+      if answers.len + answersSeq[childIndex].len > 1:
+        answers &= answersSeq[childIndex]
         return
 
   nodes &= nodesSeq.concat
-  optPlcmtsSeq &= optPlcmtsSeqSeq.concat
+  optPlacementsSeq &= optPlacementsSeqSeq.concat
   answers &= answersSeq.concat
 
 func childrenAtDepth*[F: TsuField or WaterField](
     self: SolveNode[F],
     targetDepth: int,
     nodes: var seq[SolveNode[F]],
-    optPlcmtsSeq: var seq[seq[OptPlacement]],
+    optPlacementsSeq: var seq[seq[OptPlacement]],
     answers: var seq[seq[OptPlacement]],
-    moveCnt: int,
+    moveCount: int,
     calcAllAnswers: static bool,
     goal: Goal,
     steps: Steps,
 ) {.inline, noinit.} =
   ## Calculates nodes with the given depth and sets them to `nodes`.
-  ## A sequence of edges to reach them is set to `optPlcmtsSeq`.
+  ## A sequence of edges to reach them is set to `optPlacementsSeq`.
   ## Answers that have `TargetDepth` or less steps are set to `answers` in reverse
   ## order.
-  ## This function requires that the field is settled and `nodes`, `optPlcmtsSeq`, and
+  ## This function requires that the field is settled and `nodes`, `optPlacementsSeq`, and
   ## `answers` are empty.
   goal.withStaticKindColor:
     self.childrenAtDepth targetDepth,
-      nodes, optPlcmtsSeq, answers, moveCnt, calcAllAnswers, goal, StaticKind,
+      nodes, optPlacementsSeq, answers, moveCount, calcAllAnswers, goal, StaticKind,
       StaticColor, steps
 
 # ------------------------------------------------
@@ -647,7 +657,7 @@ func childrenAtDepth*[F: TsuField or WaterField](
 func solveSingleThread[F: TsuField or WaterField](
     self: SolveNode[F],
     answers: var seq[seq[OptPlacement]],
-    moveCnt: int,
+    moveCount: int,
     calcAllAnswers: static bool,
     goal: Goal,
     kind: static GoalKind,
@@ -665,17 +675,17 @@ func solveSingleThread[F: TsuField or WaterField](
   let
     step = steps[self.depth]
     childDepth = self.depth.succ
-    childIsLeaf = childDepth == moveCnt
+    childIsLeaf = childDepth == moveCount
     children = self.children(kind, color, step)
 
   var childAnswersSeq = newSeqOfCap[seq[seq[OptPlacement]]](children.len)
   for _ in 1 .. children.len:
     childAnswersSeq.add newSeqOfCap[seq[OptPlacement]](static(Placement.enumLen))
 
-  for childIdx, (child, optPlcmt) in children.pairs:
+  for childIndex, (child, optPlacement) in children.pairs:
     if child.isAccepted(goal, kind, color):
       var ans = newSeqOfCap[OptPlacement](childDepth)
-      ans.add optPlcmt
+      ans.add optPlacement
 
       answers.add ans
 
@@ -688,15 +698,15 @@ func solveSingleThread[F: TsuField or WaterField](
     if childIsLeaf or child.canPrune(goal, kind, color):
       continue
 
-    child.solveSingleThread childAnswersSeq[childIdx],
-      moveCnt, calcAllAnswers, goal, kind, color, steps, false
+    child.solveSingleThread childAnswersSeq[childIndex],
+      moveCount, calcAllAnswers, goal, kind, color, steps, false
 
-    for ans in childAnswersSeq[childIdx].mitems:
-      ans.add optPlcmt
+    for ans in childAnswersSeq[childIndex].mitems:
+      ans.add optPlacement
 
     when not calcAllAnswers:
-      if answers.len + childAnswersSeq[childIdx].len > 1:
-        answers &= childAnswersSeq[childIdx]
+      if answers.len + childAnswersSeq[childIndex].len > 1:
+        answers &= childAnswersSeq[childIndex]
         return
 
   answers &= childAnswersSeq.concat
@@ -704,7 +714,7 @@ func solveSingleThread[F: TsuField or WaterField](
 func solveSingleThread*[F: TsuField or WaterField](
     self: SolveNode[F],
     answers: var seq[seq[OptPlacement]],
-    moveCnt: int,
+    moveCount: int,
     calcAllAnswers: static bool,
     goal: Goal,
     steps: Steps,
@@ -715,7 +725,7 @@ func solveSingleThread*[F: TsuField or WaterField](
   ## Answers in `answers` are set in reverse order.
   goal.withStaticKindColor:
     self.solveSingleThread answers,
-      moveCnt, calcAllAnswers, goal, StaticKind, StaticColor, steps, checkPruneFirst
+      moveCount, calcAllAnswers, goal, StaticKind, StaticColor, steps, checkPruneFirst
 
 # ------------------------------------------------
 # SolveNode <-> string
@@ -733,14 +743,14 @@ when defined(js) or defined(nimsuggest):
     ## Returns the string representation of the move result.
     var strs = newSeqOfCap[string](6)
 
-    strs.add $self.chainCnt
-    strs.add self.popCnts.mapIt($it).join Sep1
-    strs.add $self.hardToGarbageCnt
-    strs.add self.detailPopCnts.mapIt(it.map((cnt: int) => $cnt).join Sep1).join Sep2
-    strs.add self.detailHardToGarbageCnt.mapIt($it).join Sep1
-    if self.fullPopCnts.isOk:
-      strs.add self.fullPopCnts.unsafeValue.mapIt(
-        it.map((cnts: seq[int]) => cnts.map((cnt: int) => $cnt).join Sep1).join Sep2
+    strs.add $self.chainCount
+    strs.add self.popCounts.mapIt($it).join Sep1
+    strs.add $self.hardToGarbageCount
+    strs.add self.detailPopCounts.mapIt(it.map((count: int) => $count).join Sep1).join Sep2
+    strs.add self.detailHardToGarbageCount.mapIt($it).join Sep1
+    if self.fullPopCounts.isOk:
+      strs.add self.fullPopCounts.unsafeValue.mapIt(
+        it.map((counts: seq[int]) => counts.map((count: int) => $count).join Sep1).join Sep2
       ).join Sep3
     else:
       strs.add ErrStr
@@ -771,14 +781,14 @@ when defined(js) or defined(nimsuggest):
     strs.add self.moveResult.toStr
 
     strs.add self.popColors.toStr
-    strs.add $self.popCnt
+    strs.add $self.popCount
 
-    strs.add $self.fieldCnts.toStr
-    strs.add $self.stepsCnts.toStr
+    strs.add $self.fieldCounts.toStr
+    strs.add $self.stepsCounts.toStr
 
     strs
 
-  func parseMoveResult(str: string): Res[MoveResult] {.inline, noinit.} =
+  func parseMoveResult(str: string): StrErrorResult[MoveResult] {.inline, noinit.} =
     ## Returns the move result converted from the string representation.
     let errMsg = "Invalid move result: {str}".fmt
 
@@ -786,56 +796,57 @@ when defined(js) or defined(nimsuggest):
     if strs.len != 6:
       return err errMsg & "debug1"
 
-    let chainCnt = ?strs[0].parseIntRes.context errMsg
+    let chainCount = ?strs[0].parseInt.context errMsg
 
-    let popCntsStrs = strs[1].split2 Sep1
-    if popCntsStrs.len != static(Cell.enumLen):
+    let popCountsStrs = strs[1].split2 Sep1
+    if popCountsStrs.len != static(Cell.enumLen):
       return err errMsg & "debug2"
-    var popCnts {.noinit.}: array[Cell, int]
-    for i, s in popCntsStrs:
-      popCnts[Cell.low.succ i].assign ?s.parseIntRes.context errMsg
+    var popCounts {.noinit.}: array[Cell, int]
+    for i, s in popCountsStrs:
+      popCounts[Cell.low.succ i].assign ?s.parseInt.context errMsg
 
-    let hardToGarbageCnt = ?strs[2].parseIntRes.context errMsg
+    let hardToGarbageCount = ?strs[2].parseInt.context errMsg
 
-    let detailPopCnts = collect:
-      for detailPopCntsStrSeqSeq in strs[3].split2 Sep2:
-        let detailPopCntsStrSeq = detailPopCntsStrSeqSeq.split2 Sep1
-        if detailPopCntsStrSeq.len != static(Cell.enumLen):
+    let detailPopCounts = collect:
+      for detailPopCountsStrSeqSeq in strs[3].split2 Sep2:
+        let detailPopCountsStrSeq = detailPopCountsStrSeqSeq.split2 Sep1
+        if detailPopCountsStrSeq.len != static(Cell.enumLen):
           return err errMsg & "debug3"
 
-        var popCnts {.noinit.}: array[Cell, int]
-        for i, s in detailPopCntsStrSeq:
-          popCnts[Cell.low.succ i].assign ?s.parseIntRes.context errMsg
+        var popCounts {.noinit.}: array[Cell, int]
+        for i, s in detailPopCountsStrSeq:
+          popCounts[Cell.low.succ i].assign ?s.parseInt.context errMsg
 
-        popCnts
+        popCounts
 
-    let detailHardToGarbageCnt = collect:
+    let detailHardToGarbageCount = collect:
       for s in strs[4].split2 Sep1:
-        ?s.parseIntRes.context errMsg
+        ?s.parseInt.context errMsg
 
     if strs[5] == ErrStr:
       return ok MoveResult.init(
-        chainCnt, popCnts, hardToGarbageCnt, detailPopCnts, detailHardToGarbageCnt
+        chainCount, popCounts, hardToGarbageCount, detailPopCounts,
+        detailHardToGarbageCount,
       )
 
-    let fullPopCnts = collect:
-      for fullPopCntsStrSeqSeq in strs[5].split2 Sep3:
-        let fullPopCntsStrSeqs = fullPopCntsStrSeqSeq.split2 Sep2
-        if fullPopCntsStrSeqs.len != static(Cell.enumLen):
+    let fullPopCounts = collect:
+      for fullPopCountsStrSeqSeq in strs[5].split2 Sep3:
+        let fullPopCountsStrSeqs = fullPopCountsStrSeqSeq.split2 Sep2
+        if fullPopCountsStrSeqs.len != static(Cell.enumLen):
           return err errMsg & "debug4"
 
-        var cnts {.noinit.}: array[Cell, seq[int]]
-        for cellOrd, fullPopCntsStrSeq in fullPopCntsStrSeqs:
-          cnts[Cell.low.succ cellOrd].assign fullPopCntsStrSeq.split2(Sep1).mapIt ?it.parseIntRes.context errMsg
+        var counts {.noinit.}: array[Cell, seq[int]]
+        for cellOrd, fullPopCountsStrSeq in fullPopCountsStrSeqs:
+          counts[Cell.low.succ cellOrd].assign fullPopCountsStrSeq.split2(Sep1).mapIt ?it.parseInt.context errMsg
 
-        cnts
+        counts
 
     ok MoveResult.init(
-      chainCnt, popCnts, hardToGarbageCnt, detailPopCnts, detailHardToGarbageCnt,
-      fullPopCnts,
+      chainCount, popCounts, hardToGarbageCount, detailPopCounts,
+      detailHardToGarbageCount, fullPopCounts,
     )
 
-  func parseCells(str: string): Res[set[Cell]] {.inline, noinit.} =
+  func parseCells(str: string): StrErrorResult[set[Cell]] {.inline, noinit.} =
     ## Returns the cells converted from the string representation.
     let errMsg = "Invalid cells: {str}".fmt
 
@@ -845,7 +856,7 @@ when defined(js) or defined(nimsuggest):
 
     ok cells
 
-  func parseCounts(str: string): Res[array[Cell, int]] {.inline, noinit.} =
+  func parseCounts(str: string): StrErrorResult[array[Cell, int]] {.inline, noinit.} =
     ## Returns the counts converted from the string representation.
     let errMsg = "Invalid counts: {str}".fmt
 
@@ -855,13 +866,13 @@ when defined(js) or defined(nimsuggest):
 
     var arr {.noinit.}: array[Cell, int]
     for i, s in strs:
-      arr[Cell.low.succ i].assign ?s.parseIntRes.context errMsg
+      arr[Cell.low.succ i].assign ?s.parseInt.context errMsg
 
     ok arr
 
   func parseSolveInfo*(
       strs: seq[string]
-  ): Res[tuple[rule: Rule, goal: Goal, steps: Steps]] {.inline, noinit.} =
+  ): StrErrorResult[tuple[rule: Rule, goal: Goal, steps: Steps]] {.inline, noinit.} =
     ## Returns the rule of the solve node converted from the string representations.
     let errMsg = "Invalid solve info: {strs}".fmt
 
@@ -876,14 +887,14 @@ when defined(js) or defined(nimsuggest):
 
   func parseSolveNode*[F: TsuField or WaterField](
       strs: seq[string]
-  ): Res[SolveNode[F]] {.inline, noinit.} =
+  ): StrErrorResult[SolveNode[F]] {.inline, noinit.} =
     ## Returns the solve node converted from the string representations.
     let errMsg = "Invalid node: {strs}".fmt
 
     if strs.len != 10:
       return err errMsg
 
-    let depth = ?strs[3].parseIntRes.context errMsg
+    let depth = ?strs[3].parseInt.context errMsg
 
     let
       field =
@@ -895,14 +906,14 @@ when defined(js) or defined(nimsuggest):
 
     let
       popColors = ?strs[6].parseCells.context errMsg
-      popCnt = ?strs[7].parseIntRes.context errMsg
+      popCount = ?strs[7].parseInt.context errMsg
 
     let
-      fieldCnts = ?strs[8].parseCounts.context errMsg
-      stepsCnts = ?strs[9].parseCounts.context errMsg
+      fieldCounts = ?strs[8].parseCounts.context errMsg
+      stepsCounts = ?strs[9].parseCounts.context errMsg
 
     ok SolveNode[F].init(
-      depth, field, moveResult, popColors, popCnt, fieldCnts, stepsCnts
+      depth, field, moveResult, popColors, popCount, fieldCounts, stepsCounts
     )
 
 # ------------------------------------------------
@@ -910,7 +921,7 @@ when defined(js) or defined(nimsuggest):
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
-  const NonePlcmtStr = ".."
+  const NonePlacementStr = ".."
 
   func toStrs*(answers: seq[seq[OptPlacement]]): seq[string] {.inline, noinit.} =
     ## Returns the string representations of the answers.
@@ -921,13 +932,13 @@ when defined(js) or defined(nimsuggest):
             if it.isOk:
               $it.unsafeValue
             else:
-              NonePlcmtStr
+              NonePlacementStr
           )
         ).join
 
   func parseSolveAnswers*(
       strs: seq[string]
-  ): Res[seq[seq[OptPlacement]]] {.inline, noinit.} =
+  ): StrErrorResult[seq[seq[OptPlacement]]] {.inline, noinit.} =
     ## Returns the answers converted from the run result.
     var answers = newSeqOfCap[seq[OptPlacement]](strs.len)
     for str in strs:
@@ -937,8 +948,8 @@ when defined(js) or defined(nimsuggest):
         return err errMsg
 
       let ans = collect:
-        for charIdx in countup(0, str.len.pred, 2):
-          ?str.substr(charIdx, charIdx.succ).parseOptPlacement.context errMsg
+        for charIndex in countup(0, str.len.pred, 2):
+          ?str.substr(charIndex, charIndex.succ).parseOptPlacement.context errMsg
       answers.add ans
 
     ok answers

@@ -30,7 +30,7 @@ requires "unittest2 ^= 0.2.5"
 
 import std/[os, sequtils, strformat, strutils]
 
-task page, "Generate Web Pages":
+task pages, "Generate Web Pages":
   const
     Pon2Path {.define: "pon2.path".} = ""
     danger {.booldefine.} = true

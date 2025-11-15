@@ -37,24 +37,24 @@ bg|"""
     step2 = "gg|1N\nbb|2N".parseSteps.unsafeValue
 
   # no limitations
-  check nazo.permute(@[], allowDblNotLast = true, allowDblLast = true).mapIt(
+  check nazo.permute(@[], allowDoubleNotLast = true, allowDoubleLast = true).mapIt(
     it.puyoPuyo.steps
   ) == @[step2, step1gbgb]
 
   # w/ fixIndices
-  check nazo.permute(@[1], allowDblNotLast = true, allowDblLast = true).mapIt(
+  check nazo.permute(@[1], allowDoubleNotLast = true, allowDoubleLast = true).mapIt(
     it.puyoPuyo.steps
   ) == @[step1gbbg]
-  check nazo.permute(@[0, 1], allowDblNotLast = true, allowDblLast = true).mapIt(
+  check nazo.permute(@[0, 1], allowDoubleNotLast = true, allowDoubleLast = true).mapIt(
     it.puyoPuyo.steps
   ) == @[step1bgbg]
 
   # not allow double (last)
-  check nazo.permute(@[], allowDblNotLast = true, allowDblLast = false).mapIt(
+  check nazo.permute(@[], allowDoubleNotLast = true, allowDoubleLast = false).mapIt(
     it.puyoPuyo.steps
   ) == @[step1gbgb]
 
   # not allow double (not last)
-  check nazo.permute(@[], allowDblNotLast = false, allowDblLast = true).mapIt(
+  check nazo.permute(@[], allowDoubleNotLast = false, allowDoubleLast = true).mapIt(
     it.puyoPuyo.steps
   ) == @[step1gbgb]
