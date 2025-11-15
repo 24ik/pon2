@@ -43,7 +43,7 @@ when defined(js) or defined(nimsuggest):
   ): () -> void =
     ## Returns the handler for selecting garbage cnt.
     # NOTE: cannot inline due to karax's limitation
-    () => self.derefSimulator(helper).writeCnt(idx, col, selectId.getSelectedIdx)
+    () => self.derefSimulator(helper).writeCnt(idx, col, selectId.getSelectedIndex)
 
   proc pairPlcmtCellNode[S: Simulator or Studio or Marathon](
       self: ref S,

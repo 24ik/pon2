@@ -10,19 +10,19 @@ block: # toggle
   check not true.dup(toggle)
   check false.dup(toggle)
 
-block: # incRot, decRot
+block: # rotateInc, rotateDec
   var x = int.high
 
-  x.incRot
+  x.rotateInc
   check x == int.low
 
-  x.incRot
+  x.rotateInc
   check x == int.low.succ
 
-  x.decRot
+  x.rotateDec
   check x == int.low
 
-  x.decRot
+  x.rotateDec
   check x == int.high
 
 block: # product2

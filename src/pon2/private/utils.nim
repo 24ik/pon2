@@ -18,7 +18,7 @@ func toggle*(b: var bool) {.inline, noinit.} =
   ## Toggles the bool variable.
   b.assign not b
 
-func incRot*[T: Ordinal](x: var T) {.inline, noinit.} =
+func rotateInc*[T: Ordinal](x: var T) {.inline, noinit.} =
   ## Increments `x`.
   ## If `x` is `T.high`, assigns `T.low` to `x`.
   if x == T.high:
@@ -26,7 +26,7 @@ func incRot*[T: Ordinal](x: var T) {.inline, noinit.} =
   else:
     x.inc
 
-func decRot*[T: Ordinal](x: var T) {.inline, noinit.} =
+func rotateDec*[T: Ordinal](x: var T) {.inline, noinit.} =
   ## Decrements `x`.
   ## If `x` is `T.low`, assigns `T.high` to `x`.
   if x == T.low:
@@ -57,7 +57,7 @@ when defined(js) or defined(nimsuggest):
     ## Sleeps.
     newPromise (resolve: () -> void) => (discard resolve.setTimeout ms)
 
-  proc getSelectedIdx*(
+  proc getSelectedIndex*(
     selectId: cstring
   ): int {.inline, noinit, importjs: "document.getElementById(#).selectedIndex".}
     ## Returns the selected index.

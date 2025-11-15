@@ -318,7 +318,7 @@ func moveCursorUp*(self: var Simulator) =
     if self.mode notin EditModes:
       return
 
-    self.editData.field.row.decRot
+    self.editData.field.row.rotateDec
   else:
     if self.mode != EditorEdit:
       return
@@ -336,7 +336,7 @@ func moveCursorDown*(self: var Simulator) =
     if self.mode notin EditModes:
       return
 
-    self.editData.field.row.incRot
+    self.editData.field.row.rotateInc
   else:
     if self.mode != EditorEdit:
       return
@@ -354,7 +354,7 @@ func moveCursorRight*(self: var Simulator) =
     if self.mode notin EditModes:
       return
 
-    self.editData.field.col.incRot
+    self.editData.field.col.rotateInc
   else:
     if self.mode != EditorEdit:
       return
@@ -365,7 +365,7 @@ func moveCursorRight*(self: var Simulator) =
           it.steps[self.editData.step.idx].kind == PairPlacement:
         self.editData.step.pivot.toggle
       else:
-        self.editData.step.col.incRot
+        self.editData.step.col.rotateInc
 
 func moveCursorLeft*(self: var Simulator) =
   ## Moves the cursor leftward.
@@ -373,7 +373,7 @@ func moveCursorLeft*(self: var Simulator) =
     if self.mode notin EditModes:
       return
 
-    self.editData.field.col.decRot
+    self.editData.field.col.rotateDec
   else:
     if self.mode != EditorEdit:
       return
@@ -384,7 +384,7 @@ func moveCursorLeft*(self: var Simulator) =
           it.steps[self.editData.step.idx].kind == PairPlacement:
         self.editData.step.pivot.toggle
       else:
-        self.editData.step.col.decRot
+        self.editData.step.col.rotateDec
 
 # ------------------------------------------------
 # Edit - Delete
