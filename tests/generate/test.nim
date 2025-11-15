@@ -15,19 +15,19 @@ proc checkGenerate(
     genGoalKind: GoalKind,
     genGoalColor: GenerateGoalColor,
     genGoalVal: GoalVal,
-    moveCnt: int,
-    colorCnt: int,
+    moveCount: int,
+    colorCount: int,
     heights: tuple[weights: Opt[array[Col, int]], positives: Opt[array[Col, bool]]],
-    puyoCnts: tuple[colors: int, garbage: int, hard: int],
-    conn2Cnts: tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int]],
-    conn3Cnts:
+    puyoCounts: tuple[colors: int, garbage: int, hard: int],
+    connection2Counts: tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int]],
+    connection3Counts:
       tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int], lShape: Opt[int]],
     dropGarbagesIndices: seq[int],
     dropHardsIndices: seq[int],
     rotateIndices: seq[int],
     crossRotateIndices: seq[int],
-    allowDblNotLast: bool,
-    allowDblLast: bool,
+    allowDoubleNotLast: bool,
+    allowDoubleLast: bool,
     rule: Rule,
     seed: int,
 ) {.raises: [Exception].} =
@@ -35,9 +35,9 @@ proc checkGenerate(
   let
     genGoal = GenerateGoal.init(genGoalKind, genGoalColor, genGoalVal)
     settings = GenerateSettings.init(
-      genGoal, moveCnt, colorCnt, heights, puyoCnts, conn2Cnts, conn3Cnts,
-      dropGarbagesIndices, dropHardsIndices, rotateIndices, crossRotateIndices,
-      allowDblNotLast, allowDblLast,
+      genGoal, moveCount, colorCount, heights, puyoCounts, connection2Counts,
+      connection3Counts, dropGarbagesIndices, dropHardsIndices, rotateIndices,
+      crossRotateIndices, allowDoubleNotLast, allowDoubleLast,
     )
     wrapRes = rng.generate(settings, rule)
 
@@ -65,11 +65,11 @@ proc checkGenerate(
   wrap.unwrapNazoPuyo:
     let nazo = itNazo
 
-    check nazo.puyoPuyo.steps.len == moveCnt
+    check nazo.puyoPuyo.steps.len == moveCount
 
     check (Cell.Red .. Cell.Purple).toSeq.filter(
-      (cell) => nazo.puyoPuyo.cellCnt(cell) > 0
-    ).len == colorCnt
+      (cell) => nazo.puyoPuyo.cellCount(cell) > 0
+    ).len == colorCount
 
     check nazo.puyoPuyo.field.isSettled
     check not nazo.puyoPuyo.field.canPop
@@ -88,65 +88,67 @@ proc checkGenerate(
         check heights.positives.unsafeValue[col] ==
           (nazo.puyoPuyo.field[baseRow, col] != None)
 
-    check puyoCnts.colors == nazo.puyoPuyo.colorPuyoCnt
-    check puyoCnts.garbage == nazo.puyoPuyo.cellCnt Garbage
-    check puyoCnts.hard == nazo.puyoPuyo.cellCnt Hard
+    check puyoCounts.colors == nazo.puyoPuyo.colorPuyoCount
+    check puyoCounts.garbage == nazo.puyoPuyo.cellCount Garbage
+    check puyoCounts.hard == nazo.puyoPuyo.cellCount Hard
 
-    if conn2Cnts.total.isOk:
-      check conn2Cnts.total.unsafeValue == nazo.puyoPuyo.field.conn2.colorPuyoCnt div 2
-    if conn2Cnts.vertical.isOk:
-      check conn2Cnts.vertical.unsafeValue ==
-        nazo.puyoPuyo.field.conn2Vertical.colorPuyoCnt div 2
-    if conn2Cnts.horizontal.isOk:
-      check conn2Cnts.horizontal.unsafeValue ==
-        nazo.puyoPuyo.field.conn2Vertical.colorPuyoCnt div 2
+    if connection2Counts.total.isOk:
+      check connection2Counts.total.unsafeValue ==
+        nazo.puyoPuyo.field.connection2.colorPuyoCount div 2
+    if connection2Counts.vertical.isOk:
+      check connection2Counts.vertical.unsafeValue ==
+        nazo.puyoPuyo.field.connection2Vertical.colorPuyoCount div 2
+    if connection2Counts.horizontal.isOk:
+      check connection2Counts.horizontal.unsafeValue ==
+        nazo.puyoPuyo.field.connection2Vertical.colorPuyoCount div 2
 
-    if conn3Cnts.total.isOk:
-      check conn3Cnts.total.unsafeValue == nazo.puyoPuyo.field.conn3.colorPuyoCnt div 3
-    if conn3Cnts.vertical.isOk:
-      check conn3Cnts.vertical.unsafeValue ==
-        nazo.puyoPuyo.field.conn3Vertical.colorPuyoCnt div 3
-    if conn3Cnts.horizontal.isOk:
-      check conn3Cnts.horizontal.unsafeValue ==
-        nazo.puyoPuyo.field.conn3Vertical.colorPuyoCnt div 3
-    if conn3Cnts.lShape.isOk:
-      check conn3Cnts.lShape.unsafeValue ==
-        nazo.puyoPuyo.field.conn3LShape.colorPuyoCnt div 3
+    if connection3Counts.total.isOk:
+      check connection3Counts.total.unsafeValue ==
+        nazo.puyoPuyo.field.connection3.colorPuyoCount div 3
+    if connection3Counts.vertical.isOk:
+      check connection3Counts.vertical.unsafeValue ==
+        nazo.puyoPuyo.field.connection3Vertical.colorPuyoCount div 3
+    if connection3Counts.horizontal.isOk:
+      check connection3Counts.horizontal.unsafeValue ==
+        nazo.puyoPuyo.field.connection3Vertical.colorPuyoCount div 3
+    if connection3Counts.lShape.isOk:
+      check connection3Counts.lShape.unsafeValue ==
+        nazo.puyoPuyo.field.connection3LShape.colorPuyoCount div 3
 
-    if not allowDblNotLast:
-      check (0 ..< moveCnt.pred).toSeq.all (idx) =>
-        nazo.puyoPuyo.steps[idx].kind != PairPlacement or
-        not nazo.puyoPuyo.steps[idx].pair.isDbl
+    if not allowDoubleNotLast:
+      check (0 ..< moveCount.pred).toSeq.all (index) =>
+        nazo.puyoPuyo.steps[index].kind != PairPlacement or
+        not nazo.puyoPuyo.steps[index].pair.isDouble
 
-    if not allowDblLast:
+    if not allowDoubleLast:
       check nazo.puyoPuyo.steps[^1].kind != PairPlacement or
-        not nazo.puyoPuyo.steps[^1].pair.isDbl
+        not nazo.puyoPuyo.steps[^1].pair.isDouble
 
-    for stepIdx in dropGarbagesIndices:
-      check nazo.puyoPuyo.steps[stepIdx].kind == StepKind.Garbages and
-        not nazo.puyoPuyo.steps[stepIdx].dropHard
+    for stepIndex in dropGarbagesIndices:
+      check nazo.puyoPuyo.steps[stepIndex].kind == StepKind.Garbages and
+        not nazo.puyoPuyo.steps[stepIndex].dropHard
 
-    for stepIdx in dropHardsIndices:
-      check nazo.puyoPuyo.steps[stepIdx].kind == StepKind.Garbages and
-        nazo.puyoPuyo.steps[stepIdx].dropHard
+    for stepIndex in dropHardsIndices:
+      check nazo.puyoPuyo.steps[stepIndex].kind == StepKind.Garbages and
+        nazo.puyoPuyo.steps[stepIndex].dropHard
 
-    for stepIdx in rotateIndices:
-      check nazo.puyoPuyo.steps[stepIdx].kind == StepKind.Rotate and
-        not nazo.puyoPuyo.steps[stepIdx].cross
+    for stepIndex in rotateIndices:
+      check nazo.puyoPuyo.steps[stepIndex].kind == StepKind.Rotate and
+        not nazo.puyoPuyo.steps[stepIndex].cross
 
-    for stepIdx in crossRotateIndices:
-      check nazo.puyoPuyo.steps[stepIdx].kind == StepKind.Rotate and
-        nazo.puyoPuyo.steps[stepIdx].cross
+    for stepIndex in crossRotateIndices:
+      check nazo.puyoPuyo.steps[stepIndex].kind == StepKind.Rotate and
+        nazo.puyoPuyo.steps[stepIndex].cross
 
     let ans = nazo.solve
     check ans.len == 1
-    check ans[0].len == moveCnt
-    for stepIdx, step in nazo.puyoPuyo.steps:
+    check ans[0].len == moveCount
+    for stepIndex, step in nazo.puyoPuyo.steps:
       case step.kind
       of PairPlacement:
-        check step.optPlacement == ans[0][stepIdx]
+        check step.optPlacement == ans[0][stepIndex]
       else:
-        check ans[0][stepIdx].isErr
+        check ans[0][stepIndex].isErr
 
 block: # generate
   checkGenerate(
