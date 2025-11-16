@@ -1,3 +1,3 @@
 nimTitle	results2	pon2/private/results2.html	module src/pon2/private/results2		0
-nim	Res	pon2/private/results2.html#Res	type Res		14
-nim	context	pon2/private/results2.html#context,Res[T],string	proc context[T](self: Res[T]; ctx: string): Res[T]		16
+nim	StrErrorResult	pon2/private/results2.html#StrErrorResult	type StrErrorResult		14
+nim	context	pon2/private/results2.html#context,StrErrorResult[T],string	proc context[T](self: StrErrorResult[T]; contextMsg: string): StrErrorResult[T]		16

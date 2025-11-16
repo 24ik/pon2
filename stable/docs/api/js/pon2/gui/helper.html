@@ -95,6 +95,9 @@
     </ul>
   </details>
 </li>
+<li>
+  <a class="reference reference-toplevel" href="#19" id="69">Exports</a>
+</li>
 
 </ul>
 
@@ -107,7 +110,7 @@
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
-    <a class="reference external" href="../app.html">../app</a>
+    <a class="reference external" href="../app.html">../app</a>, <a class="reference external" href="../private/dom.html">../private/dom</a>, <a class="reference external" href="../private/results2.html">../private/results2</a>, <a class="reference external" href="../private/utils.html">../private/utils</a>
   </dl>
 </div>
 <div class="section" id="7">
@@ -164,7 +167,7 @@
     <div id="init-procs-all">
   <div id="init,typeVNodeHelper,ref.Marathon,cstring">
   <dt><pre><span class="Keyword">proc</span> <a href="#init%2CtypeVNodeHelper%2Cref.Marathon%2Ccstring"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">VNodeHelper</span><span class="Other">;</span> <span class="Identifier">marathonRef</span><span class="Other">:</span> <span class="Keyword">ref</span> <a href="../app/marathon.html#Marathon"><span class="Identifier">Marathon</span></a><span class="Other">;</span> <span class="Identifier">rootId</span><span class="Other">:</span> <span class="Identifier">cstring</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.
-    <span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -173,7 +176,7 @@
 </div>
 <div id="init,typeVNodeHelper,ref.Simulator,cstring">
   <dt><pre><span class="Keyword">proc</span> <a href="#init%2CtypeVNodeHelper%2Cref.Simulator%2Ccstring"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">VNodeHelper</span><span class="Other">;</span> <span class="Identifier">simulatorRef</span><span class="Other">:</span> <span class="Keyword">ref</span> <a href="../app/simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">rootId</span><span class="Other">:</span> <span class="Identifier">cstring</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.
-    <span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -185,7 +188,7 @@
 <div id="init2-procs-all">
   <div id="init2,typeVNodeHelper,ref.Studio,cstring">
   <dt><pre><span class="Keyword">proc</span> <a href="#init2%2CtypeVNodeHelper%2Cref.Studio%2Ccstring"><span class="Identifier">init2</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">VNodeHelper</span><span class="Other">;</span> <span class="Identifier">studioRef</span><span class="Other">:</span> <span class="Keyword">ref</span> <a href="../app/studio.html#Studio"><span class="Identifier">Studio</span></a><span class="Other">;</span> <span class="Identifier">rootId</span><span class="Other">:</span> <span class="Identifier">cstring</span><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span>
-    <span class="Identifier">main</span><span class="Other">,</span> <span class="Identifier">replay</span><span class="Other">:</span> <a href="helper.html#VNodeHelper"><span class="Identifier">VNodeHelper</span></a><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+    <span class="Identifier">main</span><span class="Other">,</span> <span class="Identifier">replay</span><span class="Other">:</span> <a href="helper.html#VNodeHelper"><span class="Identifier">VNodeHelper</span></a><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -197,6 +200,12 @@
 
   </dl>
 </div>
+<div class="section" id="19">
+  <h1><a class="toc-backref" href="#19">Exports</a></h1>
+  <dl class="item">
+    <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a>, <a href="../private/results2.html#context,StrErrorResult[T],string"><span class="Identifier">context</span></a>
+  </dl>
+</div>
 
   </div>
 </div>
@@ -204,7 +213,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-11 10:01:11 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-16 01:57:23 UTC</small>
       </div>
     </div>
   </div>

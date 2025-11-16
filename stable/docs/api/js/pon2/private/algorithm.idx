@@ -1,0 +1,2 @@
+nimTitle	algorithm	pon2/private/algorithm.html	module src/pon2/private/algorithm		0
+nim	product	pon2/private/algorithm.html#product,openArray[seq[T]]	proc product[T](seqs: openArray[seq[T]]): seq[seq[T]]		13

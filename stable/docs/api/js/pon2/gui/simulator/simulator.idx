@@ -1,2 +1,2 @@
 nimTitle	simulator	pon2/gui/simulator/simulator.html	module src/pon2/gui/simulator/simulator		0
-nim	toSimulatorVNode	pon2/gui/simulator/simulator.html#toSimulatorVNode,ref.S,VNodeHelper	proc toSimulatorVNode[S: Simulator or Studio or Marathon](self: ref S;\n    helper: VNodeHelper): VNode		21
+nim	toSimulatorVNode	pon2/gui/simulator/simulator.html#toSimulatorVNode,ref.S,VNodeHelper	proc toSimulatorVNode[S: Simulator or Studio or Marathon](self: ref S;\n    helper: VNodeHelper): VNode		23

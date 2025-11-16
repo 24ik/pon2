@@ -1,11 +1,11 @@
 nimTitle	solve	pon2/private/app/solve.html	module src/pon2/private/app/solve		0
-nim	SolveNode	pon2/private/app/solve.html#SolveNode	object SolveNode		17
-nim	init	pon2/private/app/solve.html#init,typeSolveNode[F: TsuField or WaterField],PuyoPuyo[F: TsuField or WaterField]	proc init[F: TsuField or WaterField](T: type SolveNode[F]; puyoPuyo: PuyoPuyo[F]): T:type		52
-nim	childrenAtDepth	pon2/private/app/solve.html#childrenAtDepth,SolveNode[F: TsuField or WaterField],int,seq[SolveNode[F: TsuField or WaterField]],seq[seq[OptPlacement]],seq[seq[OptPlacement]],int,staticbool,Goal,Steps	proc childrenAtDepth[F: TsuField or WaterField](self: SolveNode[F]; targetDepth: int;\n    nodes: var seq[SolveNode[F]]; optPlcmtsSeq: var seq[seq[OptPlacement]];\n    answers: var seq[seq[OptPlacement]]; moveCnt: int;\n    calcAllAnswers: static bool; goal: Goal; steps: Steps)		617
-nim	solveSingleThread	pon2/private/app/solve.html#solveSingleThread,SolveNode[F: TsuField or WaterField],seq[seq[OptPlacement]],int,staticbool,Goal,Steps,staticbool	proc solveSingleThread[F: TsuField or WaterField](self: SolveNode[F];\n    answers: var seq[seq[OptPlacement]]; moveCnt: int;\n    calcAllAnswers: static bool; goal: Goal; steps: Steps;\n    checkPruneFirst: static bool = false)		700
-nim	toStrs	pon2/private/app/solve.html#toStrs,SolveNode[F: TsuField or WaterField],Goal,Steps	proc toStrs[F: TsuField or WaterField](self: SolveNode[F]; goal: Goal; steps: Steps): seq[\n    string]		754
-nim	parseSolveInfo	pon2/private/app/solve.html#parseSolveInfo,seq[string]	proc parseSolveInfo(strs: seq[string]): Res[tuple[rule: Rule, goal: Goal,\n    steps: Steps]]		858
-nim	parseSolveNode	pon2/private/app/solve.html#parseSolveNode,seq[string]	proc parseSolveNode[F: TsuField or WaterField](strs: seq[string]): Res[SolveNode[F]]		873
-nim	toStrs	pon2/private/app/solve.html#toStrs,seq[seq[OptPlacement]]	proc toStrs(answers: seq[seq[OptPlacement]]): seq[string]		911
-nim	parseSolveAnswers	pon2/private/app/solve.html#parseSolveAnswers,seq[string]	proc parseSolveAnswers(strs: seq[string]): Res[seq[seq[OptPlacement]]]		924
-nimgrp	tostrs	pon2/private/app/solve.html#toStrs-procs-all	proc		754
+nim	SolveNode	pon2/private/app/solve.html#SolveNode	object SolveNode		19
+nim	init	pon2/private/app/solve.html#init,typeSolveNode[F: TsuField or WaterField],PuyoPuyo[F: TsuField or WaterField]	proc init[F: TsuField or WaterField](T: type SolveNode[F]; puyoPuyo: PuyoPuyo[F]): T:type		54
+nim	childrenAtDepth	pon2/private/app/solve.html#childrenAtDepth,SolveNode[F: TsuField or WaterField],int,seq[SolveNode[F: TsuField or WaterField]],seq[seq[OptPlacement]],seq[seq[OptPlacement]],int,staticbool,Goal,Steps	proc childrenAtDepth[F: TsuField or WaterField](self: SolveNode[F]; targetDepth: int;\n    nodes: var seq[SolveNode[F]]; optPlacementsSeq: var seq[seq[OptPlacement]];\n    answers: var seq[seq[OptPlacement]]; moveCount: int;\n    calcAllAnswers: static bool; goal: Goal; steps: Steps)		631
+nim	solveSingleThread	pon2/private/app/solve.html#solveSingleThread,SolveNode[F: TsuField or WaterField],seq[seq[OptPlacement]],int,staticbool,Goal,Steps,staticbool	proc solveSingleThread[F: TsuField or WaterField](self: SolveNode[F];\n    answers: var seq[seq[OptPlacement]]; moveCount: int;\n    calcAllAnswers: static bool; goal: Goal; steps: Steps;\n    checkPruneFirst: static bool = false)		714
+nim	toStrs	pon2/private/app/solve.html#toStrs,SolveNode[F: TsuField or WaterField],Goal,Steps	proc toStrs[F: TsuField or WaterField](self: SolveNode[F]; goal: Goal; steps: Steps): seq[\n    string]		768
+nim	parseSolveInfo	pon2/private/app/solve.html#parseSolveInfo,seq[string]	proc parseSolveInfo(strs: seq[string]): StrErrorResult[\n    tuple[rule: Rule, goal: Goal, steps: Steps]]		873
+nim	parseSolveNode	pon2/private/app/solve.html#parseSolveNode,seq[string]	proc parseSolveNode[F: TsuField or WaterField](strs: seq[string]): StrErrorResult[\n    SolveNode[F]]		888
+nim	toStrs	pon2/private/app/solve.html#toStrs,seq[seq[OptPlacement]]	proc toStrs(answers: seq[seq[OptPlacement]]): seq[string]		926
+nim	parseSolveAnswers	pon2/private/app/solve.html#parseSolveAnswers,seq[string]	proc parseSolveAnswers(strs: seq[string]): StrErrorResult[seq[seq[OptPlacement]]]		939
+nimgrp	tostrs	pon2/private/app/solve.html#toStrs-procs-all	proc		768

@@ -80,7 +80,7 @@
     <summary><a class="reference reference-toplevel" href="#12" id="62">Procs</a></summary>
     <ul class="simple simple-toc-section">
       <ul class="simple nested-toc-section">parseCell
-  <li><a class="reference" href="#parseCell%2Cstring" title="parseCell(str: string): Res[Cell]">parseCell(str: string): Res[Cell]</a></li>
+  <li><a class="reference" href="#parseCell%2Cstring" title="parseCell(str: string): StrErrorResult[Cell]">parseCell(str: string): StrErrorResult[Cell]</a></li>
 
 </ul>
 
@@ -102,7 +102,7 @@
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
-    <a class="reference external" href="../private/results2.html">../private/results2</a>, <a class="reference external" href="../private/tables2.html">../private/tables2</a>
+    <a class="reference external" href="../private/results2.html">../private/results2</a>, <a class="reference external" href="../private/tables.html">../private/tables</a>
   </dl>
 </div>
 <div class="section" id="7">
@@ -148,8 +148,8 @@
   <dl class="item">
     <div id="parseCell-procs-all">
   <div id="parseCell,string">
-  <dt><pre><span class="Keyword">func</span> <a href="#parseCell%2Cstring"><span class="Identifier">parseCell</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#Res"><span class="Identifier">Res</span></a><span class="Other">[</span><a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">func</span> <a href="#parseCell%2Cstring"><span class="Identifier">parseCell</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a><span class="Other">[</span><a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the cell converted from the string representation.
@@ -164,7 +164,7 @@
 <div class="section" id="19">
   <h1><a class="toc-backref" href="#19">Exports</a></h1>
   <dl class="item">
-    <a href="../private/results2.html#Res"><span class="Identifier">Res</span></a>, <a href="../private/results2.html#context,Res[T],string"><span class="Identifier">context</span></a>
+    <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a>, <a href="../private/results2.html#context,StrErrorResult[T],string"><span class="Identifier">context</span></a>
   </dl>
 </div>
 
@@ -174,7 +174,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-11 10:00:50 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-16 01:57:06 UTC</small>
       </div>
     </div>
   </div>

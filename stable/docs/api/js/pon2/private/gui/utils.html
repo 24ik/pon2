@@ -94,15 +94,15 @@
     <summary><a class="reference reference-toplevel" href="#12" id="62">Procs</a></summary>
     <ul class="simple simple-toc-section">
       <ul class="simple nested-toc-section">addCopyBtnHandler
-  <li><a class="reference" href="#addCopyBtnHandler%2CVNode%2C%2Cint" title="addCopyBtnHandler(btn: VNode; copyStrFn: () -&gt; string; showFlashMsgMs = 500)">addCopyBtnHandler(btn: VNode; copyStrFn: () -&gt; string; showFlashMsgMs = 500)</a></li>
+  <li><a class="reference" href="#addCopyBtnHandler%2CVNode%2C%2Cint" title="addCopyBtnHandler(btn: VNode; copyStrProc: () -&gt; string; showFlashMsgMs = 500)">addCopyBtnHandler(btn: VNode; copyStrProc: () -&gt; string; showFlashMsgMs = 500)</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">cellImgSrc
   <li><a class="reference" href="#cellImgSrc%2CCell" title="cellImgSrc(cell: Cell): cstring">cellImgSrc(cell: Cell): cstring</a></li>
 
 </ul>
-<ul class="simple nested-toc-section">noticeGarbageImgSrc
-  <li><a class="reference" href="#noticeGarbageImgSrc%2CNoticeGarbage" title="noticeGarbageImgSrc(notice: NoticeGarbage): cstring">noticeGarbageImgSrc(notice: NoticeGarbage): cstring</a></li>
+<ul class="simple nested-toc-section">noticeImgSrc
+  <li><a class="reference" href="#noticeImgSrc%2CNotice" title="noticeImgSrc(notice: Notice): cstring">noticeImgSrc(notice: Notice): cstring</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">safeRedraw
@@ -129,7 +129,7 @@
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
-    <a class="reference external" href="../assign3.html">../assign3</a>, <a class="reference external" href="../utils.html">../utils</a>, <a class="reference external" href="../../app.html">../../app</a>
+    <a class="reference external" href="../assign.html">../assign</a>, <a class="reference external" href="../dom.html">../dom</a>, <a class="reference external" href="../utils.html">../utils</a>, <a class="reference external" href="../../app.html">../../app</a>
   </dl>
 </div>
 <div class="section" id="9">
@@ -224,8 +224,8 @@
   <dl class="item">
     <div id="addCopyBtnHandler-procs-all">
   <div id="addCopyBtnHandler,VNode,,int">
-  <dt><pre><span class="Keyword">func</span> <a href="#addCopyBtnHandler%2CVNode%2C%2Cint"><span class="Identifier">addCopyBtnHandler</span></a><span class="Other">(</span><span class="Identifier">btn</span><span class="Other">:</span> <span class="Identifier">VNode</span><span class="Other">;</span> <span class="Identifier">copyStrFn</span><span class="Other">:</span> <span class="Other">(</span><span class="Other">)</span> <span class="Operator">-&gt;</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">showFlashMsgMs</span> <span class="Other">=</span> <span class="DecNumber">500</span><span class="Other">)</span> {.
-    <span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">func</span> <a href="#addCopyBtnHandler%2CVNode%2C%2Cint"><span class="Identifier">addCopyBtnHandler</span></a><span class="Other">(</span><span class="Identifier">btn</span><span class="Other">:</span> <span class="Identifier">VNode</span><span class="Other">;</span> <span class="Identifier">copyStrProc</span><span class="Other">:</span> <span class="Other">(</span><span class="Other">)</span> <span class="Operator">-&gt;</span> <span class="Identifier">string</span><span class="Other">;</span>
+                       <span class="Identifier">showFlashMsgMs</span> <span class="Other">=</span> <span class="DecNumber">500</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Adds the copying handler to the button.
@@ -236,7 +236,7 @@
 </div>
 <div id="cellImgSrc-procs-all">
   <div id="cellImgSrc,Cell">
-  <dt><pre><span class="Keyword">func</span> <a href="#cellImgSrc%2CCell"><span class="Identifier">cellImgSrc</span></a><span class="Other">(</span><span class="Identifier">cell</span><span class="Other">:</span> <a href="../../core/cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">cstring</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">func</span> <a href="#cellImgSrc%2CCell"><span class="Identifier">cellImgSrc</span></a><span class="Other">(</span><span class="Identifier">cell</span><span class="Other">:</span> <a href="../../core/cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">cstring</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the image source of cells.
@@ -245,10 +245,9 @@
 </div>
 
 </div>
-<div id="noticeGarbageImgSrc-procs-all">
-  <div id="noticeGarbageImgSrc,NoticeGarbage">
-  <dt><pre><span class="Keyword">func</span> <a href="#noticeGarbageImgSrc%2CNoticeGarbage"><span class="Identifier">noticeGarbageImgSrc</span></a><span class="Other">(</span><span class="Identifier">notice</span><span class="Other">:</span> <a href="../../core/notice.html#NoticeGarbage"><span class="Identifier">NoticeGarbage</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">cstring</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<div id="noticeImgSrc-procs-all">
+  <div id="noticeImgSrc,Notice">
+  <dt><pre><span class="Keyword">func</span> <a href="#noticeImgSrc%2CNotice"><span class="Identifier">noticeImgSrc</span></a><span class="Other">(</span><span class="Identifier">notice</span><span class="Other">:</span> <a href="../../core/notice.html#Notice"><span class="Identifier">Notice</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">cstring</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the image source of notice garbages.
@@ -259,7 +258,7 @@
 </div>
 <div id="safeRedraw-procs-all">
   <div id="safeRedraw">
-  <dt><pre><span class="Keyword">proc</span> <a href="#safeRedraw"><span class="Identifier">safeRedraw</span></a><span class="Other">(</span><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#safeRedraw"><span class="Identifier">safeRedraw</span></a><span class="Other">(</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Redraws the window.
@@ -278,7 +277,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-11 10:01:11 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-16 01:57:23 UTC</small>
       </div>
     </div>
   </div>

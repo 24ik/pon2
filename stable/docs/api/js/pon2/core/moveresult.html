@@ -59,12 +59,12 @@
     <summary><a class="reference reference-toplevel" href="#7" id="57">Types</a></summary>
     <ul class="simple simple-toc-section">
       <li><a class="reference" href="#MoveResult" title="MoveResult = object
-  chainCnt*: int
-  popCnts*: array[Cell, int]
-  hardToGarbageCnt*: int
-  detailPopCnts*: seq[array[Cell, int]]
-  detailHardToGarbageCnt*: seq[int]
-  fullPopCnts*: Opt[seq[array[Cell, seq[int]]]]">MoveResult</a></li>
+  chainCount*: int
+  popCounts*: array[Cell, int]
+  hardToGarbageCount*: int
+  detailPopCounts*: seq[array[Cell, int]]
+  detailHardToGarbageCount*: seq[int]
+  fullPopCounts*: Opt[seq[array[Cell, seq[int]]]]">MoveResult</a></li>
 
     </ul>
   </details>
@@ -73,20 +73,20 @@
   <details open>
     <summary><a class="reference reference-toplevel" href="#12" id="62">Procs</a></summary>
     <ul class="simple simple-toc-section">
-      <ul class="simple nested-toc-section">cellCnt
-  <li><a class="reference" href="#cellCnt%2CMoveResult%2CCell" title="cellCnt(self: MoveResult; cell: Cell): int">cellCnt(self: MoveResult; cell: Cell): int</a></li>
+      <ul class="simple nested-toc-section">cellCount
+  <li><a class="reference" href="#cellCount%2CMoveResult%2CCell" title="cellCount(self: MoveResult; cell: Cell): int">cellCount(self: MoveResult; cell: Cell): int</a></li>
 
 </ul>
-<ul class="simple nested-toc-section">cellCnts
-  <li><a class="reference" href="#cellCnts%2CMoveResult%2CCell" title="cellCnts(self: MoveResult; cell: Cell): seq[int]">cellCnts(self: MoveResult; cell: Cell): seq[int]</a></li>
+<ul class="simple nested-toc-section">cellCounts
+  <li><a class="reference" href="#cellCounts%2CMoveResult%2CCell" title="cellCounts(self: MoveResult; cell: Cell): seq[int]">cellCounts(self: MoveResult; cell: Cell): seq[int]</a></li>
 
 </ul>
-<ul class="simple nested-toc-section">colorPuyoCnt
-  <li><a class="reference" href="#colorPuyoCnt%2CMoveResult" title="colorPuyoCnt(self: MoveResult): int">colorPuyoCnt(self: MoveResult): int</a></li>
+<ul class="simple nested-toc-section">colorPuyoCount
+  <li><a class="reference" href="#colorPuyoCount%2CMoveResult" title="colorPuyoCount(self: MoveResult): int">colorPuyoCount(self: MoveResult): int</a></li>
 
 </ul>
-<ul class="simple nested-toc-section">colorPuyoCnts
-  <li><a class="reference" href="#colorPuyoCnts%2CMoveResult" title="colorPuyoCnts(self: MoveResult): seq[int]">colorPuyoCnts(self: MoveResult): seq[int]</a></li>
+<ul class="simple nested-toc-section">colorPuyoCounts
+  <li><a class="reference" href="#colorPuyoCounts%2CMoveResult" title="colorPuyoCounts(self: MoveResult): seq[int]">colorPuyoCounts(self: MoveResult): seq[int]</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">colors
@@ -97,54 +97,56 @@
   <li><a class="reference" href="#colorsSeq%2CMoveResult" title="colorsSeq(self: MoveResult): seq[set[Cell]]">colorsSeq(self: MoveResult): seq[set[Cell]]</a></li>
 
 </ul>
-<ul class="simple nested-toc-section">connCnts
-  <li><a class="reference" href="#connCnts%2CMoveResult" title="connCnts(self: MoveResult): Res[seq[int]]">connCnts(self: MoveResult): Res[seq[int]]</a></li>
-<li><a class="reference" href="#connCnts%2CMoveResult%2CCell" title="connCnts(self: MoveResult; cell: Cell): Res[seq[int]]">connCnts(self: MoveResult; cell: Cell): Res[seq[int]]</a></li>
+<ul class="simple nested-toc-section">connectionCounts
+  <li><a class="reference" href="#connectionCounts%2CMoveResult" title="connectionCounts(self: MoveResult): StrErrorResult[seq[int]]">connectionCounts(self: MoveResult): StrErrorResult[seq[int]]</a></li>
+<li><a class="reference" href="#connectionCounts%2CMoveResult%2CCell" title="connectionCounts(self: MoveResult; cell: Cell): StrErrorResult[seq[int]]">connectionCounts(self: MoveResult; cell: Cell): StrErrorResult[seq[int]]</a></li>
 
 </ul>
-<ul class="simple nested-toc-section">garbagesCnt
-  <li><a class="reference" href="#garbagesCnt%2CMoveResult" title="garbagesCnt(self: MoveResult): int">garbagesCnt(self: MoveResult): int</a></li>
+<ul class="simple nested-toc-section">garbagesCount
+  <li><a class="reference" href="#garbagesCount%2CMoveResult" title="garbagesCount(self: MoveResult): int">garbagesCount(self: MoveResult): int</a></li>
 
 </ul>
-<ul class="simple nested-toc-section">garbagesCnts
-  <li><a class="reference" href="#garbagesCnts%2CMoveResult" title="garbagesCnts(self: MoveResult): seq[int]">garbagesCnts(self: MoveResult): seq[int]</a></li>
+<ul class="simple nested-toc-section">garbagesCounts
+  <li><a class="reference" href="#garbagesCounts%2CMoveResult" title="garbagesCounts(self: MoveResult): seq[int]">garbagesCounts(self: MoveResult): seq[int]</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">init
-  <li><a class="reference" href="#init%2CtypeMoveResult%2Cint%2Carray%5BCell%2Cint%5D%2Cint%2Cseq%5Barray%5BCell%2Cint%5D%5D%2Cseq%5Bint%5D" title="init(T: type MoveResult; chainCnt: int; popCnts: array[Cell, int];
-     hardToGarbageCnt: int; detailPopCnts: seq[array[Cell, int]];
-     detailHardToGarbageCnt: seq[int]): T:type">init(T: type MoveResult; chainCnt: int; popCnts: array[Cell, int];
-     hardToGarbageCnt: int; detailPopCnts: seq[array[Cell, int]];
-     detailHardToGarbageCnt: seq[int]): T:type</a></li>
-<li><a class="reference" href="#init%2CtypeMoveResult%2Cint%2Carray%5BCell%2Cint%5D%2Cint%2Cseq%5Barray%5BCell%2Cint%5D%5D%2Cseq%5Bint%5D%2Cseq%5Barray%5BCell%2Cseq%5Bint%5D%5D%5D" title="init(T: type MoveResult; chainCnt: int; popCnts: array[Cell, int];
-     hardToGarbageCnt: int; detailPopCnts: seq[array[Cell, int]];
-     detailHardToGarbageCnt: seq[int]; fullPopCnts: seq[array[Cell, seq[int]]]): T:type">init(T: type MoveResult; chainCnt: int; popCnts: array[Cell, int];
-     hardToGarbageCnt: int; detailPopCnts: seq[array[Cell, int]];
-     detailHardToGarbageCnt: seq[int]; fullPopCnts: seq[array[Cell, seq[int]]]): T:type</a></li>
-<li><a class="reference" href="#init%2CtypeMoveResult%2Cstaticbool" title="init(T: type MoveResult; includeFullPopCnts: static bool = false): T:type">init(T: type MoveResult; includeFullPopCnts: static bool = false): T:type</a></li>
+  <li><a class="reference" href="#init%2CtypeMoveResult%2Cint%2Carray%5BCell%2Cint%5D%2Cint%2Cseq%5Barray%5BCell%2Cint%5D%5D%2Cseq%5Bint%5D" title="init(T: type MoveResult; chainCount: int; popCounts: array[Cell, int];
+     hardToGarbageCount: int; detailPopCounts: seq[array[Cell, int]];
+     detailHardToGarbageCount: seq[int]): T:type">init(T: type MoveResult; chainCount: int; popCounts: array[Cell, int];
+     hardToGarbageCount: int; detailPopCounts: seq[array[Cell, int]];
+     detailHardToGarbageCount: seq[int]): T:type</a></li>
+<li><a class="reference" href="#init%2CtypeMoveResult%2Cint%2Carray%5BCell%2Cint%5D%2Cint%2Cseq%5Barray%5BCell%2Cint%5D%5D%2Cseq%5Bint%5D%2Cseq%5Barray%5BCell%2Cseq%5Bint%5D%5D%5D" title="init(T: type MoveResult; chainCount: int; popCounts: array[Cell, int];
+     hardToGarbageCount: int; detailPopCounts: seq[array[Cell, int]];
+     detailHardToGarbageCount: seq[int];
+     fullPopCounts: seq[array[Cell, seq[int]]]): T:type">init(T: type MoveResult; chainCount: int; popCounts: array[Cell, int];
+     hardToGarbageCount: int; detailPopCounts: seq[array[Cell, int]];
+     detailHardToGarbageCount: seq[int];
+     fullPopCounts: seq[array[Cell, seq[int]]]): T:type</a></li>
+<li><a class="reference" href="#init%2CtypeMoveResult%2Cstaticbool" title="init(T: type MoveResult; includeFullPopCounts: static bool = false): T:type">init(T: type MoveResult; includeFullPopCounts: static bool = false): T:type</a></li>
 
 </ul>
-<ul class="simple nested-toc-section">noticeGarbageCnts
-  <li><a class="reference" href="#noticeGarbageCnts%2CMoveResult%2CRule" title="noticeGarbageCnts(self: MoveResult; rule: Rule; useComet = false): Res[
-    array[NoticeGarbage, int]]">noticeGarbageCnts(self: MoveResult; rule: Rule; useComet = false): Res[
-    array[NoticeGarbage, int]]</a></li>
+<ul class="simple nested-toc-section">noticeCounts
+  <li><a class="reference" href="#noticeCounts%2CMoveResult%2CRule" title="noticeCounts(self: MoveResult; rule: Rule; useComet = false): StrErrorResult[
+    array[Notice, int]]">noticeCounts(self: MoveResult; rule: Rule; useComet = false): StrErrorResult[
+    array[Notice, int]]</a></li>
 
 </ul>
-<ul class="simple nested-toc-section">placeCnts
-  <li><a class="reference" href="#placeCnts%2CMoveResult" title="placeCnts(self: MoveResult): Res[seq[int]]">placeCnts(self: MoveResult): Res[seq[int]]</a></li>
-<li><a class="reference" href="#placeCnts%2CMoveResult%2CCell" title="placeCnts(self: MoveResult; cell: Cell): Res[seq[int]]">placeCnts(self: MoveResult; cell: Cell): Res[seq[int]]</a></li>
+<ul class="simple nested-toc-section">placeCounts
+  <li><a class="reference" href="#placeCounts%2CMoveResult" title="placeCounts(self: MoveResult): StrErrorResult[seq[int]]">placeCounts(self: MoveResult): StrErrorResult[seq[int]]</a></li>
+<li><a class="reference" href="#placeCounts%2CMoveResult%2CCell" title="placeCounts(self: MoveResult; cell: Cell): StrErrorResult[seq[int]]">placeCounts(self: MoveResult; cell: Cell): StrErrorResult[seq[int]]</a></li>
 
 </ul>
-<ul class="simple nested-toc-section">puyoCnt
-  <li><a class="reference" href="#puyoCnt%2CMoveResult" title="puyoCnt(self: MoveResult): int">puyoCnt(self: MoveResult): int</a></li>
+<ul class="simple nested-toc-section">puyoCount
+  <li><a class="reference" href="#puyoCount%2CMoveResult" title="puyoCount(self: MoveResult): int">puyoCount(self: MoveResult): int</a></li>
 
 </ul>
-<ul class="simple nested-toc-section">puyoCnts
-  <li><a class="reference" href="#puyoCnts%2CMoveResult" title="puyoCnts(self: MoveResult): seq[int]">puyoCnts(self: MoveResult): seq[int]</a></li>
+<ul class="simple nested-toc-section">puyoCounts
+  <li><a class="reference" href="#puyoCounts%2CMoveResult" title="puyoCounts(self: MoveResult): seq[int]">puyoCounts(self: MoveResult): seq[int]</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">score
-  <li><a class="reference" href="#score%2CMoveResult" title="score(self: MoveResult): Res[int]">score(self: MoveResult): Res[int]</a></li>
+  <li><a class="reference" href="#score%2CMoveResult" title="score(self: MoveResult): StrErrorResult[int]">score(self: MoveResult): StrErrorResult[int]</a></li>
 
 </ul>
 
@@ -166,7 +168,7 @@
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
-    <a class="reference external" href="cell.html">cell</a>, <a class="reference external" href="common.html">common</a>, <a class="reference external" href="notice.html">notice</a>, <a class="reference external" href="rule.html">rule</a>, <a class="reference external" href="../private/arrayops2.html">../private/arrayops2</a>, <a class="reference external" href="../private/math2.html">../private/math2</a>, <a class="reference external" href="../private/results2.html">../private/results2</a>, <a class="reference external" href="../private/staticfor2.html">../private/staticfor2</a>
+    <a class="reference external" href="cell.html">cell</a>, <a class="reference external" href="common.html">common</a>, <a class="reference external" href="notice.html">notice</a>, <a class="reference external" href="rule.html">rule</a>, <a class="reference external" href="../private/arrayutils.html">../private/arrayutils</a>, <a class="reference external" href="../private/math.html">../private/math</a>, <a class="reference external" href="../private/results2.html">../private/results2</a>, <a class="reference external" href="../private/staticfor.html">../private/staticfor</a>
   </dl>
 </div>
 <div class="section" id="7">
@@ -174,12 +176,12 @@
   <dl class="item">
     <div id="MoveResult">
   <dt><pre><a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">chainCnt</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
-  <span class="Identifier">popCnts</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Cell</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span>
-  <span class="Identifier">hardToGarbageCnt</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
-  <span class="Identifier">detailPopCnts</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Cell</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span>
-  <span class="Identifier">detailHardToGarbageCnt</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span>
-  <span class="Identifier">fullPopCnts</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Opt</span><span class="Other">[</span><span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Cell</span><span class="Other">,</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span><span class="Other">]</span><span class="Other">]</span></pre></dt>
+  <span class="Identifier">chainCount</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
+  <span class="Identifier">popCounts</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Cell</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span>
+  <span class="Identifier">hardToGarbageCount</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
+  <span class="Identifier">detailPopCounts</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Cell</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span>
+  <span class="Identifier">detailHardToGarbageCount</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span>
+  <span class="Identifier">fullPopCounts</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Opt</span><span class="Other">[</span><span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Cell</span><span class="Other">,</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span><span class="Other">]</span><span class="Other">]</span></pre></dt>
   <dd>
     
     Move result.
@@ -192,10 +194,10 @@
 <div class="section" id="12">
   <h1><a class="toc-backref" href="#12">Procs</a></h1>
   <dl class="item">
-    <div id="cellCnt-procs-all">
-  <div id="cellCnt,MoveResult,Cell">
-  <dt><pre><span class="Keyword">func</span> <a href="#cellCnt%2CMoveResult%2CCell"><span class="Identifier">cellCnt</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">;</span> <span class="Identifier">cell</span><span class="Other">:</span> <a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+    <div id="cellCount-procs-all">
+  <div id="cellCount,MoveResult,Cell">
+  <dt><pre><span class="Keyword">func</span> <a href="#cellCount%2CMoveResult%2CCell"><span class="Identifier">cellCount</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">;</span> <span class="Identifier">cell</span><span class="Other">:</span> <a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the number of <tt class="docutils literal"><span class="pre"><span class="Identifier">cell</span></span></tt> that popped.
@@ -204,10 +206,10 @@
 </div>
 
 </div>
-<div id="cellCnts-procs-all">
-  <div id="cellCnts,MoveResult,Cell">
-  <dt><pre><span class="Keyword">func</span> <a href="#cellCnts%2CMoveResult%2CCell"><span class="Identifier">cellCnts</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">;</span> <span class="Identifier">cell</span><span class="Other">:</span> <a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<div id="cellCounts-procs-all">
+  <div id="cellCounts,MoveResult,Cell">
+  <dt><pre><span class="Keyword">func</span> <a href="#cellCounts%2CMoveResult%2CCell"><span class="Identifier">cellCounts</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">;</span> <span class="Identifier">cell</span><span class="Other">:</span> <a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns a sequence of the number of <tt class="docutils literal"><span class="pre"><span class="Identifier">cell</span></span></tt> that popped in each chain.
@@ -216,10 +218,10 @@
 </div>
 
 </div>
-<div id="colorPuyoCnt-procs-all">
-  <div id="colorPuyoCnt,MoveResult">
-  <dt><pre><span class="Keyword">func</span> <a href="#colorPuyoCnt%2CMoveResult"><span class="Identifier">colorPuyoCnt</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<div id="colorPuyoCount-procs-all">
+  <div id="colorPuyoCount,MoveResult">
+  <dt><pre><span class="Keyword">func</span> <a href="#colorPuyoCount%2CMoveResult"><span class="Identifier">colorPuyoCount</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the number of color puyos that popped.
@@ -228,10 +230,10 @@
 </div>
 
 </div>
-<div id="colorPuyoCnts-procs-all">
-  <div id="colorPuyoCnts,MoveResult">
-  <dt><pre><span class="Keyword">func</span> <a href="#colorPuyoCnts%2CMoveResult"><span class="Identifier">colorPuyoCnts</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<div id="colorPuyoCounts-procs-all">
+  <div id="colorPuyoCounts,MoveResult">
+  <dt><pre><span class="Keyword">func</span> <a href="#colorPuyoCounts%2CMoveResult"><span class="Identifier">colorPuyoCounts</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns a sequence of the number of color puyos that popped in each chain.
@@ -242,7 +244,7 @@
 </div>
 <div id="colors-procs-all">
   <div id="colors,MoveResult">
-  <dt><pre><span class="Keyword">func</span> <a href="#colors%2CMoveResult"><span class="Identifier">colors</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">set</span><span class="Other">[</span><a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#colors%2CMoveResult"><span class="Identifier">colors</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">set</span><span class="Other">[</span><a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -254,8 +256,8 @@
 </div>
 <div id="colorsSeq-procs-all">
   <div id="colorsSeq,MoveResult">
-  <dt><pre><span class="Keyword">func</span> <a href="#colorsSeq%2CMoveResult"><span class="Identifier">colorsSeq</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">set</span><span class="Other">[</span><a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">]</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">func</span> <a href="#colorsSeq%2CMoveResult"><span class="Identifier">colorsSeq</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">set</span><span class="Other">[</span><a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">]</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns a sequence of the set of colors that popped in each chain.
@@ -264,19 +266,19 @@
 </div>
 
 </div>
-<div id="connCnts-procs-all">
-  <div id="connCnts,MoveResult">
-  <dt><pre><span class="Keyword">func</span> <a href="#connCnts%2CMoveResult"><span class="Identifier">connCnts</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#Res"><span class="Identifier">Res</span></a><span class="Other">[</span><span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<div id="connectionCounts-procs-all">
+  <div id="connectionCounts,MoveResult">
+  <dt><pre><span class="Keyword">func</span> <a href="#connectionCounts%2CMoveResult"><span class="Identifier">connectionCounts</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a><span class="Other">[</span><span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
+    <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns a sequence of the number of connections of color puyos that popped.
     
   </dd>
 </div>
-<div id="connCnts,MoveResult,Cell">
-  <dt><pre><span class="Keyword">func</span> <a href="#connCnts%2CMoveResult%2CCell"><span class="Identifier">connCnts</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">;</span> <span class="Identifier">cell</span><span class="Other">:</span> <a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#Res"><span class="Identifier">Res</span></a><span class="Other">[</span><span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<div id="connectionCounts,MoveResult,Cell">
+  <dt><pre><span class="Keyword">func</span> <a href="#connectionCounts%2CMoveResult%2CCell"><span class="Identifier">connectionCounts</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">;</span> <span class="Identifier">cell</span><span class="Other">:</span> <a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a><span class="Other">[</span><span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span> {.
+    <span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns a sequence of the number of connections of <tt class="docutils literal"><span class="pre"><span class="Identifier">cell</span></span></tt> that popped.
@@ -285,10 +287,10 @@
 </div>
 
 </div>
-<div id="garbagesCnt-procs-all">
-  <div id="garbagesCnt,MoveResult">
-  <dt><pre><span class="Keyword">func</span> <a href="#garbagesCnt%2CMoveResult"><span class="Identifier">garbagesCnt</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<div id="garbagesCount-procs-all">
+  <div id="garbagesCount,MoveResult">
+  <dt><pre><span class="Keyword">func</span> <a href="#garbagesCount%2CMoveResult"><span class="Identifier">garbagesCount</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the number of hard and garbage puyos that popped.
@@ -297,10 +299,10 @@
 </div>
 
 </div>
-<div id="garbagesCnts-procs-all">
-  <div id="garbagesCnts,MoveResult">
-  <dt><pre><span class="Keyword">func</span> <a href="#garbagesCnts%2CMoveResult"><span class="Identifier">garbagesCnts</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<div id="garbagesCounts-procs-all">
+  <div id="garbagesCounts,MoveResult">
+  <dt><pre><span class="Keyword">func</span> <a href="#garbagesCounts%2CMoveResult"><span class="Identifier">garbagesCounts</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns a sequence of the number of hard and garbage puyos that popped in each chain.
@@ -311,9 +313,10 @@
 </div>
 <div id="init-procs-all">
   <div id="init,typeMoveResult,int,array[Cell,int],int,seq[array[Cell,int]],seq[int]">
-  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeMoveResult%2Cint%2Carray%5BCell%2Cint%5D%2Cint%2Cseq%5Barray%5BCell%2Cint%5D%5D%2Cseq%5Bint%5D"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">MoveResult</span><span class="Other">;</span> <span class="Identifier">chainCnt</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">popCnts</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Cell</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">;</span>
-          <span class="Identifier">hardToGarbageCnt</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">detailPopCnts</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Cell</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span><span class="Other">;</span>
-          <span class="Identifier">detailHardToGarbageCnt</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeMoveResult%2Cint%2Carray%5BCell%2Cint%5D%2Cint%2Cseq%5Barray%5BCell%2Cint%5D%5D%2Cseq%5Bint%5D"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">MoveResult</span><span class="Other">;</span> <span class="Identifier">chainCount</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">popCounts</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Cell</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">;</span>
+          <span class="Identifier">hardToGarbageCount</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">detailPopCounts</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Cell</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span><span class="Other">;</span>
+          <span class="Identifier">detailHardToGarbageCount</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -321,10 +324,11 @@
   </dd>
 </div>
 <div id="init,typeMoveResult,int,array[Cell,int],int,seq[array[Cell,int]],seq[int],seq[array[Cell,seq[int]]]">
-  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeMoveResult%2Cint%2Carray%5BCell%2Cint%5D%2Cint%2Cseq%5Barray%5BCell%2Cint%5D%5D%2Cseq%5Bint%5D%2Cseq%5Barray%5BCell%2Cseq%5Bint%5D%5D%5D"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">MoveResult</span><span class="Other">;</span> <span class="Identifier">chainCnt</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">popCnts</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Cell</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">;</span>
-          <span class="Identifier">hardToGarbageCnt</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">detailPopCnts</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Cell</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span><span class="Other">;</span>
-          <span class="Identifier">detailHardToGarbageCnt</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">;</span>
-          <span class="Identifier">fullPopCnts</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Cell</span><span class="Other">,</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeMoveResult%2Cint%2Carray%5BCell%2Cint%5D%2Cint%2Cseq%5Barray%5BCell%2Cint%5D%5D%2Cseq%5Bint%5D%2Cseq%5Barray%5BCell%2Cseq%5Bint%5D%5D%5D"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">MoveResult</span><span class="Other">;</span> <span class="Identifier">chainCount</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">popCounts</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Cell</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">;</span>
+          <span class="Identifier">hardToGarbageCount</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">detailPopCounts</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Cell</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span><span class="Other">;</span>
+          <span class="Identifier">detailHardToGarbageCount</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">;</span>
+          <span class="Identifier">fullPopCounts</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Cell</span><span class="Other">,</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -332,8 +336,8 @@
   </dd>
 </div>
 <div id="init,typeMoveResult,staticbool">
-  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeMoveResult%2Cstaticbool"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">MoveResult</span><span class="Other">;</span> <span class="Identifier">includeFullPopCnts</span><span class="Other">:</span> <span class="Identifier">static</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.
-    <span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeMoveResult%2Cstaticbool"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">MoveResult</span><span class="Other">;</span> <span class="Identifier">includeFullPopCounts</span><span class="Other">:</span> <span class="Identifier">static</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.
+    <span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -342,10 +346,10 @@
 </div>
 
 </div>
-<div id="noticeGarbageCnts-procs-all">
-  <div id="noticeGarbageCnts,MoveResult,Rule">
-  <dt><pre><span class="Keyword">func</span> <a href="#noticeGarbageCnts%2CMoveResult%2CRule"><span class="Identifier">noticeGarbageCnts</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">;</span> <span class="Identifier">rule</span><span class="Other">:</span> <a href="rule.html#Rule"><span class="Identifier">Rule</span></a><span class="Other">;</span> <span class="Identifier">useComet</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#Res"><span class="Identifier">Res</span></a><span class="Other">[</span>
-    <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">NoticeGarbage</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<div id="noticeCounts-procs-all">
+  <div id="noticeCounts,MoveResult,Rule">
+  <dt><pre><span class="Keyword">func</span> <a href="#noticeCounts%2CMoveResult%2CRule"><span class="Identifier">noticeCounts</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">;</span> <span class="Identifier">rule</span><span class="Other">:</span> <a href="rule.html#Rule"><span class="Identifier">Rule</span></a><span class="Other">;</span> <span class="Identifier">useComet</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a><span class="Other">[</span>
+    <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Notice</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the number of notice garbages.
@@ -354,19 +358,19 @@
 </div>
 
 </div>
-<div id="placeCnts-procs-all">
-  <div id="placeCnts,MoveResult">
-  <dt><pre><span class="Keyword">func</span> <a href="#placeCnts%2CMoveResult"><span class="Identifier">placeCnts</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#Res"><span class="Identifier">Res</span></a><span class="Other">[</span><span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<div id="placeCounts-procs-all">
+  <div id="placeCounts,MoveResult">
+  <dt><pre><span class="Keyword">func</span> <a href="#placeCounts%2CMoveResult"><span class="Identifier">placeCounts</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a><span class="Other">[</span><span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns a sequence of the number of places where color puyos popped in each chain.
     
   </dd>
 </div>
-<div id="placeCnts,MoveResult,Cell">
-  <dt><pre><span class="Keyword">func</span> <a href="#placeCnts%2CMoveResult%2CCell"><span class="Identifier">placeCnts</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">;</span> <span class="Identifier">cell</span><span class="Other">:</span> <a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#Res"><span class="Identifier">Res</span></a><span class="Other">[</span><span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<div id="placeCounts,MoveResult,Cell">
+  <dt><pre><span class="Keyword">func</span> <a href="#placeCounts%2CMoveResult%2CCell"><span class="Identifier">placeCounts</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">;</span> <span class="Identifier">cell</span><span class="Other">:</span> <a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a><span class="Other">[</span><span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span> {.
+    <span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns a sequence of the number of places where <tt class="docutils literal"><span class="pre"><span class="Identifier">cell</span></span></tt> popped in each chain.
@@ -375,9 +379,10 @@
 </div>
 
 </div>
-<div id="puyoCnt-procs-all">
-  <div id="puyoCnt,MoveResult">
-  <dt><pre><span class="Keyword">func</span> <a href="#puyoCnt%2CMoveResult"><span class="Identifier">puyoCnt</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<div id="puyoCount-procs-all">
+  <div id="puyoCount,MoveResult">
+  <dt><pre><span class="Keyword">func</span> <a href="#puyoCount%2CMoveResult"><span class="Identifier">puyoCount</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+                                        <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the number of cells that popped.
@@ -386,10 +391,10 @@
 </div>
 
 </div>
-<div id="puyoCnts-procs-all">
-  <div id="puyoCnts,MoveResult">
-  <dt><pre><span class="Keyword">func</span> <a href="#puyoCnts%2CMoveResult"><span class="Identifier">puyoCnts</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<div id="puyoCounts-procs-all">
+  <div id="puyoCounts,MoveResult">
+  <dt><pre><span class="Keyword">func</span> <a href="#puyoCounts%2CMoveResult"><span class="Identifier">puyoCounts</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns a sequence of the number of puyos that popped in each chain.
@@ -400,8 +405,8 @@
 </div>
 <div id="score-procs-all">
   <div id="score,MoveResult">
-  <dt><pre><span class="Keyword">func</span> <a href="#score%2CMoveResult"><span class="Identifier">score</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#Res"><span class="Identifier">Res</span></a><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">func</span> <a href="#score%2CMoveResult"><span class="Identifier">score</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the score.
@@ -416,7 +421,7 @@
 <div class="section" id="19">
   <h1><a class="toc-backref" href="#19">Exports</a></h1>
   <dl class="item">
-    <a href="../private/results2.html#Res"><span class="Identifier">Res</span></a>, <a href="../private/results2.html#context,Res[T],string"><span class="Identifier">context</span></a>
+    <a href="cell.html#parseCell,string"><span class="Identifier">parseCell</span></a>, <a href="cell.html#Cell"><span class="Identifier">Cell</span></a>, <a href="cell.html#ColorPuyos"><span class="Identifier">ColorPuyos</span></a>, <a href="cell.html#Puyos"><span class="Identifier">Puyos</span></a>, <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a>, <a href="../private/results2.html#context,StrErrorResult[T],string"><span class="Identifier">context</span></a>, <a href="notice.html#GarbageRates"><span class="Identifier">GarbageRates</span></a>, <a href="rule.html#parseRule,string"><span class="Identifier">parseRule</span></a>, <a href="notice.html#Notice"><span class="Identifier">Notice</span></a>, <a href="notice.html#noticeCounts,int,Rule"><span class="Identifier">noticeCounts</span></a>, <a href="../private/results2.html#StrErrorResult_2"><span class="Identifier">StrErrorResult</span></a>, <a href="../private/results2.html#context,StrErrorResult[T],string_2"><span class="Identifier">context</span></a>, <a href="rule.html#Rule"><span class="Identifier">Rule</span></a>, <a href="../private/results2.html#StrErrorResult_3"><span class="Identifier">StrErrorResult</span></a>, <a href="../private/results2.html#context,StrErrorResult[T],string_3"><span class="Identifier">context</span></a>
   </dl>
 </div>
 
@@ -426,7 +431,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-11 10:01:01 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-16 01:57:15 UTC</small>
       </div>
     </div>
   </div>

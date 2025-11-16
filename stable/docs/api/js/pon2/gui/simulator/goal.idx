@@ -1,2 +1,2 @@
 nimTitle	goal	pon2/gui/simulator/goal.html	module src/pon2/gui/simulator/goal		0
-nim	toGoalVNode	pon2/gui/simulator/goal.html#toGoalVNode,ref.S,VNodeHelper	proc toGoalVNode[S: Simulator or Studio or Marathon](self: ref S;\n    helper: VNodeHelper; cameraReady = false): VNode		20
+nim	toGoalVNode	pon2/gui/simulator/goal.html#toGoalVNode,ref.S,VNodeHelper	proc toGoalVNode[S: Simulator or Studio or Marathon](self: ref S;\n    helper: VNodeHelper; cameraReady = false): VNode		22
