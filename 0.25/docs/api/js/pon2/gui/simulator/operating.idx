@@ -1,0 +1,2 @@
+nimTitle	operating	pon2/gui/simulator/operating.html	module src/pon2/gui/simulator/operating		0
+nim	toOperatingVNode	pon2/gui/simulator/operating.html#toOperatingVNode,ref.S,VNodeHelper	proc toOperatingVNode[S: Simulator or Studio or Marathon](self: ref S;\n    helper: VNodeHelper): VNode		85

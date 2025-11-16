@@ -1,0 +1,8 @@
+nimTitle	generate	pon2/app/generate.html	module src/pon2/app/generate		0
+nim	GenerateGoalColor	pon2/app/generate.html#GenerateGoalColor	enum GenerateGoalColor		17
+nim	GenerateGoal	pon2/app/generate.html#GenerateGoal	object GenerateGoal		24
+nim	GenerateSettings	pon2/app/generate.html#GenerateSettings	object GenerateSettings		29
+nim	init	pon2/app/generate.html#init,typeGenerateGoal,GoalKind,GenerateGoalColor,GoalVal	proc init(T: type GenerateGoal; kind: GoalKind; color: GenerateGoalColor;\n     val: GoalVal): T:type		49
+nim	init	pon2/app/generate.html#init,typeGenerateSettings,GenerateGoal,int,int,tuple[Opt[array[Col,int]],Opt[array[Col,bool]]],tuple[int,int,int],tuple[Opt[int],Opt[int],Opt[int]],tuple[Opt[int],Opt[int],Opt[int],Opt[int]],seq[int],seq[int],seq[int],seq[int],bool,bool	proc init(T: type GenerateSettings; goal: GenerateGoal; moveCount, colorCount: int;\n    heights: tuple[weights: Opt[array[Col, int]],\n                   positives: Opt[array[Col, bool]]];\n     puyoCounts: tuple[colors: int, garbage: int, hard: int]; connection2Counts: tuple[\n    total: Opt[int], vertical: Opt[int], horizontal: Opt[int]];\n    connection3Counts: tuple[total: Opt[int], vertical: Opt[int],\n                             horizontal: Opt[int], lShape: Opt[int]];\n    dropGarbagesIndices, dropHardsIndices, rotateIndices, crossRotateIndices: seq[\n    int]; allowDoubleNotLast, allowDoubleLast: bool): T:type		54
+nim	generate	pon2/app/generate.html#generate,Rand,GenerateSettings,Rule	proc generate(rng: var Rand; settings: GenerateSettings; rule: Rule): StrErrorResult[\n    NazoPuyoWrap]		554
+nimgrp	init	pon2/app/generate.html#init-procs-all	proc		49

@@ -1,0 +1,2 @@
+nimTitle	browsers	pon2/private/browsers.html	module src/pon2/private/browsers		0
+nim	openDefaultBrowser	pon2/private/browsers.html#openDefaultBrowser,Uri	proc openDefaultBrowser(uri: Uri): StrErrorResult[void]		14

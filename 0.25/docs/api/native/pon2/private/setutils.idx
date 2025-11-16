@@ -1,0 +1,2 @@
+nimTitle	setutils	pon2/private/setutils.html	module src/pon2/private/setutils		0
+nim	toSet	pon2/private/setutils.html#toSet.t,untyped	template toSet(iter: untyped): untyped		13

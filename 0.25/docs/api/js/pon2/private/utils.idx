@@ -1,0 +1,9 @@
+nimTitle	utils	pon2/private/utils.html	module src/pon2/private/utils		0
+nim	toggle	pon2/private/utils.html#toggle,bool	proc toggle(x: var bool)		16
+nim	rotateInc	pon2/private/utils.html#rotateInc,T	proc rotateInc[T: Ordinal](x: var T)		20
+nim	rotateDec	pon2/private/utils.html#rotateDec,T	proc rotateDec[T: Ordinal](x: var T)		28
+nim	sleep	pon2/private/utils.html#sleep,int	proc sleep(ms: int): Future[void]		37
+nim	mobileDetected	pon2/private/utils.html#mobileDetected	proc mobileDetected(): bool		41
+nim	html2canvas	pon2/private/utils.html#html2canvas,JsObject	proc html2canvas(elem: JsObject): Future[JsObject]		47
+nim	html2canvas	pon2/private/utils.html#html2canvas,JsObject,int	proc html2canvas(elem: JsObject; scale: int): Future[JsObject]		52
+nimgrp	html2canvas	pon2/private/utils.html#html2canvas-procs-all	proc		45

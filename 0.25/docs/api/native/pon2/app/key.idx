@@ -1,0 +1,5 @@
+nimTitle	key	pon2/app/key.html	module src/pon2/app/key		0
+nim	KeyEvent	pon2/app/key.html#KeyEvent	object KeyEvent		14
+nim	init	pon2/app/key.html#init,typeKeyEvent,string	proc init(T: type KeyEvent; code: string; shift = false; ctrl = false; alt = false;\n     meta = false): T:type		25
+nim	init	pon2/app/key.html#init,typeKeyEvent,char	proc init(T: type KeyEvent; c: char; shift = false; ctrl = false; alt = false;\n     meta = false): T:type		35
+nimgrp	init	pon2/app/key.html#init-procs-all	proc		25

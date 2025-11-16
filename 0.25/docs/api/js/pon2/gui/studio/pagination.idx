@@ -1,0 +1,2 @@
+nimTitle	pagination	pon2/gui/studio/pagination.html	module src/pon2/gui/studio/pagination		0
+nim	toStudioPaginationVNode	pon2/gui/studio/pagination.html#toStudioPaginationVNode,ref.Studio,VNodeHelper	proc toStudioPaginationVNode(self: ref Studio; helper: VNodeHelper): VNode		22
