@@ -11,96 +11,114 @@ import ../../src/pon2/core/[fqdn, goal]
 # ------------------------------------------------
 
 block: # init
-  check Goal.init(Clear, OptGoalColor.ok Red, OptGoalVal.err) == Goal.init(Clear, Red)
-  check Goal.init(ChainMore, OptGoalColor.err, OptGoalVal.ok 5) ==
-    Goal.init(ChainMore, 5)
-  check Goal.init(Connection, OptGoalColor.ok Colors, OptGoalVal.ok 10) ==
-    Goal.init(Connection, Colors, 10)
-  check Goal.init == Goal.init(Clear, All)
+  check Goal.init(Connection, Colors, 8, true, GoalColor.Green) ==
+    Goal(
+      kindOpt: Opt[GoalKind].ok Connection,
+      color: Colors,
+      val: 8,
+      exact: true,
+      clearColorOpt: Opt[GoalColor].ok GoalColor.Green,
+    )
+  check Goal.init(Place, All, 1, false) ==
+    Goal(
+      kindOpt: Opt[GoalKind].ok Place,
+      color: All,
+      val: 1,
+      exact: false,
+      clearColorOpt: Opt[GoalColor].err,
+    )
+  check Goal.init(Chain, 3, true, All) ==
+    Goal(
+      kindOpt: Opt[GoalKind].ok Chain,
+      color: GoalColor.low,
+      val: 3,
+      exact: true,
+      clearColorOpt: Opt[GoalColor].ok All,
+    )
+  check Goal.init(AccumColor, 2, false) ==
+    Goal(
+      kindOpt: Opt[GoalKind].ok AccumColor,
+      color: GoalColor.low,
+      val: 2,
+      exact: false,
+      clearColorOpt: Opt[GoalColor].err,
+    )
+  check Goal.init(GoalColor.Red) ==
+    Goal(
+      kindOpt: Opt[GoalKind].err,
+      color: GoalColor.low,
+      val: 0,
+      exact: true,
+      clearColorOpt: Opt[GoalColor].ok GoalColor.Red,
+    )
+  check Goal.init == NoneGoal
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-block: # isNormalForm, isSupported
-  let
-    goal1 = Goal.init(Clear, OptGoalColor.err, OptGoalVal.err)
-    goal2 = Goal.init(Clear, Green)
-    goal3 = Goal.init(Clear, 3)
-    goal4 = Goal.init(Clear, Green, 3)
+block: # isSupported
+  check Goal.init(Place, GoalColor.Red, 3, true).isSupported
+  check not Goal.init(Place, Garbages, 3, true).isSupported
+  check Goal.init(Place, Colors, 3, true).isSupported
 
-    goal5 = Goal.init(Chain, OptGoalColor.err, OptGoalVal.err)
-    goal6 = Goal.init(Chain, Green)
-    goal7 = Goal.init(Chain, 4)
-    goal8 = Goal.init(Chain, Green, 4)
+  check Goal.init(AccumCount, GoalColor.Red, 3, true).isSupported
+  check Goal.init(AccumCount, Garbages, 3, true).isSupported
+  check Goal.init(AccumCount, Colors, 3, true).isSupported
 
-    goal9 = Goal.init(PlaceMore, OptGoalColor.err, OptGoalVal.err)
-    goal10 = Goal.init(PlaceMore, Green)
-    goal11 = Goal.init(PlaceMore, 5)
-    goal12 = Goal.init(PlaceMore, Green, 5)
-
-    goal13 = Goal.init(PlaceMore, Garbages, 5)
-
-  check not goal1.isNormalForm
-  check goal2.isNormalForm
-  check not goal3.isNormalForm
-  check not goal4.isNormalForm
-  check not goal5.isNormalForm
-  check not goal6.isNormalForm
-  check goal7.isNormalForm
-  check not goal8.isNormalForm
-  check not goal9.isNormalForm
-  check not goal10.isNormalForm
-  check not goal11.isNormalForm
-  check goal12.isNormalForm
-  check goal13.isNormalForm
-
-  check not goal1.isSupported
-  check goal2.isSupported
-  check not goal3.isSupported
-  check goal4.isSupported
-  check not goal5.isSupported
-  check not goal6.isSupported
-  check goal7.isSupported
-  check goal8.isSupported
-  check not goal9.isSupported
-  check not goal10.isSupported
-  check not goal11.isSupported
-  check goal12.isSupported
-  check not goal13.isSupported
+  check not NoneGoal.isSupported
 
 # ------------------------------------------------
 # Normalize
 # ------------------------------------------------
 
-block: # normalize, normalized
-  block:
-    let
-      goal = Goal.init(ClearChainMore, OptGoalColor.err, OptGoalVal.err)
-      goal2 = Goal.init(ClearChainMore, All, 0)
-    check goal.normalized == goal2
-    check goal.dup(normalize) == goal2
-    check goal2.normalized == goal2
+block: # isNormalized, normalize, normalized
+  let
+    goal1 = Goal.init(Connection, GoalColor.Green, 5, false, All)
 
-  block:
-    let goal = Goal.init(Clear, Purple, 3)
-    check goal.normalized == Goal.init(Clear, Purple)
+    goal2 = Goal.init(Chain, GoalColor.Green, 5, false, GoalColor.Purple)
+    goal3 = Goal.init(Chain, 5, false, GoalColor.Purple)
 
-  block:
-    let goal = Goal.init(Chain, Garbages, 2)
-    check goal.normalized == Goal.init(Chain, 2)
+    goal4 = Goal(
+      kindOpt: Opt[GoalKind].err,
+      color: GoalColor.Red,
+      val: 0,
+      exact: true,
+      clearColorOpt: Opt[GoalColor].ok Colors,
+    )
+    goal5 = Goal(
+      kindOpt: Opt[GoalKind].err,
+      color: GoalColor.low,
+      val: 0,
+      exact: true,
+      clearColorOpt: Opt[GoalColor].ok Colors,
+    )
+
+  check goal1.isNormalized
+  check not goal2.isNormalized
+  check goal3.isNormalized
+  check not goal4.isNormalized
+  check goal5.isNormalized
+
+  check goal2.normalized == goal3
+  check goal4.normalized == goal5
+
+  check goal2.dup(normalize) == goal3
+  check goal4.dup(normalize) == goal5
+
+  check NoneGoal.isNormalized
 
 # ------------------------------------------------
 # Goal <-> string / URI
 # ------------------------------------------------
 
 block: # `$`, toUriQuery, parseGoal
-  block: # w/ color
+  block: # w/ color and val
     let
-      goal = Goal.init(Clear, All)
-      str = "ぷよ全て消すべし"
-      pon2Uri = "0_0_"
-      ishikawaUri = "200"
+      goal = Goal.init(Count, GoalColor.Green, 5, false)
+      str = "緑ぷよ5個以上同時に消すべし"
+      pon2Uri = "2_2_5_0_"
+      ishikawaUri = "H25"
 
     check $goal == str
     check goal.toUriQuery(Pon2) == StrErrorResult[string].ok pon2Uri
@@ -112,9 +130,9 @@ block: # `$`, toUriQuery, parseGoal
 
   block: # w/ val
     let
-      goal = Goal.init(AccumColor, 2)
-      str = "2色消すべし"
-      pon2Uri = "1__2"
+      goal = Goal.init(AccumColor, 2, true)
+      str = "累計ちょうど2色消すべし"
+      pon2Uri = "5_0_2_1_"
       ishikawaUri = "a02"
 
     check $goal == str
@@ -125,11 +143,26 @@ block: # `$`, toUriQuery, parseGoal
     check pon2Uri.parseGoal(Pon2) == StrErrorResult[Goal].ok goal
     check ishikawaUri.parseGoal(Ishikawa) == StrErrorResult[Goal].ok goal
 
-  block: # w/ color and val
+  block: # only clear
     let
-      goal = Goal.init(ClearChainMore, Red, 3)
-      str = "3連鎖以上&赤ぷよ全て消すべし"
-      pon2Uri = "8_1_3"
+      goal = Goal.init(Colors)
+      str = "色ぷよ全て消すべし"
+      pon2Uri = "_0_0_1_7"
+      ishikawaUri = "270"
+
+    check $goal == str
+    check goal.toUriQuery(Pon2) == StrErrorResult[string].ok pon2Uri
+    check goal.toUriQuery(Ishikawa) == StrErrorResult[string].ok ishikawaUri
+    check goal.toUriQuery(Ips) == StrErrorResult[string].ok ishikawaUri
+    check str.parseGoal == StrErrorResult[Goal].ok goal
+    check pon2Uri.parseGoal(Pon2) == StrErrorResult[Goal].ok goal
+    check ishikawaUri.parseGoal(Ishikawa) == StrErrorResult[Goal].ok goal
+
+  block: # chain w/ clear
+    let
+      goal = Goal.init(Chain, 3, false, GoalColor.Red)
+      str = "3連鎖以上する&赤ぷよ全て消すべし"
+      pon2Uri = "0_0_3_0_1"
       ishikawaUri = "x13"
 
     check $goal == str
@@ -141,10 +174,17 @@ block: # `$`, toUriQuery, parseGoal
     check ishikawaUri.parseGoal(Ishikawa) == StrErrorResult[Goal].ok goal
 
   block: # invalid with Ishikawa/Ips
-    let goal = Goal.init(Connection, Yellow, -1)
-    check goal.toUriQuery(Pon2) == StrErrorResult[string].ok "15_4_-1"
-    check goal.toUriQuery(Ishikawa).isErr
-    check goal.toUriQuery(Ips).isErr
+    block:
+      let goal = Goal.init(Connection, GoalColor.Yellow, -1, true)
+      check goal.toUriQuery(Pon2) == StrErrorResult[string].ok "4_4_-1_1_"
+      check goal.toUriQuery(Ishikawa).isErr
+      check goal.toUriQuery(Ips).isErr
+
+    block:
+      let goal = Goal.init(AccumCount, All, 10, false, Colors)
+      check goal.toUriQuery(Pon2) == StrErrorResult[string].ok "6_0_10_0_7"
+      check goal.toUriQuery(Ishikawa).isErr
+      check goal.toUriQuery(Ips).isErr
 
   block: # empty query
-    check "".parseGoal(Pon2) == StrErrorResult[Goal].ok Goal.init
+    check "".parseGoal(Pon2) == StrErrorResult[Goal].ok NoneGoal

@@ -14,85 +14,78 @@ import ../../core/[cell, goal, moveresult]
 # Common
 # ------------------------------------------------
 
-const ExactKinds =
-  {AccumColor, AccumCount, Chain, ClearChain, Color, Count, Place, Connection}
-
-func isSatisfied(goal: Goal, val: int, kind: static GoalKind): bool {.inline, noinit.} =
+func isSatisfied(goal: Goal, val: int, exact: static bool): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
-  when kind in ExactKinds:
-    val == goal.optVal.unsafeValue
+  when exact:
+    val == goal.val
   else:
-    val >= goal.optVal.unsafeValue
+    val >= goal.val
 
 func isSatisfied(
-    goal: Goal, vals: openArray[int], kind: static GoalKind
+    goal: Goal, vals: openArray[int], exact: static bool
 ): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
-  when kind in ExactKinds:
-    goal.optVal.unsafeValue in vals
+  when exact:
+    goal.val in vals
   else:
-    vals.anyIt it >= goal.optVal.unsafeValue
+    vals.anyIt it >= goal.val
 
 template expandColor(
-    isSatisfiedIdent: untyped, goal: Goal, moveRes: MoveResult, kind: static GoalKind
+    isSatisfiedIdent: untyped, goal: Goal, moveResult: MoveResult, exact: static bool
 ): untyped =
-  case goal.optColor.unsafeValue
+  case goal.color
   of All:
-    goal.isSatisfiedIdent(moveRes, kind, All)
+    goal.isSatisfiedIdent(moveResult, exact, All)
   of GoalColor.Red:
-    goal.isSatisfiedIdent(moveRes, kind, GoalColor.Red)
+    goal.isSatisfiedIdent(moveResult, exact, GoalColor.Red)
   of GoalColor.Green:
-    goal.isSatisfiedIdent(moveRes, kind, GoalColor.Green)
+    goal.isSatisfiedIdent(moveResult, exact, GoalColor.Green)
   of GoalColor.Blue:
-    goal.isSatisfiedIdent(moveRes, kind, GoalColor.Blue)
+    goal.isSatisfiedIdent(moveResult, exact, GoalColor.Blue)
   of GoalColor.Yellow:
-    goal.isSatisfiedIdent(moveRes, kind, GoalColor.Yellow)
+    goal.isSatisfiedIdent(moveResult, exact, GoalColor.Yellow)
   of GoalColor.Purple:
-    goal.isSatisfiedIdent(moveRes, kind, GoalColor.Purple)
+    goal.isSatisfiedIdent(moveResult, exact, GoalColor.Purple)
   of Garbages:
-    goal.isSatisfiedIdent(moveRes, kind, Garbages)
+    goal.isSatisfiedIdent(moveResult, exact, Garbages)
   of Colors:
-    goal.isSatisfiedIdent(moveRes, kind, Colors)
+    goal.isSatisfiedIdent(moveResult, exact, Colors)
 
-# ------------------------------------------------
-# AccumColor
-# ------------------------------------------------
-
-func isSatisfiedAccumColor*(
-    goal: Goal, colors: set[Cell], kind: static GoalKind
-): bool {.inline, noinit.} =
-  ## Returns `true` if the goal is satisfied.
-  goal.isSatisfied(colors.card, kind)
-
-# ------------------------------------------------
-# AccumCount
-# ------------------------------------------------
-
-func isSatisfiedAccumCount*(
-    goal: Goal, count: int, kind: static GoalKind
-): bool {.inline, noinit.} =
-  ## Returns `true` if the goal is satisfied.
-  goal.isSatisfied(count, kind)
+template expandExact(
+    isSatisfiedIdent: untyped, goal: Goal, moveResult: MoveResult
+): untyped =
+  if goal.exact:
+    goal.isSatisfiedIdent(moveResult, true)
+  else:
+    goal.isSatisfiedIdent(moveResult, false)
 
 # ------------------------------------------------
 # Chain
 # ------------------------------------------------
 
 func isSatisfiedChain*(
-    goal: Goal, moveRes: MoveResult, kind: static GoalKind
+    goal: Goal, moveResult: MoveResult, exact: static bool
 ): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
-  goal.isSatisfied(moveRes.chainCount, kind)
+  goal.isSatisfied(moveResult.chainCount, exact)
+
+func isSatisfiedChain*(goal: Goal, moveResult: MoveResult): bool {.inline, noinit.} =
+  ## Returns `true` if the goal is satisfied.
+  isSatisfiedChain.expandExact(goal, moveResult)
 
 # ------------------------------------------------
 # Color
 # ------------------------------------------------
 
 func isSatisfiedColor*(
-    goal: Goal, moveRes: MoveResult, kind: static GoalKind
+    goal: Goal, moveResult: MoveResult, exact: static bool
 ): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
-  goal.isSatisfied(moveRes.colorsSeq.mapIt it.card, kind)
+  goal.isSatisfied(moveResult.colorsSeq.mapIt it.card, exact)
+
+func isSatisfiedColor*(goal: Goal, moveResult: MoveResult): bool {.inline, noinit.} =
+  ## Returns `true` if the goal is satisfied.
+  isSatisfiedColor.expandExact(goal, moveResult)
 
 # ------------------------------------------------
 # Count
@@ -106,70 +99,118 @@ const
   ]
 
 func isSatisfiedCount*(
-    goal: Goal, moveRes: MoveResult, kind: static GoalKind, color: static GoalColor
+    goal: Goal, moveResult: MoveResult, exact: static bool, color: static GoalColor
 ): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   let counts = staticCase:
     case color
     of All:
-      moveRes.puyoCounts
+      moveResult.puyoCounts
     of Garbages:
-      moveRes.garbagesCounts
+      moveResult.garbagesCounts
     of Colors:
-      moveRes.colorPuyoCounts
+      moveResult.colorPuyoCounts
     else:
-      moveRes.cellCounts GoalColorToCell[color]
+      moveResult.cellCounts GoalColorToCell[color]
 
-  goal.isSatisfied(counts, kind)
+  goal.isSatisfied(counts, exact)
 
 func isSatisfiedCount*(
-    goal: Goal, moveRes: MoveResult, kind: static GoalKind
+    goal: Goal, moveResult: MoveResult, exact: static bool
 ): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
-  isSatisfiedCount.expandColor goal, moveRes, kind
+  isSatisfiedCount.expandColor goal, moveResult, exact
+
+func isSatisfiedCount*(goal: Goal, moveResult: MoveResult): bool {.inline, noinit.} =
+  ## Returns `true` if the goal is satisfied.
+  isSatisfiedCount.expandExact goal, moveResult
 
 # ------------------------------------------------
 # Place
 # ------------------------------------------------
 
 func isSatisfiedPlace*(
-    goal: Goal, moveRes: MoveResult, kind: static GoalKind, color: static GoalColor
+    goal: Goal, moveResult: MoveResult, exact: static bool, color: static GoalColor
 ): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   let places = staticCase:
     case color
     of All, Colors:
-      moveRes.placeCounts
+      moveResult.placeCounts
     else:
-      moveRes.placeCounts GoalColorToCell[color]
+      moveResult.placeCounts GoalColorToCell[color]
 
-  goal.isSatisfied(places.unsafeValue, kind)
+  goal.isSatisfied(places.unsafeValue, exact)
 
 func isSatisfiedPlace*(
-    goal: Goal, moveRes: MoveResult, kind: static GoalKind
+    goal: Goal, moveResult: MoveResult, exact: static bool
 ): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
-  isSatisfiedPlace.expandColor goal, moveRes, kind
+  isSatisfiedPlace.expandColor goal, moveResult, exact
+
+func isSatisfiedPlace*(goal: Goal, moveResult: MoveResult): bool {.inline, noinit.} =
+  ## Returns `true` if the goal is satisfied.
+  isSatisfiedPlace.expandExact goal, moveResult
 
 # ------------------------------------------------
 # Connection
 # ------------------------------------------------
 
 func isSatisfiedConnection*(
-    goal: Goal, moveRes: MoveResult, kind: static GoalKind, color: static GoalColor
+    goal: Goal, moveResult: MoveResult, exact: static bool, color: static GoalColor
 ): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   let connections = staticCase:
     case color
     of All, Colors:
-      moveRes.connectionCounts
+      moveResult.connectionCounts
     else:
-      moveRes.connectionCounts GoalColorToCell[color]
+      moveResult.connectionCounts GoalColorToCell[color]
 
-  goal.isSatisfied(connections.unsafeValue, kind)
+  goal.isSatisfied(connections.unsafeValue, exact)
 
 func isSatisfiedConnection*(
-    goal: Goal, moveRes: MoveResult, kind: static GoalKind
+    goal: Goal, moveResult: MoveResult, exact: static bool
 ): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
-  isSatisfiedConnection.expandColor goal, moveRes, kind
+  isSatisfiedConnection.expandColor goal, moveResult, exact
+
+func isSatisfiedConnection*(
+    goal: Goal, moveResult: MoveResult
+): bool {.inline, noinit.} =
+  ## Returns `true` if the goal is satisfied.
+  isSatisfiedConnection.expandExact goal, moveResult
+
+# ------------------------------------------------
+# AccumColor
+# ------------------------------------------------
+
+func isSatisfiedAccumColor*(
+    goal: Goal, colors: set[Cell], exact: static bool
+): bool {.inline, noinit.} =
+  ## Returns `true` if the goal is satisfied.
+  goal.isSatisfied(colors.card, exact)
+
+func isSatisfiedAccumColor*(goal: Goal, colors: set[Cell]): bool {.inline, noinit.} =
+  ## Returns `true` if the goal is satisfied.
+  if goal.exact:
+    goal.isSatisfiedAccumColor(colors, true)
+  else:
+    goal.isSatisfiedAccumColor(colors, false)
+
+# ------------------------------------------------
+# AccumCount
+# ------------------------------------------------
+
+func isSatisfiedAccumCount*(
+    goal: Goal, count: int, exact: static bool
+): bool {.inline, noinit.} =
+  ## Returns `true` if the goal is satisfied.
+  goal.isSatisfied(count, exact)
+
+func isSatisfiedAccumCount*(goal: Goal, count: int): bool {.inline, noinit.} =
+  ## Returns `true` if the goal is satisfied.
+  if goal.exact:
+    goal.isSatisfiedAccumCount(count, true)
+  else:
+    goal.isSatisfiedAccumCount(count, false)
