@@ -171,9 +171,11 @@ const
   ]
   ClearStr = "cぷよ全て消す"
 
+  NoneGoalStr = "クリア条件未設定"
+
 func `$`*(self: Goal): string {.inline, noinit.} =
   if self == NoneGoal:
-    return ""
+    return NoneGoalStr
 
   let
     kindStr =
@@ -202,7 +204,7 @@ func parseGoal*(str: string): StrErrorResult[Goal] {.inline, noinit.} =
   let errorMsg = "Invalid goal: {str}".fmt
 
   # none goal
-  if str == "":
+  if str in ["", NoneGoalStr]:
     return ok NoneGoal
 
   if not str.endsWith GoalSuffix:
@@ -324,7 +326,7 @@ func toUriQuery*(self: Goal, fqdn = Pon2): StrErrorResult[string] {.inline, noin
     ok queries.join QuerySep
   of Ishikawa, Ips:
     if self == NoneGoal:
-      return err "Ishikawa/Ips format does not support the none-goal"
+      return ok ""
     if self.val notin 0 ..< ValToIshikawaUri.len:
       return err "Ishikawa/Ips format only supports the value in [0, {ValToIshikawaUri.len.pred}], but got {self.val}".fmt
     if self.clearColorOpt.isOk and self.kindOpt.isOk and
@@ -364,11 +366,11 @@ func parseGoal*(
     query: string, fqdn: SimulatorFqdn
 ): StrErrorResult[Goal] {.inline, noinit.} =
   ## Returns the goal converted from the URI query.
+  if query == "":
+    return ok NoneGoal
+
   case fqdn
   of Pon2:
-    if query == "":
-      return ok NoneGoal
-
     let strs = query.split QuerySep
     if strs.len != 5:
       return err "Invalid goal: {query}".fmt

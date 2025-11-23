@@ -192,7 +192,7 @@ func parseNazoPuyo*[F: TsuField or WaterField](
 
 const
   GoalKey = "goal"
-  PuyoPuyoGoalIshikawaSep = "__"
+  IshikawaPuyoPuyoGoalSep = "__"
 
 func toUriQueryPon2[F: TsuField or WaterField](
     self: NazoPuyo[F]
@@ -215,8 +215,7 @@ func toUriQueryIshikawa[F: TsuField or WaterField](
         puyoPuyoQueryRaw
       else:
         puyoPuyoQueryRaw & '_'
-
-  ok puyoPuyoQuery & PuyoPuyoGoalIshikawaSep &
+  ok puyoPuyoQuery & IshikawaPuyoPuyoGoalSep &
     ?self.goal.toUriQuery(Ishikawa).context errorMsg
 
 func toUriQuery*[F: TsuField or WaterField](
@@ -260,7 +259,7 @@ func parseNazoPuyoIshikawa[F: TsuField or WaterField](
   ## Returns the Nazo Puyo converted from the URI query.
   let
     errorMsg = "Invalid Nazo Puyo: {query}".fmt
-    strs = query.rsplit(PuyoPuyoGoalIshikawaSep, 1)
+    strs = query.rsplit(IshikawaPuyoPuyoGoalSep, 1)
   if strs.len != 2:
     return err errorMsg
 

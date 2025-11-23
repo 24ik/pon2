@@ -13,80 +13,39 @@ import ../../src/pon2/app/[nazopuyowrap]
 
 block: # init, `==`
   check NazoPuyoWrap.init(NazoPuyo[TsuField].init) == NazoPuyoWrap.init
-
-  var wrap = NazoPuyoWrap.init NazoPuyo[WaterField].init
-  wrap.optGoal.err
-  check wrap == NazoPuyoWrap.init PuyoPuyo[WaterField].init
-
-  check NazoPuyoWrap.init != NazoPuyoWrap.init NazoPuyo[WaterField].init
-  check NazoPuyoWrap.init != NazoPuyoWrap.init PuyoPuyo[TsuField].init
+  check NazoPuyoWrap.init(NazoPuyo[WaterField].init) ==
+    NazoPuyoWrap.init PuyoPuyo[WaterField].init
+  check NazoPuyoWrap.init != NazoPuyoWrap.init(NazoPuyo[WaterField].init)
 
 # ------------------------------------------------
 # Internal Access
 # ------------------------------------------------
 
-block: # unwrapNazoPuyo
+block: # unwrap
   var nazoWrap = NazoPuyoWrap.init
-  nazoWrap.unwrapNazoPuyo:
-    check it.field.rule == Tsu
+  nazoWrap.unwrap:
+    check it.puyoPuyo.field.rule == Tsu
 
-    it.field[Row1, Col3] = Hard
-    check it.garbagesCount == 1
+    it.puyoPuyo.field[Row1, Col3] = Hard
+    check it.puyoPuyo.garbagesCount == 1
 
-    check itNazo.puyoPuyo.field.rule == Tsu
-
-  let stepCount = nazoWrap.unwrapNazoPuyo:
-    it.steps.len
+  let stepCount = nazoWrap.unwrap:
+    it.puyoPuyo.steps.len
   check stepCount == 0
 
 # ------------------------------------------------
-# Property
+# Rule
 # ------------------------------------------------
 
-block: # rule, `rule=`
-  block: # nazo
-    let
-      nazoT = NazoPuyo[TsuField].init
-      nazoW = NazoPuyo[WaterField].init
-      wrapT = NazoPuyoWrap.init nazoT
-      wrapW = NazoPuyoWrap.init nazoW
+block: # setRule
+  let
+    nazoWrapT = NazoPuyoWrap.init
+    nazoWrapW = NazoPuyoWrap.init NazoPuyo[WaterField].init
 
-    check wrapT.rule == Tsu
-    check wrapW.rule == Water
-
-    var nazoWrap = NazoPuyoWrap.init nazoT
-    check nazoWrap == wrapT
-
-    nazoWrap.rule = Tsu
-    check nazoWrap == wrapT
-
-    nazoWrap.rule = Water
-    check nazoWrap == wrapW
-
-    nazoWrap.rule = Water
-    check nazoWrap == wrapW
-
-  block: # puyo
-    let
-      puyoT = PuyoPuyo[TsuField].init
-      puyoW = PuyoPuyo[WaterField].init
-      wrapT = NazoPuyoWrap.init puyoT
-      wrapW = NazoPuyoWrap.init puyoW
-
-    check wrapT.rule == Tsu
-    check wrapW.rule == Water
-
-    var nazoWrap = NazoPuyoWrap.init puyoW
-    check nazoWrap.rule == Water
-
-    nazoWrap.rule = Water
-    check nazoWrap == wrapW
-
-    nazoWrap.rule = Tsu
-    check nazoWrap == wrapT
-
-    nazoWrap.rule = Tsu
-    check nazoWrap == wrapT
+  check nazoWrapT.setRule(Tsu) == nazoWrapT
+  check nazoWrapT.setRule(Water) == nazoWrapW
+  check nazoWrapW.setRule(Tsu) == nazoWrapT
+  check nazoWrapW.setRule(Water) == nazoWrapW
 
 # ------------------------------------------------
 # Nazo Puyo wrapper <-> URI
@@ -94,16 +53,10 @@ block: # rule, `rule=`
 
 block: # toUriQuery, parseNazoPuyoWrap
   let
-    nazoT = NazoPuyo[TsuField].init
-    puyoW = PuyoPuyo[WaterField].init
-    wrapT = NazoPuyoWrap.init nazoT
-    wrapW = NazoPuyoWrap.init puyoW
+    nazo = NazoPuyo[TsuField].init
+    wrap = NazoPuyoWrap.init nazo
 
   for fqdn in SimulatorFqdn:
-    check wrapT.toUriQuery(fqdn) == nazoT.toUriQuery fqdn
-    check nazoT.toUriQuery(fqdn).unsafeValue.parseNazoPuyoWrap(fqdn) ==
-      StrErrorResult[NazoPuyoWrap].ok wrapT
-
-  check wrapW.toUriQuery(Pon2) == puyoW.toUriQuery Pon2
-  check puyoW.toUriQuery(Pon2).unsafeValue.parseNazoPuyoWrap(Pon2) ==
-    StrErrorResult[NazoPuyoWrap].ok wrapW
+    check wrap.toUriQuery(fqdn) == nazo.toUriQuery(fqdn)
+    check nazo.toUriQuery(fqdn).unsafeValue.parseNazoPuyoWrap(fqdn) ==
+      StrErrorResult[NazoPuyoWrap].ok wrap

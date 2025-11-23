@@ -186,5 +186,15 @@ block: # `$`, toUriQuery, parseGoal
       check goal.toUriQuery(Ishikawa).isErr
       check goal.toUriQuery(Ips).isErr
 
-  block: # empty query
+  block: # none goal
+    check $NoneGoal == "クリア条件未設定"
+    check "クリア条件未設定".parseGoal == StrErrorResult[Goal].ok NoneGoal
+
+    check NoneGoal.toUriQuery(Pon2) == StrErrorResult[string].ok "_0_0_1_"
+    check NoneGoal.toUriQuery(Ishikawa) == StrErrorResult[string].ok ""
+    check NoneGoal.toUriQuery(Ips) == StrErrorResult[string].ok ""
+
+    check "_0_0_1_".parseGoal(Pon2) == StrErrorResult[Goal].ok NoneGoal
     check "".parseGoal(Pon2) == StrErrorResult[Goal].ok NoneGoal
+    check "".parseGoal(Ishikawa) == StrErrorResult[Goal].ok NoneGoal
+    check "".parseGoal(Ips) == StrErrorResult[Goal].ok NoneGoal
