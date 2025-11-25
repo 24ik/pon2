@@ -156,13 +156,12 @@ func parsePuyoPuyoPon2[F: TsuField or WaterField](
         return err "Invalid Puyo Puyo (multiple `{key}`): {query}".fmt
       fieldSet.assign true
 
-      # NOTE: somehow `assign` does not compile
-      puyoPuyo.field = (
+      # NOTE: somehow assign does not work
+      puyoPuyo.field =
         when F is TsuField:
           ?val.parseTsuField(Pon2).context "Invalid Puyo Puyo: {query}".fmt
         else:
           ?val.parseWaterField(Pon2).context "Invalid Puyo Puyo: {query}".fmt
-      )
     of StepsKey:
       if stepsSet:
         return err "Invalid Puyo Puyo (multiple `{key}`): {query}".fmt
@@ -174,7 +173,7 @@ func parsePuyoPuyoPon2[F: TsuField or WaterField](
 
   if not fieldSet:
     when F is TsuField:
-      # NOTE: somehow `assign` does not compile
+      # NOTE: somehow assign does not work
       puyoPuyo.field =
         ?"".parseTsuField(Pon2).context "Unexpected error (parsePuyoPuyoPon2)"
     else:

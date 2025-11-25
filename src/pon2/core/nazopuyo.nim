@@ -46,8 +46,8 @@ func init*[F: TsuField or WaterField](T: type NazoPuyo[F]): T {.inline, noinit.}
 const
   DummyCell = Cell.low
   GoalColorToCell: array[GoalColor, Cell] = [
-    DummyCell, Cell.Red, Cell.Green, Cell.Blue, Cell.Yellow, Cell.Purple, DummyCell,
-    DummyCell,
+    DummyCell, DummyCell, Cell.Red, Cell.Green, Cell.Blue, Cell.Yellow, Cell.Purple,
+    DummyCell, DummyCell,
   ]
 
 func mark*[F: TsuField or WaterField](
@@ -60,8 +60,7 @@ func mark*[F: TsuField or WaterField](
     return NotSupport
 
   let
-    calcConnection =
-      nazo.goal.kindOpt.isOk and nazo.goal.kindOpt.unsafeValue in {Place, Connection}
+    calcConnection = nazo.goal.kind in {Place, Connection}
     loopCount =
       if endStepIndex in 0 .. nazo.puyoPuyo.steps.len:
         endStepIndex
@@ -92,50 +91,45 @@ func mark*[F: TsuField or WaterField](
     let moveResult = puyoPuyo.move calcConnection
 
     # update accumulative results
-    if nazo.goal.kindOpt.isOk:
-      case nazo.goal.kindOpt.unsafeValue
-      of AccumColor:
-        popColors.incl moveResult.colors
-      of AccumCount:
-        let addCount =
-          case nazo.goal.color
-          of All:
-            moveResult.puyoCount
-          of GoalColor.Garbages:
-            moveResult.garbagesCount
-          of Colors:
-            moveResult.colorPuyoCount
-          else:
-            moveResult.cellCount GoalColorToCell[nazo.goal.color]
+    case nazo.goal.kind
+    of AccumColor:
+      popColors.incl moveResult.colors
+    of AccumCount:
+      let addCount =
+        case nazo.goal.color
+        of All:
+          moveResult.puyoCount
+        of GoalColor.Garbages:
+          moveResult.garbagesCount
+        of Colors:
+          moveResult.colorPuyoCount
+        else:
+          moveResult.cellCount GoalColorToCell[nazo.goal.color]
 
-        popCount.inc addCount
-      else:
-        discard
+      popCount.inc addCount
+    else:
+      discard
 
     # check clear
-    var satisfied =
-      if nazo.goal.clearColorOpt.isOk:
-        let
-          clearColor = nazo.goal.clearColorOpt.unsafeValue
-          fieldCount =
-            case clearColor
-            of All:
-              puyoPuyo.field.puyoCount
-            of GoalColor.Garbages:
-              puyoPuyo.field.garbagesCount
-            of Colors:
-              puyoPuyo.field.colorPuyoCount
-            else:
-              puyoPuyo.field.cellCount GoalColorToCell[clearColor]
-
-        fieldCount == 0
-      else:
+    let clearSatisfied =
+      case nazo.goal.clearColor
+      of GoalColor.None:
         true
+      of All:
+        puyoPuyo.field.puyoCount == 0
+      of GoalColor.Garbages:
+        puyoPuyo.field.garbagesCount == 0
+      of Colors:
+        puyoPuyo.field.colorPuyoCount == 0
+      else:
+        puyoPuyo.field.cellCount(GoalColorToCell[nazo.goal.clearColor]) == 0
 
     # check kind-specific
-    if nazo.goal.kindOpt.isOk:
-      satisfied.assign satisfied and (
-        case nazo.goal.kindOpt.unsafeValue
+    if clearSatisfied:
+      let kindSatisfied =
+        case nazo.goal.kind
+        of GoalKind.None:
+          true
         of Chain:
           nazo.goal.isSatisfiedChain moveResult
         of Color:
@@ -150,10 +144,9 @@ func mark*[F: TsuField or WaterField](
           nazo.goal.isSatisfiedAccumColor popColors
         of AccumCount:
           nazo.goal.isSatisfiedAccumCount popCount
-      )
 
-    if satisfied:
-      return Accept
+      if kindSatisfied:
+        return Accept
 
     # check dead
     if puyoPuyo.field.isDead:

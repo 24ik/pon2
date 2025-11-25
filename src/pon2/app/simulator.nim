@@ -644,14 +644,14 @@ func flip*(self: var Simulator) =
 # Edit - Goal
 # ------------------------------------------------
 
-func `goalKindOpt=`*(self: var Simulator, kindOpt: Opt[GoalKind]) =
+func `goalKind=`*(self: var Simulator, kind: GoalKind) =
   ## Sets the goal kind.
   if self.mode != EditorEdit:
     return
 
   self.editBlock:
     self.nazoPuyoWrap.unwrap:
-      it.goal.kindOpt.assign kindOpt
+      it.goal.kind.assign kind
       it.goal.normalize
 
 func `goalColor=`*(self: var Simulator, color: GoalColor) =
@@ -674,24 +674,24 @@ func `goalVal=`*(self: var Simulator, val: int) =
       it.goal.val.assign val
       it.goal.normalize
 
-func `goalExact=`*(self: var Simulator, exact: bool) =
+func `goalValOperator=`*(self: var Simulator, valOperator: GoalValOperator) =
   ## Sets the goal exact.
   if self.mode != EditorEdit:
     return
 
   self.editBlock:
     self.nazoPuyoWrap.unwrap:
-      it.goal.exact.assign exact
+      it.goal.valOperator.assign valOperator
       it.goal.normalize
 
-func `goalClearColorOpt=`*(self: var Simulator, clearColorOpt: Opt[GoalColor]) =
+func `goalClearColor=`*(self: var Simulator, clearColor: GoalColor) =
   ## Sets the goal clear color.
   if self.mode != EditorEdit:
     return
 
   self.editBlock:
     self.nazoPuyoWrap.unwrap:
-      it.goal.clearColorOpt.assign clearColorOpt
+      it.goal.clearColor.assign clearColor
       it.goal.normalize
 
 # ------------------------------------------------
@@ -845,7 +845,6 @@ func forward*(self: var Simulator, replay = false, skip = false) =
       else:
         return
 
-# TODO
 func backward*(self: var Simulator, detail = false) =
   ## Backwards the simulator.
   if self.undoDeque.len == 0:

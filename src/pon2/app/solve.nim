@@ -200,9 +200,9 @@ when defined(js) or defined(nimsuggest):
       (res: StrErrorResult[seq[string]]) => (
         block:
           if res.isOk:
-            let answersRes = res.unsafeValue.parseSolveAnswers
-            if answersRes.isOk:
-              var answers = answersRes.unsafeValue
+            let answersResult = res.unsafeValue.parseSolveAnswers
+            if answersResult.isOk:
+              var answers = answersResult.unsafeValue
               for answer in answers.mitems:
                 answer &= optPlacementsSeq[nodeIndex]
                 answer.reverse

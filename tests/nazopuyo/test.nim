@@ -35,7 +35,7 @@ block: # init
   let
     puyoPuyoT = PuyoPuyo[TsuField].init
     puyoPuyoW = PuyoPuyo[WaterField].init
-    goal = Goal.init(Count, Colors, 10, true)
+    goal = Goal.init(Count, Colors, 10, Exact)
 
   check NazoPuyo[TsuField].init(puyoPuyoT, goal) ==
     NazoPuyo[TsuField](puyoPuyo: puyoPuyoT, goal: goal)
@@ -474,7 +474,7 @@ by|
 rg|23"""
       nazoPuyo = parseNazoPuyo[TsuField](str).unsafeValue
 
-      queryPon2 = "field=t_op......yg....b.r&steps=byo0_1_0_0_0_1org23&goal=0_0_2_1_"
+      queryPon2 = "field=t_op......yg....b.r&steps=byo0_1_0_0_0_1org23&goal=1_0_2_0_0"
       queryIshikawa = "6E004g031_E1ahce__u02"
 
     check nazoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
@@ -511,7 +511,7 @@ g.....
 """
       nazoPuyo = parseNazoPuyo[TsuField](str).unsafeValue
 
-      queryPon2 = "field=t_g.....&steps&goal=_0_0_1_1"
+      queryPon2 = "field=t_g.....&steps&goal=0_0_0_0_2"
       queryIshikawa = "g00___210"
 
     check nazoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
@@ -548,7 +548,7 @@ g.....
 """
       nazoPuyo = parseNazoPuyo[TsuField](str).unsafeValue
 
-      queryPon2 = "field=t_&steps&goal=1_0_3_1_"
+      queryPon2 = "field=t_&steps&goal=2_0_3_0_0"
       queryIshikawa = "___E03"
 
     check nazoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
@@ -585,7 +585,7 @@ g.....
 """
       nazoPuyo = parseNazoPuyo[TsuField](str).unsafeValue
 
-      queryPon2 = "field=t_&steps&goal=_0_0_1_"
+      queryPon2 = "field=t_&steps&goal=0_0_0_0_0"
       queryPon22 = "field=t_&steps&goal="
       queryPon23 = "field=t_&steps"
 
