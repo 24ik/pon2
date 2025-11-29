@@ -2,7 +2,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[critbits, random, sequtils, sets, sugar, unittest]
+import std/[critbits, random, sequtils, sugar, unittest]
 import ../../src/pon2/[core]
 import ../../src/pon2/app/[key, marathon, nazopuyowrap, simulator]
 
@@ -137,21 +137,21 @@ block: # selectQuery, selectRandomQuery
 
   for i in 0 ..< 2:
     marathon.selectQuery i
-    unwrapNazoPuyo marathon.simulator.nazoPuyoWrap:
-      check not it.steps[0].pair.isDouble
+    unwrap marathon.simulator.nazoPuyoWrap:
+      check not it.puyoPuyo.steps[0].pair.isDouble
 
   for _ in 1 .. 5:
     marathon.selectRandomQuery
-    unwrapNazoPuyo marathon.simulator.nazoPuyoWrap:
-      check not it.steps[0].pair.isDouble
+    unwrap marathon.simulator.nazoPuyoWrap:
+      check not it.puyoPuyo.steps[0].pair.isDouble
 
   let stepsSeq = queries.mapIt(it.parseSteps(Pon2).unsafeValue).mapIt it.toSeq.map(
     (step: Step) => Step.init step.pair.swapped
   ).toDeque
   for _ in 1 .. 5:
     marathon.selectRandomQuery(fromMatched = false)
-    unwrapNazoPuyo marathon.simulator.nazoPuyoWrap:
-      check it.steps in stepsSeq
+    unwrap marathon.simulator.nazoPuyoWrap:
+      check it.puyoPuyo.steps in stepsSeq
 
 # ------------------------------------------------
 # Keyboard
