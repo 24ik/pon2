@@ -40,16 +40,16 @@ block:
 block: # simulator (var), replaySimulator (var)
   var
     studio = Studio.init
-    sim = Simulator.init EditorEdit
-    replaySim = Simulator.init Replay
+    simulator = Simulator.init EditorEdit
+    replaySimulator = Simulator.init Replay
 
   studio.simulator.writeCell Cell.Red
-  sim.writeCell Cell.Red
-  check studio.simulator == sim
+  simulator.writeCell Cell.Red
+  check studio.simulator == simulator
 
   studio.replaySimulator.writeCell Cell.Green
-  replaySim.writeCell Cell.Green
-  check studio.replaySimulator == replaySim
+  replaySimulator.writeCell Cell.Green
+  check studio.replaySimulator == replaySimulator
 
 # ------------------------------------------------
 # Edit - Other
@@ -67,9 +67,9 @@ block: # toggleFocus
 
 block: # nextReplay, prevReplay, solve, permute
   let
-    nazo = parseNazoPuyo[TsuField](
+    nazoPuyo = parseNazoPuyo[TsuField](
       """
-3連鎖するべし
+ちょうど3連鎖するべし
 ======
 ......
 ......
@@ -88,91 +88,91 @@ ggoggg
 bg|
 bg|"""
     ).unsafeValue
-    sim = Simulator.init(nazo, EditorEdit)
-  var studio = Studio.init sim
+    simulator = Simulator.init(nazoPuyo, EditorEdit)
+  var studio = Studio.init simulator
 
-  var nazoAns = nazo
-  nazoAns.puyoPuyo.steps[0].optPlacement.assign OptPlacement.ok Left1
-  nazoAns.puyoPuyo.steps[1].optPlacement.assign OptPlacement.ok Left1
-  let simAns = Simulator.init(nazoAns, Replay)
-  var studioAns = Studio.init sim
-  studioAns.toggleFocus
+  var answerNazoPuyo = nazoPuyo
+  answerNazoPuyo.puyoPuyo.steps[0].optPlacement.assign OptPlacement.ok Left1
+  answerNazoPuyo.puyoPuyo.steps[1].optPlacement.assign OptPlacement.ok Left1
+  let answerSimulator = Simulator.init(answerNazoPuyo, Replay)
+  var answerStudio = Studio.init simulator
+  answerStudio.toggleFocus
   block:
     Studio.privateAccess
     StudioReplayData.privateAccess
-    studioAns.replaySimulator.assign simAns
-    studioAns.replayData.stepsSeq.assign @[nazoAns.puyoPuyo.steps]
+    answerStudio.replaySimulator.assign answerSimulator
+    answerStudio.replayData.stepsSeq.assign @[answerNazoPuyo.puyoPuyo.steps]
 
   studio.solve
-  check studio == studioAns
+  check studio == answerStudio
   check studio.replayStepsCount == 1
   check studio.replayStepsIndex == 0
 
   studio.nextReplay
-  check studio == studioAns
+  check studio == answerStudio
   check studio.replayStepsCount == 1
   check studio.replayStepsIndex == 0
 
   studio.prevReplay
-  check studio == studioAns
+  check studio == answerStudio
   check studio.replayStepsCount == 1
   check studio.replayStepsIndex == 0
 
-  var nazoPermute1 = nazo
-  nazoPermute1.puyoPuyo.steps[0].pair.assign GreenGreen
-  nazoPermute1.puyoPuyo.steps[1].pair.assign BlueBlue
-  nazoPermute1.puyoPuyo.steps[0].optPlacement.assign OptPlacement.ok Up0
-  nazoPermute1.puyoPuyo.steps[1].optPlacement.assign OptPlacement.ok Up1
-  let simPermute1 = Simulator.init(nazoPermute1, Replay)
-  var studioPermute1 = Studio.init sim
-  studioPermute1.toggleFocus
+  var permuteNazoPuyo1 = nazoPuyo
+  permuteNazoPuyo1.puyoPuyo.steps[0].pair.assign GreenGreen
+  permuteNazoPuyo1.puyoPuyo.steps[1].pair.assign BlueBlue
+  permuteNazoPuyo1.puyoPuyo.steps[0].optPlacement.assign OptPlacement.ok Up0
+  permuteNazoPuyo1.puyoPuyo.steps[1].optPlacement.assign OptPlacement.ok Up1
+  let permuteSimulator1 = Simulator.init(permuteNazoPuyo1, Replay)
+  var permuteStudio1 = Studio.init simulator
+  permuteStudio1.toggleFocus
   block:
     Studio.privateAccess
-    studioPermute1.replaySimulator.assign simPermute1
+    permuteStudio1.replaySimulator.assign permuteSimulator1
 
-  var nazoPermute2 = nazo
-  nazoPermute2.puyoPuyo.steps[0].pair.assign GreenBlue
-  nazoPermute2.puyoPuyo.steps[1].pair.assign GreenBlue
-  nazoPermute2.puyoPuyo.steps[0].optPlacement.assign OptPlacement.ok Right0
-  nazoPermute2.puyoPuyo.steps[1].optPlacement.assign OptPlacement.ok Right0
-  let simPermute2 = Simulator.init(nazoPermute2, Replay)
-  var studioPermute2 = Studio.init sim
-  studioPermute2.toggleFocus
+  var permuteNazoPuyo2 = nazoPuyo
+  permuteNazoPuyo2.puyoPuyo.steps[0].pair.assign GreenBlue
+  permuteNazoPuyo2.puyoPuyo.steps[1].pair.assign GreenBlue
+  permuteNazoPuyo2.puyoPuyo.steps[0].optPlacement.assign OptPlacement.ok Right0
+  permuteNazoPuyo2.puyoPuyo.steps[1].optPlacement.assign OptPlacement.ok Right0
+  let permuteSimulator2 = Simulator.init(permuteNazoPuyo2, Replay)
+  var permuteStudio2 = Studio.init simulator
+  permuteStudio2.toggleFocus
   block:
     Studio.privateAccess
     StudioReplayData.privateAccess
-    studioPermute2.replaySimulator.assign simPermute2
-    studioPermute2.replayData.stepsIndex.assign 1
+    permuteStudio2.replaySimulator.assign permuteSimulator2
+    permuteStudio2.replayData.stepsIndex.assign 1
 
   block:
     Studio.privateAccess
     StudioReplayData.privateAccess
-    let stepsSeq = @[nazoPermute1.puyoPuyo.steps, nazoPermute2.puyoPuyo.steps]
-    studioPermute1.replayData.stepsSeq.assign stepsSeq
-    studioPermute2.replayData.stepsSeq.assign stepsSeq
+    let stepsSeq = @[permuteNazoPuyo1.puyoPuyo.steps, permuteNazoPuyo2.puyoPuyo.steps]
+    permuteStudio1.replayData.stepsSeq.assign stepsSeq
+    permuteStudio2.replayData.stepsSeq.assign stepsSeq
 
   studio.permute(@[], allowDoubleNotLast = true, allowDoubleLast = true)
-  check studio == studioPermute1
+  check studio == permuteStudio1
   check studio.replayStepsCount == 2
   check studio.replayStepsIndex == 0
 
   studio.nextReplay
-  check studio == studioPermute2
+  check studio == permuteStudio2
   check studio.replayStepsCount == 2
   check studio.replayStepsIndex == 1
 
   studio.nextReplay
-  check studio == studioPermute1
+  check studio == permuteStudio1
   check studio.replayStepsCount == 2
   check studio.replayStepsIndex == 0
 
   studio.prevReplay
-  check studio == studioPermute2
+  check studio == permuteStudio2
   check studio.replayStepsCount == 2
   check studio.replayStepsIndex == 1
 
   studio.prevReplay
-  check studio == studioPermute1
+  check studio == permuteStudio1
   check studio.replayStepsCount == 2
   check studio.replayStepsIndex == 0
 
@@ -182,9 +182,9 @@ bg|"""
 
 block: # operate
   let
-    nazo = parseNazoPuyo[TsuField](
+    nazoPuyo = parseNazoPuyo[TsuField](
       """
-1連鎖するべし
+ちょうど1連鎖するべし
 ======
 ......
 ......
@@ -204,8 +204,8 @@ by|
 pp|23"""
     ).unsafeValue
     studio1 = new Studio
-  studio1[] = Studio.init Simulator.init(nazo, EditorEdit)
-  var studio2 = Studio.init Simulator.init(nazo, EditorEdit)
+  studio1[] = Studio.init Simulator.init(nazoPuyo, EditorEdit)
+  var studio2 = Studio.init Simulator.init(nazoPuyo, EditorEdit)
 
   studio1.operate KeyEvent.init("Tab", shift = true)
   studio2.toggleFocus

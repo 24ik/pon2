@@ -12,9 +12,11 @@ import ../../src/pon2/app/[generate, nazopuyowrap, solve]
 # ------------------------------------------------
 
 proc checkGenerate(
-    genGoalKind: GoalKind,
-    genGoalColor: GenerateGoalColor,
-    genGoalVal: GoalVal,
+    generateGoalKind: GoalKind,
+    generateGoalColor: GenerateGoalColor,
+    generateGoalVal: int,
+    generateGoalValOperator: GoalValOperator,
+    generateGoalClearColor: GenerateGoalColor,
     moveCount: int,
     colorCount: int,
     heights: tuple[weights: Opt[array[Col, int]], positives: Opt[array[Col, bool]]],
@@ -33,46 +35,57 @@ proc checkGenerate(
 ) {.raises: [Exception].} =
   var rng = seed.initRand
   let
-    genGoal = GenerateGoal.init(genGoalKind, genGoalColor, genGoalVal)
+    generateGoal = GenerateGoal.init(
+      generateGoalKind, generateGoalColor, generateGoalVal, generateGoalValOperator,
+      generateGoalClearColor,
+    )
     settings = GenerateSettings.init(
-      genGoal, moveCount, colorCount, heights, puyoCounts, connection2Counts,
+      generateGoal, moveCount, colorCount, heights, puyoCounts, connection2Counts,
       connection3Counts, dropGarbagesIndices, dropHardsIndices, rotateIndices,
       crossRotateIndices, allowDoubleNotLast, allowDoubleLast,
     )
-    wrapRes = rng.generate(settings, rule)
+    wrapResult = rng.generate(settings, rule)
 
-  check wrapRes.isOk
-  let wrap = wrapRes.unsafeValue
+  check wrapResult.isOk
 
-  check wrap.optGoal.isOk
-  let goal = wrap.optGoal.unsafeValue
-
-  check goal.isNormalForm
-  check goal.kind == genGoalKind
-  if goal.kind in ColorKinds:
-    case genGoalColor
+  unwrap wrapResult.unsafeValue:
+    # goal
+    check it.goal.isNormalized
+    check it.goal.kind == generateGoalKind
+    if it.goal.kind in ColorKinds:
+      case generateGoalColor
+      of GenerateGoalColor.None:
+        check false
+      of GenerateGoalColor.All:
+        check it.goal.color == GoalColor.All
+      of SingleColor:
+        check it.goal.color in GoalColor.Red .. GoalColor.Purple
+      of GenerateGoalColor.Garbages:
+        check it.goal.color == GoalColor.Garbages
+      of GenerateGoalColor.Colors:
+        check it.goal.color == GoalColor.Colors
+    check it.goal.val == generateGoalVal
+    check it.goal.valOperator == generateGoalValOperator
+    case generateGoalClearColor
+    of GenerateGoalColor.None:
+      check it.goal.clearColor == GoalColor.None
     of GenerateGoalColor.All:
-      check goal.optColor.unsafeValue == GoalColor.All
+      check it.goal.clearColor == GoalColor.All
     of SingleColor:
-      check goal.optColor.unsafeValue in GoalColor.Red .. GoalColor.Purple
+      check it.goal.clearColor in GoalColor.Red .. GoalColor.Purple
     of GenerateGoalColor.Garbages:
-      check goal.optColor.unsafeValue == GoalColor.Garbages
+      check it.goal.clearColor == GoalColor.Garbages
     of GenerateGoalColor.Colors:
-      check goal.optColor.unsafeValue == GoalColor.Colors
-  if goal.kind in ValKinds:
-    check goal.optVal.unsafeValue == genGoalVal
+      check it.goal.clearColor == GoalColor.Colors
 
-  wrap.unwrapNazoPuyo:
-    let nazo = itNazo
-
-    check nazo.puyoPuyo.steps.len == moveCount
+    check it.puyoPuyo.steps.len == moveCount
 
     check (Cell.Red .. Cell.Purple).toSeq.filter(
-      (cell) => nazo.puyoPuyo.cellCount(cell) > 0
+      (cell) => it.puyoPuyo.cellCount(cell) > 0
     ).len == colorCount
 
-    check nazo.puyoPuyo.field.isSettled
-    check not nazo.puyoPuyo.field.canPop
+    check it.puyoPuyo.field.isSettled
+    check not it.puyoPuyo.field.canPop
 
     let baseRow =
       case rule
@@ -82,79 +95,81 @@ proc checkGenerate(
       if heights.weights.unsafeValue != [0, 0, 0, 0, 0, 0]:
         for col in Col:
           if heights.weights.unsafeValue[col] == 0:
-            check nazo.puyoPuyo.field[baseRow, col] == None
+            check it.puyoPuyo.field[baseRow, col] == None
     else:
       for col in Col:
         check heights.positives.unsafeValue[col] ==
-          (nazo.puyoPuyo.field[baseRow, col] != None)
+          (it.puyoPuyo.field[baseRow, col] != None)
 
-    check puyoCounts.colors == nazo.puyoPuyo.colorPuyoCount
-    check puyoCounts.garbage == nazo.puyoPuyo.cellCount Garbage
-    check puyoCounts.hard == nazo.puyoPuyo.cellCount Hard
+    check puyoCounts.colors == it.puyoPuyo.colorPuyoCount
+    check puyoCounts.garbage == it.puyoPuyo.cellCount Garbage
+    check puyoCounts.hard == it.puyoPuyo.cellCount Hard
 
     if connection2Counts.total.isOk:
       check connection2Counts.total.unsafeValue ==
-        nazo.puyoPuyo.field.connection2.colorPuyoCount div 2
+        it.puyoPuyo.field.connection2.colorPuyoCount div 2
     if connection2Counts.vertical.isOk:
       check connection2Counts.vertical.unsafeValue ==
-        nazo.puyoPuyo.field.connection2Vertical.colorPuyoCount div 2
+        it.puyoPuyo.field.connection2Vertical.colorPuyoCount div 2
     if connection2Counts.horizontal.isOk:
       check connection2Counts.horizontal.unsafeValue ==
-        nazo.puyoPuyo.field.connection2Vertical.colorPuyoCount div 2
+        it.puyoPuyo.field.connection2Vertical.colorPuyoCount div 2
 
     if connection3Counts.total.isOk:
       check connection3Counts.total.unsafeValue ==
-        nazo.puyoPuyo.field.connection3.colorPuyoCount div 3
+        it.puyoPuyo.field.connection3.colorPuyoCount div 3
     if connection3Counts.vertical.isOk:
       check connection3Counts.vertical.unsafeValue ==
-        nazo.puyoPuyo.field.connection3Vertical.colorPuyoCount div 3
+        it.puyoPuyo.field.connection3Vertical.colorPuyoCount div 3
     if connection3Counts.horizontal.isOk:
       check connection3Counts.horizontal.unsafeValue ==
-        nazo.puyoPuyo.field.connection3Vertical.colorPuyoCount div 3
+        it.puyoPuyo.field.connection3Vertical.colorPuyoCount div 3
     if connection3Counts.lShape.isOk:
       check connection3Counts.lShape.unsafeValue ==
-        nazo.puyoPuyo.field.connection3LShape.colorPuyoCount div 3
+        it.puyoPuyo.field.connection3LShape.colorPuyoCount div 3
 
     if not allowDoubleNotLast:
       check (0 ..< moveCount.pred).toSeq.all (index) =>
-        nazo.puyoPuyo.steps[index].kind != PairPlacement or
-        not nazo.puyoPuyo.steps[index].pair.isDouble
+        it.puyoPuyo.steps[index].kind != PairPlacement or
+        not it.puyoPuyo.steps[index].pair.isDouble
 
     if not allowDoubleLast:
-      check nazo.puyoPuyo.steps[^1].kind != PairPlacement or
-        not nazo.puyoPuyo.steps[^1].pair.isDouble
+      check it.puyoPuyo.steps[^1].kind != PairPlacement or
+        not it.puyoPuyo.steps[^1].pair.isDouble
 
     for stepIndex in dropGarbagesIndices:
-      check nazo.puyoPuyo.steps[stepIndex].kind == StepKind.Garbages and
-        not nazo.puyoPuyo.steps[stepIndex].dropHard
+      check it.puyoPuyo.steps[stepIndex].kind == StepKind.Garbages and
+        not it.puyoPuyo.steps[stepIndex].dropHard
 
     for stepIndex in dropHardsIndices:
-      check nazo.puyoPuyo.steps[stepIndex].kind == StepKind.Garbages and
-        nazo.puyoPuyo.steps[stepIndex].dropHard
+      check it.puyoPuyo.steps[stepIndex].kind == StepKind.Garbages and
+        it.puyoPuyo.steps[stepIndex].dropHard
 
     for stepIndex in rotateIndices:
-      check nazo.puyoPuyo.steps[stepIndex].kind == StepKind.Rotate and
-        not nazo.puyoPuyo.steps[stepIndex].cross
+      check it.puyoPuyo.steps[stepIndex].kind == StepKind.Rotate and
+        not it.puyoPuyo.steps[stepIndex].cross
 
     for stepIndex in crossRotateIndices:
-      check nazo.puyoPuyo.steps[stepIndex].kind == StepKind.Rotate and
-        nazo.puyoPuyo.steps[stepIndex].cross
+      check it.puyoPuyo.steps[stepIndex].kind == StepKind.Rotate and
+        it.puyoPuyo.steps[stepIndex].cross
 
-    let ans = nazo.solve
-    check ans.len == 1
-    check ans[0].len == moveCount
-    for stepIndex, step in nazo.puyoPuyo.steps:
+    let answer = it.solve
+    check answer.len == 1
+    check answer[0].len == moveCount
+    for stepIndex, step in it.puyoPuyo.steps:
       case step.kind
       of PairPlacement:
-        check step.optPlacement == ans[0][stepIndex]
+        check step.optPlacement == answer[0][stepIndex]
       else:
-        check ans[0][stepIndex].isErr
+        check answer[0][stepIndex].isErr
 
 block: # generate
   checkGenerate(
     Chain,
-    GenerateGoalColor.low,
+    GenerateGoalColor.None,
     5,
+    Exact,
+    GenerateGoalColor.None,
     2,
     3,
     (
@@ -179,9 +194,11 @@ block: # generate
     123,
   )
   checkGenerate(
-    Clear,
-    GenerateGoalColor.All,
-    0,
+    Count,
+    SingleColor,
+    4,
+    AtLeast,
+    GenerateGoalColor.Garbages,
     2,
     2,
     (
