@@ -23,10 +23,10 @@ let
   fullArr3: array[Cell, seq[int]] = [@[], @[], @[4, 4, 4], @[4], @[], @[5], @[], @[6]]
   fullPopCounts = @[fullArr1, fullArr2, fullArr3]
 
-  moveRes1 = MoveResult.init(
+  moveResult1 = MoveResult.init(
     chainCount, popCounts, hardToGarbageCount, detailPopCounts, detailHardToGarbageCount
   )
-  moveRes2 = MoveResult.init(
+  moveResult2 = MoveResult.init(
     chainCount, popCounts, hardToGarbageCount, detailPopCounts,
     detailHardToGarbageCount, fullPopCounts,
   )
@@ -36,7 +36,7 @@ let
 # ------------------------------------------------
 
 block: # init
-  check moveRes1 ==
+  check moveResult1 ==
     MoveResult(
       chainCount: chainCount,
       popCounts: popCounts,
@@ -45,7 +45,7 @@ block: # init
       detailHardToGarbageCount: detailHardToGarbageCount,
       fullPopCounts: Opt[seq[array[Cell, seq[int]]]].err,
     )
-  check moveRes2 ==
+  check moveResult2 ==
     MoveResult(
       chainCount: chainCount,
       popCounts: popCounts,
@@ -69,42 +69,42 @@ block:
   let
     countP = 15
     countY = 0
-  check moveRes1.cellCount(Purple) == countP
-  check moveRes2.cellCount(Purple) == countP
-  check moveRes1.cellCount(Yellow) == countY
-  check moveRes2.cellCount(Yellow) == countY
+  check moveResult1.cellCount(Purple) == countP
+  check moveResult2.cellCount(Purple) == countP
+  check moveResult1.cellCount(Yellow) == countY
+  check moveResult2.cellCount(Yellow) == countY
 
   let countPuyo = 57
-  check moveRes1.puyoCount == countPuyo
-  check moveRes2.puyoCount == countPuyo
+  check moveResult1.puyoCount == countPuyo
+  check moveResult2.puyoCount == countPuyo
 
   let countColor = 44
-  check moveRes1.colorPuyoCount == countColor
-  check moveRes2.colorPuyoCount == countColor
+  check moveResult1.colorPuyoCount == countColor
+  check moveResult2.colorPuyoCount == countColor
 
   let countGarbages = 13
-  check moveRes1.garbagesCount == countGarbages
-  check moveRes2.garbagesCount == countGarbages
+  check moveResult1.garbagesCount == countGarbages
+  check moveResult2.garbagesCount == countGarbages
 
   let
     countsB = @[5, 0, 8]
     countsY = @[0, 0, 0]
-  check moveRes1.cellCounts(Blue) == countsB
-  check moveRes2.cellCounts(Blue) == countsB
-  check moveRes1.cellCounts(Yellow) == countsY
-  check moveRes2.cellCounts(Yellow) == countsY
+  check moveResult1.cellCounts(Blue) == countsB
+  check moveResult2.cellCounts(Blue) == countsB
+  check moveResult1.cellCounts(Yellow) == countsY
+  check moveResult2.cellCounts(Yellow) == countsY
 
   let countsPuyo = @[19, 8, 30]
-  check moveRes1.puyoCounts == countsPuyo
-  check moveRes2.puyoCounts == countsPuyo
+  check moveResult1.puyoCounts == countsPuyo
+  check moveResult2.puyoCounts == countsPuyo
 
   let countsColor = @[18, 8, 18]
-  check moveRes1.colorPuyoCounts == countsColor
-  check moveRes2.colorPuyoCounts == countsColor
+  check moveResult1.colorPuyoCounts == countsColor
+  check moveResult2.colorPuyoCounts == countsColor
 
   let countsGarbages = @[1, 0, 12]
-  check moveRes1.garbagesCounts == countsGarbages
-  check moveRes2.garbagesCounts == countsGarbages
+  check moveResult1.garbagesCounts == countsGarbages
+  check moveResult2.garbagesCounts == countsGarbages
 
 # ------------------------------------------------
 # Color
@@ -112,38 +112,38 @@ block:
 
 block: # colors, colorsSeq
   let colors2 = {Red, Green, Blue, Purple}
-  check moveRes1.colors == colors2
-  check moveRes2.colors == colors2
+  check moveResult1.colors == colors2
+  check moveResult2.colors == colors2
 
   let colorsSeq2 = @[{Red, Blue, Purple}, {Red, Green}, {Red, Blue, Purple}]
-  check moveRes1.colorsSeq == colorsSeq2
-  check moveRes2.colorsSeq == colorsSeq2
+  check moveResult1.colorsSeq == colorsSeq2
+  check moveResult2.colorsSeq == colorsSeq2
 
 # ------------------------------------------------
 # Place
 # ------------------------------------------------
 
 block: # placeCounts
-  check moveRes1.placeCounts(Purple).isErr
-  check moveRes2.placeCounts(Purple) == StrErrorResult[seq[int]].ok @[2, 0, 1]
-  check moveRes1.placeCounts(Yellow).isErr
-  check moveRes2.placeCounts(Yellow) == StrErrorResult[seq[int]].ok @[0, 0, 0]
+  check moveResult1.placeCounts(Purple).isErr
+  check moveResult2.placeCounts(Purple) == StrErrorResult[seq[int]].ok @[2, 0, 1]
+  check moveResult1.placeCounts(Yellow).isErr
+  check moveResult2.placeCounts(Yellow) == StrErrorResult[seq[int]].ok @[0, 0, 0]
 
-  check moveRes1.placeCounts.isErr
-  check moveRes2.placeCounts == StrErrorResult[seq[int]].ok @[4, 2, 3]
+  check moveResult1.placeCounts.isErr
+  check moveResult2.placeCounts == StrErrorResult[seq[int]].ok @[4, 2, 3]
 
 # ------------------------------------------------
 # Connect
 # ------------------------------------------------
 
 block: # connectionCounts
-  check moveRes1.connectionCounts(Purple).isErr
-  check moveRes2.connectionCounts(Purple) == StrErrorResult[seq[int]].ok @[4, 5, 6]
-  check moveRes1.connectionCounts(Yellow).isErr
-  check moveRes2.connectionCounts(Yellow) == StrErrorResult[seq[int]].ok @[]
+  check moveResult1.connectionCounts(Purple).isErr
+  check moveResult2.connectionCounts(Purple) == StrErrorResult[seq[int]].ok @[4, 5, 6]
+  check moveResult1.connectionCounts(Yellow).isErr
+  check moveResult2.connectionCounts(Yellow) == StrErrorResult[seq[int]].ok @[]
 
-  check moveRes1.connectionCounts.isErr
-  check moveRes2.connectionCounts ==
+  check moveResult1.connectionCounts.isErr
+  check moveResult2.connectionCounts ==
     StrErrorResult[seq[int]].ok @[4, 5, 4, 5, 4, 4, 4, 5, 6]
 
 # ------------------------------------------------
@@ -153,18 +153,18 @@ block: # connectionCounts
 let scoreAns = 8660
 
 block: # score
-  check moveRes1.score.isErr
-  check moveRes2.score == StrErrorResult[int].ok scoreAns
+  check moveResult1.score.isErr
+  check moveResult2.score == StrErrorResult[int].ok scoreAns
 
 # ------------------------------------------------
 # Notice Garbage
 # ------------------------------------------------
 
 block: # noticeCounts
-  check moveRes1.noticeCounts(Tsu).isErr
-  check moveRes2.noticeCounts(Tsu) ==
+  check moveResult1.noticeCounts(Tsu).isErr
+  check moveResult2.noticeCounts(Tsu) ==
     StrErrorResult[array[Notice, int]].ok scoreAns.noticeCounts Tsu
 
-  check moveRes1.noticeCounts(Water).isErr
-  check moveRes2.noticeCounts(Water) ==
+  check moveResult1.noticeCounts(Water).isErr
+  check moveResult2.noticeCounts(Water) ==
     StrErrorResult[array[Notice, int]].ok scoreAns.noticeCounts Water
