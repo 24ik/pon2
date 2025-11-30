@@ -46,28 +46,30 @@ func init*[F: TsuField or WaterField](T: type NazoPuyo[F]): T {.inline, noinit.}
 const
   DummyCell = Cell.low
   GoalColorToCell: array[GoalColor, Cell] = [
-    DummyCell, DummyCell, Cell.Red, Cell.Green, Cell.Blue, Cell.Yellow, Cell.Purple,
-    DummyCell, DummyCell,
+    DummyCell, Cell.Red, Cell.Green, Cell.Blue, Cell.Yellow, Cell.Purple, DummyCell,
+    DummyCell,
   ]
 
 func mark*[F: TsuField or WaterField](
-    nazo: NazoPuyo[F], endStepIndex = -1
+    self: NazoPuyo[F], endStepIndex = -1
 ): MarkResult {.inline, noinit.} =
   ## Marks the steps in the Nazo Puyo.
   ## If `endStepIndex` is negative, all steps are used.
   ## This function requires that the field is settled.
-  if not nazo.goal.isSupported:
+  if not self.goal.isSupported:
     return NotSupport
 
   let
-    calcConnection = nazo.goal.kind in {Place, Connection}
+    calcConnection =
+      self.goal.mainOpt.isOk and
+      self.goal.mainOpt.unsafeValue.kind in {Place, Connection}
     loopCount =
-      if endStepIndex in 0 .. nazo.puyoPuyo.steps.len:
+      if endStepIndex in 0 .. self.puyoPuyo.steps.len:
         endStepIndex
       else:
-        nazo.puyoPuyo.steps.len
+        self.puyoPuyo.steps.len
   var
-    puyoPuyo = nazo.puyoPuyo
+    puyoPuyo = self.puyoPuyo
     skipped = false
     popColors = set[Cell]({}) # used by AccumColor
     popCount = 0 # used by AccumCount
@@ -91,59 +93,69 @@ func mark*[F: TsuField or WaterField](
     let moveResult = puyoPuyo.move calcConnection
 
     # update accumulative results
-    case nazo.goal.kind
-    of AccumColor:
-      popColors.incl moveResult.colors
-    of AccumCount:
-      let addCount =
-        case nazo.goal.color
-        of All:
-          moveResult.puyoCount
-        of GoalColor.Garbages:
-          moveResult.garbagesCount
-        of Colors:
-          moveResult.colorPuyoCount
-        else:
-          moveResult.cellCount GoalColorToCell[nazo.goal.color]
+    if self.goal.mainOpt.isOk:
+      let main = self.goal.mainOpt.unsafeValue
 
-      popCount.inc addCount
-    else:
-      discard
+      case main.kind
+      of AccumColor:
+        popColors.incl moveResult.colors
+      of AccumCount:
+        let addCount =
+          case main.color
+          of All:
+            moveResult.puyoCount
+          of GoalColor.Garbages:
+            moveResult.garbagesCount
+          of Colors:
+            moveResult.colorPuyoCount
+          else:
+            moveResult.cellCount GoalColorToCell[main.color]
+
+        popCount.inc addCount
+      else:
+        discard
 
     # check clear
     let clearSatisfied =
-      case nazo.goal.clearColor
-      of GoalColor.None:
-        true
-      of All:
-        puyoPuyo.field.puyoCount == 0
-      of GoalColor.Garbages:
-        puyoPuyo.field.garbagesCount == 0
-      of Colors:
-        puyoPuyo.field.colorPuyoCount == 0
+      if self.goal.clearColorOpt.isOk:
+        let
+          clearColor = self.goal.clearColorOpt.unsafeValue
+          count =
+            case clearColor
+            of All:
+              puyoPuyo.field.puyoCount
+            of GoalColor.Garbages:
+              puyoPuyo.field.garbagesCount
+            of Colors:
+              puyoPuyo.field.colorPuyoCount
+            else:
+              puyoPuyo.field.cellCount GoalColorToCell[clearColor]
+
+        count == 0
       else:
-        puyoPuyo.field.cellCount(GoalColorToCell[nazo.goal.clearColor]) == 0
+        true
 
     # check kind-specific
     if clearSatisfied:
       let kindSatisfied =
-        case nazo.goal.kind
-        of GoalKind.None:
+        if self.goal.mainOpt.isOk:
+          case self.goal.mainOpt.unsafeValue.kind
+          of Chain:
+            self.goal.isSatisfiedChain moveResult
+          of Color:
+            self.goal.isSatisfiedColor moveResult
+          of Count:
+            self.goal.isSatisfiedCount moveResult
+          of Place:
+            self.goal.isSatisfiedPlace moveResult
+          of Connection:
+            self.goal.isSatisfiedConnection moveResult
+          of AccumColor:
+            self.goal.isSatisfiedAccumColor popColors
+          of AccumCount:
+            self.goal.isSatisfiedAccumCount popCount
+        else:
           true
-        of Chain:
-          nazo.goal.isSatisfiedChain moveResult
-        of Color:
-          nazo.goal.isSatisfiedColor moveResult
-        of Count:
-          nazo.goal.isSatisfiedCount moveResult
-        of Place:
-          nazo.goal.isSatisfiedPlace moveResult
-        of Connection:
-          nazo.goal.isSatisfiedConnection moveResult
-        of AccumColor:
-          nazo.goal.isSatisfiedAccumColor popColors
-        of AccumCount:
-          nazo.goal.isSatisfiedAccumCount popCount
 
       if kindSatisfied:
         return Accept
