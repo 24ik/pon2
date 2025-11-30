@@ -11,31 +11,29 @@ import ../../src/pon2/core/[fqdn, goal]
 # ------------------------------------------------
 
 block: # init
+  check GoalMain.init(AccumCount, GoalColor.Yellow, 4, AtLeast) ==
+    GoalMain(kind: AccumCount, color: GoalColor.Yellow, val: 4, valOperator: AtLeast)
+  check GoalMain.init(Chain, 2, Exact) ==
+    GoalMain(kind: Chain, color: GoalColor.low, val: 2, valOperator: Exact)
+
   check Goal.init(Connection, Colors, 8, Exact, GoalColor.Green) ==
     Goal(
-      mainOpt: Opt[GoalMain].ok GoalMain(
-        kind: Connection, color: Colors, val: 8, valOperator: Exact
-      ),
+      mainOpt: Opt[GoalMain].ok GoalMain.init(Connection, Colors, 8, Exact),
       clearColorOpt: Opt[GoalColor].ok GoalColor.Green,
     )
   check Goal.init(Place, All, 1, AtLeast) ==
     Goal(
-      mainOpt:
-        Opt[GoalMain].ok GoalMain(kind: Place, color: All, val: 1, valOperator: AtLeast),
+      mainOpt: Opt[GoalMain].ok GoalMain.init(Place, All, 1, AtLeast),
       clearColorOpt: Opt[GoalColor].err,
     )
   check Goal.init(Chain, 3, Exact, All) ==
     Goal(
-      mainOpt: Opt[GoalMain].ok GoalMain(
-        kind: Chain, color: GoalColor.low, val: 3, valOperator: Exact
-      ),
+      mainOpt: Opt[GoalMain].ok GoalMain.init(Chain, GoalColor.low, 3, Exact),
       clearColorOpt: Opt[GoalColor].ok All,
     )
   check Goal.init(AccumColor, 2, AtLeast) ==
     Goal(
-      mainOpt: Opt[GoalMain].ok GoalMain(
-        kind: AccumColor, color: GoalColor.low, val: 2, valOperator: AtLeast
-      ),
+      mainOpt: Opt[GoalMain].ok GoalMain.init(AccumColor, GoalColor.low, 2, AtLeast),
       clearColorOpt: Opt[GoalColor].err,
     )
   check Goal.init(GoalColor.Red) ==

@@ -644,14 +644,31 @@ func flip*(self: var Simulator) =
 # Edit - Goal
 # ------------------------------------------------
 
-func `goalKind=`*(self: var Simulator, kind: GoalKind) =
+const
+  DefaultGoalColor = All
+  DefaultGoalVal = 0
+  DefaultGoalValOperator = Exact
+
+func `goalKindOpt=`*(self: var Simulator, kindOpt: Opt[GoalKind]) =
   ## Sets the goal kind.
   if self.mode != EditorEdit:
     return
 
   self.editBlock:
     self.nazoPuyoWrap.unwrap:
-      it.goal.kind.assign kind
+      if kindOpt.isOk:
+        let kind = kindOpt.unsafeValue
+
+        if it.goal.mainOpt.isOk:
+          it.goal.mainOpt.unsafeValue.kind.assign kind
+        else:
+          it.goal.mainOpt.ok GoalMain.init(
+            kind, DefaultGoalColor, DefaultGoalVal, DefaultGoalValOperator
+          )
+          it.goal.assign Goal.init(kind, GoalColor.low, 0, GoalValOperator.low)
+      else:
+        if it.goal.mainOpt.isOk: it.goal.mainOpt.err else: discard
+
       it.goal.normalize
 
 func `goalColor=`*(self: var Simulator, color: GoalColor) =
@@ -659,9 +676,12 @@ func `goalColor=`*(self: var Simulator, color: GoalColor) =
   if self.mode != EditorEdit:
     return
 
-  self.editBlock:
-    self.nazoPuyoWrap.unwrap:
-      it.goal.color.assign color
+  self.nazoPuyoWrap.unwrap:
+    if it.goal.mainOpt.isErr:
+      return
+
+    self.editBlock:
+      it.goal.mainOpt.unsafeValue.color.assign color
       it.goal.normalize
 
 func `goalVal=`*(self: var Simulator, val: int) =
@@ -669,9 +689,12 @@ func `goalVal=`*(self: var Simulator, val: int) =
   if self.mode != EditorEdit:
     return
 
-  self.editBlock:
-    self.nazoPuyoWrap.unwrap:
-      it.goal.val.assign val
+  self.nazoPuyoWrap.unwrap:
+    if it.goal.mainOpt.isErr:
+      return
+
+    self.editBlock:
+      it.goal.mainOpt.unsafeValue.val.assign val
       it.goal.normalize
 
 func `goalValOperator=`*(self: var Simulator, valOperator: GoalValOperator) =
@@ -679,19 +702,22 @@ func `goalValOperator=`*(self: var Simulator, valOperator: GoalValOperator) =
   if self.mode != EditorEdit:
     return
 
-  self.editBlock:
-    self.nazoPuyoWrap.unwrap:
-      it.goal.valOperator.assign valOperator
+  self.nazoPuyoWrap.unwrap:
+    if it.goal.mainOpt.isErr:
+      return
+
+    self.editBlock:
+      it.goal.mainOpt.unsafeValue.valOperator.assign valOperator
       it.goal.normalize
 
-func `goalClearColor=`*(self: var Simulator, clearColor: GoalColor) =
+func `goalClearColorOpt=`*(self: var Simulator, clearColorOpt: Opt[GoalColor]) =
   ## Sets the goal clear color.
   if self.mode != EditorEdit:
     return
 
-  self.editBlock:
-    self.nazoPuyoWrap.unwrap:
-      it.goal.clearColor.assign clearColor
+  self.nazoPuyoWrap.unwrap:
+    self.editBlock:
+      it.goal.clearColorOpt.assign clearColorOpt
       it.goal.normalize
 
 # ------------------------------------------------

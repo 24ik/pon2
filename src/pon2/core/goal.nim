@@ -60,7 +60,7 @@ const
 # Constructor
 # ------------------------------------------------
 
-func init(
+func init*(
     T: type GoalMain,
     kind: GoalKind,
     color: GoalColor,
@@ -69,7 +69,7 @@ func init(
 ): T {.inline, noinit.} =
   T(kind: kind, color: color, val: val, valOperator: valOperator)
 
-func init(
+func init*(
     T: type GoalMain, kind: GoalKind, val: int, valOperator: GoalValOperator
 ): T {.inline, noinit.} =
   T.init(kind, DefaultColor, val, valOperator)

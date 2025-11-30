@@ -493,10 +493,10 @@ O"""
 # ------------------------------------------------
 
 block:
-  # `goalKind=`, `goalColor=`, `goalVal=`, `goalValOperator=`, `goalClearColor=`
+  # `goalKindOpt=`, `goalColor=`, `goalVal=`, `goalValOperator=`, `goalClearColorOpt=`
   var simulator = Simulator.init EditorEdit
 
-  simulator.goalKind = Chain
+  simulator.goalKindOpt = Opt[GoalKind].ok Chain
   simulator.nazoPuyoWrap.unwrap:
     check it.goal == Goal.init(Chain, 0, Exact)
 
@@ -512,11 +512,11 @@ block:
   simulator.nazoPuyoWrap.unwrap:
     check it.goal == Goal.init(Chain, 3, AtLeast)
 
-  simulator.goalClearColor = All
+  simulator.goalClearColorOpt = Opt[GoalColor].ok All
   simulator.nazoPuyoWrap.unwrap:
     check it.goal == Goal.init(Chain, 3, AtLeast, All)
 
-  simulator.goalKind = GoalKind.None
+  simulator.goalKindOpt = Opt[GoalKind].err
   simulator.nazoPuyoWrap.unwrap:
     check it.goal == Goal.init All
 
@@ -532,9 +532,13 @@ block:
   simulator.nazoPuyoWrap.unwrap:
     check it.goal == Goal.init All
 
-  simulator.goalClearColor = Colors
+  simulator.goalClearColorOpt = Opt[GoalColor].ok Colors
   simulator.nazoPuyoWrap.unwrap:
     check it.goal == Goal.init Colors
+
+  simulator.goalClearColorOpt = Opt[GoalColor].err
+  simulator.nazoPuyoWrap.unwrap:
+    check it.goal == NoneGoal
 
 # ------------------------------------------------
 # Edit - Other
@@ -1229,13 +1233,13 @@ block: # toUri, parseSimulator
       simulator =
         Simulator.init NazoPuyo[TsuField].init(PuyoPuyo[TsuField].init, Goal.init All)
       uriPon2 =
-        "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps&goal=0_0_0_0_1".parseUri
+        "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps&goal=_0".parseUri
       uriIshikawa = "https://ishikawapuyo.net/simu/pn.html?___200".parseUri
       uriIps = "https://ips.karou.jp/simu/pn.html?___200".parseUri
       uriPon22 =
-        "https://24ik.github.io/pon2/stable/studio/?field=t_&steps&goal=0_0_0_0_1".parseUri
+        "https://24ik.github.io/pon2/stable/studio/?field=t_&steps&goal=_0".parseUri
       uriPon23 =
-        "https://24ik.github.io/pon2/stable/studio/index.html?mode=vp&field=t_&steps&goal=0_0_0_0_1".parseUri
+        "https://24ik.github.io/pon2/stable/studio/index.html?mode=vp&field=t_&steps&goal=_0".parseUri
       uriIshikawa2 = "http://ishikawapuyo.net/simu/pn.html?___200".parseUri
       uriIshikawa3 = "http://ishikawapuyo.net/simu/pn.html?__200".parseUri
       uriIps2 = "http://ishikawapuyo.net/simu/pn.html?___200".parseUri
@@ -1257,7 +1261,7 @@ block: # toUri, parseSimulator
     let
       simulator = Simulator.init PuyoPuyo[TsuField].init
       uriPon2 =
-        "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps&goal=0_0_0_0_0".parseUri
+        "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps&goal=_".parseUri
       uriIshikawa = "https://ishikawapuyo.net/simu/ps.html?___".parseUri
       uriIps = "https://ips.karou.jp/simu/ps.html?___".parseUri
       uriPon22 =
@@ -1313,7 +1317,7 @@ gy|23"""
     ).unsafeValue
 
     check Simulator.init(nazo).toUri(clearPlacements = true) ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_b..&steps=rbppgy&goal=1_0_6_0_0".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_b..&steps=rbppgy&goal=0_0_6_0_".parseUri
 
 block: # toExportUri
   # EditorEdit
@@ -1326,11 +1330,11 @@ block: # toExportUri
     simulator.forward
 
     check simulator.toUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=ee&field=t_g&steps&goal=0_0_0_0_0".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=ee&field=t_g&steps&goal=_".parseUri
     check simulator.toExportUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_g......&steps&goal=0_0_0_0_0".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_g......&steps&goal=_".parseUri
     check simulator.toExportUri(viewer = false) ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=ep&field=t_g......&steps&goal=0_0_0_0_0".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=ep&field=t_g......&steps&goal=_".parseUri
 
   # ViewerEdit
   block:
@@ -1342,7 +1346,7 @@ block: # toExportUri
     simulator.forward
 
     check simulator.toExportUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps&goal=0_0_0_0_0".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps&goal=_".parseUri
 
   # ViewerPlay
   block:
@@ -1372,6 +1376,6 @@ rb|"""
     simulator.forward
 
     check simulator.toUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_rb..&steps=rb34&goal=1_0_1_0_0".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_rb..&steps=rb34&goal=0_0_1_0_".parseUri
     check simulator.toExportUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps=rb&goal=1_0_1_0_0".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps=rb&goal=0_0_1_0_".parseUri
