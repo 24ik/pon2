@@ -12,11 +12,7 @@ import ../../src/pon2/app/[generate, nazopuyowrap, solve]
 # ------------------------------------------------
 
 proc checkGenerate(
-    generateGoalKind: GoalKind,
-    generateGoalColor: GenerateGoalColor,
-    generateGoalVal: int,
-    generateGoalValOperator: GoalValOperator,
-    generateGoalClearColor: GenerateGoalColor,
+    goal: Goal,
     moveCount: int,
     colorCount: int,
     heights: tuple[weights: Opt[array[Col, int]], positives: Opt[array[Col, bool]]],
@@ -35,12 +31,8 @@ proc checkGenerate(
 ) {.raises: [Exception].} =
   var rng = seed.initRand
   let
-    generateGoal = GenerateGoal.init(
-      generateGoalKind, generateGoalColor, generateGoalVal, generateGoalValOperator,
-      generateGoalClearColor,
-    )
     settings = GenerateSettings.init(
-      generateGoal, moveCount, colorCount, heights, puyoCounts, connection2Counts,
+      goal, moveCount, colorCount, heights, puyoCounts, connection2Counts,
       connection3Counts, dropGarbagesIndices, dropHardsIndices, rotateIndices,
       crossRotateIndices, allowDoubleNotLast, allowDoubleLast,
     )
@@ -49,34 +41,7 @@ proc checkGenerate(
   check wrapResult.isOk
 
   unwrap wrapResult.unsafeValue:
-    # goal
-    check it.goal.isNormalized
-    check it.goal.kind == generateGoalKind
-    if it.goal.kind in ColorKinds:
-      case generateGoalColor
-      of GenerateGoalColor.None:
-        check false
-      of GenerateGoalColor.All:
-        check it.goal.color == GoalColor.All
-      of SingleColor:
-        check it.goal.color in GoalColor.Red .. GoalColor.Purple
-      of GenerateGoalColor.Garbages:
-        check it.goal.color == GoalColor.Garbages
-      of GenerateGoalColor.Colors:
-        check it.goal.color == GoalColor.Colors
-    check it.goal.val == generateGoalVal
-    check it.goal.valOperator == generateGoalValOperator
-    case generateGoalClearColor
-    of GenerateGoalColor.None:
-      check it.goal.clearColor == GoalColor.None
-    of GenerateGoalColor.All:
-      check it.goal.clearColor == GoalColor.All
-    of SingleColor:
-      check it.goal.clearColor in GoalColor.Red .. GoalColor.Purple
-    of GenerateGoalColor.Garbages:
-      check it.goal.clearColor == GoalColor.Garbages
-    of GenerateGoalColor.Colors:
-      check it.goal.clearColor == GoalColor.Colors
+    check it.goal == goal
 
     check it.puyoPuyo.steps.len == moveCount
 
@@ -165,11 +130,7 @@ proc checkGenerate(
 
 block: # generate
   checkGenerate(
-    Chain,
-    GenerateGoalColor.None,
-    5,
-    Exact,
-    GenerateGoalColor.None,
+    Goal.init(Chain, 5, Exact),
     2,
     3,
     (
@@ -194,11 +155,7 @@ block: # generate
     123,
   )
   checkGenerate(
-    Count,
-    SingleColor,
-    4,
-    AtLeast,
-    GenerateGoalColor.Garbages,
+    Goal.init(Count, GoalColor.Red, 4, AtLeast, GoalColor.Garbages),
     2,
     2,
     (

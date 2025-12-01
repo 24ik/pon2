@@ -9,61 +9,35 @@
 import std/[random, sequtils, sets, sugar]
 import ./[nazopuyowrap, solve]
 import ../[core]
-import ../private/[algorithm, arrayutils, assign, deques, math, results2, staticfor]
+import
+  ../private/
+    [algorithm, arrayutils, assign, deques, math, results2, setutils, staticfor]
 
 export nazopuyowrap, results2
 
-type
-  GenerateGoalColor* {.pure.} = enum
-    ## Nazo Puyo goal color for generation.
-    None
-    All
-    SingleColor
-    Garbages
-    Colors
-
-  GenerateGoal* = object ## Nazo Puyo goal for generation.
-    kind: GoalKind
-    color: GenerateGoalColor
-    val: int
-    valOperator: GoalValOperator
-    clearColor: GenerateGoalColor
-
-  GenerateSettings* = object ## Settings of Nazo Puyo generation.
-    goal: GenerateGoal
-    moveCount: int
-    colorCount: int
-    heights: tuple[weights: Opt[array[Col, int]], positives: Opt[array[Col, bool]]]
-    puyoCounts: tuple[colors: int, garbage: int, hard: int]
-    connection2Counts: tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int]]
-    connection3Counts:
-      tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int], lShape: Opt[int]]
-    dropGarbagesIndices: seq[int]
-    dropHardsIndices: seq[int]
-    rotateIndices: seq[int]
-    crossRotateIndices: seq[int]
-    allowDoubleNotLast: bool
-    allowDoubleLast: bool
+type GenerateSettings* = object ## Settings of Nazo Puyo generation.
+  goal: Goal
+  moveCount: int
+  colorCount: int
+  heights: tuple[weights: Opt[array[Col, int]], positives: Opt[array[Col, bool]]]
+  puyoCounts: tuple[colors: int, garbage: int, hard: int]
+  connection2Counts: tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int]]
+  connection3Counts:
+    tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int], lShape: Opt[int]]
+  dropGarbagesIndices: seq[int]
+  dropHardsIndices: seq[int]
+  rotateIndices: seq[int]
+  crossRotateIndices: seq[int]
+  allowDoubleNotLast: bool
+  allowDoubleLast: bool
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
 func init*(
-    T: type GenerateGoal,
-    kind: GoalKind,
-    color: GenerateGoalColor,
-    val: int,
-    valOperator: GoalValOperator,
-    clearColor: GenerateGoalColor,
-): T =
-  T(
-    kind: kind, color: color, val: val, valOperator: valOperator, clearColor: clearColor
-  )
-
-func init*(
     T: type GenerateSettings,
-    goal: GenerateGoal,
+    goal: Goal,
     moveCount, colorCount: int,
     heights: tuple[weights: Opt[array[Col, int]], positives: Opt[array[Col, bool]]],
     puyoCounts: tuple[colors: int, garbage: int, hard: int],
@@ -212,18 +186,34 @@ func split(
 # Checker
 # ------------------------------------------------
 
+const
+  DummyCell = Cell.low
+  GoalColorToCell: array[GoalColor, Cell] = [
+    DummyCell, Cell.Red, Cell.Green, Cell.Blue, Cell.Yellow, Cell.Purple, DummyCell,
+    DummyCell,
+  ]
+
 func isValid(self: GenerateSettings): StrErrorResult[void] =
   ## Returns `true` if the settings are valid.
   ## Note that this function is "weak" checker; a generation may be failed
   ## (entering infinite loop) even though this function returns `true`.
-  if self.goal.kind == GoalKind.None and self.goal.clearColor == GenerateGoalColor.None:
+  if not self.goal.isSupported:
     return err "none-goal is not supported"
 
   if self.moveCount < 1:
     return err "`moveCount` should be positive"
 
-  if self.colorCount notin 1 .. 5:
-    return err "`colorCount` should be in 1..5"
+  var colors = set[Cell]({})
+  if self.goal.mainOpt.isOk:
+    let main = self.goal.mainOpt.unsafeValue
+    if main.color in GoalColor.Red .. GoalColor.Purple:
+      colors.incl GoalColorToCell[main.color]
+  if self.goal.clearColorOpt.isOk:
+    let clearColor = self.goal.clearColorOpt.unsafeValue
+    if clearColor in GoalColor.Red .. GoalColor.Purple:
+      colors.incl GoalColorToCell[clearColor]
+  if self.colorCount notin max(colors.card, 1) .. 5:
+    return err "`colorCount` should be in 1..5 (some goals require 2..5)"
 
   if self.heights.weights.isOk == self.heights.positives.isOk:
     return err "Either `heights.weights` or `heights.positives` should have a value"
@@ -459,46 +449,6 @@ func generatePuyoPuyo[F: TsuField or WaterField](
   ok PuyoPuyo[F].init(field, steps)
 
 # ------------------------------------------------
-# Goal
-# ------------------------------------------------
-
-const
-  DummyGoalColor = GoalColor.All
-  CellToGoalColor: array[Cell, GoalColor] = [
-    DummyGoalColor, DummyGoalColor, DummyGoalColor, GoalColor.Red, GoalColor.Green,
-    GoalColor.Blue, GoalColor.Yellow, GoalColor.Purple,
-  ]
-
-func generateColor(
-    rng: var Rand, color: GenerateGoalColor, useCells: seq[Cell]
-): GoalColor =
-  ## Returns a random color.
-  case color
-  of GenerateGoalColor.None:
-    GoalColor.None
-  of GenerateGoalColor.All:
-    GoalColor.All
-  of SingleColor:
-    CellToGoalColor[rng.sample useCells]
-  of GenerateGoalColor.Garbages:
-    GoalColor.Garbages
-  of GenerateGoalColor.Colors:
-    GoalColor.Colors
-
-func generateGoal(
-    rng: var Rand, settings: GenerateSettings, useCells: seq[Cell]
-): Goal =
-  ## Returns a random goal.
-  var goal = Goal.init
-  goal.kind.assign settings.goal.kind
-  goal.color.assign rng.generateColor(settings.goal.color, useCells)
-  goal.val.assign settings.goal.val
-  goal.valOperator.assign settings.goal.valOperator
-  goal.clearColor.assign rng.generateColor(settings.goal.clearColor, useCells)
-
-  goal.normalized
-
-# ------------------------------------------------
 # Generate
 # ------------------------------------------------
 
@@ -508,12 +458,20 @@ proc generate[F: TsuField or WaterField](
   ## Returns a random Nazo Puyo that has a unique solution.
   ?settings.isValid.context "Generation failed"
 
-  let
-    useCells =
-      (Cell.Red .. Cell.Purple).toSeq.dup(shuffle(rng, _))[0 ..< settings.colorCount]
-    goal = rng.generateGoal(settings, useCells)
-  if not goal.isSupported:
-    return err "Unsupported goal"
+  # cells
+  var useCellsSet = set[Cell]({})
+  if settings.goal.mainOpt.isOk:
+    let main = settings.goal.mainOpt.unsafeValue
+    if main.color in GoalColor.Red .. GoalColor.Purple:
+      useCellsSet.incl GoalColorToCell[main.color]
+  if settings.goal.clearColorOpt.isOk:
+    let clearColor = settings.goal.clearColorOpt.unsafeValue
+    if clearColor in GoalColor.Red .. GoalColor.Purple:
+      useCellsSet.incl GoalColorToCell[clearColor]
+  useCellsSet.incl (Cell.Red .. Cell.Purple).toSeq.dup(shuffle(rng, _))[
+    0 ..< settings.colorCount - useCellsSet.card
+  ].toSet
+  let useCells = useCellsSet.toSeq
 
   while true:
     let puyoPuyoResult = generatePuyoPuyo[F](rng, settings, useCells)
@@ -557,7 +515,7 @@ proc generate[F: TsuField or WaterField](
         settings.connection3Counts.lShape.unsafeValue * 3:
       continue
 
-    var nazoPuyo = NazoPuyo[F].init(puyoPuyo, goal)
+    var nazoPuyo = NazoPuyo[F].init(puyoPuyo, settings.goal)
     let answers = nazoPuyo.solve(calcAllAnswers = false)
     if answers.len == 1 and answers[0].len == settings.moveCount:
       for stepIndex, optPlacement in answers[0]:
