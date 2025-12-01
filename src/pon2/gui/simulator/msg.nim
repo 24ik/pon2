@@ -25,15 +25,14 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper
   ): string =
     ## Returns the text message.
-    if self.derefSimulator(helper).nazoPuyoWrap.optGoal.isOk:
-      $helper.simulator.markResultOpt.unsafeValue
-    else:
-      let nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      nazoWrap.unwrapNazoPuyo:
-        if self.derefSimulator(helper).state == Stable and it.field.isDead:
+    self.derefSimulator(helper).nazoPuyoWrap.unwrap:
+      if it.goal == NoneGoal:
+        if self.derefSimulator(helper).state == Stable and it.puyoPuyo.field.isDead:
           $MarkResult.Dead
         else:
           ""
+      else:
+        $helper.simulator.markResultOpt.unsafeValue
 
   proc score[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
@@ -66,9 +65,11 @@ when defined(js) or defined(nimsuggest):
     let
       score = self.score helper
       noticeCounts = self.noticeCounts(helper, score)
+      showNotice = self.derefSimulator(helper).nazoPuyoWrap.unwrap:
+        it.goal != NoneGoal
 
     buildHtml tdiv:
-      if self.derefSimulator(helper).nazoPuyoWrap.optGoal.isErr:
+      if showNotice:
         table:
           tbody:
             tr:

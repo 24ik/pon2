@@ -28,10 +28,8 @@ when defined(js) or defined(nimsuggest):
           self.derefSimulator(helper).mode notin PlayModes:
         Opt[Cell].ok Cell.None
       else:
-        let
-          nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-          steps = nazoWrap.unwrapNazoPuyo:
-            it.steps
+        let steps = self.derefSimulator(helper).nazoPuyoWrap.unwrap:
+          it.puyoPuyo.steps
 
         if self.derefSimulator(helper).operatingIndex >= steps.len:
           Opt[Cell].ok Cell.None

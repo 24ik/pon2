@@ -27,9 +27,9 @@ when defined(js) or defined(nimsuggest):
       nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
 
     var cross = false
-    let cellOpt = nazoWrap.unwrapNazoPuyo:
-      if stepIndex < it.steps.len:
-        let step = it.steps[stepIndex]
+    let cellOpt = nazoWrap.unwrap:
+      if stepIndex < it.puyoPuyo.steps.len:
+        let step = it.puyoPuyo.steps[stepIndex]
         case step.kind
         of PairPlacement:
           Opt[Cell].ok if pivot: step.pair.pivot else: step.pair.rotor

@@ -229,11 +229,11 @@ when isMainModule:
               rawQuery[1 ..^ 1]
           )
 
-          let simRes = uri.parseSimulator
-          if simRes.isOk:
-            globalStudioRef[] = Studio.init simRes.unsafeValue
+          let simulatorResult = uri.parseSimulator
+          if simulatorResult.isOk:
+            globalStudioRef[] = Studio.init simulatorResult.unsafeValue
           else:
-            errorMsg.assign simRes.error
+            errorMsg.assign simulatorResult.error
 
           initialized.assign true
 
@@ -270,38 +270,34 @@ when isMainModule:
         echo "URLを一つ入力してください．"
         return
 
-      let simRes = urls[0].parseUri.parseSimulator
-      if simRes.isErr:
+      let simulatorResult = urls[0].parseUri.parseSimulator
+      if simulatorResult.isErr:
         echo "URL形式が間違っています．エラー内容："
-        echo simRes.error
+        echo simulatorResult.error
         return
-
-      let sim = simRes.unsafeValue
-      if sim.nazoPuyoWrap.optGoal.isErr:
-        echo "なぞぷよのURLを入力してください．"
-        return
+      let simulator = simulatorResult.unsafeValue
 
       if openQuestion:
         urls[0].parseUri.openDefaultBrowser.isOkOr:
           echo "ブラウザの起動に失敗しました．"
 
-      unwrapNazoPuyo sim.nazoPuyoWrap:
+      unwrap simulator.nazoPuyoWrap:
         let
-          answers = itNazo.solve
+          answers = it.solve
           stepsSeq = collect:
             for answer in answers:
-              var steps = it.steps
-              for stepIndex, optPlcmt in answer:
-                if it.steps[stepIndex].kind == PairPlacement:
-                  steps[stepIndex].optPlacement.assign optPlcmt
+              var steps = it.puyoPuyo.steps
+              for stepIndex, optPlacement in answer:
+                if it.puyoPuyo.steps[stepIndex].kind == PairPlacement:
+                  steps[stepIndex].optPlacement.assign optPlacement
 
               steps
 
         for answerIndex, steps in stepsSeq:
-          var nazo = itNazo
-          nazo.puyoPuyo.steps.assign steps
+          var nazoPuyo = it
+          nazoPuyo.puyoPuyo.steps.assign steps
 
-          let answerUri = Simulator.init(nazo, EditorEdit).toUri.unsafeValue
+          let answerUri = Simulator.init(nazoPuyo, EditorEdit).toUri.unsafeValue
           echo "({answerIndex.succ}) {answerUri}".fmt
 
           if openAnswer:
@@ -325,25 +321,21 @@ when isMainModule:
         echo "URLを一つ入力してください．"
         return
 
-      let simRes = urls[0].parseUri.parseSimulator
-      if simRes.isErr:
+      let simulatorResult = urls[0].parseUri.parseSimulator
+      if simulatorResult.isErr:
         echo "URL形式が間違っています．エラー内容："
-        echo simRes.error
+        echo simulatorResult.error
         return
-
-      let sim = simRes.unsafeValue
-      if sim.nazoPuyoWrap.optGoal.isErr:
-        echo "なぞぷよのURLを入力してください．"
-        return
+      let simulator = simulatorResult.unsafeValue
 
       let fixIndices = fixMoves.mapIt it.pred
-      unwrapNazoPuyo sim.nazoPuyoWrap:
+      unwrap simulator.nazoPuyoWrap:
         var index = 0
-        for nazo in itNazo.permute(fixIndices, allowDoubleNotLast, allowDoubleLast):
+        for nazoPuyo in it.permute(fixIndices, allowDoubleNotLast, allowDoubleLast):
           let
-            sim = Simulator.init(nazo, EditorEdit)
-            questionUri = sim.toUri(clearPlacements = true).unsafeValue
-            answerUri = sim.toUri.unsafeValue
+            resultSimulator = Simulator.init(nazoPuyo, EditorEdit)
+            questionUri = resultSimulator.toUri(clearPlacements = true).unsafeValue
+            answerUri = resultSimulator.toUri.unsafeValue
 
           echo "(Q{index.succ}) {questionUri}".fmt
           echo "(A{index.succ}) {answerUri}".fmt
@@ -372,9 +364,11 @@ when isMainModule:
     proc runGenerator(
         count = 5,
         rule = 0,
-        goalKind = 5,
+        goalKindOpt = 1,
         goalColor = 0,
         goalVal = 3,
+        goalValOperator = 0,
+        goalClearColorOpt = 0,
         moveCount = 2,
         colorCount = 2,
         heights = "0++++0",
@@ -420,16 +414,17 @@ when isMainModule:
       let errorMsg =
         if rule notin 0 .. Rule.high.ord:
           "ルールが不正です．"
-        elif goalKind notin 0 .. GoalKind.high.ord:
+        elif goalKindOpt notin 0 .. GoalKind.high.ord.succ:
           "クリア条件の種類が不正です．"
-        elif goalColor notin 0 .. GenerateGoalColor.high.ord:
+        elif goalColor notin 0 .. GoalColor.high.ord:
           "クリア条件の色が不正です．"
-        elif goalVal notin 0 .. GoalVal.high.ord:
-          "クリア条件の色が不正です．"
+        elif goalValOperator notin 0 .. GoalValOperator.high.ord:
+          "クリア条件の値比較の演算子が不正です．"
+        elif goalClearColorOpt notin 0 .. GoalColor.high.ord.succ:
+          "全消し条件の色が不正です．"
         elif heights.len != Width:
           "高さ指定が不正です．"
-        elif puyoCountColor < 0 and
-          goalKind.GoalKind notin {Chain, ChainMore, ClearChain, ClearChainMore}:
+        elif puyoCountColor < 0 and goalKindOpt.succ != Chain.ord:
           "連鎖問題でない場合は色ぷよ数の指定が必要です．"
         else:
           ""
@@ -437,6 +432,7 @@ when isMainModule:
         echo errorMsg
         return
 
+      # height
       let
         heightWeights: Opt[array[Col, int]]
         heightPositives: Opt[array[Col, bool]]
@@ -476,8 +472,22 @@ when isMainModule:
         )
 
         settings = GenerateSettings.init(
-          GenerateGoal.init(
-            goalKind.GoalKind, goalColor.GenerateGoalColor, goalVal.GoalVal
+          Goal(
+            mainOpt: (
+              if goalKindOpt == 0: Opt[GoalMain].err
+              else: Opt[GoalMain].ok GoalMain(
+                kind: goalKindOpt.pred.GoalKind,
+                color: goalColor.GoalColor,
+                val: goalVal,
+                valOperator: goalValOperator.GoalValOperator,
+              )
+            ),
+            clearColorOpt: (
+              if goalClearColorOpt == 0:
+                Opt[GoalColor].err
+              else:
+                Opt[GoalColor].ok(goalClearColorOpt.pred.GoalColor)
+            ),
           ),
           moveCount,
           colorCount,
@@ -502,16 +512,16 @@ when isMainModule:
       var rng = seed2.initRand
 
       for index in 0 ..< count:
-        let nazoRes = rng.generate(settings, rule2)
-        if nazoRes.isErr:
+        let nazoPuyoResult = rng.generate(settings, rule2)
+        if nazoPuyoResult.isErr:
           echo "生成に失敗しました．エラー内容："
-          echo nazoRes.error
+          echo nazoPuyoResult.error
           return
 
         let
-          sim = Simulator.init(nazoRes.unsafeValue, EditorEdit)
-          questionUri = sim.toUri(clearPlacements = true).unsafeValue
-          answerUri = sim.toUri.unsafeValue
+          simulator = Simulator.init(nazoPuyoResult.unsafeValue, EditorEdit)
+          questionUri = simulator.toUri(clearPlacements = true).unsafeValue
+          answerUri = simulator.toUri.unsafeValue
 
         echo "(Q{index.succ}) {questionUri}".fmt
         echo "(A{index.succ}) {answerUri}".fmt
@@ -577,9 +587,11 @@ $subcmds""",
         short = {
           "count": 'n',
           "rule": 'r',
-          "goalKind": 'K',
+          "goalKindOpt": 'K',
           "goalColor": 'C',
           "goalVal": 'V',
+          "goalValOperator": 'O',
+          "goalClearColorOpt": 'L',
           "moveCount": 'm',
           "colorCount": 'c',
           "heights": 'H',
@@ -592,11 +604,14 @@ $subcmds""",
         help = {
           "count": "生成数",
           "rule": "ルール（0:通 1:水中）",
-          "goalKind":
-            "クリア条件の種類（0:cぷよ全て消すべし 1:n色消すべし 2:n色以上消すべし 3:cぷよn個消すべし 4:cぷよn個以上消すべし 5:n連鎖するべし 6:n連鎖以上するべし 7:n連鎖&cぷよ全て消すべし 8:n連鎖以上&cぷよ全て消すべし 9:n色同時に消すべし 10:n色以上同時に消すべし 11:cぷよn個同時に消すべし 12:cぷよn個以上同時に消すべし 13:cぷよn箇所同時に消すべし 14:cぷよn箇所以上同時に消すべし 15:cぷよn連結で消すべし 16:cぷよn連結以上で消すべし）",
+          "goalKindOpt":
+            "クリア条件の種類（0:メイン条件なし 1:n連鎖 2:n色同時 3:n個同時 4:n箇所 5:n連結 6:累計n色 7:累計n個）",
           "goalColor":
-            "クリア条件の色（0:全 1:どれか1色 2:お邪魔 3:色ぷよ）",
+            "クリア条件の色（0:全 1:赤 2:緑 3:青 4:黄 5:紫 6:お邪魔 7:色）",
           "goalVal": "クリア条件の数",
+          "goalValOperator": "クリア条件の演算子（0:ちょうど 1:以上）",
+          "goalClearColorOpt":
+            "全消し条件の色（0:全 1:赤 2:緑 3:青 4:黄 5:紫 6:お邪魔 7:色）",
           "moveCount": "手数",
           "colorCount": "色数",
           "heights": "高さ比率（例：「012210」「0---00」）",

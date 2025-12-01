@@ -29,9 +29,11 @@ when defined(js) or defined(nimsuggest):
       wideCtrl = helper.mobile and mode in PlayModes
       isReplaySimulator =
         helper.studioOpt.isOk and helper.studioOpt.unsafeValue.isReplaySimulator
+      showGoal = self.derefSimulator(helper).nazoPuyoWrap.unwrap:
+        mode in EditModes or it.goal != NoneGoal
 
     buildHtml tdiv:
-      if self.derefSimulator(helper).nazoPuyoWrap.optGoal.isOk:
+      if showGoal:
         tdiv(class = (if helper.mobile: "block mb-2" else: "block").cstring):
           self.toGoalVNode helper
       tdiv(class = "block"):
@@ -95,7 +97,7 @@ when defined(js) or defined(nimsuggest):
           (StyleAttr.display, "none".cstring), (StyleAttr.width, "fit-content".cstring)
         ),
       ):
-        if self.derefSimulator(helper).nazoPuyoWrap.optGoal.isOk:
+        if showGoal:
           tdiv(class = "block"):
             self.toGoalVNode(helper, cameraReady = true)
         tdiv(class = "block"):

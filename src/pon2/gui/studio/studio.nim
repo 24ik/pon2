@@ -25,8 +25,7 @@ when defined(js) or defined(nimsuggest):
     buildHtml tdiv(class = "columns"):
       tdiv(class = "column is-narrow"):
         self.toSimulatorVNode helper
-      if self[].simulator.mode in EditorModes and
-          self[].simulator.nazoPuyoWrap.optGoal.isOk:
+      if self[].simulator.mode in EditorModes:
         tdiv(class = "column is-narrow"):
           tdiv(class = "block"):
             self.toStudioCtrlVNode helper

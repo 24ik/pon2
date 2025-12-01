@@ -6,7 +6,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[deques, sequtils, sugar]
+import std/[deques, sugar]
 import ./[key, nazopuyowrap, permute, simulator, solve]
 import ../[core]
 import ../private/[assign, utils]
@@ -288,7 +288,7 @@ when defined(js) or defined(nimsuggest):
             fixIndices, allowDoubleNotLast, allowDoubleLast, self[].progressRef
           )
           .then(
-            (nazoPuyos: seq[originalNazo.type]) => (
+            (nazoPuyos: seq[originalNazoPuyo.type]) => (
               block:
                 for nazoPuyo in nazoPuyos:
                   self[].replayData.stepsSeq.add nazoPuyo.puyoPuyo.steps
