@@ -23,18 +23,19 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper, cameraReady = false
   ): VNode =
     ## Returns the goal node.
-    let goal = self.derefSimulator(helper).nazoPuyoWrap.optGoal.unsafeValue
+    let goal = self.derefSimulator(helper).nazoPuyoWrap.unwrap:
+      it.goal
 
     if cameraReady or self.derefSimulator(helper).mode != EditorEdit:
       return buildHtml article(
         class = (
-          if helper.simulator.markResultOpt.unsafeValue == Accept: "message is-success"
+          if helper.simulator.markResult == Accept: "message is-success"
           else: "message is-info"
         ).cstring
       ):
         tdiv(class = "message-body"):
           text $goal
-          if helper.simulator.markResultOpt.unsafeValue == Accept:
+          if helper.simulator.markResult == Accept:
             span(class = "icon"):
               italic(class = "fa-solid fa-circle-check")
 
@@ -42,6 +43,7 @@ when defined(js) or defined(nimsuggest):
       kindId = "pon2-simulator-goal-kind-" & helper.simulator.goalId
       colorId = "pon2-simulator-goal-color-" & helper.simulator.goalId
       valId = "pon2-simulator-goal-val-" & helper.simulator.goalId
+      clearColorId = "pon2-simulator-goal-clearcolor-" & helper.simulator.goalId
 
     buildHtml tdiv:
       tdiv(class = "block mb-1"):
@@ -49,40 +51,95 @@ when defined(js) or defined(nimsuggest):
           select(
             id = kindId,
             onchange =
-              () =>
-              (self.derefSimulator(helper).goalKind = kindId.getSelectedIndex.GoalKind),
+              () => (
+                block:
+                  let index = kindId.getSelectedIndex
+                  self.derefSimulator(helper).goalKindOpt =
+                    if index == 0:
+                      Opt[GoalKind].err
+                    else:
+                      Opt[GoalKind].ok index.pred.GoalKind
+              ),
           ):
+            option(selected = goal.mainOpt.isErr):
+              text "メイン条件未設定"
             for kind in GoalKind:
-              option(selected = kind == goal.kind):
+              option(
+                selected = goal.mainOpt.isOk and goal.mainOpt.unsafeValue.kind == kind
+              ):
                 text $kind
-      tdiv(class = "block"):
-        if goal.kind in ColorKinds:
-          button(class = "button is-static px-2"):
-            text "c ="
-          tdiv(class = "select"):
-            select(
-              id = colorId,
-              onchange =
-                () => (
-                  self.derefSimulator(helper).goalColor =
-                    colorId.getSelectedIndex.GoalColor
-                ),
-            ):
-              option(selected = goal.optColor.unsafeValue == All):
-                text "全"
-              for color in GoalColor.All.succ .. GoalColor.high:
-                option(selected = color == goal.optColor.unsafeValue):
-                  text $color
-        if goal.kind in ValKinds:
+      if goal.mainOpt.isOk:
+        let main = goal.mainOpt.unsafeValue
+
+        tdiv(class = "block mb-1"):
+          if main.kind in ColorKinds:
+            button(class = "button is-static px-2"):
+              text "c ="
+            tdiv(class = "select"):
+              select(
+                id = colorId,
+                onchange =
+                  () => (
+                    self.derefSimulator(helper).goalColor =
+                      colorId.getSelectedIndex.GoalColor
+                  ),
+              ):
+                option(selected = main.color == All):
+                  text "全"
+                for color in GoalColor.All.succ .. GoalColor.high:
+                  option(selected = main.color == color):
+                    text ($color).cstring
+        tdiv(class = "block mb-1"):
           button(class = "button is-static px-2"):
             text "n ="
           tdiv(class = "select"):
             select(
               id = valId,
               onchange =
-                () =>
-                (self.derefSimulator(helper).goalVal = valId.getSelectedIndex.GoalVal),
+                () => (self.derefSimulator(helper).goalVal = valId.getSelectedIndex),
             ):
               for val in 0 .. 99:
-                option(selected = val == goal.optVal.unsafeValue):
+                option(selected = main.val == val):
                   text $val
+          button(
+            class = "button px-2",
+            onclick =
+              () => (
+                self.derefSimulator(helper).goalValOperator =
+                  main.valOperator.rotateSucc
+              ),
+          ):
+            text ($main.valOperator).cstring
+      tdiv(class = "block"):
+        tdiv(class = "select"):
+          select(
+            id = clearColorId,
+            disabled = goal.clearColorOpt.isErr,
+            onchange =
+              () => (
+                self.derefSimulator(helper).goalClearColorOpt =
+                  Opt[GoalColor].ok clearColorId.getSelectedIndex.GoalColor
+              ),
+          ):
+            option(selected = goal.clearColorOpt == Opt[GoalColor].ok All):
+              text "全"
+            for color in GoalColor.All.succ .. GoalColor.high:
+              option(selected = goal.clearColorOpt == Opt[GoalColor].ok color):
+                text ($color).cstring
+        button(
+          class = "button px-2",
+          onclick =
+            () => (
+              block:
+                if goal.clearColorOpt.isOk:
+                  self.derefSimulator(helper).goalClearColorOpt = Opt[GoalColor].err
+                else:
+                  self.derefSimulator(helper).goalClearColorOpt =
+                    Opt[GoalColor].ok GoalColor.low
+            ),
+        ):
+          if goal.clearColorOpt.isOk:
+            text "ぷよ全て消す"
+          else:
+            strikethrough:
+              text "ぷよ全て消す"

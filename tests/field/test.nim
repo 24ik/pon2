@@ -3,7 +3,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, sugar, unittest]
+import std/[sugar, unittest]
 import
   ../../src/pon2/core/
     [cell, common, field, fqdn, moveresult, pair, placement, popresult, rule, step]

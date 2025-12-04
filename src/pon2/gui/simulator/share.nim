@@ -34,13 +34,12 @@ when defined(js) or defined(nimsuggest):
     var queries = newSeqOfCap[(string, string)](3)
     queries.add ("url", $self.derefSimulator(helper).toExportUri.unsafeValue)
 
-    if self.derefSimulator(helper).nazoPuyoWrap.optGoal.isOk:
-      let nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      nazoWrap.unwrapNazoPuyo:
+    self.derefSimulator(helper).nazoPuyoWrap.unwrap:
+      if it.goal != NoneGoal:
         let
-          ruleDesc = RuleDescs[it.field.rule]
-          moveCount = it.steps.len
-          goalDesc = $self.derefSimulator(helper).nazoPuyoWrap.optGoal.unsafeValue
+          ruleDesc = RuleDescs[it.puyoPuyo.field.rule]
+          moveCount = it.puyoPuyo.steps.len
+          goalDesc = $it.goal
 
         queries.add ("text", "{ruleDesc}{moveCount}手・{goalDesc}".fmt)
         queries.add ("hashtags", "なぞぷよ")

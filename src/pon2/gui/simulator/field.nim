@@ -24,14 +24,18 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper, row: Row, col: Col, editable: bool
   ): Color =
     ## Returns the cell's background color.
+    let rule = self.derefSimulator(helper).nazoPuyoWrap.rule
+
     if editable and not helper.mobile and self.derefSimulator(helper).editData.focusField and
         self.derefSimulator(helper).editData.field == (row, col):
       SelectColor
     elif row == Row.low:
       GhostColor
-    elif row.ord + WaterHeight >= Height and
-        self.derefSimulator(helper).nazoPuyoWrap.rule == Water:
+    elif rule == Water and row.ord + WaterHeight >= Height:
       WaterColor
+    elif (rule == Tsu and row == Row1 and col == Col2) or
+        (rule == Water and row.ord == AirHeight.pred):
+      DeadColor
     else:
       DefaultColor
 
@@ -48,9 +52,8 @@ when defined(js) or defined(nimsuggest):
     ## Returns the field node.
     let
       editable = not cameraReady and self.derefSimulator(helper).mode in EditModes
-      nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      arr = nazoWrap.unwrapNazoPuyo:
-        it.field.toArray
+      cellArray = self.derefSimulator(helper).nazoPuyoWrap.unwrap:
+        it.puyoPuyo.field.toArray
       tableBorder = (StyleAttr.border, "1px gray solid".cstring)
       tableStyle =
         if editable:
@@ -68,7 +71,7 @@ when defined(js) or defined(nimsuggest):
           tr:
             for col in Col:
               let
-                imgSrc = arr[row][col].cellImgSrc
+                imgSrc = cellArray[row][col].cellImgSrc
                 cellStyle = style(
                   StyleAttr.backgroundColor,
                   self.cellBackgroundColor(helper, row, col, editable).toHtmlRgba.cstring,

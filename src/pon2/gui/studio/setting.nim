@@ -42,8 +42,8 @@ when defined(js) or defined(nimsuggest):
 
   proc toStudioSettingsVNode*(self: ref Studio, helper: VNodeHelper): VNode =
     ## Returns the studio settings node.
-    let stepCount = unwrapNazoPuyo self[].simulator.nazoPuyoWrap:
-      it.steps.len
+    let stepCount = unwrap self[].simulator.nazoPuyoWrap:
+      it.puyoPuyo.steps.len
 
     buildHtml tdiv:
       tdiv(class = "block"):

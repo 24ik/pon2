@@ -27,9 +27,9 @@ when defined(js) or defined(nimsuggest):
       nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
 
     var cross = false
-    let cellOpt = nazoWrap.unwrapNazoPuyo:
-      if stepIndex < it.steps.len:
-        let step = it.steps[stepIndex]
+    let cellOpt = nazoWrap.unwrap:
+      if stepIndex < it.puyoPuyo.steps.len:
+        let step = it.puyoPuyo.steps[stepIndex]
         case step.kind
         of PairPlacement:
           Opt[Cell].ok if pivot: step.pair.pivot else: step.pair.rotor
@@ -53,7 +53,7 @@ when defined(js) or defined(nimsuggest):
           if cross:
             span(class = "fa-stack", style = style(StyleAttr.fontSize, "0.5em")):
               italic(class = "fa-solid fa-arrows-rotate fa-stack-2x")
-              italic(class = "fa-solid fa-xmark fa-stack-1x")
+              italic(class = "fa-solid fa-grip-lines-vertical fa-stack-1x")
           else:
             italic(class = "fa-solid fa-arrows-rotate")
 

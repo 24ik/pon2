@@ -49,11 +49,11 @@ func allStepsSeq(
     if cellCounts[pivotCell] == 0:
       continue
 
-    var newCellCountsMid = cellCounts
-    newCellCountsMid[pivotCell].dec
+    var newCellCountsBase = cellCounts
+    newCellCountsBase[pivotCell].dec
 
     for rotorCell in pivotCell .. Cell.Purple:
-      if newCellCountsMid[rotorCell] == 0:
+      if newCellCountsBase[rotorCell] == 0:
         continue
 
       if pivotCell == rotorCell:
@@ -64,19 +64,19 @@ func allStepsSeq(
           if not allowDoubleNotLast:
             continue
 
-      var newCellCounts = newCellCountsMid
+      var newCellCounts = newCellCountsBase
       newCellCounts[rotorCell].dec
 
       let
-        newPairMid = Pair.init(pivotCell, rotorCell)
+        newPairBase = Pair.init(pivotCell, rotorCell)
         newPair: Pair
       if stepIndex in fixIndices:
-        if step.pair notin {newPairMid, newPairMid.swapped}:
+        if step.pair notin {newPairBase, newPairBase.swapped}:
           continue
 
         newPair = step.pair
       else:
-        newPair = newPairMid
+        newPair = newPairBase
 
       stepsSeq &=
         steps.allStepsSeq(

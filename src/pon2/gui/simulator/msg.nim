@@ -25,15 +25,14 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper
   ): string =
     ## Returns the text message.
-    if self.derefSimulator(helper).nazoPuyoWrap.optGoal.isOk:
-      $helper.simulator.markResultOpt.unsafeValue
-    else:
-      let nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      nazoWrap.unwrapNazoPuyo:
-        if self.derefSimulator(helper).state == Stable and it.field.isDead:
+    self.derefSimulator(helper).nazoPuyoWrap.unwrap:
+      if it.goal == NoneGoal:
+        if self.derefSimulator(helper).state == Stable and it.puyoPuyo.field.isDead:
           $MarkResult.Dead
         else:
           ""
+      else:
+        $helper.simulator.markResult
 
   proc score[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
@@ -51,11 +50,9 @@ when defined(js) or defined(nimsuggest):
       counts = Notice.initArrayWith 0
       totalCount = 0
     for notice in countdown(Comet, Small):
-      counts[notice].assign originalNoticeCounts[notice]
-      totalCount.inc min(originalNoticeCounts[notice], ShowNoticeCount - totalCount)
-
-      if totalCount >= ShowNoticeCount:
-        break
+      let count = min(originalNoticeCounts[notice], ShowNoticeCount - totalCount)
+      counts[notice].assign count
+      totalCount.inc count
 
     counts
 
@@ -66,9 +63,11 @@ when defined(js) or defined(nimsuggest):
     let
       score = self.score helper
       noticeCounts = self.noticeCounts(helper, score)
+      showNotice = self.derefSimulator(helper).nazoPuyoWrap.unwrap:
+        it.goal == NoneGoal
 
     buildHtml tdiv:
-      if self.derefSimulator(helper).nazoPuyoWrap.optGoal.isErr:
+      if showNotice:
         table:
           tbody:
             tr:
@@ -84,5 +83,5 @@ when defined(js) or defined(nimsuggest):
                     img(src = Cell.None.cellImgSrc)
               td:
                 tdiv(class = "is-size-7"):
-                  text $score
+                  text " " & $score
       text self.txtMsg(helper).cstring

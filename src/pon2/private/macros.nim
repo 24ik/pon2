@@ -42,6 +42,44 @@ macro defineExpand*(
     macroIdentSuffix: untyped, expandSuffixes: varargs[untyped]
 ): untyped =
   ## Defines expand macro.
+  runnableExamples:
+    # You can define a new macro `defineExample` by
+    # `defineExpand("Example", "Foo", "Bar")`.
+    # This defines the following macro:
+    macro expandExample(identsAndBody: varargs[untyped]): untyped =
+      ## Runs in sequence with the body (the last argument) changed to the specified
+      ## identifiers (the rest arguments) with the suffix Foo, Bar.
+      ## Underscore in the body is replaced by the index of the suffix.
+      let
+        body = identsAndBody[^1]
+        idents = identsAndBody[0 ..^ 2]
+        stmts = nnkStmtList.newNimNode body
+
+      var bodyFoo = body.replaced("_".ident, 0.newLit)
+      for id in idents:
+        bodyFoo.replace id, (id.strVal & "Foo").ident
+
+      add(stmts, bodyFoo)
+
+      var bodyBar = body.replaced("_".ident, 1.newLit)
+      for id in idents:
+        bodyBar.replace id, (id.strVal & "Bar").ident
+
+      add(stmts, bodyBar)
+
+      stmts
+
+    # Usage of `expandExample`:
+    let
+      xFoo = 10
+      xBar = 20
+      yFoo = 100
+      yBar = 200
+
+    expandExample x, y:
+      assert x == _.succ * 10
+      assert y == _.succ * 100
+
   # identifiers
   let
     identsAndBodyIdent = "identsAndBody".ident
@@ -90,6 +128,8 @@ macro defineExpand*(
 
     macroBody.add "add".newCall(stmtsIdent, expandedBodyIdent)
 
+  macroBody.add stmtsIdent
+
   nnkMacroDef.newTree(
     ("expand" & macroIdentSuffix.strVal).ident,
     newEmptyNode(),
@@ -107,6 +147,19 @@ macro defineExpand*(
 macro staticCase*(caseStmtOrExpr: typed): untyped =
   ## Converts the `case` statement to compile-time branching.
   ## Each `case` branch opens a new scope.
+  runnableExamples:
+    type MyEnum = enum
+      Foo
+      Bar
+
+    const x = Foo
+    staticCase:
+      case x
+      of Foo:
+        assert x == Foo
+      of Bar:
+        assert x == Bar
+
   let
     caseStmt =
       case caseStmtOrExpr.kind

@@ -11,7 +11,7 @@ block: # permute
   let
     nazo = parseNazoPuyo[TsuField](
       """
-3連鎖するべし
+ちょうど3連鎖するべし
 ======
 ......
 ......

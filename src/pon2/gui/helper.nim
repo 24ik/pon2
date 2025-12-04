@@ -22,7 +22,7 @@ when defined(js) or defined(nimsuggest):
     SimulatorVNodeHelper* = object ## Helper for making VNode of simulators.
       goalId*: cstring
       cameraReadyId*: cstring
-      markResultOpt*: Opt[MarkResult]
+      markResult*: MarkResult
 
     StudioVNodeHelper* = object ## Helper for making VNode of studios.
       isReplaySimulator*: bool
@@ -41,7 +41,7 @@ when defined(js) or defined(nimsuggest):
     T(
       goalId: "pon2-simulator-goal-" & rootId,
       cameraReadyId: "pon2-simulator-cameraready-" & rootId,
-      markResultOpt: simulator.mark,
+      markResult: simulator.mark,
     )
 
   func init(T: type StudioVNodeHelper, rootId: cstring, isReplaySimulator: bool): T =

@@ -28,10 +28,8 @@ when defined(js) or defined(nimsuggest):
           self.derefSimulator(helper).mode notin PlayModes:
         Opt[Cell].ok Cell.None
       else:
-        let
-          nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-          steps = nazoWrap.unwrapNazoPuyo:
-            it.steps
+        let steps = self.derefSimulator(helper).nazoPuyoWrap.unwrap:
+          it.puyoPuyo.steps
 
         if self.derefSimulator(helper).operatingIndex >= steps.len:
           Opt[Cell].ok Cell.None
@@ -78,7 +76,7 @@ when defined(js) or defined(nimsuggest):
           if cross:
             span(class = "fa-stack", style = style(StyleAttr.fontSize, "0.5em")):
               italic(class = "fa-solid fa-arrows-rotate fa-stack-2x")
-              italic(class = "fa-solid fa-xmark fa-stack-1x")
+              italic(class = "fa-solid fa-grip-lines-vertical fa-stack-1x")
           else:
             italic(class = "fa-solid fa-arrows-rotate")
 

@@ -56,6 +56,9 @@ when defined(js) or defined(nimsuggest):
 
   proc toStudioCtrlVNode*(self: ref Studio, helper: VNodeHelper): VNode =
     ## Returns the studio controller node.
+    let goalIsNone = self[].simulator.nazoPuyoWrap.unwrap:
+      it.goal == NoneGoal
+
     buildHtml tdiv:
       tdiv(class = "block"):
         tdiv(class = "field is-grouped"):
@@ -66,6 +69,7 @@ when defined(js) or defined(nimsuggest):
                 elif self[].working: "button is-static"
                 else: "button"
               ).cstring,
+              disabled = goalIsNone,
               onclick = () => self.runSolve,
             ):
               text "解探索"
@@ -76,6 +80,7 @@ when defined(js) or defined(nimsuggest):
                 elif self[].working: "button is-static"
                 else: "button"
               ).cstring,
+              disabled = goalIsNone,
               onclick = () => self.runPermute helper,
             ):
               text "ツモ並べ替え"

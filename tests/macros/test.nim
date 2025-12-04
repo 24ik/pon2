@@ -80,6 +80,7 @@ block: # staticCase
       else:
         -1
 
+  check 0.nextPow2 == 1
   check 1.nextPow2 == 1
   check 2.nextPow2 == 2
   check 3.nextPow2 == 4

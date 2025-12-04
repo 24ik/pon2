@@ -9,51 +9,35 @@
 import std/[random, sequtils, sets, sugar]
 import ./[nazopuyowrap, solve]
 import ../[core]
-import ../private/[algorithm, arrayutils, assign, deques, math, results2, staticfor]
+import
+  ../private/
+    [algorithm, arrayutils, assign, deques, math, results2, setutils, staticfor]
 
 export nazopuyowrap, results2
 
-type
-  GenerateGoalColor* {.pure.} = enum
-    ## Nazo Puyo goal color for generation.
-    All
-    SingleColor
-    Garbages
-    Colors
-
-  GenerateGoal* = object ## Nazo Puyo goal for generation.
-    kind: GoalKind
-    color: GenerateGoalColor
-    val: GoalVal
-
-  GenerateSettings* = object ## Settings of Nazo Puyo generation.
-    goal: GenerateGoal
-    moveCount: int
-    colorCount: int
-    heights: tuple[weights: Opt[array[Col, int]], positives: Opt[array[Col, bool]]]
-    puyoCounts: tuple[colors: int, garbage: int, hard: int]
-    connection2Counts: tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int]]
-    connection3Counts:
-      tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int], lShape: Opt[int]]
-    dropGarbagesIndices: seq[int]
-    dropHardsIndices: seq[int]
-    rotateIndices: seq[int]
-    crossRotateIndices: seq[int]
-    allowDoubleNotLast: bool
-    allowDoubleLast: bool
+type GenerateSettings* = object ## Settings of Nazo Puyo generation.
+  goal: Goal
+  moveCount: int
+  colorCount: int
+  heights: tuple[weights: Opt[array[Col, int]], positives: Opt[array[Col, bool]]]
+  puyoCounts: tuple[colors: int, garbage: int, hard: int]
+  connection2Counts: tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int]]
+  connection3Counts:
+    tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int], lShape: Opt[int]]
+  dropGarbagesIndices: seq[int]
+  dropHardsIndices: seq[int]
+  rotateIndices: seq[int]
+  crossRotateIndices: seq[int]
+  allowDoubleNotLast: bool
+  allowDoubleLast: bool
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
 func init*(
-    T: type GenerateGoal, kind: GoalKind, color: GenerateGoalColor, val: GoalVal
-): T =
-  T(kind: kind, color: color, val: val)
-
-func init*(
     T: type GenerateSettings,
-    goal: GenerateGoal,
+    goal: Goal,
     moveCount, colorCount: int,
     heights: tuple[weights: Opt[array[Col, int]], positives: Opt[array[Col, bool]]],
     puyoCounts: tuple[colors: int, garbage: int, hard: int],
@@ -123,10 +107,10 @@ func split(
   sepIndices.sort
   sepIndices.add total
 
-  let res = collect:
+  let chunks = collect:
     for i in 0 ..< chunkCount:
       sepIndices[i.succ] - sepIndices[i]
-  ok res
+  ok chunks
 
 func split(
     rng: var Rand, total: int, weights: openArray[int]
@@ -150,20 +134,20 @@ func split(
   if weightSum == 0:
     return rng.split(total, weights.len, allowZeroChunk = true)
 
-  var res = newSeq[int](weights.len) # NOTE: somehow `newSeqUninit` does not work
+  var chunks = newSeq[int](weights.len) # NOTE: somehow `newSeqUninit` does not work
   while true:
     var last = total
 
     for i in 0 ..< weights.len.pred:
       var rounded = rng.round total * weights[i] / weightSum
-      res[i].assign rounded
+      chunks[i].assign rounded
       last.dec rounded
 
     if last == 0 or (last > 0 and weights[^1] > 0):
-      res[^1].assign last
+      chunks[^1].assign last
       break
 
-  ok res
+  ok chunks
 
 func split(
     rng: var Rand, total: int, positives: openArray[bool]
@@ -187,30 +171,49 @@ func split(
   let counts =
     ?rng.split(total, positives.countIt it, allowZeroChunk = false).context "Cannot split"
   var
-    res = newSeqOfCap[int](positives.len)
+    chunks = newSeqOfCap[int](positives.len)
     countsIndex = 0
-  for pos in positives:
-    if pos:
-      res.add counts[countsIndex]
+  for positive in positives:
+    if positive:
+      chunks.add counts[countsIndex]
       countsIndex.inc
     else:
-      res.add 0
+      chunks.add 0
 
-  ok res
+  ok chunks
 
 # ------------------------------------------------
 # Checker
 # ------------------------------------------------
 
+const
+  DummyCell = Cell.low
+  GoalColorToCell: array[GoalColor, Cell] = [
+    DummyCell, Cell.Red, Cell.Green, Cell.Blue, Cell.Yellow, Cell.Purple, DummyCell,
+    DummyCell,
+  ]
+
 func isValid(self: GenerateSettings): StrErrorResult[void] =
   ## Returns `true` if the settings are valid.
   ## Note that this function is "weak" checker; a generation may be failed
   ## (entering infinite loop) even though this function returns `true`.
+  if not self.goal.isSupported:
+    return err "none-goal is not supported"
+
   if self.moveCount < 1:
     return err "`moveCount` should be positive"
 
-  if self.colorCount notin 1 .. 5:
-    return err "`colorCount` should be in 1..5"
+  var colors = set[Cell]({})
+  if self.goal.mainOpt.isOk:
+    let main = self.goal.mainOpt.unsafeValue
+    if main.color in GoalColor.Red .. GoalColor.Purple:
+      colors.incl GoalColorToCell[main.color]
+  if self.goal.clearColorOpt.isOk:
+    let clearColor = self.goal.clearColorOpt.unsafeValue
+    if clearColor in GoalColor.Red .. GoalColor.Purple:
+      colors.incl GoalColorToCell[clearColor]
+  if self.colorCount notin max(colors.card, 1) .. 5:
+    return err "`colorCount` should be in 1..5 (some goals require 2..5)"
 
   if self.heights.weights.isOk == self.heights.positives.isOk:
     return err "Either `heights.weights` or `heights.positives` should have a value"
@@ -430,7 +433,7 @@ func generatePuyoPuyo[F: TsuField or WaterField](
 
   # field
   var
-    fieldArray = Row.initArrayWith Col.initArrayWith None
+    fieldArray = Row.initArrayWith Col.initArrayWith Cell.None
     cellIndex = 0
   staticFor(col, Col):
     for i in 0 ..< cellCountsInField[col.ord]:
@@ -446,42 +449,6 @@ func generatePuyoPuyo[F: TsuField or WaterField](
   ok PuyoPuyo[F].init(field, steps)
 
 # ------------------------------------------------
-# Goal
-# ------------------------------------------------
-
-const
-  DummyGoalColor = GoalColor.All
-  CellToGoalColor: array[Cell, GoalColor] = [
-    DummyGoalColor, DummyGoalColor, DummyGoalColor, GoalColor.Red, GoalColor.Green,
-    GoalColor.Blue, GoalColor.Yellow, GoalColor.Purple,
-  ]
-
-func generateGoal(
-    rng: var Rand, settings: GenerateSettings, useCells: seq[Cell]
-): Goal =
-  ## Returns a random goal.
-  var goal = Goal.init
-  goal.kind.assign settings.goal.kind
-
-  if goal.kind in ColorKinds:
-    goal.optColor.ok (
-      case settings.goal.color
-      of GenerateGoalColor.All:
-        GoalColor.All
-      of SingleColor:
-        CellToGoalColor[rng.sample useCells]
-      of GenerateGoalColor.Garbages:
-        GoalColor.Garbages
-      of GenerateGoalColor.Colors:
-        GoalColor.Colors
-    )
-
-  if goal.kind in ValKinds:
-    goal.optVal.ok settings.goal.val
-
-  goal.normalized
-
-# ------------------------------------------------
 # Generate
 # ------------------------------------------------
 
@@ -491,19 +458,27 @@ proc generate[F: TsuField or WaterField](
   ## Returns a random Nazo Puyo that has a unique solution.
   ?settings.isValid.context "Generation failed"
 
-  let
-    useCells =
-      (Cell.Red .. Cell.Purple).toSeq.dup(shuffle(rng, _))[0 ..< settings.colorCount]
-    goal = rng.generateGoal(settings, useCells)
-  if not goal.isSupported:
-    return err "Unsupported goal"
+  # cells
+  var useCellsSet = set[Cell]({})
+  if settings.goal.mainOpt.isOk:
+    let main = settings.goal.mainOpt.unsafeValue
+    if main.color in GoalColor.Red .. GoalColor.Purple:
+      useCellsSet.incl GoalColorToCell[main.color]
+  if settings.goal.clearColorOpt.isOk:
+    let clearColor = settings.goal.clearColorOpt.unsafeValue
+    if clearColor in GoalColor.Red .. GoalColor.Purple:
+      useCellsSet.incl GoalColorToCell[clearColor]
+  useCellsSet.incl (Cell.Red .. Cell.Purple).toSeq.dup(shuffle(rng, _))[
+    0 ..< settings.colorCount - useCellsSet.card
+  ].toSet
+  let useCells = useCellsSet.toSeq
 
   while true:
-    let puyoPuyoRes = generatePuyoPuyo[F](rng, settings, useCells)
-    if puyoPuyoRes.isErr:
+    let puyoPuyoResult = generatePuyoPuyo[F](rng, settings, useCells)
+    if puyoPuyoResult.isErr:
       continue
 
-    let puyoPuyo = puyoPuyoRes.unsafeValue
+    let puyoPuyo = puyoPuyoResult.unsafeValue
 
     if puyoPuyo.field.isDead:
       continue
@@ -540,14 +515,14 @@ proc generate[F: TsuField or WaterField](
         settings.connection3Counts.lShape.unsafeValue * 3:
       continue
 
-    var nazo = NazoPuyo[F].init(puyoPuyo, goal)
-    let answers = nazo.solve(calcAllAnswers = false)
+    var nazoPuyo = NazoPuyo[F].init(puyoPuyo, settings.goal)
+    let answers = nazoPuyo.solve(calcAllAnswers = false)
     if answers.len == 1 and answers[0].len == settings.moveCount:
       for stepIndex, optPlacement in answers[0]:
-        if nazo.puyoPuyo.steps[stepIndex].kind == PairPlacement:
-          nazo.puyoPuyo.steps[stepIndex].optPlacement.assign optPlacement
+        if nazoPuyo.puyoPuyo.steps[stepIndex].kind == PairPlacement:
+          nazoPuyo.puyoPuyo.steps[stepIndex].optPlacement.assign optPlacement
 
-      return ok nazo
+      return ok nazoPuyo
 
   return err "Not reached here"
 

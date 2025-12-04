@@ -6,7 +6,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[deques, sequtils, sugar]
+import std/[deques, sugar]
 import ./[key, nazopuyowrap, permute, simulator, solve]
 import ../[core]
 import ../private/[assign, utils]
@@ -127,8 +127,8 @@ func nextReplay*(self: var Studio) =
     self.replayData.stepsIndex.inc
 
   self.replaySimulator.reset
-  unwrapNazoPuyo self.replaySimulator.nazoPuyoWrap:
-    var nazo = itNazo
+  unwrap self.replaySimulator.nazoPuyoWrap:
+    var nazo = it
     nazo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIndex]
 
     self.replaySimulator.assign Simulator.init(nazo, Replay)
@@ -144,8 +144,8 @@ func prevReplay*(self: var Studio) =
     self.replayData.stepsIndex.dec
 
   self.replaySimulator.reset
-  unwrapNazoPuyo self.replaySimulator.nazoPuyoWrap:
-    var nazo = itNazo
+  unwrap self.replaySimulator.nazoPuyoWrap:
+    var nazo = it
     nazo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIndex]
 
     self.replaySimulator.assign Simulator.init(nazo, Replay)
@@ -162,35 +162,34 @@ func canWork(self: Studio): bool =
   if self.simulator.mode notin EditorModes:
     return false
 
-  if self.simulator.nazoPuyoWrap.optGoal.isErr:
-    return false
-
   if self.simulator.state notin {Stable, AfterEdit}:
     return false
 
   true
 
-func workPostProcess[F: TsuField or WaterField](self: var Studio, nazo: NazoPuyo[F]) =
+func workPostProcess[F: TsuField or WaterField](
+    self: var Studio, nazoPuyo: NazoPuyo[F]
+) =
   ## Updates the replay simulator.
   if self.replayData.stepsSeq.len > 0:
     self.focusReplay.assign true
     self.replayData.stepsIndex.assign 0
 
-    var nazo2 = nazo
-    nazo2.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIndex]
-    self.replaySimulator.assign Simulator.init(nazo2, Replay)
+    var nazoPuyo2 = nazoPuyo
+    nazoPuyo2.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIndex]
+    self.replaySimulator.assign Simulator.init(nazoPuyo2, Replay)
   else:
     self.focusReplay.assign false
 
 proc setAnswers[F: TsuField or WaterField](
-    self: var Studio, originalNazo: NazoPuyo[F], answers: seq[SolveAnswer]
+    self: var Studio, originalNazoPuyo: NazoPuyo[F], answers: seq[SolveAnswer]
 ) =
   ## Sets the answers.
   let stepsSeq = collect:
     for answer in answers:
-      var steps = originalNazo.puyoPuyo.steps
+      var steps = originalNazoPuyo.puyoPuyo.steps
       for stepIndex, optPlacement in answer:
-        if originalNazo.puyoPuyo.steps[stepIndex].kind == PairPlacement:
+        if originalNazoPuyo.puyoPuyo.steps[stepIndex].kind == PairPlacement:
           steps[stepIndex].optPlacement.assign optPlacement
 
       steps
@@ -206,9 +205,9 @@ proc solve*(self: var Studio) =
   self.solving.assign true
   self.replayData.stepsSeq.setLen 0
 
-  unwrapNazoPuyo self.simulator.nazoPuyoWrap:
-    self.setAnswers itNazo, itNazo.solve
-    self.workPostProcess itNazo
+  unwrap self.simulator.nazoPuyoWrap:
+    self.setAnswers it, it.solve
+    self.workPostProcess it
 
   self.solving.assign false
 
@@ -223,17 +222,17 @@ when defined(js) or defined(nimsuggest):
       self.solving.assign true
       self.replayData.stepsSeq.setLen 0
 
-      unwrapNazoPuyo self.simulator.nazoPuyoWrap:
-        let originalNazo = itNazo # NOTE: allow editing when working
+      unwrap self.simulator.nazoPuyoWrap:
+        let originalNazoPuyo = it # NOTE: allow editing when working
 
         {.push warning[Uninit]: off.}
-        discard originalNazo
+        discard originalNazoPuyo
           .asyncSolve(self[].progressRef)
           .then(
             (answers: seq[SolveAnswer]) => (
               block:
-                self[].setAnswers originalNazo, answers
-                self[].workPostProcess originalNazo
+                self[].setAnswers originalNazoPuyo, answers
+                self[].workPostProcess originalNazoPuyo
                 self[].solving.assign false
             )
           )
@@ -257,11 +256,11 @@ proc permute*(
   self.permuting.assign true
   self.replayData.stepsSeq.setLen 0
 
-  unwrapNazoPuyo self.simulator.nazoPuyoWrap:
-    for nazo in itNazo.permute(fixIndices, allowDoubleNotLast, allowDoubleLast):
-      self.replayData.stepsSeq.add nazo.puyoPuyo.steps
+  unwrap self.simulator.nazoPuyoWrap:
+    for nazoPuyo in it.permute(fixIndices, allowDoubleNotLast, allowDoubleLast):
+      self.replayData.stepsSeq.add nazoPuyo.puyoPuyo.steps
 
-    self.workPostProcess itNazo
+    self.workPostProcess it
 
   self.permuting.assign false
 
@@ -280,20 +279,20 @@ when defined(js) or defined(nimsuggest):
       self.permuting.assign true
       self.replayData.stepsSeq.setLen 0
 
-      unwrapNazoPuyo self.simulator.nazoPuyoWrap:
-        let originalNazo = itNazo # NOTE: allow editing when working
+      unwrap self.simulator.nazoPuyoWrap:
+        let originalNazoPuyo = it # NOTE: allow editing when working
 
         {.push warning[Uninit]: off.}
-        discard originalNazo
+        discard originalNazoPuyo
           .asyncPermute(
             fixIndices, allowDoubleNotLast, allowDoubleLast, self[].progressRef
           )
           .then(
-            (nazos: seq[originalNazo.type]) => (
+            (nazoPuyos: seq[originalNazoPuyo.type]) => (
               block:
-                for nazo in nazos:
-                  self[].replayData.stepsSeq.add nazo.puyoPuyo.steps
-                self[].workPostProcess originalNazo
+                for nazoPuyo in nazoPuyos:
+                  self[].replayData.stepsSeq.add nazoPuyo.puyoPuyo.steps
+                self[].workPostProcess originalNazoPuyo
                 self[].permuting.assign false
             )
           )

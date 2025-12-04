@@ -69,6 +69,6 @@ func noticeCounts*(
       count = score2 div unit
 
     counts[notice].assign count
-    score2.assign score2.pred unit * count
+    score2.dec unit * count
 
   counts
