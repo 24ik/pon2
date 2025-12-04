@@ -170,11 +170,9 @@
           </ul></dd>
 <dt><a name="asyncSolve" href="#asyncSolve"><span>asyncSolve:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="solve: proc asyncSolve[F: TsuField or WaterField](nazo: NazoPuyo[F]; progressRef: ref tuple[
-    now, total: int] = nil; calcAllAnswers: static bool = true): Future[
-    seq[SolveAnswer]]" href="pon2/app/solve.html#asyncSolve%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D%2Cref.tuple%5Bint%2Cint%5D%2Cstaticbool">solve: proc asyncSolve[F: TsuField or WaterField](nazo: NazoPuyo[F]; progressRef: ref tuple[
-    now, total: int] = nil; calcAllAnswers: static bool = true): Future[
-    seq[SolveAnswer]]</a></li>
+          data-doc-search-tag="solve: proc asyncSolve[F: TsuField or WaterField](self: NazoPuyo[F]; progressRef: ref tuple[
+    now, total: int] = nil; calcAllAnswers = true): Future[seq[SolveAnswer]]" href="pon2/app/solve.html#asyncSolve%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D%2Cref.tuple%5Bint%2Cint%5D">solve: proc asyncSolve[F: TsuField or WaterField](self: NazoPuyo[F]; progressRef: ref tuple[
+    now, total: int] = nil; calcAllAnswers = true): Future[seq[SolveAnswer]]</a></li>
           <li><a class="reference external"
           data-doc-search-tag="studio: proc asyncSolve(self: ref Studio)" href="pon2/app/studio.html#asyncSolve%2Cref.Studio">studio: proc asyncSolve(self: ref Studio)</a></li>
           </ul></dd>
@@ -288,11 +286,11 @@
 <li><a class="reference external"
           data-doc-search-tag="solve: proc childrenAtDepth[F: TsuField or WaterField](self: SolveNode[F]; targetDepth: int;
     nodes: var seq[SolveNode[F]]; optPlacementsSeq: var seq[seq[OptPlacement]];
-    answers: var seq[seq[OptPlacement]]; moveCount: int;
-    calcAllAnswers: static bool; goal: Goal; steps: Steps)" href="pon2/private/app/solve.html#childrenAtDepth%2CSolveNode%5BF%3A%20TsuField%20or%20WaterField%5D%2Cint%2Cseq%5BSolveNode%5BF%3A%20TsuField%20or%20WaterField%5D%5D%2Cseq%5Bseq%5BOptPlacement%5D%5D%2Cseq%5Bseq%5BOptPlacement%5D%5D%2Cint%2Cstaticbool%2CGoal%2CSteps">solve: proc childrenAtDepth[F: TsuField or WaterField](self: SolveNode[F]; targetDepth: int;
+    answers: var seq[seq[OptPlacement]]; moveCount: int; calcAllAnswers: bool;
+    goal: Goal; steps: Steps)" href="pon2/private/app/solve.html#childrenAtDepth%2CSolveNode%5BF%3A%20TsuField%20or%20WaterField%5D%2Cint%2Cseq%5BSolveNode%5BF%3A%20TsuField%20or%20WaterField%5D%5D%2Cseq%5Bseq%5BOptPlacement%5D%5D%2Cseq%5Bseq%5BOptPlacement%5D%5D%2Cint%2Cbool%2CGoal%2CSteps">solve: proc childrenAtDepth[F: TsuField or WaterField](self: SolveNode[F]; targetDepth: int;
     nodes: var seq[SolveNode[F]]; optPlacementsSeq: var seq[seq[OptPlacement]];
-    answers: var seq[seq[OptPlacement]]; moveCount: int;
-    calcAllAnswers: static bool; goal: Goal; steps: Steps)</a></li>
+    answers: var seq[seq[OptPlacement]]; moveCount: int; calcAllAnswers: bool;
+    goal: Goal; steps: Steps)</a></li>
           </ul></dd>
 <dt><a name="clear" href="#clear"><span>clear:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -413,6 +411,10 @@
           data-doc-search-tag="field: proc crossRotate[F: TsuField or WaterField](self: var F)" href="pon2/core/field.html#crossRotate%2CF">field: proc crossRotate[F: TsuField or WaterField](self: var F)</a></li>
           <li><a class="reference external"
           data-doc-search-tag="xmm: proc crossRotate(self: var XmmBinaryField)" href="pon2/private/core/binaryfield/xmm.html#crossRotate%2CM128i">xmm: proc crossRotate(self: var XmmBinaryField)</a></li>
+          </ul></dd>
+<dt><a name="DeadColor" href="#DeadColor"><span>DeadColor:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="utils: const DeadColor" href="pon2/private/gui/utils.html#DeadColor">utils: const DeadColor</a></li>
           </ul></dd>
 <dt><a name="DefaultColor" href="#DefaultColor"><span>DefaultColor:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -556,14 +558,6 @@
     NazoPuyoWrap]" href="pon2/app/generate.html#generate%2CRand%2CGenerateSettings%2CRule">generate: proc generate(rng: var Rand; settings: GenerateSettings; rule: Rule): StrErrorResult[
     NazoPuyoWrap]</a></li>
           </ul></dd>
-<dt><a name="GenerateGoal" href="#GenerateGoal"><span>GenerateGoal:</span></a></dt><dd><ul class="simple">
-<li><a class="reference external"
-          data-doc-search-tag="generate: object GenerateGoal" href="pon2/app/generate.html#GenerateGoal">generate: object GenerateGoal</a></li>
-          </ul></dd>
-<dt><a name="GenerateGoalColor" href="#GenerateGoalColor"><span>GenerateGoalColor:</span></a></dt><dd><ul class="simple">
-<li><a class="reference external"
-          data-doc-search-tag="generate: enum GenerateGoalColor" href="pon2/app/generate.html#GenerateGoalColor">generate: enum GenerateGoalColor</a></li>
-          </ul></dd>
 <dt><a name="GenerateSettings" href="#GenerateSettings"><span>GenerateSettings:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="generate: object GenerateSettings" href="pon2/app/generate.html#GenerateSettings">generate: object GenerateSettings</a></li>
@@ -596,6 +590,10 @@
 <li><a class="reference external"
           data-doc-search-tag="goal: object Goal" href="pon2/core/goal.html#Goal">goal: object Goal</a></li>
           </ul></dd>
+<dt><a name="goalClearColorOpt%3D" href="#goalClearColorOpt%3D"><span>goalClearColorOpt=:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="simulator: proc goalClearColorOpt=(self: var Simulator; clearColorOpt: Opt[GoalColor])" href="pon2/app/simulator.html#goalClearColorOpt%3D%2CSimulator%2COpt%5BGoalColor%5D">simulator: proc goalClearColorOpt=(self: var Simulator; clearColorOpt: Opt[GoalColor])</a></li>
+          </ul></dd>
 <dt><a name="GoalColor" href="#GoalColor"><span>GoalColor:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="goal: enum GoalColor" href="pon2/core/goal.html#GoalColor">goal: enum GoalColor</a></li>
@@ -608,17 +606,25 @@
 <li><a class="reference external"
           data-doc-search-tag="goal: enum GoalKind" href="pon2/core/goal.html#GoalKind">goal: enum GoalKind</a></li>
           </ul></dd>
-<dt><a name="goalKind%3D" href="#goalKind%3D"><span>goalKind=:</span></a></dt><dd><ul class="simple">
+<dt><a name="goalKindOpt%3D" href="#goalKindOpt%3D"><span>goalKindOpt=:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="simulator: proc goalKind=(self: var Simulator; kind: GoalKind)" href="pon2/app/simulator.html#goalKind%3D%2CSimulator%2CGoalKind">simulator: proc goalKind=(self: var Simulator; kind: GoalKind)</a></li>
+          data-doc-search-tag="simulator: proc goalKindOpt=(self: var Simulator; kindOpt: Opt[GoalKind])" href="pon2/app/simulator.html#goalKindOpt%3D%2CSimulator%2COpt%5BGoalKind%5D">simulator: proc goalKindOpt=(self: var Simulator; kindOpt: Opt[GoalKind])</a></li>
           </ul></dd>
-<dt><a name="GoalVal" href="#GoalVal"><span>GoalVal:</span></a></dt><dd><ul class="simple">
+<dt><a name="GoalMain" href="#GoalMain"><span>GoalMain:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="goal: type GoalVal" href="pon2/core/goal.html#GoalVal">goal: type GoalVal</a></li>
+          data-doc-search-tag="goal: object GoalMain" href="pon2/core/goal.html#GoalMain">goal: object GoalMain</a></li>
           </ul></dd>
 <dt><a name="goalVal%3D" href="#goalVal%3D"><span>goalVal=:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="simulator: proc goalVal=(self: var Simulator; val: GoalVal)" href="pon2/app/simulator.html#goalVal%3D%2CSimulator%2CGoalVal">simulator: proc goalVal=(self: var Simulator; val: GoalVal)</a></li>
+          data-doc-search-tag="simulator: proc goalVal=(self: var Simulator; val: int)" href="pon2/app/simulator.html#goalVal%3D%2CSimulator%2Cint">simulator: proc goalVal=(self: var Simulator; val: int)</a></li>
+          </ul></dd>
+<dt><a name="GoalValOperator" href="#GoalValOperator"><span>GoalValOperator:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="goal: enum GoalValOperator" href="pon2/core/goal.html#GoalValOperator">goal: enum GoalValOperator</a></li>
+          </ul></dd>
+<dt><a name="goalValOperator%3D" href="#goalValOperator%3D"><span>goalValOperator=:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="simulator: proc goalValOperator=(self: var Simulator; valOperator: GoalValOperator)" href="pon2/app/simulator.html#goalValOperator%3D%2CSimulator%2CGoalValOperator">simulator: proc goalValOperator=(self: var Simulator; valOperator: GoalValOperator)</a></li>
           </ul></dd>
 <dt><a name="hardToGarbageCount" href="#hardToGarbageCount"><span>hardToGarbageCount:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -636,21 +642,15 @@
           </ul></dd>
 <dt><a name="init" href="#init"><span>init:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="generate: proc init(T: type GenerateGoal; kind: GoalKind; color: GenerateGoalColor;
-     val: GoalVal): T:type" href="pon2/app/generate.html#init%2CtypeGenerateGoal%2CGoalKind%2CGenerateGoalColor%2CGoalVal">generate: proc init(T: type GenerateGoal; kind: GoalKind; color: GenerateGoalColor;
-     val: GoalVal): T:type</a></li>
-          <li><a class="reference external"
-          data-doc-search-tag="generate: proc init(T: type GenerateSettings; goal: GenerateGoal; moveCount, colorCount: int;
-    heights: tuple[weights: Opt[array[Col, int]],
-                   positives: Opt[array[Col, bool]]];
+          data-doc-search-tag="generate: proc init(T: type GenerateSettings; goal: Goal; moveCount, colorCount: int; heights: tuple[
+    weights: Opt[array[Col, int]], positives: Opt[array[Col, bool]]];
      puyoCounts: tuple[colors: int, garbage: int, hard: int]; connection2Counts: tuple[
     total: Opt[int], vertical: Opt[int], horizontal: Opt[int]];
     connection3Counts: tuple[total: Opt[int], vertical: Opt[int],
                              horizontal: Opt[int], lShape: Opt[int]];
     dropGarbagesIndices, dropHardsIndices, rotateIndices, crossRotateIndices: seq[
-    int]; allowDoubleNotLast, allowDoubleLast: bool): T:type" href="pon2/app/generate.html#init%2CtypeGenerateSettings%2CGenerateGoal%2Cint%2Cint%2Ctuple%5BOpt%5Barray%5BCol%2Cint%5D%5D%2COpt%5Barray%5BCol%2Cbool%5D%5D%5D%2Ctuple%5Bint%2Cint%2Cint%5D%2Ctuple%5BOpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%5D%2Ctuple%5BOpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%5D%2Cseq%5Bint%5D%2Cseq%5Bint%5D%2Cseq%5Bint%5D%2Cseq%5Bint%5D%2Cbool%2Cbool">generate: proc init(T: type GenerateSettings; goal: GenerateGoal; moveCount, colorCount: int;
-    heights: tuple[weights: Opt[array[Col, int]],
-                   positives: Opt[array[Col, bool]]];
+    int]; allowDoubleNotLast, allowDoubleLast: bool): T:type" href="pon2/app/generate.html#init%2CtypeGenerateSettings%2CGoal%2Cint%2Cint%2Ctuple%5BOpt%5Barray%5BCol%2Cint%5D%5D%2COpt%5Barray%5BCol%2Cbool%5D%5D%5D%2Ctuple%5Bint%2Cint%2Cint%5D%2Ctuple%5BOpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%5D%2Ctuple%5BOpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%2COpt%5Bint%5D%5D%2Cseq%5Bint%5D%2Cseq%5Bint%5D%2Cseq%5Bint%5D%2Cseq%5Bint%5D%2Cbool%2Cbool">generate: proc init(T: type GenerateSettings; goal: Goal; moveCount, colorCount: int; heights: tuple[
+    weights: Opt[array[Col, int]], positives: Opt[array[Col, bool]]];
      puyoCounts: tuple[colors: int, garbage: int, hard: int]; connection2Counts: tuple[
     total: Opt[int], vertical: Opt[int], horizontal: Opt[int]];
     connection3Counts: tuple[total: Opt[int], vertical: Opt[int],
@@ -672,7 +672,9 @@
           <li><a class="reference external"
           data-doc-search-tag="nazopuyowrap: proc init(T: type NazoPuyoWrap): T:type" href="pon2/app/nazopuyowrap.html#init%2CtypeNazoPuyoWrap">nazopuyowrap: proc init(T: type NazoPuyoWrap): T:type</a></li>
           <li><a class="reference external"
-          data-doc-search-tag="nazopuyowrap: proc init[F: TsuField or WaterField](T: type NazoPuyoWrap; nazo: NazoPuyo[F]): T:type" href="pon2/app/nazopuyowrap.html#init%2CtypeNazoPuyoWrap%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D">nazopuyowrap: proc init[F: TsuField or WaterField](T: type NazoPuyoWrap; nazo: NazoPuyo[F]): T:type</a></li>
+          data-doc-search-tag="nazopuyowrap: proc init(T: type NazoPuyoWrap; nazo: NazoPuyo[TsuField]): T:type" href="pon2/app/nazopuyowrap.html#init%2CtypeNazoPuyoWrap%2CNazoPuyo%5BTsuField%5D">nazopuyowrap: proc init(T: type NazoPuyoWrap; nazo: NazoPuyo[TsuField]): T:type</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="nazopuyowrap: proc init(T: type NazoPuyoWrap; nazo: NazoPuyo[WaterField]): T:type" href="pon2/app/nazopuyowrap.html#init%2CtypeNazoPuyoWrap%2CNazoPuyo%5BWaterField%5D">nazopuyowrap: proc init(T: type NazoPuyoWrap; nazo: NazoPuyo[WaterField]): T:type</a></li>
           <li><a class="reference external"
           data-doc-search-tag="nazopuyowrap: proc init[F: TsuField or WaterField](T: type NazoPuyoWrap; puyoPuyo: PuyoPuyo[F]): T:type" href="pon2/app/nazopuyowrap.html#init%2CtypeNazoPuyoWrap%2CPuyoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D">nazopuyowrap: proc init[F: TsuField or WaterField](T: type NazoPuyoWrap; puyoPuyo: PuyoPuyo[F]): T:type</a></li>
           <li><a class="reference external"
@@ -696,13 +698,27 @@
           <li><a class="reference external"
           data-doc-search-tag="goal: proc init(T: type Goal): T:type" href="pon2/core/goal.html#init%2CtypeGoal">goal: proc init(T: type Goal): T:type</a></li>
           <li><a class="reference external"
-          data-doc-search-tag="goal: proc init(T: type Goal; kind: GoalKind; color: GoalColor): T:type" href="pon2/core/goal.html#init%2CtypeGoal%2CGoalKind%2CGoalColor">goal: proc init(T: type Goal; kind: GoalKind; color: GoalColor): T:type</a></li>
+          data-doc-search-tag="goal: proc init(T: type Goal; clearColor: GoalColor): T:type" href="pon2/core/goal.html#init%2CtypeGoal%2CGoalColor">goal: proc init(T: type Goal; clearColor: GoalColor): T:type</a></li>
           <li><a class="reference external"
-          data-doc-search-tag="goal: proc init(T: type Goal; kind: GoalKind; color: GoalColor; val: GoalVal): T:type" href="pon2/core/goal.html#init%2CtypeGoal%2CGoalKind%2CGoalColor%2CGoalVal">goal: proc init(T: type Goal; kind: GoalKind; color: GoalColor; val: GoalVal): T:type</a></li>
+          data-doc-search-tag="goal: proc init(T: type Goal; kind: GoalKind; color: GoalColor; val: int;
+     valOperator: GoalValOperator): T:type" href="pon2/core/goal.html#init%2CtypeGoal%2CGoalKind%2CGoalColor%2Cint%2CGoalValOperator">goal: proc init(T: type Goal; kind: GoalKind; color: GoalColor; val: int;
+     valOperator: GoalValOperator): T:type</a></li>
           <li><a class="reference external"
-          data-doc-search-tag="goal: proc init(T: type Goal; kind: GoalKind; val: GoalVal): T:type" href="pon2/core/goal.html#init%2CtypeGoal%2CGoalKind%2CGoalVal">goal: proc init(T: type Goal; kind: GoalKind; val: GoalVal): T:type</a></li>
+          data-doc-search-tag="goal: proc init(T: type Goal; kind: GoalKind; color: GoalColor; val: int;
+     valOperator: GoalValOperator; clearColor: GoalColor): T:type" href="pon2/core/goal.html#init%2CtypeGoal%2CGoalKind%2CGoalColor%2Cint%2CGoalValOperator%2CGoalColor">goal: proc init(T: type Goal; kind: GoalKind; color: GoalColor; val: int;
+     valOperator: GoalValOperator; clearColor: GoalColor): T:type</a></li>
           <li><a class="reference external"
-          data-doc-search-tag="goal: proc init(T: type Goal; kind: GoalKind; optColor: OptGoalColor; optVal: OptGoalVal): T:type" href="pon2/core/goal.html#init%2CtypeGoal%2CGoalKind%2COptGoalColor%2COptGoalVal">goal: proc init(T: type Goal; kind: GoalKind; optColor: OptGoalColor; optVal: OptGoalVal): T:type</a></li>
+          data-doc-search-tag="goal: proc init(T: type Goal; kind: GoalKind; val: int; valOperator: GoalValOperator): T:type" href="pon2/core/goal.html#init%2CtypeGoal%2CGoalKind%2Cint%2CGoalValOperator">goal: proc init(T: type Goal; kind: GoalKind; val: int; valOperator: GoalValOperator): T:type</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="goal: proc init(T: type Goal; kind: GoalKind; val: int; valOperator: GoalValOperator;
+     clearColor: GoalColor): T:type" href="pon2/core/goal.html#init%2CtypeGoal%2CGoalKind%2Cint%2CGoalValOperator%2CGoalColor">goal: proc init(T: type Goal; kind: GoalKind; val: int; valOperator: GoalValOperator;
+     clearColor: GoalColor): T:type</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="goal: proc init(T: type GoalMain; kind: GoalKind; color: GoalColor; val: int;
+     valOperator: GoalValOperator): T:type" href="pon2/core/goal.html#init%2CtypeGoalMain%2CGoalKind%2CGoalColor%2Cint%2CGoalValOperator">goal: proc init(T: type GoalMain; kind: GoalKind; color: GoalColor; val: int;
+     valOperator: GoalValOperator): T:type</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="goal: proc init(T: type GoalMain; kind: GoalKind; val: int; valOperator: GoalValOperator): T:type" href="pon2/core/goal.html#init%2CtypeGoalMain%2CGoalKind%2Cint%2CGoalValOperator">goal: proc init(T: type GoalMain; kind: GoalKind; val: int; valOperator: GoalValOperator): T:type</a></li>
           <li><a class="reference external"
           data-doc-search-tag="moveresult: proc init(T: type MoveResult; chainCount: int; popCounts: array[Cell, int];
      hardToGarbageCount: int; detailPopCounts: seq[array[Cell, int]];
@@ -828,9 +844,9 @@
 <li><a class="reference external"
           data-doc-search-tag="pair: proc isDouble(self: Pair): bool" href="pon2/core/pair.html#isDouble%2CPair">pair: proc isDouble(self: Pair): bool</a></li>
           </ul></dd>
-<dt><a name="isNormalForm" href="#isNormalForm"><span>isNormalForm:</span></a></dt><dd><ul class="simple">
+<dt><a name="isNormalized" href="#isNormalized"><span>isNormalized:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="goal: proc isNormalForm(self: Goal): bool" href="pon2/core/goal.html#isNormalForm%2CGoal">goal: proc isNormalForm(self: Goal): bool</a></li>
+          data-doc-search-tag="goal: proc isNormalized(self: Goal): bool" href="pon2/core/goal.html#isNormalized%2CGoal">goal: proc isNormalized(self: Goal): bool</a></li>
           </ul></dd>
 <dt><a name="isPopped" href="#isPopped"><span>isPopped:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -846,43 +862,31 @@
           </ul></dd>
 <dt><a name="isSatisfiedAccumColor" href="#isSatisfiedAccumColor"><span>isSatisfiedAccumColor:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="nazopuyo: proc isSatisfiedAccumColor(goal: Goal; colors: set[Cell]; kind: static GoalKind): bool" href="pon2/private/core/nazopuyo.html#isSatisfiedAccumColor%2CGoal%2Cset%5BCell%5D%2CstaticGoalKind">nazopuyo: proc isSatisfiedAccumColor(goal: Goal; colors: set[Cell]; kind: static GoalKind): bool</a></li>
+          data-doc-search-tag="nazopuyo: proc isSatisfiedAccumColor(goal: Goal; colors: set[Cell]): bool" href="pon2/private/core/nazopuyo.html#isSatisfiedAccumColor%2CGoal%2Cset%5BCell%5D">nazopuyo: proc isSatisfiedAccumColor(goal: Goal; colors: set[Cell]): bool</a></li>
           </ul></dd>
 <dt><a name="isSatisfiedAccumCount" href="#isSatisfiedAccumCount"><span>isSatisfiedAccumCount:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="nazopuyo: proc isSatisfiedAccumCount(goal: Goal; count: int; kind: static GoalKind): bool" href="pon2/private/core/nazopuyo.html#isSatisfiedAccumCount%2CGoal%2Cint%2CstaticGoalKind">nazopuyo: proc isSatisfiedAccumCount(goal: Goal; count: int; kind: static GoalKind): bool</a></li>
+          data-doc-search-tag="nazopuyo: proc isSatisfiedAccumCount(goal: Goal; count: int): bool" href="pon2/private/core/nazopuyo.html#isSatisfiedAccumCount%2CGoal%2Cint">nazopuyo: proc isSatisfiedAccumCount(goal: Goal; count: int): bool</a></li>
           </ul></dd>
 <dt><a name="isSatisfiedChain" href="#isSatisfiedChain"><span>isSatisfiedChain:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="nazopuyo: proc isSatisfiedChain(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool" href="pon2/private/core/nazopuyo.html#isSatisfiedChain%2CGoal%2CMoveResult%2CstaticGoalKind">nazopuyo: proc isSatisfiedChain(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool</a></li>
+          data-doc-search-tag="nazopuyo: proc isSatisfiedChain(goal: Goal; moveResult: MoveResult): bool" href="pon2/private/core/nazopuyo.html#isSatisfiedChain%2CGoal%2CMoveResult">nazopuyo: proc isSatisfiedChain(goal: Goal; moveResult: MoveResult): bool</a></li>
           </ul></dd>
 <dt><a name="isSatisfiedColor" href="#isSatisfiedColor"><span>isSatisfiedColor:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="nazopuyo: proc isSatisfiedColor(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool" href="pon2/private/core/nazopuyo.html#isSatisfiedColor%2CGoal%2CMoveResult%2CstaticGoalKind">nazopuyo: proc isSatisfiedColor(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool</a></li>
+          data-doc-search-tag="nazopuyo: proc isSatisfiedColor(goal: Goal; moveResult: MoveResult): bool" href="pon2/private/core/nazopuyo.html#isSatisfiedColor%2CGoal%2CMoveResult">nazopuyo: proc isSatisfiedColor(goal: Goal; moveResult: MoveResult): bool</a></li>
           </ul></dd>
 <dt><a name="isSatisfiedConnection" href="#isSatisfiedConnection"><span>isSatisfiedConnection:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="nazopuyo: proc isSatisfiedConnection(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool" href="pon2/private/core/nazopuyo.html#isSatisfiedConnection%2CGoal%2CMoveResult%2CstaticGoalKind">nazopuyo: proc isSatisfiedConnection(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool</a></li>
-          <li><a class="reference external"
-          data-doc-search-tag="nazopuyo: proc isSatisfiedConnection(goal: Goal; moveRes: MoveResult; kind: static GoalKind;
-                      color: static GoalColor): bool" href="pon2/private/core/nazopuyo.html#isSatisfiedConnection%2CGoal%2CMoveResult%2CstaticGoalKind%2CstaticGoalColor">nazopuyo: proc isSatisfiedConnection(goal: Goal; moveRes: MoveResult; kind: static GoalKind;
-                      color: static GoalColor): bool</a></li>
+          data-doc-search-tag="nazopuyo: proc isSatisfiedConnection(goal: Goal; moveResult: MoveResult): bool" href="pon2/private/core/nazopuyo.html#isSatisfiedConnection%2CGoal%2CMoveResult">nazopuyo: proc isSatisfiedConnection(goal: Goal; moveResult: MoveResult): bool</a></li>
           </ul></dd>
 <dt><a name="isSatisfiedCount" href="#isSatisfiedCount"><span>isSatisfiedCount:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="nazopuyo: proc isSatisfiedCount(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool" href="pon2/private/core/nazopuyo.html#isSatisfiedCount%2CGoal%2CMoveResult%2CstaticGoalKind">nazopuyo: proc isSatisfiedCount(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool</a></li>
-          <li><a class="reference external"
-          data-doc-search-tag="nazopuyo: proc isSatisfiedCount(goal: Goal; moveRes: MoveResult; kind: static GoalKind;
-                 color: static GoalColor): bool" href="pon2/private/core/nazopuyo.html#isSatisfiedCount%2CGoal%2CMoveResult%2CstaticGoalKind%2CstaticGoalColor">nazopuyo: proc isSatisfiedCount(goal: Goal; moveRes: MoveResult; kind: static GoalKind;
-                 color: static GoalColor): bool</a></li>
+          data-doc-search-tag="nazopuyo: proc isSatisfiedCount(goal: Goal; moveResult: MoveResult): bool" href="pon2/private/core/nazopuyo.html#isSatisfiedCount%2CGoal%2CMoveResult">nazopuyo: proc isSatisfiedCount(goal: Goal; moveResult: MoveResult): bool</a></li>
           </ul></dd>
 <dt><a name="isSatisfiedPlace" href="#isSatisfiedPlace"><span>isSatisfiedPlace:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="nazopuyo: proc isSatisfiedPlace(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool" href="pon2/private/core/nazopuyo.html#isSatisfiedPlace%2CGoal%2CMoveResult%2CstaticGoalKind">nazopuyo: proc isSatisfiedPlace(goal: Goal; moveRes: MoveResult; kind: static GoalKind): bool</a></li>
-          <li><a class="reference external"
-          data-doc-search-tag="nazopuyo: proc isSatisfiedPlace(goal: Goal; moveRes: MoveResult; kind: static GoalKind;
-                 color: static GoalColor): bool" href="pon2/private/core/nazopuyo.html#isSatisfiedPlace%2CGoal%2CMoveResult%2CstaticGoalKind%2CstaticGoalColor">nazopuyo: proc isSatisfiedPlace(goal: Goal; moveRes: MoveResult; kind: static GoalKind;
-                 color: static GoalColor): bool</a></li>
+          data-doc-search-tag="nazopuyo: proc isSatisfiedPlace(goal: Goal; moveResult: MoveResult): bool" href="pon2/private/core/nazopuyo.html#isSatisfiedPlace%2CGoal%2CMoveResult">nazopuyo: proc isSatisfiedPlace(goal: Goal; moveResult: MoveResult): bool</a></li>
           </ul></dd>
 <dt><a name="isSettled" href="#isSettled"><span>isSettled:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -940,9 +944,9 @@
           </ul></dd>
 <dt><a name="mark" href="#mark"><span>mark:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="simulator: proc mark(self: Simulator): Opt[MarkResult]" href="pon2/app/simulator.html#mark%2CSimulator">simulator: proc mark(self: Simulator): Opt[MarkResult]</a></li>
+          data-doc-search-tag="simulator: proc mark(self: Simulator): MarkResult" href="pon2/app/simulator.html#mark%2CSimulator">simulator: proc mark(self: Simulator): MarkResult</a></li>
           <li><a class="reference external"
-          data-doc-search-tag="nazopuyo: proc mark[F: TsuField or WaterField](nazo: NazoPuyo[F]; endStepIndex = -1): MarkResult" href="pon2/core/nazopuyo.html#mark%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D%2Cint">nazopuyo: proc mark[F: TsuField or WaterField](nazo: NazoPuyo[F]; endStepIndex = -1): MarkResult</a></li>
+          data-doc-search-tag="nazopuyo: proc mark[F: TsuField or WaterField](self: NazoPuyo[F]; endStepIndex = -1): MarkResult" href="pon2/core/nazopuyo.html#mark%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D%2Cint">nazopuyo: proc mark[F: TsuField or WaterField](self: NazoPuyo[F]; endStepIndex = -1): MarkResult</a></li>
           </ul></dd>
 <dt><a name="MarkResult" href="#MarkResult"><span>MarkResult:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -1068,6 +1072,10 @@
 <li><a class="reference external"
           data-doc-search-tag="goal: const NoColorKinds" href="pon2/core/goal.html#NoColorKinds">goal: const NoColorKinds</a></li>
           </ul></dd>
+<dt><a name="NoneGoal" href="#NoneGoal"><span>NoneGoal:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="goal: const NoneGoal" href="pon2/core/goal.html#NoneGoal">goal: const NoneGoal</a></li>
+          </ul></dd>
 <dt><a name="NonePlacement" href="#NonePlacement"><span>NonePlacement:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="placement: const NonePlacement" href="pon2/core/placement.html#NonePlacement">placement: const NonePlacement</a></li>
@@ -1079,6 +1087,10 @@
 <dt><a name="normalized" href="#normalized"><span>normalized:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="goal: proc normalized(self: Goal): Goal" href="pon2/core/goal.html#normalized%2CGoal">goal: proc normalized(self: Goal): Goal</a></li>
+          </ul></dd>
+<dt><a name="normalizeGoal" href="#normalizeGoal"><span>normalizeGoal:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="simulator: proc normalizeGoal(self: var Simulator)" href="pon2/app/simulator.html#normalizeGoal%2CSimulator">simulator: proc normalizeGoal(self: var Simulator)</a></li>
           </ul></dd>
 <dt><a name="Notice" href="#Notice"><span>Notice:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -1096,10 +1108,6 @@
 <li><a class="reference external"
           data-doc-search-tag="utils: proc noticeImgSrc(notice: Notice): cstring" href="pon2/private/gui/utils.html#noticeImgSrc%2CNotice">utils: proc noticeImgSrc(notice: Notice): cstring</a></li>
           </ul></dd>
-<dt><a name="NoValKinds" href="#NoValKinds"><span>NoValKinds:</span></a></dt><dd><ul class="simple">
-<li><a class="reference external"
-          data-doc-search-tag="goal: const NoValKinds" href="pon2/core/goal.html#NoValKinds">goal: const NoValKinds</a></li>
-          </ul></dd>
 <dt><a name="operate" href="#operate"><span>operate:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="marathon: proc operate(self: var Marathon; key: KeyEvent): bool" href="pon2/app/marathon.html#operate%2CMarathon%2CKeyEvent">marathon: proc operate(self: var Marathon; key: KeyEvent): bool</a></li>
@@ -1115,14 +1123,6 @@
 <dt><a name="operatingPlacement" href="#operatingPlacement"><span>operatingPlacement:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="simulator: proc operatingPlacement(self: Simulator): Placement" href="pon2/app/simulator.html#operatingPlacement%2CSimulator">simulator: proc operatingPlacement(self: Simulator): Placement</a></li>
-          </ul></dd>
-<dt><a name="OptGoalColor" href="#OptGoalColor"><span>OptGoalColor:</span></a></dt><dd><ul class="simple">
-<li><a class="reference external"
-          data-doc-search-tag="goal: type OptGoalColor" href="pon2/core/goal.html#OptGoalColor">goal: type OptGoalColor</a></li>
-          </ul></dd>
-<dt><a name="OptGoalVal" href="#OptGoalVal"><span>OptGoalVal:</span></a></dt><dd><ul class="simple">
-<li><a class="reference external"
-          data-doc-search-tag="goal: type OptGoalVal" href="pon2/core/goal.html#OptGoalVal">goal: type OptGoalVal</a></li>
           </ul></dd>
 <dt><a name="OptPlacement" href="#OptPlacement"><span>OptPlacement:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -1454,9 +1454,17 @@
 <li><a class="reference external"
           data-doc-search-tag="simulator: proc rotatePlacementRight(self: var Simulator)" href="pon2/app/simulator.html#rotatePlacementRight%2CSimulator">simulator: proc rotatePlacementRight(self: var Simulator)</a></li>
           </ul></dd>
+<dt><a name="rotatePred" href="#rotatePred"><span>rotatePred:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="utils: proc rotatePred[T: Ordinal](x: T): T" href="pon2/private/utils.html#rotatePred%2CT">utils: proc rotatePred[T: Ordinal](x: T): T</a></li>
+          </ul></dd>
 <dt><a name="rotateRight" href="#rotateRight"><span>rotateRight:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="placement: proc rotateRight(self: var Placement)" href="pon2/core/placement.html#rotateRight%2CPlacement">placement: proc rotateRight(self: var Placement)</a></li>
+          </ul></dd>
+<dt><a name="rotateSucc" href="#rotateSucc"><span>rotateSucc:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="utils: proc rotateSucc[T: Ordinal](x: T): T" href="pon2/private/utils.html#rotateSucc%2CT">utils: proc rotateSucc[T: Ordinal](x: T): T</a></li>
           </ul></dd>
 <dt><a name="rotor" href="#rotor"><span>rotor:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -1480,8 +1488,6 @@
           </ul></dd>
 <dt><a name="rule" href="#rule"><span>rule:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="nazopuyowrap: proc rule(self: NazoPuyoWrap): Rule" href="pon2/app/nazopuyowrap.html#rule%2CNazoPuyoWrap">nazopuyowrap: proc rule(self: NazoPuyoWrap): Rule</a></li>
-          <li><a class="reference external"
           data-doc-search-tag="simulator: proc rule(self: Simulator): Rule" href="pon2/app/simulator.html#rule%2CSimulator">simulator: proc rule(self: Simulator): Rule</a></li>
           <li><a class="reference external"
           data-doc-search-tag="field: proc rule(self: TsuField): Rule" href="pon2/core/field.html#rule%2CTsuField">field: proc rule(self: TsuField): Rule</a></li>
@@ -1494,8 +1500,6 @@
           </ul></dd>
 <dt><a name="rule%3D" href="#rule%3D"><span>rule=:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="nazopuyowrap: proc rule=(self: var NazoPuyoWrap; rule: Rule)" href="pon2/app/nazopuyowrap.html#rule%3D%2CNazoPuyoWrap%2CRule">nazopuyowrap: proc rule=(self: var NazoPuyoWrap; rule: Rule)</a></li>
-          <li><a class="reference external"
           data-doc-search-tag="simulator: proc rule=(self: var Simulator; rule: Rule)" href="pon2/app/simulator.html#rule%3D%2CSimulator%2CRule">simulator: proc rule=(self: var Simulator; rule: Rule)</a></li>
           </ul></dd>
 <dt><a name="run" href="#run"><span>run:</span></a></dt><dd><ul class="simple">
@@ -1523,6 +1527,10 @@
 <dt><a name="selectRandomQuery" href="#selectRandomQuery"><span>selectRandomQuery:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="marathon: proc selectRandomQuery(self: var Marathon; fromMatched = true)" href="pon2/app/marathon.html#selectRandomQuery%2CMarathon">marathon: proc selectRandomQuery(self: var Marathon; fromMatched = true)</a></li>
+          </ul></dd>
+<dt><a name="setRule" href="#setRule"><span>setRule:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="nazopuyowrap: proc setRule(self: NazoPuyoWrap; rule: Rule): NazoPuyoWrap" href="pon2/app/nazopuyowrap.html#setRule%2CNazoPuyoWrap%2CRule">nazopuyowrap: proc setRule(self: NazoPuyoWrap; rule: Rule): NazoPuyoWrap</a></li>
           </ul></dd>
 <dt><a name="settle" href="#settle"><span>settle:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -1676,10 +1684,8 @@
           </ul></dd>
 <dt><a name="solve" href="#solve"><span>solve:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="solve: proc solve[F: TsuField or WaterField](nazo: NazoPuyo[F];
-                                 calcAllAnswers: static bool = true): seq[
-    SolveAnswer]" href="pon2/app/solve.html#solve%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D%2Cstaticbool">solve: proc solve[F: TsuField or WaterField](nazo: NazoPuyo[F];
-                                 calcAllAnswers: static bool = true): seq[
+          data-doc-search-tag="solve: proc solve[F: TsuField or WaterField](self: NazoPuyo[F]; calcAllAnswers = true): seq[
+    SolveAnswer]" href="pon2/app/solve.html#solve%2CNazoPuyo%5BF%3A%20TsuField%20or%20WaterField%5D">solve: proc solve[F: TsuField or WaterField](self: NazoPuyo[F]; calcAllAnswers = true): seq[
     SolveAnswer]</a></li>
           <li><a class="reference external"
           data-doc-search-tag="studio: proc solve(self: var Studio)" href="pon2/app/studio.html#solve%2CStudio">studio: proc solve(self: var Studio)</a></li>
@@ -1695,12 +1701,10 @@
 <dt><a name="solveSingleThread" href="#solveSingleThread"><span>solveSingleThread:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="solve: proc solveSingleThread[F: TsuField or WaterField](self: SolveNode[F];
-    answers: var seq[seq[OptPlacement]]; moveCount: int;
-    calcAllAnswers: static bool; goal: Goal; steps: Steps;
-    checkPruneFirst: static bool = false)" href="pon2/private/app/solve.html#solveSingleThread%2CSolveNode%5BF%3A%20TsuField%20or%20WaterField%5D%2Cseq%5Bseq%5BOptPlacement%5D%5D%2Cint%2Cstaticbool%2CGoal%2CSteps%2Cstaticbool">solve: proc solveSingleThread[F: TsuField or WaterField](self: SolveNode[F];
-    answers: var seq[seq[OptPlacement]]; moveCount: int;
-    calcAllAnswers: static bool; goal: Goal; steps: Steps;
-    checkPruneFirst: static bool = false)</a></li>
+    answers: var seq[seq[OptPlacement]]; moveCount: int; calcAllAnswers: bool;
+    goal: Goal; steps: Steps; checkPruneFirst = false)" href="pon2/private/app/solve.html#solveSingleThread%2CSolveNode%5BF%3A%20TsuField%20or%20WaterField%5D%2Cseq%5Bseq%5BOptPlacement%5D%5D%2Cint%2Cbool%2CGoal%2CSteps">solve: proc solveSingleThread[F: TsuField or WaterField](self: SolveNode[F];
+    answers: var seq[seq[OptPlacement]]; moveCount: int; calcAllAnswers: bool;
+    goal: Goal; steps: Steps; checkPruneFirst = false)</a></li>
           </ul></dd>
 <dt><a name="solving" href="#solving"><span>solving:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -1786,13 +1790,23 @@
           <li><a class="reference external"
           data-doc-search-tag="xmm: proc sum(f1, f2, f3, f4, f5, f6, f7, f8: XmmBinaryField): XmmBinaryField" href="pon2/private/core/binaryfield/xmm.html#sum%2CM128i%2CM128i%2CM128i%2CM128i%2CM128i%2CM128i%2CM128i%2CM128i">xmm: proc sum(f1, f2, f3, f4, f5, f6, f7, f8: XmmBinaryField): XmmBinaryField</a></li>
           <li><a class="reference external"
-          data-doc-search-tag="math: proc sum[E: enum; T: SomeNumber](items: array[E, T]; slice: static Slice[E]): T" href="pon2/private/math.html#sum%2Carray%5BE%2CT%5D%2CstaticSlice%5BE%3A%20enum%5D">math: proc sum[E: enum; T: SomeNumber](items: array[E, T]; slice: static Slice[E]): T</a></li>
+          data-doc-search-tag="math: proc sum[E: enum; T: SomeNumber](numbers: array[E, T]; slice: static Slice[E]): T" href="pon2/private/math.html#sum%2Carray%5BE%2CT%5D%2CstaticSlice%5BE%3A%20enum%5D">math: proc sum[E: enum; T: SomeNumber](numbers: array[E, T]; slice: static Slice[E]): T</a></li>
           <li><a class="reference external"
-          data-doc-search-tag="math: proc sum[T: SomeNumber](items: openArray[T]): T" href="pon2/private/math.html#sum%2CopenArray%5BT%5D">math: proc sum[T: SomeNumber](items: openArray[T]): T</a></li>
-          </ul></dd>
-<dt><a name="sumIt" href="#sumIt"><span>sumIt:</span></a></dt><dd><ul class="simple">
-<li><a class="reference external"
-          data-doc-search-tag="math: template sumIt[E: enum; T: SomeNumber](slice: static Slice[E]; body: untyped): T" href="pon2/private/math.html#sumIt.t%2CstaticSlice%5BE%3A%20enum%5D%2Cuntyped">math: template sumIt[E: enum; T: SomeNumber](slice: static Slice[E]; body: untyped): T</a></li>
+          data-doc-search-tag="math: proc sum[T: SomeNumber](numbers: openArray[T]): T" href="pon2/private/math.html#sum%2CopenArray%5BT%5D">math: proc sum[T: SomeNumber](numbers: openArray[T]): T</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="math: proc sum[T: SomeNumber](x1, x2: T): T" href="pon2/private/math.html#sum%2CT%2CT">math: proc sum[T: SomeNumber](x1, x2: T): T</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="math: proc sum[T: SomeNumber](x1, x2, x3: T): T" href="pon2/private/math.html#sum%2CT%2CT%2CT">math: proc sum[T: SomeNumber](x1, x2, x3: T): T</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="math: proc sum[T: SomeNumber](x1, x2, x3, x4: T): T" href="pon2/private/math.html#sum%2CT%2CT%2CT%2CT">math: proc sum[T: SomeNumber](x1, x2, x3, x4: T): T</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="math: proc sum[T: SomeNumber](x1, x2, x3, x4, x5: T): T" href="pon2/private/math.html#sum%2CT%2CT%2CT%2CT%2CT">math: proc sum[T: SomeNumber](x1, x2, x3, x4, x5: T): T</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="math: proc sum[T: SomeNumber](x1, x2, x3, x4, x5, x6: T): T" href="pon2/private/math.html#sum%2CT%2CT%2CT%2CT%2CT%2CT">math: proc sum[T: SomeNumber](x1, x2, x3, x4, x5, x6: T): T</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="math: proc sum[T: SomeNumber](x1, x2, x3, x4, x5, x6, x7: T): T" href="pon2/private/math.html#sum%2CT%2CT%2CT%2CT%2CT%2CT%2CT">math: proc sum[T: SomeNumber](x1, x2, x3, x4, x5, x6, x7: T): T</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="math: proc sum[T: SomeNumber](x1, x2, x3, x4, x5, x6, x7, x8: T): T" href="pon2/private/math.html#sum%2CT%2CT%2CT%2CT%2CT%2CT%2CT%2CT">math: proc sum[T: SomeNumber](x1, x2, x3, x4, x5, x6, x7, x8: T): T</a></li>
           </ul></dd>
 <dt><a name="swap" href="#swap"><span>swap:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -2032,9 +2046,9 @@
 <li><a class="reference external"
           data-doc-search-tag="unionfind: type UnionFindNode" href="pon2/private/unionfind.html#UnionFindNode">unionfind: type UnionFindNode</a></li>
           </ul></dd>
-<dt><a name="unwrapNazoPuyo" href="#unwrapNazoPuyo"><span>unwrapNazoPuyo:</span></a></dt><dd><ul class="simple">
+<dt><a name="unwrap" href="#unwrap"><span>unwrap:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="nazopuyowrap: macro unwrapNazoPuyo(self: untyped; body: untyped): untyped" href="pon2/app/nazopuyowrap.html#unwrapNazoPuyo.m%2Cuntyped%2Cuntyped">nazopuyowrap: macro unwrapNazoPuyo(self: untyped; body: untyped): untyped</a></li>
+          data-doc-search-tag="nazopuyowrap: macro unwrap(self: untyped; body: untyped): untyped" href="pon2/app/nazopuyowrap.html#unwrap.m%2Cuntyped%2Cuntyped">nazopuyowrap: macro unwrap(self: untyped; body: untyped): untyped</a></li>
           </ul></dd>
 <dt><a name="validDoublePlacements" href="#validDoublePlacements"><span>validDoublePlacements:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -2047,10 +2061,6 @@
           data-doc-search-tag="field: proc validPlacements[F: TsuField or WaterField](self: F): set[Placement]" href="pon2/core/field.html#validPlacements%2CF">field: proc validPlacements[F: TsuField or WaterField](self: F): set[Placement]</a></li>
           <li><a class="reference external"
           data-doc-search-tag="binaryfield: proc validPlacements(self: BinaryField): set[Placement]" href="pon2/private/core/binaryfield.html#validPlacements%2CM128i">binaryfield: proc validPlacements(self: BinaryField): set[Placement]</a></li>
-          </ul></dd>
-<dt><a name="ValKinds" href="#ValKinds"><span>ValKinds:</span></a></dt><dd><ul class="simple">
-<li><a class="reference external"
-          data-doc-search-tag="goal: const ValKinds" href="pon2/core/goal.html#ValKinds">goal: const ValKinds</a></li>
           </ul></dd>
 <dt><a name="ViewerModes" href="#ViewerModes"><span>ViewerModes:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -2118,7 +2128,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-16 01:57:23 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-04 07:35:11 UTC</small>
       </div>
     </div>
   </div>

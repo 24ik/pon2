@@ -3,10 +3,10 @@ nim	NazoPuyo	pon2/core/nazopuyo.html#NazoPuyo	object NazoPuyo		17
 nim	MarkResult	pon2/core/nazopuyo.html#MarkResult	enum MarkResult		21
 nim	init	pon2/core/nazopuyo.html#init,typeNazoPuyo[F: TsuField or WaterField],PuyoPuyo[F: TsuField or WaterField],Goal	proc init[F: TsuField or WaterField](T: type NazoPuyo[F]; puyoPuyo: PuyoPuyo[F];\n                                goal: Goal): T:type		34
 nim	init	pon2/core/nazopuyo.html#init,typeNazoPuyo[F: TsuField or WaterField]	proc init[F: TsuField or WaterField](T: type NazoPuyo[F]): T:type		39
-nim	mark	pon2/core/nazopuyo.html#mark,NazoPuyo[F: TsuField or WaterField],int	proc mark[F: TsuField or WaterField](nazo: NazoPuyo[F]; endStepIndex = -1): MarkResult		53
-nim	`$`	pon2/core/nazopuyo.html#$,NazoPuyo[F: TsuField or WaterField]	proc `$`[F: TsuField or WaterField](self: NazoPuyo[F]): string		185
-nim	parseNazoPuyo	pon2/core/nazopuyo.html#parseNazoPuyo,string	proc parseNazoPuyo[F: TsuField or WaterField](str: string): StrErrorResult[\n    NazoPuyo[F]]		188
-nim	toUriQuery	pon2/core/nazopuyo.html#toUriQuery,NazoPuyo[F: TsuField or WaterField]	proc toUriQuery[F: TsuField or WaterField](self: NazoPuyo[F]; fqdn = Pon2): StrErrorResult[\n    string]		237
-nim	parseNazoPuyo	pon2/core/nazopuyo.html#parseNazoPuyo,string,SimulatorFqdn	proc parseNazoPuyo[F: TsuField or WaterField](query: string; fqdn: SimulatorFqdn): StrErrorResult[\n    NazoPuyo[F]]		287
+nim	mark	pon2/core/nazopuyo.html#mark,NazoPuyo[F: TsuField or WaterField],int	proc mark[F: TsuField or WaterField](self: NazoPuyo[F]; endStepIndex = -1): MarkResult		53
+nim	`$`	pon2/core/nazopuyo.html#$,NazoPuyo[F: TsuField or WaterField]	proc `$`[F: TsuField or WaterField](self: NazoPuyo[F]): string		175
+nim	parseNazoPuyo	pon2/core/nazopuyo.html#parseNazoPuyo,string	proc parseNazoPuyo[F: TsuField or WaterField](str: string): StrErrorResult[\n    NazoPuyo[F]]		178
+nim	toUriQuery	pon2/core/nazopuyo.html#toUriQuery,NazoPuyo[F: TsuField or WaterField]	proc toUriQuery[F: TsuField or WaterField](self: NazoPuyo[F]; fqdn = Pon2): StrErrorResult[\n    string]		226
+nim	parseNazoPuyo	pon2/core/nazopuyo.html#parseNazoPuyo,string,SimulatorFqdn	proc parseNazoPuyo[F: TsuField or WaterField](query: string; fqdn: SimulatorFqdn): StrErrorResult[\n    NazoPuyo[F]]		276
 nimgrp	init	pon2/core/nazopuyo.html#init-procs-all	proc		34
-nimgrp	parsenazopuyo	pon2/core/nazopuyo.html#parseNazoPuyo-procs-all	proc		188
+nimgrp	parsenazopuyo	pon2/core/nazopuyo.html#parseNazoPuyo-procs-all	proc		178

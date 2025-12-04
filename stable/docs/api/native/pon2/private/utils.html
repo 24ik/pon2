@@ -66,6 +66,14 @@
   <li><a class="reference" href="#rotateInc%2CT" title="rotateInc[T: Ordinal](x: var T)">rotateInc[T: Ordinal](x: var T)</a></li>
 
 </ul>
+<ul class="simple nested-toc-section">rotatePred
+  <li><a class="reference" href="#rotatePred%2CT" title="rotatePred[T: Ordinal](x: T): T">rotatePred[T: Ordinal](x: T): T</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">rotateSucc
+  <li><a class="reference" href="#rotateSucc%2CT" title="rotateSucc[T: Ordinal](x: T): T">rotateSucc[T: Ordinal](x: T): T</a></li>
+
+</ul>
 <ul class="simple nested-toc-section">toggle
   <li><a class="reference" href="#toggle%2Cbool" title="toggle(x: var bool)">toggle(x: var bool)</a></li>
 
@@ -114,6 +122,28 @@
 </div>
 
 </div>
+<div id="rotatePred-procs-all">
+  <div id="rotatePred,T">
+  <dt><pre><span class="Keyword">func</span> <a href="#rotatePred%2CT"><span class="Identifier">rotatePred</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Identifier">Ordinal</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Returns the predecessor of <tt class="docutils literal"><span class="pre"><span class="Identifier">x</span></span></tt>. If <tt class="docutils literal"><span class="pre"><span class="Identifier">x</span></span></tt> is <tt class="docutils literal"><span class="pre"><span class="Identifier">T</span><span class="Operator">.</span><span class="Identifier">low</span></span></tt>, returns <tt class="docutils literal"><span class="pre"><span class="Identifier">T</span><span class="Operator">.</span><span class="Identifier">high</span></span></tt>.
+    
+  </dd>
+</div>
+
+</div>
+<div id="rotateSucc-procs-all">
+  <div id="rotateSucc,T">
+  <dt><pre><span class="Keyword">func</span> <a href="#rotateSucc%2CT"><span class="Identifier">rotateSucc</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Identifier">Ordinal</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Returns the successor of <tt class="docutils literal"><span class="pre"><span class="Identifier">x</span></span></tt>. If <tt class="docutils literal"><span class="pre"><span class="Identifier">x</span></span></tt> is <tt class="docutils literal"><span class="pre"><span class="Identifier">T</span><span class="Operator">.</span><span class="Identifier">high</span></span></tt>, returns <tt class="docutils literal"><span class="pre"><span class="Identifier">T</span><span class="Operator">.</span><span class="Identifier">low</span></span></tt>.
+    
+  </dd>
+</div>
+
+</div>
 <div id="toggle-procs-all">
   <div id="toggle,bool">
   <dt><pre><span class="Keyword">func</span> <a href="#toggle%2Cbool"><span class="Identifier">toggle</span></a><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">bool</span><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
@@ -135,7 +165,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-16 01:57:13 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-04 07:35:06 UTC</small>
       </div>
     </div>
   </div>
