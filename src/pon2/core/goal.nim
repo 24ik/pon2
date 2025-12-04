@@ -180,7 +180,7 @@ const
   GoalSep = '&'
 
   ExactPlaceholder = "<EXACT>"
-  AtleastPlaceholder = "<ATLEAST>"
+  AtLeastPlaceholder = "<ATLEAST>"
   ExactStr = "ちょうど"
   AtLeastStr = "以上"
 

@@ -364,11 +364,11 @@ when isMainModule:
 
     proc runGenerator(
         count = 5,
-        rule = 0,
+        rule = 1,
         goalKindOpt = 1,
-        goalColor = 0,
+        goalColor = 1,
         goalVal = 3,
-        goalValOperator = 0,
+        goalValOperator = 1,
         goalClearColorOpt = 0,
         moveCount = 2,
         colorCount = 2,
@@ -413,19 +413,19 @@ when isMainModule:
         stepCrossRotate = sc.mapIt it.pred
 
       let errorMsg =
-        if rule notin 0 .. Rule.high.ord:
+        if rule notin 1 .. Rule.high.ord.succ:
           "ルールが不正です．"
         elif goalKindOpt notin 0 .. GoalKind.high.ord.succ:
           "クリア条件の種類が不正です．"
-        elif goalColor notin 0 .. GoalColor.high.ord:
+        elif goalColor notin 1 .. GoalColor.high.ord.succ:
           "クリア条件の色が不正です．"
-        elif goalValOperator notin 0 .. GoalValOperator.high.ord:
+        elif goalValOperator notin 1 .. GoalValOperator.high.ord.succ:
           "クリア条件の値比較の演算子が不正です．"
         elif goalClearColorOpt notin 0 .. GoalColor.high.ord.succ:
           "全消し条件の色が不正です．"
         elif heights.len != Width:
           "高さ指定が不正です．"
-        elif puyoCountColor < 0 and goalKindOpt.succ != Chain.ord:
+        elif puyoCountColor < 0 and goalKindOpt.pred != Chain.ord:
           "連鎖問題でない場合は色ぷよ数の指定が必要です．"
         else:
           ""
@@ -453,7 +453,7 @@ when isMainModule:
         heightPositives = Opt[array[Col, bool]].ok positives
 
       let
-        rule2 = rule.Rule
+        rule2 = rule.pred.Rule
         puyoCountColor2 =
           if puyoCountColor < 0:
             goalVal * 4
@@ -476,18 +476,16 @@ when isMainModule:
           Goal(
             mainOpt: (
               if goalKindOpt == 0: Opt[GoalMain].err
-              else: Opt[GoalMain].ok GoalMain(
-                kind: goalKindOpt.pred.GoalKind,
-                color: goalColor.GoalColor,
-                val: goalVal,
-                valOperator: goalValOperator.GoalValOperator,
+              else: Opt[GoalMain].ok GoalMain.init(
+                goalKindOpt.pred.GoalKind, goalColor.pred.GoalColor, goalVal,
+                goalValOperator.pred.GoalValOperator,
               )
             ),
             clearColorOpt: (
               if goalClearColorOpt == 0:
                 Opt[GoalColor].err
               else:
-                Opt[GoalColor].ok(goalClearColorOpt.pred.GoalColor)
+                Opt[GoalColor].ok goalClearColorOpt.pred.GoalColor
             ),
           ),
           moveCount,
@@ -604,15 +602,15 @@ $subcmds""",
         },
         help = {
           "count": "生成数",
-          "rule": "ルール（0:通 1:水中）",
+          "rule": "ルール（1:通 2:水中）",
           "goalKindOpt":
             "クリア条件の種類（0:メイン条件なし 1:n連鎖 2:n色同時 3:n個同時 4:n箇所 5:n連結 6:累計n色 7:累計n個）",
           "goalColor":
-            "クリア条件の色（0:全 1:赤 2:緑 3:青 4:黄 5:紫 6:お邪魔 7:色）",
+            "クリア条件の色（1:全 2:赤 3:緑 4:青 5:黄 6:紫 7:お邪魔 8:色）",
           "goalVal": "クリア条件の数",
-          "goalValOperator": "クリア条件の演算子（0:ちょうど 1:以上）",
+          "goalValOperator": "クリア条件の演算子（1:ちょうど 2:以上）",
           "goalClearColorOpt":
-            "全消し条件の色（0:全 1:赤 2:緑 3:青 4:黄 5:紫 6:お邪魔 7:色）",
+            "全消し条件の色（0: 全消し条件なし 1:全 2:赤 3:緑 4:青 5:黄 6:紫 7:お邪魔 8:色）",
           "moveCount": "手数",
           "colorCount": "色数",
           "heights": "高さ比率（例：「012210」「0---00」）",
