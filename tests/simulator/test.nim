@@ -1388,3 +1388,5 @@ rb|"""
       StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_rb..&steps=rb34&goal=0_0_1_0_".parseUri
     check simulator.toExportUri ==
       StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps=rb&goal=0_0_1_0_".parseUri
+    check simulator.toExportUri(clearPlacements = false) ==
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps=rb34&goal=0_0_1_0_".parseUri

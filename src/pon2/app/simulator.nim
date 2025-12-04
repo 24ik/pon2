@@ -1194,9 +1194,16 @@ func toExportUri*(
     self: Simulator, viewer = true, clearPlacements = true, fqdn = Pon2
 ): StrErrorResult[Uri] =
   ## Returns the URI of the simulator with any moves reset.
-  var sim = self
+  var simulator = self
 
-  sim.undoAll
-  sim.mode = if viewer: ViewerPlay else: EditorPlay
+  simulator.undoAll
+  simulator.mode = if viewer: ViewerPlay else: EditorPlay
 
-  sim.toUri(clearPlacements, fqdn)
+  if not clearPlacements:
+    let originalSteps = self.nazoPuyoWrap.unwrap:
+      it.puyoPuyo.steps
+
+    simulator.nazoPuyoWrap.unwrap:
+      it.puyoPuyo.steps.assign originalSteps
+
+  simulator.toUri(clearPlacements, fqdn)
