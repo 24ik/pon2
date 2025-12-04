@@ -31,6 +31,7 @@ const
   GhostColor* = rgb(200, 200, 200).color
   WaterColor* = rgb(135, 248, 255).color
   DefaultColor* = rgb(225, 225, 225).color
+  DeadColor* = hsl(348, 100, 85).color
 
   CounterStyleColor = rgb(255, 140, 0).color
   TranslucentStyleColor = rgba(0, 0, 0, 16).color

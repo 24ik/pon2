@@ -24,14 +24,18 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper, row: Row, col: Col, editable: bool
   ): Color =
     ## Returns the cell's background color.
+    let rule = self.derefSimulator(helper).nazoPuyoWrap.rule
+
     if editable and not helper.mobile and self.derefSimulator(helper).editData.focusField and
         self.derefSimulator(helper).editData.field == (row, col):
       SelectColor
     elif row == Row.low:
       GhostColor
-    elif row.ord + WaterHeight >= Height and
-        self.derefSimulator(helper).nazoPuyoWrap.rule == Water:
+    elif rule == Water and row.ord + WaterHeight >= Height:
       WaterColor
+    elif (rule == Tsu and row == Row1 and col == Col2) or
+        (rule == Water and row.ord == AirHeight.pred):
+      DeadColor
     else:
       DefaultColor
 
