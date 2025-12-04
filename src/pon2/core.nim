@@ -18,15 +18,17 @@
 ## - [step](./core/step.html)
 ##
 ## Compile Options:
-## | Option                            | Description                            | Default          |
-## | --------------------------------- | -------------------------------------- | ---------------- |
-## | `-d:pon2.waterheight=<int>`       | Height of the water.                   | `8`              |
-## | `-d:pon2.fqdn=<str>`              | FQDN of the web simulator.             | `24ik.github.io` |
-## | `-d:pon2.garbagerate.tsu=<int>`   | Garbage rate in Tsu rule.              | `70`             |
-## | `-d:pon2.garbagerate.water=<int>` | Garbage rate in Water rule.            | `90`             |
-## | `-d:pon2.simd=<int>`              | SIMD level. (1: SSE4.2, 0: None)       | 1                |
-## | `-d:pon2.bmi=<int>`               | BMI level. (2: BMI2, 1: BMI1, 0: None) | 2                |
-## | `-d:pon2.clmul=<bool>`            | Uses CLMUL.                            | `true`           |
+## | Option                                   | Description                            | Default          |
+## | ---------------------------------------- | -------------------------------------- | ---------------- |
+## | `-d:pon2.waterheight=<int>`              | Height of the water.                   | `8`              |
+## | `-d:pon2.fqdn=<str>`                     | FQDN of the web simulator.             | `24ik.github.io` |
+## | `-d:pon2.garbagerate.tsu=<int>`          | Garbage rate in Tsu rule.              | `70`             |
+## | `-d:pon2.garbagerate.spinner=<int>`      | Garbage rate in Spinner rule.          | `120`            |
+## | `-d:pon2.garbagerate.crossspinner=<int>` | Garbage rate in Cross Spinner rule.    | `120`            |
+## | `-d:pon2.garbagerate.water=<int>`        | Garbage rate in Water rule.            | `90`             |
+## | `-d:pon2.simd=<int>`                     | SIMD level. (1: SSE4.2, 0: None)       | 1                |
+## | `-d:pon2.bmi=<int>`                      | BMI level. (2: BMI2, 1: BMI1, 0: None) | 2                |
+## | `-d:pon2.clmul=<bool>`                   | Uses CLMUL.                            | `true`           |
 ##
 
 {.push raises: [].}

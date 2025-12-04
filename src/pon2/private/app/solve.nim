@@ -16,10 +16,10 @@ when defined(js) or defined(nimsuggest):
 
   export core, results2
 
-type SolveNode*[F: TsuField or WaterField] = object ## Node of solutions search tree.
+type SolveNode* = object ## Node of solutions search tree.
   depth: int
 
-  field: F
+  field: Field
   moveResult: MoveResult
 
   popColors: set[Cell]
@@ -32,10 +32,10 @@ type SolveNode*[F: TsuField or WaterField] = object ## Node of solutions search 
 # Constructor
 # ------------------------------------------------
 
-func init[F: TsuField or WaterField](
-    T: type SolveNode[F],
+func init(
+    T: type SolveNode,
     depth: int,
-    field: F,
+    field: Field,
     moveResult: MoveResult,
     popColors: set[Cell],
     popCount: int,
@@ -51,9 +51,7 @@ func init[F: TsuField or WaterField](
     stepsCounts: stepsCounts,
   )
 
-func init*[F: TsuField or WaterField](
-    T: type SolveNode[F], puyoPuyo: PuyoPuyo[F]
-): T {.inline, noinit.} =
+func init*(T: type SolveNode, puyoPuyo: PuyoPuyo): T {.inline, noinit.} =
   var fieldCounts {.noinit.}, stepsCounts {.noinit.}: array[Cell, int]
   fieldCounts[Cell.None].assign 0
   stepsCounts[Cell.None].assign 0
@@ -74,9 +72,7 @@ const
     DummyCell,
   ]
 
-func child[F: TsuField or WaterField](
-    self: SolveNode[F], goal: Goal, step: Step
-): SolveNode[F] {.inline, noinit.} =
+func child(self: SolveNode, goal: Goal, step: Step): SolveNode {.inline, noinit.} =
   ## Returns the child node.
   ## This function requires that the field is settled.
   # move
@@ -166,14 +162,14 @@ func child[F: TsuField or WaterField](
       let cell = self.field[Row0, col]
       childFieldCounts[cell].dec (cell != None).int
 
-  SolveNode[F].init(
+  SolveNode.init(
     self.depth.succ, childField, moveResult, childPopColors, childPopCount,
     childFieldCounts, childStepsCounts,
   )
 
-func children[F: TsuField or WaterField](
-    self: SolveNode[F], goal: Goal, step: Step
-): seq[tuple[node: SolveNode[F], optPlacement: OptPlacement]] {.inline, noinit.} =
+func children(
+    self: SolveNode, goal: Goal, step: Step
+): seq[tuple[node: SolveNode, optPlacement: OptPlacement]] {.inline, noinit.} =
   ## Returns the children of the node.
   ## This function requires that the field is settled.
   ## `optPlacement` is set to `NonePlacement` if the edge is non-`PairPlacement`.
@@ -193,22 +189,16 @@ func children[F: TsuField or WaterField](
 # Accept
 # ------------------------------------------------
 
-func cellCount[F: TsuField or WaterField](
-    self: SolveNode[F], cell: Cell
-): int {.inline, noinit.} =
+func cellCount(self: SolveNode, cell: Cell): int {.inline, noinit.} =
   ## Returns the number of `cell` in the node.
   self.fieldCounts[cell] + self.stepsCounts[cell]
 
-func garbagesCount[F: TsuField or WaterField](
-    self: SolveNode[F]
-): int {.inline, noinit.} =
+func garbagesCount(self: SolveNode): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos in the node.
   (self.fieldCounts[Hard] + self.fieldCounts[Garbage]) +
     (self.stepsCounts[Hard] + self.stepsCounts[Garbage])
 
-func isAccepted[F: TsuField or WaterField](
-    self: SolveNode[F], goal: Goal
-): bool {.inline, noinit.} =
+func isAccepted(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   # check clear
   if goal.clearColorOpt.isOk:
@@ -275,9 +265,7 @@ cmovl %2, %0
     else:
       result.assign x.filter4Nim
 
-func canPrune[F: TsuField or WaterField](
-    self: SolveNode[F], goal: Goal
-): bool {.inline, noinit.} =
+func canPrune(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
   ## Returns `true` if the node is unsolvable.
   # clear
   if goal.clearColorOpt.isOk:
@@ -418,10 +406,10 @@ func canPrune[F: TsuField or WaterField](
 # Child - Depth
 # ------------------------------------------------
 
-func childrenAtDepth*[F: TsuField or WaterField](
-    self: SolveNode[F],
+func childrenAtDepth*(
+    self: SolveNode,
     targetDepth: int,
-    nodes: var seq[SolveNode[F]],
+    nodes: var seq[SolveNode],
     optPlacementsSeq: var seq[seq[OptPlacement]],
     answers: var seq[seq[OptPlacement]],
     moveCount: int,
@@ -444,11 +432,11 @@ func childrenAtDepth*[F: TsuField or WaterField](
     childCount = children.len
 
   var
-    nodesSeq = newSeqOfCap[seq[SolveNode[F]]](childCount)
+    nodesSeq = newSeqOfCap[seq[SolveNode]](childCount)
     optPlacementsSeqSeq = newSeqOfCap[seq[seq[OptPlacement]]](childCount)
     answersSeq = newSeqOfCap[seq[seq[OptPlacement]]](childCount)
   for _ in 1 .. childCount:
-    nodesSeq.add newSeqOfCap[SolveNode[F]](static(Placement.enumLen))
+    nodesSeq.add newSeqOfCap[SolveNode](static(Placement.enumLen))
     optPlacementsSeqSeq.add newSeqOfCap[seq[OptPlacement]](static(Placement.enumLen))
     answersSeq.add newSeqOfCap[seq[OptPlacement]](static(Placement.enumLen))
 
@@ -501,8 +489,8 @@ func childrenAtDepth*[F: TsuField or WaterField](
 # Solve
 # ------------------------------------------------
 
-func solveSingleThread*[F: TsuField or WaterField](
-    self: SolveNode[F],
+func solveSingleThread*(
+    self: SolveNode,
     answers: var seq[seq[OptPlacement]],
     moveCount: int,
     calcAllAnswers: bool,
@@ -580,8 +568,8 @@ when defined(js) or defined(nimsuggest):
     strs.add $self.hardToGarbageCount
     strs.add self.detailPopCounts.mapIt(it.map((count: int) => $count).join Sep1).join Sep2
     strs.add self.detailHardToGarbageCount.mapIt($it).join Sep1
-    if self.fullPopCounts.isOk:
-      strs.add self.fullPopCounts.unsafeValue.mapIt(
+    if self.fullPopCountsOpt.isOk:
+      strs.add self.fullPopCountsOpt.unsafeValue.mapIt(
         it.map((counts: seq[int]) => counts.map((count: int) => $count).join Sep1).join Sep2
       ).join Sep3
     else:
@@ -597,13 +585,12 @@ when defined(js) or defined(nimsuggest):
     ## Returns the string representation of the array.
     self.mapIt($it).join Sep1
 
-  func toStrs*[F: TsuField or WaterField](
-      self: SolveNode[F], goal: Goal, steps: Steps
+  func toStrs*(
+      self: SolveNode, goal: Goal, steps: Steps
   ): seq[string] {.inline, noinit.} =
     ## Returns the string representations of the node.
-    var strs = newSeqOfCap[string](10)
+    var strs = newSeqOfCap[string](9)
 
-    strs.add $self.field.rule
     strs.add $goal.toUriQuery.unsafeValue
     strs.add $steps.toUriQuery.unsafeValue
 
@@ -704,47 +691,40 @@ when defined(js) or defined(nimsuggest):
 
   func parseSolveInfo*(
       strs: seq[string]
-  ): StrErrorResult[tuple[rule: Rule, goal: Goal, steps: Steps]] {.inline, noinit.} =
+  ): StrErrorResult[tuple[goal: Goal, steps: Steps]] {.inline, noinit.} =
     ## Returns the rule of the solve node converted from the string representations.
     let errorMsg = "Invalid solve info: {strs}".fmt
 
-    if strs.len != 10:
+    if strs.len != 9:
       return err errorMsg
 
     ok (
-      ?strs[0].parseRule.context errorMsg,
-      ?strs[1].parseGoal(Pon2).context errorMsg,
-      ?strs[2].parseSteps(Pon2).context errorMsg,
+      ?strs[0].parseGoal(Pon2).context errorMsg,
+      ?strs[1].parseSteps(Pon2).context errorMsg,
     )
 
-  func parseSolveNode*[F: TsuField or WaterField](
+  func parseSolveNode*(
       strs: seq[string]
-  ): StrErrorResult[SolveNode[F]] {.inline, noinit.} =
+  ): StrErrorResult[SolveNode] {.inline, noinit.} =
     ## Returns the solve node converted from the string representations.
     let errorMsg = "Invalid node: {strs}".fmt
 
-    if strs.len != 10:
+    if strs.len != 9:
       return err errorMsg
 
-    let depth = ?strs[3].parseInt.context errorMsg
-
     let
-      field =
-        when F is TsuField:
-          ?strs[4].parseTsuField(Pon2).context errorMsg
-        else:
-          ?strs[4].parseWaterField(Pon2).context errorMsg
-      moveResult = ?strs[5].parseMoveResult.context errorMsg
+      depth = ?strs[2].parseInt.context errorMsg
 
-    let
-      popColors = ?strs[6].parseCells.context errorMsg
-      popCount = ?strs[7].parseInt.context errorMsg
+      field = ?strs[3].parseField(Pon2).context errorMsg
+      moveResult = ?strs[4].parseMoveResult.context errorMsg
 
-    let
-      fieldCounts = ?strs[8].parseCounts.context errorMsg
-      stepsCounts = ?strs[9].parseCounts.context errorMsg
+      popColors = ?strs[5].parseCells.context errorMsg
+      popCount = ?strs[6].parseInt.context errorMsg
 
-    ok SolveNode[F].init(
+      fieldCounts = ?strs[7].parseCounts.context errorMsg
+      stepsCounts = ?strs[8].parseCounts.context errorMsg
+
+    ok SolveNode.init(
       depth, field, moveResult, popColors, popCount, fieldCounts, stepsCounts
     )
 

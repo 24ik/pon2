@@ -7,14 +7,12 @@
 {.experimental: "views".}
 
 import ../[core]
-import ../private/[algorithm, core, macros]
+import ../private/[algorithm, core]
 import ../private/app/[solve]
 
 export core
 
 when defined(js) or defined(nimsuggest):
-  import ../private/[dom, strutils]
-
   when not defined(pon2.build.worker):
     import std/[asyncjs, jsconsole, sequtils, sugar]
     import ../private/[assign, webworkers]
@@ -33,8 +31,8 @@ type SolveAnswer* = seq[OptPlacement]
   ## Elements corresponding to non-`PairPlacement` steps are set to `NonePlacement`.
 
 when not defined(js):
-  proc solveSingleThread[F: TsuField or WaterField](
-      self: SolveNode[F],
+  proc solveSingleThread(
+      self: SolveNode,
       answers: ptr seq[SolveAnswer],
       moveCount: int,
       calcAllAnswers: bool,
@@ -80,8 +78,8 @@ when not defined(js):
     runningNodeIndices.excl finishNodeIndices
     false
 
-  proc solveMultiThread[F: TsuField or WaterField](
-      self: SolveNode[F],
+  proc solveMultiThread(
+      self: SolveNode,
       answers: var seq[SolveAnswer],
       moveCount: int,
       calcAllAnswers: bool,
@@ -100,7 +98,7 @@ when not defined(js):
     const TargetDepth = 3
 
     var
-      nodes = newSeq[SolveNode[F]]()
+      nodes = newSeq[SolveNode]()
       optPlacementsSeq = newSeq[seq[OptPlacement]]()
     self.childrenAtDepth TargetDepth,
       nodes, optPlacementsSeq, answers, moveCount, calcAllAnswers, goal, steps
@@ -147,9 +145,7 @@ when not defined(js):
 
     answers &= answersSeq.concat
 
-proc solve*[F: TsuField or WaterField](
-    self: NazoPuyo[F], calcAllAnswers = true
-): seq[SolveAnswer] =
+proc solve*(self: NazoPuyo, calcAllAnswers = true): seq[SolveAnswer] =
   ## Solves the Nazo Puyo.
   ## A single thread is used on JS backend; otherwise multiple threads are used.
   ## This function requires that the field is settled.
@@ -157,7 +153,7 @@ proc solve*[F: TsuField or WaterField](
     return @[]
 
   let
-    root = SolveNode[F].init self.puyoPuyo
+    root = SolveNode.init self.puyoPuyo
     moveCount = self.puyoPuyo.steps.len
   var answers = newSeq[SolveAnswer]()
 
@@ -213,8 +209,8 @@ when defined(js) or defined(nimsuggest):
             progressRef[].now.inc
       )
 
-    proc asyncSolve*[F: TsuField or WaterField](
-        self: NazoPuyo[F],
+    proc asyncSolve*(
+        self: NazoPuyo,
         progressRef: ref tuple[now, total: int] = nil,
         calcAllAnswers = true,
     ): Future[seq[SolveAnswer]] {.async.} =
@@ -232,10 +228,10 @@ when defined(js) or defined(nimsuggest):
 
         return newSeq[SolveAnswer]()
 
-      let rootNode = SolveNode[F].init self.puyoPuyo
+      let rootNode = SolveNode.init self.puyoPuyo
 
       var
-        nodes = newSeq[SolveNode[F]]()
+        nodes = newSeq[SolveNode]()
         optPlacementsSeq = newSeq[seq[OptPlacement]]()
         answers = newSeq[SolveAnswer]()
 
@@ -280,3 +276,33 @@ when defined(js) or defined(nimsuggest):
         await future
 
       return answers & answersSeqRef[].concat
+
+when isMainModule:
+  let nazoPuyo =
+    """
+12連鎖以上するべし
+======
+[通]
+......
+....ob
+....ob
+....ob
+bbyyog
+bgryog
+ggrrog
+bbggoy
+brrgoy
+yryyoy
+ybbyor
+ybggor
+rrrgor
+------
+bg|
+rg|
+ry|
+by|
+yb|
+yr|
+gr|
+gb|""".parseNazoPuyo.unsafeValue
+  echo nazoPuyo

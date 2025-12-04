@@ -4,7 +4,9 @@
 {.experimental: "views".}
 
 import std/[monotimes, sequtils, stats, strformat, sugar, times]
-import ../src/pon2/[app]
+# import ../src/pon2/[app]
+import ../src/pon2/[core]
+import ../src/pon2/app/[solve]
 import ../src/pon2/private/[algorithm, math, results2]
 
 func select(list: seq[Duration], n: int): Duration =
@@ -107,6 +109,7 @@ when isMainModule:
   block:
     let field =
       """
+[通]
 .o....
 .o..o.
 .o.oo.
@@ -119,50 +122,51 @@ when isMainModule:
 .o.oo.
 .o.oo.
 .o.oo.
-.o.oo.""".parseTsuField.unsafeValue
+.o.oo.""".parseField.unsafeValue
 
     "invalidPlacements".measureExecTime:
       discard field.invalidPlacements
 
   "place (Tsu)".measureExecTime:
-    var field = TsuField.init
+    var field = Field.init
   do:
     field.place RedGreen, Right2
 
   "place (Water)".measureExecTime:
-    var field = WaterField.init
+    var field = Field.init Rule.Water
   do:
     field.place RedGreen, Right2
 
   "pop".measureExecTime:
-    var field = TsuField.init
+    var field = Field.init
   do:
     discard field.pop
 
   "dropGarbages (Tsu)".measureExecTime:
-    var field = TsuField.init
+    var field = Field.init
   do:
     field.dropGarbages [Col0: 0, 1, 2, 3, 4, 5], false
 
   "dropGarbages (Water)".measureExecTime:
-    var field = WaterField.init
+    var field = Field.init Rule.Water
   do:
     field.dropGarbages [Col0: 0, 1, 2, 3, 4, 5], false
 
   "settle (Tsu)".measureExecTime:
-    var field = TsuField.init
+    var field = Field.init
   do:
     field.settle
 
   "settle (Water)".measureExecTime:
-    var field = WaterField.init
+    var field = Field.init Rule.Water
   do:
     field.settle
 
   block:
     let
-      field19 = parseTsuField(
+      field19 =
         """
+[通]
 by.yrr
 gb.gry
 rbgyyr
@@ -175,8 +179,7 @@ rggbyb
 gybgbb
 rgybgy
 rgybgy
-rgybgy"""
-      ).unsafeValue
+rgybgy""".parseField.unsafeValue
       pair = BlueGreen
       plcmt = Up2
 
@@ -192,8 +195,9 @@ rgybgy"""
 
   block:
     let
-      field18 = parseWaterField(
+      field18 =
         """
+[すいちゅう]
 .....g
 .rbrbr
 gbrbrb
@@ -207,8 +211,7 @@ bypygg
 bgrbrg
 bgrbrp
 rgrbrp
-pbgrbr"""
-      ).unsafeValue
+pbgrbr""".parseField.unsafeValue
       pair = GreenBlue
       plcmt = Up0
 
@@ -223,10 +226,11 @@ pbgrbr"""
       discard field.move(pair, plcmt, true)
 
   "solve (Rashomon)".measureExecTime:
-    let nazo = parseNazoPuyo[TsuField](
+    let nazoPuyo =
       """
 ぷよ全て消すべし
 ======
+[通]
 ......
 ......
 ......
@@ -246,16 +250,16 @@ bg|
 by|
 by|
 rg|
-ry|"""
-    ).unsafeValue
+ry|""".parseNazoPuyo.unsafeValue
   do:
-    discard nazo.solve
+    discard nazoPuyo.solve
 
   "solve (Galaxy)".measureExecTime:
-    let nazo = parseNazoPuyo[TsuField](
+    let nazoPuyo =
       """
 12連鎖以上するべし
 ======
+[通]
 ......
 ....ob
 ....ob
@@ -277,7 +281,6 @@ by|
 yb|
 yr|
 gr|
-gb|"""
-    ).unsafeValue
+gb|""".parseNazoPuyo.unsafeValue
   do:
-    discard nazo.solve
+    discard nazoPuyo.solve

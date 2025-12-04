@@ -19,8 +19,6 @@ when defined(js) or defined(nimsuggest):
 
   export vdom
 
-  const RuleDescs: array[Rule, string] = ["", "すいちゅう"]
-
   proc toXLink[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
   ): Uri =
@@ -34,15 +32,15 @@ when defined(js) or defined(nimsuggest):
     var queries = newSeqOfCap[(string, string)](3)
     queries.add ("url", $self.derefSimulator(helper).toExportUri.unsafeValue)
 
-    self.derefSimulator(helper).nazoPuyoWrap.unwrap:
-      if it.goal != NoneGoal:
-        let
-          ruleDesc = RuleDescs[it.puyoPuyo.field.rule]
-          moveCount = it.puyoPuyo.steps.len
-          goalDesc = $it.goal
+    let goal = self.derefSimulator(helper).nazoPuyo.goal
+    if goal != NoneGoal:
+      let
+        ruleDesc = $self.derefSimulator(helper).rule
+        moveCount = self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps.len
+        goalDesc = $goal
 
-        queries.add ("text", "{ruleDesc}{moveCount}手・{goalDesc}".fmt)
-        queries.add ("hashtags", "なぞぷよ")
+      queries.add ("text", "{ruleDesc}{moveCount}手・{goalDesc}".fmt)
+      queries.add ("hashtags", "なぞぷよ")
 
     uri.query.assign queries.encodeQuery
 

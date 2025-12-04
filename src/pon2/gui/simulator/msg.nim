@@ -25,14 +25,14 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper
   ): string =
     ## Returns the text message.
-    self.derefSimulator(helper).nazoPuyoWrap.unwrap:
-      if it.goal == NoneGoal:
-        if self.derefSimulator(helper).state == Stable and it.puyoPuyo.field.isDead:
-          $MarkResult.Dead
-        else:
-          ""
+    if self.derefSimulator(helper).nazoPuyo.goal == NoneGoal:
+      if self.derefSimulator(helper).state == Stable and
+          self.derefSimulator(helper).nazoPuyo.puyoPuyo.field.isDead:
+        $MarkResult.Dead
       else:
-        $helper.simulator.markResult
+        ""
+    else:
+      $helper.simulator.markResult
 
   proc score[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
@@ -63,8 +63,7 @@ when defined(js) or defined(nimsuggest):
     let
       score = self.score helper
       noticeCounts = self.noticeCounts(helper, score)
-      showNotice = self.derefSimulator(helper).nazoPuyoWrap.unwrap:
-        it.goal == NoneGoal
+      showNotice = self.derefSimulator(helper).nazoPuyo.goal == NoneGoal
 
     buildHtml tdiv:
       if showNotice:

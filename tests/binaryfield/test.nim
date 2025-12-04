@@ -112,7 +112,7 @@ xxxxxx
 # Operator
 # ------------------------------------------------
 
-block: # `+`, `-`, `*`, `xor`, `+=`, `-=`, `*=`, sum, prod
+block: # `+`, `-`, `*`, `xor`, `+=`, `-=`, `*=`, sum, product
   let
     f1 =
       """
@@ -174,7 +174,7 @@ xxxxxx
 ......
 ......
 ......""".toBinaryField
-    fProd =
+    fProduct =
       """
 x.....
 xx....
@@ -207,7 +207,7 @@ x.....
 
   check f1 + f2 == fSum
   check f1 - f2 == fDiff
-  check f1 * f2 == fProd
+  check f1 * f2 == fProduct
   check (f1 xor f2) == fXor
 
   var f3 = f1
@@ -220,18 +220,18 @@ x.....
 
   f3 = f1
   f3 *= f2
-  check f3 == fProd
+  check f3 == fProduct
 
-  check sum(f1, f2, fProd) == f1 + f2 + fProd
-  check sum(f1, f2, fProd, fDiff) == f1 + f2 + fProd + fDiff
-  check sum(f1, f2, fProd, fDiff, fXor) == f1 + f2 + fProd + fDiff + fXor
-  check sum(f1, f2, fProd, fDiff, fXor, f3) == f1 + f2 + fProd + fDiff + fXor + f3
-  check sum(f1, f2, fProd, fDiff, fXor, f3, BinaryField.init) ==
-    f1 + f2 + fProd + fDiff + fXor + f3 + BinaryField.init
-  check sum(f1, f2, fProd, fDiff, fXor, f3, BinaryField.init, BinaryField.initFloor) ==
-    f1 + f2 + fProd + fDiff + fXor + f3 + BinaryField.init + BinaryField.initFloor
+  check sum(f1, f2, fProduct) == f1 + f2 + fProduct
+  check sum(f1, f2, fProduct, fDiff) == f1 + f2 + fProduct + fDiff
+  check sum(f1, f2, fProduct, fDiff, fXor) == f1 + f2 + fProduct + fDiff + fXor
+  check sum(f1, f2, fProduct, fDiff, fXor, f3) == f1 + f2 + fProduct + fDiff + fXor + f3
+  check sum(f1, f2, fProduct, fDiff, fXor, f3, BinaryField.init) ==
+    f1 + f2 + fProduct + fDiff + fXor + f3 + BinaryField.init
+  check sum(f1, f2, fProduct, fDiff, fXor, f3, BinaryField.init, BinaryField.initFloor) ==
+    f1 + f2 + fProduct + fDiff + fXor + f3 + BinaryField.init + BinaryField.initFloor
 
-  check prod(f1, f2, fXor) == f1 * f2 * fXor
+  check product(f1, f2, fXor) == f1 * f2 * fXor
 
 # ------------------------------------------------
 # Keep

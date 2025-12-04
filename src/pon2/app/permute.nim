@@ -103,27 +103,27 @@ func allStepsSeq(
 # Permute
 # ------------------------------------------------
 
-proc permute*[F: TsuField or WaterField](
-    nazo: NazoPuyo[F],
+proc permute*(
+    self: NazoPuyo,
     fixIndices: openArray[int],
     allowDoubleNotLast, allowDoubleLast: bool,
-): seq[NazoPuyo[F]] =
+): seq[NazoPuyo] =
   ## Returns a sequence of Nazo Puyos that is obtained by permuting steps and has a
   ## unique answer.
   collect:
-    for steps in nazo.puyoPuyo.steps.allStepsSeq(
+    for steps in self.puyoPuyo.steps.allStepsSeq(
       fixIndices, allowDoubleNotLast, allowDoubleLast
     ):
-      var nazo2 = nazo
-      nazo2.puyoPuyo.steps.assign steps
+      var nazoPuyo = self
+      nazoPuyo.puyoPuyo.steps.assign steps
 
-      let answers = nazo2.solve(calcAllAnswers = false)
+      let answers = nazoPuyo.solve(calcAllAnswers = false)
       if answers.len == 1:
-        for stepIndex, step in nazo2.puyoPuyo.steps.mpairs:
+        for stepIndex, step in nazoPuyo.puyoPuyo.steps.mpairs:
           if step.kind == PairPlacement:
             step.optPlacement.assign answers[0][stepIndex]
 
-        nazo2
+        nazoPuyo
 
 # ------------------------------------------------
 # Permute - Async
@@ -131,36 +131,36 @@ proc permute*[F: TsuField or WaterField](
 
 when defined(js) or defined(nimsuggest):
   when not defined(pon2.build.worker):
-    proc asyncPermute*[F: TsuField or WaterField](
-        nazo: NazoPuyo[F],
+    proc asyncPermute*(
+        self: NazoPuyo,
         fixIndices: openArray[int],
         allowDoubleNotLast, allowDoubleLast: bool,
         progressRef: ref tuple[now, total: int] = nil,
-    ): Future[seq[NazoPuyo[F]]] {.async.} =
+    ): Future[seq[NazoPuyo]] {.async.} =
       ## Permutes the Nazo Puyo asynchronously with web workers.
       ## This function requires that the field is settled.
       let stepsSeq =
-        nazo.puyoPuyo.steps.allStepsSeq(fixIndices, allowDoubleNotLast, allowDoubleLast)
+        self.puyoPuyo.steps.allStepsSeq(fixIndices, allowDoubleNotLast, allowDoubleLast)
       if not progressRef.isNil:
         if stepsSeq.len == 0:
           progressRef[] = (1, 1)
         else:
           progressRef[] = (0, stepsSeq.len)
 
-      var nazos = newSeq[NazoPuyo[F]]()
+      var nazoPuyos = newSeq[NazoPuyo]()
       for steps in stepsSeq:
-        var nazo2 = nazo
-        nazo2.puyoPuyo.steps.assign steps
+        var nazoPuyo = self
+        nazoPuyo.puyoPuyo.steps.assign steps
 
-        let answers = await nazo2.asyncSolve(calcAllAnswers = false)
+        let answers = await nazoPuyo.asyncSolve(calcAllAnswers = false)
         if answers.len == 1:
-          for stepIndex, step in nazo2.puyoPuyo.steps.mpairs:
+          for stepIndex, step in nazoPuyo.puyoPuyo.steps.mpairs:
             if step.kind == PairPlacement:
               step.optPlacement.assign answers[0][stepIndex]
 
-          nazos.add nazo2
+          nazoPuyos.add nazoPuyo
 
         if not progressRef.isNil:
           progressRef[].now.inc
 
-      return nazos
+      return nazoPuyos

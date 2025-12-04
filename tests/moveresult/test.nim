@@ -13,15 +13,15 @@ let
   hardToGarbageCount = 3
   detailHardToGarbageCount = @[1, 2, 0]
 
-  detailArr1: array[Cell, int] = [0, 1, 0, 4, 0, 5, 0, 9]
-  detailArr2: array[Cell, int] = [0, 0, 0, 4, 4, 0, 0, 0]
-  detailArr3: array[Cell, int] = [0, 0, 12, 4, 0, 8, 0, 6]
-  detailPopCounts = @[detailArr1, detailArr2, detailArr3]
+  detailArray1: array[Cell, int] = [0, 1, 0, 4, 0, 5, 0, 9]
+  detailArray2: array[Cell, int] = [0, 0, 0, 4, 4, 0, 0, 0]
+  detailArray3: array[Cell, int] = [0, 0, 12, 4, 0, 8, 0, 6]
+  detailPopCounts = @[detailArray1, detailArray2, detailArray3]
 
-  fullArr1: array[Cell, seq[int]] = [@[], @[1], @[], @[4], @[], @[5], @[], @[4, 5]]
-  fullArr2: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[4], @[], @[], @[]]
-  fullArr3: array[Cell, seq[int]] = [@[], @[], @[4, 4, 4], @[4], @[], @[5], @[], @[6]]
-  fullPopCounts = @[fullArr1, fullArr2, fullArr3]
+  fullArray1: array[Cell, seq[int]] = [@[], @[1], @[], @[4], @[], @[5], @[], @[4, 5]]
+  fullArray2: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[4], @[], @[], @[]]
+  fullArray3: array[Cell, seq[int]] = [@[], @[], @[4, 4, 4], @[4], @[], @[5], @[], @[6]]
+  fullPopCounts = @[fullArray1, fullArray2, fullArray3]
 
   moveResult1 = MoveResult.init(
     chainCount, popCounts, hardToGarbageCount, detailPopCounts, detailHardToGarbageCount
@@ -43,7 +43,7 @@ block: # init
       hardToGarbageCount: hardToGarbageCount,
       detailPopCounts: detailPopCounts,
       detailHardToGarbageCount: detailHardToGarbageCount,
-      fullPopCounts: Opt[seq[array[Cell, seq[int]]]].err,
+      fullPopCountsOpt: Opt[seq[array[Cell, seq[int]]]].err,
     )
   check moveResult2 ==
     MoveResult(
@@ -52,12 +52,13 @@ block: # init
       hardToGarbageCount: hardToGarbageCount,
       detailPopCounts: detailPopCounts,
       detailHardToGarbageCount: detailHardToGarbageCount,
-      fullPopCounts: Opt[seq[array[Cell, seq[int]]]].ok fullPopCounts,
+      fullPopCountsOpt: Opt[seq[array[Cell, seq[int]]]].ok fullPopCounts,
     )
 
-  check MoveResult.init == MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
+  check MoveResult.init(false) == MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
   check MoveResult.init(true) ==
     MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[], @[])
+  check MoveResult.init == MoveResult.init true
 
 # ------------------------------------------------
 # Count
@@ -150,21 +151,18 @@ block: # connectionCounts
 # Score
 # ------------------------------------------------
 
-let scoreAns = 8660
+let scoreAnswer = 8660
 
 block: # score
   check moveResult1.score.isErr
-  check moveResult2.score == StrErrorResult[int].ok scoreAns
+  check moveResult2.score == StrErrorResult[int].ok scoreAnswer
 
 # ------------------------------------------------
 # Notice Garbage
 # ------------------------------------------------
 
 block: # noticeCounts
-  check moveResult1.noticeCounts(Tsu).isErr
-  check moveResult2.noticeCounts(Tsu) ==
-    StrErrorResult[array[Notice, int]].ok scoreAns.noticeCounts Tsu
-
-  check moveResult1.noticeCounts(Water).isErr
-  check moveResult2.noticeCounts(Water) ==
-    StrErrorResult[array[Notice, int]].ok scoreAns.noticeCounts Water
+  for rule in Rule:
+    check moveResult1.noticeCounts(rule).isErr
+    check moveResult2.noticeCounts(rule) ==
+      StrErrorResult[array[Notice, int]].ok scoreAnswer.noticeCounts rule

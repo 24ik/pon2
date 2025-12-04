@@ -3,7 +3,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, sets, sugar, unittest]
+import std/[sets, sugar, unittest]
 import ../../src/pon2/[core]
 import ../../src/pon2/app/[solve]
 
@@ -27,19 +27,16 @@ func toAnswers(strs: varargs[string]): HashSet[SolveAnswer] =
 
   answers
 
-proc tsuSolve(str: string, calcAllAnswers: static bool = true): HashSet[SolveAnswer] =
+proc solve(str: string, calcAllAnswers = true): HashSet[SolveAnswer] =
   ## Returns the answers of Tsu Nazo Puyo.
-  parseNazoPuyo[TsuField](str).unsafeValue.solve(calcAllAnswers).toHashSet
-
-proc waterSolve(str: string, calcAllAnswers: static bool = true): HashSet[SolveAnswer] =
-  ## Returns the answers of Water Nazo Puyo.
-  parseNazoPuyo[WaterField](str).unsafeValue.solve(calcAllAnswers).toHashSet
+  str.parseNazoPuyo.unsafeValue.solve(calcAllAnswers).toHashSet
 
 block: # solve
   block: # Chain
     check """
 ちょうど3連鎖するべし
 ======
+[通]
 ......
 ......
 ......
@@ -55,13 +52,14 @@ block: # solve
 .yyoo.
 ------
 ry|
-ry|""".tsuSolve ==
+ry|""".solve ==
       "4S3N".toAnswers
 
   block: # Color
     check """
 ちょうど2色同時に消すべし
 ======
+[だいかいてん]
 ......
 ......
 ......
@@ -77,13 +75,14 @@ ry|""".tsuSolve ==
 .gggp.
 ------
 gp|
-gp|""".tsuSolve ==
+gp|""".solve ==
       "656S".toAnswers
 
   block: # Count
     check """
 ぷよちょうど12個同時に消すべし
 ======
+[クロスかいてん]
 ......
 ......
 ......
@@ -99,13 +98,14 @@ rggb..
 rrgbb.
 ------
 rb|
-rg|""".tsuSolve ==
+rg|""".solve ==
       "3S32".toAnswers
 
   block: # Place
     check """
 ぷよちょうど2箇所で同時に消すべし
 ======
+[通]
 ......
 ......
 ......
@@ -121,13 +121,14 @@ y...y.
 yyryy.
 ------
 ry|
-ry|""".tsuSolve ==
+ry|""".solve ==
       "4S32".toAnswers
 
   block: # Connection
     check """
 ぷよちょうど7連結で消すべし
 ======
+[だいかいてん]
 ......
 ......
 ......
@@ -143,13 +144,14 @@ rrbb..
 gggbr.
 ------
 gg|
-bg|""".tsuSolve ==
+bg|""".solve ==
       "4N54".toAnswers
 
   block: # AccumColor
     check """
 累計ちょうど3色消すべし
 ======
+[クロスかいてん]
 ......
 ......
 ......
@@ -165,13 +167,14 @@ bg|""".tsuSolve ==
 .bgbrr
 ------
 bg|
-rg|""".tsuSolve ==
+rg|""".solve ==
       "3S65".toAnswers
 
   block: # AccumCount
     check """
 ぷよ累計ちょうど18個消すべし
 ======
+[通]
 ......
 ......
 ......
@@ -187,13 +190,14 @@ ooo...
 ooobbb
 ------
 yy|
-yg|""".tsuSolve ==
+yg|""".solve ==
       toAnswers("1N2S", "124N")
 
   block: # clear
     check """
 ぷよ全て消すべし
 ======
+[だいかいてん]
 ......
 ......
 ......
@@ -209,13 +213,14 @@ bb.yyy
 yy.bbb
 ------
 by|
-by|""".tsuSolve ==
+by|""".solve ==
       "433S".toAnswers
 
   block: # clear w/ kind
     check """
 ちょうど4連鎖する&ぷよ全て消すべし
 ======
+[クロスかいてん]
 ......
 ......
 ......
@@ -231,13 +236,14 @@ oobb..
 oorboo
 ------
 rb|
-yb|""".tsuSolve ==
+yb|""".solve ==
       "1S5S".toAnswers
 
   block: # more
     check """
 ぷよ累計28個以上消すべし
 ======
+[通]
 ......
 ......
 ......
@@ -253,13 +259,14 @@ yb|""".tsuSolve ==
 .grbb.
 ------
 rb|
-rb|""".tsuSolve ==
+rb|""".solve ==
       "1N1S".toAnswers
 
   block: # Water
     check """
 ちょうど3連鎖するべし
 ======
+[すいちゅう]
 ......
 ......
 ......
@@ -276,13 +283,14 @@ rpor..
 ......
 ------
 ry|
-rp|""".waterSolve ==
+rp|""".solve ==
       "322S".toAnswers
 
   block: # Hard
     check """
 ちょうど3連鎖するべし
 ======
+[だいかいてん]
 ......
 ......
 ......
@@ -298,13 +306,14 @@ rp|""".waterSolve ==
 ..oggg
 ------
 gg|
-gr|""".tsuSolve ==
+gr|""".solve ==
       "1N2S".toAnswers
 
   block: # drop garbages
     check """
 ちょうど4連鎖するべし
 ======
+[クロスかいてん]
 ......
 ......
 ......
@@ -321,13 +330,14 @@ gr|""".tsuSolve ==
 ------
 yg|
 (0,0,0,0,1,0)
-yr|""".tsuSolve ==
+yr|""".solve ==
       "3S..4S".toAnswers
 
   block: # rotate
     check """
 ぷよ全て消すべし
 ======
+[だいかいてん]
 .....o
 .....o
 ....bo
@@ -342,14 +352,15 @@ yr|""".tsuSolve ==
 ...oro
 .yyobo
 ------
-O
-gy|""".tsuSolve ==
+R
+gy|""".solve ==
       "..32".toAnswers
 
   block: # initial nazopuyo is satisfied
     check """
 ぷよ全て消すべし
 ======
+[通]
 ......
 ......
 ......
@@ -364,11 +375,12 @@ gy|""".tsuSolve ==
 ......
 ......
 ------
-rr|""".tsuSolve ==
+rr|""".solve ==
       toAnswers()
     check """
 ぷよ全て消すべし
 ======
+[だいかいてん]
 ......
 ......
 ......
@@ -385,13 +397,14 @@ rr|""".tsuSolve ==
 ------
 (0,0,4,0,2,0)
 rr|
-rr|""".tsuSolve ==
+rr|""".solve ==
       "..4N4N".toAnswers
 
   block: # not supported
     check """
 おじゃまぷよ2箇所以上で同時に消すべし
 ======
+[クロスかいてん]
 ......
 ......
 ......
@@ -407,13 +420,14 @@ y...y.
 yyryy.
 ------
 ry|
-ry|""".tsuSolve ==
+ry|""".solve ==
       toAnswers()
 
   block: # early satisfy
     check """
 ぷよ全て消すべし
 ======
+[通]
 ......
 ......
 ......
@@ -429,13 +443,14 @@ ry|""".tsuSolve ==
 .rrbb.
 ------
 rr|
-rb|""".tsuSolve ==
+rb|""".solve ==
       toAnswers("1N", "5N54", "6N54")
 
   block: # not calcAllAnswers
     check """
 ぷよ全て消すべし
 ======
+[だいかいてん]
 ......
 ......
 ......
@@ -451,7 +466,7 @@ rb|""".tsuSolve ==
 .rrbb.
 ------
 rr|
-rb|""".tsuSolve(
+rb|""".solve(
       false
     ) <= toAnswers("1N", "5N54", "6N54")
 
@@ -459,6 +474,7 @@ rb|""".tsuSolve(
     check """
 ちょうど13連鎖するべし
 ======
+[通]
 ......
 ......
 ......
@@ -477,5 +493,5 @@ yy|
 gg|
 yy|
 bg|
-yg|""".tsuSolve ==
+yg|""".solve ==
       "23344N2121".toAnswers

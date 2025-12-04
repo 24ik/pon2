@@ -24,20 +24,25 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper, row: Row, col: Col, editable: bool
   ): Color =
     ## Returns the cell's background color.
-    let rule = self.derefSimulator(helper).nazoPuyoWrap.rule
+    let rule = self.derefSimulator(helper).rule
 
     if editable and not helper.mobile and self.derefSimulator(helper).editData.focusField and
         self.derefSimulator(helper).editData.field == (row, col):
       SelectColor
     elif row == Row.low:
       GhostColor
-    elif rule == Water and row.ord + WaterHeight >= Height:
+    elif rule == Rule.Water and row.ord + WaterHeight >= Height:
       WaterColor
-    elif (rule == Tsu and row == Row1 and col == Col2) or
-        (rule == Water and row.ord == AirHeight.pred):
-      DeadColor
     else:
-      DefaultColor
+      let isDead =
+        case rule
+        of Rule.Tsu:
+          row == Row1 and col == Col2
+        of Spinner, CrossSpinner:
+          row == Row1 and col in {Col2, Col3}
+        of Rule.Water:
+          row.ord == AirHeight.pred
+      if isDead: DeadColor else: DefaultColor
 
   func initBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, row: Row, col: Col
@@ -52,8 +57,7 @@ when defined(js) or defined(nimsuggest):
     ## Returns the field node.
     let
       editable = not cameraReady and self.derefSimulator(helper).mode in EditModes
-      cellArray = self.derefSimulator(helper).nazoPuyoWrap.unwrap:
-        it.puyoPuyo.field.toArray
+      cellArray = self.derefSimulator(helper).nazoPuyo.puyoPuyo.field.toArray
       tableBorder = (StyleAttr.border, "1px gray solid".cstring)
       tableStyle =
         if editable:

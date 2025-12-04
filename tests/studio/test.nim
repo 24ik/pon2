@@ -5,7 +5,7 @@
 
 import std/[importutils, unittest]
 import ../../src/pon2/[core]
-import ../../src/pon2/app/[key, nazopuyowrap, simulator, studio]
+import ../../src/pon2/app/[key, simulator, studio]
 import ../../src/pon2/private/[assign]
 
 func `==`(progressRef1, progressRef2: ref tuple[now, total: int]): bool =
@@ -67,10 +67,11 @@ block: # toggleFocus
 
 block: # nextReplay, prevReplay, solve, permute
   let
-    nazoPuyo = parseNazoPuyo[TsuField](
+    nazoPuyo =
       """
 ちょうど3連鎖するべし
 ======
+[通]
 ......
 ......
 ......
@@ -86,8 +87,7 @@ o.go.o
 ggoggg
 ------
 bg|
-bg|"""
-    ).unsafeValue
+bg|""".parseNazoPuyo.unsafeValue
     simulator = Simulator.init(nazoPuyo, EditorEdit)
   var studio = Studio.init simulator
 
@@ -182,10 +182,11 @@ bg|"""
 
 block: # operate
   let
-    nazoPuyo = parseNazoPuyo[TsuField](
+    nazoPuyo =
       """
 ちょうど1連鎖するべし
 ======
+[通]
 ......
 ......
 ......
@@ -201,8 +202,7 @@ block: # operate
 bbb...
 ------
 by|
-pp|23"""
-    ).unsafeValue
+pp|23""".parseNazoPuyo.unsafeValue
     studio1 = new Studio
   studio1[] = Studio.init Simulator.init(nazoPuyo, EditorEdit)
   var studio2 = Studio.init Simulator.init(nazoPuyo, EditorEdit)

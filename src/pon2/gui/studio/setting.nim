@@ -42,9 +42,6 @@ when defined(js) or defined(nimsuggest):
 
   proc toStudioSettingsVNode*(self: ref Studio, helper: VNodeHelper): VNode =
     ## Returns the studio settings node.
-    let stepCount = unwrap self[].simulator.nazoPuyoWrap:
-      it.puyoPuyo.steps.len
-
     buildHtml tdiv:
       tdiv(class = "block"):
         bold:
@@ -65,7 +62,7 @@ when defined(js) or defined(nimsuggest):
                 `type` = "checkbox",
               )
             text "　N手目を固定:"
-            for stepIndex in 0 ..< stepCount:
+            for stepIndex in 0 ..< self[].simulator.nazoPuyo.puyoPuyo.steps.len:
               label(class = "checkbox"):
                 text "　{stepIndex.succ}".fmt.cstring
                 input(
