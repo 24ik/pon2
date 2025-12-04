@@ -184,7 +184,7 @@ when defined(js) or defined(nimsuggest):
       if step.cross:
         span(class = "fa-stack", style = style(StyleAttr.fontSize, "0.5em")):
           italic(class = "fa-solid fa-arrows-rotate fa-stack-2x")
-          italic(class = "fa-solid fa-xmark fa-stack-1x")
+          italic(class = "fa-solid fa-grip-lines-vertical fa-stack-1x")
       else:
         italic(class = "fa-solid fa-arrows-rotate")
 

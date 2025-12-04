@@ -493,16 +493,25 @@ O"""
 # ------------------------------------------------
 
 block:
-  # `goalKindOpt=`, `goalColor=`, `goalVal=`, `goalValOperator=`, `goalClearColorOpt=`
-  var simulator = Simulator.init EditorEdit
+  # normalizeGoal, `goalKindOpt=`, `goalColor=`, `goalVal=`, `goalValOperator=`,
+  # `goalClearColorOpt=`
+  var simulator = Simulator.init(
+    NazoPuyo[TsuField].init(
+      PuyoPuyo[TsuField].init, Goal.init(Color, GoalColor.Red, 2, Exact)
+    ),
+    EditorEdit,
+  )
+  simulator.normalizeGoal
+  simulator.nazoPuyoWrap.unwrap:
+    check it.goal == Goal.init(Color, 2, Exact)
 
   simulator.goalKindOpt = Opt[GoalKind].ok Chain
   simulator.nazoPuyoWrap.unwrap:
-    check it.goal == Goal.init(Chain, 0, Exact)
+    check it.goal == Goal.init(Chain, 2, Exact)
 
   simulator.goalColor = GoalColor.Yellow
   simulator.nazoPuyoWrap.unwrap:
-    check it.goal == Goal.init(Chain, 0, Exact)
+    check it.goal == Goal.init(Chain, 2, Exact)
 
   simulator.goalVal = 3
   simulator.nazoPuyoWrap.unwrap:

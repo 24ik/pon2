@@ -649,6 +649,12 @@ const
   DefaultGoalVal = 0
   DefaultGoalValOperator = Exact
 
+func normalizeGoal*(self: var Simulator) =
+  ## Normalizes the goal.
+  ## This function only affects to the goal.
+  self.nazoPuyoWrap.unwrap:
+    it.goal.normalize
+
 func `goalKindOpt=`*(self: var Simulator, kindOpt: Opt[GoalKind]) =
   ## Sets the goal kind.
   if self.mode != EditorEdit:
@@ -665,7 +671,6 @@ func `goalKindOpt=`*(self: var Simulator, kindOpt: Opt[GoalKind]) =
           it.goal.mainOpt.ok GoalMain.init(
             kind, DefaultGoalColor, DefaultGoalVal, DefaultGoalValOperator
           )
-          it.goal.assign Goal.init(kind, GoalColor.low, 0, GoalValOperator.low)
       else:
         if it.goal.mainOpt.isOk: it.goal.mainOpt.err else: discard
 

@@ -15,13 +15,13 @@ export results2
 type
   GoalKind* {.pure.} = enum
     ## Kind of the goal to clear the Nazo Puyo.
-    Chain = "n連鎖するべし"
-    Color = "n色同時に消すべし"
-    Count = "cぷよn個同時に消すべし"
-    Place = "cぷよn箇所同時に消すべし"
-    Connection = "cぷよn連結で消すべし"
-    AccumColor = "n色消すべし"
-    AccumCount = "cぷよn個消すべし"
+    Chain = "n連鎖する"
+    Color = "n色同時に消す"
+    Count = "cぷよn個同時に消す"
+    Place = "cぷよn箇所で同時に消す"
+    Connection = "cぷよn連結で消す"
+    AccumColor = "累計n色消す"
+    AccumCount = "cぷよ累計n個消す"
 
   GoalColor* {.pure.} = enum
     ## 'c' in the `GoalKind`.

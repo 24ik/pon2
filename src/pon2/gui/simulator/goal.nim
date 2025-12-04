@@ -29,13 +29,13 @@ when defined(js) or defined(nimsuggest):
     if cameraReady or self.derefSimulator(helper).mode != EditorEdit:
       return buildHtml article(
         class = (
-          if helper.simulator.markResultOpt.unsafeValue == Accept: "message is-success"
+          if helper.simulator.markResult == Accept: "message is-success"
           else: "message is-info"
         ).cstring
       ):
         tdiv(class = "message-body"):
           text $goal
-          if helper.simulator.markResultOpt.unsafeValue == Accept:
+          if helper.simulator.markResult == Accept:
             span(class = "icon"):
               italic(class = "fa-solid fa-circle-check")
 
@@ -43,6 +43,7 @@ when defined(js) or defined(nimsuggest):
       kindId = "pon2-simulator-goal-kind-" & helper.simulator.goalId
       colorId = "pon2-simulator-goal-color-" & helper.simulator.goalId
       valId = "pon2-simulator-goal-val-" & helper.simulator.goalId
+      clearColorId = "pon2-simulator-goal-clearcolor-" & helper.simulator.goalId
 
     buildHtml tdiv:
       tdiv(class = "block mb-1"):
@@ -68,15 +69,9 @@ when defined(js) or defined(nimsuggest):
               ):
                 text $kind
       if goal.mainOpt.isOk:
-        let
-          main = goal.mainOpt.unsafeValue
-          atLeastBtnClass = (
-            case main.valOperator
-            of Exact: "button px-2"
-            of AtLeast: "button is-primary px-2"
-          ).cstring
+        let main = goal.mainOpt.unsafeValue
 
-        tdiv(class = "block"):
+        tdiv(class = "block mb-1"):
           if main.kind in ColorKinds:
             button(class = "button is-static px-2"):
               text "c ="
@@ -93,7 +88,8 @@ when defined(js) or defined(nimsuggest):
                   text "全"
                 for color in GoalColor.All.succ .. GoalColor.high:
                   option(selected = main.color == color):
-                    text $color
+                    text ($color).cstring
+        tdiv(class = "block mb-1"):
           button(class = "button is-static px-2"):
             text "n ="
           tdiv(class = "select"):
@@ -106,13 +102,44 @@ when defined(js) or defined(nimsuggest):
                 option(selected = main.val == val):
                   text $val
           button(
-            class = atLeastBtnClass,
+            class = "button px-2",
             onclick =
               () => (
                 self.derefSimulator(helper).goalValOperator =
-                  (1 - main.valOperator.ord).GoalValOperator
+                  main.valOperator.rotateSucc
               ),
           ):
-            text "以上"
+            text ($main.valOperator).cstring
       tdiv(class = "block"):
-        discard
+        tdiv(class = "select"):
+          select(
+            id = clearColorId,
+            disabled = goal.clearColorOpt.isErr,
+            onchange =
+              () => (
+                self.derefSimulator(helper).goalClearColorOpt =
+                  Opt[GoalColor].ok clearColorId.getSelectedIndex.GoalColor
+              ),
+          ):
+            option(selected = goal.clearColorOpt == Opt[GoalColor].ok All):
+              text "全"
+            for color in GoalColor.All.succ .. GoalColor.high:
+              option(selected = goal.clearColorOpt == Opt[GoalColor].ok color):
+                text ($color).cstring
+        button(
+          class = "button px-2",
+          onclick =
+            () => (
+              block:
+                if goal.clearColorOpt.isOk:
+                  self.derefSimulator(helper).goalClearColorOpt = Opt[GoalColor].err
+                else:
+                  self.derefSimulator(helper).goalClearColorOpt =
+                    Opt[GoalColor].ok GoalColor.low
+            ),
+        ):
+          if goal.clearColorOpt.isOk:
+            text "ぷよ全て消す"
+          else:
+            strikethrough:
+              text "ぷよ全て消す"

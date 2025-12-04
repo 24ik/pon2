@@ -232,6 +232,7 @@ when isMainModule:
           let simulatorResult = uri.parseSimulator
           if simulatorResult.isOk:
             globalStudioRef[] = Studio.init simulatorResult.unsafeValue
+            globalStudioRef[].simulator.normalizeGoal
           else:
             errorMsg.assign simulatorResult.error
 
