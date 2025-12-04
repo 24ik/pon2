@@ -1,0 +1,4 @@
+nimTitle	arrayutils	pon2/private/arrayutils.html	module src/pon2/private/arrayutils		0
+nim	initArrayWith	pon2/private/arrayutils.html#initArrayWith,staticint,T	proc initArrayWith[T](count: static int; val: T): array[count, T]		11
+nim	initArrayWith	pon2/private/arrayutils.html#initArrayWith,typedesc[E],T	proc initArrayWith[E: enum; T](t: typedesc[E]; val: T): array[E, T]		24
+nimgrp	initarraywith	pon2/private/arrayutils.html#initArrayWith-procs-all	proc		11

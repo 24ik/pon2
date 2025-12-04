@@ -1,0 +1,11 @@
+nimTitle	math	pon2/private/math.html	module src/pon2/private/math		0
+nim	sum	pon2/private/math.html#sum,T,T	proc sum[T: SomeNumber](x1, x2: T): T		14
+nim	sum	pon2/private/math.html#sum,T,T,T	proc sum[T: SomeNumber](x1, x2, x3: T): T		18
+nim	sum	pon2/private/math.html#sum,T,T,T,T	proc sum[T: SomeNumber](x1, x2, x3, x4: T): T		22
+nim	sum	pon2/private/math.html#sum,T,T,T,T,T	proc sum[T: SomeNumber](x1, x2, x3, x4, x5: T): T		26
+nim	sum	pon2/private/math.html#sum,T,T,T,T,T,T	proc sum[T: SomeNumber](x1, x2, x3, x4, x5, x6: T): T		30
+nim	sum	pon2/private/math.html#sum,T,T,T,T,T,T,T	proc sum[T: SomeNumber](x1, x2, x3, x4, x5, x6, x7: T): T		34
+nim	sum	pon2/private/math.html#sum,T,T,T,T,T,T,T,T	proc sum[T: SomeNumber](x1, x2, x3, x4, x5, x6, x7, x8: T): T		38
+nim	sum	pon2/private/math.html#sum,openArray[T]	proc sum[T: SomeNumber](numbers: openArray[T]): T		42
+nim	sum	pon2/private/math.html#sum,array[E,T],staticSlice[E: enum]	proc sum[E: enum; T: SomeNumber](numbers: array[E, T]; slice: static Slice[E]): T		50
+nimgrp	sum	pon2/private/math.html#sum-procs-all	proc		14

@@ -1,0 +1,3 @@
+nimTitle	ctrl	pon2/gui/simulator/ctrl.html	module src/pon2/gui/simulator/ctrl		0
+nim	toSideCtrlVNode	pon2/gui/simulator/ctrl.html#toSideCtrlVNode,ref.S,VNodeHelper	proc toSideCtrlVNode[S: Simulator or Studio or Marathon](self: ref S;\n    helper: VNodeHelper): VNode		22
+nim	toBottomCtrlVNode	pon2/gui/simulator/ctrl.html#toBottomCtrlVNode,ref.S,VNodeHelper	proc toBottomCtrlVNode[S: Simulator or Studio or Marathon](self: ref S;\n    helper: VNodeHelper): VNode		280

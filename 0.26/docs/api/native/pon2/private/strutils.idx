@@ -1,0 +1,4 @@
+nimTitle	strutils	pon2/private/strutils.html	module src/pon2/private/strutils		0
+nim	parseInt	pon2/private/strutils.html#parseInt,string	proc parseInt(str: string): StrErrorResult[int]		15
+nim	split2	pon2/private/strutils.html#split2,string,string,int	proc split2(str, sep: string; maxsplit = -1): seq[string]		22
+nim	split2	pon2/private/strutils.html#split2.i,string,string,int	iterator split2(str, sep: string; maxsplit = -1): string		30

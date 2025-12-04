@@ -1,0 +1,11 @@
+nimTitle	solve	pon2/private/app/solve.html	module src/pon2/private/app/solve		0
+nim	SolveNode	pon2/private/app/solve.html#SolveNode	object SolveNode		19
+nim	init	pon2/private/app/solve.html#init,typeSolveNode[F: TsuField or WaterField],PuyoPuyo[F: TsuField or WaterField]	proc init[F: TsuField or WaterField](T: type SolveNode[F]; puyoPuyo: PuyoPuyo[F]): T:type		54
+nim	childrenAtDepth	pon2/private/app/solve.html#childrenAtDepth,SolveNode[F: TsuField or WaterField],int,seq[SolveNode[F: TsuField or WaterField]],seq[seq[OptPlacement]],seq[seq[OptPlacement]],int,bool,Goal,Steps	proc childrenAtDepth[F: TsuField or WaterField](self: SolveNode[F]; targetDepth: int;\n    nodes: var seq[SolveNode[F]]; optPlacementsSeq: var seq[seq[OptPlacement]];\n    answers: var seq[seq[OptPlacement]]; moveCount: int; calcAllAnswers: bool;\n    goal: Goal; steps: Steps)		421
+nim	solveSingleThread	pon2/private/app/solve.html#solveSingleThread,SolveNode[F: TsuField or WaterField],seq[seq[OptPlacement]],int,bool,Goal,Steps	proc solveSingleThread[F: TsuField or WaterField](self: SolveNode[F];\n    answers: var seq[seq[OptPlacement]]; moveCount: int; calcAllAnswers: bool;\n    goal: Goal; steps: Steps; checkPruneFirst = false)		504
+nim	toStrs	pon2/private/app/solve.html#toStrs,SolveNode[F: TsuField or WaterField],Goal,Steps	proc toStrs[F: TsuField or WaterField](self: SolveNode[F]; goal: Goal; steps: Steps): seq[\n    string]		600
+nim	parseSolveInfo	pon2/private/app/solve.html#parseSolveInfo,seq[string]	proc parseSolveInfo(strs: seq[string]): StrErrorResult[\n    tuple[rule: Rule, goal: Goal, steps: Steps]]		705
+nim	parseSolveNode	pon2/private/app/solve.html#parseSolveNode,seq[string]	proc parseSolveNode[F: TsuField or WaterField](strs: seq[string]): StrErrorResult[\n    SolveNode[F]]		720
+nim	toStrs	pon2/private/app/solve.html#toStrs,seq[seq[OptPlacement]]	proc toStrs(answers: seq[seq[OptPlacement]]): seq[string]		758
+nim	parseSolveAnswers	pon2/private/app/solve.html#parseSolveAnswers,seq[string]	proc parseSolveAnswers(strs: seq[string]): StrErrorResult[seq[seq[OptPlacement]]]		771
+nimgrp	tostrs	pon2/private/app/solve.html#toStrs-procs-all	proc		600
