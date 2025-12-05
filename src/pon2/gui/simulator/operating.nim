@@ -28,13 +28,13 @@ when defined(js) or defined(nimsuggest):
           self.derefSimulator(helper).mode notin PlayModes:
         Opt[Cell].ok Cell.None
       else:
-        let steps = self.derefSimulator(helper).nazoPuyoWrap.unwrap:
-          it.puyoPuyo.steps
-
-        if self.derefSimulator(helper).operatingIndex >= steps.len:
+        if self.derefSimulator(helper).operatingIndex >=
+            self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps.len:
           Opt[Cell].ok Cell.None
         else:
-          let step = steps[self.derefSimulator(helper).operatingIndex]
+          let step = self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps[
+            self.derefSimulator(helper).operatingIndex
+          ]
           case step.kind
           of PairPlacement:
             # pivot
@@ -76,7 +76,7 @@ when defined(js) or defined(nimsuggest):
           if cross:
             span(class = "fa-stack", style = style(StyleAttr.fontSize, "0.5em")):
               italic(class = "fa-solid fa-arrows-rotate fa-stack-2x")
-              italic(class = "fa-solid fa-grip-lines-vertical fa-stack-1x")
+              italic(class = "fa-solid fa-c fa-stack-1x")
           else:
             italic(class = "fa-solid fa-arrows-rotate")
 

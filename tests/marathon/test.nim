@@ -4,7 +4,7 @@
 
 import std/[critbits, random, sequtils, sugar, unittest]
 import ../../src/pon2/[core]
-import ../../src/pon2/app/[key, marathon, nazopuyowrap, simulator]
+import ../../src/pon2/app/[key, marathon, simulator]
 
 # ------------------------------------------------
 # Operator
@@ -52,12 +52,12 @@ block: # simulator
     rng = 123.initRand
     marathon = Marathon.init rng
 
-  var sim = Simulator.init PuyoPuyo[TsuField].init
-  check marathon.simulator == sim
+  var simulator = Simulator.init PuyoPuyo.init
+  check marathon.simulator == simulator
 
-  sim.writeCell Cell.Green
+  simulator.writeCell Cell.Green
   marathon.simulator.writeCell Cell.Green
-  check marathon.simulator == sim
+  check marathon.simulator == simulator
 
 # ------------------------------------------------
 # Match
@@ -126,32 +126,29 @@ block: # selectQuery, selectRandomQuery
     marathon = Marathon.init(rng, queries)
 
   marathon.selectQuery 0
-  check marathon.simulator == Simulator.init PuyoPuyo[TsuField].init
+  check marathon.simulator == Simulator.init PuyoPuyo.init
 
   marathon.match "ab"
   marathon.selectQuery 0
-  check marathon.simulator == Simulator.init PuyoPuyo[TsuField].init
+  check marathon.simulator == Simulator.init PuyoPuyo.init
 
   marathon.isReady = true
   marathon.match "ab"
 
   for i in 0 ..< 2:
     marathon.selectQuery i
-    unwrap marathon.simulator.nazoPuyoWrap:
-      check not it.puyoPuyo.steps[0].pair.isDouble
+    check not marathon.simulator.nazoPuyo.puyoPuyo.steps[0].pair.isDouble
 
   for _ in 1 .. 5:
     marathon.selectRandomQuery
-    unwrap marathon.simulator.nazoPuyoWrap:
-      check not it.puyoPuyo.steps[0].pair.isDouble
+    check not marathon.simulator.nazoPuyo.puyoPuyo.steps[0].pair.isDouble
 
   let stepsSeq = queries.mapIt(it.parseSteps(Pon2).unsafeValue).mapIt it.toSeq.map(
     (step: Step) => Step.init step.pair.swapped
   ).toDeque
   for _ in 1 .. 5:
     marathon.selectRandomQuery(fromMatched = false)
-    unwrap marathon.simulator.nazoPuyoWrap:
-      check it.puyoPuyo.steps in stepsSeq
+    check marathon.simulator.nazoPuyo.puyoPuyo.steps in stepsSeq
 
 # ------------------------------------------------
 # Keyboard

@@ -114,7 +114,7 @@ func sum*(
     bitor2(f1[1], f2[1], f3[1], f4[1], f5[1], f6[1], f7[1], f8[1]),
   ]
 
-func prod*(f1, f2, f3: Bit64BinaryField): Bit64BinaryField {.inline, noinit.} =
+func product*(f1, f2, f3: Bit64BinaryField): Bit64BinaryField {.inline, noinit.} =
   [bitand2(f1[0], f2[0], f3[0]), bitand2(f1[1], f2[1], f3[1])]
 
 # ------------------------------------------------
@@ -462,12 +462,12 @@ func `[]=`*(
 # Insert / Delete
 # ------------------------------------------------
 
-func isInWater(row: Row, rule: static Rule): bool {.inline, noinit.} =
+func isInWater(row: Row, phys: Phys): bool {.inline, noinit.} =
   ## Returns `true` if the row is in the water.
-  (static rule == Water) and row.ord + WaterHeight >= Height
+  phys == Phys.Water and row.ord + WaterHeight >= Height
 
 func insert(
-    self: var uint64, col: Col, row: Row, val: bool, rule: static Rule
+    self: var uint64, col: Col, row: Row, val: bool, phys: Phys
 ) {.inline, noinit.} =
   ## Inserts the value and shifts the binary field's element.
   ## If (row, col) is in the air, shifts the binary field's element upward above where
@@ -482,7 +482,7 @@ func insert(
   let
     below: uint64
     above: uint64
-  if row.isInWater rule:
+  if row.isInWater phys:
     let belowMask = 0x3fff_0000_0000_0000'u64 shr rowColShift
     below = ((self and belowMask) shr 1).keptValid
     above = self *~ belowMask
@@ -495,18 +495,18 @@ func insert(
   self.changeBitBE rowColShift + 2, val
 
 func insert*(
-    self: var Bit64BinaryField, row: Row, col: Col, val: bool, rule: static Rule
+    self: var Bit64BinaryField, row: Row, col: Col, val: bool, phys: Phys
 ) {.inline, noinit.} =
   ## Inserts the value and shifts the binary field.
   ## If (row, col) is in the air, shifts the binary field upward above where inserted.
   ## If it is in the water, shifts the binary field downward below where inserted.
   case col
   of Col0 .. Col2:
-    self[0].insert col, row, val, rule
+    self[0].insert col, row, val, phys
   of Col3 .. Col5:
-    self[1].insert col.pred 3, row, val, rule
+    self[1].insert col.pred 3, row, val, phys
 
-func del(self: var uint64, col: Col, row: Row, rule: static Rule) {.inline, noinit.} =
+func del(self: var uint64, col: Col, row: Row, phys: Phys) {.inline, noinit.} =
   ## Deletes the value and shifts the binary field's element.
   ## If (row, col) is in the air, shifts the binary field's element downward above
   ## where deleted.
@@ -522,7 +522,7 @@ func del(self: var uint64, col: Col, row: Row, rule: static Rule) {.inline, noin
   let
     below: uint64
     above: uint64
-  if row.isInWater rule:
+  if row.isInWater phys:
     below = ((self and belowMask) shl 1).keptValid
     above = self and aboveMask
   else:
@@ -532,16 +532,16 @@ func del(self: var uint64, col: Col, row: Row, rule: static Rule) {.inline, noin
   self.assign ((below or above) and colMask) or (self *~ colMask)
 
 func del*(
-    self: var Bit64BinaryField, row: Row, col: Col, rule: static Rule
+    self: var Bit64BinaryField, row: Row, col: Col, phys: Phys
 ) {.inline, noinit.} =
   ## Deletes the value and shifts the binary field.
   ## If (row, col) is in the air, shifts the binary field downward above where deleted.
   ## If it is in the water, shifts the binary field upward below where deleted.
   case col
   of Col0 .. Col2:
-    self[0].del col, row, rule
+    self[0].del col, row, phys
   of Col3 .. Col5:
-    self[1].del col.pred 3, row, rule
+    self[1].del col.pred 3, row, phys
 
 # ------------------------------------------------
 # Drop Garbages

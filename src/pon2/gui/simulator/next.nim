@@ -22,14 +22,12 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper, doubleNext: bool, pivot: bool
   ): VNode =
     ## Returns the node of the cell in the next or double-next step.
-    let
-      stepIndex = self.derefSimulator(helper).operatingIndex.succ 1 + doubleNext.int
-      nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
+    let stepIndex = self.derefSimulator(helper).operatingIndex.succ 1 + doubleNext.int
 
     var cross = false
-    let cellOpt = nazoWrap.unwrap:
-      if stepIndex < it.puyoPuyo.steps.len:
-        let step = it.puyoPuyo.steps[stepIndex]
+    let cellOpt =
+      if stepIndex < self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps.len:
+        let step = self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps[stepIndex]
         case step.kind
         of PairPlacement:
           Opt[Cell].ok if pivot: step.pair.pivot else: step.pair.rotor
@@ -53,7 +51,7 @@ when defined(js) or defined(nimsuggest):
           if cross:
             span(class = "fa-stack", style = style(StyleAttr.fontSize, "0.5em")):
               italic(class = "fa-solid fa-arrows-rotate fa-stack-2x")
-              italic(class = "fa-solid fa-grip-lines-vertical fa-stack-1x")
+              italic(class = "fa-solid fa-c fa-stack-1x")
           else:
             italic(class = "fa-solid fa-arrows-rotate")
 

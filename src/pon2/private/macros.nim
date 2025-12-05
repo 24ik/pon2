@@ -43,9 +43,9 @@ macro defineExpand*(
 ): untyped =
   ## Defines expand macro.
   runnableExamples:
-    # You can define a new macro `defineExample` by
-    # `defineExpand("Example", "Foo", "Bar")`.
+    defineExpand("Example", "Foo", "Bar")
     # This defines the following macro:
+    #[
     macro expandExample(identsAndBody: varargs[untyped]): untyped =
       ## Runs in sequence with the body (the last argument) changed to the specified
       ## identifiers (the rest arguments) with the suffix Foo, Bar.
@@ -68,8 +68,8 @@ macro defineExpand*(
       add(stmts, bodyBar)
 
       stmts
+    ]#
 
-    # Usage of `expandExample`:
     let
       xFoo = 10
       xBar = 20

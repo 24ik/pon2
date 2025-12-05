@@ -6,16 +6,16 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, typetraits, uri]
+import std/[strformat, uri]
 import
   ./[cell, field, fqdn, goal, moveresult, pair, placement, popresult, puyopuyo, step]
-import ../private/[assign, bitutils, core, macros, results2, strutils, tables]
+import ../private/[assign, bitutils, core, results2, strutils, tables]
 
 export goal, puyopuyo, results2
 
 type
-  NazoPuyo*[F: TsuField or WaterField] = object ## Nazo Puyo.
-    puyoPuyo*: PuyoPuyo[F]
+  NazoPuyo* = object ## Nazo Puyo.
+    puyoPuyo*: PuyoPuyo
     goal*: Goal
 
   MarkResult* {.pure.} = enum
@@ -31,13 +31,11 @@ type
 # Constructor
 # ------------------------------------------------
 
-func init*[F: TsuField or WaterField](
-    T: type NazoPuyo[F], puyoPuyo: PuyoPuyo[F], goal: Goal
-): T {.inline, noinit.} =
+func init*(T: type NazoPuyo, puyoPuyo: PuyoPuyo, goal: Goal): T {.inline, noinit.} =
   T(puyoPuyo: puyoPuyo, goal: goal)
 
-func init*[F: TsuField or WaterField](T: type NazoPuyo[F]): T {.inline, noinit.} =
-  T.init(PuyoPuyo[F].init, Goal.init)
+func init*(T: type NazoPuyo, rule = Rule.Tsu): T {.inline, noinit.} =
+  T.init(PuyoPuyo.init rule, Goal.init)
 
 # ------------------------------------------------
 # Mark
@@ -50,9 +48,7 @@ const
     DummyCell,
   ]
 
-func mark*[F: TsuField or WaterField](
-    self: NazoPuyo[F], endStepIndex = -1
-): MarkResult {.inline, noinit.} =
+func mark*(self: NazoPuyo, endStepIndex = -1): MarkResult {.inline, noinit.} =
   ## Marks the steps in the Nazo Puyo.
   ## If `endStepIndex` is negative, all steps are used.
   ## This function requires that the field is settled.
@@ -172,12 +168,10 @@ func mark*[F: TsuField or WaterField](
 
 const GoalPuyoPuyoSep = "\n======\n"
 
-func `$`*[F: TsuField or WaterField](self: NazoPuyo[F]): string {.inline, noinit.} =
+func `$`*(self: NazoPuyo): string {.inline, noinit.} =
   $self.goal & GoalPuyoPuyoSep & $self.puyoPuyo
 
-func parseNazoPuyo*[F: TsuField or WaterField](
-    str: string
-): StrErrorResult[NazoPuyo[F]] {.inline, noinit.} =
+func parseNazoPuyo*(str: string): StrErrorResult[NazoPuyo] {.inline, noinit.} =
   ## Returns the Nazo Puyo converted from the string representation.
   let
     errorMsg = "Invalid Nazo Puyo: {str}".fmt
@@ -187,9 +181,9 @@ func parseNazoPuyo*[F: TsuField or WaterField](
 
   let
     goal = ?strs[0].parseGoal.context errorMsg
-    puyoPuyo = ?parsePuyoPuyo[F](strs[1]).context errorMsg
+    puyoPuyo = ?strs[1].parsePuyoPuyo.context errorMsg
 
-  ok NazoPuyo[F].init(puyoPuyo, goal)
+  ok NazoPuyo.init(puyoPuyo, goal)
 
 # ------------------------------------------------
 # Nazo Puyo <-> URI
@@ -199,18 +193,14 @@ const
   GoalKey = "goal"
   IshikawaPuyoPuyoGoalSep = "__"
 
-func toUriQueryPon2[F: TsuField or WaterField](
-    self: NazoPuyo[F]
-): StrErrorResult[string] {.inline, noinit.} =
+func toUriQueryPon2(self: NazoPuyo): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the Nazo Puyo.
   let errorMsg = "Nazo Puyo that does not support URI conversion: {self}".fmt
 
   ok (?self.puyoPuyo.toUriQuery(Pon2).context errorMsg) & '&' &
     [(GoalKey, ?self.goal.toUriQuery(Pon2).context errorMsg)].encodeQuery
 
-func toUriQueryIshikawa[F: TsuField or WaterField](
-    self: NazoPuyo[F]
-): StrErrorResult[string] {.inline, noinit.} =
+func toUriQueryIshikawa(self: NazoPuyo): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the Nazo Puyo.
   let
     errorMsg = "Nazo Puyo that does not support URI conversion: {self}".fmt
@@ -223,20 +213,18 @@ func toUriQueryIshikawa[F: TsuField or WaterField](
   ok puyoPuyoQuery & IshikawaPuyoPuyoGoalSep &
     ?self.goal.toUriQuery(Ishikawa).context errorMsg
 
-func toUriQuery*[F: TsuField or WaterField](
-    self: NazoPuyo[F], fqdn = Pon2
+func toUriQuery*(
+    self: NazoPuyo, fqdn = Pon2
 ): StrErrorResult[string] {.inline, noinit.} =
   ## Returns the URI query converted from the Nazo Puyo.
   case fqdn
   of Pon2: self.toUriQueryPon2
   of Ishikawa, Ips: self.toUriQueryIshikawa
 
-func parseNazoPuyoPon2[F: TsuField or WaterField](
-    query: string
-): StrErrorResult[NazoPuyo[F]] {.inline, noinit.} =
+func parseNazoPuyoPon2(query: string): StrErrorResult[NazoPuyo] {.inline, noinit.} =
   ## Returns the Nazo Puyo converted from the URI query.
   var
-    nazoPuyo = NazoPuyo[F].init
+    nazoPuyo = NazoPuyo.init
     goalSet = false
     keyVals = newSeq[(string, string)](0)
 
@@ -254,31 +242,30 @@ func parseNazoPuyoPon2[F: TsuField or WaterField](
   if not goalSet:
     nazoPuyo.goal.assign ?"".parseGoal(Pon2).context "Unexpected error (parseNazoPuyoPon2)"
 
-  nazoPuyo.puyoPuyo.assign ?parsePuyoPuyo[F](keyVals.encodeQuery, Pon2).context "Invalid Nazo Puyo: {query}".fmt
+  nazoPuyo.puyoPuyo.assign ?parsePuyoPuyo(keyVals.encodeQuery, Pon2).context "Invalid Nazo Puyo: {query}".fmt
 
   ok nazoPuyo
 
-func parseNazoPuyoIshikawa[F: TsuField or WaterField](
-    query: string
-): StrErrorResult[NazoPuyo[F]] {.inline, noinit.} =
+func parseNazoPuyoIshikawa(query: string): StrErrorResult[NazoPuyo] {.inline, noinit.} =
   ## Returns the Nazo Puyo converted from the URI query.
   let
     errorMsg = "Invalid Nazo Puyo: {query}".fmt
     strs = query.rsplit(IshikawaPuyoPuyoGoalSep, 1)
-  if strs.len != 2:
+  if strs.len notin 1 .. 2:
     return err errorMsg
 
-  ok NazoPuyo[F].init(
-    ?parsePuyoPuyo[F](strs[0], Ishikawa).context errorMsg,
-    ?strs[1].parseGoal(Ishikawa).context errorMsg,
+  ok NazoPuyo.init(
+    ?strs[0].parsePuyoPuyo(Ishikawa).context errorMsg,
+    if strs.len == 1:
+      NoneGoal
+    else:
+      ?strs[1].parseGoal(Ishikawa).context errorMsg,
   )
 
-func parseNazoPuyo*[F: TsuField or WaterField](
+func parseNazoPuyo*(
     query: string, fqdn: SimulatorFqdn
-): StrErrorResult[NazoPuyo[F]] {.inline, noinit.} =
+): StrErrorResult[NazoPuyo] {.inline, noinit.} =
   ## Returns the Nazo Puyo converted from the URI query.
   case fqdn
-  of Pon2:
-    parseNazoPuyoPon2[F](query)
-  of Ishikawa, Ips:
-    parseNazoPuyoIshikawa[F](query)
+  of Pon2: query.parseNazoPuyoPon2
+  of Ishikawa, Ips: query.parseNazoPuyoIshikawa

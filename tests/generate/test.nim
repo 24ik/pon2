@@ -5,13 +5,14 @@
 
 import std/[random, sequtils, sugar, unittest]
 import ../../src/pon2/[core]
-import ../../src/pon2/app/[generate, nazopuyowrap, solve]
+import ../../src/pon2/app/[generate, solve]
 
 # ------------------------------------------------
 # Generate
 # ------------------------------------------------
 
 proc checkGenerate(
+    rule: Rule,
     goal: Goal,
     moveCount: int,
     colorCount: int,
@@ -26,110 +27,110 @@ proc checkGenerate(
     crossRotateIndices: seq[int],
     allowDoubleNotLast: bool,
     allowDoubleLast: bool,
-    rule: Rule,
     seed: int,
 ) {.raises: [Exception].} =
   var rng = seed.initRand
   let
     settings = GenerateSettings.init(
-      goal, moveCount, colorCount, heights, puyoCounts, connection2Counts,
+      rule, goal, moveCount, colorCount, heights, puyoCounts, connection2Counts,
       connection3Counts, dropGarbagesIndices, dropHardsIndices, rotateIndices,
       crossRotateIndices, allowDoubleNotLast, allowDoubleLast,
     )
-    wrapResult = rng.generate(settings, rule)
+    nazoPuyoResult = rng.generate settings
 
-  check wrapResult.isOk
+  check nazoPuyoResult.isOk
+  let nazoPuyo = nazoPuyoResult.unsafeValue
 
-  unwrap wrapResult.unsafeValue:
-    check it.goal == goal
+  check nazoPuyo.goal == goal
 
-    check it.puyoPuyo.steps.len == moveCount
+  check nazoPuyo.puyoPuyo.steps.len == moveCount
 
-    check (Cell.Red .. Cell.Purple).toSeq.filter(
-      (cell) => it.puyoPuyo.cellCount(cell) > 0
-    ).len == colorCount
+  check (Cell.Red .. Cell.Purple).toSeq.filter(
+    (cell) => nazoPuyo.puyoPuyo.cellCount(cell) > 0
+  ).len == colorCount
 
-    check it.puyoPuyo.field.isSettled
-    check not it.puyoPuyo.field.canPop
+  check nazoPuyo.puyoPuyo.field.isSettled
+  check not nazoPuyo.puyoPuyo.field.canPop
 
-    let baseRow =
-      case rule
-      of Tsu: Row.high
-      of Water: AirHeight.Row
-    if heights.weights.isOk:
-      if heights.weights.unsafeValue != [0, 0, 0, 0, 0, 0]:
-        for col in Col:
-          if heights.weights.unsafeValue[col] == 0:
-            check it.puyoPuyo.field[baseRow, col] == None
-    else:
+  let baseRow =
+    case rule
+    of Tsu, Spinner, CrossSpinner: Row.high
+    of Water: AirHeight.Row
+  if heights.weights.isOk:
+    if heights.weights.unsafeValue != [0, 0, 0, 0, 0, 0]:
       for col in Col:
-        check heights.positives.unsafeValue[col] ==
-          (it.puyoPuyo.field[baseRow, col] != None)
+        if heights.weights.unsafeValue[col] == 0:
+          check nazoPuyo.puyoPuyo.field[baseRow, col] == None
+  else:
+    for col in Col:
+      check heights.positives.unsafeValue[col] ==
+        (nazoPuyo.puyoPuyo.field[baseRow, col] != None)
 
-    check puyoCounts.colors == it.puyoPuyo.colorPuyoCount
-    check puyoCounts.garbage == it.puyoPuyo.cellCount Garbage
-    check puyoCounts.hard == it.puyoPuyo.cellCount Hard
+  check puyoCounts.colors == nazoPuyo.puyoPuyo.colorPuyoCount
+  check puyoCounts.garbage == nazoPuyo.puyoPuyo.cellCount Garbage
+  check puyoCounts.hard == nazoPuyo.puyoPuyo.cellCount Hard
 
-    if connection2Counts.total.isOk:
-      check connection2Counts.total.unsafeValue ==
-        it.puyoPuyo.field.connection2.colorPuyoCount div 2
-    if connection2Counts.vertical.isOk:
-      check connection2Counts.vertical.unsafeValue ==
-        it.puyoPuyo.field.connection2Vertical.colorPuyoCount div 2
-    if connection2Counts.horizontal.isOk:
-      check connection2Counts.horizontal.unsafeValue ==
-        it.puyoPuyo.field.connection2Vertical.colorPuyoCount div 2
+  if connection2Counts.total.isOk:
+    check connection2Counts.total.unsafeValue ==
+      nazoPuyo.puyoPuyo.field.connection2.colorPuyoCount div 2
+  if connection2Counts.vertical.isOk:
+    check connection2Counts.vertical.unsafeValue ==
+      nazoPuyo.puyoPuyo.field.connection2Vertical.colorPuyoCount div 2
+  if connection2Counts.horizontal.isOk:
+    check connection2Counts.horizontal.unsafeValue ==
+      nazoPuyo.puyoPuyo.field.connection2Vertical.colorPuyoCount div 2
 
-    if connection3Counts.total.isOk:
-      check connection3Counts.total.unsafeValue ==
-        it.puyoPuyo.field.connection3.colorPuyoCount div 3
-    if connection3Counts.vertical.isOk:
-      check connection3Counts.vertical.unsafeValue ==
-        it.puyoPuyo.field.connection3Vertical.colorPuyoCount div 3
-    if connection3Counts.horizontal.isOk:
-      check connection3Counts.horizontal.unsafeValue ==
-        it.puyoPuyo.field.connection3Vertical.colorPuyoCount div 3
-    if connection3Counts.lShape.isOk:
-      check connection3Counts.lShape.unsafeValue ==
-        it.puyoPuyo.field.connection3LShape.colorPuyoCount div 3
+  if connection3Counts.total.isOk:
+    check connection3Counts.total.unsafeValue ==
+      nazoPuyo.puyoPuyo.field.connection3.colorPuyoCount div 3
+  if connection3Counts.vertical.isOk:
+    check connection3Counts.vertical.unsafeValue ==
+      nazoPuyo.puyoPuyo.field.connection3Vertical.colorPuyoCount div 3
+  if connection3Counts.horizontal.isOk:
+    check connection3Counts.horizontal.unsafeValue ==
+      nazoPuyo.puyoPuyo.field.connection3Vertical.colorPuyoCount div 3
+  if connection3Counts.lShape.isOk:
+    check connection3Counts.lShape.unsafeValue ==
+      nazoPuyo.puyoPuyo.field.connection3LShape.colorPuyoCount div 3
 
-    if not allowDoubleNotLast:
-      check (0 ..< moveCount.pred).toSeq.all (index) =>
-        it.puyoPuyo.steps[index].kind != PairPlacement or
-        not it.puyoPuyo.steps[index].pair.isDouble
+  if not allowDoubleNotLast:
+    check (0 ..< moveCount.pred).toSeq.all (index) =>
+      nazoPuyo.puyoPuyo.steps[index].kind != PairPlacement or
+      not nazoPuyo.puyoPuyo.steps[index].pair.isDouble
 
-    if not allowDoubleLast:
-      check it.puyoPuyo.steps[^1].kind != PairPlacement or
-        not it.puyoPuyo.steps[^1].pair.isDouble
+  if not allowDoubleLast:
+    check nazoPuyo.puyoPuyo.steps[^1].kind != PairPlacement or
+      not nazoPuyo.puyoPuyo.steps[^1].pair.isDouble
 
-    for stepIndex in dropGarbagesIndices:
-      check it.puyoPuyo.steps[stepIndex].kind == StepKind.Garbages and
-        not it.puyoPuyo.steps[stepIndex].dropHard
+  for stepIndex in dropGarbagesIndices:
+    check nazoPuyo.puyoPuyo.steps[stepIndex].kind == StepKind.Garbages and
+      not nazoPuyo.puyoPuyo.steps[stepIndex].dropHard
 
-    for stepIndex in dropHardsIndices:
-      check it.puyoPuyo.steps[stepIndex].kind == StepKind.Garbages and
-        it.puyoPuyo.steps[stepIndex].dropHard
+  for stepIndex in dropHardsIndices:
+    check nazoPuyo.puyoPuyo.steps[stepIndex].kind == StepKind.Garbages and
+      nazoPuyo.puyoPuyo.steps[stepIndex].dropHard
 
-    for stepIndex in rotateIndices:
-      check it.puyoPuyo.steps[stepIndex].kind == StepKind.Rotate and
-        not it.puyoPuyo.steps[stepIndex].cross
+  for stepIndex in rotateIndices:
+    check nazoPuyo.puyoPuyo.steps[stepIndex].kind == StepKind.Rotate and
+      not nazoPuyo.puyoPuyo.steps[stepIndex].cross
 
-    for stepIndex in crossRotateIndices:
-      check it.puyoPuyo.steps[stepIndex].kind == StepKind.Rotate and
-        it.puyoPuyo.steps[stepIndex].cross
+  for stepIndex in crossRotateIndices:
+    check nazoPuyo.puyoPuyo.steps[stepIndex].kind == StepKind.Rotate and
+      nazoPuyo.puyoPuyo.steps[stepIndex].cross
 
-    let answer = it.solve
-    check answer.len == 1
-    check answer[0].len == moveCount
-    for stepIndex, step in it.puyoPuyo.steps:
-      case step.kind
-      of PairPlacement:
-        check step.optPlacement == answer[0][stepIndex]
-      else:
-        check answer[0][stepIndex].isErr
+  let answer = nazoPuyo.solve
+  check answer.len == 1
+  check answer[0].len == moveCount
+  for stepIndex, step in nazoPuyo.puyoPuyo.steps:
+    case step.kind
+    of PairPlacement:
+      check step.optPlacement == answer[0][stepIndex]
+    else:
+      check answer[0][stepIndex].isErr
 
 block: # generate
   checkGenerate(
+    Rule.Water,
     Goal.init(Chain, 5, Exact),
     2,
     3,
@@ -151,10 +152,10 @@ block: # generate
     newSeq[int](),
     false,
     false,
-    Water,
     123,
   )
   checkGenerate(
+    Rule.Spinner,
     Goal.init(Count, GoalColor.Red, 4, AtLeast, GoalColor.Garbages),
     2,
     2,
@@ -176,6 +177,5 @@ block: # generate
     newSeq[int](),
     false,
     false,
-    Tsu,
     456,
   )

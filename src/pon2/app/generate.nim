@@ -7,15 +7,16 @@
 {.experimental: "views".}
 
 import std/[random, sequtils, sets, sugar]
-import ./[nazopuyowrap, solve]
+import ./[solve]
 import ../[core]
 import
   ../private/
     [algorithm, arrayutils, assign, deques, math, results2, setutils, staticfor]
 
-export nazopuyowrap, results2
+export results2
 
 type GenerateSettings* = object ## Settings of Nazo Puyo generation.
+  rule: Rule
   goal: Goal
   moveCount: int
   colorCount: int
@@ -37,6 +38,7 @@ type GenerateSettings* = object ## Settings of Nazo Puyo generation.
 
 func init*(
     T: type GenerateSettings,
+    rule: Rule,
     goal: Goal,
     moveCount, colorCount: int,
     heights: tuple[weights: Opt[array[Col, int]], positives: Opt[array[Col, bool]]],
@@ -48,6 +50,7 @@ func init*(
     allowDoubleNotLast, allowDoubleLast: bool,
 ): T =
   GenerateSettings(
+    rule: rule,
     goal: goal,
     moveCount: moveCount,
     colorCount: colorCount,
@@ -259,6 +262,11 @@ func isValid(self: GenerateSettings): StrErrorResult[void] =
     if connection3VHL > self.connection3Counts.total.unsafeValue:
       return err "`connection3Counts.total` is too small"
 
+  if self.rule != Spinner and self.rotateIndices.len > 0:
+    return err "Rotate is allowed only in the Spinner rule."
+  if self.rule != CrossSpinner and self.crossRotateIndices.len > 0:
+    return err "Cross-rotate is allowed only in the CrossSpinner rule."
+
   let
     dropGarbagesIndexSet = self.dropGarbagesIndices.toHashSet
     dropHardsIndexSet = self.dropHardsIndices.toHashSet
@@ -300,9 +308,9 @@ func generateGarbagesCounts(rng: var Rand, total: int): array[Col, int] =
 
   counts
 
-func generatePuyoPuyo[F: TsuField or WaterField](
+func generatePuyoPuyo(
     rng: var Rand, settings: GenerateSettings, useCells: seq[Cell]
-): StrErrorResult[PuyoPuyo[F]] =
+): StrErrorResult[PuyoPuyo] =
   ## Returns a random Puyo Puyo.
   ## Note that an infinite loop can occur.
   ## This function requires the settings passes `isValid`.
@@ -427,34 +435,32 @@ func generatePuyoPuyo[F: TsuField or WaterField](
         ?rng.split(cells.len, settings.heights.positives.unsafeValue).context "Field generation failed"
     )
     if cellCountsInField.allIt(
-      it in 0 .. (when F is TsuField: Height else: WaterHeight)
+      it in 0 .. (if settings.rule == Rule.Water: WaterHeight else: Height)
     ):
       break
 
   # field
   var
-    fieldArray = Row.initArrayWith Col.initArrayWith Cell.None
+    cellArray = Row.initArrayWith Col.initArrayWith Cell.None
     cellIndex = 0
   staticFor(col, Col):
     for i in 0 ..< cellCountsInField[col.ord]:
       let row =
-        when F is TsuField:
-          Row.high.pred i
-        else:
+        if settings.rule == Rule.Water:
           Row.low.succ(AirHeight).succ i
-      fieldArray[row][col].assign cells[cellIndex]
+        else:
+          Row.high.pred i
+      cellArray[row][col].assign cells[cellIndex]
       cellIndex.inc
-  let field = when F is TsuField: fieldArray.toTsuField else: fieldArray.toWaterField
+  let field = cellArray.toField settings.rule
 
-  ok PuyoPuyo[F].init(field, steps)
+  ok PuyoPuyo.init(field, steps)
 
 # ------------------------------------------------
 # Generate
 # ------------------------------------------------
 
-proc generate[F: TsuField or WaterField](
-    rng: var Rand, settings: GenerateSettings
-): StrErrorResult[NazoPuyo[F]] =
+proc generate*(rng: var Rand, settings: GenerateSettings): StrErrorResult[NazoPuyo] =
   ## Returns a random Nazo Puyo that has a unique solution.
   ?settings.isValid.context "Generation failed"
 
@@ -474,10 +480,9 @@ proc generate[F: TsuField or WaterField](
   let useCells = useCellsSet.toSeq
 
   while true:
-    let puyoPuyoResult = generatePuyoPuyo[F](rng, settings, useCells)
+    let puyoPuyoResult = rng.generatePuyoPuyo(settings, useCells)
     if puyoPuyoResult.isErr:
       continue
-
     let puyoPuyo = puyoPuyoResult.unsafeValue
 
     if puyoPuyo.field.isDead:
@@ -515,7 +520,7 @@ proc generate[F: TsuField or WaterField](
         settings.connection3Counts.lShape.unsafeValue * 3:
       continue
 
-    var nazoPuyo = NazoPuyo[F].init(puyoPuyo, settings.goal)
+    var nazoPuyo = NazoPuyo.init(puyoPuyo, settings.goal)
     let answers = nazoPuyo.solve(calcAllAnswers = false)
     if answers.len == 1 and answers[0].len == settings.moveCount:
       for stepIndex, optPlacement in answers[0]:
@@ -525,13 +530,3 @@ proc generate[F: TsuField or WaterField](
       return ok nazoPuyo
 
   return err "Not reached here"
-
-proc generate*(
-    rng: var Rand, settings: GenerateSettings, rule: Rule
-): StrErrorResult[NazoPuyoWrap] =
-  ## Returns a random Nazo Puyo that has a unique solution.
-  case rule
-  of Tsu:
-    ok NazoPuyoWrap.init ?generate[TsuField](rng, settings)
-  of Water:
-    ok NazoPuyoWrap.init ?generate[WaterField](rng, settings)

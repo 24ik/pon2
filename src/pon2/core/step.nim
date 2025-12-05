@@ -157,8 +157,8 @@ const
   HardPrefix = '['
   HardSuffix = ']'
   GarbagesSep = ","
-  RotateDesc = "O"
-  CrossRotateDesc = "X"
+  RotateDesc = "R"
+  CrossRotateDesc = "C"
 
 func `$`*(self: Step): string {.inline, noinit.} =
   case self.kind

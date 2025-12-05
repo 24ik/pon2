@@ -1,11 +1,5 @@
 ## This module implements notice garbage puyos.
 ##
-## Compile Options:
-## | Option                            | Description                 | Default  |
-## | --------------------------------- | --------------------------- | -------- |
-## | `-d:pon2.garbagerate.tsu=<int>`   | Garbage rate in Tsu rule.   | `70`     |
-## | `-d:pon2.garbagerate.water=<int>` | Garbage rate in Water rule. | `90`     |
-##
 
 {.push raises: [].}
 {.experimental: "strictDefs".}
@@ -14,8 +8,6 @@
 
 import ./[rule]
 import ../private/[assign, staticfor]
-
-export notice, rule
 
 type Notice* {.pure.} = enum
   ## Notice garbage puyo.
@@ -26,15 +18,6 @@ type Notice* {.pure.} = enum
   Moon
   Crown
   Comet
-
-const
-  TsuGarbageRate {.define: "pon2.garbagerate.tsu".} = 70
-  WaterGarbageRate {.define: "pon2.garbagerate.water".} = 90
-  GarbageRates*: array[Rule, int] = [TsuGarbageRate, WaterGarbageRate]
-
-static:
-  for rate in GarbageRates:
-    doAssert rate > 0
 
 # ------------------------------------------------
 # Notice Garbage
@@ -62,7 +45,7 @@ func noticeCounts*(
     highestNotice = Crown
     counts[Comet].assign 0
 
-  var score2 = score div GarbageRates[rule]
+  var score2 = score div Behaviours[rule].garbageRate
   for notice in countdown(highestNotice, Notice.low):
     let
       unit = NoticeUnits[notice]

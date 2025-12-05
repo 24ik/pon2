@@ -7,7 +7,7 @@
 {.experimental: "views".}
 
 import std/[sequtils, sugar, random]
-import ./[key, nazopuyowrap, simulator]
+import ./[key, simulator]
 import ../[core]
 import
   ../private/[algorithm, arrayutils, assign, critbits, results2, setutils, strutils]
@@ -44,7 +44,7 @@ func init*(
     T: type Marathon, rng: Rand, queries: openArray[string] = [], isReady = false
 ): T =
   var marathon = T(
-    simulator: Simulator.init PuyoPuyo[TsuField].init,
+    simulator: Simulator.init PuyoPuyo.init,
     matchQueries: @[],
     allQueries: @[],
     isReady: false,
@@ -247,7 +247,7 @@ func loadSteps(self: var Marathon, query: string) =
     (query[i.succ] & query[i]).parseStep(Pon2).isErrOr:
       steps.addLast value
 
-  self.simulator.assign Simulator.init PuyoPuyo[TsuField].init(TsuField.init, steps)
+  self.simulator.assign Simulator.init PuyoPuyo.init(Field.init, steps)
 
 func selectQuery*(self: var Marathon, index: int) =
   ## Applies the selected query to the simulator.

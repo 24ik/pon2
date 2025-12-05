@@ -23,8 +23,7 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper, cameraReady = false
   ): VNode =
     ## Returns the goal node.
-    let goal = self.derefSimulator(helper).nazoPuyoWrap.unwrap:
-      it.goal
+    let goal = self.derefSimulator(helper).nazoPuyo.goal
 
     if cameraReady or self.derefSimulator(helper).mode != EditorEdit:
       return buildHtml article(

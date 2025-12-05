@@ -18,7 +18,7 @@ type MoveResult* = object ## Move result.
   hardToGarbageCount*: int
   detailPopCounts*: seq[array[Cell, int]]
   detailHardToGarbageCount*: seq[int]
-  fullPopCounts*: Opt[seq[array[Cell, seq[int]]]]
+  fullPopCountsOpt*: Opt[seq[array[Cell, seq[int]]]]
 
 # ------------------------------------------------
 # Constructor
@@ -38,7 +38,7 @@ func init*(
     hardToGarbageCount: hardToGarbageCount,
     detailPopCounts: detailPopCounts,
     detailHardToGarbageCount: detailHardToGarbageCount,
-    fullPopCounts: Opt[seq[array[Cell, seq[int]]]].err,
+    fullPopCountsOpt: Opt[seq[array[Cell, seq[int]]]].err,
   )
 
 func init*(
@@ -56,13 +56,11 @@ func init*(
     hardToGarbageCount: hardToGarbageCount,
     detailPopCounts: detailPopCounts,
     detailHardToGarbageCount: detailHardToGarbageCount,
-    fullPopCounts: Opt[seq[array[Cell, seq[int]]]].ok fullPopCounts,
+    fullPopCountsOpt: Opt[seq[array[Cell, seq[int]]]].ok fullPopCounts,
   )
 
-func init*(
-    T: type MoveResult, includeFullPopCounts: static bool = false
-): T {.inline, noinit.} =
-  when includeFullPopCounts:
+func init*(T: type MoveResult, includeFullPopCounts = true): T {.inline, noinit.} =
+  if includeFullPopCounts:
     T.init(0, static(Cell.initArrayWith 0), 0, @[], @[], @[])
   else:
     T.init(0, static(Cell.initArrayWith 0), 0, @[], @[])
@@ -137,16 +135,17 @@ func placeCounts*(
     self: MoveResult, cell: Cell
 ): StrErrorResult[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of places where `cell` popped in each chain.
-  if self.fullPopCounts.isOk:
-    ok self.fullPopCounts.unsafeValue.mapIt it[cell].len
+  if self.fullPopCountsOpt.isOk:
+    ok self.fullPopCountsOpt.unsafeValue.mapIt it[cell].len
   else:
     err "`placeCounts` not supported: {self}".fmt
 
 func placeCounts*(self: MoveResult): StrErrorResult[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of places where color puyos popped in each chain.
-  if self.fullPopCounts.isOk:
-    ok self.fullPopCounts.unsafeValue.mapIt (it[Red].len + it[Green].len + it[Blue].len) +
-      (it[Yellow].len + it[Purple].len)
+  if self.fullPopCountsOpt.isOk:
+    ok self.fullPopCountsOpt.unsafeValue.mapIt (
+      it[Red].len + it[Green].len + it[Blue].len
+    ) + (it[Yellow].len + it[Purple].len)
   else:
     err "`placeCounts` not supported: {self}".fmt
 
@@ -158,15 +157,15 @@ func connectionCounts*(
     self: MoveResult, cell: Cell
 ): StrErrorResult[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of connections of `cell` that popped.
-  if self.fullPopCounts.isOk:
-    ok concat self.fullPopCounts.unsafeValue.mapIt it[cell]
+  if self.fullPopCountsOpt.isOk:
+    ok concat self.fullPopCountsOpt.unsafeValue.mapIt it[cell]
   else:
     err "`connectionCounts` not supported: {self}".fmt
 
 func connectionCounts*(self: MoveResult): StrErrorResult[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of connections of color puyos that popped.
-  if self.fullPopCounts.isOk:
-    ok concat self.fullPopCounts.unsafeValue.mapIt it[Red .. Purple].concat
+  if self.fullPopCountsOpt.isOk:
+    ok concat self.fullPopCountsOpt.unsafeValue.mapIt it[Red .. Purple].concat
   else:
     err "`connectionCounts` not supported: {self}".fmt
 
@@ -204,11 +203,11 @@ func connectionBonus(counts: seq[int]): int {.inline, noinit.} =
 
 func score*(self: MoveResult): StrErrorResult[int] {.inline, noinit.} =
   ## Returns the score.
-  if self.fullPopCounts.isErr:
+  if self.fullPopCountsOpt.isErr:
     return err "`score` not supported: {self}".fmt
 
   var totalScore = 0
-  for chainIndex, countsArray in self.fullPopCounts.unsafeValue:
+  for chainIndex, countsArray in self.fullPopCountsOpt.unsafeValue:
     var
       connectionBonus = 0
       totalPuyoCount = 0

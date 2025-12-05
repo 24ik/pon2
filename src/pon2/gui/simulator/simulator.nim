@@ -29,8 +29,8 @@ when defined(js) or defined(nimsuggest):
       wideCtrl = helper.mobile and mode in PlayModes
       isReplaySimulator =
         helper.studioOpt.isOk and helper.studioOpt.unsafeValue.isReplaySimulator
-      showGoal = self.derefSimulator(helper).nazoPuyoWrap.unwrap:
-        mode in EditModes or it.goal != NoneGoal
+      showGoal =
+        mode == EditorEdit or self.derefSimulator(helper).nazoPuyo.goal != NoneGoal
 
     buildHtml tdiv:
       if showGoal:

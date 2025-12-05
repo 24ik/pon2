@@ -101,7 +101,7 @@ func sum*(
 ): XmmBinaryField {.inline, noinit.} =
   ((f1 + f2) + (f3 + f4)) + ((f5 + f6) + (f7 + f8))
 
-func prod*(f1, f2, f3: XmmBinaryField): XmmBinaryField {.inline, noinit.} =
+func product*(f1, f2, f3: XmmBinaryField): XmmBinaryField {.inline, noinit.} =
   f1 * f2 * f3
 
 # ------------------------------------------------
@@ -345,17 +345,12 @@ func `[]=`*(
 # Insert / Delete
 # ------------------------------------------------
 
-func isInWater(row: Row, rule: static Rule): bool {.inline, noinit.} =
+func isInWater(row: Row, phys: Phys): bool {.inline, noinit.} =
   ## Returns `true` if the row is in the water.
-  (static rule == Water) and row.ord + WaterHeight >= Height
+  phys == Phys.Water and row.ord + WaterHeight >= Height
 
 func insert(
-    self: var uint64,
-    col: Col,
-    row: Row,
-    val: bool,
-    rule: static Rule,
-    col0123: static bool,
+    self: var uint64, col: Col, row: Row, val: bool, phys: Phys, col0123: static bool
 ) {.inline, noinit.} =
   ## Inserts the value and shifts the binary field's element.
   ## If (row, col) is in the air, shifts the binary field's element upward above where
@@ -373,7 +368,7 @@ func insert(
   let
     below: uint64
     above: uint64
-  if row.isInWater rule:
+  if row.isInWater phys:
     let belowMask = 0x3fff_0000_0000_0000'u64 shr rowColShift
     below = ((self and belowMask) shr 1) and ValidMask
     above = self *~ belowMask
@@ -386,7 +381,7 @@ func insert(
   self.changeBitBE rowColShift + 2, val
 
 func insert*(
-    self: var XmmBinaryField, row: Row, col: Col, val: bool, rule: static Rule
+    self: var XmmBinaryField, row: Row, col: Col, val: bool, phys: Phys
 ) {.inline, noinit.} =
   ## Inserts the value and shifts the binary field.
   ## If (row, col) is in the air, shifts the binary field upward above where inserted.
@@ -397,15 +392,15 @@ func insert*(
   {.push warning[Uninit]: off.}
   case col
   of Col0 .. Col3:
-    arr[1].insert col, row, val, rule, true
+    arr[1].insert(col, row, val, phys, col0123 = true)
   of Col4, Col5:
-    arr[0].insert col.pred 4, row, val, rule, false
+    arr[0].insert(col.pred 4, row, val, phys, col0123 = false)
   {.pop.}
 
   self.assign arr.addr.mm_load_si128
 
 func del(
-    self: var uint64, col: Col, row: Row, rule: static Rule, col0123: static bool
+    self: var uint64, col: Col, row: Row, phys: Phys, col0123: static bool
 ) {.inline, noinit.} =
   ## Deletes the value and shifts the binary field's element.
   ## If (row, col) is in the air, shifts the binary field's element downward above
@@ -425,7 +420,7 @@ func del(
   let
     below: uint64
     above: uint64
-  if row.isInWater rule:
+  if row.isInWater phys:
     below = ((self and belowMask) shl 1) and ValidMask
     above = self and aboveMask
   else:
@@ -434,24 +429,22 @@ func del(
 
   self.assign ((below or above) and colMask) or (self *~ colMask)
 
-func del*(
-    self: var XmmBinaryField, row: Row, col: Col, rule: static Rule
-) {.inline, noinit.} =
+func del*(self: var XmmBinaryField, row: Row, col: Col, phys: Phys) {.inline, noinit.} =
   ## Deletes the value and shifts the binary field.
   ## If (row, col) is in the air, shifts the binary field downward above where deleted.
   ## If it is in the water, shifts the binary field upward below where deleted.
-  var arr {.noinit, align(16).}: array[2, uint64]
-  arr.addr.mm_store_si128 self
+  var valArray {.noinit, align(16).}: array[2, uint64]
+  valArray.addr.mm_store_si128 self
 
   {.push warning[Uninit]: off.}
   case col
   of Col0 .. Col3:
-    arr[1].del col, row, rule, true
+    valArray[1].del(col, row, phys, col0123 = true)
   of Col4, Col5:
-    arr[0].del col.pred 4, row, rule, false
+    valArray[0].del(col.pred 4, row, phys, col0123 = false)
   {.pop.}
 
-  self.assign arr.addr.mm_load_si128
+  self.assign valArray.addr.mm_load_si128
 
 # ------------------------------------------------
 # Drop Garbages
@@ -463,16 +456,16 @@ func dropGarbagesTsu*(
   ## Drops cells by Tsu rule.
   ## This function requires that the mask is settled and the counts are non-negative.
   let notExist = XmmBinaryField.initOne - existField
-  var arr {.noinit, align(16).}: array[8, uint16]
-  arr.addr.mm_store_si128 notExist
+  var valArray {.noinit, align(16).}: array[8, uint16]
+  valArray.addr.mm_store_si128 notExist
 
   expand6 Col:
     block:
       const ArrayIndex = 7 - _
-      let notExistElem = arr[ArrayIndex]
-      arr[ArrayIndex].assign notExistElem *~ (notExistElem shl counts[Col])
+      let notExistElem = valArray[ArrayIndex]
+      valArray[ArrayIndex].assign notExistElem *~ (notExistElem shl counts[Col])
 
-  self += arr.addr.mm_load_si128
+  self += valArray.addr.mm_load_si128
 
 func dropGarbagesWater*(
     self, other1, other2: var XmmBinaryField,
@@ -485,14 +478,14 @@ func dropGarbagesWater*(
   const WaterMaskElem = ValidMaskElem *~ AirMaskElem
 
   var
-    arrSelf {.noinit, align(16).}: array[8, uint16]
-    arrOther1 {.noinit, align(16).}: array[8, uint16]
-    arrOther2 {.noinit, align(16).}: array[8, uint16]
-    arrExist {.noinit, align(16).}: array[8, uint16]
-  arrSelf.addr.mm_store_si128 self
-  arrOther1.addr.mm_store_si128 other1
-  arrOther2.addr.mm_store_si128 other2
-  arrExist.addr.mm_store_si128 existField
+    valArraySelf {.noinit, align(16).}: array[8, uint16]
+    valArrayOther1 {.noinit, align(16).}: array[8, uint16]
+    valArrayOther2 {.noinit, align(16).}: array[8, uint16]
+    valArrayExist {.noinit, align(16).}: array[8, uint16]
+  valArraySelf.addr.mm_store_si128 self
+  valArrayOther1.addr.mm_store_si128 other1
+  valArrayOther2.addr.mm_store_si128 other2
+  valArrayExist.addr.mm_store_si128 existField
 
   expand6 Col:
     block:
@@ -500,13 +493,13 @@ func dropGarbagesWater*(
 
       let
         cnt = counts[Col]
-        exist = arrExist[ArrayIndex]
+        exist = valArrayExist[ArrayIndex]
 
       if exist == 0:
         if cnt <= WaterHeight:
-          arrSelf[ArrayIndex].assign WaterMaskElem *~ (WaterMaskElem shr cnt)
+          valArraySelf[ArrayIndex].assign WaterMaskElem *~ (WaterMaskElem shr cnt)
         else:
-          arrSelf[ArrayIndex].assign WaterMaskElem or
+          valArraySelf[ArrayIndex].assign WaterMaskElem or
             (AirMaskElem *~ (AirMaskElem shl (cnt - WaterHeight)))
       else:
         let
@@ -515,13 +508,13 @@ func dropGarbagesWater*(
           emptySpace = ValidMaskElem *~ (shiftExist or shiftExist.blsmsk)
           garbages = emptySpace *~ (emptySpace shl cnt)
 
-        arrSelf[ArrayIndex].assign (arrSelf[ArrayIndex] shr shift) or garbages
-        arrOther1[ArrayIndex].assign arrOther1[ArrayIndex] shr shift
-        arrOther2[ArrayIndex].assign arrOther2[ArrayIndex] shr shift
+        valArraySelf[ArrayIndex].assign (valArraySelf[ArrayIndex] shr shift) or garbages
+        valArrayOther1[ArrayIndex].assign valArrayOther1[ArrayIndex] shr shift
+        valArrayOther2[ArrayIndex].assign valArrayOther2[ArrayIndex] shr shift
 
-  self.assign arrSelf.addr.mm_load_si128
-  other1.assign arrOther1.addr.mm_load_si128
-  other2.assign arrOther2.addr.mm_load_si128
+  self.assign valArraySelf.addr.mm_load_si128
+  other1.assign valArrayOther1.addr.mm_load_si128
+  other2.assign valArrayOther2.addr.mm_load_si128
 
 # ------------------------------------------------
 # Settle
@@ -531,27 +524,27 @@ func write(
     self: out array[Col, PextMask[uint16]], existField: XmmBinaryField
 ) {.inline, noinit.} =
   ## Initializes the masks.
-  var arr {.noinit, align(16).}: array[8, uint16]
-  arr.addr.mm_store_si128 existField
+  var valArray {.noinit, align(16).}: array[8, uint16]
+  valArray.addr.mm_store_si128 existField
 
   staticFor(col, Col):
     {.push warning[ProveInit]: off.}
-    self[col].assign PextMask[uint16].init arr[7 - col.ord]
+    self[col].assign PextMask[uint16].init valArray[7 - col.ord]
     {.pop.}
 
 func settleTsu(
     self: var XmmBinaryField, masks: array[Col, PextMask[uint16]]
 ) {.inline, noinit.} =
   ## Settles the binary field by Tsu rule.
-  var arr {.noinit, align(16).}: array[8, uint16]
-  arr.addr.mm_store_si128 self
+  var valArray {.noinit, align(16).}: array[8, uint16]
+  valArray.addr.mm_store_si128 self
 
   expand6 Col:
     block:
       const ArrayIndex = 7 - Col.ord
-      arr[ArrayIndex].assign arr[ArrayIndex].pext masks[Col]
+      valArray[ArrayIndex].assign valArray[ArrayIndex].pext masks[Col]
 
-  self.assign arr.addr.mm_load_si128.shiftedUpRaw
+  self.assign valArray.addr.mm_load_si128.shiftedUpRaw
 
 func settleTsu*(
     field1, field2, field3: var XmmBinaryField, existField: XmmBinaryField
@@ -568,17 +561,17 @@ func settleWater(
     self: var XmmBinaryField, masks: array[Col, PextMask[uint16]]
 ) {.inline, noinit.} =
   ## Settles the binary field by Water rule.
-  var arr {.noinit, align(16).}: array[8, uint16]
-  arr.addr.mm_store_si128 self
+  var valArray {.noinit, align(16).}: array[8, uint16]
+  valArray.addr.mm_store_si128 self
 
   expand6 Col:
     block:
       const ArrayIndex = 7 - Col.ord
       let mask = masks[Col]
-      arr[ArrayIndex].assign arr[ArrayIndex].pext(mask) shl
+      valArray[ArrayIndex].assign valArray[ArrayIndex].pext(mask) shl
         max(1, 1 + WaterHeight - mask.popcnt)
 
-  self.assign arr.addr.mm_load_si128
+  self.assign valArray.addr.mm_load_si128
 
 func settleWater*(
     field1, field2, field3: var XmmBinaryField, existField: XmmBinaryField

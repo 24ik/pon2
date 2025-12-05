@@ -56,8 +56,9 @@ when defined(js) or defined(nimsuggest):
 
   proc toStudioCtrlVNode*(self: ref Studio, helper: VNodeHelper): VNode =
     ## Returns the studio controller node.
-    let goalIsNone = self[].simulator.nazoPuyoWrap.unwrap:
-      it.goal == NoneGoal
+    let workDisabled =
+      self[].simulator.nazoPuyo.goal == NoneGoal or
+      self[].simulator.nazoPuyo.puyoPuyo.steps.len == 0
 
     buildHtml tdiv:
       tdiv(class = "block"):
@@ -69,7 +70,7 @@ when defined(js) or defined(nimsuggest):
                 elif self[].working: "button is-static"
                 else: "button"
               ).cstring,
-              disabled = goalIsNone,
+              disabled = workDisabled,
               onclick = () => self.runSolve,
             ):
               text "解探索"
@@ -80,7 +81,7 @@ when defined(js) or defined(nimsuggest):
                 elif self[].working: "button is-static"
                 else: "button"
               ).cstring,
-              disabled = goalIsNone,
+              disabled = workDisabled,
               onclick = () => self.runPermute helper,
             ):
               text "ツモ並べ替え"

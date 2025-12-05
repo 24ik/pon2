@@ -85,8 +85,7 @@ when defined(js) or defined(nimsuggest):
         editable and not helper.mobile and
         not self.derefSimulator(helper).editData.focusField and
         self.derefSimulator(helper).editData.step.index == stepIndex
-      steps = self.derefSimulator(helper).nazoPuyoWrap.unwrap:
-        it.puyoPuyo.steps
+      steps = self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps
       isPlaceholder = stepIndex >= steps.len
       optPlcmtDesc = (if isPlaceholder: ""
       else: $steps[stepIndex].optPlacement).cstring
@@ -184,7 +183,7 @@ when defined(js) or defined(nimsuggest):
       if step.cross:
         span(class = "fa-stack", style = style(StyleAttr.fontSize, "0.5em")):
           italic(class = "fa-solid fa-arrows-rotate fa-stack-2x")
-          italic(class = "fa-solid fa-grip-lines-vertical fa-stack-1x")
+          italic(class = "fa-solid fa-c fa-stack-1x")
       else:
         italic(class = "fa-solid fa-arrows-rotate")
 
@@ -210,8 +209,7 @@ when defined(js) or defined(nimsuggest):
 
     let
       editable = self.derefSimulator(helper).mode == EditorEdit and not cameraReady
-      steps = self.derefSimulator(helper).nazoPuyoWrap.unwrap:
-        it.puyoPuyo.steps
+      steps = self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps
 
     buildHtml table(class = "table is-narrow"):
       tbody:

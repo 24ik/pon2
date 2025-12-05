@@ -5,16 +5,16 @@
 
 import std/[unittest, uri]
 import ../../src/pon2/[core]
-import ../../src/pon2/app/[key, nazopuyowrap, simulator]
-import ../../src/pon2/private/[algorithm, assign, utils]
+import ../../src/pon2/app/[key, simulator]
+import ../../src/pon2/private/[algorithm, assign]
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
 block: # init
-  check Simulator.init == Simulator.init NazoPuyoWrap.init
-  check Simulator.init(PuyoPuyo[WaterField].init, EditorEdit).mode == EditorEdit
+  check Simulator.init == Simulator.init NazoPuyo.init
+  check Simulator.init(PuyoPuyo.init Rule.Water, EditorEdit).mode == EditorEdit
 
 # ------------------------------------------------
 # Edit - Undo / Redo
@@ -24,31 +24,31 @@ block: # undo, redo
   var simulator = Simulator.init EditorEdit
 
   simulator.writeCell Cell.Green
-  let wrap1 = simulator.nazoPuyoWrap
+  let nazoPuyo1 = simulator.nazoPuyo
 
   simulator.undo
-  check simulator.nazoPuyoWrap == NazoPuyoWrap.init
+  check simulator.nazoPuyo == NazoPuyo.init
 
   simulator.undo
-  check simulator.nazoPuyoWrap == NazoPuyoWrap.init
+  check simulator.nazoPuyo == NazoPuyo.init
 
   simulator.redo
-  check simulator.nazoPuyoWrap == wrap1
+  check simulator.nazoPuyo == nazoPuyo1
 
   simulator.redo
-  check simulator.nazoPuyoWrap == wrap1
+  check simulator.nazoPuyo == nazoPuyo1
 
 # ------------------------------------------------
 # Property - Getter
 # ------------------------------------------------
 
 block:
-  # rule, nazoPuyoWrap, moveResult, mode, state, editData,
+  # rule, nazoPuyo, moveResult, mode, state, editData,
   # operatingPlacement, operatingIndex
   let simulator = Simulator.init
 
   check simulator.rule == Tsu
-  check simulator.nazoPuyoWrap == NazoPuyoWrap.init
+  check simulator.nazoPuyo == NazoPuyo.init
   check simulator.moveResult == MoveResult.init true
   check simulator.mode == ViewerPlay
   check simulator.state == Stable
@@ -72,21 +72,22 @@ block: # `rule=`
 
   simulator.rule = Tsu
   check simulator.rule == Tsu
-  check simulator.nazoPuyoWrap == NazoPuyoWrap.init
+  check simulator.nazoPuyo == NazoPuyo.init
 
   simulator.rule = Water
   check simulator.rule == Water
-  check simulator.nazoPuyoWrap == NazoPuyoWrap.init NazoPuyo[WaterField].init
+  check simulator.nazoPuyo == NazoPuyo.init Rule.Water
 
   simulator.rule = Water
   check simulator.rule == Water
-  check simulator.nazoPuyoWrap == NazoPuyoWrap.init NazoPuyo[WaterField].init
+  check simulator.nazoPuyo == NazoPuyo.init Rule.Water
 
 block: # `mode=`
-  let nazo = parseNazoPuyo[TsuField](
+  let nazoPuyo =
     """
 ちょうど3連鎖するべし
 ======
+[通]
 ......
 ......
 ......
@@ -103,48 +104,43 @@ block: # `mode=`
 ------
 rb|
 (0,0,0,0,0,1)
-py|"""
-  ).unsafeValue
+py|""".parseNazoPuyo.unsafeValue
 
   block: # from ViewerPlay
-    let field0 = nazo.puyoPuyo.field
+    let field0 = nazoPuyo.puyoPuyo.field
 
-    var simulator = Simulator.init nazo
+    var simulator = Simulator.init nazoPuyo
     simulator.forward
     simulator.mode = ViewerEdit
 
-    simulator.nazoPuyoWrap.unwrap:
-      check it.puyoPuyo.field == field0
+    check simulator.nazoPuyo.puyoPuyo.field == field0
 
   block: # from ViewerEdit
-    let field0 = nazo.puyoPuyo.field
+    let field0 = nazoPuyo.puyoPuyo.field
 
-    var simulator = Simulator.init(nazo, ViewerEdit)
+    var simulator = Simulator.init(nazoPuyo, ViewerEdit)
     simulator.forward
     simulator.mode = ViewerPlay
 
-    simulator.nazoPuyoWrap.unwrap:
-      check it.puyoPuyo.field == field0
+    check simulator.nazoPuyo.puyoPuyo.field == field0
 
   block: # from EditorPlay
-    let field0 = nazo.puyoPuyo.field
+    let field0 = nazoPuyo.puyoPuyo.field
 
-    var simulator = Simulator.init(nazo, EditorPlay)
+    var simulator = Simulator.init(nazoPuyo, EditorPlay)
     simulator.forward
     simulator.mode = EditorEdit
 
-    simulator.nazoPuyoWrap.unwrap:
-      check it.puyoPuyo.field == field0
+    check simulator.nazoPuyo.puyoPuyo.field == field0
 
   block: # from EditorEdit
-    let field0 = nazo.puyoPuyo.field
+    let field0 = nazoPuyo.puyoPuyo.field
 
-    var simulator = Simulator.init(nazo, EditorEdit)
+    var simulator = Simulator.init(nazoPuyo, EditorEdit)
     simulator.forward
     simulator.mode = EditorPlay
 
-    simulator.nazoPuyoWrap.unwrap:
-      check it.puyoPuyo.field == field0
+    check simulator.nazoPuyo.puyoPuyo.field == field0
 
 block: # `editCell=`
   var simulator = Simulator.init ViewerEdit
@@ -172,10 +168,11 @@ block: # `editCross=`
 # ------------------------------------------------
 
 block: # moveCursorUp, moveCursorDown, moveCursorRight, moveCursorLeft
-  let nazo = parseNazoPuyo[TsuField](
+  let nazoPuyo =
     """
 ちょうど3連鎖するべし
 ======
+[通]
 ......
 ......
 ......
@@ -192,9 +189,8 @@ block: # moveCursorUp, moveCursorDown, moveCursorRight, moveCursorLeft
 ------
 rb|
 (0,0,0,0,0,1)
-py|"""
-  ).unsafeValue
-  var simulator = Simulator.init(nazo, EditorEdit)
+py|""".parseNazoPuyo.unsafeValue
+  var simulator = Simulator.init(nazoPuyo, EditorEdit)
 
   simulator.moveCursorUp
   check simulator.editData.field == (Row12, Col0)
@@ -230,10 +226,11 @@ py|"""
 # ------------------------------------------------
 
 block: # delStep
-  let nazo = parseNazoPuyo[TsuField](
+  let nazoPuyo =
     """
 ちょうど3連鎖するべし
 ======
+[通]
 ......
 ......
 ......
@@ -250,35 +247,32 @@ block: # delStep
 ------
 rb|3N
 (0,0,0,0,0,1)
-py|"""
-  ).unsafeValue
+py|""".parseNazoPuyo.unsafeValue
   var
-    steps = nazo.puyoPuyo.steps
-    simulator = Simulator.init(nazo, EditorEdit)
+    steps = nazoPuyo.puyoPuyo.steps
+    simulator = Simulator.init(nazoPuyo, EditorEdit)
 
   simulator.delStep
   steps.del 0
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.steps == steps
+  check simulator.nazoPuyo.puyoPuyo.steps == steps
 
   simulator.delStep 1
   steps.del 1
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.steps == steps
+  check simulator.nazoPuyo.puyoPuyo.steps == steps
 
   simulator.delStep 1
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.steps == steps
+  check simulator.nazoPuyo.puyoPuyo.steps == steps
 
 # ------------------------------------------------
 # Edit - Write
 # ------------------------------------------------
 
 block: # writeCell, writeRotate
-  let nazo = parseNazoPuyo[TsuField](
+  let nazoPuyo =
     """
 ちょうど3連鎖するべし
 ======
+[だいかいてん]
 ......
 ......
 ......
@@ -296,116 +290,96 @@ block: # writeCell, writeRotate
 rb|3N
 (0,0,0,0,0,1)
 py|
-X"""
-  ).unsafeValue
+R""".parseNazoPuyo.unsafeValue
   var
-    field = nazo.puyoPuyo.field
-    steps = nazo.puyoPuyo.steps
-    simulator = Simulator.init(nazo, EditorEdit)
+    field = nazoPuyo.puyoPuyo.field
+    steps = nazoPuyo.puyoPuyo.steps
+    simulator = Simulator.init(nazoPuyo, EditorEdit)
 
   simulator.editCell = Green
   simulator.writeCell Row3, Col4
   field[Row3, Col4] = Green
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.field == field
+  check simulator.nazoPuyo.puyoPuyo.field == field
 
   simulator.writeCell Blue
   field[Row0, Col0] = Blue
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.field == field
+  check simulator.nazoPuyo.puyoPuyo.field == field
 
   simulator.editCross = true
   simulator.writeCell Row3, Col4
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.field == field
+  check simulator.nazoPuyo.puyoPuyo.field == field
 
   simulator.toggleInsert
 
   simulator.editCell = Green
   simulator.writeCell Row6, Col4
   field.insert Row6, Col4, Green
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.field == field
+  check simulator.nazoPuyo.puyoPuyo.field == field
 
   simulator.editCell = Cell.None
   simulator.writeCell Row8, Col4
   field.del Row8, Col4
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.field == field
+  check simulator.nazoPuyo.puyoPuyo.field == field
 
   simulator.toggleFocus
 
   simulator.writeCell Yellow
   steps.insert Step.init(YellowYellow), 0
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.steps == steps
+  check simulator.nazoPuyo.puyoPuyo.steps == steps
 
   simulator.writeCell Cell.None
   steps.del 0
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.steps == steps
+  check simulator.nazoPuyo.puyoPuyo.steps == steps
 
   simulator.toggleInsert
 
   simulator.editCell = Blue
   simulator.writeCell 2, false
   steps[2].pair.rotor = Blue
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.steps == steps
+  check simulator.nazoPuyo.puyoPuyo.steps == steps
 
   simulator.editCell = Garbage
   simulator.writeCell 1, false
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.steps == steps
+  check simulator.nazoPuyo.puyoPuyo.steps == steps
 
   simulator.editCell = Hard
   simulator.writeCell 1, true
   steps[1].dropHard.assign true
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.steps == steps
+  check simulator.nazoPuyo.puyoPuyo.steps == steps
 
   simulator.writeCell 2, true
   steps[2] = Step.init([0, 0, 0, 0, 0, 0], true)
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.steps == steps
+  check simulator.nazoPuyo.puyoPuyo.steps == steps
 
   simulator.editCell = Purple
   simulator.writeCell 3, true
   steps[3] = Step.init PurplePurple
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.steps == steps
+  check simulator.nazoPuyo.puyoPuyo.steps == steps
 
   simulator.editCell = Yellow
   simulator.writeCell 4, false
   steps.addLast Step.init YellowYellow
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.steps == steps
+  check simulator.nazoPuyo.puyoPuyo.steps == steps
 
   simulator.editCross = false
   simulator.writeCell 2, true
   steps[2] = Step.init(cross = false)
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.steps == steps
-
-  simulator.writeRotate(cross = true)
-  steps[0] = Step.init(cross = true)
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.steps == steps
+  check simulator.nazoPuyo.puyoPuyo.steps == steps
 
   simulator.writeRotate(cross = false)
   steps[0] = Step.init(cross = false)
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.steps == steps
+  check simulator.nazoPuyo.puyoPuyo.steps == steps
 
 # ------------------------------------------------
 # Edit - Shift / Flip
 # ------------------------------------------------
 
 block: # shiftFieldUp, shiftFieldDown, shiftFieldRight, shiftFieldLeft
-  let nazo = parseNazoPuyo[TsuField](
+  let nazoPuyo =
     """
 ぷよ全て消すべし
 ======
+[だいかいてん]
 ......
 ......
 ......
@@ -422,71 +396,55 @@ block: # shiftFieldUp, shiftFieldDown, shiftFieldRight, shiftFieldLeft
 ------
 rg|
 (0,1,2,3,4,5)
-O"""
-  ).unsafeValue
+R""".parseNazoPuyo.unsafeValue
   var
-    field = nazo.puyoPuyo.field
-    steps = nazo.puyoPuyo.steps
-    simulator = Simulator.init(nazo, EditorEdit)
+    field = nazoPuyo.puyoPuyo.field
+    steps = nazoPuyo.puyoPuyo.steps
+    simulator = Simulator.init(nazoPuyo, EditorEdit)
 
   simulator.shiftFieldUp
   field.shiftUp
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.field == field
+  check simulator.nazoPuyo.puyoPuyo.field == field
 
   simulator.shiftFieldDown
   field.shiftDown
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.field == field
+  check simulator.nazoPuyo.puyoPuyo.field == field
 
   simulator.shiftFieldRight
   field.shiftRight
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.field == field
+  check simulator.nazoPuyo.puyoPuyo.field == field
 
   simulator.shiftFieldLeft
   field.shiftLeft
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.field == field
+  check simulator.nazoPuyo.puyoPuyo.field == field
 
   simulator.flipFieldVertical
   field.flipVertical
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.field == field
+  check simulator.nazoPuyo.puyoPuyo.field == field
 
   simulator.flipFieldHorizontal
   field.flipHorizontal
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.field == field
+  check simulator.nazoPuyo.puyoPuyo.field == field
 
   simulator.flip
   field.flipHorizontal
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.field == field
+  check simulator.nazoPuyo.puyoPuyo.field == field
 
   simulator.toggleFocus
 
   simulator.flip
   steps[0].pair.swap
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.steps == steps
+  check simulator.nazoPuyo.puyoPuyo.steps == steps
 
   simulator.moveCursorDown
   simulator.flip
   steps[1].counts.reverse
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.steps == steps
+  check simulator.nazoPuyo.puyoPuyo.steps == steps
 
   simulator.moveCursorDown
-  simulator.flip
-  steps[2].cross.toggle
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.steps == steps
-
   simulator.moveCursorDown
   simulator.flip
-  simulator.nazoPuyoWrap.unwrap:
-    check it.puyoPuyo.steps == steps
+  check simulator.nazoPuyo.puyoPuyo.steps == steps
 
 # ------------------------------------------------
 # Edit - Goal
@@ -496,58 +454,43 @@ block:
   # normalizeGoal, `goalKindOpt=`, `goalColor=`, `goalVal=`, `goalValOperator=`,
   # `goalClearColorOpt=`
   var simulator = Simulator.init(
-    NazoPuyo[TsuField].init(
-      PuyoPuyo[TsuField].init, Goal.init(Color, GoalColor.Red, 2, Exact)
-    ),
-    EditorEdit,
+    NazoPuyo.init(PuyoPuyo.init, Goal.init(Color, GoalColor.Red, 2, Exact)), EditorEdit
   )
   simulator.normalizeGoal
-  simulator.nazoPuyoWrap.unwrap:
-    check it.goal == Goal.init(Color, 2, Exact)
+  check simulator.nazoPuyo.goal == Goal.init(Color, 2, Exact)
 
   simulator.goalKindOpt = Opt[GoalKind].ok Chain
-  simulator.nazoPuyoWrap.unwrap:
-    check it.goal == Goal.init(Chain, 2, Exact)
+  check simulator.nazoPuyo.goal == Goal.init(Chain, 2, Exact)
 
   simulator.goalColor = GoalColor.Yellow
-  simulator.nazoPuyoWrap.unwrap:
-    check it.goal == Goal.init(Chain, 2, Exact)
+  check simulator.nazoPuyo.goal == Goal.init(Chain, 2, Exact)
 
   simulator.goalVal = 3
-  simulator.nazoPuyoWrap.unwrap:
-    check it.goal == Goal.init(Chain, 3, Exact)
+  check simulator.nazoPuyo.goal == Goal.init(Chain, 3, Exact)
 
   simulator.goalValOperator = AtLeast
-  simulator.nazoPuyoWrap.unwrap:
-    check it.goal == Goal.init(Chain, 3, AtLeast)
+  check simulator.nazoPuyo.goal == Goal.init(Chain, 3, AtLeast)
 
   simulator.goalClearColorOpt = Opt[GoalColor].ok All
-  simulator.nazoPuyoWrap.unwrap:
-    check it.goal == Goal.init(Chain, 3, AtLeast, All)
+  check simulator.nazoPuyo.goal == Goal.init(Chain, 3, AtLeast, All)
 
   simulator.goalKindOpt = Opt[GoalKind].err
-  simulator.nazoPuyoWrap.unwrap:
-    check it.goal == Goal.init All
+  check simulator.nazoPuyo.goal == Goal.init All
 
   simulator.goalColor = GoalColor.Red
-  simulator.nazoPuyoWrap.unwrap:
-    check it.goal == Goal.init All
+  check simulator.nazoPuyo.goal == Goal.init All
 
   simulator.goalVal = 1
-  simulator.nazoPuyoWrap.unwrap:
-    check it.goal == Goal.init All
+  check simulator.nazoPuyo.goal == Goal.init All
 
   simulator.goalValOperator = AtLeast
-  simulator.nazoPuyoWrap.unwrap:
-    check it.goal == Goal.init All
+  check simulator.nazoPuyo.goal == Goal.init All
 
   simulator.goalClearColorOpt = Opt[GoalColor].ok Colors
-  simulator.nazoPuyoWrap.unwrap:
-    check it.goal == Goal.init Colors
+  check simulator.nazoPuyo.goal == Goal.init Colors
 
   simulator.goalClearColorOpt = Opt[GoalColor].err
-  simulator.nazoPuyoWrap.unwrap:
-    check it.goal == NoneGoal
+  check simulator.nazoPuyo.goal == NoneGoal
 
 # ------------------------------------------------
 # Edit - Other
@@ -603,10 +546,11 @@ block:
 block: # forward, backward, reset
   block: # play
     let
-      wrap0 = NazoPuyoWrap.init parseNazoPuyo[TsuField](
+      nazoPuyo0 =
         """
 ちょうど3連鎖するべし
 ======
+[だいかいてん]
 ......
 ......
 ......
@@ -622,12 +566,12 @@ block: # forward, backward, reset
 .ggooo
 ------
 rb|
-O"""
-      ).unsafeValue
-      wrap0P = NazoPuyoWrap.init parseNazoPuyo[TsuField](
+R""".parseNazoPuyo.unsafeValue
+      nazoPuyo0P =
         """
 ちょうど3連鎖するべし
 ======
+[だいかいてん]
 ......
 ......
 ......
@@ -643,12 +587,12 @@ O"""
 .ggooo
 ------
 rb|6N
-O"""
-      ).unsafeValue
-      wrap1 = NazoPuyoWrap.init parseNazoPuyo[TsuField](
+R""".parseNazoPuyo.unsafeValue
+      nazoPuyo1 =
         """
 ちょうど3連鎖するべし
 ======
+[だいかいてん]
 ......
 ......
 ......
@@ -664,12 +608,12 @@ O"""
 .ggooo
 ------
 rb|6N
-O"""
-      ).unsafeValue
-      wrap2 = NazoPuyoWrap.init parseNazoPuyo[TsuField](
+R""".parseNazoPuyo.unsafeValue
+      nazoPuyo2 =
         """
 ちょうど3連鎖するべし
 ======
+[だいかいてん]
 ......
 ......
 ......
@@ -685,12 +629,12 @@ O"""
 .ggo..
 ------
 rb|6N
-O"""
-      ).unsafeValue
-      wrap3 = NazoPuyoWrap.init parseNazoPuyo[TsuField](
+R""".parseNazoPuyo.unsafeValue
+      nazoPuyo3 =
         """
 ちょうど3連鎖するべし
 ======
+[だいかいてん]
 ......
 ......
 ......
@@ -706,12 +650,12 @@ O"""
 .ggobb
 ------
 rb|6N
-O"""
-      ).unsafeValue
-      wrap4 = NazoPuyoWrap.init parseNazoPuyo[TsuField](
+R""".parseNazoPuyo.unsafeValue
+      nazoPuyo4 =
         """
 ちょうど3連鎖するべし
 ======
+[だいかいてん]
 ......
 bbogg.
 ..bgo.
@@ -727,12 +671,12 @@ bbogg.
 ......
 ------
 rb|6N
-O"""
-      ).unsafeValue
-      wrap5 = NazoPuyoWrap.init parseNazoPuyo[TsuField](
+R""".parseNazoPuyo.unsafeValue
+      nazoPuyo5 =
         """
 ちょうど3連鎖するべし
 ======
+[だいかいてん]
 ......
 ......
 ......
@@ -748,8 +692,7 @@ O"""
 bbboo.
 ------
 rb|6N
-O"""
-      ).unsafeValue
+R""".parseNazoPuyo.unsafeValue
 
       counts: array[Cell, int] = [0, 0, 2, 4, 0, 0, 0, 0]
       full: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[], @[], @[], @[]]
@@ -760,84 +703,85 @@ O"""
       moveResult4 = MoveResult.init true
       moveResult5 = MoveResult.init true
 
-    var simulator = Simulator.init wrap0
+    var simulator = Simulator.init nazoPuyo0
     check simulator.moveResult == moveResult0
 
     for _ in 1 .. 3:
       simulator.movePlacementRight
     simulator.forward
-    check simulator.nazoPuyoWrap == wrap1
+    check simulator.nazoPuyo == nazoPuyo1
     check simulator.moveResult == moveResult1
 
     simulator.forward
-    check simulator.nazoPuyoWrap == wrap2
+    check simulator.nazoPuyo == nazoPuyo2
     check simulator.moveResult == moveResult2
 
     simulator.forward
-    check simulator.nazoPuyoWrap == wrap3
+    check simulator.nazoPuyo == nazoPuyo3
     check simulator.moveResult == moveResult3
 
     simulator.forward
-    check simulator.nazoPuyoWrap == wrap4
+    check simulator.nazoPuyo == nazoPuyo4
     check simulator.moveResult == moveResult4
 
     simulator.forward
-    check simulator.nazoPuyoWrap == wrap5
+    check simulator.nazoPuyo == nazoPuyo5
     check simulator.moveResult == moveResult5
 
     simulator.forward
-    check simulator.nazoPuyoWrap == wrap5
+    check simulator.nazoPuyo == nazoPuyo5
     check simulator.moveResult == moveResult5
 
     simulator.forward(replay = true)
-    check simulator.nazoPuyoWrap == wrap5
+    check simulator.nazoPuyo == nazoPuyo5
     check simulator.moveResult == moveResult5
 
     simulator.forward(skip = true)
-    check simulator.nazoPuyoWrap == wrap5
+    check simulator.nazoPuyo == nazoPuyo5
     check simulator.moveResult == moveResult5
 
     simulator.backward
-    check simulator.nazoPuyoWrap == wrap3
+    check simulator.nazoPuyo == nazoPuyo3
     check simulator.moveResult == moveResult3
 
     simulator.backward(detail = true)
-    check simulator.nazoPuyoWrap == wrap2
+    check simulator.nazoPuyo == nazoPuyo2
     check simulator.moveResult == moveResult2
 
     simulator.backward(detail = true)
-    check simulator.nazoPuyoWrap == wrap1
+    check simulator.nazoPuyo == nazoPuyo1
     check simulator.moveResult == moveResult1
 
     simulator.backward(detail = true)
-    check simulator.nazoPuyoWrap == wrap0P
+    check simulator.nazoPuyo == nazoPuyo0P
     check simulator.moveResult == moveResult0
 
     simulator.backward(detail = true)
-    check simulator.nazoPuyoWrap == wrap0P
+    check simulator.nazoPuyo == nazoPuyo0P
     check simulator.moveResult == moveResult0
 
     simulator.backward
-    check simulator.nazoPuyoWrap == wrap0P
+    check simulator.nazoPuyo == nazoPuyo0P
     check simulator.moveResult == moveResult0
 
     simulator.forward(replay = true)
-    check simulator.nazoPuyoWrap == wrap1
+    check simulator.nazoPuyo == nazoPuyo1
     check simulator.moveResult == moveResult1
 
     simulator.reset
-    check simulator.nazoPuyoWrap == wrap0P
+    check simulator.nazoPuyo == nazoPuyo0P
     check simulator.moveResult == moveResult0
 
     simulator.forward(skip = true)
-    check simulator.nazoPuyoWrap == wrap0
+    check simulator.nazoPuyo == nazoPuyo0
     check simulator.moveResult == moveResult0
 
   block: # edit
-    let nazo0 = parseNazoPuyo[TsuField](
+    let nazoPuyo0 =
       """
 ちょうど3連鎖するべし
 ======
+[通]
 ......
 ......
 ......
@@ -852,37 +796,32 @@ O"""
 .ogbrr
 .ggooo
 ------
-rb|"""
-    ).unsafeValue
+rb|""".parseNazoPuyo.unsafeValue
     var
-      field = nazo0.puyoPuyo.field
-      simulator = Simulator.init(nazo0, EditorEdit)
+      field = nazoPuyo0.puyoPuyo.field
+      simulator = Simulator.init(nazoPuyo0, EditorEdit)
     let field0 = field
     check simulator.state == AfterEdit
 
     simulator.forward
     field.settle
     check simulator.state == WillPop
-    simulator.nazoPuyoWrap.unwrap:
-      check it.puyoPuyo.field == field
+    check simulator.nazoPuyo.puyoPuyo.field == field
 
     simulator.forward
     discard field.pop
     check simulator.state == WillSettle
-    simulator.nazoPuyoWrap.unwrap:
-      check it.puyoPuyo.field == field
+    check simulator.nazoPuyo.puyoPuyo.field == field
 
     simulator.backward
     check simulator.state == AfterEdit
-    simulator.nazoPuyoWrap.unwrap:
-      check it.puyoPuyo.field == field0
+    check simulator.nazoPuyo.puyoPuyo.field == field0
 
     for _ in 1 .. 3:
       simulator.forward
     simulator.reset
     check simulator.state == AfterEdit
-    simulator.nazoPuyoWrap.unwrap:
-      check it.puyoPuyo.field == field0
+    check simulator.nazoPuyo.puyoPuyo.field == field0
 
     simulator.forward
     simulator.forward
@@ -890,42 +829,38 @@ rb|"""
     simulator.writeCell Cell.Purple
     field[Row0, Col0] = Cell.Purple
     check simulator.state == AfterEdit
-    simulator.nazoPuyoWrap.unwrap:
-      check it.puyoPuyo.field == field
+    check simulator.nazoPuyo.puyoPuyo.field == field
 
     simulator.forward
     field.settle
     check simulator.state == Stable
-    simulator.nazoPuyoWrap.unwrap:
-      check it.puyoPuyo.field == field
+    check simulator.nazoPuyo.puyoPuyo.field == field
 
     simulator.forward
     check simulator.state == Stable
-    simulator.nazoPuyoWrap.unwrap:
-      check it.puyoPuyo.field == field
+    check simulator.nazoPuyo.puyoPuyo.field == field
 
     simulator.writeCell Cell.Yellow
     field[Row0, Col0] = Cell.Yellow
     simulator.forward
     simulator.reset
     check simulator.state == AfterEdit
-    simulator.nazoPuyoWrap.unwrap:
-      check it.puyoPuyo.field == field
+    check simulator.nazoPuyo.puyoPuyo.field == field
 
     simulator.backward
     check simulator.state == AfterEdit
-    simulator.nazoPuyoWrap.unwrap:
-      check it.puyoPuyo.field == field
+    check simulator.nazoPuyo.puyoPuyo.field == field
 
 # ------------------------------------------------
 # Mark
 # ------------------------------------------------
 
 block: # mark
-  let nazo = parseNazoPuyo[TsuField](
+  let nazoPuyo =
     """
 ちょうど1連鎖するべし
 ======
+[通]
 ......
 ......
 ......
@@ -941,9 +876,8 @@ block: # mark
 .yyy..
 ------
 yy|
-yy|"""
-  ).unsafeValue
-  var simulator = Simulator.init nazo
+yy|""".parseNazoPuyo.unsafeValue
+  var simulator = Simulator.init nazoPuyo
   check simulator.mark == WrongAnswer
 
   simulator.movePlacementRight
@@ -982,17 +916,18 @@ yy|"""
   simulator.backward
   check simulator.mark == WrongAnswer
 
-  check Simulator.init(PuyoPuyo[TsuField].init).mark == NotSupport
+  check Simulator.init(PuyoPuyo.init).mark == NotSupport
 
 # ------------------------------------------------
 # Keyboard
 # ------------------------------------------------
 
 block: # operate
-  let nazo = parseNazoPuyo[TsuField](
+  let nazoPuyo =
     """
 ちょうど1連鎖するべし
 ======
+[通]
 ......
 ......
 ......
@@ -1009,11 +944,10 @@ block: # operate
 ------
 rg|1N
 by|
-pp|23"""
-  ).unsafeValue
+pp|23""".parseNazoPuyo.unsafeValue
   var
-    simulator1 = Simulator.init nazo
-    simulator2 = Simulator.init nazo
+    simulator1 = Simulator.init nazoPuyo
+    simulator2 = Simulator.init nazoPuyo
   check simulator1 == simulator2
 
   simulator1.rotatePlacementLeft
@@ -1175,8 +1109,8 @@ pp|23"""
   check simulator1 == simulator2
 
   var
-    simulator3 = Simulator.init(nazo, Replay)
-    simulator4 = Simulator.init(nazo, Replay)
+    simulator3 = Simulator.init(nazoPuyo, Replay)
+    simulator4 = Simulator.init(nazoPuyo, Replay)
   check simulator3 == simulator4
 
   simulator3.forward(replay = true)
@@ -1207,12 +1141,12 @@ pp|23"""
   check simulator3 == simulator4
 
   var
-    simulator5 = Simulator.init(nazo, EditorEdit)
-    simulator6 = Simulator.init(nazo, EditorEdit)
+    simulator5 = Simulator.init(nazoPuyo, EditorEdit)
+    simulator6 = Simulator.init(nazoPuyo, EditorEdit)
   check simulator5 == simulator6
 
   simulator5.rule = Water
-  check simulator6.operate KeyEvent.init 'r'
+  check simulator6.operate KeyEvent.init 'e'
   check simulator5 == simulator6
 
   simulator5.rule = Tsu
@@ -1239,16 +1173,15 @@ pp|23"""
 block: # toUri, parseSimulator
   block: # Nazo Puyo
     let
-      simulator =
-        Simulator.init NazoPuyo[TsuField].init(PuyoPuyo[TsuField].init, Goal.init All)
+      simulator = Simulator.init NazoPuyo.init(PuyoPuyo.init, Goal.init All)
       uriPon2 =
-        "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps&goal=_0".parseUri
+        "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps&goal=_0".parseUri
       uriIshikawa = "https://ishikawapuyo.net/simu/pn.html?___200".parseUri
       uriIps = "https://ips.karou.jp/simu/pn.html?___200".parseUri
       uriPon22 =
-        "https://24ik.github.io/pon2/stable/studio/?field=t_&steps&goal=_0".parseUri
+        "https://24ik.github.io/pon2/stable/studio/?field=0_&steps&goal=_0".parseUri
       uriPon23 =
-        "https://24ik.github.io/pon2/stable/studio/index.html?mode=vp&field=t_&steps&goal=_0".parseUri
+        "https://24ik.github.io/pon2/stable/studio/index.html?mode=0&field=0_&steps&goal=_0".parseUri
       uriIshikawa2 = "http://ishikawapuyo.net/simu/pn.html?___200".parseUri
       uriIshikawa3 = "http://ishikawapuyo.net/simu/pn.html?__200".parseUri
       uriIps2 = "http://ishikawapuyo.net/simu/pn.html?___200".parseUri
@@ -1268,17 +1201,17 @@ block: # toUri, parseSimulator
 
   block: # Puyo Puyo
     let
-      simulator = Simulator.init PuyoPuyo[TsuField].init
+      simulator = Simulator.init PuyoPuyo.init
       uriPon2 =
-        "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps&goal=_".parseUri
+        "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps&goal=_".parseUri
       uriIshikawa = "https://ishikawapuyo.net/simu/ps.html?___".parseUri
       uriIps = "https://ips.karou.jp/simu/ps.html?___".parseUri
       uriPon22 =
-        "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps&goal=".parseUri
+        "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps&goal=".parseUri
       uriPon23 =
-        "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps&goal".parseUri
+        "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps&goal".parseUri
       uriPon24 =
-        "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps".parseUri
+        "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps".parseUri
       uriIshikawa2 = "https://ishikawapuyo.net/simu/ps.html?__".parseUri
       uriIshikawa3 = "https://ishikawapuyo.net/simu/ps.html?_".parseUri
       uriIshikawa4 = "https://ishikawapuyo.net/simu/ps.html?".parseUri
@@ -1302,10 +1235,11 @@ block: # toUri, parseSimulator
     check uriIshikawa6.parseSimulator == StrErrorResult[Simulator].ok simulator
 
   block: # clearPlacements
-    let nazo = parseNazoPuyo[TsuField](
+    let nazoPuyo =
       """
 ちょうど6連鎖するべし
 ======
+[通]
 ......
 ......
 ......
@@ -1322,11 +1256,10 @@ block: # toUri, parseSimulator
 ------
 rb|1N
 pp|
-gy|23"""
-    ).unsafeValue
+gy|23""".parseNazoPuyo.unsafeValue
 
-    check Simulator.init(nazo).toUri(clearPlacements = true) ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_b..&steps=rbppgy&goal=0_0_6_0_".parseUri
+    check Simulator.init(nazoPuyo).toUri(clearPlacements = true) ==
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_b..&steps=rbppgy&goal=0_0_6_0_".parseUri
 
 block: # toExportUri
   # EditorEdit
@@ -1339,11 +1272,11 @@ block: # toExportUri
     simulator.forward
 
     check simulator.toUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=ee&field=t_g&steps&goal=_".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=3&field=0_g&steps&goal=_".parseUri
     check simulator.toExportUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_g......&steps&goal=_".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_g......&steps&goal=_".parseUri
     check simulator.toExportUri(viewer = false) ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=ep&field=t_g......&steps&goal=_".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=2&field=0_g......&steps&goal=_".parseUri
 
   # ViewerEdit
   block:
@@ -1355,14 +1288,15 @@ block: # toExportUri
     simulator.forward
 
     check simulator.toExportUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps&goal=_".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps&goal=_".parseUri
 
   # ViewerPlay
   block:
-    let nazo = parseNazoPuyo[TsuField](
+    let nazoPuyo =
       """
 ちょうど1連鎖するべし
 ======
+[通]
 ......
 ......
 ......
@@ -1377,16 +1311,15 @@ block: # toExportUri
 ......
 ......
 ------
-rb|"""
-    ).unsafeValue
+rb|""".parseNazoPuyo.unsafeValue
 
-    var simulator = Simulator.init nazo
+    var simulator = Simulator.init nazoPuyo
     simulator.rotatePlacementRight
     simulator.forward
 
     check simulator.toUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_rb..&steps=rb34&goal=0_0_1_0_".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_rb..&steps=rb34&goal=0_0_1_0_".parseUri
     check simulator.toExportUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps=rb&goal=0_0_1_0_".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps=rb&goal=0_0_1_0_".parseUri
     check simulator.toExportUri(clearPlacements = false) ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=vp&field=t_&steps=rb34&goal=0_0_1_0_".parseUri
+      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps=rb34&goal=0_0_1_0_".parseUri

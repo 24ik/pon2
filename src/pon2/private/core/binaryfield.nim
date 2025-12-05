@@ -37,14 +37,15 @@ else:
 # Property
 # ------------------------------------------------
 
-func isDead*(self: BinaryField, rule: static Rule): bool {.inline, noinit.} =
+func isDead*(self: BinaryField, deadRule: DeadRule): bool {.inline, noinit.} =
   ## Returns `true` if the binary field is in a defeated state.
-  staticCase:
-    case rule
-    of Tsu:
-      self[Row1, Col2]
-    of Water:
-      self * BinaryField.initLowerAir != BinaryField.init
+  case deadRule
+  of DeadRule.Tsu:
+    self[Row1, Col2]
+  of Fever:
+    self[Row1, Col2] or self[Row1, Col3]
+  of DeadRule.Water:
+    self * BinaryField.initLowerAir != BinaryField.init
 
 # ------------------------------------------------
 # Placement

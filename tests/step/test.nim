@@ -156,19 +156,19 @@ block: # garbages
 
   block: # rotate
     let step = Step.init(cross = false)
-    check $step == "O"
-    check "O".parseStep == StrErrorResult[Step].ok step
+    check $step == "R"
+    check "R".parseStep == StrErrorResult[Step].ok step
 
-    check step.toUriQuery(Pon2) == StrErrorResult[string].ok "O"
+    check step.toUriQuery(Pon2) == StrErrorResult[string].ok "R"
     check step.toUriQuery(Ishikawa).isErr
     check step.toUriQuery(Ips).isErr
 
   block: # cross rotate
     let step = Step.init(cross = true)
-    check $step == "X"
-    check "X".parseStep == StrErrorResult[Step].ok step
+    check $step == "C"
+    check "C".parseStep == StrErrorResult[Step].ok step
 
-    check step.toUriQuery(Pon2) == StrErrorResult[string].ok "X"
+    check step.toUriQuery(Pon2) == StrErrorResult[string].ok "C"
     check step.toUriQuery(Ishikawa).isErr
     check step.toUriQuery(Ips).isErr
 
@@ -215,11 +215,11 @@ block: # `$`, parseSteps, toUriQuery
   block: # rotate
     let steps = [Step.init(cross = true), Step.init(cross = false)].toDeque
 
-    let str = "X\nO"
+    let str = "C\nR"
     check $steps == str
     check str.parseSteps == StrErrorResult[Steps].ok steps
 
-    let query = "XO"
+    let query = "CR"
     check steps.toUriQuery(Pon2) == StrErrorResult[string].ok query
     check steps.toUriQuery(Ishikawa).isErr
     check steps.toUriQuery(Ips).isErr
