@@ -21,6 +21,7 @@ when defined(js) or defined(nimsuggest):
 
 when not defined(js):
   import std/[os, sequtils, sugar]
+  import ../private/[assign, tables]
 
   {.push warning[Deprecated]: off.}
   import std/[threadpool]
@@ -31,6 +32,11 @@ type SolveAnswer* = seq[OptPlacement]
   ## Elements corresponding to non-`PairPlacement` steps are set to `NonePlacement`.
 
 when not defined(js):
+  # NOTE: `ChildTargetDepth == 4` is good; see https://github.com/24ik/pon2/issues/260
+  const
+    SolvePollingMs = 50
+    ChildTargetDepth = 4
+
   proc solveSingleThread(
       self: SolveNode,
       answers: ptr seq[SolveAnswer],
@@ -48,36 +54,6 @@ when not defined(js):
     )
     true
 
-  func checkSpawnFinished(
-      futures: seq[FlowVar[bool]],
-      answers: var seq[SolveAnswer],
-      answersSeq: var seq[seq[SolveAnswer]],
-      runningNodeIndices: var set[int16],
-      optPlacementsSeq: seq[seq[OptPlacement]],
-      calcAllAnswers: bool,
-  ): bool =
-    ## Checks all the spawned threads and reflects results if they have finished.
-    ## Returns `true` if early-returned.
-    var finishNodeIndices = set[int16]({})
-
-    for runningNodeIndex in runningNodeIndices:
-      if not futures[runningNodeIndex].isReady:
-        continue
-
-      finishNodeIndices.incl runningNodeIndex
-
-      let optPlacements = optPlacementsSeq[runningNodeIndex]
-      for answer in answersSeq[runningNodeIndex].mitems:
-        answer &= optPlacements
-        answer.reverse
-
-      if not calcAllAnswers and answers.len + answersSeq[runningNodeIndex].len > 1:
-        runningNodeIndices.excl finishNodeIndices
-        return true
-
-    runningNodeIndices.excl finishNodeIndices
-    false
-
   proc solveMultiThread(
       self: SolveNode,
       answers: var seq[SolveAnswer],
@@ -88,19 +64,10 @@ when not defined(js):
   ) =
     ## Solves the Nazo Puyo at the node with multiple threads.
     ## This function requires that the field is settled and `answers` is empty.
-    const
-      SpawnWaitMs = 25
-      SolveWaitMs = 50
-
-    # NOTE: `TargetDepth == 3` is good; see https://github.com/24ik/pon2/issues/198
-    # NOTE: `TargetDepth` should be less than 4 due to the limitations of Nim's built-in
-    # sets, that is used by node indices (22^3 < int16.high < 22^4)
-    const TargetDepth = 3
-
     var
       nodes = newSeq[SolveNode]()
       optPlacementsSeq = newSeq[seq[OptPlacement]]()
-    self.childrenAtDepth TargetDepth,
+    self.childrenAtDepth ChildTargetDepth,
       nodes, optPlacementsSeq, answers, moveCount, calcAllAnswers, goal, steps
 
     for answer in answers.mitems:
@@ -109,41 +76,50 @@ when not defined(js):
     if not calcAllAnswers and answers.len > 1:
       return
 
-    let nodeCount = nodes.len
+    var nodeToIndices = initTable[SolveNode, seq[int]](nodes.len)
+    for nodeIndex, node in nodes:
+      nodeToIndices.mgetOrPut(node, @[]).add nodeIndex
+
+    let futureCount = nodeToIndices.len
     var
       answersSeq = collect:
-        for _ in 1 .. nodeCount:
+        for _ in 1 .. futureCount:
           newSeq[SolveAnswer]()
-      futures = newSeqOfCap[FlowVar[bool]](nodeCount)
-      runningNodeIndices = set[int16]({})
+      futures = newSeqOfCap[FlowVar[bool]](futureCount)
 
-    var nodeIndex = 0'i16
-    while nodeIndex < nodeCount:
-      if preferSpawn():
-        futures.add spawn nodes[nodeIndex].solveSingleThread(
-          answersSeq[nodeIndex].addr, moveCount, calcAllAnswers, goal, steps
+    block:
+      var futureIndex = 0
+      for node in nodeToIndices.keys:
+        futures.add spawn node.solveSingleThread(
+          answersSeq[futureIndex].addr, moveCount, calcAllAnswers, goal, steps
         )
+        futureIndex.inc
 
-        runningNodeIndices.incl nodeIndex
-        nodeIndex.inc
+    var
+      completedCount = 0
+      completedSeq = false.repeat futureCount
+    while completedCount < futureCount:
+      var futureIndex = 0
+      for node in nodeToIndices.keys:
+        if completedSeq[futureIndex] or not futures[futureIndex].isReady:
+          futureIndex.inc
+          continue
 
-        continue
+        let nodeIndices = nodeToIndices[node].unsafeValue
+        for nodeIndex in nodeIndices:
+          {.push warning[Uninit]: off.}
+          answers &=
+            answersSeq[futureIndex].mapIt (it & optPlacementsSeq[nodeIndex]).reversed
+          {.pop.}
 
-      let earlyReturned {.used.} = futures.checkSpawnFinished(
-        answers, answersSeq, runningNodeIndices, optPlacementsSeq, calcAllAnswers
-      )
-      if not calcAllAnswers and earlyReturned:
-        break
+        if not calcAllAnswers and answers.len > 1:
+          return
 
-      sleep SpawnWaitMs
+        completedCount.inc
+        completedSeq[futureIndex].assign true
+        futureIndex.inc
 
-    while runningNodeIndices.card > 0:
-      discard futures.checkSpawnFinished(
-        answers, answersSeq, runningNodeIndices, optPlacementsSeq, calcAllAnswers
-      )
-      sleep SolveWaitMs
-
-    answers &= answersSeq.concat
+      sleep SolvePollingMs
 
 proc solve*(self: NazoPuyo, calcAllAnswers = true): seq[SolveAnswer] =
   ## Solves the Nazo Puyo.
@@ -182,6 +158,9 @@ proc solve*(self: NazoPuyo, calcAllAnswers = true): seq[SolveAnswer] =
 
 when defined(js) or defined(nimsuggest):
   when not defined(pon2.build.worker):
+    # NOTE: 2 and 3 show similar performance; 2 is chosen for faster `childrenAtDepth`
+    const ChildTargetDepth = 2
+
     func initCompleteHandler(
         nodeIndex: int,
         optPlacementsSeq: seq[seq[OptPlacement]],
@@ -216,9 +195,6 @@ when defined(js) or defined(nimsuggest):
     ): Future[seq[SolveAnswer]] {.async.} =
       ## Solves the Nazo Puyo asynchronously with web workers.
       ## This function requires that the field is settled.
-      # NOTE: 2 and 3 show similar performance; 2 is chosen for faster `childrenAtDepth`
-      const TargetDepth = 2
-
       if not progressRef.isNil:
         progressRef[] = (0, 0)
 
@@ -235,7 +211,7 @@ when defined(js) or defined(nimsuggest):
         optPlacementsSeq = newSeq[seq[OptPlacement]]()
         answers = newSeq[SolveAnswer]()
 
-      rootNode.childrenAtDepth TargetDepth,
+      rootNode.childrenAtDepth ChildTargetDepth,
         nodes, optPlacementsSeq, answers, self.puyoPuyo.steps.len, calcAllAnswers,
         self.goal, self.puyoPuyo.steps
 
@@ -276,3 +252,7 @@ when defined(js) or defined(nimsuggest):
         await future
 
       return answers & answersSeqRef[].concat
+
+when isMainModule:
+  let nazoPuyo = "4AimeNPrACeNOirue_o1c1C1A1o1__E04".parseNazoPuyo(Ishikawa).unsafeValue
+  echo nazoPuyo.solve
