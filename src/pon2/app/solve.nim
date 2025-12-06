@@ -276,33 +276,3 @@ when defined(js) or defined(nimsuggest):
         await future
 
       return answers & answersSeqRef[].concat
-
-when isMainModule:
-  let nazoPuyo =
-    """
-12連鎖以上するべし
-======
-[通]
-......
-....ob
-....ob
-....ob
-bbyyog
-bgryog
-ggrrog
-bbggoy
-brrgoy
-yryyoy
-ybbyor
-ybggor
-rrrgor
-------
-bg|
-rg|
-ry|
-by|
-yb|
-yr|
-gr|
-gb|""".parseNazoPuyo.unsafeValue
-  echo nazoPuyo
