@@ -1,2 +1,2 @@
 nimTitle	field	pon2/gui/simulator/field.html	module src/pon2/gui/simulator/field		0
-nim	toFieldVNode	pon2/gui/simulator/field.html#toFieldVNode,ref.S,VNodeHelper	proc toFieldVNode[S: Simulator or Studio or Marathon](self: ref S;\n    helper: VNodeHelper; cameraReady = false): VNode		49
+nim	toFieldVNode	pon2/gui/simulator/field.html#toFieldVNode,ref.S,VNodeHelper	proc toFieldVNode[S: Simulator or Studio or Marathon](self: ref S;\n    helper: VNodeHelper; cameraReady = false): VNode		54

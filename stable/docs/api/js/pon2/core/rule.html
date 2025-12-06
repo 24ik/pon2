@@ -58,8 +58,30 @@
   <details open>
     <summary><a class="reference reference-toplevel" href="#7" id="57">Types</a></summary>
     <ul class="simple simple-toc-section">
-      <li><a class="reference" href="#Rule" title="Rule {.pure.} = enum
-  Tsu = &quot;t&quot;, Water = &quot;w&quot;">Rule</a></li>
+      <li><a class="reference" href="#Behaviour" title="Behaviour = object
+  phys*: Phys
+  dead*: DeadRule
+  garbageRate*: int">Behaviour</a></li>
+<li><a class="reference" href="#DeadRule" title="DeadRule {.pure.} = enum
+  Tsu, Fever, Water">DeadRule</a></li>
+<li><a class="reference" href="#Phys" title="Phys {.pure.} = enum
+  Tsu, Water">Phys</a></li>
+<li><a class="reference" href="#Rule" title="Rule {.pure.} = enum
+  Tsu = &quot;通&quot;, Spinner = &quot;だいかいてん&quot;,
+  CrossSpinner = &quot;クロスかいてん&quot;, Water = &quot;すいちゅう&quot;">Rule</a></li>
+
+    </ul>
+  </details>
+</li>
+<li>
+  <details open>
+    <summary><a class="reference reference-toplevel" href="#10" id="60">Consts</a></summary>
+    <ul class="simple simple-toc-section">
+      <li><a class="reference" href="#Behaviours" title="Behaviours: array[Rule, Behaviour] = [(phys: Phys.Tsu, dead: DeadRule.Tsu,
+                                       garbageRate: 70), (phys: Phys.Tsu,
+    dead: DeadRule.Fever, garbageRate: 120), (phys: Phys.Tsu,
+    dead: DeadRule.Fever, garbageRate: 120), (phys: Phys.Water,
+    dead: DeadRule.Water, garbageRate: 90)]">Behaviours</a></li>
 
     </ul>
   </details>
@@ -87,22 +109,77 @@
     
     <div id="tocRoot"></div>
     
-    <p class="module-desc">This module implements Puyo Puyo rules. </p>
+    <p class="module-desc"><p>This module implements Puyo Puyo rules.</p>
+<p>Compile Options:</p>
+<table border="1" class="docutils"><tr><th>Option</th><th>Description</th><th>Default</th></tr>
+<tr><td><tt class="docutils literal"><span class="pre"><span class="Operator">-</span><span class="Identifier">d</span><span class="Punctuation">:</span><span class="Identifier">pon2</span><span class="Operator">.</span><span class="Identifier">garbagerate</span><span class="Operator">.</span><span class="Identifier">tsu</span><span class="Operator">=&lt;</span><span class="Identifier">int</span><span class="Operator">&gt;</span></span></tt></td><td>Garbage rate in Tsu rule.</td><td><tt class="docutils literal"><span class="pre"><span class="DecNumber">70</span></span></tt></td></tr>
+<tr><td><tt class="docutils literal"><span class="pre"><span class="Operator">-</span><span class="Identifier">d</span><span class="Punctuation">:</span><span class="Identifier">pon2</span><span class="Operator">.</span><span class="Identifier">garbagerate</span><span class="Operator">.</span><span class="Identifier">spinner</span><span class="Operator">=&lt;</span><span class="Identifier">int</span><span class="Operator">&gt;</span></span></tt></td><td>Garbage rate in Spinner rule.</td><td><tt class="docutils literal"><span class="pre"><span class="DecNumber">120</span></span></tt></td></tr>
+<tr><td><tt class="docutils literal"><span class="pre"><span class="Operator">-</span><span class="Identifier">d</span><span class="Punctuation">:</span><span class="Identifier">pon2</span><span class="Operator">.</span><span class="Identifier">garbagerate</span><span class="Operator">.</span><span class="Identifier">crossspinner</span><span class="Operator">=&lt;</span><span class="Identifier">int</span><span class="Operator">&gt;</span></span></tt></td><td>Garbage rate in Cross Spinner rule.</td><td><tt class="docutils literal"><span class="pre"><span class="DecNumber">120</span></span></tt></td></tr>
+<tr><td><tt class="docutils literal"><span class="pre"><span class="Operator">-</span><span class="Identifier">d</span><span class="Punctuation">:</span><span class="Identifier">pon2</span><span class="Operator">.</span><span class="Identifier">garbagerate</span><span class="Operator">.</span><span class="Identifier">water</span><span class="Operator">=&lt;</span><span class="Identifier">int</span><span class="Operator">&gt;</span></span></tt></td><td>Garbage rate in Water rule.</td><td><tt class="docutils literal"><span class="pre"><span class="DecNumber">90</span></span></tt></td></tr>
+</table></p>
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
-    <a class="reference external" href="../private/results2.html">../private/results2</a>, <a class="reference external" href="../private/tables.html">../private/tables</a>
+    <a class="reference external" href="../private/results2.html">../private/results2</a>
   </dl>
 </div>
 <div class="section" id="7">
   <h1><a class="toc-backref" href="#7">Types</a></h1>
   <dl class="item">
-    <div id="Rule">
+    <div id="Behaviour">
+  <dt><pre><a href="rule.html#Behaviour"><span class="Identifier">Behaviour</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">phys</span><span class="Operator">*</span><span class="Other">:</span> <a href="rule.html#Phys"><span class="Identifier">Phys</span></a>
+  <span class="Identifier">dead</span><span class="Operator">*</span><span class="Other">:</span> <a href="rule.html#DeadRule"><span class="Identifier">DeadRule</span></a>
+  <span class="Identifier">garbageRate</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span></pre></dt>
+  <dd>
+    
+    Field behaviour.
+    
+  </dd>
+</div>
+<div id="DeadRule">
+  <dt><pre><a href="rule.html#DeadRule"><span class="Identifier">DeadRule</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
+  <span class="Identifier">Tsu</span><span class="Other">,</span> <span class="Identifier">Fever</span><span class="Other">,</span> <span class="Identifier">Water</span></pre></dt>
+  <dd>
+    
+    Puyo Puyo rule of dead conditions.
+    
+  </dd>
+</div>
+<div id="Phys">
+  <dt><pre><a href="rule.html#Phys"><span class="Identifier">Phys</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
+  <span class="Identifier">Tsu</span><span class="Other">,</span> <span class="Identifier">Water</span></pre></dt>
+  <dd>
+    
+    Puyo Puyo physics of fields.
+    
+  </dd>
+</div>
+<div id="Rule">
   <dt><pre><a href="rule.html#Rule"><span class="Identifier">Rule</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">Tsu</span> <span class="Other">=</span> <span class="StringLit">&quot;t&quot;</span><span class="Other">,</span> <span class="Identifier">Water</span> <span class="Other">=</span> <span class="StringLit">&quot;w&quot;</span></pre></dt>
+  <span class="Identifier">Tsu</span> <span class="Other">=</span> <span class="StringLit">&quot;通&quot;</span><span class="Other">,</span> <span class="Identifier">Spinner</span> <span class="Other">=</span> <span class="StringLit">&quot;だいかいてん&quot;</span><span class="Other">,</span>
+  <span class="Identifier">CrossSpinner</span> <span class="Other">=</span> <span class="StringLit">&quot;クロスかいてん&quot;</span><span class="Other">,</span> <span class="Identifier">Water</span> <span class="Other">=</span> <span class="StringLit">&quot;すいちゅう&quot;</span></pre></dt>
   <dd>
     
     Puyo Puyo rule.
+    
+  </dd>
+</div>
+
+  </dl>
+</div>
+<div class="section" id="10">
+  <h1><a class="toc-backref" href="#10">Consts</a></h1>
+  <dl class="item">
+    <div id="Behaviours">
+  <dt><pre><a href="rule.html#Behaviours"><span class="Identifier">Behaviours</span></a><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Rule</span><span class="Other">,</span> <a href="rule.html#Behaviour"><span class="Identifier">Behaviour</span></a><span class="Other">]</span> <span class="Other">=</span> <span class="Other">[</span><span class="Other">(</span><span class="Identifier">phys</span><span class="Other">:</span> <span class="DecNumber">Phys.Tsu</span><span class="Other">,</span> <span class="Identifier">dead</span><span class="Other">:</span> <span class="DecNumber">DeadRule.Tsu</span><span class="Other">,</span>
+                                       <span class="Identifier">garbageRate</span><span class="Other">:</span> <span class="DecNumber">70</span><span class="Other">)</span><span class="Other">,</span> <span class="Other">(</span><span class="Identifier">phys</span><span class="Other">:</span> <span class="DecNumber">Phys.Tsu</span><span class="Other">,</span>
+    <span class="Identifier">dead</span><span class="Other">:</span> <span class="DecNumber">DeadRule.Fever</span><span class="Other">,</span> <span class="Identifier">garbageRate</span><span class="Other">:</span> <span class="DecNumber">120</span><span class="Other">)</span><span class="Other">,</span> <span class="Other">(</span><span class="Identifier">phys</span><span class="Other">:</span> <span class="DecNumber">Phys.Tsu</span><span class="Other">,</span>
+    <span class="Identifier">dead</span><span class="Other">:</span> <span class="DecNumber">DeadRule.Fever</span><span class="Other">,</span> <span class="Identifier">garbageRate</span><span class="Other">:</span> <span class="DecNumber">120</span><span class="Other">)</span><span class="Other">,</span> <span class="Other">(</span><span class="Identifier">phys</span><span class="Other">:</span> <span class="DecNumber">Phys.Water</span><span class="Other">,</span>
+    <span class="Identifier">dead</span><span class="Other">:</span> <span class="DecNumber">DeadRule.Water</span><span class="Other">,</span> <span class="Identifier">garbageRate</span><span class="Other">:</span> <span class="DecNumber">90</span><span class="Other">)</span><span class="Other">]</span></pre></dt>
+  <dd>
+    
+    
     
   </dd>
 </div>
@@ -140,7 +217,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-04 07:35:08 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-06 03:28:02 UTC</small>
       </div>
     </div>
   </div>

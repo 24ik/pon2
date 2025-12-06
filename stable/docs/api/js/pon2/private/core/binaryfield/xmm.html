@@ -117,7 +117,7 @@
 
 </ul>
 <ul class="simple nested-toc-section">del
-  <li><a class="reference" href="#del%2CM128i%2CRow%2CCol%2CstaticRule" title="del(self: var XmmBinaryField; row: Row; col: Col; rule: static Rule)">del(self: var XmmBinaryField; row: Row; col: Col; rule: static Rule)</a></li>
+  <li><a class="reference" href="#del%2CM128i%2CRow%2CCol%2CPhys" title="del(self: var XmmBinaryField; row: Row; col: Col; phys: Phys)">del(self: var XmmBinaryField; row: Row; col: Col; phys: Phys)</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">dropGarbagesTsu
@@ -161,9 +161,7 @@
 
 </ul>
 <ul class="simple nested-toc-section">insert
-  <li><a class="reference" href="#insert%2CM128i%2CRow%2CCol%2Cbool%2CstaticRule" title="insert(self: var XmmBinaryField; row: Row; col: Col; val: bool;
-       rule: static Rule)">insert(self: var XmmBinaryField; row: Row; col: Col; val: bool;
-       rule: static Rule)</a></li>
+  <li><a class="reference" href="#insert%2CM128i%2CRow%2CCol%2Cbool%2CPhys" title="insert(self: var XmmBinaryField; row: Row; col: Col; val: bool; phys: Phys)">insert(self: var XmmBinaryField; row: Row; col: Col; val: bool; phys: Phys)</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">keepValid
@@ -191,8 +189,8 @@
   <li><a class="reference" href="#popcnt%2CM128i" title="popcnt(self: XmmBinaryField): int">popcnt(self: XmmBinaryField): int</a></li>
 
 </ul>
-<ul class="simple nested-toc-section">prod
-  <li><a class="reference" href="#prod%2CM128i%2CM128i%2CM128i" title="prod(f1, f2, f3: XmmBinaryField): XmmBinaryField">prod(f1, f2, f3: XmmBinaryField): XmmBinaryField</a></li>
+<ul class="simple nested-toc-section">product
+  <li><a class="reference" href="#product%2CM128i%2CM128i%2CM128i" title="product(f1, f2, f3: XmmBinaryField): XmmBinaryField">product(f1, f2, f3: XmmBinaryField): XmmBinaryField</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">replace
@@ -483,9 +481,9 @@
 
 </div>
 <div id="del-procs-all">
-  <div id="del,M128i,Row,Col,staticRule">
-  <dt><pre><span class="Keyword">func</span> <a href="#del%2CM128i%2CRow%2CCol%2CstaticRule"><span class="Identifier">del</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="xmm.html#XmmBinaryField"><span class="Identifier">XmmBinaryField</span></a><span class="Other">;</span> <span class="Identifier">row</span><span class="Other">:</span> <a href="../../../core/common.html#Row"><span class="Identifier">Row</span></a><span class="Other">;</span> <span class="Identifier">col</span><span class="Other">:</span> <a href="../../../core/common.html#Col"><span class="Identifier">Col</span></a><span class="Other">;</span> <span class="Identifier">rule</span><span class="Other">:</span> <span class="Identifier">static</span> <span class="Identifier">Rule</span><span class="Other">)</span> {.
-    <span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <div id="del,M128i,Row,Col,Phys">
+  <dt><pre><span class="Keyword">func</span> <a href="#del%2CM128i%2CRow%2CCol%2CPhys"><span class="Identifier">del</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="xmm.html#XmmBinaryField"><span class="Identifier">XmmBinaryField</span></a><span class="Other">;</span> <span class="Identifier">row</span><span class="Other">:</span> <a href="../../../core/common.html#Row"><span class="Identifier">Row</span></a><span class="Other">;</span> <span class="Identifier">col</span><span class="Other">:</span> <a href="../../../core/common.html#Col"><span class="Identifier">Col</span></a><span class="Other">;</span> <span class="Identifier">phys</span><span class="Other">:</span> <a href="../../../core/rule.html#Phys"><span class="Identifier">Phys</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
+    <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Deletes the value and shifts the binary field. If (row, col) is in the air, shifts the binary field downward above where deleted. If it is in the water, shifts the binary field upward below where deleted.
@@ -600,9 +598,9 @@
 
 </div>
 <div id="insert-procs-all">
-  <div id="insert,M128i,Row,Col,bool,staticRule">
-  <dt><pre><span class="Keyword">func</span> <a href="#insert%2CM128i%2CRow%2CCol%2Cbool%2CstaticRule"><span class="Identifier">insert</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="xmm.html#XmmBinaryField"><span class="Identifier">XmmBinaryField</span></a><span class="Other">;</span> <span class="Identifier">row</span><span class="Other">:</span> <a href="../../../core/common.html#Row"><span class="Identifier">Row</span></a><span class="Other">;</span> <span class="Identifier">col</span><span class="Other">:</span> <a href="../../../core/common.html#Col"><span class="Identifier">Col</span></a><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">;</span>
-            <span class="Identifier">rule</span><span class="Other">:</span> <span class="Identifier">static</span> <span class="Identifier">Rule</span><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <div id="insert,M128i,Row,Col,bool,Phys">
+  <dt><pre><span class="Keyword">func</span> <a href="#insert%2CM128i%2CRow%2CCol%2Cbool%2CPhys"><span class="Identifier">insert</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="xmm.html#XmmBinaryField"><span class="Identifier">XmmBinaryField</span></a><span class="Other">;</span> <span class="Identifier">row</span><span class="Other">:</span> <a href="../../../core/common.html#Row"><span class="Identifier">Row</span></a><span class="Other">;</span> <span class="Identifier">col</span><span class="Other">:</span> <a href="../../../core/common.html#Col"><span class="Identifier">Col</span></a><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">;</span> <span class="Identifier">phys</span><span class="Other">:</span> <a href="../../../core/rule.html#Phys"><span class="Identifier">Phys</span></a><span class="Other">)</span> {.
+    <span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Inserts the value and shifts the binary field. If (row, col) is in the air, shifts the binary field upward above where inserted. If it is in the water, shifts the binary field downward below where inserted.
@@ -692,9 +690,9 @@
 </div>
 
 </div>
-<div id="prod-procs-all">
-  <div id="prod,M128i,M128i,M128i">
-  <dt><pre><span class="Keyword">func</span> <a href="#prod%2CM128i%2CM128i%2CM128i"><span class="Identifier">prod</span></a><span class="Other">(</span><span class="Identifier">f1</span><span class="Other">,</span> <span class="Identifier">f2</span><span class="Other">,</span> <span class="Identifier">f3</span><span class="Other">:</span> <a href="xmm.html#XmmBinaryField"><span class="Identifier">XmmBinaryField</span></a><span class="Other">)</span><span class="Other">:</span> <a href="xmm.html#XmmBinaryField"><span class="Identifier">XmmBinaryField</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
+<div id="product-procs-all">
+  <div id="product,M128i,M128i,M128i">
+  <dt><pre><span class="Keyword">func</span> <a href="#product%2CM128i%2CM128i%2CM128i"><span class="Identifier">product</span></a><span class="Other">(</span><span class="Identifier">f1</span><span class="Other">,</span> <span class="Identifier">f2</span><span class="Other">,</span> <span class="Identifier">f3</span><span class="Other">:</span> <a href="xmm.html#XmmBinaryField"><span class="Identifier">XmmBinaryField</span></a><span class="Other">)</span><span class="Other">:</span> <a href="xmm.html#XmmBinaryField"><span class="Identifier">XmmBinaryField</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -1031,7 +1029,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-04 07:35:09 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-06 03:28:03 UTC</small>
       </div>
     </div>
   </div>

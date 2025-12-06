@@ -6,9 +6,9 @@ rdoccmd:
 import std/assertions
 import "/home/runner/work/pon2/pon2/src/pon2/private/macros.nim"
 {.line: ("/home/runner/work/pon2/pon2/src/pon2/private/macros.nim", 45, 3).}:
-  # You can define a new macro `defineExample` by
-  # `defineExpand("Example", "Foo", "Bar")`.
+  defineExpand("Example", "Foo", "Bar")
   # This defines the following macro:
+  #[
   macro expandExample(identsAndBody: varargs[untyped]): untyped =
     ## Runs in sequence with the body (the last argument) changed to the specified
     ## identifiers (the rest arguments) with the suffix Foo, Bar.
@@ -31,8 +31,8 @@ import "/home/runner/work/pon2/pon2/src/pon2/private/macros.nim"
     add(stmts, bodyBar)
 
     stmts
+  ]#
 
-  # Usage of `expandExample`:
   let
     xFoo = 10
     xBar = 20

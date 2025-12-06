@@ -18,7 +18,7 @@ nim	sum	pon2/private/core/binaryfield/xmm.html#sum,M128i,M128i,M128i,M128i,M128i
 nim	sum	pon2/private/core/binaryfield/xmm.html#sum,M128i,M128i,M128i,M128i,M128i,M128i	proc sum(f1, f2, f3, f4, f5, f6: XmmBinaryField): XmmBinaryField		91
 nim	sum	pon2/private/core/binaryfield/xmm.html#sum,M128i,M128i,M128i,M128i,M128i,M128i,M128i	proc sum(f1, f2, f3, f4, f5, f6, f7: XmmBinaryField): XmmBinaryField		94
 nim	sum	pon2/private/core/binaryfield/xmm.html#sum,M128i,M128i,M128i,M128i,M128i,M128i,M128i,M128i	proc sum(f1, f2, f3, f4, f5, f6, f7, f8: XmmBinaryField): XmmBinaryField		99
-nim	prod	pon2/private/core/binaryfield/xmm.html#prod,M128i,M128i,M128i	proc prod(f1, f2, f3: XmmBinaryField): XmmBinaryField		104
+nim	product	pon2/private/core/binaryfield/xmm.html#product,M128i,M128i,M128i	proc product(f1, f2, f3: XmmBinaryField): XmmBinaryField		104
 nim	kept	pon2/private/core/binaryfield/xmm.html#kept,M128i,Row	proc kept(self: XmmBinaryField; row: Row): XmmBinaryField		141
 nim	kept	pon2/private/core/binaryfield/xmm.html#kept,M128i,Col	proc kept(self: XmmBinaryField; col: Col): XmmBinaryField		145
 nim	keptValid	pon2/private/core/binaryfield/xmm.html#keptValid,M128i	proc keptValid(self: XmmBinaryField): XmmBinaryField		149
@@ -51,14 +51,14 @@ nim	crossRotate	pon2/private/core/binaryfield/xmm.html#crossRotate,M128i	proc cr
 nim	`[]`	pon2/private/core/binaryfield/xmm.html#[],M128i,staticRow,staticCol	proc `[]`(self: XmmBinaryField; row: static Row; col: static Col): bool		311
 nim	`[]`	pon2/private/core/binaryfield/xmm.html#[],M128i,Row,Col	proc `[]`(self: XmmBinaryField; row: Row; col: Col): bool		321
 nim	`[]=`	pon2/private/core/binaryfield/xmm.html#[]=,M128i,Row,Col,bool	proc `[]=`(self: var XmmBinaryField; row: Row; col: Col; val: bool)		328
-nim	insert	pon2/private/core/binaryfield/xmm.html#insert,M128i,Row,Col,bool,staticRule	proc insert(self: var XmmBinaryField; row: Row; col: Col; val: bool;\n       rule: static Rule)		388
-nim	del	pon2/private/core/binaryfield/xmm.html#del,M128i,Row,Col,staticRule	proc del(self: var XmmBinaryField; row: Row; col: Col; rule: static Rule)		437
-nim	dropGarbagesTsu	pon2/private/core/binaryfield/xmm.html#dropGarbagesTsu,M128i,array[Col,int],M128i	proc dropGarbagesTsu(self: var XmmBinaryField; counts: array[Col, int];\n                existField: XmmBinaryField)		460
-nim	dropGarbagesWater	pon2/private/core/binaryfield/xmm.html#dropGarbagesWater,M128i,M128i,M128i,array[Col,int],M128i	proc dropGarbagesWater(self, other1, other2: var XmmBinaryField;\n                  counts: array[Col, int]; existField: XmmBinaryField)		477
-nim	settleTsu	pon2/private/core/binaryfield/xmm.html#settleTsu,M128i,M128i,M128i,M128i	proc settleTsu(field1, field2, field3: var XmmBinaryField; existField: XmmBinaryField)		556
-nim	settleWater	pon2/private/core/binaryfield/xmm.html#settleWater,M128i,M128i,M128i,M128i	proc settleWater(field1, field2, field3: var XmmBinaryField;\n            existField: XmmBinaryField)		583
-nim	areSettledTsu	pon2/private/core/binaryfield/xmm.html#areSettledTsu,M128i,M128i,M128i,M128i	proc areSettledTsu(field1, field2, field3, existField: XmmBinaryField): bool		594
-nim	areSettledWater	pon2/private/core/binaryfield/xmm.html#areSettledWater,M128i,M128i,M128i,M128i	proc areSettledWater(field1, field2, field3, existField: XmmBinaryField): bool		605
+nim	insert	pon2/private/core/binaryfield/xmm.html#insert,M128i,Row,Col,bool,Phys	proc insert(self: var XmmBinaryField; row: Row; col: Col; val: bool; phys: Phys)		383
+nim	del	pon2/private/core/binaryfield/xmm.html#del,M128i,Row,Col,Phys	proc del(self: var XmmBinaryField; row: Row; col: Col; phys: Phys)		432
+nim	dropGarbagesTsu	pon2/private/core/binaryfield/xmm.html#dropGarbagesTsu,M128i,array[Col,int],M128i	proc dropGarbagesTsu(self: var XmmBinaryField; counts: array[Col, int];\n                existField: XmmBinaryField)		453
+nim	dropGarbagesWater	pon2/private/core/binaryfield/xmm.html#dropGarbagesWater,M128i,M128i,M128i,array[Col,int],M128i	proc dropGarbagesWater(self, other1, other2: var XmmBinaryField;\n                  counts: array[Col, int]; existField: XmmBinaryField)		470
+nim	settleTsu	pon2/private/core/binaryfield/xmm.html#settleTsu,M128i,M128i,M128i,M128i	proc settleTsu(field1, field2, field3: var XmmBinaryField; existField: XmmBinaryField)		549
+nim	settleWater	pon2/private/core/binaryfield/xmm.html#settleWater,M128i,M128i,M128i,M128i	proc settleWater(field1, field2, field3: var XmmBinaryField;\n            existField: XmmBinaryField)		576
+nim	areSettledTsu	pon2/private/core/binaryfield/xmm.html#areSettledTsu,M128i,M128i,M128i,M128i	proc areSettledTsu(field1, field2, field3, existField: XmmBinaryField): bool		587
+nim	areSettledWater	pon2/private/core/binaryfield/xmm.html#areSettledWater,M128i,M128i,M128i,M128i	proc areSettledWater(field1, field2, field3, existField: XmmBinaryField): bool		598
 nimgrp	kept	pon2/private/core/binaryfield/xmm.html#kept-procs-all	proc		141
 nimgrp	[]	pon2/private/core/binaryfield/xmm.html#[]-procs-all	proc		311
 nimgrp	sum	pon2/private/core/binaryfield/xmm.html#sum-procs-all	proc		82

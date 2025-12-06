@@ -1,15 +1,15 @@
 nimTitle	puyopuyo	pon2/core/puyopuyo.html	module src/pon2/core/puyopuyo		0
 nim	PuyoPuyo	pon2/core/puyopuyo.html#PuyoPuyo	object PuyoPuyo		15
-nim	init	pon2/core/puyopuyo.html#init,typePuyoPuyo[F: TsuField or WaterField],F,Steps	proc init[F: TsuField or WaterField](T: type PuyoPuyo[F]; field: F; steps: Steps): T:type		23
-nim	init	pon2/core/puyopuyo.html#init,typePuyoPuyo[F: TsuField or WaterField]	proc init[F: TsuField or WaterField](T: type PuyoPuyo[F]): T:type		28
-nim	cellCount	pon2/core/puyopuyo.html#cellCount,PuyoPuyo[F: TsuField or WaterField],Cell	proc cellCount[F: TsuField or WaterField](self: PuyoPuyo[F]; cell: Cell): int		35
-nim	puyoCount	pon2/core/puyopuyo.html#puyoCount,PuyoPuyo[F: TsuField or WaterField]	proc puyoCount[F: TsuField or WaterField](self: PuyoPuyo[F]): int		41
-nim	colorPuyoCount	pon2/core/puyopuyo.html#colorPuyoCount,PuyoPuyo[F: TsuField or WaterField]	proc colorPuyoCount[F: TsuField or WaterField](self: PuyoPuyo[F]): int		45
-nim	garbagesCount	pon2/core/puyopuyo.html#garbagesCount,PuyoPuyo[F: TsuField or WaterField]	proc garbagesCount[F: TsuField or WaterField](self: PuyoPuyo[F]): int		51
-nim	move	pon2/core/puyopuyo.html#move,PuyoPuyo[F: TsuField or WaterField]	proc move[F: TsuField or WaterField](self: var PuyoPuyo[F]; calcConn = true): MoveResult		61
-nim	`$`	pon2/core/puyopuyo.html#$,PuyoPuyo[F: TsuField or WaterField]	proc `$`[F: TsuField or WaterField](self: PuyoPuyo[F]): string		77
-nim	parsePuyoPuyo	pon2/core/puyopuyo.html#parsePuyoPuyo,string	proc parsePuyoPuyo[F: TsuField or WaterField](str: string): StrErrorResult[\n    PuyoPuyo[F]]		80
-nim	toUriQuery	pon2/core/puyopuyo.html#toUriQuery,PuyoPuyo[F: TsuField or WaterField]	proc toUriQuery[F: TsuField or WaterField](self: PuyoPuyo[F]; fqdn = Pon2): StrErrorResult[\n    string]		135
-nim	parsePuyoPuyo	pon2/core/puyopuyo.html#parsePuyoPuyo,string,SimulatorFqdn	proc parsePuyoPuyo[F: TsuField or WaterField](query: string; fqdn: SimulatorFqdn): StrErrorResult[\n    PuyoPuyo[F]]		209
+nim	init	pon2/core/puyopuyo.html#init,typePuyoPuyo,Field,Steps	proc init(T: type PuyoPuyo; field: Field; steps: Steps): T:type		23
+nim	init	pon2/core/puyopuyo.html#init,typePuyoPuyo	proc init(T: type PuyoPuyo; rule = Rule.Tsu): T:type		26
+nim	cellCount	pon2/core/puyopuyo.html#cellCount,PuyoPuyo,Cell	proc cellCount(self: PuyoPuyo; cell: Cell): int		33
+nim	puyoCount	pon2/core/puyopuyo.html#puyoCount,PuyoPuyo	proc puyoCount(self: PuyoPuyo): int		37
+nim	colorPuyoCount	pon2/core/puyopuyo.html#colorPuyoCount,PuyoPuyo	proc colorPuyoCount(self: PuyoPuyo): int		41
+nim	garbagesCount	pon2/core/puyopuyo.html#garbagesCount,PuyoPuyo	proc garbagesCount(self: PuyoPuyo): int		45
+nim	move	pon2/core/puyopuyo.html#move,PuyoPuyo	proc move(self: var PuyoPuyo; calcConnection = true): MoveResult		53
+nim	`$`	pon2/core/puyopuyo.html#$,PuyoPuyo	proc `$`(self: PuyoPuyo): string		67
+nim	parsePuyoPuyo	pon2/core/puyopuyo.html#parsePuyoPuyo,string	proc parsePuyoPuyo(str: string): StrErrorResult[PuyoPuyo]		70
+nim	toUriQuery	pon2/core/puyopuyo.html#toUriQuery,PuyoPuyo	proc toUriQuery(self: PuyoPuyo; fqdn = Pon2): StrErrorResult[string]		115
+nim	parsePuyoPuyo	pon2/core/puyopuyo.html#parsePuyoPuyo,string,SimulatorFqdn	proc parsePuyoPuyo(query: string; fqdn: SimulatorFqdn): StrErrorResult[PuyoPuyo]		172
 nimgrp	init	pon2/core/puyopuyo.html#init-procs-all	proc		23
-nimgrp	parsepuyopuyo	pon2/core/puyopuyo.html#parsePuyoPuyo-procs-all	proc		80
+nimgrp	parsepuyopuyo	pon2/core/puyopuyo.html#parsePuyoPuyo-procs-all	proc		70

@@ -141,33 +141,33 @@
     
     Defines expand macro.
 <p><strong class="examples_text">Example:</strong></p>
-<pre class="listing"><span class="Comment"># You can define a new macro `defineExample` by</span>
-<span class="Comment"># `defineExpand(&quot;Example&quot;, &quot;Foo&quot;, &quot;Bar&quot;)`.</span>
+<pre class="listing"><span class="Identifier">defineExpand</span><span class="Punctuation">(</span><span class="StringLit">&quot;Example&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;Foo&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;Bar&quot;</span><span class="Punctuation">)</span>
 <span class="Comment"># This defines the following macro:</span>
-<span class="Keyword">macro</span> <span class="Identifier">expandExample</span><span class="Punctuation">(</span><span class="Identifier">identsAndBody</span><span class="Punctuation">:</span> <span class="Identifier">varargs</span><span class="Punctuation">[</span><span class="Identifier">untyped</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">untyped</span> <span class="Operator">=</span>
-  <span class="Comment">## Runs in sequence with the body (the last argument) changed to the specified</span>
-  <span class="Comment">## identifiers (the rest arguments) with the suffix Foo, Bar.</span>
-  <span class="Comment">## Underscore in the body is replaced by the index of the suffix.</span>
-  <span class="Keyword">let</span>
-    <span class="Identifier">body</span> <span class="Operator">=</span> <span class="Identifier">identsAndBody</span><span class="Punctuation">[</span><span class="Operator">^</span><span class="DecNumber">1</span><span class="Punctuation">]</span>
-    <span class="Identifier">idents</span> <span class="Operator">=</span> <span class="Identifier">identsAndBody</span><span class="Punctuation">[</span><span class="DecNumber">0</span> <span class="Operator">..^</span> <span class="DecNumber">2</span><span class="Punctuation">]</span>
-    <span class="Identifier">stmts</span> <span class="Operator">=</span> <span class="Identifier">nnkStmtList</span><span class="Operator">.</span><span class="Identifier">newNimNode</span> <span class="Identifier">body</span>
+<span class="LongComment">#[
+macro expandExample(identsAndBody: varargs[untyped]): untyped =
+  ## Runs in sequence with the body (the last argument) changed to the specified
+  ## identifiers (the rest arguments) with the suffix Foo, Bar.
+  ## Underscore in the body is replaced by the index of the suffix.
+  let
+    body = identsAndBody[^1]
+    idents = identsAndBody[0 ..^ 2]
+    stmts = nnkStmtList.newNimNode body
 
-  <span class="Keyword">var</span> <span class="Identifier">bodyFoo</span> <span class="Operator">=</span> <span class="Identifier">body</span><span class="Operator">.</span><span class="Identifier">replaced</span><span class="Punctuation">(</span><span class="StringLit">&quot;_&quot;</span><span class="Operator">.</span><span class="Identifier">ident</span><span class="Punctuation">,</span> <span class="FloatNumber">0.</span><span class="Identifier">newLit</span><span class="Punctuation">)</span>
-  <span class="Keyword">for</span> <span class="Identifier">id</span> <span class="Keyword">in</span> <span class="Identifier">idents</span><span class="Punctuation">:</span>
-    <span class="Identifier">bodyFoo</span><span class="Operator">.</span><span class="Identifier">replace</span> <span class="Identifier">id</span><span class="Punctuation">,</span> <span class="Punctuation">(</span><span class="Identifier">id</span><span class="Operator">.</span><span class="Identifier">strVal</span> <span class="Operator">&amp;</span> <span class="StringLit">&quot;Foo&quot;</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">ident</span>
+  var bodyFoo = body.replaced(&quot;_&quot;.ident, 0.newLit)
+  for id in idents:
+    bodyFoo.replace id, (id.strVal &amp; &quot;Foo&quot;).ident
 
-  <span class="Identifier">add</span><span class="Punctuation">(</span><span class="Identifier">stmts</span><span class="Punctuation">,</span> <span class="Identifier">bodyFoo</span><span class="Punctuation">)</span>
+  add(stmts, bodyFoo)
 
-  <span class="Keyword">var</span> <span class="Identifier">bodyBar</span> <span class="Operator">=</span> <span class="Identifier">body</span><span class="Operator">.</span><span class="Identifier">replaced</span><span class="Punctuation">(</span><span class="StringLit">&quot;_&quot;</span><span class="Operator">.</span><span class="Identifier">ident</span><span class="Punctuation">,</span> <span class="FloatNumber">1.</span><span class="Identifier">newLit</span><span class="Punctuation">)</span>
-  <span class="Keyword">for</span> <span class="Identifier">id</span> <span class="Keyword">in</span> <span class="Identifier">idents</span><span class="Punctuation">:</span>
-    <span class="Identifier">bodyBar</span><span class="Operator">.</span><span class="Identifier">replace</span> <span class="Identifier">id</span><span class="Punctuation">,</span> <span class="Punctuation">(</span><span class="Identifier">id</span><span class="Operator">.</span><span class="Identifier">strVal</span> <span class="Operator">&amp;</span> <span class="StringLit">&quot;Bar&quot;</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">ident</span>
+  var bodyBar = body.replaced(&quot;_&quot;.ident, 1.newLit)
+  for id in idents:
+    bodyBar.replace id, (id.strVal &amp; &quot;Bar&quot;).ident
 
-  <span class="Identifier">add</span><span class="Punctuation">(</span><span class="Identifier">stmts</span><span class="Punctuation">,</span> <span class="Identifier">bodyBar</span><span class="Punctuation">)</span>
+  add(stmts, bodyBar)
 
-  <span class="Identifier">stmts</span>
+  stmts
+]#</span>
 
-<span class="Comment"># Usage of `expandExample`:</span>
 <span class="Keyword">let</span>
   <span class="Identifier">xFoo</span> <span class="Operator">=</span> <span class="DecNumber">10</span>
   <span class="Identifier">xBar</span> <span class="Operator">=</span> <span class="DecNumber">20</span>
@@ -215,7 +215,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-04 07:35:05 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-06 03:28:00 UTC</small>
       </div>
     </div>
   </div>

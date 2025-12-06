@@ -1,4 +1,3 @@
 nimTitle	notice	pon2/core/notice.html	module src/pon2/core/notice		0
-nim	Notice	pon2/core/notice.html#Notice	enum Notice		20
-nim	GarbageRates	pon2/core/notice.html#GarbageRates	const GarbageRates		33
-nim	noticeCounts	pon2/core/notice.html#noticeCounts,int,Rule	proc noticeCounts(score: int; rule: Rule; useComet = false): array[Notice, int]		45
+nim	Notice	pon2/core/notice.html#Notice	enum Notice		12
+nim	noticeCounts	pon2/core/notice.html#noticeCounts,int,Rule	proc noticeCounts(score: int; rule: Rule; useComet = false): array[Notice, int]		28
