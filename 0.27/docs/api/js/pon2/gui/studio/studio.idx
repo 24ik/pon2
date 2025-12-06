@@ -1,0 +1,2 @@
+nimTitle	studio	pon2/gui/studio/studio.html	module src/pon2/gui/studio/studio		0
+nim	toStudioVNode	pon2/gui/studio/studio.html#toStudioVNode,ref.Studio,VNodeHelper,VNodeHelper	proc toStudioVNode(self: ref Studio; helper, replayHelper: VNodeHelper): VNode		23

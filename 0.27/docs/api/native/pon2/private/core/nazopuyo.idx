@@ -1,0 +1,8 @@
+nimTitle	nazopuyo	pon2/private/core/nazopuyo.html	module src/pon2/private/core/nazopuyo		0
+nim	isSatisfiedChain	pon2/private/core/nazopuyo.html#isSatisfiedChain,Goal,MoveResult	proc isSatisfiedChain(goal: Goal; moveResult: MoveResult): bool		41
+nim	isSatisfiedColor	pon2/private/core/nazopuyo.html#isSatisfiedColor,Goal,MoveResult	proc isSatisfiedColor(goal: Goal; moveResult: MoveResult): bool		49
+nim	isSatisfiedCount	pon2/private/core/nazopuyo.html#isSatisfiedCount,Goal,MoveResult	proc isSatisfiedCount(goal: Goal; moveResult: MoveResult): bool		64
+nim	isSatisfiedPlace	pon2/private/core/nazopuyo.html#isSatisfiedPlace,Goal,MoveResult	proc isSatisfiedPlace(goal: Goal; moveResult: MoveResult): bool		85
+nim	isSatisfiedConnection	pon2/private/core/nazopuyo.html#isSatisfiedConnection,Goal,MoveResult	proc isSatisfiedConnection(goal: Goal; moveResult: MoveResult): bool		102
+nim	isSatisfiedAccumColor	pon2/private/core/nazopuyo.html#isSatisfiedAccumColor,Goal,set[Cell]	proc isSatisfiedAccumColor(goal: Goal; colors: set[Cell]): bool		121
+nim	isSatisfiedAccumCount	pon2/private/core/nazopuyo.html#isSatisfiedAccumCount,Goal,int	proc isSatisfiedAccumCount(goal: Goal; count: int): bool		129

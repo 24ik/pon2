@@ -1,0 +1,2 @@
+nimTitle	permute	pon2/app/permute.html	module src/pon2/app/permute		0
+nim	permute	pon2/app/permute.html#permute,NazoPuyo,openArray[int],bool,bool	proc permute(self: NazoPuyo; fixIndices: openArray[int];\n        allowDoubleNotLast, allowDoubleLast: bool): seq[NazoPuyo]		106

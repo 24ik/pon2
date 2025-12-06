@@ -1,0 +1,24 @@
+nimTitle	moveresult	pon2/core/moveresult.html	module src/pon2/core/moveresult		0
+nim	MoveResult	pon2/core/moveresult.html#MoveResult	object MoveResult		15
+nim	init	pon2/core/moveresult.html#init,typeMoveResult,int,array[Cell,int],int,seq[array[Cell,int]],seq[int]	proc init(T: type MoveResult; chainCount: int; popCounts: array[Cell, int];\n     hardToGarbageCount: int; detailPopCounts: seq[array[Cell, int]];\n     detailHardToGarbageCount: seq[int]): T:type		27
+nim	init	pon2/core/moveresult.html#init,typeMoveResult,int,array[Cell,int],int,seq[array[Cell,int]],seq[int],seq[array[Cell,seq[int]]]	proc init(T: type MoveResult; chainCount: int; popCounts: array[Cell, int];\n     hardToGarbageCount: int; detailPopCounts: seq[array[Cell, int]];\n     detailHardToGarbageCount: seq[int];\n     fullPopCounts: seq[array[Cell, seq[int]]]): T:type		44
+nim	init	pon2/core/moveresult.html#init,typeMoveResult	proc init(T: type MoveResult; includeFullPopCounts = true): T:type		62
+nim	cellCount	pon2/core/moveresult.html#cellCount,MoveResult,Cell	proc cellCount(self: MoveResult; cell: Cell): int		76
+nim	puyoCount	pon2/core/moveresult.html#puyoCount,MoveResult	proc puyoCount(self: MoveResult): int		80
+nim	colorPuyoCount	pon2/core/moveresult.html#colorPuyoCount,MoveResult	proc colorPuyoCount(self: MoveResult): int		84
+nim	garbagesCount	pon2/core/moveresult.html#garbagesCount,MoveResult	proc garbagesCount(self: MoveResult): int		88
+nim	cellCounts	pon2/core/moveresult.html#cellCounts,MoveResult,Cell	proc cellCounts(self: MoveResult; cell: Cell): seq[int]		92
+nim	puyoCounts	pon2/core/moveresult.html#puyoCounts,MoveResult	proc puyoCounts(self: MoveResult): seq[int]		96
+nim	colorPuyoCounts	pon2/core/moveresult.html#colorPuyoCounts,MoveResult	proc colorPuyoCounts(self: MoveResult): seq[int]		100
+nim	garbagesCounts	pon2/core/moveresult.html#garbagesCounts,MoveResult	proc garbagesCounts(self: MoveResult): seq[int]		104
+nim	colors	pon2/core/moveresult.html#colors,MoveResult	proc colors(self: MoveResult): set[Cell]		122
+nim	colorsSeq	pon2/core/moveresult.html#colorsSeq,MoveResult	proc colorsSeq(self: MoveResult): seq[set[Cell]]		126
+nim	placeCounts	pon2/core/moveresult.html#placeCounts,MoveResult,Cell	proc placeCounts(self: MoveResult; cell: Cell): StrErrorResult[seq[int]]		134
+nim	placeCounts	pon2/core/moveresult.html#placeCounts,MoveResult	proc placeCounts(self: MoveResult): StrErrorResult[seq[int]]		143
+nim	connectionCounts	pon2/core/moveresult.html#connectionCounts,MoveResult,Cell	proc connectionCounts(self: MoveResult; cell: Cell): StrErrorResult[seq[int]]		156
+nim	connectionCounts	pon2/core/moveresult.html#connectionCounts,MoveResult	proc connectionCounts(self: MoveResult): StrErrorResult[seq[int]]		165
+nim	score	pon2/core/moveresult.html#score,MoveResult	proc score(self: MoveResult): StrErrorResult[int]		204
+nim	noticeCounts	pon2/core/moveresult.html#noticeCounts,MoveResult,Rule	proc noticeCounts(self: MoveResult; rule: Rule; useComet = false): StrErrorResult[\n    array[Notice, int]]		239
+nimgrp	placecounts	pon2/core/moveresult.html#placeCounts-procs-all	proc		134
+nimgrp	init	pon2/core/moveresult.html#init-procs-all	proc		27
+nimgrp	connectioncounts	pon2/core/moveresult.html#connectionCounts-procs-all	proc		156

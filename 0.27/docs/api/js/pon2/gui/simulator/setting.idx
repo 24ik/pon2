@@ -1,0 +1,2 @@
+nimTitle	setting	pon2/gui/simulator/setting.html	module src/pon2/gui/simulator/setting		0
+nim	toSettingsVNode	pon2/gui/simulator/setting.html#toSettingsVNode,ref.S,VNodeHelper	proc toSettingsVNode[S: Simulator or Studio or Marathon](self: ref S;\n    helper: VNodeHelper): VNode		32

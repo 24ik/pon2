@@ -1,0 +1,4 @@
+nimTitle	staticfor	pon2/private/staticfor.html	module src/pon2/private/staticfor		0
+nim	staticFor	pon2/private/staticfor.html#staticFor.t,,staticSlice[E: enum],untyped	template staticFor[E: enum](index: untyped{nkIdent}; slice: static Slice[E];\n                   body: untyped): untyped		5
+nim	staticFor	pon2/private/staticfor.html#staticFor.t,,typedesc[],untyped	template staticFor(index: untyped{nkIdent}; enumType: typedesc[enum]; body: untyped): untyped		13
+nimgrp	staticfor	pon2/private/staticfor.html#staticFor-templates-all	template		5

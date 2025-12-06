@@ -1,0 +1,4 @@
+nimTitle	paths	pon2/private/paths.html	module src/pon2/private/paths		0
+nim	srcPath	pon2/private/paths.html#srcPath.t	template srcPath(): Path		16
+nim	splitPath	pon2/private/paths.html#splitPath,Path	proc splitPath(path: Path): tuple[head, tail: Path]		20
+nim	joinPath	pon2/private/paths.html#joinPath,Path,Path	proc joinPath(head, tail: Path): Path		31

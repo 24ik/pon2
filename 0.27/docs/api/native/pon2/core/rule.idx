@@ -1,0 +1,7 @@
+nimTitle	rule	pon2/core/rule.html	module src/pon2/core/rule		0
+nim	Rule	pon2/core/rule.html#Rule	enum Rule		35
+nim	Phys	pon2/core/rule.html#Phys	enum Phys		41
+nim	DeadRule	pon2/core/rule.html#DeadRule	enum DeadRule		46
+nim	Behaviour	pon2/core/rule.html#Behaviour	object Behaviour		52
+nim	Behaviours	pon2/core/rule.html#Behaviours	const Behaviours		57
+nim	parseRule	pon2/core/rule.html#parseRule,string	proc parseRule(str: string): StrErrorResult[Rule]		68

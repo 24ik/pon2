@@ -1,0 +1,11 @@
+nimTitle	solve	pon2/private/app/solve.html	module src/pon2/private/app/solve		0
+nim	SolveNode	pon2/private/app/solve.html#SolveNode	object SolveNode		19
+nim	init	pon2/private/app/solve.html#init,typeSolveNode,PuyoPuyo	proc init(T: type SolveNode; puyoPuyo: PuyoPuyo): T:type		54
+nim	childrenAtDepth	pon2/private/app/solve.html#childrenAtDepth,SolveNode,int,seq[SolveNode],seq[seq[OptPlacement]],seq[seq[OptPlacement]],int,bool,Goal,Steps	proc childrenAtDepth(self: SolveNode; targetDepth: int; nodes: var seq[SolveNode];\n                optPlacementsSeq: var seq[seq[OptPlacement]];\n                answers: var seq[seq[OptPlacement]]; moveCount: int;\n                calcAllAnswers: bool; goal: Goal; steps: Steps)		409
+nim	solveSingleThread	pon2/private/app/solve.html#solveSingleThread,SolveNode,seq[seq[OptPlacement]],int,bool,Goal,Steps	proc solveSingleThread(self: SolveNode; answers: var seq[seq[OptPlacement]];\n                  moveCount: int; calcAllAnswers: bool; goal: Goal;\n                  steps: Steps; checkPruneFirst = false)		492
+nim	toStrs	pon2/private/app/solve.html#toStrs,SolveNode,Goal,Steps	proc toStrs(self: SolveNode; goal: Goal; steps: Steps): seq[string]		588
+nim	parseSolveInfo	pon2/private/app/solve.html#parseSolveInfo,seq[string]	proc parseSolveInfo(strs: seq[string]): StrErrorResult[\n    tuple[goal: Goal, steps: Steps]]		692
+nim	parseSolveNode	pon2/private/app/solve.html#parseSolveNode,seq[string]	proc parseSolveNode(strs: seq[string]): StrErrorResult[SolveNode]		706
+nim	toStrs	pon2/private/app/solve.html#toStrs,seq[seq[OptPlacement]]	proc toStrs(answers: seq[seq[OptPlacement]]): seq[string]		738
+nim	parseSolveAnswers	pon2/private/app/solve.html#parseSolveAnswers,seq[string]	proc parseSolveAnswers(strs: seq[string]): StrErrorResult[seq[seq[OptPlacement]]]		751
+nimgrp	tostrs	pon2/private/app/solve.html#toStrs-procs-all	proc		588
