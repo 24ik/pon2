@@ -19,46 +19,47 @@ nim	sum	pon2/private/core/binaryfield/xmm.html#sum,M128i,M128i,M128i,M128i,M128i
 nim	sum	pon2/private/core/binaryfield/xmm.html#sum,M128i,M128i,M128i,M128i,M128i,M128i,M128i	proc sum(f1, f2, f3, f4, f5, f6, f7: XmmBinaryField): XmmBinaryField		94
 nim	sum	pon2/private/core/binaryfield/xmm.html#sum,M128i,M128i,M128i,M128i,M128i,M128i,M128i,M128i	proc sum(f1, f2, f3, f4, f5, f6, f7, f8: XmmBinaryField): XmmBinaryField		99
 nim	product	pon2/private/core/binaryfield/xmm.html#product,M128i,M128i,M128i	proc product(f1, f2, f3: XmmBinaryField): XmmBinaryField		104
-nim	kept	pon2/private/core/binaryfield/xmm.html#kept,M128i,Row	proc kept(self: XmmBinaryField; row: Row): XmmBinaryField		141
-nim	kept	pon2/private/core/binaryfield/xmm.html#kept,M128i,Col	proc kept(self: XmmBinaryField; col: Col): XmmBinaryField		145
-nim	keptValid	pon2/private/core/binaryfield/xmm.html#keptValid,M128i	proc keptValid(self: XmmBinaryField): XmmBinaryField		149
-nim	keptVisible	pon2/private/core/binaryfield/xmm.html#keptVisible,M128i	proc keptVisible(self: XmmBinaryField): XmmBinaryField		153
-nim	keptAir	pon2/private/core/binaryfield/xmm.html#keptAir,M128i	proc keptAir(self: XmmBinaryField): XmmBinaryField		157
-nim	keepValid	pon2/private/core/binaryfield/xmm.html#keepValid,M128i	proc keepValid(self: var XmmBinaryField)		161
-nim	clear	pon2/private/core/binaryfield/xmm.html#clear,M128i	proc clear(self: var XmmBinaryField)		169
-nim	replace	pon2/private/core/binaryfield/xmm.html#replace,M128i,Col,M128i	proc replace(self: var XmmBinaryField; col: Col; after: XmmBinaryField)		177
-nim	popcnt	pon2/private/core/binaryfield/xmm.html#popcnt,M128i	proc popcnt(self: XmmBinaryField): int		188
-nim	shiftedUpRaw	pon2/private/core/binaryfield/xmm.html#shiftedUpRaw,M128i	proc shiftedUpRaw(self: XmmBinaryField): XmmBinaryField		201
-nim	shiftedUp	pon2/private/core/binaryfield/xmm.html#shiftedUp,M128i	proc shiftedUp(self: XmmBinaryField): XmmBinaryField		205
-nim	shiftedDownRaw	pon2/private/core/binaryfield/xmm.html#shiftedDownRaw,M128i	proc shiftedDownRaw(self: XmmBinaryField): XmmBinaryField		209
-nim	shiftedDown	pon2/private/core/binaryfield/xmm.html#shiftedDown,M128i	proc shiftedDown(self: XmmBinaryField): XmmBinaryField		213
-nim	shiftedRightRaw	pon2/private/core/binaryfield/xmm.html#shiftedRightRaw,M128i	proc shiftedRightRaw(self: XmmBinaryField): XmmBinaryField		217
-nim	shiftedRight	pon2/private/core/binaryfield/xmm.html#shiftedRight,M128i	proc shiftedRight(self: XmmBinaryField): XmmBinaryField		221
-nim	shiftedLeftRaw	pon2/private/core/binaryfield/xmm.html#shiftedLeftRaw,M128i	proc shiftedLeftRaw(self: XmmBinaryField): XmmBinaryField		225
-nim	shiftedLeft	pon2/private/core/binaryfield/xmm.html#shiftedLeft,M128i	proc shiftedLeft(self: XmmBinaryField): XmmBinaryField		229
-nim	shiftUpRaw	pon2/private/core/binaryfield/xmm.html#shiftUpRaw,M128i	proc shiftUpRaw(self: var XmmBinaryField)		237
-nim	shiftUp	pon2/private/core/binaryfield/xmm.html#shiftUp,M128i	proc shiftUp(self: var XmmBinaryField)		241
-nim	shiftDownRaw	pon2/private/core/binaryfield/xmm.html#shiftDownRaw,M128i	proc shiftDownRaw(self: var XmmBinaryField)		245
-nim	shiftDown	pon2/private/core/binaryfield/xmm.html#shiftDown,M128i	proc shiftDown(self: var XmmBinaryField)		249
-nim	shiftRightRaw	pon2/private/core/binaryfield/xmm.html#shiftRightRaw,M128i	proc shiftRightRaw(self: var XmmBinaryField)		253
-nim	shiftRight	pon2/private/core/binaryfield/xmm.html#shiftRight,M128i	proc shiftRight(self: var XmmBinaryField)		257
-nim	shiftLeftRaw	pon2/private/core/binaryfield/xmm.html#shiftLeftRaw,M128i	proc shiftLeftRaw(self: var XmmBinaryField)		261
-nim	shiftLeft	pon2/private/core/binaryfield/xmm.html#shiftLeft,M128i	proc shiftLeft(self: var XmmBinaryField)		265
-nim	flipVertical	pon2/private/core/binaryfield/xmm.html#flipVertical,M128i	proc flipVertical(self: var XmmBinaryField)		273
-nim	flipHorizontal	pon2/private/core/binaryfield/xmm.html#flipHorizontal,M128i	proc flipHorizontal(self: var XmmBinaryField)		279
-nim	rotate	pon2/private/core/binaryfield/xmm.html#rotate,M128i	proc rotate(self: var XmmBinaryField)		289
-nim	crossRotate	pon2/private/core/binaryfield/xmm.html#crossRotate,M128i	proc crossRotate(self: var XmmBinaryField)		296
-nim	`[]`	pon2/private/core/binaryfield/xmm.html#[],M128i,staticRow,staticCol	proc `[]`(self: XmmBinaryField; row: static Row; col: static Col): bool		311
-nim	`[]`	pon2/private/core/binaryfield/xmm.html#[],M128i,Row,Col	proc `[]`(self: XmmBinaryField; row: Row; col: Col): bool		321
-nim	`[]=`	pon2/private/core/binaryfield/xmm.html#[]=,M128i,Row,Col,bool	proc `[]=`(self: var XmmBinaryField; row: Row; col: Col; val: bool)		328
-nim	insert	pon2/private/core/binaryfield/xmm.html#insert,M128i,Row,Col,bool,Phys	proc insert(self: var XmmBinaryField; row: Row; col: Col; val: bool; phys: Phys)		383
-nim	del	pon2/private/core/binaryfield/xmm.html#del,M128i,Row,Col,Phys	proc del(self: var XmmBinaryField; row: Row; col: Col; phys: Phys)		432
-nim	dropGarbagesTsu	pon2/private/core/binaryfield/xmm.html#dropGarbagesTsu,M128i,array[Col,int],M128i	proc dropGarbagesTsu(self: var XmmBinaryField; counts: array[Col, int];\n                existField: XmmBinaryField)		453
-nim	dropGarbagesWater	pon2/private/core/binaryfield/xmm.html#dropGarbagesWater,M128i,M128i,M128i,array[Col,int],M128i	proc dropGarbagesWater(self, other1, other2: var XmmBinaryField;\n                  counts: array[Col, int]; existField: XmmBinaryField)		470
-nim	settleTsu	pon2/private/core/binaryfield/xmm.html#settleTsu,M128i,M128i,M128i,M128i	proc settleTsu(field1, field2, field3: var XmmBinaryField; existField: XmmBinaryField)		549
-nim	settleWater	pon2/private/core/binaryfield/xmm.html#settleWater,M128i,M128i,M128i,M128i	proc settleWater(field1, field2, field3: var XmmBinaryField;\n            existField: XmmBinaryField)		576
-nim	areSettledTsu	pon2/private/core/binaryfield/xmm.html#areSettledTsu,M128i,M128i,M128i,M128i	proc areSettledTsu(field1, field2, field3, existField: XmmBinaryField): bool		587
-nim	areSettledWater	pon2/private/core/binaryfield/xmm.html#areSettledWater,M128i,M128i,M128i,M128i	proc areSettledWater(field1, field2, field3, existField: XmmBinaryField): bool		598
-nimgrp	kept	pon2/private/core/binaryfield/xmm.html#kept-procs-all	proc		141
-nimgrp	[]	pon2/private/core/binaryfield/xmm.html#[]-procs-all	proc		311
+nim	hash	pon2/private/core/binaryfield/xmm.html#hash,M128i	proc hash(self: XmmBinaryField): Hash		111
+nim	kept	pon2/private/core/binaryfield/xmm.html#kept,M128i,Row	proc kept(self: XmmBinaryField; row: Row): XmmBinaryField		152
+nim	kept	pon2/private/core/binaryfield/xmm.html#kept,M128i,Col	proc kept(self: XmmBinaryField; col: Col): XmmBinaryField		156
+nim	keptValid	pon2/private/core/binaryfield/xmm.html#keptValid,M128i	proc keptValid(self: XmmBinaryField): XmmBinaryField		160
+nim	keptVisible	pon2/private/core/binaryfield/xmm.html#keptVisible,M128i	proc keptVisible(self: XmmBinaryField): XmmBinaryField		164
+nim	keptAir	pon2/private/core/binaryfield/xmm.html#keptAir,M128i	proc keptAir(self: XmmBinaryField): XmmBinaryField		168
+nim	keepValid	pon2/private/core/binaryfield/xmm.html#keepValid,M128i	proc keepValid(self: var XmmBinaryField)		172
+nim	clear	pon2/private/core/binaryfield/xmm.html#clear,M128i	proc clear(self: var XmmBinaryField)		180
+nim	replace	pon2/private/core/binaryfield/xmm.html#replace,M128i,Col,M128i	proc replace(self: var XmmBinaryField; col: Col; after: XmmBinaryField)		188
+nim	popcnt	pon2/private/core/binaryfield/xmm.html#popcnt,M128i	proc popcnt(self: XmmBinaryField): int		199
+nim	shiftedUpRaw	pon2/private/core/binaryfield/xmm.html#shiftedUpRaw,M128i	proc shiftedUpRaw(self: XmmBinaryField): XmmBinaryField		212
+nim	shiftedUp	pon2/private/core/binaryfield/xmm.html#shiftedUp,M128i	proc shiftedUp(self: XmmBinaryField): XmmBinaryField		216
+nim	shiftedDownRaw	pon2/private/core/binaryfield/xmm.html#shiftedDownRaw,M128i	proc shiftedDownRaw(self: XmmBinaryField): XmmBinaryField		220
+nim	shiftedDown	pon2/private/core/binaryfield/xmm.html#shiftedDown,M128i	proc shiftedDown(self: XmmBinaryField): XmmBinaryField		224
+nim	shiftedRightRaw	pon2/private/core/binaryfield/xmm.html#shiftedRightRaw,M128i	proc shiftedRightRaw(self: XmmBinaryField): XmmBinaryField		228
+nim	shiftedRight	pon2/private/core/binaryfield/xmm.html#shiftedRight,M128i	proc shiftedRight(self: XmmBinaryField): XmmBinaryField		232
+nim	shiftedLeftRaw	pon2/private/core/binaryfield/xmm.html#shiftedLeftRaw,M128i	proc shiftedLeftRaw(self: XmmBinaryField): XmmBinaryField		236
+nim	shiftedLeft	pon2/private/core/binaryfield/xmm.html#shiftedLeft,M128i	proc shiftedLeft(self: XmmBinaryField): XmmBinaryField		240
+nim	shiftUpRaw	pon2/private/core/binaryfield/xmm.html#shiftUpRaw,M128i	proc shiftUpRaw(self: var XmmBinaryField)		248
+nim	shiftUp	pon2/private/core/binaryfield/xmm.html#shiftUp,M128i	proc shiftUp(self: var XmmBinaryField)		252
+nim	shiftDownRaw	pon2/private/core/binaryfield/xmm.html#shiftDownRaw,M128i	proc shiftDownRaw(self: var XmmBinaryField)		256
+nim	shiftDown	pon2/private/core/binaryfield/xmm.html#shiftDown,M128i	proc shiftDown(self: var XmmBinaryField)		260
+nim	shiftRightRaw	pon2/private/core/binaryfield/xmm.html#shiftRightRaw,M128i	proc shiftRightRaw(self: var XmmBinaryField)		264
+nim	shiftRight	pon2/private/core/binaryfield/xmm.html#shiftRight,M128i	proc shiftRight(self: var XmmBinaryField)		268
+nim	shiftLeftRaw	pon2/private/core/binaryfield/xmm.html#shiftLeftRaw,M128i	proc shiftLeftRaw(self: var XmmBinaryField)		272
+nim	shiftLeft	pon2/private/core/binaryfield/xmm.html#shiftLeft,M128i	proc shiftLeft(self: var XmmBinaryField)		276
+nim	flipVertical	pon2/private/core/binaryfield/xmm.html#flipVertical,M128i	proc flipVertical(self: var XmmBinaryField)		284
+nim	flipHorizontal	pon2/private/core/binaryfield/xmm.html#flipHorizontal,M128i	proc flipHorizontal(self: var XmmBinaryField)		290
+nim	rotate	pon2/private/core/binaryfield/xmm.html#rotate,M128i	proc rotate(self: var XmmBinaryField)		300
+nim	crossRotate	pon2/private/core/binaryfield/xmm.html#crossRotate,M128i	proc crossRotate(self: var XmmBinaryField)		307
+nim	`[]`	pon2/private/core/binaryfield/xmm.html#[],M128i,staticRow,staticCol	proc `[]`(self: XmmBinaryField; row: static Row; col: static Col): bool		322
+nim	`[]`	pon2/private/core/binaryfield/xmm.html#[],M128i,Row,Col	proc `[]`(self: XmmBinaryField; row: Row; col: Col): bool		332
+nim	`[]=`	pon2/private/core/binaryfield/xmm.html#[]=,M128i,Row,Col,bool	proc `[]=`(self: var XmmBinaryField; row: Row; col: Col; val: bool)		339
+nim	insert	pon2/private/core/binaryfield/xmm.html#insert,M128i,Row,Col,bool,Phys	proc insert(self: var XmmBinaryField; row: Row; col: Col; val: bool; phys: Phys)		394
+nim	del	pon2/private/core/binaryfield/xmm.html#del,M128i,Row,Col,Phys	proc del(self: var XmmBinaryField; row: Row; col: Col; phys: Phys)		443
+nim	dropGarbagesTsu	pon2/private/core/binaryfield/xmm.html#dropGarbagesTsu,M128i,array[Col,int],M128i	proc dropGarbagesTsu(self: var XmmBinaryField; counts: array[Col, int];\n                existField: XmmBinaryField)		464
+nim	dropGarbagesWater	pon2/private/core/binaryfield/xmm.html#dropGarbagesWater,M128i,M128i,M128i,array[Col,int],M128i	proc dropGarbagesWater(self, other1, other2: var XmmBinaryField;\n                  counts: array[Col, int]; existField: XmmBinaryField)		481
+nim	settleTsu	pon2/private/core/binaryfield/xmm.html#settleTsu,M128i,M128i,M128i,M128i	proc settleTsu(field1, field2, field3: var XmmBinaryField; existField: XmmBinaryField)		560
+nim	settleWater	pon2/private/core/binaryfield/xmm.html#settleWater,M128i,M128i,M128i,M128i	proc settleWater(field1, field2, field3: var XmmBinaryField;\n            existField: XmmBinaryField)		587
+nim	areSettledTsu	pon2/private/core/binaryfield/xmm.html#areSettledTsu,M128i,M128i,M128i,M128i	proc areSettledTsu(field1, field2, field3, existField: XmmBinaryField): bool		598
+nim	areSettledWater	pon2/private/core/binaryfield/xmm.html#areSettledWater,M128i,M128i,M128i,M128i	proc areSettledWater(field1, field2, field3, existField: XmmBinaryField): bool		609
+nimgrp	kept	pon2/private/core/binaryfield/xmm.html#kept-procs-all	proc		152
+nimgrp	[]	pon2/private/core/binaryfield/xmm.html#[]-procs-all	proc		322
 nimgrp	sum	pon2/private/core/binaryfield/xmm.html#sum-procs-all	proc		82
