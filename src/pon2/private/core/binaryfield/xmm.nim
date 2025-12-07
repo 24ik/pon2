@@ -6,11 +6,11 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sugar]
+import std/[hashes, sugar]
 import ../../[assign, bitutils, macros, simd, staticfor]
 import ../../../core/[common, rule]
 
-export simd
+export hashes, simd
 
 type XmmBinaryField* = M128i
   ## Binary field with XMM register.
@@ -103,6 +103,17 @@ func sum*(
 
 func product*(f1, f2, f3: XmmBinaryField): XmmBinaryField {.inline, noinit.} =
   f1 * f2 * f3
+
+# ------------------------------------------------
+# Hash
+# ------------------------------------------------
+
+func hash*(self: XmmBinaryField): Hash {.inline, noinit.} =
+  ## Returns the hash of the binary field.
+  var valArray {.noinit, align(16).}: array[2, uint64]
+  valArray.addr.mm_store_si128 self
+
+  valArray.hash
 
 # ------------------------------------------------
 # Keep
