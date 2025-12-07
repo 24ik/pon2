@@ -28,6 +28,7 @@ type
 
   WebWorkerPool* = object ## Web worker pool.
     workerRefs: seq[ref WebWorker]
+    isReadyRef: ref bool
 
 const
   WebWorkerPath {.define: "pon2.webworker".} = "./worker.min.js"
@@ -49,13 +50,16 @@ proc init(T: type WebWorker): T {.inline, noinit.} =
   T(workerObj: newWorkerObj(), running: false)
 
 proc init(T: type WebWorkerPool, workerCount = 1): T {.inline, noinit.} =
-  let workerRefs = collect:
-    for _ in 1 .. workerCount:
-      let workerRef = new WebWorker
-      workerRef[] = WebWorker.init
-      workerRef
+  let
+    workerRefs = collect:
+      for _ in 1 .. workerCount:
+        let workerRef = new WebWorker
+        workerRef[] = WebWorker.init
+        workerRef
+    isReadyRef = new bool
+  isReadyRef[] = true
 
-  T(workerRefs: workerRefs)
+  T(workerRefs: workerRefs, isReadyRef: isReadyRef)
 
 # ------------------------------------------------
 # Caller
@@ -107,9 +111,15 @@ proc run*(
     self: WebWorkerPool, args: varargs[string]
 ): Future[StrErrorResult[seq[string]]] {.async.} =
   ## Runs the task.
+  while not self.isReadyRef[]:
+    await sleep PoolPollingMs
+
   var freeWorkerIndex = -1
   block waiting:
     while freeWorkerIndex < 0:
+      if not self.isReadyRef[]:
+        break waiting
+
       for workerIndex, workerRef in self.workerRefs:
         if not workerRef[].running:
           freeWorkerIndex.assign workerIndex
@@ -117,7 +127,29 @@ proc run*(
 
       await sleep PoolPollingMs
 
+  if not self.isReadyRef[]:
+    return StrErrorResult[seq[string]].ok @[]
+
   return await self.workerRefs[freeWorkerIndex].run args
+
+proc terminate*(self: WebWorkerPool) {.inline, noinit.} =
+  ## Terminates the web worker pool.
+  self.isReadyRef[] = false
+
+  for workerRef in self.workerRefs:
+    workerRef[].workerObj.terminate()
+
+  # NOTE: ensure that all `run`s already called return empty sequences
+  discard setTimeout(
+    () => (
+      block:
+        for workerRef in self.workerRefs:
+          workerRef[] = WebWorker.init
+
+        self.isReadyRef[] = true
+    ),
+    PoolPollingMs * 3,
+  )
 
 # ------------------------------------------------
 # Callee

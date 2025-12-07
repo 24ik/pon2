@@ -61,6 +61,18 @@ when defined(js) or defined(nimsuggest):
       self[].simulator.nazoPuyo.puyoPuyo.steps.len == 0
 
     buildHtml tdiv:
+      if not helper.mobile:
+        tdiv(class = "block"):
+          tdiv(class = "field is-grouped"):
+            tdiv(class = "control"):
+              button(
+                class =
+                  (if self[].focusReplay: "button is-primary" else: "button").cstring,
+                onclick = () => self[].toggleFocus,
+              ):
+                text "解答を操作"
+                span(style = counterStyle):
+                  text "Sft+Tab"
       tdiv(class = "block"):
         tdiv(class = "field is-grouped"):
           tdiv(class = "control"):
@@ -85,16 +97,16 @@ when defined(js) or defined(nimsuggest):
               onclick = () => self.runPermute helper,
             ):
               text "ツモ並べ替え"
-          if not helper.mobile:
-            tdiv(class = "control"):
-              button(
-                class =
-                  (if self[].focusReplay: "button is-primary" else: "button").cstring,
-                onclick = () => self[].toggleFocus,
-              ):
-                text "解答を操作"
-                span(style = counterStyle):
-                  text "Sft+Tab"
+          tdiv(class = "control"):
+            button(
+              class = "button",
+              disabled = not self[].working,
+              onclick = () => self.stopWork,
+            ):
+              span(class = "icon"):
+                italic(class = "fa-solid fa-power-off")
+              span:
+                text "停止"
       tdiv(class = "block"):
         progress(
           class = "progress is-primary",

@@ -16,6 +16,7 @@ export simulator
 when defined(js) or defined(nimsuggest):
   when not defined(pon2.build.worker):
     import std/[jsconsole]
+    import ../private/[webworkers]
 
 type
   StudioReplayData* = object ## Data for the replay simulator.
@@ -143,6 +144,24 @@ func prevReplay*(self: var Studio) =
   var nazoPuyo = self.replaySimulator.nazoPuyo
   nazoPuyo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIndex]
   self.replaySimulator.assign Simulator.init(nazoPuyo, Replay)
+
+# ------------------------------------------------
+# Terminate
+# ------------------------------------------------
+
+when defined(js) or defined(nimsuggest):
+  when not defined(pon2.build.worker):
+    proc stopWork*(self: ref Studio) =
+      ## Stops the current work.
+      if not self[].working:
+        return
+
+      webWorkerPool.terminate
+
+      self[].solving.assign false
+      self[].permuting.assign false
+      self[].replayData.stepsSeq.setLen 0
+      self[].progressRef[] = (0, 0)
 
 # ------------------------------------------------
 # Solve
