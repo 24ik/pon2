@@ -252,7 +252,3 @@ when defined(js) or defined(nimsuggest):
         await future
 
       return answers & answersSeqRef[].concat
-
-when isMainModule:
-  let nazoPuyo = "4AimeNPrACeNOirue_o1c1C1A1o1__E04".parseNazoPuyo(Ishikawa).unsafeValue
-  echo nazoPuyo.solve
