@@ -17,11 +17,15 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui, utils]
 
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
+
   export vdom
 
   const
-    BtnClass = "button".cstring
-    SelectBtnClass = "button is-primary is-selected".cstring
+    BtnClass = "button".kstring
+    SelectBtnClass = "button is-primary is-selected".kstring
 
   func initBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, rule: Rule
@@ -83,16 +87,16 @@ when defined(js) or defined(nimsuggest):
               (italicClass, disabled) =
                 case rule
                 of Rule.Tsu:
-                  ("fa-solid fa-2".cstring, steps.anyIt it.kind == Rotate)
+                  ("fa-solid fa-2".kstring, steps.anyIt it.kind == Rotate)
                 of Spinner:
                   (
-                    "fa-solid fa-arrows-rotate".cstring,
+                    "fa-solid fa-arrows-rotate".kstring,
                     steps.anyIt (it.kind == Rotate and it.cross),
                   )
                 of CrossSpinner:
-                  ("DUMMY".cstring, steps.anyIt (it.kind == Rotate and not it.cross))
+                  ("DUMMY".kstring, steps.anyIt (it.kind == Rotate and not it.cross))
                 of Rule.Water:
-                  ("fa-solid fa-droplet".cstring, steps.anyIt it.kind == Rotate)
+                  ("fa-solid fa-droplet".kstring, steps.anyIt it.kind == Rotate)
 
             tdiv(class = "control"):
               button(
