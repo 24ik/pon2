@@ -16,9 +16,12 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[arrayutils, assign, gui, math]
 
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
+
   export vdom
 
-when defined(js) or defined(nimsuggest):
   const ShowNoticeCount = 6
 
   proc txtMsg[S: Simulator or Studio or Marathon](
@@ -82,5 +85,5 @@ when defined(js) or defined(nimsuggest):
                     img(src = Cell.None.cellImgSrc)
               td:
                 tdiv(class = "is-size-7"):
-                  text " " & $score
-      text self.txtMsg(helper).cstring
+                  text (" " & $score).kstring
+      text self.txtMsg(helper).kstring
