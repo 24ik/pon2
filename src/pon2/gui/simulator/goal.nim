@@ -17,6 +17,10 @@ when defined(js) or defined(nimsuggest):
   import ../../[app, core]
   import ../../private/[dom, gui, utils]
 
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
+
   export vdom
 
   proc toGoalVNode*[S: Simulator or Studio or Marathon](
@@ -30,19 +34,20 @@ when defined(js) or defined(nimsuggest):
         class = (
           if helper.simulator.markResult == Accept: "message is-success"
           else: "message is-info"
-        ).cstring
+        ).kstring
       ):
         tdiv(class = "message-body"):
-          text $goal
+          text ($goal).kstring
           if helper.simulator.markResult == Accept:
             span(class = "icon"):
               italic(class = "fa-solid fa-circle-check")
 
     let
-      kindId = "pon2-simulator-goal-kind-" & helper.simulator.goalId
-      colorId = "pon2-simulator-goal-color-" & helper.simulator.goalId
-      valId = "pon2-simulator-goal-val-" & helper.simulator.goalId
-      clearColorId = "pon2-simulator-goal-clearcolor-" & helper.simulator.goalId
+      kindId = ("pon2-simulator-goal-kind-" & helper.simulator.goalId).kstring
+      colorId = ("pon2-simulator-goal-color-" & helper.simulator.goalId).kstring
+      valId = ("pon2-simulator-goal-val-" & helper.simulator.goalId).kstring
+      clearColorId =
+        ("pon2-simulator-goal-clearcolor-" & helper.simulator.goalId).kstring
 
     buildHtml tdiv:
       tdiv(class = "block mb-1"):
@@ -66,7 +71,7 @@ when defined(js) or defined(nimsuggest):
               option(
                 selected = goal.mainOpt.isOk and goal.mainOpt.unsafeValue.kind == kind
               ):
-                text $kind
+                text ($kind).kstring
       if goal.mainOpt.isOk:
         let main = goal.mainOpt.unsafeValue
 
@@ -87,7 +92,7 @@ when defined(js) or defined(nimsuggest):
                   text "全"
                 for color in GoalColor.All.succ .. GoalColor.high:
                   option(selected = main.color == color):
-                    text ($color).cstring
+                    text ($color).kstring
         tdiv(class = "block mb-1"):
           button(class = "button is-static px-2"):
             text "n ="
@@ -99,7 +104,7 @@ when defined(js) or defined(nimsuggest):
             ):
               for val in 0 .. 99:
                 option(selected = main.val == val):
-                  text $val
+                  text ($val).kstring
           button(
             class = "button px-2",
             onclick =
@@ -108,7 +113,7 @@ when defined(js) or defined(nimsuggest):
                   main.valOperator.rotateSucc
               ),
           ):
-            text ($main.valOperator).cstring
+            text ($main.valOperator).kstring
       tdiv(class = "block"):
         tdiv(class = "select"):
           select(
@@ -124,7 +129,7 @@ when defined(js) or defined(nimsuggest):
               text "全"
             for color in GoalColor.All.succ .. GoalColor.high:
               option(selected = goal.clearColorOpt == Opt[GoalColor].ok color):
-                text ($color).cstring
+                text ($color).kstring
         button(
           class = "button px-2",
           onclick =
