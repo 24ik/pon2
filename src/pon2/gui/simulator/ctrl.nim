@@ -17,6 +17,10 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
+
   export vdom
 
   proc toSideCtrlVNode*[S: Simulator or Studio or Marathon](
@@ -27,7 +31,7 @@ when defined(js) or defined(nimsuggest):
       insertBtnCls = (
         if self.derefSimulator(helper).editData.insert: "button is-primary"
         else: "button"
-      ).cstring
+      ).kstring
       fieldStyle =
         if helper.mobile:
           style(StyleAttr.columnGap, "0.5em")
@@ -152,7 +156,7 @@ when defined(js) or defined(nimsuggest):
                   italic(class = "fa-solid fa-backward-fast")
                   if not helper.mobile:
                     span(style = counterStyle):
-                      text (if mode == ViewerEdit: "Z" else: "Sft+W").cstring
+                      text (if mode == ViewerEdit: "Z" else: "Sft+W").kstring
             tdiv(class = "control", style = fieldStyle):
               button(
                 class = "button", onclick = () => self.derefSimulator(helper).backward
@@ -161,7 +165,7 @@ when defined(js) or defined(nimsuggest):
                   italic(class = "fa-solid fa-backward-step")
                   if not helper.mobile:
                     span(style = counterStyle):
-                      text (if mode == ViewerEdit: "X" else: "W").cstring
+                      text (if mode == ViewerEdit: "X" else: "W").kstring
             tdiv(class = "control", style = fieldStyle):
               button(
                 class = "button", onclick = () => self.derefSimulator(helper).forward
@@ -170,7 +174,7 @@ when defined(js) or defined(nimsuggest):
                   italic(class = "fa-solid fa-forward-step")
                   if not helper.mobile:
                     span(style = counterStyle):
-                      text (if mode == ViewerEdit: "C" else: "S").cstring
+                      text (if mode == ViewerEdit: "C" else: "S").kstring
         of PlayModes:
           if helper.mobile:
             tdiv(class = "field is-grouped is-grouped-centered", style = fieldStyle):
