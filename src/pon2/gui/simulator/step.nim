@@ -18,11 +18,15 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[dom, gui, utils]
 
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
+
   export vdom
 
   const
-    CellClass = "button p-0".cstring
-    SelectCellClass = "button p-0 is-primary".cstring
+    CellClass = "button p-0".kstring
+    SelectCellClass = "button p-0 is-primary".kstring
 
   func initDelBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, stepIndex: int
@@ -88,7 +92,7 @@ when defined(js) or defined(nimsuggest):
       steps = self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps
       isPlaceholder = stepIndex >= steps.len
       optPlcmtDesc = (if isPlaceholder: ""
-      else: $steps[stepIndex].optPlacement).cstring
+      else: $steps[stepIndex].optPlacement).kstring
 
     buildHtml tdiv(class = "columns is-mobile is-1"):
       # pair
@@ -146,17 +150,17 @@ when defined(js) or defined(nimsuggest):
           class = (
             if helper.mobile: "columns is-mobile is-gapless"
             else: "columns is-mobile is-1"
-          ).cstring
+          ).kstring
         ):
           for col in Col:
             let
               selectId =
-                "pon2-simulator-step-garbagecount-{stepIndex}-{col.ord}".fmt.cstring
+                "pon2-simulator-step-garbagecount-{stepIndex}-{col.ord}".fmt.kstring
               selectStyle =
                 if not self.derefSimulator(helper).editData.focusField and
                     self.derefSimulator(helper).editData.step.index == stepIndex and
                     self.derefSimulator(helper).editData.step.col == col:
-                  style(StyleAttr.backgroundColor, SelectColor.toHtmlRgba.cstring)
+                  style(StyleAttr.backgroundColor, SelectColor.toHtmlRgba.kstring)
                 else:
                   style()
 
@@ -171,9 +175,9 @@ when defined(js) or defined(nimsuggest):
                   ):
                     for count in 0 .. 9:
                       option(selected = count == step.counts[col]):
-                        text $count
+                        text ($count).kstring
               else:
-                text $step.counts[col]
+                text ($step.counts[col]).kstring
 
   proc rotateNode[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, step: Step, stepIndex: int, editable: bool
@@ -194,7 +198,7 @@ when defined(js) or defined(nimsuggest):
               self.derefSimulator(helper).editData.step.index == stepIndex:
           "button is-size-7 is-primary"
           else: "button is-size-7"
-        ).cstring,
+        ).kstring,
         onclick = () => (self.derefSimulator(helper).writeCell(stepIndex, true)),
       ):
         icon
@@ -214,12 +218,13 @@ when defined(js) or defined(nimsuggest):
     buildHtml table(class = "table is-narrow"):
       tbody:
         for stepIndex, step in steps:
-          let rowClass =
+          let rowClass = (
             if not editable and self.derefSimulator(helper).state == Stable and
                 self.derefSimulator(helper).operatingIndex == stepIndex:
-              "is-selected".cstring
+              "is-selected"
             else:
-              "".cstring
+              ""
+          ).kstring
 
           tr(class = rowClass):
             td:
@@ -236,7 +241,7 @@ when defined(js) or defined(nimsuggest):
 
                 tdiv(class = "column is-narrow"):
                   bold:
-                    text $stepIndex.succ
+                    text ($stepIndex.succ).kstring
 
                 # step
                 tdiv(class = "column is-narrow"):
@@ -266,7 +271,7 @@ when defined(js) or defined(nimsuggest):
 
                 tdiv(class = "column is-narrow"):
                   bold:
-                    text $placeholderIndex.succ
+                    text ($placeholderIndex.succ).kstring
 
                 tdiv(class = "column is-narrow"):
                   self.pairPlcmtNode(
