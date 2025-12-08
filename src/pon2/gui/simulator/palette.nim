@@ -17,11 +17,15 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
+
   export vdom
 
-  const Shortcuts: array[Cell, cstring] = [
-    "Space".cstring, "P".cstring, "O".cstring, "H".cstring, "J".cstring, "K".cstring,
-    "L".cstring, ";".cstring,
+  const Shortcuts: array[Cell, kstring] = [
+    "Space".kstring, "P".kstring, "O".kstring, "H".kstring, "J".kstring, "K".kstring,
+    "L".kstring, ";".kstring,
   ]
 
   func initBtnHandler[S: Simulator or Studio or Marathon](
@@ -44,11 +48,11 @@ when defined(js) or defined(nimsuggest):
     ## Returns the palette node.
     let
       editObj = self.derefSimulator(helper).editData.editObj
-      btnClass = (if helper.mobile: "button is-large px-2" else: "button px-2").cstring
+      btnClass = (if helper.mobile: "button is-large px-2" else: "button px-2").kstring
       selectBtnClass = (
         if helper.mobile: "button is-large is-primary px-2"
         else: "button px-2 is-primary"
-      ).cstring
+      ).kstring
 
     buildHtml tdiv(class = "card", style = translucentStyle):
       tdiv(class = "card-content p-1"):
@@ -69,8 +73,9 @@ when defined(js) or defined(nimsuggest):
                       onclick = self.initBtnHandler(helper, cell),
                     ):
                       figure(
-                        class =
-                          (if helper.mobile: "image is-32x32" else: "image is-24x24")
+                        class = (
+                          if helper.mobile: "image is-32x32" else: "image is-24x24"
+                        ).kstring
                       ):
                         img(src = cell.cellImgSrc)
                       if not helper.mobile and not cellSelected:
@@ -86,12 +91,13 @@ when defined(js) or defined(nimsuggest):
                     onclick = self.initBtnHandler(helper, cross),
                   ):
                     figure(
-                      class =
-                        (if helper.mobile: "image is-32x32" else: "image is-24x24")
+                      class = (
+                        if helper.mobile: "image is-32x32" else: "image is-24x24"
+                      ).kstring
                     ):
                       span(
                         class =
-                          (if helper.mobile: "icon is-medium" else: "icon").cstring
+                          (if helper.mobile: "icon is-medium" else: "icon").kstring
                       ):
                         if cross:
                           span(
@@ -104,4 +110,4 @@ when defined(js) or defined(nimsuggest):
                           italic(class = "fa-solid fa-arrows-rotate")
                     if not helper.mobile and not selected:
                       span(style = counterStyle):
-                        text (if cross: "M" else: "N").cstring
+                        text (if cross: "M" else: "N").kstring
