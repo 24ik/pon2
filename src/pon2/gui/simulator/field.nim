@@ -18,6 +18,10 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
+
   export vdom
 
   proc cellBackgroundColor[S: Simulator or Studio or Marathon](
@@ -58,13 +62,13 @@ when defined(js) or defined(nimsuggest):
     let
       editable = not cameraReady and self.derefSimulator(helper).mode in EditModes
       cellArray = self.derefSimulator(helper).nazoPuyo.puyoPuyo.field.toArray
-      tableBorder = (StyleAttr.border, "1px gray solid".cstring)
+      tableBorder = (StyleAttr.border, "1px gray solid".kstring)
       tableStyle =
         if editable:
           style(
             tableBorder,
-            (StyleAttr.borderCollapse, "separate".cstring),
-            (StyleAttr.borderSpacing, "1px".cstring),
+            (StyleAttr.borderCollapse, "separate".kstring),
+            (StyleAttr.borderSpacing, "1px".kstring),
           )
         else:
           style(tableBorder)
@@ -78,7 +82,7 @@ when defined(js) or defined(nimsuggest):
                 imgSrc = cellArray[row][col].cellImgSrc
                 cellStyle = style(
                   StyleAttr.backgroundColor,
-                  self.cellBackgroundColor(helper, row, col, editable).toHtmlRgba.cstring,
+                  self.cellBackgroundColor(helper, row, col, editable).toHtmlRgba.kstring,
                 )
 
               td:
