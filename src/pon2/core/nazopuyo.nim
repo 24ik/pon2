@@ -9,9 +9,10 @@
 import std/[strformat, uri]
 import
   ./[cell, field, fqdn, goal, moveresult, pair, placement, popresult, puyopuyo, step]
-import ../private/[assign, bitutils, core, results2, strutils, tables]
+import ../[utils]
+import ../private/[assign, bitutils, core, strutils, tables]
 
-export goal, puyopuyo, results2
+export goal, puyopuyo, utils
 
 type
   NazoPuyo* = object ## Nazo Puyo.

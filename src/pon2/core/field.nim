@@ -8,13 +8,12 @@
 
 import std/[sequtils, strformat, sugar, typetraits]
 import ./[cell, common, fqdn, moveresult, pair, placement, popresult, rule, step]
+import ../[utils]
 import
-  ../private/[
-    arrayutils, assign, bitutils, core, macros, math, results2, staticfor, strutils,
-    tables,
-  ]
+  ../private/
+    [arrayutils, assign, bitutils, core, macros, math, staticfor, strutils, tables]
 
-export cell, common, moveresult, placement, popresult, results2, rule
+export cell, common, moveresult, placement, popresult, rule, utils
 
 type Field* = object ## Puyo Puyo field.
   rule*: Rule

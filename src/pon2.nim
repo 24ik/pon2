@@ -7,6 +7,7 @@
 ## - [pon2/gui](./pon2/gui.html)
 ## - [pon2/app](./pon2/app.html)
 ## - [pon2/core](./pon2/core.html)
+## - [pon2/utils](./pon2/utils.html)
 ##
 ## Note that these submodules are listed in descending order of "layers".
 ## Importing a higher-level module automatically imports all modules below it.
@@ -64,7 +65,7 @@ when isMainModule:
     import std/[strformat]
 
     when defined(pon2.build.worker):
-      import ./pon2/private/[app, results2, webworkers]
+      import ./pon2/private/[app, webworkers]
     else:
       import std/[sugar]
       import karax/[karax, karaxdsl, kbase, vdom]

@@ -8,9 +8,10 @@
 
 import std/[strformat, sugar]
 import ./[common, fqdn]
-import ../private/[macros, results2, tables]
+import ../[utils]
+import ../private/[macros, tables]
 
-export common, results2
+export common, utils
 
 type
   Dir* {.pure.} = enum

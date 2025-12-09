@@ -36,6 +36,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
+import ./[utils]
 import
   ./core/[
     cell, common, field, fqdn, goal, moveresult, nazopuyo, notice, pair, placement,
@@ -44,4 +45,4 @@ import
 
 export
   cell, common, field, fqdn, goal, moveresult, nazopuyo, notice, pair, placement,
-  popresult, puyopuyo, rule, step
+  popresult, puyopuyo, rule, step, utils

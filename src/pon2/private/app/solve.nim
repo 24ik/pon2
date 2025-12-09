@@ -12,9 +12,10 @@ import ../../private/[assign, core, macros, math, staticfor]
 
 when defined(js) or defined(nimsuggest):
   import std/[strformat, sugar]
-  import ../../private/[results2, strutils]
+  import ../../[utils]
+  import ../../private/[strutils]
 
-  export core, results2
+  export core, utils
 
 type SolveNode* = object ## Node of solutions search tree.
   depth: int

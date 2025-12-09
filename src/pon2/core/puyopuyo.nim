@@ -8,9 +8,10 @@
 
 import std/[strformat, uri]
 import ./[cell, field, fqdn, moveresult, pair, placement, popresult, step]
+import ../[utils]
 import ../private/[assign, bitutils, strutils, tables]
 
-export field, moveresult, results2, step
+export field, moveresult, step, utils
 
 type PuyoPuyo* = object ## Puyo Puyo game.
   field*: Field

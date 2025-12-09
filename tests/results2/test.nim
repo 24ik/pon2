@@ -4,7 +4,7 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2/private/[results2]
+import ../../src/pon2/utils/[results2]
 
 block: # context
   let

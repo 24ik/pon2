@@ -9,11 +9,9 @@
 import std/[random, sequtils, sets, sugar]
 import ./[solve]
 import ../[core]
-import
-  ../private/
-    [algorithm, arrayutils, assign, deques, math, results2, setutils, staticfor]
+import ../private/[algorithm, arrayutils, assign, deques, math, setutils, staticfor]
 
-export results2
+export core
 
 type GenerateSettings* = object ## Settings of Nazo Puyo generation.
   rule: Rule

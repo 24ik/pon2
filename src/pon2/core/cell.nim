@@ -7,9 +7,10 @@
 {.experimental: "views".}
 
 import std/[strformat, sugar]
-import ../private/[results2, tables]
+import ../[utils]
+import ../private/[tables]
 
-export results2
+export utils
 
 type Cell* {.pure.} = enum
   None = "."

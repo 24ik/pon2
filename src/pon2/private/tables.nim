@@ -7,9 +7,9 @@
 {.experimental: "views".}
 
 import std/[strformat, tables]
-import ./[results2]
+import ../[utils]
 
-export results2
+export utils
 export tables except `[]`
 
 func `[]`*[K, V](

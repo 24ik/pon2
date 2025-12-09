@@ -8,9 +8,10 @@
 
 import std/[strformat, sugar]
 import ./[cell, fqdn]
-import ../private/[assign, results2, tables]
+import ../[utils]
+import ../private/[assign, tables]
 
-export cell, results2
+export cell, utils
 
 type Pair* {.pure.} = enum
   ## The pair of two color puyos.

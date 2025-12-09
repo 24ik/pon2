@@ -15,9 +15,9 @@
 {.experimental: "views".}
 
 import std/[strformat]
-import ../private/[results2]
+import ../[utils]
 
-export results2
+export utils
 
 const
   TsuGarbageRate {.define: "pon2.garbagerate.tsu".} = 70

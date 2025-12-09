@@ -8,9 +8,10 @@
 
 import std/[bitops, sequtils, strformat, sugar]
 import ./[cell, common, fqdn, pair, placement]
-import ../private/[arrayutils, assign, deques, math, results2, strutils, tables]
+import ../[utils]
+import ../private/[arrayutils, assign, deques, math, strutils, tables]
 
-export deques, pair, placement, results2
+export deques, pair, placement, utils
 
 type
   StepKind* {.pure.} = enum

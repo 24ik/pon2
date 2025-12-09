@@ -14,9 +14,9 @@ when defined(js) or defined(nimsuggest):
   import std/[jsffi]
   import karax/[kbase, vdom]
   import ../[app]
-  import ../private/[dom, results2, utils]
+  import ../private/[dom, utils]
 
-  export kbase, results2
+  export app, kbase
 
   type
     SimulatorVNodeHelper* = object ## Helper for making VNode of simulators.

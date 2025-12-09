@@ -15,13 +15,9 @@ import std/[sequtils, strformat, sugar, uri]
 import ./[key]
 import ../[core]
 import
-  ../private/
-    [
-      algorithm, arrayutils, assign, deques, results2, staticfor, strutils, tables,
-      utils,
-    ]
+  ../private/[algorithm, arrayutils, assign, deques, staticfor, strutils, tables, utils]
 
-export core, results2, uri
+export core, uri
 
 type
   SimulatorMode* {.pure.} = enum

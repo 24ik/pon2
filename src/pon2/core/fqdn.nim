@@ -12,9 +12,10 @@
 {.experimental: "views".}
 
 import std/[strformat, sugar]
-import ../private/[results2, tables]
+import ../[utils]
+import ../private/[tables]
 
-export results2
+export utils
 
 const Pon2Fqdn {.define: "pon2.fqdn".} = "24ik.github.io"
 

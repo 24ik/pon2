@@ -12,12 +12,13 @@
 {.experimental: "views".}
 
 import std/[asyncjs, jsffi, sequtils, strformat, sugar]
-import ./[assign, dom, results2, strutils, utils]
+import ./[assign, dom, strutils, utils as privateUtils]
+import ../[utils]
 
 when not defined(pon2.build.worker):
   import ./[math]
 
-export results2
+export utils
 
 type
   WebWorkerTask* =

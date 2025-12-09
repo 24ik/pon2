@@ -9,10 +9,9 @@
 import std/[sequtils, sugar, random]
 import ./[key, simulator]
 import ../[core]
-import
-  ../private/[algorithm, arrayutils, assign, critbits, results2, setutils, strutils]
+import ../private/[algorithm, arrayutils, assign, critbits, setutils, strutils]
 
-export simulator
+export core, simulator
 
 type Marathon* = object ## Marathon manager.
   simulator: Simulator

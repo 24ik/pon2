@@ -7,9 +7,9 @@
 {.experimental: "views".}
 
 import std/[browsers, uri]
-import ./[results2]
+import ../[utils]
 
-export browsers, results2
+export browsers, utils
 
 proc openDefaultBrowser*(uri: Uri): Pon2Result[void] {.inline, noinit.} =
   ## Opens the default web browser with the given URI.

@@ -7,9 +7,9 @@
 {.experimental: "views".}
 
 import std/[strutils]
-import ./[results2]
+import ../[utils]
 
-export results2
+export utils
 export strutils except parseInt
 
 func parseInt*(str: string): Pon2Result[int] {.inline, noinit.} =

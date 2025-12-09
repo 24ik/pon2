@@ -8,9 +8,10 @@
 
 import std/[setutils, strformat, sugar]
 import ./[fqdn]
-import ../private/[assign, results2, strutils, tables]
+import ../[utils]
+import ../private/[assign, strutils, tables]
 
-export results2
+export utils
 
 type
   GoalKind* {.pure.} = enum
