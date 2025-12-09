@@ -67,7 +67,7 @@ when isMainModule:
       import ./pon2/private/[app, results2, webworkers]
     else:
       import std/[sugar]
-      import karax/[karax, karaxdsl, vdom]
+      import karax/[karax, karaxdsl, kbase, vdom]
       import ./pon2/private/[dom, gui]
       when defined(pon2.build.marathon):
         import std/[asyncjs, jsfetch, random]
@@ -91,7 +91,7 @@ when isMainModule:
                 text "エラー内容"
               tdiv(class = "control"):
                 textarea(class = "textarea is-large", readonly = true):
-                  text msg.cstring
+                  text msg.kstring
 
       proc initFooterNode(): VNode =
         ## Returns the footer node.
@@ -194,7 +194,7 @@ when isMainModule:
           if errorMsg == "":
             let helper = VNodeHelper.init(globalMarathonRef, "pon2-main")
             section(
-              class = (if helper.mobile: "section pt-3 pl-3" else: "section").cstring
+              class = (if helper.mobile: "section pt-3 pl-3" else: "section").kstring
             ):
               globalMarathonRef.toMarathonVNode helper
           else:
@@ -249,7 +249,7 @@ when isMainModule:
           if errorMsg == "":
             let (helper, replayHelper) = VNodeHelper.init2(globalStudioRef, "pon2-main")
             section(
-              class = (if helper.mobile: "section pt-3 pl-3" else: "section").cstring
+              class = (if helper.mobile: "section pt-3 pl-3" else: "section").kstring
             ):
               globalStudioRef.toStudioVNode(helper, replayHelper)
           else:
