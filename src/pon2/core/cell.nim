@@ -6,9 +6,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, sugar]
+import std/[strformat]
 import ../[utils]
-import ../private/[tables]
 
 export utils
 
@@ -30,10 +29,10 @@ const
 # Cell <-> string
 # ------------------------------------------------
 
-const StrToCell = collect:
-  for cell in Cell:
-    {$cell: cell}
-
 func parseCell*(str: string): Pon2Result[Cell] {.inline, noinit.} =
   ## Returns the cell converted from the string representation.
-  StrToCell[str].context "Invalid cell: {str}".fmt
+  for cell in Cell:
+    if str == $cell:
+      return ok cell
+
+  err "Invalid cell: {str}".fmt
