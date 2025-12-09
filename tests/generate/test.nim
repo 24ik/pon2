@@ -124,9 +124,9 @@ proc checkGenerate(
   for stepIndex, step in nazoPuyo.puyoPuyo.steps:
     case step.kind
     of PairPlacement:
-      check step.optPlacement == answer[0][stepIndex]
+      check answer[0][stepIndex] == step.placement
     else:
-      check answer[0][stepIndex].isErr
+      check answer[0][stepIndex] == Placement.None
 
 block: # generate
   checkGenerate(

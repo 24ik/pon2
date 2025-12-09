@@ -12,22 +12,16 @@ import ../../src/pon2/core/[cell, common, fqdn, pair, placement, step]
 
 block: # init
   block:
-    let step = Step.init(RedGreen, NonePlacement)
+    let step = Step.init RedGreen
     check step.kind == PairPlacement
     check step.pair == RedGreen
-    check step.optPlacement == NonePlacement
-
-  block:
-    let step = Step.init BlueYellow
-    check step.kind == PairPlacement
-    check step.pair == BlueYellow
-    check step.optPlacement == NonePlacement
+    check step.placement == Placement.None
 
   block:
     let step = Step.init(PurplePurple, Down3)
     check step.kind == PairPlacement
     check step.pair == PurplePurple
-    check step.optPlacement == OptPlacement.ok Down3
+    check step.placement == Down3
 
   block:
     let

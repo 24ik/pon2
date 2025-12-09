@@ -121,7 +121,7 @@ proc permute*(
       if answers.len == 1:
         for stepIndex, step in nazoPuyo.puyoPuyo.steps.mpairs:
           if step.kind == PairPlacement:
-            step.optPlacement.assign answers[0][stepIndex]
+            step.placement.assign answers[0][stepIndex]
 
         nazoPuyo
 
@@ -156,7 +156,7 @@ when defined(js) or defined(nimsuggest):
         if answers.len == 1:
           for stepIndex, step in nazoPuyo.puyoPuyo.steps.mpairs:
             if step.kind == PairPlacement:
-              step.optPlacement.assign answers[0][stepIndex]
+              step.placement.assign answers[0][stepIndex]
 
           nazoPuyos.add nazoPuyo
 

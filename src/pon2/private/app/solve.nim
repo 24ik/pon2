@@ -170,10 +170,10 @@ func child(self: SolveNode, goal: Goal, step: Step): SolveNode {.inline, noinit.
 
 func children(
     self: SolveNode, goal: Goal, step: Step
-): seq[tuple[node: SolveNode, optPlacement: OptPlacement]] {.inline, noinit.} =
+): seq[tuple[node: SolveNode, placement: Placement]] {.inline, noinit.} =
   ## Returns the children of the node.
   ## This function requires that the field is settled.
-  ## `optPlacement` is set to `NonePlacement` if the edge is non-`PairPlacement`.
+  ## `placement` is set to `NonePlacement` if the edge is non-`PairPlacement`.
   case step.kind
   of PairPlacement:
     let placements =
@@ -182,9 +182,9 @@ func children(
       else:
         self.field.validPlacements
 
-    placements.mapIt (self.child(goal, Step.init(step.pair, it)), OptPlacement.ok it)
+    placements.mapIt (self.child(goal, Step.init(step.pair, it)), it)
   of StepKind.Garbages, Rotate:
-    @[(self.child(goal, step), NonePlacement)]
+    @[(self.child(goal, step), Placement.None)]
 
 # ------------------------------------------------
 # Accept
@@ -411,18 +411,18 @@ func childrenAtDepth*(
     self: SolveNode,
     targetDepth: int,
     nodes: var seq[SolveNode],
-    optPlacementsSeq: var seq[seq[OptPlacement]],
-    answers: var seq[seq[OptPlacement]],
+    placementsSeq: var seq[seq[Placement]],
+    answers: var seq[seq[Placement]],
     moveCount: int,
     calcAllAnswers: bool,
     goal: Goal,
     steps: Steps,
 ) {.inline, noinit.} =
   ## Calculates nodes with the given depth and sets them to `nodes`.
-  ## A sequence of edges to reach them is set to `optPlacementsSeq`.
+  ## A sequence of edges to reach them is set to `placementsSeq`.
   ## Answers that have `targetDepth` or less steps are set to `answers` in reverse
   ## order.
-  ## This function requires that the field is settled and `nodes`, `optPlacementsSeq`, and
+  ## This function requires that the field is settled and `nodes`, `placementsSeq`, and
   ## `answers` are empty.
   let
     step = steps[self.depth]
@@ -434,17 +434,17 @@ func childrenAtDepth*(
 
   var
     nodesSeq = newSeqOfCap[seq[SolveNode]](childCount)
-    optPlacementsSeqSeq = newSeqOfCap[seq[seq[OptPlacement]]](childCount)
-    answersSeq = newSeqOfCap[seq[seq[OptPlacement]]](childCount)
+    placementsSeqSeq = newSeqOfCap[seq[seq[Placement]]](childCount)
+    answersSeq = newSeqOfCap[seq[seq[Placement]]](childCount)
   for _ in 1 .. childCount:
     nodesSeq.add newSeqOfCap[SolveNode](static(Placement.enumLen))
-    optPlacementsSeqSeq.add newSeqOfCap[seq[OptPlacement]](static(Placement.enumLen))
-    answersSeq.add newSeqOfCap[seq[OptPlacement]](static(Placement.enumLen))
+    placementsSeqSeq.add newSeqOfCap[seq[Placement]](static(Placement.enumLen))
+    answersSeq.add newSeqOfCap[seq[Placement]](static(Placement.enumLen))
 
-  for childIndex, (child, optPlacement) in children.pairs:
+  for childIndex, (child, placement) in children.pairs:
     if child.isAccepted goal:
-      var answer = newSeqOfCap[OptPlacement](childDepth)
-      answer.add optPlacement
+      var answer = newSeqOfCap[Placement](childDepth)
+      answer.add placement
 
       answers.add answer
 
@@ -459,31 +459,31 @@ func childrenAtDepth*(
     if childIsSpawned:
       nodesSeq[childIndex].add child
 
-      var optPlacements = newSeqOfCap[OptPlacement](childDepth)
-      optPlacements.add optPlacement
-      optPlacementsSeqSeq[childIndex].add optPlacements
+      var placements = newSeqOfCap[Placement](childDepth)
+      placements.add placement
+      placementsSeqSeq[childIndex].add placements
     else:
       child.childrenAtDepth targetDepth,
         nodesSeq[childIndex],
-        optPlacementsSeqSeq[childIndex],
+        placementsSeqSeq[childIndex],
         answersSeq[childIndex],
         moveCount,
         calcAllAnswers,
         goal,
         steps
 
-      for optPlacements in optPlacementsSeqSeq[childIndex].mitems:
-        optPlacements.add optPlacement
+      for placements in placementsSeqSeq[childIndex].mitems:
+        placements.add placement
 
     for answer in answersSeq[childIndex].mitems:
-      answer.add optPlacement
+      answer.add placement
 
     if not calcAllAnswers and answers.len + answersSeq[childIndex].len > 1:
       answers &= answersSeq[childIndex]
       return
 
   nodes &= nodesSeq.concat
-  optPlacementsSeq &= optPlacementsSeqSeq.concat
+  placementsSeq &= placementsSeqSeq.concat
   answers &= answersSeq.concat
 
 # ------------------------------------------------
@@ -492,7 +492,7 @@ func childrenAtDepth*(
 
 func solveSingleThread*(
     self: SolveNode,
-    answers: var seq[seq[OptPlacement]],
+    answers: var seq[seq[Placement]],
     moveCount: int,
     calcAllAnswers: bool,
     goal: Goal,
@@ -511,14 +511,14 @@ func solveSingleThread*(
     childIsLeaf = childDepth == moveCount
     children = self.children(goal, step)
 
-  var childAnswersSeq = newSeqOfCap[seq[seq[OptPlacement]]](children.len)
+  var childAnswersSeq = newSeqOfCap[seq[seq[Placement]]](children.len)
   for _ in 1 .. children.len:
-    childAnswersSeq.add newSeqOfCap[seq[OptPlacement]](static(Placement.enumLen))
+    childAnswersSeq.add newSeqOfCap[seq[Placement]](static(Placement.enumLen))
 
-  for childIndex, (child, optPlacement) in children.pairs:
+  for childIndex, (child, placement) in children.pairs:
     if child.isAccepted goal:
-      var answer = newSeqOfCap[OptPlacement](childDepth)
-      answer.add optPlacement
+      var answer = newSeqOfCap[Placement](childDepth)
+      answer.add placement
 
       answers.add answer
 
@@ -540,7 +540,7 @@ func solveSingleThread*(
     )
 
     for answer in childAnswersSeq[childIndex].mitems:
-      answer.add optPlacement
+      answer.add placement
 
     if not calcAllAnswers and answers.len + childAnswersSeq[childIndex].len > 1:
       answers &= childAnswersSeq[childIndex]
@@ -734,33 +734,38 @@ when defined(js) or defined(nimsuggest):
 when defined(js) or defined(nimsuggest):
   const NonePlacementStr = ".."
 
-  func toStrs*(answers: seq[seq[OptPlacement]]): seq[string] {.inline, noinit.} =
+  func toStrs*(answers: seq[seq[Placement]]): seq[string] {.inline, noinit.} =
     ## Returns the string representations of the answers.
     collect:
-      for ans in answers:
+      for answer in answers:
         (
-          ans.mapIt(
-            if it.isOk:
-              $it.unsafeValue
-            else:
+          answer.mapIt(
+            case it
+            of Placement.None:
               NonePlacementStr
+            else:
+              $it
           )
         ).join
 
   func parseSolveAnswers*(
       strs: seq[string]
-  ): Pon2Result[seq[seq[OptPlacement]]] {.inline, noinit.} =
+  ): Pon2Result[seq[seq[Placement]]] {.inline, noinit.} =
     ## Returns the answers converted from the run result.
-    var answers = newSeqOfCap[seq[OptPlacement]](strs.len)
+    var answers = newSeqOfCap[seq[Placement]](strs.len)
     for str in strs:
       let errorMsg = "Invalid answers: {str}".fmt
 
       if str.len mod 2 == 1:
         return err errorMsg
 
-      let ans = collect:
+      let answer = collect:
         for charIndex in countup(0, str.len.pred, 2):
-          ?str.substr(charIndex, charIndex.succ).parseOptPlacement.context errorMsg
-      answers.add ans
+          let s = str.substr(charIndex, charIndex.succ)
+          if s == NonePlacementStr:
+            Placement.None
+          else:
+            ?s.parsePlacement.context errorMsg
+      answers.add answer
 
     ok answers

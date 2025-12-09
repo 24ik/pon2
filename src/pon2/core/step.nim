@@ -24,7 +24,7 @@ type
     case kind*: StepKind
     of PairPlacement:
       pair*: Pair
-      optPlacement*: OptPlacement
+      placement*: Placement
     of Garbages:
       counts*: array[Col, int]
       dropHard*: bool
@@ -37,14 +37,8 @@ type
 # Constructor
 # ------------------------------------------------
 
-func init*(T: type Step, pair: Pair, optPlacement: OptPlacement): T {.inline, noinit.} =
-  T(kind: PairPlacement, pair: pair, optPlacement: optPlacement)
-
-func init*(T: type Step, pair: Pair): T {.inline, noinit.} =
-  T.init(pair, NonePlacement)
-
-func init*(T: type Step, pair: Pair, placement: Placement): T {.inline, noinit.} =
-  T.init(pair, OptPlacement.ok placement)
+func init*(T: type Step, pair: Pair, placement = Placement.None): T {.inline, noinit.} =
+  T(kind: PairPlacement, pair: pair, placement: placement)
 
 func init*(
     T: type Step, counts: array[Col, int], dropHard: bool
@@ -65,7 +59,7 @@ func `==`*(step1, step2: Step): bool {.inline, noinit.} =
   case step1.kind
   of PairPlacement:
     step2.kind == PairPlacement and step1.pair == step2.pair and
-      step1.optPlacement == step2.optPlacement
+      step1.placement == step2.placement
   of Garbages:
     step2.kind == Garbages and step1.counts == step2.counts and
       step1.dropHard == step2.dropHard
@@ -164,7 +158,7 @@ const
 func `$`*(self: Step): string {.inline, noinit.} =
   case self.kind
   of PairPlacement:
-    "{self.pair}{PairPlacementSep}{self.optPlacement}".fmt
+    "{self.pair}{PairPlacementSep}{self.placement}".fmt
   of Garbages:
     let
       joined = self.counts.mapIt($it).join GarbagesSep
@@ -208,9 +202,9 @@ func parseStep*(str: string): Pon2Result[Step] {.inline, noinit.} =
 
   let
     pair = ?strs[0].parsePair.context "Invalid step: {str}".fmt
-    optPlacement = ?strs[1].parseOptPlacement.context "Invalid step: {str}".fmt
+    placement = ?strs[1].parsePlacement.context "Invalid step: {str}".fmt
 
-  ok Step.init(pair, optPlacement)
+  ok Step.init(pair, placement)
 
 # ------------------------------------------------
 # Step <-> URI
@@ -235,7 +229,7 @@ func toUriQuery*(self: Step, fqdn = Pon2): Pon2Result[string] {.inline, noinit.}
   ## Returns the URI query converted from the step.
   case self.kind
   of PairPlacement:
-    ok "{self.pair.toUriQuery fqdn}{self.optPlacement.toUriQuery fqdn}".fmt
+    ok "{self.pair.toUriQuery fqdn}{self.placement.toUriQuery fqdn}".fmt
   of Garbages:
     case fqdn
     of Pon2:
@@ -299,7 +293,7 @@ func parseStep*(
     elif query.len == 4:
       ok Step.init(
         ?query[0 ..< 2].parsePair(fqdn).context "Invalid step (pair): {query}".fmt,
-        ?query[2 ..< 4].parseOptPlacement(fqdn).context(
+        ?query[2 ..< 4].parsePlacement(fqdn).context(
           "Invalid step (placement): {query}".fmt
         ),
       )
@@ -322,12 +316,12 @@ func parseStep*(
 
     let
       pair = ?query[0 .. 0].parsePair(fqdn).context "Invalid step (pair): {query}".fmt
-      optPlacement =
-        ?query[1 .. 1].parseOptPlacement(fqdn).context(
+      placement =
+        ?query[1 .. 1].parsePlacement(fqdn).context(
           "Invalid step (placement): {query}".fmt
         )
 
-    ok Step.init(pair, optPlacement)
+    ok Step.init(pair, placement)
 
 # ------------------------------------------------
 # Steps <-> string

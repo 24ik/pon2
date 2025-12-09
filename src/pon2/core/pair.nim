@@ -9,7 +9,7 @@
 import std/[strformat]
 import ./[cell, fqdn]
 import ../[utils]
-import ../private/[assign, tables]
+import ../private/[assign]
 
 export cell, utils
 

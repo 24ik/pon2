@@ -91,8 +91,7 @@ when defined(js) or defined(nimsuggest):
         self.derefSimulator(helper).editData.step.index == stepIndex
       steps = self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps
       isPlaceholder = stepIndex >= steps.len
-      optPlcmtDesc = (if isPlaceholder: ""
-      else: $steps[stepIndex].optPlacement).kstring
+      optPlcmtDesc = (if isPlaceholder: "" else: $steps[stepIndex].placement).kstring
 
     buildHtml tdiv(class = "columns is-mobile is-1"):
       # pair

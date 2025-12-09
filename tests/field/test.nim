@@ -236,8 +236,8 @@ hhhhhh""".toField.isDead
 block: # invalidPlacements, validPlacements, validDoublePlacements
   block:
     let field = Field.init
-    check field.invalidPlacements == {}
-    check field.validPlacements == {Placement.low .. Placement.high}
+    check field.invalidPlacements == {Placement.None}
+    check field.validPlacements == ActualPlacements
     check field.validDoublePlacements == DoublePlacements
 
   block:
@@ -258,7 +258,7 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......""".toField
     check field.invalidPlacements ==
-      {Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2}
+      {Placement.None, Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2}
     check field.validPlacements == {
       Up2, Up3, Up4, Up5, Right2, Right3, Right4, Down2, Down3, Down4, Down5, Left3,
       Left4, Left5,
@@ -282,7 +282,7 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......
 ......""".toField
-    check field.invalidPlacements == {Down1}
+    check field.invalidPlacements == {Placement.None, Down1}
 
   block:
     let field =
@@ -301,7 +301,7 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......
 ......""".toField
-    check field.invalidPlacements == {Down1, Down3}
+    check field.invalidPlacements == {Placement.None, Down1, Down3}
 
   block:
     let field =
@@ -321,7 +321,7 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......""".toField
     check field.invalidPlacements ==
-      {Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2, Down3}
+      {Placement.None, Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2, Down3}
 
   block:
     let field =
@@ -342,7 +342,10 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......""".toField
     check field.invalidPlacements ==
-      {Down1, Right3, Down3, Up4, Right4, Down4, Left4, Up5, Down5, Left5}
+      {
+        Placement.None, Down1, Right3, Down3, Up4, Right4, Down4, Left4, Up5, Down5,
+        Left5,
+      }
 
 # ------------------------------------------------
 # Indexer
@@ -385,9 +388,9 @@ h.....
 ......""".toField
 
   check fieldT[Row1, Col1] == Red
-  check fieldT[Row0, Col0] == None
+  check fieldT[Row0, Col0] == Cell.None
   check fieldW[Row5, Col0] == Hard
-  check fieldW[Row1, Col1] == None
+  check fieldW[Row1, Col1] == Cell.None
 
   fieldT[Row2, Col3] = Purple
   check fieldT[Row2, Col3] == Purple
@@ -548,7 +551,7 @@ p.....
 ......
 .o....""".toField
 
-    field.insert Row4, Col4, None
+    field.insert Row4, Col4, Cell.None
     check field ==
       """
 [すいちゅう]
@@ -1597,7 +1600,7 @@ block: # place
 ....oo
 ...hoo""".toField
 
-    check field.dup(place(_, PurplePurple, NonePlacement)) == field
+    check field.dup(place(_, PurplePurple, Placement.None)) == field
 
     field.place RedGreen, Right0
     check field ==
@@ -1671,7 +1674,7 @@ rgrhoo""".toField
 .y.poo
 rgrhoo""".toField
 
-    field.place YellowPurple, OptPlacement.ok Down5
+    field.place YellowPurple, Down5
     check field ==
       """
 [クロスかいてん]
@@ -1708,7 +1711,7 @@ rgrhoo""".toField
 ......
 ......""".toField
 
-    check field.dup(place(_, PurplePurple, NonePlacement)) == field
+    check field.dup(place(_, PurplePurple, Placement.None)) == field
 
     field.place BlueYellow, Left4
     check field ==
@@ -1729,7 +1732,7 @@ rgrhoo""".toField
 ....o.
 ......""".toField
 
-    field.place PurpleRed, OptPlacement.ok Down4
+    field.place PurpleRed, Down4
     check field ==
       """
 [すいちゅう]
@@ -2019,7 +2022,7 @@ block: # move
       plcmt = Down3
 
       chainCount = 3
-      popCounts = [None: 0, 0, 2, 4, 10, 5, 0, 4]
+      popCounts = [Cell.None: 0, 0, 2, 4, 10, 5, 0, 4]
       hardToGarbageCount = 0
       detailHardToGarbageCount = @[0, 0, 0]
 

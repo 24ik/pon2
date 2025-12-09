@@ -199,9 +199,9 @@ proc setAnswers(
   let stepsSeq = collect:
     for answer in answers:
       var steps = originalNazoPuyo.puyoPuyo.steps
-      for stepIndex, optPlacement in answer:
+      for stepIndex, placement in answer:
         if originalNazoPuyo.puyoPuyo.steps[stepIndex].kind == PairPlacement:
-          steps[stepIndex].optPlacement.assign optPlacement
+          steps[stepIndex].placement.assign placement
 
       steps
 

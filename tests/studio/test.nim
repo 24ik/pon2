@@ -92,8 +92,8 @@ bg|""".parseNazoPuyo.unsafeValue
   var studio = Studio.init simulator
 
   var answerNazoPuyo = nazoPuyo
-  answerNazoPuyo.puyoPuyo.steps[0].optPlacement.assign OptPlacement.ok Left1
-  answerNazoPuyo.puyoPuyo.steps[1].optPlacement.assign OptPlacement.ok Left1
+  answerNazoPuyo.puyoPuyo.steps[0].placement.assign Left1
+  answerNazoPuyo.puyoPuyo.steps[1].placement.assign Left1
   let answerSimulator = Simulator.init(answerNazoPuyo, Replay)
   var answerStudio = Studio.init simulator
   answerStudio.toggleFocus
@@ -121,8 +121,8 @@ bg|""".parseNazoPuyo.unsafeValue
   var permuteNazoPuyo1 = nazoPuyo
   permuteNazoPuyo1.puyoPuyo.steps[0].pair.assign GreenGreen
   permuteNazoPuyo1.puyoPuyo.steps[1].pair.assign BlueBlue
-  permuteNazoPuyo1.puyoPuyo.steps[0].optPlacement.assign OptPlacement.ok Up0
-  permuteNazoPuyo1.puyoPuyo.steps[1].optPlacement.assign OptPlacement.ok Up1
+  permuteNazoPuyo1.puyoPuyo.steps[0].placement.assign Up0
+  permuteNazoPuyo1.puyoPuyo.steps[1].placement.assign Up1
   let permuteSimulator1 = Simulator.init(permuteNazoPuyo1, Replay)
   var permuteStudio1 = Studio.init simulator
   permuteStudio1.toggleFocus
@@ -133,8 +133,8 @@ bg|""".parseNazoPuyo.unsafeValue
   var permuteNazoPuyo2 = nazoPuyo
   permuteNazoPuyo2.puyoPuyo.steps[0].pair.assign GreenBlue
   permuteNazoPuyo2.puyoPuyo.steps[1].pair.assign GreenBlue
-  permuteNazoPuyo2.puyoPuyo.steps[0].optPlacement.assign OptPlacement.ok Right0
-  permuteNazoPuyo2.puyoPuyo.steps[1].optPlacement.assign OptPlacement.ok Right0
+  permuteNazoPuyo2.puyoPuyo.steps[0].placement.assign Right0
+  permuteNazoPuyo2.puyoPuyo.steps[1].placement.assign Right0
   let permuteSimulator2 = Simulator.init(permuteNazoPuyo2, Replay)
   var permuteStudio2 = Studio.init simulator
   permuteStudio2.toggleFocus

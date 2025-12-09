@@ -7,19 +7,12 @@ import std/[unittest]
 import
   ../../src/pon2/core/
     [field, fqdn, goal, nazopuyo, placement, popresult, puyopuyo, rule, step]
-import ../../src/pon2/private/[strutils]
+import ../../src/pon2/private/[assign, strutils]
 
 func mark2(nazoPuyo: NazoPuyo, placements: varargs[Placement]): MarkResult =
   var nazoPuyo2 = nazoPuyo
   for i, placement in placements:
-    nazoPuyo2.puyoPuyo.steps[i].optPlacement.ok placement
-
-  nazoPuyo2.mark
-
-func mark2(nazoPuyo: NazoPuyo, optPlacements: varargs[OptPlacement]): MarkResult =
-  var nazoPuyo2 = nazoPuyo
-  for i, optPlacement in optPlacements:
-    nazoPuyo2.puyoPuyo.steps[i].optPlacement = optPlacement
+    nazoPuyo2.puyoPuyo.steps[i].placement.assign placement
 
   nazoPuyo2.mark
 
@@ -250,7 +243,7 @@ by|
 by|""".parseNazoPuyo.unsafeValue
 
     check nazoPuyo.mark2(Left3, Down2) == Accept
-    check nazoPuyo.mark2(OptPlacement.ok Left3, NonePlacement) == WrongAnswer
+    check nazoPuyo.mark2(Left3, Placement.None) == WrongAnswer
 
   block: # Clear w/ kind
     let nazoPuyo =
@@ -302,7 +295,7 @@ by|""".parseNazoPuyo.unsafeValue
 
     check nazoPuyo.mark2(Up2) == Dead
     check nazoPuyo.mark2(Up5) == InvalidMove
-    check nazoPuyo.mark2(NonePlacement, OptPlacement.ok Up3) == SkipMove
+    check nazoPuyo.mark2(Placement.None, Up3) == SkipMove
 
   block: # NotSupport
     let nazoPuyo =
@@ -327,7 +320,7 @@ yyryy.
 ry|
 ry|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(NonePlacement) == NotSupport
+    check nazoPuyo.mark2(Placement.None) == NotSupport
 
   block: # initial nazopuyo is accepted
     let nazoPuyo =

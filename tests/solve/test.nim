@@ -7,14 +7,11 @@ import std/[sets, sugar, unittest]
 import ../../src/pon2/[core]
 import ../../src/pon2/app/[solve]
 
-const NonePlcmtStr = ".."
+const NonePlacementStr = ".."
 
-func toOptPlcmt(str: string): OptPlacement =
-  ## Returns the `OptPlacement` converted from the string representation.
-  if str == NonePlcmtStr:
-    NonePlacement
-  else:
-    OptPlacement.ok str.parsePlacement.unsafeValue
+func toPlacement(str: string): Placement =
+  ## Returns the placement converted from the string representation.
+  if str == NonePlacementStr: Placement.None else: str.parsePlacement.unsafeValue
 
 func toAnswers(strs: varargs[string]): HashSet[SolveAnswer] =
   ## Returns the answers converted from the string representation.
@@ -22,7 +19,7 @@ func toAnswers(strs: varargs[string]): HashSet[SolveAnswer] =
   for str in strs:
     let answer = collect:
       for i in countup(0, str.len.pred, 2):
-        str.substr(i, i.succ).toOptPlcmt
+        str.substr(i, i.succ).toPlacement
     answers.incl answer
 
   answers

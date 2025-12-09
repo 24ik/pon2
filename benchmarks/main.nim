@@ -4,10 +4,9 @@
 {.experimental: "views".}
 
 import std/[monotimes, sequtils, stats, strformat, sugar, times]
-# import ../src/pon2/[app]
 import ../src/pon2/[core]
 import ../src/pon2/app/[solve]
-import ../src/pon2/private/[algorithm, math, results2]
+import ../src/pon2/private/[algorithm, math]
 
 func select(list: seq[Duration], n: int): Duration =
   ## Returns the n-th smallest value in the sequence.

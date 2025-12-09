@@ -755,11 +755,11 @@ func forwardApply(self: var Simulator, replay = false, skip = false) =
     if self.nazoPuyo.puyoPuyo.steps[self.operatingIndex].kind != PairPlacement:
       discard
     elif skip:
-      self.nazoPuyo.puyoPuyo.steps[self.operatingIndex].optPlacement.err
+      self.nazoPuyo.puyoPuyo.steps[self.operatingIndex].placement.assign Placement.None
     elif replay:
       discard
     else:
-      self.nazoPuyo.puyoPuyo.steps[self.operatingIndex].optPlacement.ok self.operatingPlacement
+      self.nazoPuyo.puyoPuyo.steps[self.operatingIndex].placement.assign self.operatingPlacement
 
   let step = self.nazoPuyo.puyoPuyo.steps[self.operatingIndex]
   self.nazoPuyo.puyoPuyo.field.apply step
@@ -1077,7 +1077,7 @@ func toUri*(self: Simulator, clearPlacements = false, fqdn = Pon2): Pon2Result[U
   if clearPlacements:
     for step in nazoPuyo.puyoPuyo.steps.mitems:
       if step.kind == PairPlacement:
-        step.optPlacement.err
+        step.placement.assign Placement.None
   let nazoPuyoQuery =
     ?nazoPuyo.toUriQuery(fqdn).context "Simulator that does not support URI conversion"
   uri.query.assign if fqdn == Pon2:

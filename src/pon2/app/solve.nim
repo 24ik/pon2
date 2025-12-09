@@ -27,7 +27,7 @@ when not defined(js):
   import std/[threadpool]
   {.pop.}
 
-type SolveAnswer* = seq[OptPlacement]
+type SolveAnswer* = seq[Placement]
   ## Nazo Puyo answer.
   ## Elements corresponding to non-`PairPlacement` steps are set to `NonePlacement`.
 
@@ -66,9 +66,9 @@ when not defined(js):
     ## This function requires that the field is settled and `answers` is empty.
     var
       nodes = newSeq[SolveNode]()
-      optPlacementsSeq = newSeq[seq[OptPlacement]]()
+      placementsSeq = newSeq[seq[Placement]]()
     self.childrenAtDepth ChildTargetDepth,
-      nodes, optPlacementsSeq, answers, moveCount, calcAllAnswers, goal, steps
+      nodes, placementsSeq, answers, moveCount, calcAllAnswers, goal, steps
 
     for answer in answers.mitems:
       answer.reverse
@@ -109,7 +109,7 @@ when not defined(js):
         for nodeIndex in nodeIndices:
           {.push warning[Uninit]: off.}
           answers &=
-            answersSeq[futureIndex].mapIt (it & optPlacementsSeq[nodeIndex]).reversed
+            answersSeq[futureIndex].mapIt (it & placementsSeq[nodeIndex]).reversed
           {.pop.}
 
         if not calcAllAnswers and answers.len > 1:
@@ -163,7 +163,7 @@ when defined(js) or defined(nimsuggest):
 
     func initCompleteHandler(
         nodeIndex: int,
-        optPlacementsSeq: seq[seq[OptPlacement]],
+        placementsSeq: seq[seq[Placement]],
         answersSeqRef: ref seq[seq[SolveAnswer]],
         progressRef: ref tuple[now, total: int],
     ): Pon2Result[seq[string]] -> void =
@@ -175,7 +175,7 @@ when defined(js) or defined(nimsuggest):
             if answersResult.isOk:
               var answers = answersResult.unsafeValue
               for answer in answers.mitems:
-                answer &= optPlacementsSeq[nodeIndex]
+                answer &= placementsSeq[nodeIndex]
                 answer.reverse
 
               answersSeqRef[][nodeIndex].assign answers
@@ -208,11 +208,11 @@ when defined(js) or defined(nimsuggest):
 
       var
         nodes = newSeq[SolveNode]()
-        optPlacementsSeq = newSeq[seq[OptPlacement]]()
+        placementsSeq = newSeq[seq[Placement]]()
         answers = newSeq[SolveAnswer]()
 
       rootNode.childrenAtDepth ChildTargetDepth,
-        nodes, optPlacementsSeq, answers, self.puyoPuyo.steps.len, calcAllAnswers,
+        nodes, placementsSeq, answers, self.puyoPuyo.steps.len, calcAllAnswers,
         self.goal, self.puyoPuyo.steps
 
       for answer in answers.mitems:
@@ -243,7 +243,7 @@ when defined(js) or defined(nimsuggest):
           webWorkerPool
           .run(node.toStrs(self.goal, self.puyoPuyo.steps))
           .then(
-            initCompleteHandler(nodeIndex, optPlacementsSeq, answersSeqRef, progressRef)
+            initCompleteHandler(nodeIndex, placementsSeq, answersSeqRef, progressRef)
           )
           .catch((error: Error) => console.error error)
       {.pop.}

@@ -387,19 +387,14 @@ func placeWater(self: var Field, pair: Pair, placement: Placement) {.inline, noi
 func place*(self: var Field, pair: Pair, placement: Placement) {.inline, noinit.} =
   ## Places the pair.
   ## This function requires that the field is settled.
+  if placement == Placement.None:
+    return
+
   case Behaviours[self.rule].phys
   of Phys.Tsu:
     self.placeTsu pair, placement
   of Phys.Water:
     self.placeWater pair, placement
-
-func place*(
-    self: var Field, pair: Pair, optPlacement: OptPlacement
-) {.inline, noinit.} =
-  ## Places the pair.
-  ## This function requires that the field is settled.
-  if optPlacement.isOk:
-    self.place pair, optPlacement.unsafeValue
 
 # ------------------------------------------------
 # Pop
@@ -485,7 +480,7 @@ func apply*(self: var Field, step: Step) {.inline, noinit.} =
   ## This function requires that the field is settled.
   case step.kind
   of PairPlacement:
-    self.place step.pair, step.optPlacement
+    self.place step.pair, step.placement
   of Garbages:
     self.dropGarbages step.counts, step.dropHard
   of Rotate:
@@ -741,7 +736,7 @@ const
 func toUriQueryPon2(self: Field): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query converted from the field.
   const
-    NoneChars = {($None)[0]}
+    NoneChars = {($Cell.None)[0]}
     RuleFieldSep = Pon2UriRuleFieldSep # NOTE: strformat needs this
 
   let
@@ -840,7 +835,7 @@ func parseFieldPon2(query: string): Pon2Result[Field] {.inline, noinit.} =
     if strs[1].len > Height * Width:
       return err errorMsg
 
-    let airStr = ($None)[0].repeat(Height * Width - strs[1].len) & strs[1]
+    let airStr = ($Cell.None)[0].repeat(Height * Width - strs[1].len) & strs[1]
 
     staticFor(row, Row):
       staticFor(col, Col):
@@ -853,14 +848,15 @@ func parseFieldPon2(query: string): Pon2Result[Field] {.inline, noinit.} =
 
     let
       airStrRaw = airWaterStrs[0]
-      airStr = ($None)[0].repeat(AirHeight * Width - airStrRaw.len) & airStrRaw
+      airStr = ($Cell.None)[0].repeat(AirHeight * Width - airStrRaw.len) & airStrRaw
     staticFor(row, Row.low .. LowerAirRow):
       staticFor(col, Col):
         cellArray[row][col].assign ?($airStr[row.ord * Width + col.ord]).parseCell.context errorMsg
 
     let
       waterStrRaw = airWaterStrs[1]
-      waterStr = waterStrRaw & ($None)[0].repeat(WaterHeight * Width - waterStrRaw.len)
+      waterStr =
+        waterStrRaw & ($Cell.None)[0].repeat(WaterHeight * Width - waterStrRaw.len)
     staticFor(row, LowerAirRow.succ .. Row.high):
       staticFor(col, Col):
         cellArray[row][col].assign ?($waterStr[(row.ord - AirHeight) * Width + col.ord]).parseCell.context errorMsg
@@ -895,7 +891,7 @@ func parseFieldIshikawa(query: string): Pon2Result[Field] {.inline, noinit.} =
       return err errorMsg
 
     let firstRow = (Height - strs.len).Row
-    var cellArray = static(Row.initArrayWith Col.initArrayWith None)
+    var cellArray = static(Row.initArrayWith Col.initArrayWith Cell.None)
     for rowIndex, str in strs:
       for colIndex, c in str:
         cellArray[firstRow.succ rowIndex][Col.low.succ colIndex].assign ?TildeIshikawaCharToCell[

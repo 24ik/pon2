@@ -519,9 +519,9 @@ proc generate*(rng: var Rand, settings: GenerateSettings): Pon2Result[NazoPuyo] 
     var nazoPuyo = NazoPuyo.init(puyoPuyo, settings.goal)
     let answers = nazoPuyo.solve(calcAllAnswers = false)
     if answers.len == 1 and answers[0].len == settings.moveCount:
-      for stepIndex, optPlacement in answers[0]:
+      for stepIndex, placement in answers[0]:
         if nazoPuyo.puyoPuyo.steps[stepIndex].kind == PairPlacement:
-          nazoPuyo.puyoPuyo.steps[stepIndex].optPlacement.assign optPlacement
+          nazoPuyo.puyoPuyo.steps[stepIndex].placement.assign placement
 
       return ok nazoPuyo
 

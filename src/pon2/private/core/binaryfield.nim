@@ -93,6 +93,8 @@ func invalidPlacements*(self: BinaryField): set[Placement] {.inline, noinit.} =
   for col in availableCols.complement:
     invalidPlacements.incl InvalidPlacements[col]
 
+  invalidPlacements.incl Placement.None
+
   invalidPlacements
 
 func validPlacements*(self: BinaryField): set[Placement] {.inline, noinit.} =

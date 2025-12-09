@@ -1139,8 +1139,8 @@ block: # isDead
 block: # invalidPlacements, validPlacements, validDoublePlacements
   block:
     let field = BinaryField.init
-    check field.invalidPlacements == {}
-    check field.validPlacements == {Placement.low .. Placement.high}
+    check field.invalidPlacements == {Placement.None}
+    check field.validPlacements == ActualPlacements
     check field.validDoublePlacements == DoublePlacements
 
   block:
@@ -1160,7 +1160,7 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......""".toBinaryField
     check field.invalidPlacements ==
-      {Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2}
+      {Placement.None, Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2}
 
   block:
     let field =
@@ -1178,7 +1178,7 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......
 ......""".toBinaryField
-    check field.invalidPlacements == {Down1}
+    check field.invalidPlacements == {Placement.None, Down1}
 
   block:
     let field =
@@ -1196,7 +1196,7 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......
 ......""".toBinaryField
-    check field.invalidPlacements == {Down1, Down3}
+    check field.invalidPlacements == {Placement.None, Down1, Down3}
 
   block:
     let field =
@@ -1215,7 +1215,7 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......""".toBinaryField
     check field.invalidPlacements ==
-      {Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2, Down3}
+      {Placement.None, Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2, Down3}
 
   block:
     let field =
@@ -1234,7 +1234,10 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......""".toBinaryField
     check field.invalidPlacements ==
-      {Down1, Right3, Down3, Up4, Right4, Down4, Left4, Up5, Down5, Left5}
+      {
+        Placement.None, Down1, Right3, Down3, Up4, Right4, Down4, Left4, Up5, Down5,
+        Left5,
+      }
 
 # ------------------------------------------------
 # Pop
