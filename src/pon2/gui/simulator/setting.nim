@@ -37,7 +37,7 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper
   ): VNode =
     ## Returns the select node.
-    let playBtnClass, editBtnClass: cstring
+    let playBtnClass, editBtnClass: kstring
     if self.derefSimulator(helper).mode in PlayModes:
       playBtnClass = SelectBtnClass
       editBtnClass = BtnClass
