@@ -1,18 +1,55 @@
+## This module implements cells.
+##
+
+{.push raises: [].}
+{.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.experimental: "views".}
+
+import std/[sequtils]
 import stew/[staticfor]
+import ./[macros]
 
-export staticfor
-
-template staticFor*[E: enum](
-    index: untyped{nkIdent}, slice: static Slice[E], body: untyped
+template staticFor*[T: Ordinal](
+    elemIdent: untyped{nkIdent}, elems: static Slice[T], body: untyped
 ): untyped =
   ## Unrolled `for` loop over the given slice.
-  staticFor(index2, slice.a.ord .. slice.b.ord):
-    const `index` = index2.E
+  const ElemOrdSlice = elems.a.ord .. elems.b.ord
+  staticFor(elemOrd, ElemOrdSlice):
+    const `elemIdent` = elemOrd.T
     body
 
-template staticFor*(
-    index: untyped{nkIdent}, enumType: typedesc[enum], body: untyped
+macro staticFor*(
+    elemIdent: untyped{nkIdent}, elems: static openArray[int], body: untyped
+): untyped =
+  ## Unrolled `for` loop over the given array.
+  let stmts = nnkStmtList.newNimNode body
+  for elem in elems:
+    stmts.add nnkBlockStmt.newTree(
+      nnkEmpty.newNimNode, body.replaced(elemIdent, elem.newLit)
+    )
+
+  stmts
+
+template staticFor*[T: Ordinal](
+    elemIdent: untyped{nkIdent}, elems: static openArray[T], body: untyped
+): untyped =
+  ## Unrolled `for` loop over the given array.
+  const ElemOrds = elems.mapIt it.ord
+  staticFor(elemOrd, ElemOrds):
+    const `elemIdent` = elemOrd.T
+    body
+
+template staticFor*[T: Ordinal](
+    elemIdent: untyped{nkIdent}, elems: static set[T], body: untyped
+): untyped =
+  ## Unrolled `for` loop over the given set.
+  const ElemsSeq = elems.toSeq
+  staticFor(elemIdent, ElemsSeq, body)
+
+template staticFor*[T: Ordinal](
+    elemIdent: untyped{nkIdent}, elemType: typedesc[T], body: untyped
 ): untyped =
   ## Unrolled `for` loop over the all value in the given enum type.
-  staticFor(index, enumType.low .. enumType.high):
-    body
+  const ElemsSlice = elemType.low .. elemType.high
+  staticFor(elemIdent, ElemsSlice, body)
