@@ -76,6 +76,8 @@ block: # Pair <-> string
   check pairRes == Pon2Result[Pair].ok RedGreen
 
   check "RG".parsePair.isErr
+  check "".parsePair.isErr
+  check "oo".parsePair.isErr
 
 block: # Pair <-> URI
   check RedGreen.toUriQuery(Pon2) == "rg"

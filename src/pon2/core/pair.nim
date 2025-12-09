@@ -6,7 +6,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, sugar]
+import std/[strformat]
 import ./[cell, fqdn]
 import ../[utils]
 import ../private/[assign, tables]
@@ -50,14 +50,16 @@ type Pair* {.pure.} = enum
 # Constructor
 # ------------------------------------------------
 
+const ColorCount = ColorPuyos.card
+
 func init*(T: type Pair, pivot, rotor: Cell): T {.inline, noinit.} =
-  ## Note that the result is undefined if the pivot or rotor is no-color.
+  ## Note that the result is undefined if the pivot or rotor are not color puyos.
   # no-color cell is treated as Red
   let
     pivotVal = max(pivot.ord - Red.ord, 0)
     rotorVal = max(rotor.ord - Red.ord, 0)
 
-  (pivotVal * ColorPuyos.card + rotorVal).T
+  (pivotVal * ColorCount + rotorVal).T
 
 func init*(T: type Pair): T {.inline, noinit.} =
   T.low
@@ -67,10 +69,10 @@ func init*(T: type Pair): T {.inline, noinit.} =
 # ------------------------------------------------
 
 func pivot*(self: Pair): Cell {.inline, noinit.} = ## Returns the pivot-puyo.
-  Red.succ self.ord div ColorPuyos.card
+  Red.succ self.ord div ColorCount
 
 func rotor*(self: Pair): Cell {.inline, noinit.} = ## Returns the rotor-puyo.
-  Red.succ self.ord mod ColorPuyos.card
+  Red.succ self.ord mod ColorCount
 
 func isDouble*(self: Pair): bool {.inline, noinit.} =
   ## Returns `true` if the pair is double (monochromatic).
@@ -84,7 +86,7 @@ func `pivot=`*(self: var Pair, colorPuyo: Cell) {.inline, noinit.} =
   ## Sets the pivot-puyo.
   ## If the `colorPuyo` is not color puyo, does nothing.
   if colorPuyo in ColorPuyos:
-    self.inc (colorPuyo.ord - self.pivot.ord) * ColorPuyos.card
+    self.inc (colorPuyo.ord - self.pivot.ord) * ColorCount
 
 func `rotor=`*(self: var Pair, colorPuyo: Cell) {.inline, noinit.} =
   ## Sets the rotor-puyo.
@@ -127,23 +129,28 @@ func garbagesCount*(self: Pair): int {.inline, noinit.} =
 # Pair <-> string
 # ------------------------------------------------
 
-const StrToPair = collect:
-  for pair in Pair:
-    {$pair: pair}
-
 func parsePair*(str: string): Pon2Result[Pair] {.inline, noinit.} =
   ## Returns the pair converted from the string representation.
-  StrToPair[str].context "Invalid pair: {str}".fmt
+  let errorMsg = "Invalid pair: {str}".fmt
+
+  if str.len != 2:
+    return err errorMsg
+
+  let pivot = ?str[0 .. 0].parseCell.context errorMsg
+  if pivot notin ColorPuyos:
+    return err errorMsg
+
+  let rotor = ?str[1 .. 1].parseCell.context errorMsg
+  if rotor notin ColorPuyos:
+    return err errorMsg
+
+  ok Pair.init(pivot, rotor)
 
 # ------------------------------------------------
 # Pair <-> URI
 # ------------------------------------------------
 
-const
-  PairToIshikawaUri = "0coAM2eqCO4gsEQ6iuGS8kwIU"
-  IshikawaUriToPair = collect:
-    for pair in Pair:
-      {$PairToIshikawaUri[pair.ord]: pair}
+const PairToIshikawaUri = "0coAM2eqCO4gsEQ6iuGS8kwIU"
 
 func toUriQuery*(self: Pair, fqdn = Pon2): string {.inline, noinit.} =
   ## Returns the URI query converted from the pair.
@@ -161,4 +168,13 @@ func parsePair*(
   of Pon2:
     query.parsePair
   of Ishikawa, Ips:
-    IshikawaUriToPair[query].context "Invalid pair: {query}".fmt
+    let errorMsg = "Invalid pair: {query}".fmt
+
+    if query.len != 1:
+      return err errorMsg
+
+    let index = PairToIshikawaUri.find query[0]
+    if index >= 0:
+      ok index.Pair
+    else:
+      err errorMsg
