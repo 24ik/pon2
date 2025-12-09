@@ -14,7 +14,8 @@
 import std/[typetraits]
 
 type
-  Row* {.pure.} = enum ## Field's row. The top is 0 and the bottom is 12.
+  Row* {.pure.} = enum
+    ## Field's row. `Row.high` is the top and `Row.low` is the bottom.
     Row0
     Row1
     Row2
@@ -29,7 +30,8 @@ type
     Row11
     Row12
 
-  Col* {.pure.} = enum ## Field's column. The left is 0 and the right is 5.
+  Col* {.pure.} = enum
+    ## Field's column. `Col.high` is the left and `Col.low` is the right.
     Col0
     Col1
     Col2
