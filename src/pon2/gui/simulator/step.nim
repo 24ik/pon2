@@ -43,7 +43,7 @@ when defined(js) or defined(nimsuggest):
     () => self.derefSimulator(helper).writeCell(index, pivot)
 
   func initCountSelectHandler[S: Simulator or Studio or Marathon](
-      self: ref S, helper: VNodeHelper, index: int, col: Col, selectId: cstring
+      self: ref S, helper: VNodeHelper, index: int, col: Col, selectId: kstring
   ): () -> void =
     ## Returns the handler for selecting garbage counts.
     # NOTE: cannot inline due to karax's limitation
