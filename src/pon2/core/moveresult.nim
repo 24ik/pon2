@@ -133,14 +133,14 @@ func colorsSeq*(self: MoveResult): seq[set[Cell]] {.inline, noinit.} =
 
 func placeCounts*(
     self: MoveResult, cell: Cell
-): StrErrorResult[seq[int]] {.inline, noinit.} =
+): Pon2Result[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of places where `cell` popped in each chain.
   if self.fullPopCountsOpt.isOk:
     ok self.fullPopCountsOpt.unsafeValue.mapIt it[cell].len
   else:
     err "`placeCounts` not supported: {self}".fmt
 
-func placeCounts*(self: MoveResult): StrErrorResult[seq[int]] {.inline, noinit.} =
+func placeCounts*(self: MoveResult): Pon2Result[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of places where color puyos popped in each chain.
   if self.fullPopCountsOpt.isOk:
     ok self.fullPopCountsOpt.unsafeValue.mapIt (
@@ -155,14 +155,14 @@ func placeCounts*(self: MoveResult): StrErrorResult[seq[int]] {.inline, noinit.}
 
 func connectionCounts*(
     self: MoveResult, cell: Cell
-): StrErrorResult[seq[int]] {.inline, noinit.} =
+): Pon2Result[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of connections of `cell` that popped.
   if self.fullPopCountsOpt.isOk:
     ok concat self.fullPopCountsOpt.unsafeValue.mapIt it[cell]
   else:
     err "`connectionCounts` not supported: {self}".fmt
 
-func connectionCounts*(self: MoveResult): StrErrorResult[seq[int]] {.inline, noinit.} =
+func connectionCounts*(self: MoveResult): Pon2Result[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of connections of color puyos that popped.
   if self.fullPopCountsOpt.isOk:
     ok concat self.fullPopCountsOpt.unsafeValue.mapIt it[Red .. Purple].concat
@@ -201,7 +201,7 @@ func connectionBonus(counts: seq[int]): int {.inline, noinit.} =
   ## Returns the connect bonus.
   sum counts.mapIt ConnectionBonuses[it]
 
-func score*(self: MoveResult): StrErrorResult[int] {.inline, noinit.} =
+func score*(self: MoveResult): Pon2Result[int] {.inline, noinit.} =
   ## Returns the score.
   if self.fullPopCountsOpt.isErr:
     return err "`score` not supported: {self}".fmt
@@ -238,8 +238,8 @@ func score*(self: MoveResult): StrErrorResult[int] {.inline, noinit.} =
 
 func noticeCounts*(
     self: MoveResult, rule: Rule, useComet = false
-): StrErrorResult[array[Notice, int]] {.inline, noinit.} =
+): Pon2Result[array[Notice, int]] {.inline, noinit.} =
   ## Returns the number of notice garbages.
-  StrErrorResult[array[Notice, int]].ok (
+  Pon2Result[array[Notice, int]].ok (
     ?self.score.context "`noticeCounts` not supported: {self}".fmt
   ).noticeCounts(rule, useComet)

@@ -121,54 +121,54 @@ block: # `$`, parseStep, toUriQuery
   let step = Step.init(BluePurple, Left3)
 
   check $step == "bp|43"
-  check "bp|43".parseStep == StrErrorResult[Step].ok step
+  check "bp|43".parseStep == Pon2Result[Step].ok step
 
-  check step.toUriQuery(Pon2) == StrErrorResult[string].ok "bp43"
-  check step.toUriQuery(Ishikawa) == StrErrorResult[string].ok "QG"
-  check step.toUriQuery(Ips) == StrErrorResult[string].ok "QG"
+  check step.toUriQuery(Pon2) == Pon2Result[string].ok "bp43"
+  check step.toUriQuery(Ishikawa) == Pon2Result[string].ok "QG"
+  check step.toUriQuery(Ips) == Pon2Result[string].ok "QG"
 
-  check "bp43".parseStep(Pon2) == StrErrorResult[Step].ok step
-  check "QG".parseStep(Ishikawa) == StrErrorResult[Step].ok step
-  check "QG".parseStep(Ips) == StrErrorResult[Step].ok step
+  check "bp43".parseStep(Pon2) == Pon2Result[Step].ok step
+  check "QG".parseStep(Ishikawa) == Pon2Result[Step].ok step
+  check "QG".parseStep(Ips) == Pon2Result[Step].ok step
 
 block: # garbages
   block: # Garbage
     let step = Step.init([Col0: 2, 3, 3, 2, 2, 3], false)
     check $step == "(2,3,3,2,2,3)"
-    check "(2,3,3,2,2,3)".parseStep == StrErrorResult[Step].ok step
+    check "(2,3,3,2,2,3)".parseStep == Pon2Result[Step].ok step
 
-    check step.toUriQuery(Pon2) == StrErrorResult[string].ok "o2_3_3_2_2_3o"
-    check step.toUriQuery(Ishikawa) == StrErrorResult[string].ok "yp"
-    check step.toUriQuery(Ips) == StrErrorResult[string].ok "yp"
+    check step.toUriQuery(Pon2) == Pon2Result[string].ok "o2_3_3_2_2_3o"
+    check step.toUriQuery(Ishikawa) == Pon2Result[string].ok "yp"
+    check step.toUriQuery(Ips) == Pon2Result[string].ok "yp"
 
-    check "o2_3_3_2_2_3o".parseStep(Pon2) == StrErrorResult[Step].ok step
-    check "yp".parseStep(Ishikawa) == StrErrorResult[Step].ok step
-    check "yp".parseStep(Ips) == StrErrorResult[Step].ok step
+    check "o2_3_3_2_2_3o".parseStep(Pon2) == Pon2Result[Step].ok step
+    check "yp".parseStep(Ishikawa) == Pon2Result[Step].ok step
+    check "yp".parseStep(Ips) == Pon2Result[Step].ok step
 
   block: # Hard
     let step = Step.init([Col0: 0, 0, 0, -1, 0, 0], true)
     check $step == "[0,0,0,-1,0,0]"
-    check "[0,0,0,-1,0,0]".parseStep == StrErrorResult[Step].ok step
+    check "[0,0,0,-1,0,0]".parseStep == Pon2Result[Step].ok step
 
-    check step.toUriQuery(Pon2) == StrErrorResult[string].ok "h0_0_0_-1_0_0h"
+    check step.toUriQuery(Pon2) == Pon2Result[string].ok "h0_0_0_-1_0_0h"
     check step.toUriQuery(Ishikawa).isErr
     check step.toUriQuery(Ips).isErr
 
   block: # rotate
     let step = Step.init(cross = false)
     check $step == "R"
-    check "R".parseStep == StrErrorResult[Step].ok step
+    check "R".parseStep == Pon2Result[Step].ok step
 
-    check step.toUriQuery(Pon2) == StrErrorResult[string].ok "R"
+    check step.toUriQuery(Pon2) == Pon2Result[string].ok "R"
     check step.toUriQuery(Ishikawa).isErr
     check step.toUriQuery(Ips).isErr
 
   block: # cross rotate
     let step = Step.init(cross = true)
     check $step == "C"
-    check "C".parseStep == StrErrorResult[Step].ok step
+    check "C".parseStep == Pon2Result[Step].ok step
 
-    check step.toUriQuery(Pon2) == StrErrorResult[string].ok "C"
+    check step.toUriQuery(Pon2) == Pon2Result[string].ok "C"
     check step.toUriQuery(Ishikawa).isErr
     check step.toUriQuery(Ips).isErr
 
@@ -186,16 +186,16 @@ block: # `$`, parseSteps, toUriQuery
 
     let str = "rg|\n(1,0,0,0,0,1)\nyy|3N"
     check $steps == str
-    check str.parseSteps == StrErrorResult[Steps].ok steps
+    check str.parseSteps == Pon2Result[Steps].ok steps
 
     let query = "rgo1_0_0_0_0_1oyy3N"
-    check steps.toUriQuery(Pon2) == StrErrorResult[string].ok query
-    check steps.toUriQuery(Ishikawa) == StrErrorResult[string].ok "c1axG4"
-    check steps.toUriQuery(Ips) == StrErrorResult[string].ok "c1axG4"
+    check steps.toUriQuery(Pon2) == Pon2Result[string].ok query
+    check steps.toUriQuery(Ishikawa) == Pon2Result[string].ok "c1axG4"
+    check steps.toUriQuery(Ips) == Pon2Result[string].ok "c1axG4"
 
-    check query.parseSteps(Pon2) == StrErrorResult[Steps].ok steps
-    check "c1axG4".parseSteps(Ishikawa) == StrErrorResult[Steps].ok steps
-    check "c1axG4".parseSteps(Ips) == StrErrorResult[Steps].ok steps
+    check query.parseSteps(Pon2) == Pon2Result[Steps].ok steps
+    check "c1axG4".parseSteps(Ishikawa) == Pon2Result[Steps].ok steps
+    check "c1axG4".parseSteps(Ips) == Pon2Result[Steps].ok steps
 
   block: # Hard
     let steps =
@@ -203,35 +203,35 @@ block: # `$`, parseSteps, toUriQuery
 
     let str = "[0,0,2,0,1,3]\npb|"
     check $steps == str
-    check str.parseSteps == StrErrorResult[Steps].ok steps
+    check str.parseSteps == Pon2Result[Steps].ok steps
 
     let query = "h0_0_2_0_1_3hpb"
-    check steps.toUriQuery(Pon2) == StrErrorResult[string].ok query
+    check steps.toUriQuery(Pon2) == Pon2Result[string].ok query
     check steps.toUriQuery(Ishikawa).isErr
     check steps.toUriQuery(Ips).isErr
 
-    check query.parseSteps(Pon2) == StrErrorResult[Steps].ok steps
+    check query.parseSteps(Pon2) == Pon2Result[Steps].ok steps
 
   block: # rotate
     let steps = [Step.init(cross = true), Step.init(cross = false)].toDeque
 
     let str = "C\nR"
     check $steps == str
-    check str.parseSteps == StrErrorResult[Steps].ok steps
+    check str.parseSteps == Pon2Result[Steps].ok steps
 
     let query = "CR"
-    check steps.toUriQuery(Pon2) == StrErrorResult[string].ok query
+    check steps.toUriQuery(Pon2) == Pon2Result[string].ok query
     check steps.toUriQuery(Ishikawa).isErr
     check steps.toUriQuery(Ips).isErr
 
-    check query.parseSteps(Pon2) == StrErrorResult[Steps].ok steps
+    check query.parseSteps(Pon2) == Pon2Result[Steps].ok steps
 
   block: # empty steps
     let steps = Steps.init
 
     check $steps == ""
-    check "".parseSteps == StrErrorResult[Steps].ok steps
+    check "".parseSteps == Pon2Result[Steps].ok steps
 
     for fqdn in SimulatorFqdn:
-      check steps.toUriQuery(fqdn) == StrErrorResult[string].ok ""
-      check "".parseSteps(fqdn) == StrErrorResult[Steps].ok steps
+      check steps.toUriQuery(fqdn) == Pon2Result[string].ok ""
+      check "".parseSteps(fqdn) == Pon2Result[Steps].ok steps

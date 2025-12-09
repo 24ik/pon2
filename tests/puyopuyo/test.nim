@@ -236,13 +236,13 @@ rg|23"""
       queryPon2 = "field=0_op......yg....b.r&steps=byo0_1_0_0_0_1org23"
       queryIshikawa = "6E004g031_E1ahce"
 
-    check puyoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check puyoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check puyoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check puyoPuyo.toUriQuery(Ishikawa) == Pon2Result[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
-    check queryPon2.parsePuyoPuyo(Pon2) == StrErrorResult[PuyoPuyo].ok puyoPuyo
-    check queryIshikawa.parsePuyoPuyo(Ishikawa) == StrErrorResult[PuyoPuyo].ok puyoPuyo
-    check queryIshikawa.parsePuyoPuyo(Ips) == StrErrorResult[PuyoPuyo].ok puyoPuyo
+    check queryPon2.parsePuyoPuyo(Pon2) == Pon2Result[PuyoPuyo].ok puyoPuyo
+    check queryIshikawa.parsePuyoPuyo(Ishikawa) == Pon2Result[PuyoPuyo].ok puyoPuyo
+    check queryIshikawa.parsePuyoPuyo(Ips) == Pon2Result[PuyoPuyo].ok puyoPuyo
 
   block: # empty steps
     let
@@ -272,15 +272,15 @@ rg|23"""
       queryIshikawa = "1"
       queryIshikawa2 = "1_"
 
-    check puyoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check puyoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check puyoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check puyoPuyo.toUriQuery(Ishikawa) == Pon2Result[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
     for query in [queryPon2, queryPon22, queryPon23]:
-      check query.parsePuyoPuyo(Pon2) == StrErrorResult[PuyoPuyo].ok puyoPuyo
+      check query.parsePuyoPuyo(Pon2) == Pon2Result[PuyoPuyo].ok puyoPuyo
     for query in [queryIshikawa, queryIshikawa2]:
-      check query.parsePuyoPuyo(Ishikawa) == StrErrorResult[PuyoPuyo].ok puyoPuyo
-      check query.parsePuyoPuyo(Ips) == StrErrorResult[PuyoPuyo].ok puyoPuyo
+      check query.parsePuyoPuyo(Ishikawa) == Pon2Result[PuyoPuyo].ok puyoPuyo
+      check query.parsePuyoPuyo(Ips) == Pon2Result[PuyoPuyo].ok puyoPuyo
 
   block: # empty field
     let
@@ -290,14 +290,14 @@ rg|23"""
       queryPon22 = "steps=gb"
       queryIshikawa = "_q1"
 
-    check puyoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check puyoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check puyoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check puyoPuyo.toUriQuery(Ishikawa) == Pon2Result[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
     for query in [queryPon2, queryPon22]:
-      check query.parsePuyoPuyo(Pon2) == StrErrorResult[PuyoPuyo].ok puyoPuyo
-    check queryIshikawa.parsePuyoPuyo(Ishikawa) == StrErrorResult[PuyoPuyo].ok puyoPuyo
-    check queryIshikawa.parsePuyoPuyo(Ips) == StrErrorResult[PuyoPuyo].ok puyoPuyo
+      check query.parsePuyoPuyo(Pon2) == Pon2Result[PuyoPuyo].ok puyoPuyo
+    check queryIshikawa.parsePuyoPuyo(Ishikawa) == Pon2Result[PuyoPuyo].ok puyoPuyo
+    check queryIshikawa.parsePuyoPuyo(Ips) == Pon2Result[PuyoPuyo].ok puyoPuyo
 
   block: # empty field and steps
     let
@@ -312,12 +312,12 @@ rg|23"""
       queryIshikawa = ""
       queryIshikawa2 = "_"
 
-    check puyoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check puyoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check puyoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check puyoPuyo.toUriQuery(Ishikawa) == Pon2Result[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
     for query in [queryPon2, queryPon22, queryPon23, queryPon24, queryPon25, queryPon26]:
-      check query.parsePuyoPuyo(Pon2) == StrErrorResult[PuyoPuyo].ok puyoPuyo
+      check query.parsePuyoPuyo(Pon2) == Pon2Result[PuyoPuyo].ok puyoPuyo
     for query in [queryIshikawa, queryIshikawa2]:
-      check query.parsePuyoPuyo(Ishikawa) == StrErrorResult[PuyoPuyo].ok puyoPuyo
-      check query.parsePuyoPuyo(Ips) == StrErrorResult[PuyoPuyo].ok puyoPuyo
+      check query.parsePuyoPuyo(Ishikawa) == Pon2Result[PuyoPuyo].ok puyoPuyo
+      check query.parsePuyoPuyo(Ips) == Pon2Result[PuyoPuyo].ok puyoPuyo

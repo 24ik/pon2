@@ -13,7 +13,7 @@ import ../../src/pon2/core/[cell]
 block: # parseCell
   for cell in Cell:
     let cellRes = parseCell $cell
-    check cellRes == StrErrorResult[Cell].ok cell
+    check cellRes == Pon2Result[Cell].ok cell
 
   check "".parseCell.isErr
   check "H".parseCell.isErr

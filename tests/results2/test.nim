@@ -12,6 +12,6 @@ block: # context
     err1 = "error1"
     err2 = "error2"
 
-  check StrErrorResult[int].ok(val).context(err2) == StrErrorResult[int].ok(val)
-  check StrErrorResult[int].err(err1).context(err2) ==
-    StrErrorResult[int].err(err2 & "\n" & err1)
+  check Pon2Result[int].ok(val).context(err2) == Pon2Result[int].ok(val)
+  check Pon2Result[int].err(err1).context(err2) ==
+    Pon2Result[int].err(err2 & "\n" & err1)

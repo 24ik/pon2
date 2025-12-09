@@ -680,7 +680,7 @@ func `$`*(self: Field): string {.inline, noinit.} =
 
   lines.join "\n"
 
-func parseField*(str: string): StrErrorResult[Field] {.inline, noinit.} =
+func parseField*(str: string): Pon2Result[Field] {.inline, noinit.} =
   ## Returns the field converted from the string representation.
   let errorMsg = "Invalid field: {str}".fmt
 
@@ -739,7 +739,7 @@ const
     for cell, str in CellToTildeIshikawaStr:
       {str[0]: cell}
 
-func toUriQueryPon2(self: Field): StrErrorResult[string] {.inline, noinit.} =
+func toUriQueryPon2(self: Field): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query converted from the field.
   const
     NoneChars = {($None)[0]}
@@ -772,7 +772,7 @@ func toUriQueryPon2(self: Field): StrErrorResult[string] {.inline, noinit.} =
 
   ok query
 
-func toUriQueryIshikawa(self: Field): StrErrorResult[string] {.inline, noinit.} =
+func toUriQueryIshikawa(self: Field): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query converted from the field.
   if self.rule != Rule.Tsu:
     return err "non-Tsu field is not supported on Ishikawa/Ips format: {self}".fmt
@@ -813,13 +813,13 @@ func toUriQueryIshikawa(self: Field): StrErrorResult[string] {.inline, noinit.} 
 
     ok lines.join.strip(trailing = false, chars = {'0'})
 
-func toUriQuery*(self: Field, fqdn = Pon2): StrErrorResult[string] {.inline, noinit.} =
+func toUriQuery*(self: Field, fqdn = Pon2): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query converted from the field.
   case fqdn
   of Pon2: self.toUriQueryPon2
   of Ishikawa, Ips: self.toUriQueryIshikawa
 
-func parseFieldPon2(query: string): StrErrorResult[Field] {.inline, noinit.} =
+func parseFieldPon2(query: string): Pon2Result[Field] {.inline, noinit.} =
   ## Returns the field converted from the URI query.
   let errorMsg = "Invalid field: {query}".fmt
 
@@ -877,7 +877,7 @@ func splitByLen(str: string, length: int): seq[string] {.inline, noinit.} =
       for firstIndex in countup(0, str.len.pred, length):
         str.substr(firstIndex, min(firstIndex.succ length, str.len).pred)
 
-func parseFieldIshikawa(query: string): StrErrorResult[Field] {.inline, noinit.} =
+func parseFieldIshikawa(query: string): Pon2Result[Field] {.inline, noinit.} =
   ## Returns the field converted from the URI query.
   let errorMsg = "Invalid field: {query}".fmt
 
@@ -927,7 +927,7 @@ func parseFieldIshikawa(query: string): StrErrorResult[Field] {.inline, noinit.}
 
 func parseField*(
     query: string, fqdn: SimulatorFqdn
-): StrErrorResult[Field] {.inline, noinit.} =
+): Pon2Result[Field] {.inline, noinit.} =
   ## Returns the field converted from the URI query.
   case fqdn
   of Pon2: query.parseFieldPon2

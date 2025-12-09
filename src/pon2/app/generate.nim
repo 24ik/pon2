@@ -79,7 +79,7 @@ func round(rng: var Rand, x: float): int =
 
 func split(
     rng: var Rand, total, chunkCount: int, allowZeroChunk: bool
-): StrErrorResult[seq[int]] =
+): Pon2Result[seq[int]] =
   ## Splits the number `total` into `chunkCount` chunks.
   if total < 0:
     return err "`total` cannot be negative"
@@ -115,9 +115,7 @@ func split(
       sepIndices[i.succ] - sepIndices[i]
   ok chunks
 
-func split(
-    rng: var Rand, total: int, weights: openArray[int]
-): StrErrorResult[seq[int]] =
+func split(rng: var Rand, total: int, weights: openArray[int]): Pon2Result[seq[int]] =
   ## Splits the number `total` into chunks following the probability `weights`.
   ## If `weights` are all zero, splits randomly.
   ## Note that an infinite loop can occur.
@@ -154,7 +152,7 @@ func split(
 
 func split(
     rng: var Rand, total: int, positives: openArray[bool]
-): StrErrorResult[seq[int]] =
+): Pon2Result[seq[int]] =
   ## Splits the number `total` into chunks randomly.
   ## Elements of the result where `positives` are `true` are set to positive, and
   ## the others are set to zero.
@@ -196,7 +194,7 @@ const
     DummyCell,
   ]
 
-func isValid(self: GenerateSettings): StrErrorResult[void] =
+func isValid(self: GenerateSettings): Pon2Result[void] =
   ## Returns `true` if the settings are valid.
   ## Note that this function is "weak" checker; a generation may be failed
   ## (entering infinite loop) even though this function returns `true`.
@@ -292,7 +290,7 @@ func isValid(self: GenerateSettings): StrErrorResult[void] =
   if notPairPlacementIndexSet.card >= self.moveCount:
     return err "at least one pair-step is required"
 
-  StrErrorResult[void].ok
+  Pon2Result[void].ok
 
 # ------------------------------------------------
 # Puyo Puyo
@@ -310,7 +308,7 @@ func generateGarbagesCounts(rng: var Rand, total: int): array[Col, int] =
 
 func generatePuyoPuyo(
     rng: var Rand, settings: GenerateSettings, useCells: seq[Cell]
-): StrErrorResult[PuyoPuyo] =
+): Pon2Result[PuyoPuyo] =
   ## Returns a random Puyo Puyo.
   ## Note that an infinite loop can occur.
   ## This function requires the settings passes `isValid`.
@@ -460,7 +458,7 @@ func generatePuyoPuyo(
 # Generate
 # ------------------------------------------------
 
-proc generate*(rng: var Rand, settings: GenerateSettings): StrErrorResult[NazoPuyo] =
+proc generate*(rng: var Rand, settings: GenerateSettings): Pon2Result[NazoPuyo] =
   ## Returns a random Nazo Puyo that has a unique solution.
   ?settings.isValid.context "Generation failed"
 

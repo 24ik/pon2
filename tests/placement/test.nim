@@ -62,7 +62,7 @@ block: # Placement <-> string
   check $Right2 == "34"
 
   let plcmtRes = "34".parsePlacement
-  check plcmtRes == StrErrorResult[Placement].ok Right2
+  check plcmtRes == Pon2Result[Placement].ok Right2
 
   check "".parsePlacement.isErr
   check "33".parsePlacement.isErr
@@ -72,10 +72,10 @@ block: # OptPlacement <-> string
   check $NonePlacement == ""
 
   let optPlcmtRes = "6S".parseOptPlacement
-  check optPlcmtRes == StrErrorResult[OptPlacement].ok OptPlacement.ok Down5
+  check optPlcmtRes == Pon2Result[OptPlacement].ok OptPlacement.ok Down5
 
   let optPlcmtRes2 = "".parseOptPlacement
-  check optPlcmtRes2 == StrErrorResult[OptPlacement].ok NonePlacement
+  check optPlcmtRes2 == Pon2Result[OptPlacement].ok NonePlacement
 
   check "6s".parseOptPlacement.isErr
 
@@ -85,10 +85,10 @@ block: # Placement <-> URI
     check Right2.toUriQuery(fqdn) == "g"
 
   let plcmtRes = "34".parsePlacement Pon2
-  check plcmtRes == StrErrorResult[Placement].ok Right2
+  check plcmtRes == Pon2Result[Placement].ok Right2
   for fqdn in [Ishikawa, Ips]:
     let plcmtRes2 = "g".parsePlacement(fqdn)
-    check plcmtRes2 == StrErrorResult[Placement].ok Right2
+    check plcmtRes2 == Pon2Result[Placement].ok Right2
 
   check "g".parsePlacement(Pon2).isErr
   check "34".parsePlacement(Ishikawa).isErr
@@ -104,14 +104,14 @@ block: # OptPlacement <-> URI
   let
     optPlcmtRes = "34".parseOptPlacement Pon2
     optPlcmtRes2 = "".parseOptPlacement Pon2
-  check optPlcmtRes == StrErrorResult[OptPlacement].ok OptPlacement.ok Right2
-  check optPlcmtRes2 == StrErrorResult[OptPlacement].ok NonePlacement
+  check optPlcmtRes == Pon2Result[OptPlacement].ok OptPlacement.ok Right2
+  check optPlcmtRes2 == Pon2Result[OptPlacement].ok NonePlacement
   for fqdn in [Ishikawa, Ips]:
     let
       optPlcmtRes3 = "g".parseOptPlacement fqdn
       optPlcmtRes4 = "1".parseOptPlacement fqdn
-    check optPlcmtRes3 == StrErrorResult[OptPlacement].ok OptPlacement.ok Right2
-    check optPlcmtRes4 == StrErrorResult[OptPlacement].ok NonePlacement
+    check optPlcmtRes3 == Pon2Result[OptPlacement].ok OptPlacement.ok Right2
+    check optPlcmtRes4 == Pon2Result[OptPlacement].ok NonePlacement
 
   check "1".parseOptPlacement(Pon2).isErr
   check "".parseOptPlacement(Ishikawa).isErr

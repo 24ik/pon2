@@ -225,7 +225,7 @@ func `$`*(self: Goal): string {.inline, noinit.} =
 
   "{mainStr}{GoalSep}{clearStr}".fmt.strip(chars = {GoalSep}) & GoalSuffix
 
-func parseGoal*(str: string): StrErrorResult[Goal] {.inline, noinit.} =
+func parseGoal*(str: string): Pon2Result[Goal] {.inline, noinit.} =
   ## Returns the goal converted from the string representation.
   let errorMsg = "Invalid goal: {str}".fmt
 
@@ -333,7 +333,7 @@ const
   ClearIshikawaUri = '2'
   EmptyValIshikawaUri = '0'
 
-func toUriQuery*(self: Goal, fqdn = Pon2): StrErrorResult[string] {.inline, noinit.} =
+func toUriQuery*(self: Goal, fqdn = Pon2): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query converted from the requirement.
   case fqdn
   of Pon2:
@@ -391,7 +391,7 @@ func toUriQuery*(self: Goal, fqdn = Pon2): StrErrorResult[string] {.inline, noin
 
 func parseGoal*(
     query: string, fqdn: SimulatorFqdn
-): StrErrorResult[Goal] {.inline, noinit.} =
+): Pon2Result[Goal] {.inline, noinit.} =
   ## Returns the goal converted from the URI query.
   if query == "":
     return ok NoneGoal

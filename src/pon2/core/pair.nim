@@ -130,7 +130,7 @@ const StrToPair = collect:
   for pair in Pair:
     {$pair: pair}
 
-func parsePair*(str: string): StrErrorResult[Pair] {.inline, noinit.} =
+func parsePair*(str: string): Pon2Result[Pair] {.inline, noinit.} =
   ## Returns the pair converted from the string representation.
   StrToPair[str].context "Invalid pair: {str}".fmt
 
@@ -154,7 +154,7 @@ func toUriQuery*(self: Pair, fqdn = Pon2): string {.inline, noinit.} =
 
 func parsePair*(
     query: string, fqdn: SimulatorFqdn
-): StrErrorResult[Pair] {.inline, noinit.} =
+): Pon2Result[Pair] {.inline, noinit.} =
   ## Returns the pair converted from the URI query.
   case fqdn
   of Pon2:

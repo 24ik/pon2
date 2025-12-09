@@ -607,7 +607,7 @@ when defined(js) or defined(nimsuggest):
 
     strs
 
-  func parseMoveResult(str: string): StrErrorResult[MoveResult] {.inline, noinit.} =
+  func parseMoveResult(str: string): Pon2Result[MoveResult] {.inline, noinit.} =
     ## Returns the move result converted from the string representation.
     let errorMsg = "Invalid move result: {str}".fmt
 
@@ -665,7 +665,7 @@ when defined(js) or defined(nimsuggest):
       detailHardToGarbageCount, fullPopCounts,
     )
 
-  func parseCells(str: string): StrErrorResult[set[Cell]] {.inline, noinit.} =
+  func parseCells(str: string): Pon2Result[set[Cell]] {.inline, noinit.} =
     ## Returns the cells converted from the string representation.
     let errorMsg = "Invalid cells: {str}".fmt
 
@@ -675,7 +675,7 @@ when defined(js) or defined(nimsuggest):
 
     ok cells
 
-  func parseCounts(str: string): StrErrorResult[array[Cell, int]] {.inline, noinit.} =
+  func parseCounts(str: string): Pon2Result[array[Cell, int]] {.inline, noinit.} =
     ## Returns the counts converted from the string representation.
     let errorMsg = "Invalid counts: {str}".fmt
 
@@ -691,7 +691,7 @@ when defined(js) or defined(nimsuggest):
 
   func parseSolveInfo*(
       strs: seq[string]
-  ): StrErrorResult[tuple[goal: Goal, steps: Steps]] {.inline, noinit.} =
+  ): Pon2Result[tuple[goal: Goal, steps: Steps]] {.inline, noinit.} =
     ## Returns the rule of the solve node converted from the string representations.
     let errorMsg = "Invalid solve info: {strs}".fmt
 
@@ -703,9 +703,7 @@ when defined(js) or defined(nimsuggest):
       ?strs[1].parseSteps(Pon2).context errorMsg,
     )
 
-  func parseSolveNode*(
-      strs: seq[string]
-  ): StrErrorResult[SolveNode] {.inline, noinit.} =
+  func parseSolveNode*(strs: seq[string]): Pon2Result[SolveNode] {.inline, noinit.} =
     ## Returns the solve node converted from the string representations.
     let errorMsg = "Invalid node: {strs}".fmt
 
@@ -750,7 +748,7 @@ when defined(js) or defined(nimsuggest):
 
   func parseSolveAnswers*(
       strs: seq[string]
-  ): StrErrorResult[seq[seq[OptPlacement]]] {.inline, noinit.} =
+  ): Pon2Result[seq[seq[OptPlacement]]] {.inline, noinit.} =
     ## Returns the answers converted from the run result.
     var answers = newSeqOfCap[seq[OptPlacement]](strs.len)
     for str in strs:

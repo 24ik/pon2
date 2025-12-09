@@ -67,7 +67,7 @@ const FieldStepsSep = "\n------\n"
 func `$`*(self: PuyoPuyo): string {.inline, noinit.} =
   $self.field & FieldStepsSep & $self.steps
 
-func parsePuyoPuyo*(str: string): StrErrorResult[PuyoPuyo] {.inline, noinit.} =
+func parsePuyoPuyo*(str: string): Pon2Result[PuyoPuyo] {.inline, noinit.} =
   ## Returns the game converted from the string representation.
   let strs = str.split FieldStepsSep
   if strs.len != 2:
@@ -90,7 +90,7 @@ const
 
   FieldStepsSepIshikawaUri = "_"
 
-func toUriQueryPon2(self: PuyoPuyo): StrErrorResult[string] {.inline, noinit.} =
+func toUriQueryPon2(self: PuyoPuyo): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query converted from the game.
   let errorMsg = "Puyo Puyo that does not support URI conversion: {self}".fmt
 
@@ -99,7 +99,7 @@ func toUriQueryPon2(self: PuyoPuyo): StrErrorResult[string] {.inline, noinit.} =
     (StepsKey, ?self.steps.toUriQuery(Pon2).context errorMsg),
   ].encodeQuery
 
-func toUriQueryIshikawa(self: PuyoPuyo): StrErrorResult[string] {.inline, noinit.} =
+func toUriQueryIshikawa(self: PuyoPuyo): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query converted from the game.
   let
     errorMsg = "Puyo Puyo that does not support URI conversion: {self}".fmt
@@ -112,15 +112,13 @@ func toUriQueryIshikawa(self: PuyoPuyo): StrErrorResult[string] {.inline, noinit
     else: fieldQuery & FieldStepsSepIshikawaUri & stepsQuery
   )
 
-func toUriQuery*(
-    self: PuyoPuyo, fqdn = Pon2
-): StrErrorResult[string] {.inline, noinit.} =
+func toUriQuery*(self: PuyoPuyo, fqdn = Pon2): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query converted from the game.
   case fqdn
   of Pon2: self.toUriQueryPon2
   of Ishikawa, Ips: self.toUriQueryIshikawa
 
-func parsePuyoPuyoPon2(query: string): StrErrorResult[PuyoPuyo] {.inline, noinit.} =
+func parsePuyoPuyoPon2(query: string): Pon2Result[PuyoPuyo] {.inline, noinit.} =
   ## Returns the game converted from the URI query.
   var
     puyoPuyo = PuyoPuyo.init
@@ -152,7 +150,7 @@ func parsePuyoPuyoPon2(query: string): StrErrorResult[PuyoPuyo] {.inline, noinit
 
   ok puyoPuyo
 
-func parsePuyoPuyoIshikawa(query: string): StrErrorResult[PuyoPuyo] {.inline, noinit.} =
+func parsePuyoPuyoIshikawa(query: string): Pon2Result[PuyoPuyo] {.inline, noinit.} =
   ## Returns the game converted from the URI query.
   let strs = query.split FieldStepsSepIshikawaUri
 
@@ -171,7 +169,7 @@ func parsePuyoPuyoIshikawa(query: string): StrErrorResult[PuyoPuyo] {.inline, no
 
 func parsePuyoPuyo*(
     query: string, fqdn: SimulatorFqdn
-): StrErrorResult[PuyoPuyo] {.inline, noinit.} =
+): Pon2Result[PuyoPuyo] {.inline, noinit.} =
   ## Returns the game converted from the URI query.
   case fqdn
   of Pon2: query.parsePuyoPuyoPon2

@@ -11,8 +11,8 @@ import ../../src/pon2/core/[rule]
 # ------------------------------------------------
 
 block: # parseRule
-  check "通".parseRule == StrErrorResult[Rule].ok Rule.Tsu
-  check "だいかいてん".parseRule == StrErrorResult[Rule].ok Spinner
-  check "クロスかいてん".parseRule == StrErrorResult[Rule].ok CrossSpinner
-  check "すいちゅう".parseRule == StrErrorResult[Rule].ok Rule.Water
+  check "通".parseRule == Pon2Result[Rule].ok Rule.Tsu
+  check "だいかいてん".parseRule == Pon2Result[Rule].ok Spinner
+  check "クロスかいてん".parseRule == Pon2Result[Rule].ok CrossSpinner
+  check "すいちゅう".parseRule == Pon2Result[Rule].ok Rule.Water
   check "".parseRule.isErr

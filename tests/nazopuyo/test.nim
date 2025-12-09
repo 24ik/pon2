@@ -474,13 +474,13 @@ rg|23"""
       queryPon2 = "field=0_op......yg....b.r&steps=byo0_1_0_0_0_1org23&goal=0_0_2_0_"
       queryIshikawa = "6E004g031_E1ahce__u02"
 
-    check nazoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check nazoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check nazoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check nazoPuyo.toUriQuery(Ishikawa) == Pon2Result[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
-    check queryPon2.parseNazoPuyo(Pon2) == StrErrorResult[NazoPuyo].ok nazoPuyo
-    check queryIshikawa.parseNazoPuyo(Ishikawa) == StrErrorResult[NazoPuyo].ok nazoPuyo
-    check queryIshikawa.parseNazoPuyo(Ips) == StrErrorResult[NazoPuyo].ok nazoPuyo
+    check queryPon2.parseNazoPuyo(Pon2) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(Ishikawa) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(Ips) == Pon2Result[NazoPuyo].ok nazoPuyo
 
   block: # empty steps
     let
@@ -509,13 +509,13 @@ g.....
       queryPon2 = "field=0_g.....&steps&goal=_1"
       queryIshikawa = "g00___210"
 
-    check nazoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check nazoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check nazoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check nazoPuyo.toUriQuery(Ishikawa) == Pon2Result[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
-    check queryPon2.parseNazoPuyo(Pon2) == StrErrorResult[NazoPuyo].ok nazoPuyo
-    check queryIshikawa.parseNazoPuyo(Ishikawa) == StrErrorResult[NazoPuyo].ok nazoPuyo
-    check queryIshikawa.parseNazoPuyo(Ips) == StrErrorResult[NazoPuyo].ok nazoPuyo
+    check queryPon2.parseNazoPuyo(Pon2) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(Ishikawa) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(Ips) == Pon2Result[NazoPuyo].ok nazoPuyo
 
   block: # empty field and steps
     let
@@ -544,13 +544,13 @@ g.....
       queryPon2 = "field=0_&steps&goal=1_0_3_0_"
       queryIshikawa = "___E03"
 
-    check nazoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check nazoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check nazoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check nazoPuyo.toUriQuery(Ishikawa) == Pon2Result[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
-    check queryPon2.parseNazoPuyo(Pon2) == StrErrorResult[NazoPuyo].ok nazoPuyo
-    check queryIshikawa.parseNazoPuyo(Ishikawa) == StrErrorResult[NazoPuyo].ok nazoPuyo
-    check queryIshikawa.parseNazoPuyo(Ips) == StrErrorResult[NazoPuyo].ok nazoPuyo
+    check queryPon2.parseNazoPuyo(Pon2) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(Ishikawa) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(Ips) == Pon2Result[NazoPuyo].ok nazoPuyo
 
   block: # empty query
     let
@@ -580,7 +580,7 @@ g.....
       queryPon22 = "field=0_&steps&goal="
       queryPon23 = "field=0_&steps"
 
-    check nazoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
+    check nazoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
 
     for query in [queryPon2, queryPon22, queryPon23]:
-      check query.parseNazoPuyo(Pon2) == StrErrorResult[NazoPuyo].ok nazoPuyo
+      check query.parseNazoPuyo(Pon2) == Pon2Result[NazoPuyo].ok nazoPuyo

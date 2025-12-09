@@ -65,7 +65,7 @@ const Behaviours*: array[Rule, Behaviour] = [
 # Rule <-> string
 # ------------------------------------------------
 
-func parseRule*(str: string): StrErrorResult[Rule] {.inline, noinit.} =
+func parseRule*(str: string): Pon2Result[Rule] {.inline, noinit.} =
   ## Returns the rule converted from the string representation.
   case str
   of $Rule.Tsu:

@@ -171,7 +171,7 @@ const GoalPuyoPuyoSep = "\n======\n"
 func `$`*(self: NazoPuyo): string {.inline, noinit.} =
   $self.goal & GoalPuyoPuyoSep & $self.puyoPuyo
 
-func parseNazoPuyo*(str: string): StrErrorResult[NazoPuyo] {.inline, noinit.} =
+func parseNazoPuyo*(str: string): Pon2Result[NazoPuyo] {.inline, noinit.} =
   ## Returns the Nazo Puyo converted from the string representation.
   let
     errorMsg = "Invalid Nazo Puyo: {str}".fmt
@@ -193,14 +193,14 @@ const
   GoalKey = "goal"
   IshikawaPuyoPuyoGoalSep = "__"
 
-func toUriQueryPon2(self: NazoPuyo): StrErrorResult[string] {.inline, noinit.} =
+func toUriQueryPon2(self: NazoPuyo): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query converted from the Nazo Puyo.
   let errorMsg = "Nazo Puyo that does not support URI conversion: {self}".fmt
 
   ok (?self.puyoPuyo.toUriQuery(Pon2).context errorMsg) & '&' &
     [(GoalKey, ?self.goal.toUriQuery(Pon2).context errorMsg)].encodeQuery
 
-func toUriQueryIshikawa(self: NazoPuyo): StrErrorResult[string] {.inline, noinit.} =
+func toUriQueryIshikawa(self: NazoPuyo): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query converted from the Nazo Puyo.
   let
     errorMsg = "Nazo Puyo that does not support URI conversion: {self}".fmt
@@ -213,15 +213,13 @@ func toUriQueryIshikawa(self: NazoPuyo): StrErrorResult[string] {.inline, noinit
   ok puyoPuyoQuery & IshikawaPuyoPuyoGoalSep &
     ?self.goal.toUriQuery(Ishikawa).context errorMsg
 
-func toUriQuery*(
-    self: NazoPuyo, fqdn = Pon2
-): StrErrorResult[string] {.inline, noinit.} =
+func toUriQuery*(self: NazoPuyo, fqdn = Pon2): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query converted from the Nazo Puyo.
   case fqdn
   of Pon2: self.toUriQueryPon2
   of Ishikawa, Ips: self.toUriQueryIshikawa
 
-func parseNazoPuyoPon2(query: string): StrErrorResult[NazoPuyo] {.inline, noinit.} =
+func parseNazoPuyoPon2(query: string): Pon2Result[NazoPuyo] {.inline, noinit.} =
   ## Returns the Nazo Puyo converted from the URI query.
   var
     nazoPuyo = NazoPuyo.init
@@ -246,7 +244,7 @@ func parseNazoPuyoPon2(query: string): StrErrorResult[NazoPuyo] {.inline, noinit
 
   ok nazoPuyo
 
-func parseNazoPuyoIshikawa(query: string): StrErrorResult[NazoPuyo] {.inline, noinit.} =
+func parseNazoPuyoIshikawa(query: string): Pon2Result[NazoPuyo] {.inline, noinit.} =
   ## Returns the Nazo Puyo converted from the URI query.
   let
     errorMsg = "Invalid Nazo Puyo: {query}".fmt
@@ -264,7 +262,7 @@ func parseNazoPuyoIshikawa(query: string): StrErrorResult[NazoPuyo] {.inline, no
 
 func parseNazoPuyo*(
     query: string, fqdn: SimulatorFqdn
-): StrErrorResult[NazoPuyo] {.inline, noinit.} =
+): Pon2Result[NazoPuyo] {.inline, noinit.} =
   ## Returns the Nazo Puyo converted from the URI query.
   case fqdn
   of Pon2: query.parseNazoPuyoPon2

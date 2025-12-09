@@ -1057,9 +1057,7 @@ func initPon2Paths(): seq[string] =
 
 const Pon2Paths = initPon2Paths()
 
-func toUri*(
-    self: Simulator, clearPlacements = false, fqdn = Pon2
-): StrErrorResult[Uri] =
+func toUri*(self: Simulator, clearPlacements = false, fqdn = Pon2): Pon2Result[Uri] =
   ## Returns the URI converted from the simulator.
   var uri = initUri()
   uri.scheme.assign "https"
@@ -1093,7 +1091,7 @@ func toUri*(
 
   ok uri
 
-func parseSimulator*(uri: Uri): StrErrorResult[Simulator] =
+func parseSimulator*(uri: Uri): Pon2Result[Simulator] =
   ## Returns the simulator converted from the URI.
   ## Viewer modes and play modes are set to the result simulator preferentially
   ## if the FQDN is `Ishikawa` or `Ips`.
@@ -1158,7 +1156,7 @@ func parseSimulator*(uri: Uri): StrErrorResult[Simulator] =
 
 func toExportUri*(
     self: Simulator, viewer = true, clearPlacements = true, fqdn = Pon2
-): StrErrorResult[Uri] =
+): Pon2Result[Uri] =
   ## Returns the URI of the simulator with any moves reset.
   var simulator = self
 

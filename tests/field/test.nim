@@ -2246,8 +2246,8 @@ r.....
   check $fieldC == strC
   check $fieldW == strW
 
-  check strC.parseField == StrErrorResult[Field].ok fieldC
-  check strW.parseField == StrErrorResult[Field].ok fieldW
+  check strC.parseField == Pon2Result[Field].ok fieldC
+  check strW.parseField == Pon2Result[Field].ok fieldW
 
 # ------------------------------------------------
 # Field <-> URI
@@ -2295,16 +2295,16 @@ r.....
       queryWResult = fieldW.toUriQuery Pon2
 
     check queryTResult ==
-      StrErrorResult[string].ok "0_r......g......b......y......p......o....h......."
+      Pon2Result[string].ok "0_r......g......b......y......p......o....h......."
     check queryWResult ==
-      StrErrorResult[string].ok "3_r.....~.g......b......y......p......o....h"
+      Pon2Result[string].ok "3_r.....~.g......b......y......p......o....h"
 
     let
       queryT = queryTResult.unsafeValue
       queryW = queryWResult.unsafeValue
 
-    check queryT.parseField(Pon2) == StrErrorResult[Field].ok fieldT
-    check queryW.parseField(Pon2) == StrErrorResult[Field].ok fieldW
+    check queryT.parseField(Pon2) == Pon2Result[Field].ok fieldT
+    check queryW.parseField(Pon2) == Pon2Result[Field].ok fieldW
 
   block: # Ishikawa, Ips
     for fqdn in [Ishikawa, Ips]:
@@ -2312,12 +2312,12 @@ r.....
         queryTResult = fieldT.toUriQuery fqdn
         queryWResult = fieldW.toUriQuery fqdn
 
-      check queryTResult == StrErrorResult[string].ok "~1.02.003.0004.00005.00000600009."
+      check queryTResult == Pon2Result[string].ok "~1.02.003.0004.00005.00000600009."
       check queryWResult.isErr
 
       let queryT = queryTResult.unsafeValue
 
-      check queryT.parseField(fqdn) == StrErrorResult[Field].ok fieldT
+      check queryT.parseField(fqdn) == Pon2Result[Field].ok fieldT
 
   block: # Ishikawa, Ips (not tilde)
     let field =
@@ -2339,21 +2339,21 @@ r.....
 
     for fqdn in [Ishikawa, Ips]:
       let queryResult = field.toUriQuery(fqdn)
-      check queryResult == StrErrorResult[string].ok "10g"
-      check queryResult.unsafeValue.parseField(fqdn) == StrErrorResult[Field].ok field
+      check queryResult == Pon2Result[string].ok "10g"
+      check queryResult.unsafeValue.parseField(fqdn) == Pon2Result[Field].ok field
 
   block: # empty field
-    check Field.init.toUriQuery(Pon2) == StrErrorResult[string].ok "0_"
-    check Field.init.toUriQuery(Ishikawa) == StrErrorResult[string].ok ""
-    check Field.init.toUriQuery(Ips) == StrErrorResult[string].ok ""
+    check Field.init.toUriQuery(Pon2) == Pon2Result[string].ok "0_"
+    check Field.init.toUriQuery(Ishikawa) == Pon2Result[string].ok ""
+    check Field.init.toUriQuery(Ips) == Pon2Result[string].ok ""
 
-    check Field.init(Spinner).toUriQuery(Pon2) == StrErrorResult[string].ok "1_"
-    check Field.init(CrossSpinner).toUriQuery(Pon2) == StrErrorResult[string].ok "2_"
-    check Field.init(Rule.Water).toUriQuery(Pon2) == StrErrorResult[string].ok "3_~"
+    check Field.init(Spinner).toUriQuery(Pon2) == Pon2Result[string].ok "1_"
+    check Field.init(CrossSpinner).toUriQuery(Pon2) == Pon2Result[string].ok "2_"
+    check Field.init(Rule.Water).toUriQuery(Pon2) == Pon2Result[string].ok "3_~"
 
     check Field.init(Spinner).toUriQuery(Ishikawa).isErr
     check Field.init(CrossSpinner).toUriQuery(Ishikawa).isErr
     check Field.init(Rule.Water).toUriQuery(Ishikawa).isErr
 
   block: # empty query
-    check "".parseField(Pon2) == StrErrorResult[Field].ok Field.init
+    check "".parseField(Pon2) == Pon2Result[Field].ok Field.init

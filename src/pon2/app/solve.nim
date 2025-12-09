@@ -166,9 +166,9 @@ when defined(js) or defined(nimsuggest):
         optPlacementsSeq: seq[seq[OptPlacement]],
         answersSeqRef: ref seq[seq[SolveAnswer]],
         progressRef: ref tuple[now, total: int],
-    ): StrErrorResult[seq[string]] -> void =
+    ): Pon2Result[seq[string]] -> void =
       ## Returns a handler called after a web worker job completes.
-      (res: StrErrorResult[seq[string]]) => (
+      (res: Pon2Result[seq[string]]) => (
         block:
           if res.isOk:
             let answersResult = res.unsafeValue.parseSolveAnswers

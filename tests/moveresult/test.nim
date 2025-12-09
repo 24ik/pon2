@@ -126,12 +126,12 @@ block: # colors, colorsSeq
 
 block: # placeCounts
   check moveResult1.placeCounts(Purple).isErr
-  check moveResult2.placeCounts(Purple) == StrErrorResult[seq[int]].ok @[2, 0, 1]
+  check moveResult2.placeCounts(Purple) == Pon2Result[seq[int]].ok @[2, 0, 1]
   check moveResult1.placeCounts(Yellow).isErr
-  check moveResult2.placeCounts(Yellow) == StrErrorResult[seq[int]].ok @[0, 0, 0]
+  check moveResult2.placeCounts(Yellow) == Pon2Result[seq[int]].ok @[0, 0, 0]
 
   check moveResult1.placeCounts.isErr
-  check moveResult2.placeCounts == StrErrorResult[seq[int]].ok @[4, 2, 3]
+  check moveResult2.placeCounts == Pon2Result[seq[int]].ok @[4, 2, 3]
 
 # ------------------------------------------------
 # Connect
@@ -139,13 +139,13 @@ block: # placeCounts
 
 block: # connectionCounts
   check moveResult1.connectionCounts(Purple).isErr
-  check moveResult2.connectionCounts(Purple) == StrErrorResult[seq[int]].ok @[4, 5, 6]
+  check moveResult2.connectionCounts(Purple) == Pon2Result[seq[int]].ok @[4, 5, 6]
   check moveResult1.connectionCounts(Yellow).isErr
-  check moveResult2.connectionCounts(Yellow) == StrErrorResult[seq[int]].ok @[]
+  check moveResult2.connectionCounts(Yellow) == Pon2Result[seq[int]].ok @[]
 
   check moveResult1.connectionCounts.isErr
   check moveResult2.connectionCounts ==
-    StrErrorResult[seq[int]].ok @[4, 5, 4, 5, 4, 4, 4, 5, 6]
+    Pon2Result[seq[int]].ok @[4, 5, 4, 5, 4, 4, 4, 5, 6]
 
 # ------------------------------------------------
 # Score
@@ -155,7 +155,7 @@ let scoreAnswer = 8660
 
 block: # score
   check moveResult1.score.isErr
-  check moveResult2.score == StrErrorResult[int].ok scoreAnswer
+  check moveResult2.score == Pon2Result[int].ok scoreAnswer
 
 # ------------------------------------------------
 # Notice Garbage
@@ -165,4 +165,4 @@ block: # noticeCounts
   for rule in Rule:
     check moveResult1.noticeCounts(rule).isErr
     check moveResult2.noticeCounts(rule) ==
-      StrErrorResult[array[Notice, int]].ok scoreAnswer.noticeCounts rule
+      Pon2Result[array[Notice, int]].ok scoreAnswer.noticeCounts rule

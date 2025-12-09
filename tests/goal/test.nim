@@ -89,12 +89,12 @@ block: # `$`, toUriQuery, parseGoal
       ishikawaUri = "H25"
 
     check $goal == str
-    check goal.toUriQuery(Pon2) == StrErrorResult[string].ok pon2Uri
-    check goal.toUriQuery(Ishikawa) == StrErrorResult[string].ok ishikawaUri
-    check goal.toUriQuery(Ips) == StrErrorResult[string].ok ishikawaUri
-    check str.parseGoal == StrErrorResult[Goal].ok goal
-    check pon2Uri.parseGoal(Pon2) == StrErrorResult[Goal].ok goal
-    check ishikawaUri.parseGoal(Ishikawa) == StrErrorResult[Goal].ok goal
+    check goal.toUriQuery(Pon2) == Pon2Result[string].ok pon2Uri
+    check goal.toUriQuery(Ishikawa) == Pon2Result[string].ok ishikawaUri
+    check goal.toUriQuery(Ips) == Pon2Result[string].ok ishikawaUri
+    check str.parseGoal == Pon2Result[Goal].ok goal
+    check pon2Uri.parseGoal(Pon2) == Pon2Result[Goal].ok goal
+    check ishikawaUri.parseGoal(Ishikawa) == Pon2Result[Goal].ok goal
 
   block: # w/ val
     let
@@ -104,12 +104,12 @@ block: # `$`, toUriQuery, parseGoal
       ishikawaUri = "a02"
 
     check $goal == str
-    check goal.toUriQuery(Pon2) == StrErrorResult[string].ok pon2Uri
-    check goal.toUriQuery(Ishikawa) == StrErrorResult[string].ok ishikawaUri
-    check goal.toUriQuery(Ips) == StrErrorResult[string].ok ishikawaUri
-    check str.parseGoal == StrErrorResult[Goal].ok goal
-    check pon2Uri.parseGoal(Pon2) == StrErrorResult[Goal].ok goal
-    check ishikawaUri.parseGoal(Ishikawa) == StrErrorResult[Goal].ok goal
+    check goal.toUriQuery(Pon2) == Pon2Result[string].ok pon2Uri
+    check goal.toUriQuery(Ishikawa) == Pon2Result[string].ok ishikawaUri
+    check goal.toUriQuery(Ips) == Pon2Result[string].ok ishikawaUri
+    check str.parseGoal == Pon2Result[Goal].ok goal
+    check pon2Uri.parseGoal(Pon2) == Pon2Result[Goal].ok goal
+    check ishikawaUri.parseGoal(Ishikawa) == Pon2Result[Goal].ok goal
 
   block: # only clear
     let
@@ -119,12 +119,12 @@ block: # `$`, toUriQuery, parseGoal
       ishikawaUri = "270"
 
     check $goal == str
-    check goal.toUriQuery(Pon2) == StrErrorResult[string].ok pon2Uri
-    check goal.toUriQuery(Ishikawa) == StrErrorResult[string].ok ishikawaUri
-    check goal.toUriQuery(Ips) == StrErrorResult[string].ok ishikawaUri
-    check str.parseGoal == StrErrorResult[Goal].ok goal
-    check pon2Uri.parseGoal(Pon2) == StrErrorResult[Goal].ok goal
-    check ishikawaUri.parseGoal(Ishikawa) == StrErrorResult[Goal].ok goal
+    check goal.toUriQuery(Pon2) == Pon2Result[string].ok pon2Uri
+    check goal.toUriQuery(Ishikawa) == Pon2Result[string].ok ishikawaUri
+    check goal.toUriQuery(Ips) == Pon2Result[string].ok ishikawaUri
+    check str.parseGoal == Pon2Result[Goal].ok goal
+    check pon2Uri.parseGoal(Pon2) == Pon2Result[Goal].ok goal
+    check ishikawaUri.parseGoal(Ishikawa) == Pon2Result[Goal].ok goal
 
   block: # chain w/ clear
     let
@@ -134,36 +134,36 @@ block: # `$`, toUriQuery, parseGoal
       ishikawaUri = "x13"
 
     check $goal == str
-    check goal.toUriQuery(Pon2) == StrErrorResult[string].ok pon2Uri
-    check goal.toUriQuery(Ishikawa) == StrErrorResult[string].ok ishikawaUri
-    check goal.toUriQuery(Ips) == StrErrorResult[string].ok ishikawaUri
-    check str.parseGoal == StrErrorResult[Goal].ok goal
-    check pon2Uri.parseGoal(Pon2) == StrErrorResult[Goal].ok goal
-    check ishikawaUri.parseGoal(Ishikawa) == StrErrorResult[Goal].ok goal
+    check goal.toUriQuery(Pon2) == Pon2Result[string].ok pon2Uri
+    check goal.toUriQuery(Ishikawa) == Pon2Result[string].ok ishikawaUri
+    check goal.toUriQuery(Ips) == Pon2Result[string].ok ishikawaUri
+    check str.parseGoal == Pon2Result[Goal].ok goal
+    check pon2Uri.parseGoal(Pon2) == Pon2Result[Goal].ok goal
+    check ishikawaUri.parseGoal(Ishikawa) == Pon2Result[Goal].ok goal
 
   block: # invalid with Ishikawa/Ips
     block:
       let goal = Goal.init(Connection, GoalColor.Yellow, -1, Exact)
-      check goal.toUriQuery(Pon2) == StrErrorResult[string].ok "4_4_-1_0_"
+      check goal.toUriQuery(Pon2) == Pon2Result[string].ok "4_4_-1_0_"
       check goal.toUriQuery(Ishikawa).isErr
       check goal.toUriQuery(Ips).isErr
 
     block:
       let goal = Goal.init(AccumCount, All, 10, AtLeast, Colors)
-      check goal.toUriQuery(Pon2) == StrErrorResult[string].ok "6_0_10_1_7"
+      check goal.toUriQuery(Pon2) == Pon2Result[string].ok "6_0_10_1_7"
       check goal.toUriQuery(Ishikawa).isErr
       check goal.toUriQuery(Ips).isErr
 
   block: # none goal
     check $NoneGoal == "クリア条件未設定"
-    check "クリア条件未設定".parseGoal == StrErrorResult[Goal].ok NoneGoal
-    check "".parseGoal == StrErrorResult[Goal].ok NoneGoal
+    check "クリア条件未設定".parseGoal == Pon2Result[Goal].ok NoneGoal
+    check "".parseGoal == Pon2Result[Goal].ok NoneGoal
 
-    check NoneGoal.toUriQuery(Pon2) == StrErrorResult[string].ok "_"
-    check NoneGoal.toUriQuery(Ishikawa) == StrErrorResult[string].ok ""
-    check NoneGoal.toUriQuery(Ips) == StrErrorResult[string].ok ""
+    check NoneGoal.toUriQuery(Pon2) == Pon2Result[string].ok "_"
+    check NoneGoal.toUriQuery(Ishikawa) == Pon2Result[string].ok ""
+    check NoneGoal.toUriQuery(Ips) == Pon2Result[string].ok ""
 
-    check "_".parseGoal(Pon2) == StrErrorResult[Goal].ok NoneGoal
-    check "".parseGoal(Pon2) == StrErrorResult[Goal].ok NoneGoal
-    check "".parseGoal(Ishikawa) == StrErrorResult[Goal].ok NoneGoal
-    check "".parseGoal(Ips) == StrErrorResult[Goal].ok NoneGoal
+    check "_".parseGoal(Pon2) == Pon2Result[Goal].ok NoneGoal
+    check "".parseGoal(Pon2) == Pon2Result[Goal].ok NoneGoal
+    check "".parseGoal(Ishikawa) == Pon2Result[Goal].ok NoneGoal
+    check "".parseGoal(Ips) == Pon2Result[Goal].ok NoneGoal

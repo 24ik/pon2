@@ -121,7 +121,7 @@ when isMainModule:
       # JS - Main - Worker
       # ------------------------------------------------
 
-      proc task(args: seq[string]): StrErrorResult[seq[string]] =
+      proc task(args: seq[string]): Pon2Result[seq[string]] =
         let errorMsg = "Invalid run args: {args}".fmt
 
         if args.len == 0:

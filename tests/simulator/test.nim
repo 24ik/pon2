@@ -1186,18 +1186,18 @@ block: # toUri, parseSimulator
       uriIshikawa3 = "http://ishikawapuyo.net/simu/pn.html?__200".parseUri
       uriIps2 = "http://ishikawapuyo.net/simu/pn.html?___200".parseUri
 
-    check simulator.toUri(fqdn = Pon2) == StrErrorResult[Uri].ok uriPon2
-    check simulator.toUri(fqdn = Ishikawa) == StrErrorResult[Uri].ok uriIshikawa
-    check simulator.toUri(fqdn = Ips) == StrErrorResult[Uri].ok uriIps
+    check simulator.toUri(fqdn = Pon2) == Pon2Result[Uri].ok uriPon2
+    check simulator.toUri(fqdn = Ishikawa) == Pon2Result[Uri].ok uriIshikawa
+    check simulator.toUri(fqdn = Ips) == Pon2Result[Uri].ok uriIps
 
-    check uriPon2.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIshikawa.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIps.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriPon22.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriPon23.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIshikawa2.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIshikawa3.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIps2.parseSimulator == StrErrorResult[Simulator].ok simulator
+    check uriPon2.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIshikawa.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIps.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriPon22.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriPon23.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIshikawa2.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIshikawa3.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIps2.parseSimulator == Pon2Result[Simulator].ok simulator
 
   block: # Puyo Puyo
     let
@@ -1218,21 +1218,21 @@ block: # toUri, parseSimulator
       uriIshikawa5 = "https://ishikawapuyo.net/simu/ps.html".parseUri
       uriIshikawa6 = "https://ishikawapuyo.net/simu/pn.html".parseUri
 
-    check simulator.toUri(fqdn = Pon2) == StrErrorResult[Uri].ok uriPon2
-    check simulator.toUri(fqdn = Ishikawa) == StrErrorResult[Uri].ok uriIshikawa
-    check simulator.toUri(fqdn = Ips) == StrErrorResult[Uri].ok uriIps
+    check simulator.toUri(fqdn = Pon2) == Pon2Result[Uri].ok uriPon2
+    check simulator.toUri(fqdn = Ishikawa) == Pon2Result[Uri].ok uriIshikawa
+    check simulator.toUri(fqdn = Ips) == Pon2Result[Uri].ok uriIps
 
-    check uriPon2.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIshikawa.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIps.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriPon22.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriPon23.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriPon24.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIshikawa2.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIshikawa3.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIshikawa4.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIshikawa5.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIshikawa6.parseSimulator == StrErrorResult[Simulator].ok simulator
+    check uriPon2.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIshikawa.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIps.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriPon22.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriPon23.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriPon24.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIshikawa2.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIshikawa3.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIshikawa4.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIshikawa5.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIshikawa6.parseSimulator == Pon2Result[Simulator].ok simulator
 
   block: # clearPlacements
     let nazoPuyo =
@@ -1259,7 +1259,7 @@ pp|
 gy|23""".parseNazoPuyo.unsafeValue
 
     check Simulator.init(nazoPuyo).toUri(clearPlacements = true) ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_b..&steps=rbppgy&goal=0_0_6_0_".parseUri
+      Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_b..&steps=rbppgy&goal=0_0_6_0_".parseUri
 
 block: # toExportUri
   # EditorEdit
@@ -1272,11 +1272,11 @@ block: # toExportUri
     simulator.forward
 
     check simulator.toUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=3&field=0_g&steps&goal=_".parseUri
+      Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=3&field=0_g&steps&goal=_".parseUri
     check simulator.toExportUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_g......&steps&goal=_".parseUri
+      Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_g......&steps&goal=_".parseUri
     check simulator.toExportUri(viewer = false) ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=2&field=0_g......&steps&goal=_".parseUri
+      Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=2&field=0_g......&steps&goal=_".parseUri
 
   # ViewerEdit
   block:
@@ -1288,7 +1288,7 @@ block: # toExportUri
     simulator.forward
 
     check simulator.toExportUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps&goal=_".parseUri
+      Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps&goal=_".parseUri
 
   # ViewerPlay
   block:
@@ -1318,8 +1318,8 @@ rb|""".parseNazoPuyo.unsafeValue
     simulator.forward
 
     check simulator.toUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_rb..&steps=rb34&goal=0_0_1_0_".parseUri
+      Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_rb..&steps=rb34&goal=0_0_1_0_".parseUri
     check simulator.toExportUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps=rb&goal=0_0_1_0_".parseUri
+      Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps=rb&goal=0_0_1_0_".parseUri
     check simulator.toExportUri(clearPlacements = false) ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps=rb34&goal=0_0_1_0_".parseUri
+      Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps=rb34&goal=0_0_1_0_".parseUri
