@@ -12,7 +12,7 @@
 {.experimental: "views".}
 
 import std/[setutils]
-import ../[assign, macros, simd, staticfor]
+import ../[assign, simd, staticfor]
 import ../../core/[common, placement, rule]
 
 export common, placement

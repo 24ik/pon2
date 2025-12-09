@@ -1,4 +1,4 @@
-## This module implements cells.
+## This module implements static unrolled for-loop.
 ##
 
 {.push raises: [].}

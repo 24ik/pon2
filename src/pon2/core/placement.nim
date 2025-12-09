@@ -9,7 +9,7 @@
 import std/[strformat, sugar]
 import ./[common, fqdn]
 import ../[utils]
-import ../private/[macros, tables]
+import ../private/[staticcase, tables]
 
 export common, utils
 

@@ -7,7 +7,7 @@
 {.experimental: "views".}
 
 import std/[hashes, sugar]
-import ../../[assign, bitutils, macros, simd, staticfor]
+import ../../[assign, bitutils, macros, simd, staticcase, staticfor]
 import ../../../core/[common, rule]
 
 export hashes, simd
