@@ -69,12 +69,11 @@ when isMainModule:
     else:
       import std/[sugar]
       import karax/[karax, karaxdsl, kbase, vdom]
-      import ./pon2/private/[dom, gui]
+      import ./pon2/private/[dom, gui, strutils]
       when defined(pon2.build.marathon):
         import std/[asyncjs, jsfetch, random]
-        import ./pon2/private/[strutils]
       else:
-        import ./pon2/private/[assign, strutils]
+        import ./pon2/private/[assign]
 
     # ------------------------------------------------
     # JS - Utils

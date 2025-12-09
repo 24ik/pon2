@@ -9,7 +9,8 @@
 import std/[paths]
 
 when defined(js):
-  import std/[strformat, strutils]
+  import std/[strformat]
+  import ./[strutils]
 
 export paths except splitPath
 
