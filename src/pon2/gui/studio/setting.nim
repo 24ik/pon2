@@ -22,6 +22,10 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[dom]
 
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
+
   export vdom
 
   const
@@ -64,11 +68,11 @@ when defined(js) or defined(nimsuggest):
             text "　N手目を固定:"
             for stepIndex in 0 ..< self[].simulator.nazoPuyo.puyoPuyo.steps.len:
               label(class = "checkbox"):
-                text "　{stepIndex.succ}".fmt.cstring
+                text "　{stepIndex.succ}".fmt.kstring
                 input(
                   id =
                     FixIndicesIdPrefix & helper.studioOpt.unsafeValue.settingId &
-                    ($stepIndex).cstring,
+                    ($stepIndex).kstring,
                   `type` = "checkbox",
                 )
 
@@ -80,7 +84,7 @@ when defined(js) or defined(nimsuggest):
     while true:
       let checkbox = (
         FixIndicesIdPrefix & helper.studioOpt.unsafeValue.settingId &
-        ($stepIndex).cstring
+        ($stepIndex).kstring
       ).getElementById
       if checkbox.isNil:
         break
