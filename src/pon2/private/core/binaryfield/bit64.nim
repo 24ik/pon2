@@ -7,7 +7,7 @@
 {.experimental: "views".}
 
 import std/[sugar]
-import ../../[assign, bitutils, macros, staticcase, staticfor]
+import ../../[assign, bitutils, expand, staticcase, staticfor]
 import ../../../core/[common, rule]
 
 type Bit64BinaryField* = array[2, uint64]

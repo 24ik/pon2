@@ -11,7 +11,7 @@ import ./[cell, common, fqdn, moveresult, pair, placement, popresult, rule, step
 import ../[utils]
 import
   ../private/
-    [arrayutils, assign, bitutils, core, macros, math, staticfor, strutils, tables]
+    [arrayutils, assign, bitutils, core, expand, math, staticfor, strutils, tables]
 
 export cell, common, moveresult, placement, popresult, rule, utils
 
