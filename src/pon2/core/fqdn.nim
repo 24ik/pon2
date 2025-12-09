@@ -11,16 +11,15 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, sugar]
+import std/[strformat]
 import ../[utils]
-import ../private/[tables]
 
 export utils
 
 const Pon2Fqdn {.define: "pon2.fqdn".} = "24ik.github.io"
 
 type SimulatorFqdn* {.pure.} = enum
-  ## FQDN of the web simulator.
+  ## FQDN of web simulators.
   Pon2 = Pon2Fqdn
   Ishikawa = "ishikawapuyo.net"
   Ips = "ips.karou.jp"
@@ -29,10 +28,10 @@ type SimulatorFqdn* {.pure.} = enum
 # FQDN <-> string
 # ------------------------------------------------
 
-const StrToFqdn = collect:
-  for fqdn in SimulatorFqdn:
-    {$fqdn: fqdn}
-
 func parseSimulatorFqdn*(str: string): Pon2Result[SimulatorFqdn] {.inline, noinit.} =
   ## Returns the FQDN converted from the string representation.
-  StrToFqdn[str].context "Invalid FQDN: {str}".fmt
+  for fqdn in SimulatorFqdn:
+    if str == $fqdn:
+      return ok fqdn
+
+  err "Invalid FQDN: {str}".fmt
