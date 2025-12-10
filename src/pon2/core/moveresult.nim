@@ -32,6 +32,7 @@ func init*(
     hardToGarbageCount: int,
     detailPopCounts: seq[array[Cell, int]],
     detailHardToGarbageCount: seq[int],
+    fullPopCountsOpt: Opt[seq[array[Cell, seq[int]]]],
 ): T {.inline, noinit.} =
   T(
     chainCount: chainCount,
@@ -39,7 +40,24 @@ func init*(
     hardToGarbageCount: hardToGarbageCount,
     detailPopCounts: detailPopCounts,
     detailHardToGarbageCount: detailHardToGarbageCount,
-    fullPopCountsOpt: Opt[seq[array[Cell, seq[int]]]].err,
+    fullPopCountsOpt: fullPopCountsOpt,
+  )
+
+func init*(
+    T: type MoveResult,
+    chainCount: int,
+    popCounts: array[Cell, int],
+    hardToGarbageCount: int,
+    detailPopCounts: seq[array[Cell, int]],
+    detailHardToGarbageCount: seq[int],
+): T {.inline, noinit.} =
+  T.init(
+    chainCount,
+    popCounts,
+    hardToGarbageCount,
+    detailPopCounts,
+    detailHardToGarbageCount,
+    Opt[seq[array[Cell, seq[int]]]].err,
   )
 
 func init*(
@@ -51,20 +69,22 @@ func init*(
     detailHardToGarbageCount: seq[int],
     fullPopCounts: seq[array[Cell, seq[int]]],
 ): T {.inline, noinit.} =
-  T(
-    chainCount: chainCount,
-    popCounts: popCounts,
-    hardToGarbageCount: hardToGarbageCount,
-    detailPopCounts: detailPopCounts,
-    detailHardToGarbageCount: detailHardToGarbageCount,
-    fullPopCountsOpt: Opt[seq[array[Cell, seq[int]]]].ok fullPopCounts,
+  T.init(
+    chainCount,
+    popCounts,
+    hardToGarbageCount,
+    detailPopCounts,
+    detailHardToGarbageCount,
+    Opt[seq[array[Cell, seq[int]]]].ok fullPopCounts,
   )
 
 func init*(T: type MoveResult, includeFullPopCounts = true): T {.inline, noinit.} =
+  const ZeroArray = Cell.initArrayWith 0
+
   if includeFullPopCounts:
-    T.init(0, static(Cell.initArrayWith 0), 0, @[], @[], @[])
+    T.init(0, ZeroArray, 0, @[], @[], @[])
   else:
-    T.init(0, static(Cell.initArrayWith 0), 0, @[], @[])
+    T.init(0, ZeroArray, 0, @[], @[])
 
 # ------------------------------------------------
 # Count
@@ -111,11 +131,11 @@ func garbagesCounts*(self: MoveResult): seq[int] {.inline, noinit.} =
 # Color
 # ------------------------------------------------
 
-func colors(arr: array[Cell, int]): set[Cell] {.inline, noinit.} =
+func colors(counts: array[Cell, int]): set[Cell] {.inline, noinit.} =
   ## Returns the set of colors that popped.
-  var cells = set[Cell]({})
-  for cell in Red .. Purple:
-    if arr[cell] > 0:
+  var cells: set[Cell] = {}
+  staticFor(cell, ColorPuyos):
+    if counts[cell] > 0:
       cells.incl cell
 
   cells
@@ -214,22 +234,23 @@ func score*(self: MoveResult): Pon2Result[int] {.inline, noinit.} =
       totalPuyoCount = 0
       colorCount = 0
 
-    staticFor(cell, Red .. Purple):
-      connectionBonus.inc countsArray[cell].connectionBonus
+    staticFor(cell, ColorPuyos):
+      connectionBonus += countsArray[cell].connectionBonus
 
       let puyoCount = self.detailPopCounts[chainIndex][cell]
-      totalPuyoCount.inc puyoCount
+      totalPuyoCount += puyoCount
 
       if puyoCount > 0:
-        colorCount.inc
+        colorCount += 1
 
     let
       hardCount = self.detailPopCounts[chainIndex][Hard]
       hardToGarbageCount = self.detailHardToGarbageCount[chainIndex]
       colorBonus = ColorBonuses[colorCount]
 
-    totalScore.inc ((totalPuyoCount + hardToGarbageCount) * 10 + hardCount * 80) *
-      max(ChainBonuses[chainIndex.succ] + connectionBonus + colorBonus, 1)
+    totalScore +=
+      ((totalPuyoCount + hardToGarbageCount) * 10 + hardCount * 80) *
+      max(ChainBonuses[chainIndex + 1] + connectionBonus + colorBonus, 1)
 
   ok totalScore
 
