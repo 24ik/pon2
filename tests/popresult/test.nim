@@ -3,7 +3,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, unittest]
+import std/[unittest]
 import ../../src/pon2/core/[cell, common, popresult]
 import ../../src/pon2/private/[assign, strutils]
 import ../../src/pon2/private/core/[binaryfield]
@@ -12,12 +12,12 @@ proc toBinaryField(str: string): BinaryField =
   ## Returns the binary field converted from the string representation.
   let strs = str.split "\n"
 
-  var arr {.noinit.}: array[Row, array[Col, bool]]
+  var boolArray {.noinit.}: array[Row, array[Col, bool]]
   for row in Row:
     for col in Col:
-      arr[row][col].assign strs[row.ord][col.ord] == 'x'
+      boolArray[row][col].assign strs[row.ord][col.ord] == 'x'
 
-  return arr.toBinaryField
+  return boolArray.toBinaryField
 
 # ------------------------------------------------
 # Constructor
@@ -65,16 +65,16 @@ block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
 
   let
     zero = BinaryField.init
-    popRes = PopResult.init(
+    popResult = PopResult.init(
       red, zero, zero, yellow, zero, hard, hardToGarbage, garbage, red + yellow
     )
 
-  check popRes.cellCount(Red) == 2
-  check popRes.cellCount(Green) == 0
-  check popRes.puyoCount == 6
-  check popRes.colorPuyoCount == 3
-  check popRes.garbagesCount == 3
-  check popRes.hardToGarbageCount == 1
+  check popResult.cellCount(Red) == 2
+  check popResult.cellCount(Green) == 0
+  check popResult.puyoCount == 6
+  check popResult.colorPuyoCount == 3
+  check popResult.garbagesCount == 3
+  check popResult.hardToGarbageCount == 1
 
 # ------------------------------------------------
 # Connection
@@ -114,7 +114,7 @@ x.....
 ......""".toBinaryField
 
     zero = BinaryField.init
-    popRes = PopResult.init(red, green, zero, zero, zero, zero, zero, zero, zero)
+    popResult = PopResult.init(red, green, zero, zero, zero, zero, zero, zero, zero)
 
-  check popRes.connectionCounts ==
+  check popResult.connectionCounts ==
     [@[], @[], @[], @[3, 1, 2, 4, 2], @[21], @[], @[], @[]]
