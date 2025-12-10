@@ -141,7 +141,7 @@ func child(self: SolveNode, goal: Goal, step: Step): SolveNode {.inline, noinit.
     goal.mainOpt.unsafeValue.color in {All, GoalColor.Garbages}
   ):
     let stepGarbageHardCount, isHard, isGarbage: int
-    if step.kind == GarbageDrop:
+    if step.kind == NuisanceDrop:
       stepGarbageHardCount = step.garbagesCount
       isHard = step.hard.int
       isGarbage = (not step.hard).int
@@ -183,7 +183,7 @@ func children(
         self.field.validPlacements
 
     placements.mapIt (self.child(goal, Step.init(step.pair, it)), it)
-  of GarbageDrop, FieldRotate:
+  of NuisanceDrop, FieldRotate:
     @[(self.child(goal, step), Placement.None)]
 
 # ------------------------------------------------

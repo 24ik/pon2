@@ -27,7 +27,7 @@ block: # init
     let
       counts = [Col0: 1, 0, 1, 1, 0, 0]
       step = Step.init(counts, true)
-    check step.kind == GarbageDrop
+    check step.kind == NuisanceDrop
     check step.counts == counts
     check step.hard
 

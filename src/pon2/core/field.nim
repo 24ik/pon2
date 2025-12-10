@@ -482,7 +482,7 @@ func apply*(self: var Field, step: Step) {.inline, noinit.} =
   case step.kind
   of PairPlace:
     self.place step.pair, step.placement
-  of GarbageDrop:
+  of NuisanceDrop:
     self.dropGarbages step.counts, step.hard
   of FieldRotate:
     if step.cross: self.crossRotate else: self.rotate

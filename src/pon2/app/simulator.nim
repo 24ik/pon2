@@ -471,7 +471,7 @@ func writeCell(self: var Simulator, index: int, pivot: bool, cell: Cell) =
           case self.nazoPuyo.puyoPuyo.steps[index].kind
           of PairPlace, FieldRotate:
             self.nazoPuyo.puyoPuyo.steps[index].assign Step.init(ZeroArray, cellIsHard)
-          of GarbageDrop:
+          of NuisanceDrop:
             self.nazoPuyo.puyoPuyo.steps[index].hard.assign cellIsHard
         of Cell.Red .. Cell.Purple:
           case self.nazoPuyo.puyoPuyo.steps[index].kind
@@ -480,7 +480,7 @@ func writeCell(self: var Simulator, index: int, pivot: bool, cell: Cell) =
               self.nazoPuyo.puyoPuyo.steps[index].pair.pivot = cell
             else:
               self.nazoPuyo.puyoPuyo.steps[index].pair.rotor = cell
-          of GarbageDrop, FieldRotate:
+          of NuisanceDrop, FieldRotate:
             self.nazoPuyo.puyoPuyo.steps[index].assign Step.init Pair.init(cell, cell)
 
 func writeRotate(self: var Simulator, index: int, pivot: bool, cross: bool) =
@@ -499,7 +499,7 @@ func writeRotate(self: var Simulator, index: int, pivot: bool, cross: bool) =
         self.nazoPuyo.puyoPuyo.steps.insert Step.init(cross = cross), index
     else:
       case self.nazoPuyo.puyoPuyo.steps[index].kind
-      of PairPlace, GarbageDrop:
+      of PairPlace, NuisanceDrop:
         self.editBlock:
           self.nazoPuyo.puyoPuyo.steps[index].assign Step.init(cross = cross)
       of FieldRotate:
@@ -536,7 +536,7 @@ func writeCount*(self: var Simulator, index: int, col: Col, count: int) =
 
   if index >= self.nazoPuyo.puyoPuyo.steps.len:
     return
-  if self.nazoPuyo.puyoPuyo.steps[index].kind != GarbageDrop:
+  if self.nazoPuyo.puyoPuyo.steps[index].kind != NuisanceDrop:
     return
 
   self.editBlock:
@@ -617,7 +617,7 @@ func flip*(self: var Simulator) =
       case self.nazoPuyo.puyoPuyo.steps[self.editData.step.index].kind
       of PairPlace:
         self.nazoPuyo.puyoPuyo.steps[self.editData.step.index].pair.swap
-      of GarbageDrop:
+      of NuisanceDrop:
         self.nazoPuyo.puyoPuyo.steps[self.editData.step.index].counts.reverse
       of FieldRotate:
         discard

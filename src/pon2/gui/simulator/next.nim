@@ -31,7 +31,7 @@ when defined(js) or defined(nimsuggest):
         case step.kind
         of PairPlace:
           Opt[Cell].ok if pivot: step.pair.pivot else: step.pair.rotor
-        of GarbageDrop:
+        of NuisanceDrop:
           Opt[Cell].ok if step.hard: Hard else: Garbage
         of FieldRotate:
           cross = step.cross

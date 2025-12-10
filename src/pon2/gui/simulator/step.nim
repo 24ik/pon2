@@ -247,7 +247,7 @@ when defined(js) or defined(nimsuggest):
                   case step.kind
                   of PairPlace:
                     self.pairPlcmtNode(helper, step, stepIndex, editable)
-                  of GarbageDrop:
+                  of NuisanceDrop:
                     self.garbagesNode(helper, step, stepIndex, editable)
                   of FieldRotate:
                     self.rotateNode(helper, step, stepIndex, editable)

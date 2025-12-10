@@ -17,7 +17,7 @@ type
   StepKind* {.pure.} = enum
     ## Discriminator for `Step`.
     PairPlace
-    GarbageDrop
+    NuisanceDrop
     FieldRotate
 
   Step* = object ## Game step.
@@ -25,7 +25,7 @@ type
     of PairPlace:
       pair*: Pair
       placement*: Placement
-    of GarbageDrop:
+    of NuisanceDrop:
       counts*: array[Col, int]
       hard*: bool
     of FieldRotate:
@@ -40,8 +40,8 @@ type
 func init*(T: type Step, pair: Pair, placement = Placement.None): T {.inline, noinit.} =
   T(kind: PairPlace, pair: pair, placement: placement)
 
-func init*(T: type Step, counts: array[Col, int], hard: bool): T {.inline, noinit.} =
-  T(kind: GarbageDrop, counts: counts, hard: hard)
+func init*(T: type Step, counts: array[Col, int], hard = false): T {.inline, noinit.} =
+  T(kind: NuisanceDrop, counts: counts, hard: hard)
 
 func init*(T: type Step, cross: bool): T {.inline, noinit.} =
   T(kind: FieldRotate, cross: cross)
@@ -60,7 +60,7 @@ func `==`*(step1, step2: Step): bool {.inline, noinit.} =
   case step1.kind
   of PairPlace:
     step1.pair == step2.pair and step1.placement == step2.placement
-  of GarbageDrop:
+  of NuisanceDrop:
     step1.counts == step2.counts and step1.hard == step2.hard
   of FieldRotate:
     step2.kind == FieldRotate and step1.cross == step2.cross
@@ -74,7 +74,7 @@ func isValid*(self: Step, originalCompatible = false): bool {.inline, noinit.} =
   case self.kind
   of PairPlace, FieldRotate:
     true
-  of GarbageDrop:
+  of NuisanceDrop:
     if originalCompatible:
       let
         maxCount = self.counts.max
@@ -93,7 +93,7 @@ func cellCount*(self: Step, cell: Cell): int {.inline, noinit.} =
   case self.kind
   of PairPlace:
     self.pair.cellCount cell
-  of GarbageDrop:
+  of NuisanceDrop:
     if (cell == Hard and self.hard) or (cell == Garbage and not self.hard):
       self.counts.sum
     else:
@@ -105,38 +105,36 @@ func puyoCount*(self: Step): int {.inline, noinit.} =
   ## Returns the number of puyos in the step.
   case self.kind
   of PairPlace: 2
-  of GarbageDrop: self.counts.sum
+  of NuisanceDrop: self.counts.sum
   of FieldRotate: 0
 
 func colorPuyoCount*(self: Step): int {.inline, noinit.} =
   ## Returns the number of color puyos in the step.
   case self.kind
   of PairPlace: 2
-  of GarbageDrop: 0
-  of FieldRotate: 0
+  of NuisanceDrop, FieldRotate: 0
 
 func garbagesCount*(self: Step): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos in the step.
   case self.kind
-  of PairPlace: 0
-  of GarbageDrop: self.counts.sum
-  of FieldRotate: 0
+  of PairPlace, FieldRotate: 0
+  of NuisanceDrop: self.counts.sum
 
 func cellCount*(steps: Steps, cell: Cell): int {.inline, noinit.} =
   ## Returns the number of `cell` in the steps.
-  sum steps.mapIt it.cellCount cell
+  steps.mapIt(it.cellCount cell).sum
 
 func puyoCount*(steps: Steps): int {.inline, noinit.} =
   ## Returns the number of puyos in the steps.
-  sum steps.mapIt it.puyoCount
+  steps.mapIt(it.puyoCount).sum
 
 func colorPuyoCount*(steps: Steps): int {.inline, noinit.} =
   ## Returns the number of color puyos in the steps.
-  sum steps.mapIt it.colorPuyoCount
+  steps.mapIt(it.colorPuyoCount).sum
 
 func garbagesCount*(steps: Steps): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos in the steps.
-  sum steps.mapIt it.garbagesCount
+  steps.mapIt(it.garbagesCount).sum
 
 # ------------------------------------------------
 # Step <-> string
@@ -156,7 +154,7 @@ func `$`*(self: Step): string {.inline, noinit.} =
   case self.kind
   of PairPlace:
     "{self.pair}{PairPlaceSep}{self.placement}".fmt
-  of GarbageDrop:
+  of NuisanceDrop:
     let
       joined = self.counts.mapIt($it).join GarbagesSep
       prefix, suffix: char
@@ -227,7 +225,7 @@ func toUriQuery*(self: Step, fqdn = Pon2): Pon2Result[string] {.inline, noinit.}
   case self.kind
   of PairPlace:
     ok "{self.pair.toUriQuery fqdn}{self.placement.toUriQuery fqdn}".fmt
-  of GarbageDrop:
+  of NuisanceDrop:
     case fqdn
     of Pon2:
       let

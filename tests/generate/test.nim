@@ -103,11 +103,11 @@ proc checkGenerate(
       not nazoPuyo.puyoPuyo.steps[^1].pair.isDouble
 
   for stepIndex in dropGarbagesIndices:
-    check nazoPuyo.puyoPuyo.steps[stepIndex].kind == GarbageDrop and
+    check nazoPuyo.puyoPuyo.steps[stepIndex].kind == NuisanceDrop and
       not nazoPuyo.puyoPuyo.steps[stepIndex].hard
 
   for stepIndex in dropHardsIndices:
-    check nazoPuyo.puyoPuyo.steps[stepIndex].kind == GarbageDrop and
+    check nazoPuyo.puyoPuyo.steps[stepIndex].kind == NuisanceDrop and
       nazoPuyo.puyoPuyo.steps[stepIndex].hard
 
   for stepIndex in rotateIndices:

@@ -55,7 +55,7 @@ when defined(js) or defined(nimsuggest):
                 Opt[Cell].ok Cell.None
             else:
               Opt[Cell].ok Cell.None
-          of GarbageDrop:
+          of NuisanceDrop:
             if index == 2 and step.counts[col] > 0:
               Opt[Cell].ok (if step.hard: Hard else: Garbage)
             else:
