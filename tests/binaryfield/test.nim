@@ -6,7 +6,7 @@
 import std/[sequtils, sugar, unittest]
 import ../../src/pon2/private/[assign, strutils]
 import ../../src/pon2/private/core/[binaryfield]
-import ../../src/pon2/core/[common, placement, rule]
+import ../../src/pon2/core/[behaviour, common, placement]
 
 proc toBinaryField(str: string): BinaryField =
   ## Returns the binary field converted from the string representation.
@@ -674,7 +674,7 @@ x.....
 x.....
 x.....""".toBinaryField
 
-  field.insert Row3, Col1, true, Tsu
+  field.insert Row3, Col1, true, Phys.Tsu
   check field ==
     """
 .x....
@@ -691,7 +691,7 @@ xx....
 x.....
 x.....""".toBinaryField
 
-  field.insert Row4, Col1, false, Tsu
+  field.insert Row4, Col1, false, Phys.Tsu
   check field ==
     """
 .x....
@@ -708,7 +708,7 @@ x.....
 x.....
 x.....""".toBinaryField
 
-  field.del Row5, Col1, Tsu
+  field.del Row5, Col1, Phys.Tsu
   check field ==
     """
 ......
@@ -725,7 +725,7 @@ xx....
 x.....
 x.....""".toBinaryField
 
-  field.insert Row4, Col0, true, Water
+  field.insert Row4, Col0, true, Phys.Water
   check field ==
     """
 ......
@@ -742,7 +742,7 @@ x...x.
 x.....
 x.....""".toBinaryField
 
-  field.insert Row5, Col0, false, Water
+  field.insert Row5, Col0, false, Phys.Water
   check field ==
     """
 ......
@@ -759,7 +759,7 @@ x...x.
 ......
 x.....""".toBinaryField
 
-  field.del Row4, Col0, Water
+  field.del Row4, Col0, Phys.Water
   check field ==
     """
 ......
@@ -776,7 +776,7 @@ xx....
 ......
 x.....""".toBinaryField
 
-  field.del Row5, Col0, Water
+  field.del Row5, Col0, Phys.Water
   check field ==
     """
 ......

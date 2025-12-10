@@ -8,7 +8,7 @@
 
 import std/[sugar]
 import ../../[assign, bitutils, expand, staticcase, staticfor]
-import ../../../core/[common, rule]
+import ../../../core/[behaviour, common]
 
 type Bit64BinaryField* = array[2, uint64]
   ## Binary field with 64bit operations.

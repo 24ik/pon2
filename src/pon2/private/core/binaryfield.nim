@@ -13,7 +13,7 @@
 
 import std/[setutils]
 import ../[assign, simd, staticfor]
-import ../../core/[common, placement, rule]
+import ../../core/[behaviour, common, placement]
 
 export common, placement
 

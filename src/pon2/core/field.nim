@@ -7,7 +7,8 @@
 {.experimental: "views".}
 
 import std/[sequtils, strformat, sugar, typetraits]
-import ./[cell, common, fqdn, moveresult, pair, placement, popresult, rule, step]
+import
+  ./[behaviour, cell, common, fqdn, moveresult, pair, placement, popresult, rule, step]
 import ../[utils]
 import
   ../private/

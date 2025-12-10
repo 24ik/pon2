@@ -6,7 +6,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./[rule]
+import ./[behaviour, rule]
 import ../private/[assign, staticfor]
 
 type Notice* {.pure.} = enum

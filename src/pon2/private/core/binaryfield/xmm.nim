@@ -8,7 +8,7 @@
 
 import std/[hashes, sugar]
 import ../../[assign, bitutils, expand, simd, staticcase, staticfor]
-import ../../../core/[common, rule]
+import ../../../core/[behaviour, common]
 
 export hashes, simd
 
