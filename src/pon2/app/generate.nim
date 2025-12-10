@@ -268,7 +268,7 @@ func isValid(self: GenerateSettings): Pon2Result[void] =
     dropHardsIndexSet = self.dropHardsIndices.toHashSet
     rotateIndexSet = self.rotateIndices.toHashSet
     crossRotateIndexSet = self.crossRotateIndices.toHashSet
-    notPairPlacementIndexSet =
+    notPairPlaceIndexSet =
       dropGarbagesIndexSet + dropHardsIndexSet + rotateIndexSet + crossRotateIndexSet
 
   if dropGarbagesIndexSet.card > self.puyoCounts.garbage:
@@ -277,15 +277,15 @@ func isValid(self: GenerateSettings): Pon2Result[void] =
   if dropHardsIndexSet.card > self.puyoCounts.hard:
     return err "`dropHardsIndices` is too large"
 
-  if notPairPlacementIndexSet.anyIt it notin 0 ..< self.moveCount:
+  if notPairPlaceIndexSet.anyIt it notin 0 ..< self.moveCount:
     return err "`indices` are out of range"
 
-  if notPairPlacementIndexSet.card !=
+  if notPairPlaceIndexSet.card !=
       dropGarbagesIndexSet.card + dropHardsIndexSet.card + rotateIndexSet.card +
       crossRotateIndexSet.card:
     return err "all `indices` should be disjoint"
 
-  if notPairPlacementIndexSet.card >= self.moveCount:
+  if notPairPlaceIndexSet.card >= self.moveCount:
     return err "at least one pair-step is required"
 
   Pon2Result[void].ok
@@ -316,7 +316,7 @@ func generatePuyoPuyo(
     rotateIndexSet = settings.rotateIndices.toHashSet
     crossRotateIndexSet = settings.crossRotateIndices.toHashSet
 
-    pairPlacementStepCount =
+    pairPlaceStepCount =
       settings.moveCount - (
         dropGarbagesIndexSet + dropHardsIndexSet + rotateIndexSet + crossRotateIndexSet
       ).card
@@ -357,17 +357,17 @@ func generatePuyoPuyo(
     rng.shuffle cells
 
     # steps (pair-placement)
-    let pairPlacementSteps = collect:
-      for i in 1 .. pairPlacementStepCount:
+    let pairPlaceSteps = collect:
+      for i in 1 .. pairPlaceStepCount:
         Step.init Pair.init(cells[^(2 * i - 1)], cells[^(2 * i)])
 
     # check steps (pair-placement)
     if not settings.allowDoubleNotLast:
-      for i in 0 ..< pairPlacementSteps.len.pred:
-        if pairPlacementSteps[i].pair.isDouble:
+      for i in 0 ..< pairPlaceSteps.len.pred:
+        if pairPlaceSteps[i].pair.isDouble:
           continue
     if not settings.allowDoubleLast:
-      if pairPlacementSteps[^1].pair.isDouble:
+      if pairPlaceSteps[^1].pair.isDouble:
         continue
 
     # steps (garbages)
@@ -382,7 +382,7 @@ func generatePuyoPuyo(
             ).context "Steps generation failed"
           collect:
             for total in garbageCountsInSteps:
-              Step.init(rng.generateGarbagesCounts(total), dropHard = false)
+              Step.init(rng.generateGarbagesCounts(total), hard = false)
       hardsSteps =
         if dropHardsIndexSet.card == 0:
           newSeq[Step]()
@@ -391,13 +391,13 @@ func generatePuyoPuyo(
             ?rng.split(hardCountInSteps, dropHardsIndexSet.card, allowZeroChunk = false).context "Steps generation failed"
           collect:
             for total in hardCountsInSteps:
-              Step.init(rng.generateGarbagesCounts(total), dropHard = true)
+              Step.init(rng.generateGarbagesCounts(total), hard = true)
 
     # steps
     var
       garbagesStepsIndex = 0
       hardsStepsIndex = 0
-      pairPlacementStepsIndex = 0
+      pairPlaceStepsIndex = 0
     for stepIndex in 0 ..< settings.moveCount:
       if stepIndex in dropGarbagesIndexSet:
         steps.addLast garbagesSteps[garbagesStepsIndex]
@@ -410,11 +410,11 @@ func generatePuyoPuyo(
       elif stepIndex in crossRotateIndexSet:
         steps.addLast Step.init(cross = true)
       else:
-        steps.addLast pairPlacementSteps[pairPlacementStepsIndex]
-        pairPlacementStepsIndex.inc
+        steps.addLast pairPlaceSteps[pairPlaceStepsIndex]
+        pairPlaceStepsIndex.inc
 
     # fix cells
-    cells.setLen cells.len.pred pairPlacementStepCount * 2
+    cells.setLen cells.len.pred pairPlaceStepCount * 2
     cells &= Garbage.repeat garbageCountInField
     cells &= Hard.repeat hardCountInField
     rng.shuffle cells
@@ -520,7 +520,7 @@ proc generate*(rng: var Rand, settings: GenerateSettings): Pon2Result[NazoPuyo] 
     let answers = nazoPuyo.solve(calcAllAnswers = false)
     if answers.len == 1 and answers[0].len == settings.moveCount:
       for stepIndex, placement in answers[0]:
-        if nazoPuyo.puyoPuyo.steps[stepIndex].kind == PairPlacement:
+        if nazoPuyo.puyoPuyo.steps[stepIndex].kind == PairPlace:
           nazoPuyo.puyoPuyo.steps[stepIndex].placement.assign placement
 
       return ok nazoPuyo

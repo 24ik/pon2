@@ -457,19 +457,19 @@ func canPop*(self: Field): bool {.inline, noinit.} =
 # ------------------------------------------------
 
 func dropGarbages*(
-    self: var Field, counts: array[Col, int], dropHard: bool
+    self: var Field, counts: array[Col, int], hard: bool
 ) {.inline, noinit.} =
   ## Drops hard or garbage puyos.
   ## This function requires that the field is settled and the counts are non-negative.
   let
     existField = self.exist
-    notDropHardInt = (not dropHard).int
+    notDropHardInt = (not hard).int
 
   case Behaviours[self.rule].phys
   of Phys.Tsu:
     self.binaryFields[notDropHardInt].dropGarbagesTsu counts, existField
   of Phys.Water:
-    self.binaryFields[notDropHardInt].dropGarbagesWater self.binaryFields[dropHard.int],
+    self.binaryFields[notDropHardInt].dropGarbagesWater self.binaryFields[hard.int],
       self.binaryFields[2], counts, existField
 
 # ------------------------------------------------
@@ -480,11 +480,11 @@ func apply*(self: var Field, step: Step) {.inline, noinit.} =
   ## Applies the step.
   ## This function requires that the field is settled.
   case step.kind
-  of PairPlacement:
+  of PairPlace:
     self.place step.pair, step.placement
-  of Garbages:
-    self.dropGarbages step.counts, step.dropHard
-  of Rotate:
+  of GarbageDrop:
+    self.dropGarbages step.counts, step.hard
+  of FieldRotate:
     if step.cross: self.crossRotate else: self.rotate
 
 # ------------------------------------------------
@@ -586,13 +586,13 @@ func move*(
     self.place pair, placement
 
 func move*(
-    self: var Field, counts: array[Col, int], dropHard: bool, calcConnection = true
+    self: var Field, counts: array[Col, int], hard: bool, calcConnection = true
 ): MoveResult {.inline, noinit.} =
   ## Drops hard or garbage puyos, advances the field until chains end, and returns a
   ## moving result.
   ## This function requires that the field is settled and the counts are non-negative.
   self.moveImpl(calcConnection, settleAfterApply = false):
-    self.dropGarbages counts, dropHard
+    self.dropGarbages counts, hard
 
 func move*(
     self: var Field, cross: bool, calcConnection = true
@@ -607,7 +607,7 @@ func move*(
 ): MoveResult {.inline, noinit.} =
   ## Applies the step, advances the field until chains end, and returns a moving result.
   ## This function requires that the field is settled.
-  self.moveImpl(calcConnection, settleAfterApply = step.kind == Rotate):
+  self.moveImpl(calcConnection, settleAfterApply = step.kind == FieldRotate):
     self.apply step
 
 # ------------------------------------------------

@@ -29,7 +29,7 @@ when not defined(js):
 
 type SolveAnswer* = seq[Placement]
   ## Nazo Puyo answer.
-  ## Elements corresponding to non-`PairPlacement` steps are set to `NonePlacement`.
+  ## Elements corresponding to non-`PairPlace` steps are set to `NonePlacement`.
 
 when not defined(js):
   # NOTE: `ChildTargetDepth == 4` is good; see https://github.com/24ik/pon2/issues/260

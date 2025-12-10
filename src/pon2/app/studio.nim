@@ -200,7 +200,7 @@ proc setAnswers(
     for answer in answers:
       var steps = originalNazoPuyo.puyoPuyo.steps
       for stepIndex, placement in answer:
-        if originalNazoPuyo.puyoPuyo.steps[stepIndex].kind == PairPlacement:
+        if originalNazoPuyo.puyoPuyo.steps[stepIndex].kind == PairPlace:
           steps[stepIndex].placement.assign placement
 
       steps

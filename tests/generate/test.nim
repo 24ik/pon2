@@ -95,27 +95,27 @@ proc checkGenerate(
 
   if not allowDoubleNotLast:
     check (0 ..< moveCount.pred).toSeq.all (index) =>
-      nazoPuyo.puyoPuyo.steps[index].kind != PairPlacement or
+      nazoPuyo.puyoPuyo.steps[index].kind != PairPlace or
       not nazoPuyo.puyoPuyo.steps[index].pair.isDouble
 
   if not allowDoubleLast:
-    check nazoPuyo.puyoPuyo.steps[^1].kind != PairPlacement or
+    check nazoPuyo.puyoPuyo.steps[^1].kind != PairPlace or
       not nazoPuyo.puyoPuyo.steps[^1].pair.isDouble
 
   for stepIndex in dropGarbagesIndices:
-    check nazoPuyo.puyoPuyo.steps[stepIndex].kind == StepKind.Garbages and
-      not nazoPuyo.puyoPuyo.steps[stepIndex].dropHard
+    check nazoPuyo.puyoPuyo.steps[stepIndex].kind == GarbageDrop and
+      not nazoPuyo.puyoPuyo.steps[stepIndex].hard
 
   for stepIndex in dropHardsIndices:
-    check nazoPuyo.puyoPuyo.steps[stepIndex].kind == StepKind.Garbages and
-      nazoPuyo.puyoPuyo.steps[stepIndex].dropHard
+    check nazoPuyo.puyoPuyo.steps[stepIndex].kind == GarbageDrop and
+      nazoPuyo.puyoPuyo.steps[stepIndex].hard
 
   for stepIndex in rotateIndices:
-    check nazoPuyo.puyoPuyo.steps[stepIndex].kind == StepKind.Rotate and
+    check nazoPuyo.puyoPuyo.steps[stepIndex].kind == FieldRotate and
       not nazoPuyo.puyoPuyo.steps[stepIndex].cross
 
   for stepIndex in crossRotateIndices:
-    check nazoPuyo.puyoPuyo.steps[stepIndex].kind == StepKind.Rotate and
+    check nazoPuyo.puyoPuyo.steps[stepIndex].kind == FieldRotate and
       nazoPuyo.puyoPuyo.steps[stepIndex].cross
 
   let answer = nazoPuyo.solve
@@ -123,7 +123,7 @@ proc checkGenerate(
   check answer[0].len == moveCount
   for stepIndex, step in nazoPuyo.puyoPuyo.steps:
     case step.kind
-    of PairPlacement:
+    of PairPlace:
       check answer[0][stepIndex] == step.placement
     else:
       check answer[0][stepIndex] == Placement.None

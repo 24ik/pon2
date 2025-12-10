@@ -127,7 +127,7 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper, step: Step, stepIndex: int, editable: bool
   ): VNode =
     ## Returns the garbages node.
-    let imgSrc = if step.dropHard: Hard.cellImgSrc else: Garbage.cellImgSrc
+    let imgSrc = if step.hard: Hard.cellImgSrc else: Garbage.cellImgSrc
 
     buildHtml tdiv(class = "columns is-mobile is-1 is-vcentered"):
       # garbage/hard
@@ -245,11 +245,11 @@ when defined(js) or defined(nimsuggest):
                 # step
                 tdiv(class = "column is-narrow"):
                   case step.kind
-                  of PairPlacement:
+                  of PairPlace:
                     self.pairPlcmtNode(helper, step, stepIndex, editable)
-                  of StepKind.Garbages:
+                  of GarbageDrop:
                     self.garbagesNode(helper, step, stepIndex, editable)
-                  of Rotate:
+                  of FieldRotate:
                     self.rotateNode(helper, step, stepIndex, editable)
 
         # placeholder after the last step

@@ -122,7 +122,7 @@ func child(self: SolveNode, goal: Goal, step: Step): SolveNode {.inline, noinit.
 
   # step
   var childStepsCounts = self.stepsCounts
-  if step.kind == PairPlacement:
+  if step.kind == PairPlace:
     let
       pivotCell = step.pair.pivot
       rotorCell = step.pair.rotor
@@ -141,10 +141,10 @@ func child(self: SolveNode, goal: Goal, step: Step): SolveNode {.inline, noinit.
     goal.mainOpt.unsafeValue.color in {All, GoalColor.Garbages}
   ):
     let stepGarbageHardCount, isHard, isGarbage: int
-    if step.kind == StepKind.Garbages:
+    if step.kind == GarbageDrop:
       stepGarbageHardCount = step.garbagesCount
-      isHard = step.dropHard.int
-      isGarbage = (not step.dropHard).int
+      isHard = step.hard.int
+      isGarbage = (not step.hard).int
 
       childStepsCounts[Garbage.pred isHard].dec stepGarbageHardCount
     else:
@@ -158,7 +158,7 @@ func child(self: SolveNode, goal: Goal, step: Step): SolveNode {.inline, noinit.
       moveResult.hardToGarbageCount - stepGarbageHardCount * isGarbage
 
   # rotate
-  if step.kind == Rotate:
+  if step.kind == FieldRotate:
     staticFor(col, Col):
       let cell = self.field[Row0, col]
       childFieldCounts[cell].dec (cell != None).int
@@ -173,9 +173,9 @@ func children(
 ): seq[tuple[node: SolveNode, placement: Placement]] {.inline, noinit.} =
   ## Returns the children of the node.
   ## This function requires that the field is settled.
-  ## `placement` is set to `NonePlacement` if the edge is non-`PairPlacement`.
+  ## `placement` is set to `NonePlacement` if the edge is non-`PairPlace`.
   case step.kind
-  of PairPlacement:
+  of PairPlace:
     let placements =
       if step.pair.isDouble:
         self.field.validDoublePlacements
@@ -183,7 +183,7 @@ func children(
         self.field.validPlacements
 
     placements.mapIt (self.child(goal, Step.init(step.pair, it)), it)
-  of StepKind.Garbages, Rotate:
+  of GarbageDrop, FieldRotate:
     @[(self.child(goal, step), Placement.None)]
 
 # ------------------------------------------------

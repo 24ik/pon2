@@ -295,7 +295,7 @@ when isMainModule:
           for answer in answers:
             var steps = simulator.nazoPuyo.puyoPuyo.steps
             for stepIndex, placement in answer:
-              if simulator.nazoPuyo.puyoPuyo.steps[stepIndex].kind == PairPlacement:
+              if simulator.nazoPuyo.puyoPuyo.steps[stepIndex].kind == PairPlace:
                 steps[stepIndex].placement.assign placement
 
             steps

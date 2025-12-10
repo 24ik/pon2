@@ -13,13 +13,13 @@ import ../../src/pon2/core/[cell, common, fqdn, pair, placement, step]
 block: # init
   block:
     let step = Step.init RedGreen
-    check step.kind == PairPlacement
+    check step.kind == PairPlace
     check step.pair == RedGreen
     check step.placement == Placement.None
 
   block:
     let step = Step.init(PurplePurple, Down3)
-    check step.kind == PairPlacement
+    check step.kind == PairPlace
     check step.pair == PurplePurple
     check step.placement == Down3
 
@@ -27,15 +27,15 @@ block: # init
     let
       counts = [Col0: 1, 0, 1, 1, 0, 0]
       step = Step.init(counts, true)
-    check step.kind == Garbages
+    check step.kind == GarbageDrop
     check step.counts == counts
-    check step.dropHard
+    check step.hard
 
   block:
     let
       cross = false
       step = Step.init(cross)
-    check step.kind == Rotate
+    check step.kind == FieldRotate
     check step.cross == cross
 
   check Step.init == Step.init Pair.init

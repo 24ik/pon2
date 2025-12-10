@@ -87,16 +87,19 @@ when defined(js) or defined(nimsuggest):
               (italicClass, disabled) =
                 case rule
                 of Rule.Tsu:
-                  ("fa-solid fa-2".kstring, steps.anyIt it.kind == Rotate)
+                  ("fa-solid fa-2".kstring, steps.anyIt it.kind == FieldRotate)
                 of Spinner:
                   (
                     "fa-solid fa-arrows-rotate".kstring,
-                    steps.anyIt (it.kind == Rotate and it.cross),
+                    steps.anyIt (it.kind == FieldRotate and it.cross),
                   )
                 of CrossSpinner:
-                  ("DUMMY".kstring, steps.anyIt (it.kind == Rotate and not it.cross))
+                  (
+                    "DUMMY".kstring,
+                    steps.anyIt (it.kind == FieldRotate and not it.cross),
+                  )
                 of Rule.Water:
-                  ("fa-solid fa-droplet".kstring, steps.anyIt it.kind == Rotate)
+                  ("fa-solid fa-droplet".kstring, steps.anyIt it.kind == FieldRotate)
 
             tdiv(class = "control"):
               button(

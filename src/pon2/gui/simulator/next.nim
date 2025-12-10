@@ -29,11 +29,11 @@ when defined(js) or defined(nimsuggest):
       if stepIndex < self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps.len:
         let step = self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps[stepIndex]
         case step.kind
-        of PairPlacement:
+        of PairPlace:
           Opt[Cell].ok if pivot: step.pair.pivot else: step.pair.rotor
-        of StepKind.Garbages:
-          Opt[Cell].ok if step.dropHard: Hard else: Garbage
-        of Rotate:
+        of GarbageDrop:
+          Opt[Cell].ok if step.hard: Hard else: Garbage
+        of FieldRotate:
           cross = step.cross
 
           if pivot:

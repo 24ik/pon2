@@ -344,7 +344,7 @@ R""".parseNazoPuyo.unsafeValue
 
   simulator.editCell = Hard
   simulator.writeCell 1, true
-  steps[1].dropHard.assign true
+  steps[1].hard.assign true
   check simulator.nazoPuyo.puyoPuyo.steps == steps
 
   simulator.writeCell 2, true

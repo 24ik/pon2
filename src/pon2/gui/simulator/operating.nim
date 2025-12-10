@@ -36,7 +36,7 @@ when defined(js) or defined(nimsuggest):
             self.derefSimulator(helper).operatingIndex
           ]
           case step.kind
-          of PairPlacement:
+          of PairPlace:
             # pivot
             if index == 1 and
                 col == self.derefSimulator(helper).operatingPlacement.pivotCol:
@@ -55,12 +55,12 @@ when defined(js) or defined(nimsuggest):
                 Opt[Cell].ok Cell.None
             else:
               Opt[Cell].ok Cell.None
-          of StepKind.Garbages:
+          of GarbageDrop:
             if index == 2 and step.counts[col] > 0:
-              Opt[Cell].ok (if step.dropHard: Hard else: Garbage)
+              Opt[Cell].ok (if step.hard: Hard else: Garbage)
             else:
               Opt[Cell].ok Cell.None
-          of Rotate:
+          of FieldRotate:
             cross = step.cross
 
             if index == 2 and col == Col2:

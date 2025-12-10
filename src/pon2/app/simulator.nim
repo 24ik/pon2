@@ -258,13 +258,13 @@ func `rule=`*(self: var Simulator, rule: Rule) =
 
   case rule
   of Tsu, Water:
-    if self.nazoPuyo.puyoPuyo.steps.anyIt it.kind == Rotate:
+    if self.nazoPuyo.puyoPuyo.steps.anyIt it.kind == FieldRotate:
       return
   of Spinner:
-    if self.nazoPuyo.puyoPuyo.steps.anyIt(it.kind == Rotate and it.cross):
+    if self.nazoPuyo.puyoPuyo.steps.anyIt(it.kind == FieldRotate and it.cross):
       return
   of CrossSpinner:
-    if self.nazoPuyo.puyoPuyo.steps.anyIt(it.kind == Rotate and not it.cross):
+    if self.nazoPuyo.puyoPuyo.steps.anyIt(it.kind == FieldRotate and not it.cross):
       return
 
   self.editBlock:
@@ -360,7 +360,7 @@ func moveCursorRight*(self: var Simulator) =
       return
 
     if self.editData.step.index >= self.nazoPuyo.puyoPuyo.steps.len or
-        self.nazoPuyo.puyoPuyo.steps[self.editData.step.index].kind == PairPlacement:
+        self.nazoPuyo.puyoPuyo.steps[self.editData.step.index].kind == PairPlace:
       self.editData.step.pivot.toggle
     else:
       self.editData.step.col.rotateInc
@@ -377,7 +377,7 @@ func moveCursorLeft*(self: var Simulator) =
       return
 
     if self.editData.step.index >= self.nazoPuyo.puyoPuyo.steps.len or
-        self.nazoPuyo.puyoPuyo.steps[self.editData.step.index].kind == PairPlacement:
+        self.nazoPuyo.puyoPuyo.steps[self.editData.step.index].kind == PairPlace:
       self.editData.step.pivot.toggle
     else:
       self.editData.step.col.rotateDec
@@ -469,18 +469,18 @@ func writeCell(self: var Simulator, index: int, pivot: bool, cell: Cell) =
         of Hard, Garbage:
           let cellIsHard = cell == Hard
           case self.nazoPuyo.puyoPuyo.steps[index].kind
-          of PairPlacement, Rotate:
+          of PairPlace, FieldRotate:
             self.nazoPuyo.puyoPuyo.steps[index].assign Step.init(ZeroArray, cellIsHard)
-          of StepKind.Garbages:
-            self.nazoPuyo.puyoPuyo.steps[index].dropHard.assign cellIsHard
+          of GarbageDrop:
+            self.nazoPuyo.puyoPuyo.steps[index].hard.assign cellIsHard
         of Cell.Red .. Cell.Purple:
           case self.nazoPuyo.puyoPuyo.steps[index].kind
-          of PairPlacement:
+          of PairPlace:
             if pivot:
               self.nazoPuyo.puyoPuyo.steps[index].pair.pivot = cell
             else:
               self.nazoPuyo.puyoPuyo.steps[index].pair.rotor = cell
-          of StepKind.Garbages, Rotate:
+          of GarbageDrop, FieldRotate:
             self.nazoPuyo.puyoPuyo.steps[index].assign Step.init Pair.init(cell, cell)
 
 func writeRotate(self: var Simulator, index: int, pivot: bool, cross: bool) =
@@ -499,10 +499,10 @@ func writeRotate(self: var Simulator, index: int, pivot: bool, cross: bool) =
         self.nazoPuyo.puyoPuyo.steps.insert Step.init(cross = cross), index
     else:
       case self.nazoPuyo.puyoPuyo.steps[index].kind
-      of PairPlacement, StepKind.Garbages:
+      of PairPlace, GarbageDrop:
         self.editBlock:
           self.nazoPuyo.puyoPuyo.steps[index].assign Step.init(cross = cross)
-      of Rotate:
+      of FieldRotate:
         if self.nazoPuyo.puyoPuyo.steps[index].cross != cross:
           self.editBlock:
             self.nazoPuyo.puyoPuyo.steps[index].cross.toggle
@@ -536,7 +536,7 @@ func writeCount*(self: var Simulator, index: int, col: Col, count: int) =
 
   if index >= self.nazoPuyo.puyoPuyo.steps.len:
     return
-  if self.nazoPuyo.puyoPuyo.steps[index].kind != StepKind.Garbages:
+  if self.nazoPuyo.puyoPuyo.steps[index].kind != GarbageDrop:
     return
 
   self.editBlock:
@@ -615,11 +615,11 @@ func flip*(self: var Simulator) =
 
     self.editBlock:
       case self.nazoPuyo.puyoPuyo.steps[self.editData.step.index].kind
-      of PairPlacement:
+      of PairPlace:
         self.nazoPuyo.puyoPuyo.steps[self.editData.step.index].pair.swap
-      of StepKind.Garbages:
+      of GarbageDrop:
         self.nazoPuyo.puyoPuyo.steps[self.editData.step.index].counts.reverse
-      of Rotate:
+      of FieldRotate:
         discard
 
 # ------------------------------------------------
@@ -752,7 +752,7 @@ func forwardApply(self: var Simulator, replay = false, skip = false) =
 
   # set placement
   if self.mode in PlayModes:
-    if self.nazoPuyo.puyoPuyo.steps[self.operatingIndex].kind != PairPlacement:
+    if self.nazoPuyo.puyoPuyo.steps[self.operatingIndex].kind != PairPlace:
       discard
     elif skip:
       self.nazoPuyo.puyoPuyo.steps[self.operatingIndex].placement.assign Placement.None
@@ -765,7 +765,7 @@ func forwardApply(self: var Simulator, replay = false, skip = false) =
   self.nazoPuyo.puyoPuyo.field.apply step
 
   # set state
-  if step.kind == Rotate:
+  if step.kind == FieldRotate:
     if self.nazoPuyo.puyoPuyo.field.isSettled:
       self.state.assign Stable
 
@@ -1076,7 +1076,7 @@ func toUri*(self: Simulator, clearPlacements = false, fqdn = Pon2): Pon2Result[U
   var nazoPuyo = self.nazoPuyo
   if clearPlacements:
     for step in nazoPuyo.puyoPuyo.steps.mitems:
-      if step.kind == PairPlacement:
+      if step.kind == PairPlace:
         step.placement.assign Placement.None
   let nazoPuyoQuery =
     ?nazoPuyo.toUriQuery(fqdn).context "Simulator that does not support URI conversion"

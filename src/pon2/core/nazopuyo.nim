@@ -76,7 +76,7 @@ func mark*(self: NazoPuyo, endStepIndex = -1): MarkResult {.inline, noinit.} =
 
     # check skip, invalid
     case step.kind
-    of PairPlacement:
+    of PairPlace:
       case step.placement
       of Placement.None:
         skipped.assign true
@@ -85,7 +85,7 @@ func mark*(self: NazoPuyo, endStepIndex = -1): MarkResult {.inline, noinit.} =
           return SkipMove
         if step.placement in puyoPuyo.field.invalidPlacements:
           return InvalidMove
-    of StepKind.Garbages, Rotate:
+    of GarbageDrop, FieldRotate:
       discard
 
     let moveResult = puyoPuyo.move calcConnection

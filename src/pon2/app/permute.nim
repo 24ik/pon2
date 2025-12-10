@@ -30,14 +30,14 @@ func allStepsSeq(
 ): seq[Steps] =
   ## Returns all possible steps in ascending order that can be obtained by permuting
   ## puyos contained in the steps.
-  ## Non-`PairPlacement` steps are left as they are.
+  ## Non-`PairPlace` steps are left as they are.
   ## Note that Swapped pair may give a different answer but this function does not
   ## consider it.
   if stepIndex == steps.len:
     return @[Steps.init(steps.len)]
 
   let step = steps[stepIndex]
-  if step.kind != PairPlacement:
+  if step.kind != PairPlace:
     return steps.allStepsSeq(
       stepIndex.succ, fixIndices, allowDoubleNotLast, allowDoubleLast, cellCounts
     ).mapIt it.dup(addFirst(_, step))
@@ -90,7 +90,7 @@ func allStepsSeq(
 ): seq[Steps] =
   ## Returns all possible steps in ascending order that can be obtained by permuting
   ## puyos contained in the steps.
-  ## Non-`PairPlacement` steps are left as they are.
+  ## Non-`PairPlace` steps are left as they are.
   ## Note that Swapped pair may give a different answer but this function does not
   ## consider it.
   var cellCounts {.noinit.}: array[Cell, int]
@@ -120,7 +120,7 @@ proc permute*(
       let answers = nazoPuyo.solve(calcAllAnswers = false)
       if answers.len == 1:
         for stepIndex, step in nazoPuyo.puyoPuyo.steps.mpairs:
-          if step.kind == PairPlacement:
+          if step.kind == PairPlace:
             step.placement.assign answers[0][stepIndex]
 
         nazoPuyo
@@ -155,7 +155,7 @@ when defined(js) or defined(nimsuggest):
         let answers = await nazoPuyo.asyncSolve(calcAllAnswers = false)
         if answers.len == 1:
           for stepIndex, step in nazoPuyo.puyoPuyo.steps.mpairs:
-            if step.kind == PairPlacement:
+            if step.kind == PairPlace:
               step.placement.assign answers[0][stepIndex]
 
           nazoPuyos.add nazoPuyo
