@@ -189,7 +189,7 @@ func toUriQuery*(self: Placement, fqdn = Pon2): string {.inline, noinit.} =
   case fqdn
   of Pon2:
     $self
-  of Ishikawa, Ips:
+  of IshikawaPuyo, Ips:
     $PlacementToIshikawaUri[self.ord]
 
 func parsePlacement*(
@@ -199,7 +199,7 @@ func parsePlacement*(
   case fqdn
   of Pon2:
     query.parsePlacement
-  of Ishikawa, Ips:
+  of IshikawaPuyo, Ips:
     let errorMsg = "Invalid placement: {query}".fmt
 
     if query.len != 1:

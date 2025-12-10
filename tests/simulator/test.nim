@@ -1187,7 +1187,7 @@ block: # toUri, parseSimulator
       uriIps2 = "http://ishikawapuyo.net/simu/pn.html?___200".parseUri
 
     check simulator.toUri(fqdn = Pon2) == Pon2Result[Uri].ok uriPon2
-    check simulator.toUri(fqdn = Ishikawa) == Pon2Result[Uri].ok uriIshikawa
+    check simulator.toUri(fqdn = IshikawaPuyo) == Pon2Result[Uri].ok uriIshikawa
     check simulator.toUri(fqdn = Ips) == Pon2Result[Uri].ok uriIps
 
     check uriPon2.parseSimulator == Pon2Result[Simulator].ok simulator
@@ -1219,7 +1219,7 @@ block: # toUri, parseSimulator
       uriIshikawa6 = "https://ishikawapuyo.net/simu/pn.html".parseUri
 
     check simulator.toUri(fqdn = Pon2) == Pon2Result[Uri].ok uriPon2
-    check simulator.toUri(fqdn = Ishikawa) == Pon2Result[Uri].ok uriIshikawa
+    check simulator.toUri(fqdn = IshikawaPuyo) == Pon2Result[Uri].ok uriIshikawa
     check simulator.toUri(fqdn = Ips) == Pon2Result[Uri].ok uriIps
 
     check uriPon2.parseSimulator == Pon2Result[Simulator].ok simulator

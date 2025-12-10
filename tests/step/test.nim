@@ -118,11 +118,11 @@ block: # `$`, parseStep, toUriQuery
   check "bp|43".parseStep == Pon2Result[Step].ok step
 
   check step.toUriQuery(Pon2) == Pon2Result[string].ok "bp43"
-  check step.toUriQuery(Ishikawa) == Pon2Result[string].ok "QG"
+  check step.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok "QG"
   check step.toUriQuery(Ips) == Pon2Result[string].ok "QG"
 
   check "bp43".parseStep(Pon2) == Pon2Result[Step].ok step
-  check "QG".parseStep(Ishikawa) == Pon2Result[Step].ok step
+  check "QG".parseStep(IshikawaPuyo) == Pon2Result[Step].ok step
   check "QG".parseStep(Ips) == Pon2Result[Step].ok step
 
 block: # garbages
@@ -132,11 +132,11 @@ block: # garbages
     check "(2,3,3,2,2,3)".parseStep == Pon2Result[Step].ok step
 
     check step.toUriQuery(Pon2) == Pon2Result[string].ok "o2_3_3_2_2_3o"
-    check step.toUriQuery(Ishikawa) == Pon2Result[string].ok "yp"
+    check step.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok "yp"
     check step.toUriQuery(Ips) == Pon2Result[string].ok "yp"
 
     check "o2_3_3_2_2_3o".parseStep(Pon2) == Pon2Result[Step].ok step
-    check "yp".parseStep(Ishikawa) == Pon2Result[Step].ok step
+    check "yp".parseStep(IshikawaPuyo) == Pon2Result[Step].ok step
     check "yp".parseStep(Ips) == Pon2Result[Step].ok step
 
   block: # Hard
@@ -145,7 +145,7 @@ block: # garbages
     check "[0,0,0,-1,0,0]".parseStep == Pon2Result[Step].ok step
 
     check step.toUriQuery(Pon2) == Pon2Result[string].ok "h0_0_0_-1_0_0h"
-    check step.toUriQuery(Ishikawa).isErr
+    check step.toUriQuery(IshikawaPuyo).isErr
     check step.toUriQuery(Ips).isErr
 
   block: # rotate
@@ -154,7 +154,7 @@ block: # garbages
     check "R".parseStep == Pon2Result[Step].ok step
 
     check step.toUriQuery(Pon2) == Pon2Result[string].ok "R"
-    check step.toUriQuery(Ishikawa).isErr
+    check step.toUriQuery(IshikawaPuyo).isErr
     check step.toUriQuery(Ips).isErr
 
   block: # cross rotate
@@ -163,7 +163,7 @@ block: # garbages
     check "C".parseStep == Pon2Result[Step].ok step
 
     check step.toUriQuery(Pon2) == Pon2Result[string].ok "C"
-    check step.toUriQuery(Ishikawa).isErr
+    check step.toUriQuery(IshikawaPuyo).isErr
     check step.toUriQuery(Ips).isErr
 
 # ------------------------------------------------
@@ -184,11 +184,11 @@ block: # `$`, parseSteps, toUriQuery
 
     let query = "rgo1_0_0_0_0_1oyy3N"
     check steps.toUriQuery(Pon2) == Pon2Result[string].ok query
-    check steps.toUriQuery(Ishikawa) == Pon2Result[string].ok "c1axG4"
+    check steps.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok "c1axG4"
     check steps.toUriQuery(Ips) == Pon2Result[string].ok "c1axG4"
 
     check query.parseSteps(Pon2) == Pon2Result[Steps].ok steps
-    check "c1axG4".parseSteps(Ishikawa) == Pon2Result[Steps].ok steps
+    check "c1axG4".parseSteps(IshikawaPuyo) == Pon2Result[Steps].ok steps
     check "c1axG4".parseSteps(Ips) == Pon2Result[Steps].ok steps
 
   block: # Hard
@@ -201,7 +201,7 @@ block: # `$`, parseSteps, toUriQuery
 
     let query = "h0_0_2_0_1_3hpb"
     check steps.toUriQuery(Pon2) == Pon2Result[string].ok query
-    check steps.toUriQuery(Ishikawa).isErr
+    check steps.toUriQuery(IshikawaPuyo).isErr
     check steps.toUriQuery(Ips).isErr
 
     check query.parseSteps(Pon2) == Pon2Result[Steps].ok steps
@@ -215,7 +215,7 @@ block: # `$`, parseSteps, toUriQuery
 
     let query = "CR"
     check steps.toUriQuery(Pon2) == Pon2Result[string].ok query
-    check steps.toUriQuery(Ishikawa).isErr
+    check steps.toUriQuery(IshikawaPuyo).isErr
     check steps.toUriQuery(Ips).isErr
 
     check query.parseSteps(Pon2) == Pon2Result[Steps].ok steps

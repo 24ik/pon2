@@ -157,7 +157,7 @@ func toUriQuery*(self: Pair, fqdn = Pon2): string {.inline, noinit.} =
   case fqdn
   of Pon2:
     $self
-  of Ishikawa, Ips:
+  of IshikawaPuyo, Ips:
     $PairToIshikawaUri[self.ord]
 
 func parsePair*(
@@ -167,7 +167,7 @@ func parsePair*(
   case fqdn
   of Pon2:
     query.parsePair
-  of Ishikawa, Ips:
+  of IshikawaPuyo, Ips:
     let errorMsg = "Invalid pair: {query}".fmt
 
     if query.len != 1:

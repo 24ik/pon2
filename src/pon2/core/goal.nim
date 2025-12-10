@@ -352,13 +352,13 @@ func toUriQuery*(self: Goal, fqdn = Pon2): Pon2Result[string] {.inline, noinit.}
           ""
 
     ok "{mainQuery}{QuerySep}{clearQuery}".fmt
-  of Ishikawa, Ips:
+  of IshikawaPuyo, Ips:
     # check value
     if self.mainOpt.isOk:
       let main = self.mainOpt.unsafeValue
       const ValMax = ValToIshikawaUri.len.pred
       if main.val notin 0 .. ValMax:
-        return err "Ishikawa/Ips format only supports the value in [0, {ValMax}], but got {main.val}".fmt
+        return err "IshikawaPuyo/Ips format only supports the value in [0, {ValMax}], but got {main.val}".fmt
 
     if self.clearColorOpt.isOk:
       let
@@ -367,7 +367,7 @@ func toUriQuery*(self: Goal, fqdn = Pon2): Pon2Result[string] {.inline, noinit.}
           if self.mainOpt.isOk:
             let main = self.mainOpt.unsafeValue
             if main.kind != Chain:
-              return err "Ishikawa/Ips format only supports clearColor alone or with Chain, but got {main.kind}".fmt
+              return err "IshikawaPuyo/Ips format only supports clearColor alone or with Chain, but got {main.kind}".fmt
 
             (
               KindToIshikawaUri[Chain.ord].succ main.valOperator.ord + 2,
@@ -457,7 +457,7 @@ func parseGoal*(
       return err valOperatorErrorMsg
 
     ok Goal.init(kind, color, val, valOperator, clearColorOpt)
-  of Ishikawa, Ips:
+  of IshikawaPuyo, Ips:
     if query.len != 3:
       return err "Invalid goal: {query}".fmt
 

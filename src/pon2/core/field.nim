@@ -770,7 +770,7 @@ func toUriQueryPon2(self: Field): Pon2Result[string] {.inline, noinit.} =
 func toUriQueryIshikawa(self: Field): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query converted from the field.
   if self.rule != Rule.Tsu:
-    return err "non-Tsu field is not supported on Ishikawa/Ips format: {self}".fmt
+    return err "non-Tsu field is not supported on IshikawaPuyo/Ips format: {self}".fmt
 
   let cellArray = self.toArray
 
@@ -812,7 +812,7 @@ func toUriQuery*(self: Field, fqdn = Pon2): Pon2Result[string] {.inline, noinit.
   ## Returns the URI query converted from the field.
   case fqdn
   of Pon2: self.toUriQueryPon2
-  of Ishikawa, Ips: self.toUriQueryIshikawa
+  of IshikawaPuyo, Ips: self.toUriQueryIshikawa
 
 func parseFieldPon2(query: string): Pon2Result[Field] {.inline, noinit.} =
   ## Returns the field converted from the URI query.
@@ -927,4 +927,4 @@ func parseField*(
   ## Returns the field converted from the URI query.
   case fqdn
   of Pon2: query.parseFieldPon2
-  of Ishikawa, Ips: query.parseFieldIshikawa
+  of IshikawaPuyo, Ips: query.parseFieldIshikawa

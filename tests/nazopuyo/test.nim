@@ -468,11 +468,11 @@ rg|23"""
       queryIshikawa = "6E004g031_E1ahce__u02"
 
     check nazoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
-    check nazoPuyo.toUriQuery(Ishikawa) == Pon2Result[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok queryIshikawa
     check nazoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
     check queryPon2.parseNazoPuyo(Pon2) == Pon2Result[NazoPuyo].ok nazoPuyo
-    check queryIshikawa.parseNazoPuyo(Ishikawa) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(IshikawaPuyo) == Pon2Result[NazoPuyo].ok nazoPuyo
     check queryIshikawa.parseNazoPuyo(Ips) == Pon2Result[NazoPuyo].ok nazoPuyo
 
   block: # empty steps
@@ -503,11 +503,11 @@ g.....
       queryIshikawa = "g00___210"
 
     check nazoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
-    check nazoPuyo.toUriQuery(Ishikawa) == Pon2Result[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok queryIshikawa
     check nazoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
     check queryPon2.parseNazoPuyo(Pon2) == Pon2Result[NazoPuyo].ok nazoPuyo
-    check queryIshikawa.parseNazoPuyo(Ishikawa) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(IshikawaPuyo) == Pon2Result[NazoPuyo].ok nazoPuyo
     check queryIshikawa.parseNazoPuyo(Ips) == Pon2Result[NazoPuyo].ok nazoPuyo
 
   block: # empty field and steps
@@ -538,11 +538,11 @@ g.....
       queryIshikawa = "___E03"
 
     check nazoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
-    check nazoPuyo.toUriQuery(Ishikawa) == Pon2Result[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok queryIshikawa
     check nazoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
     check queryPon2.parseNazoPuyo(Pon2) == Pon2Result[NazoPuyo].ok nazoPuyo
-    check queryIshikawa.parseNazoPuyo(Ishikawa) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(IshikawaPuyo) == Pon2Result[NazoPuyo].ok nazoPuyo
     check queryIshikawa.parseNazoPuyo(Ips) == Pon2Result[NazoPuyo].ok nazoPuyo
 
   block: # empty query

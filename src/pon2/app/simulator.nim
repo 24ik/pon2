@@ -1063,7 +1063,7 @@ func toUri*(self: Simulator, clearPlacements = false, fqdn = Pon2): Pon2Result[U
     case fqdn
     of Pon2:
       Pon2Path
-    of Ishikawa, Ips:
+    of IshikawaPuyo, Ips:
       if self.nazoPuyo.goal != NoneGoal:
         "/simu/pn.html"
       else:
@@ -1090,13 +1090,13 @@ func toUri*(self: Simulator, clearPlacements = false, fqdn = Pon2): Pon2Result[U
 func parseSimulator*(uri: Uri): Pon2Result[Simulator] =
   ## Returns the simulator converted from the URI.
   ## Viewer modes and play modes are set to the result simulator preferentially
-  ## if the FQDN is `Ishikawa` or `Ips`.
+  ## if the FQDN is `IshikawaPuyo` or `Ips`.
   let fqdn: SimulatorFqdn
   case uri.hostname
   of $Pon2:
     fqdn = Pon2
-  of $Ishikawa:
-    fqdn = Ishikawa
+  of $IshikawaPuyo:
+    fqdn = IshikawaPuyo
   of $Ips:
     fqdn = Ips
   else:
@@ -1136,7 +1136,7 @@ func parseSimulator*(uri: Uri): Pon2Result[Simulator] =
       ?keyVals.encodeQuery.parseNazoPuyo(fqdn).context "Invalid simulator: {uri}".fmt,
       mode.unsafeValue,
     )
-  of Ishikawa, Ips:
+  of IshikawaPuyo, Ips:
     let mode: SimulatorMode
     case uri.path
     of "/simu/pe.html":

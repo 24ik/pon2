@@ -105,8 +105,8 @@ func toUriQueryIshikawa(self: PuyoPuyo): Pon2Result[string] {.inline, noinit.} =
   let
     errorMsg = "Puyo Puyo that does not support URI conversion: {self}".fmt
 
-    fieldQuery = ?self.field.toUriQuery(Ishikawa).context errorMsg
-    stepsQuery = ?self.steps.toUriQuery(Ishikawa).context errorMsg
+    fieldQuery = ?self.field.toUriQuery(IshikawaPuyo).context errorMsg
+    stepsQuery = ?self.steps.toUriQuery(IshikawaPuyo).context errorMsg
 
   ok (
     if stepsQuery == "": fieldQuery
@@ -117,7 +117,7 @@ func toUriQuery*(self: PuyoPuyo, fqdn = Pon2): Pon2Result[string] {.inline, noin
   ## Returns the URI query converted from the game.
   case fqdn
   of Pon2: self.toUriQueryPon2
-  of Ishikawa, Ips: self.toUriQueryIshikawa
+  of IshikawaPuyo, Ips: self.toUriQueryIshikawa
 
 func parsePuyoPuyoPon2(query: string): Pon2Result[PuyoPuyo] {.inline, noinit.} =
   ## Returns the game converted from the URI query.
@@ -160,11 +160,11 @@ func parsePuyoPuyoIshikawa(query: string): Pon2Result[PuyoPuyo] {.inline, noinit
   of 1:
     discard
   of 2:
-    steps.assign ?strs[1].parseSteps(Ishikawa).context "Invalid Puyo Puyo: {query}".fmt
+    steps.assign ?strs[1].parseSteps(IshikawaPuyo).context "Invalid Puyo Puyo: {query}".fmt
   else:
     return err "Invalid Puyo Puyo: {query}".fmt
 
-  let field = ?strs[0].parseField(Ishikawa).context "Invalid Puyo Puyo: {query}".fmt
+  let field = ?strs[0].parseField(IshikawaPuyo).context "Invalid Puyo Puyo: {query}".fmt
 
   ok PuyoPuyo.init(field, steps)
 
@@ -174,4 +174,4 @@ func parsePuyoPuyo*(
   ## Returns the game converted from the URI query.
   case fqdn
   of Pon2: query.parsePuyoPuyoPon2
-  of Ishikawa, Ips: query.parsePuyoPuyoIshikawa
+  of IshikawaPuyo, Ips: query.parsePuyoPuyoIshikawa

@@ -68,12 +68,12 @@ block: # Placement <-> URI
   check None.toUriQuery(Pon2) == ""
   check "".parsePlacement(Pon2) == Pon2Result[Placement].ok None
 
-  for fqdn in [Ishikawa, Ips]:
+  for fqdn in [IshikawaPuyo, Ips]:
     check Right2.toUriQuery(fqdn) == "g"
     check "g".parsePlacement(fqdn) == Pon2Result[Placement].ok Right2
     check None.toUriQuery(fqdn) == "1"
     check "1".parsePlacement(fqdn) == Pon2Result[Placement].ok None
 
   check "g".parsePlacement(Pon2).isErr
-  check "34".parsePlacement(Ishikawa).isErr
+  check "34".parsePlacement(IshikawaPuyo).isErr
   check "".parsePlacement(Ips).isErr

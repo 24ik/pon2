@@ -237,9 +237,9 @@ func toUriQuery*(self: Step, fqdn = Pon2): Pon2Result[string] {.inline, noinit.}
         wrapper = if self.dropHard: HardWrapUri else: GarbageWrapUri
         joined = self.counts.mapIt($it).join GarbagesSepUri
       ok "{wrapper}{joined}{wrapper}".fmt
-    of Ishikawa, Ips:
+    of IshikawaPuyo, Ips:
       if not self.isValid(originalCompatible = true) or self.dropHard:
-        return err "Not supported step with Ishikawa/Ips format: {self}".fmt
+        return err "Not supported step with IshikawaPuyo/Ips format: {self}".fmt
 
       let maxGarbageCount = self.counts.max
       if maxGarbageCount == 0:
@@ -254,8 +254,8 @@ func toUriQuery*(self: Step, fqdn = Pon2): Pon2Result[string] {.inline, noinit.}
     case fqdn
     of Pon2:
       ok (if self.cross: CrossRotateDesc else: RotateDesc)
-    of Ishikawa, Ips:
-      err "Not supported step with Ishikawa/Ips format: {self}".fmt
+    of IshikawaPuyo, Ips:
+      err "Not supported step with IshikawaPuyo/Ips format: {self}".fmt
 
 func parseStep*(
     query: string, fqdn: SimulatorFqdn
@@ -299,7 +299,7 @@ func parseStep*(
       )
     else:
       err "Invalid step: {query}".fmt
-  of Ishikawa, Ips:
+  of IshikawaPuyo, Ips:
     if query.len != 2:
       return err "Invalid step: {query}".fmt
 
@@ -400,7 +400,7 @@ func parseSteps*(
         index.inc 2
 
     ok steps
-  of Ishikawa, Ips:
+  of IshikawaPuyo, Ips:
     if query.len mod 2 != 0:
       return err "Invalid steps: {query}".fmt
 

@@ -81,16 +81,16 @@ block: # Pair <-> string
 
 block: # Pair <-> URI
   check RedGreen.toUriQuery(Pon2) == "rg"
-  for fqdn in [Ishikawa, Ips]:
+  for fqdn in [IshikawaPuyo, Ips]:
     check RedGreen.toUriQuery(fqdn) == "c"
 
   let pairRes = "rg".parsePair(Pon2)
   check pairRes == Pon2Result[Pair].ok RedGreen
 
-  for fqdn in [Ishikawa, Ips]:
+  for fqdn in [IshikawaPuyo, Ips]:
     let pairRes2 = "c".parsePair(fqdn)
     check pairRes2 == Pon2Result[Pair].ok RedGreen
 
   check "c".parsePair(Pon2).isErr
-  check "rg".parsePair(Ishikawa).isErr
+  check "rg".parsePair(IshikawaPuyo).isErr
   check "rg".parsePair(Ips).isErr

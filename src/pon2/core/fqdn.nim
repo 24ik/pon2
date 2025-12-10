@@ -21,7 +21,7 @@ const Pon2Fqdn {.define: "pon2.fqdn".} = "24ik.github.io"
 type SimulatorFqdn* {.pure.} = enum
   ## FQDN of web simulators.
   Pon2 = Pon2Fqdn
-  Ishikawa = "ishikawapuyo.net"
+  IshikawaPuyo = "ishikawapuyo.net"
   Ips = "ips.karou.jp"
 
 # ------------------------------------------------

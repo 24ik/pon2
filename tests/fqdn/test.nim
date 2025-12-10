@@ -12,7 +12,8 @@ import ../../src/pon2/core/[fqdn]
 
 block: # parseSimulatorFqdn
   check "24ik.github.io".parseSimulatorFqdn == Pon2Result[SimulatorFqdn].ok Pon2
-  check "ishikawapuyo.net".parseSimulatorFqdn == Pon2Result[SimulatorFqdn].ok Ishikawa
+  check "ishikawapuyo.net".parseSimulatorFqdn ==
+    Pon2Result[SimulatorFqdn].ok IshikawaPuyo
   check "ips.karou.jp".parseSimulatorFqdn == Pon2Result[SimulatorFqdn].ok Ips
 
   check "".parseSimulatorFqdn.isErr

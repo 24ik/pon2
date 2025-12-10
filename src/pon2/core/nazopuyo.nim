@@ -206,20 +206,20 @@ func toUriQueryIshikawa(self: NazoPuyo): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query converted from the Nazo Puyo.
   let
     errorMsg = "Nazo Puyo that does not support URI conversion: {self}".fmt
-    puyoPuyoQueryRaw = ?self.puyoPuyo.toUriQuery(Ishikawa).context errorMsg
+    puyoPuyoQueryRaw = ?self.puyoPuyo.toUriQuery(IshikawaPuyo).context errorMsg
     puyoPuyoQuery =
       if '_' in puyoPuyoQueryRaw:
         puyoPuyoQueryRaw
       else:
         puyoPuyoQueryRaw & '_'
   ok puyoPuyoQuery & IshikawaPuyoPuyoGoalSep &
-    ?self.goal.toUriQuery(Ishikawa).context errorMsg
+    ?self.goal.toUriQuery(IshikawaPuyo).context errorMsg
 
 func toUriQuery*(self: NazoPuyo, fqdn = Pon2): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query converted from the Nazo Puyo.
   case fqdn
   of Pon2: self.toUriQueryPon2
-  of Ishikawa, Ips: self.toUriQueryIshikawa
+  of IshikawaPuyo, Ips: self.toUriQueryIshikawa
 
 func parseNazoPuyoPon2(query: string): Pon2Result[NazoPuyo] {.inline, noinit.} =
   ## Returns the Nazo Puyo converted from the URI query.
@@ -255,11 +255,11 @@ func parseNazoPuyoIshikawa(query: string): Pon2Result[NazoPuyo] {.inline, noinit
     return err errorMsg
 
   ok NazoPuyo.init(
-    ?strs[0].parsePuyoPuyo(Ishikawa).context errorMsg,
+    ?strs[0].parsePuyoPuyo(IshikawaPuyo).context errorMsg,
     if strs.len == 1:
       NoneGoal
     else:
-      ?strs[1].parseGoal(Ishikawa).context errorMsg,
+      ?strs[1].parseGoal(IshikawaPuyo).context errorMsg,
   )
 
 func parseNazoPuyo*(
@@ -268,4 +268,4 @@ func parseNazoPuyo*(
   ## Returns the Nazo Puyo converted from the URI query.
   case fqdn
   of Pon2: query.parseNazoPuyoPon2
-  of Ishikawa, Ips: query.parseNazoPuyoIshikawa
+  of IshikawaPuyo, Ips: query.parseNazoPuyoIshikawa
