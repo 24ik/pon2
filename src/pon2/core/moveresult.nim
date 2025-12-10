@@ -78,10 +78,10 @@ func init*(
     Opt[seq[array[Cell, seq[int]]]].ok fullPopCounts,
   )
 
-func init*(T: type MoveResult, includeFullPopCounts = true): T {.inline, noinit.} =
+func init*(T: type MoveResult, inclFullPopCounts = true): T {.inline, noinit.} =
   const ZeroArray = Cell.initArrayWith 0
 
-  if includeFullPopCounts:
+  if inclFullPopCounts:
     T.init(0, ZeroArray, 0, @[], @[], @[])
   else:
     T.init(0, ZeroArray, 0, @[], @[])

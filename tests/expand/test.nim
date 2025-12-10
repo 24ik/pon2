@@ -16,18 +16,18 @@ block: # defineExpand
       barA = 2
 
     expandA foo, bar:
-      let res = foo + bar
+      let fooBar = foo + bar
 
-    check res == fooA + barA
+    check fooBar == fooA + barA
 
   block:
     let
       fooA = 10
       fooB = 20
 
-    var resA, resB: int
-    expandAB res, foo:
-      res = foo.succ + _
+    var fooBarA, fooBarB: int
+    expandAB fooBar, foo:
+      fooBar = foo.succ + _
 
-    check resA == fooA.succ + 0
-    check resB == fooB.succ + 1
+    check fooBarA == fooA.succ + 0
+    check fooBarB == fooB.succ + 1

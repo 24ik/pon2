@@ -36,29 +36,27 @@ let
 # ------------------------------------------------
 
 block: # init
-  check moveResult1 ==
-    MoveResult(
-      chainCount: chainCount,
-      popCounts: popCounts,
-      hardToGarbageCount: hardToGarbageCount,
-      detailPopCounts: detailPopCounts,
-      detailHardToGarbageCount: detailHardToGarbageCount,
-      fullPopCountsOpt: Opt[seq[array[Cell, seq[int]]]].err,
-    )
-  check moveResult2 ==
-    MoveResult(
-      chainCount: chainCount,
-      popCounts: popCounts,
-      hardToGarbageCount: hardToGarbageCount,
-      detailPopCounts: detailPopCounts,
-      detailHardToGarbageCount: detailHardToGarbageCount,
-      fullPopCountsOpt: Opt[seq[array[Cell, seq[int]]]].ok fullPopCounts,
-    )
+  check MoveResult.init(
+    chainCount,
+    popCounts,
+    hardToGarbageCount,
+    detailPopCounts,
+    detailHardToGarbageCount,
+    Opt[seq[array[Cell, seq[int]]]].ok fullPopCounts,
+  ) == moveResult2
+  check MoveResult.init(
+    chainCount,
+    popCounts,
+    hardToGarbageCount,
+    detailPopCounts,
+    detailHardToGarbageCount,
+    Opt[seq[array[Cell, seq[int]]]].err,
+  ) == moveResult1
 
-  check MoveResult.init(false) == MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
-  check MoveResult.init(true) ==
+  check MoveResult.init(inclFullPopCounts = false) ==
+    MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
+  check MoveResult.init(inclFullPopCounts = true) ==
     MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[], @[])
-  check MoveResult.init == MoveResult.init true
 
 # ------------------------------------------------
 # Count

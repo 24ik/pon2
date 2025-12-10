@@ -71,9 +71,7 @@ block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
 
 block: # Pair <-> string
   check $RedGreen == "rg"
-
-  let pairRes = "rg".parsePair
-  check pairRes == Pon2Result[Pair].ok RedGreen
+  check "rg".parsePair == Pon2Result[Pair].ok RedGreen
 
   check "RG".parsePair.isErr
   check "".parsePair.isErr
@@ -81,15 +79,11 @@ block: # Pair <-> string
 
 block: # Pair <-> URI
   check RedGreen.toUriQuery(Pon2) == "rg"
+  check "rg".parsePair(Pon2) == Pon2Result[Pair].ok RedGreen
+
   for fqdn in [IshikawaPuyo, Ips]:
     check RedGreen.toUriQuery(fqdn) == "c"
-
-  let pairRes = "rg".parsePair(Pon2)
-  check pairRes == Pon2Result[Pair].ok RedGreen
-
-  for fqdn in [IshikawaPuyo, Ips]:
-    let pairRes2 = "c".parsePair(fqdn)
-    check pairRes2 == Pon2Result[Pair].ok RedGreen
+    check "c".parsePair(fqdn) == Pon2Result[Pair].ok RedGreen
 
   check "c".parsePair(Pon2).isErr
   check "rg".parsePair(IshikawaPuyo).isErr
