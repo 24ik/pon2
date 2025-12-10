@@ -6,7 +6,6 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./[behaviour, rule]
 import ../private/[assign, staticfor]
 
 type Notice* {.pure.} = enum
@@ -26,13 +25,13 @@ type Notice* {.pure.} = enum
 const NoticeUnits: array[Notice, int] = [1, 6, 30, 180, 360, 720, 1440]
 
 func noticeCounts*(
-    score: int, rule: Rule, useComet = false
+    score, garbageRate: int, useComet = false
 ): array[Notice, int] {.inline, noinit.} =
   ## Returns the number of notice garbage puyos.
   var counts {.noinit.}: array[Notice, int]
 
   if score < 0:
-    let invCounts = (-score).noticeCounts(rule, useComet)
+    let invCounts = (-score).noticeCounts(garbageRate, useComet)
     staticFor(notice, Notice):
       counts[notice].assign -invCounts[notice]
 
@@ -45,7 +44,7 @@ func noticeCounts*(
     highestNotice = Crown
     counts[Comet].assign 0
 
-  var score2 = score div Behaviours[rule].garbageRate
+  var score2 = score div garbageRate
   for notice in countdown(highestNotice, Notice.low):
     let
       unit = NoticeUnits[notice]

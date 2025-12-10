@@ -7,7 +7,7 @@
 {.experimental: "views".}
 
 import std/[sequtils, strformat, sugar]
-import ./[cell, common, notice, rule]
+import ./[cell, common, notice]
 import ../[utils]
 import ../private/[arrayutils, math, staticfor]
 
@@ -238,9 +238,9 @@ func score*(self: MoveResult): Pon2Result[int] {.inline, noinit.} =
 # ------------------------------------------------
 
 func noticeCounts*(
-    self: MoveResult, rule: Rule, useComet = false
+    self: MoveResult, garbageRate: int, useComet = false
 ): Pon2Result[array[Notice, int]] {.inline, noinit.} =
   ## Returns the number of notice garbages.
   Pon2Result[array[Notice, int]].ok (
     ?self.score.context "`noticeCounts` not supported: {self}".fmt
-  ).noticeCounts(rule, useComet)
+  ).noticeCounts(garbageRate, useComet)

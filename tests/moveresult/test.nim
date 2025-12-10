@@ -4,7 +4,7 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2/core/[cell, moveresult, notice, rule]
+import ../../src/pon2/core/[cell, moveresult, notice]
 import ../../src/pon2/private/[arrayutils]
 
 let
@@ -162,7 +162,7 @@ block: # score
 # ------------------------------------------------
 
 block: # noticeCounts
-  for rule in Rule:
-    check moveResult1.noticeCounts(rule).isErr
-    check moveResult2.noticeCounts(rule) ==
-      Pon2Result[array[Notice, int]].ok scoreAnswer.noticeCounts rule
+  for garbageRate in [70, 90, 120]:
+    check moveResult1.noticeCounts(garbageRate).isErr
+    check moveResult2.noticeCounts(garbageRate) ==
+      Pon2Result[array[Notice, int]].ok scoreAnswer.noticeCounts garbageRate
