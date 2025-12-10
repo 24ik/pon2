@@ -9,6 +9,12 @@ block: # parseInt
   check "123".parseInt == Pon2Result[int].ok 123
   check "xyz".parseInt.isErr
 
+block: # parseOrdinal
+  check parseOrdinal[bool]("0") == Pon2Result[bool].ok false
+  check parseOrdinal[char]($'x'.ord) == Pon2Result[char].ok 'x'
+
+  check parseOrdinal[bool]("2").isErr
+
 block: # split2
   proc checkSplit2(str, sep: string, res: seq[string], maxsplit = -1) =
     check str.split2(sep, maxsplit) == res
