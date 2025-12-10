@@ -24,6 +24,7 @@ type Cell* {.pure.} = enum
 const
   Puyos* = {Hard .. Purple}
   ColorPuyos* = {Red .. Purple}
+  NuisancePuyos* = {Hard, Garbage}
 
 # ------------------------------------------------
 # Cell <-> string
