@@ -15,7 +15,7 @@ import std/[typetraits]
 
 type
   Row* {.pure.} = enum
-    ## Field's row. `Row.high` is the top and `Row.low` is the bottom.
+    ## Field's row. `Row.low` is the top and `Row.high` is the bottom.
     Row0
     Row1
     Row2
@@ -31,7 +31,7 @@ type
     Row12
 
   Col* {.pure.} = enum
-    ## Field's column. `Col.high` is the left and `Col.low` is the right.
+    ## Field's column. `Col.low` is the left and `Col.high` is the right.
     Col0
     Col1
     Col2
@@ -42,8 +42,12 @@ type
 const
   Height* = Row.enumLen
   Width* = Col.enumLen
+
   WaterHeight* {.define: "pon2.waterheight".} = 8
   AirHeight* = Height - WaterHeight
+
+  AirBottomRow* = Row.high.pred WaterHeight
+  WaterTopRow* = AirBottomRow.succ
 
 static:
   doAssert WaterHeight >= 2
