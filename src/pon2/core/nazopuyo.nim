@@ -103,7 +103,7 @@ func mark*(self: NazoPuyo, endStepIndex = -1): MarkResult {.inline, noinit.} =
           of All:
             moveResult.puyoCount
           of GoalColor.Garbages:
-            moveResult.garbagesCount
+            moveResult.nuisancePuyoCount
           of Colors:
             moveResult.colorPuyoCount
           else:
@@ -123,7 +123,7 @@ func mark*(self: NazoPuyo, endStepIndex = -1): MarkResult {.inline, noinit.} =
             of All:
               puyoPuyo.field.puyoCount
             of GoalColor.Garbages:
-              puyoPuyo.field.garbagesCount
+              puyoPuyo.field.nuisancePuyoCount
             of Colors:
               puyoPuyo.field.colorPuyoCount
             else:

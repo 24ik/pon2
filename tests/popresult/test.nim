@@ -48,7 +48,7 @@ block: # isPopped
 # Count
 # ------------------------------------------------
 
-block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
+block: # cellCount, puyoCount, colorPuyoCount, nuisancePuyoCount
   var
     red = BinaryField.init
     yellow = BinaryField.init
@@ -73,7 +73,7 @@ block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
   check popResult.cellCount(Green) == 0
   check popResult.puyoCount == 6
   check popResult.colorPuyoCount == 3
-  check popResult.garbagesCount == 3
+  check popResult.nuisancePuyoCount == 3
   check popResult.hardToGarbageCount == 1
 
 # ------------------------------------------------

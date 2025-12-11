@@ -103,7 +103,7 @@ func child(self: SolveNode, goal: Goal, step: Step): SolveNode {.inline, noinit.
         of Colors:
           moveResult.colorPuyoCount
         of GoalColor.Garbages:
-          moveResult.garbagesCount
+          moveResult.nuisancePuyoCount
         else:
           moveResult.cellCount GoalColorToCell[main.color]
       childPopColors = {}
@@ -142,7 +142,7 @@ func child(self: SolveNode, goal: Goal, step: Step): SolveNode {.inline, noinit.
   ):
     let stepGarbageHardCount, isHard, isGarbage: int
     if step.kind == NuisanceDrop:
-      stepGarbageHardCount = step.garbagesCount
+      stepGarbageHardCount = step.nuisancePuyoCount
       isHard = step.hard.int
       isGarbage = (not step.hard).int
 
@@ -194,7 +194,7 @@ func cellCount(self: SolveNode, cell: Cell): int {.inline, noinit.} =
   ## Returns the number of `cell` in the node.
   self.fieldCounts[cell] + self.stepsCounts[cell]
 
-func garbagesCount(self: SolveNode): int {.inline, noinit.} =
+func nuisancePuyoCount(self: SolveNode): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos in the node.
   (self.fieldCounts[Hard] + self.fieldCounts[Garbage]) +
     (self.stepsCounts[Hard] + self.stepsCounts[Garbage])
@@ -362,11 +362,11 @@ func canPrune(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
           )
           case main.color
           of All:
-            colorPossibleCount + (colorPossibleCount > 0).int * self.garbagesCount
+            colorPossibleCount + (colorPossibleCount > 0).int * self.nuisancePuyoCount
           of Colors:
             colorPossibleCount
           else: # Garbages
-            (colorPossibleCount > 0).int * self.garbagesCount
+            (colorPossibleCount > 0).int * self.nuisancePuyoCount
         else:
           self.cellCount(GoalColorToCell[main.color]).filter4
 

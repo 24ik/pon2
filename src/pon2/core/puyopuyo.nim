@@ -43,9 +43,9 @@ func colorPuyoCount*(self: PuyoPuyo): int {.inline, noinit.} =
   ## Returns the number of color puyos in the game.
   self.field.colorPuyoCount + self.steps.colorPuyoCount
 
-func garbagesCount*(self: PuyoPuyo): int {.inline, noinit.} =
-  ## Returns the number of hard and garbage puyos in the game.
-  self.field.garbagesCount + self.steps.garbagesCount
+func nuisancePuyoCount*(self: PuyoPuyo): int {.inline, noinit.} =
+  ## Returns the number of nuisance puyos in the game.
+  self.field.nuisancePuyoCount + self.steps.nuisancePuyoCount
 
 # ------------------------------------------------
 # Move

@@ -650,7 +650,7 @@ py....
 # Count
 # ------------------------------------------------
 
-block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
+block: # cellCount, puyoCount, colorPuyoCount, nuisancePuyoCount
   let
     fieldS =
       """
@@ -697,8 +697,8 @@ h..o..
   check fieldS.colorPuyoCount == 7
   check fieldW.colorPuyoCount == 7
 
-  check fieldS.garbagesCount == 6
-  check fieldW.garbagesCount == 6
+  check fieldS.nuisancePuyoCount == 6
+  check fieldW.nuisancePuyoCount == 6
 
 # ------------------------------------------------
 # Connect - 2
@@ -2026,7 +2026,7 @@ block: # move
       hardToGarbageCount = 0
       detailHardToGarbageCount = @[0, 0, 0]
 
-      garbagesCount = [Col0: 0, 1, 2, 0, 2, 1]
+      nuisancePuyoCount = [Col0: 0, 1, 2, 0, 2, 1]
 
       detailArray1: array[Cell, int] = [0, 0, 1, 0, 0, 5, 0, 0]
       detailArray2: array[Cell, int] = [0, 0, 0, 0, 10, 0, 0, 0]
@@ -2058,7 +2058,7 @@ block: # move
 
     block: # drop garbage
       var field2 = fieldBefore
-      check field2.move(garbagesCount, false, false) ==
+      check field2.move(nuisancePuyoCount, false, false) ==
         MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
       check field2 ==
         """
@@ -2079,7 +2079,7 @@ block: # move
 
     block: # drop hard
       var field2 = fieldBefore
-      check field2.move(Step.init(garbagesCount, true), false) ==
+      check field2.move(Step.init(nuisancePuyoCount, true), false) ==
         MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
       check field2 ==
         """

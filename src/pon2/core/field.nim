@@ -187,8 +187,8 @@ func colorPuyoCount*(self: Field): int {.inline, noinit.} =
   ## Returns the number of color puyos in the field.
   (self.binaryFields[2] + self.red).popcnt
 
-func garbagesCount*(self: Field): int {.inline, noinit.} =
-  ## Returns the number of hard and garbage puyos in the field.
+func nuisancePuyoCount*(self: Field): int {.inline, noinit.} =
+  ## Returns the number of nuisance puyos in the field.
   ((self.binaryFields[0] xor self.binaryFields[1]) - self.binaryFields[2]).popcnt
 
 # ------------------------------------------------

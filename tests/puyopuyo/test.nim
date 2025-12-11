@@ -31,7 +31,7 @@ block: # init
 # Count
 # ------------------------------------------------
 
-block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
+block: # cellCount, puyoCount, colorPuyoCount, nuisancePuyoCount
   let
     fieldT =
       """
@@ -82,13 +82,13 @@ rgo...
   check puyoT.cellCount(Garbage) == 4
   check puyoT.puyoCount == 15
   check puyoT.colorPuyoCount == 7
-  check puyoT.garbagesCount == 8
+  check puyoT.nuisancePuyoCount == 8
 
   check puyoW.cellCount(Purple) == 3
   check puyoW.cellCount(Hard) == 6
   check puyoW.puyoCount == 14
   check puyoW.colorPuyoCount == 7
-  check puyoW.garbagesCount == 7
+  check puyoW.nuisancePuyoCount == 7
 
 # ------------------------------------------------
 # Move

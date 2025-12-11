@@ -63,7 +63,7 @@ block: # isValid
 # Count
 # ------------------------------------------------
 
-block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
+block: # cellCount, puyoCount, colorPuyoCount, nuisancePuyoCount
   block:
     let step = Step.init YellowPurple
     check step.cellCount(Red) == 0

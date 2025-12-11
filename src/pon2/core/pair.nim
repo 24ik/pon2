@@ -121,8 +121,8 @@ func colorPuyoCount*(self: Pair): int {.inline, noinit.} =
   ## Returns the number of color puyos in the pair.
   2
 
-func garbagesCount*(self: Pair): int {.inline, noinit.} =
-  ## Returns the number of hard and garbage puyos in the pair.
+func nuisancePuyoCount*(self: Pair): int {.inline, noinit.} =
+  ## Returns the number of nuisance puyos in the pair.
   0
 
 # ------------------------------------------------

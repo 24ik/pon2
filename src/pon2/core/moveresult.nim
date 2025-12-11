@@ -106,8 +106,8 @@ func colorPuyoCount*(self: MoveResult): int {.inline, noinit.} =
   ## Returns the number of color puyos that popped.
   self.popCounts.sumColor
 
-func garbagesCount*(self: MoveResult): int {.inline, noinit.} =
-  ## Returns the number of hard and garbage puyos that popped.
+func nuisancePuyoCount*(self: MoveResult): int {.inline, noinit.} =
+  ## Returns the number of nuisance puyos that popped.
   self.popCounts[Hard] + self.popCounts[Garbage]
 
 func cellCounts*(self: MoveResult, cell: Cell): seq[int] {.inline, noinit.} =
@@ -122,9 +122,8 @@ func colorPuyoCounts*(self: MoveResult): seq[int] {.inline, noinit.} =
   ## Returns a sequence of the number of color puyos that popped in each chain.
   self.detailPopCounts.mapIt it.sumColor
 
-func garbagesCounts*(self: MoveResult): seq[int] {.inline, noinit.} =
-  ## Returns a sequence of the number of hard and garbage puyos that popped in
-  ## each chain.
+func nuisancePuyoCounts*(self: MoveResult): seq[int] {.inline, noinit.} =
+  ## Returns a sequence of the number of nuisance puyos that popped in each chain.
   self.detailPopCounts.mapIt it[Hard] + it[Garbage]
 
 # ------------------------------------------------

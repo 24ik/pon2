@@ -80,8 +80,8 @@ func colorPuyoCount*(self: PopResult): int {.inline, noinit.} =
   ## Returns the number of color puyos that popped.
   self.color.popcnt
 
-func garbagesCount*(self: PopResult): int {.inline, noinit.} =
-  ## Returns the number of hard and garbage puyos that popped.
+func nuisancePuyoCount*(self: PopResult): int {.inline, noinit.} =
+  ## Returns the number of nuisance puyos that popped.
   self.hard.popcnt + self.garbage.popcnt
 
 func hardToGarbageCount*(self: PopResult): int {.inline, noinit.} =

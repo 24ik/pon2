@@ -57,13 +57,13 @@ block: # swapped, swap
 # Count
 # ------------------------------------------------
 
-block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
+block: # cellCount, puyoCount, colorPuyoCount, nuisancePuyoCount
   check YellowGreen.cellCount(Yellow) == 1
   check YellowGreen.cellCount(Green) == 1
   check YellowGreen.cellCount(Purple) == 0
   check YellowGreen.puyoCount == 2
   check YellowGreen.colorPuyoCount == 2
-  check YellowGreen.garbagesCount == 0
+  check YellowGreen.nuisancePuyoCount == 0
 
 # ------------------------------------------------
 # Pair <-> string / URI

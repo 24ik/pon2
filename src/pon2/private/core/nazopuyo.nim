@@ -69,7 +69,7 @@ func isSatisfiedCount*(goal: Goal, moveResult: MoveResult): bool {.inline, noini
       of All:
         moveResult.puyoCounts
       of Garbages:
-        moveResult.garbagesCounts
+        moveResult.nuisancePuyoCounts
       of Colors:
         moveResult.colorPuyoCounts
       else:

@@ -63,8 +63,8 @@ block: # init
 # ------------------------------------------------
 
 block:
-  # cellCount, puyoCount, colorPuyoCount, garbagesCount,
-  # cellCounts, puyoCounts, colorPuyoCounts, garbagesCounts
+  # cellCount, puyoCount, colorPuyoCount, nuisancePuyoCount,
+  # cellCounts, puyoCounts, colorPuyoCounts, nuisancePuyoCounts
   let
     countP = 15
     countY = 0
@@ -82,8 +82,8 @@ block:
   check moveResult2.colorPuyoCount == countColor
 
   let countGarbages = 13
-  check moveResult1.garbagesCount == countGarbages
-  check moveResult2.garbagesCount == countGarbages
+  check moveResult1.nuisancePuyoCount == countGarbages
+  check moveResult2.nuisancePuyoCount == countGarbages
 
   let
     countsB = @[5, 0, 8]
@@ -102,8 +102,8 @@ block:
   check moveResult2.colorPuyoCounts == countsColor
 
   let countsGarbages = @[1, 0, 12]
-  check moveResult1.garbagesCounts == countsGarbages
-  check moveResult2.garbagesCounts == countsGarbages
+  check moveResult1.nuisancePuyoCounts == countsGarbages
+  check moveResult2.nuisancePuyoCounts == countsGarbages
 
 # ------------------------------------------------
 # Color

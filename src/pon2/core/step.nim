@@ -115,7 +115,7 @@ func colorPuyoCount*(self: Step): int {.inline, noinit.} =
   of NuisanceDrop, FieldRotate: 0
 
 func nuisancePuyoCount*(self: Step): int {.inline, noinit.} =
-  ## Returns the number of hard and garbage puyos in the step.
+  ## Returns the number of nuisance puyos in the step.
   case self.kind
   of PairPlace, FieldRotate: 0
   of NuisanceDrop: self.counts.sum
