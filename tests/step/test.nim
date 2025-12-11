@@ -12,12 +12,6 @@ import ../../src/pon2/core/[cell, common, fqdn, pair, placement, step]
 
 block: # init
   block:
-    let step = Step.init RedGreen
-    check step.kind == PairPlace
-    check step.pair == RedGreen
-    check step.placement == Placement.None
-
-  block:
     let step = Step.init(PurplePurple, Down3)
     check step.kind == PairPlace
     check step.pair == PurplePurple
@@ -26,10 +20,11 @@ block: # init
   block:
     let
       counts = [Col0: 1, 0, 1, 1, 0, 0]
-      step = Step.init(counts, true)
+      hard = true
+      step = Step.init(counts, hard)
     check step.kind == NuisanceDrop
     check step.counts == counts
-    check step.hard
+    check step.hard == hard
 
   block:
     let
@@ -38,7 +33,8 @@ block: # init
     check step.kind == FieldRotate
     check step.cross == cross
 
-  check Step.init == Step.init Pair.init
+  block:
+    check Step.init == Step.init Pair.init
 
 # ------------------------------------------------
 # Property
@@ -75,17 +71,17 @@ block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
     check step.cellCount(Garbage) == 0
     check step.puyoCount == 2
     check step.colorPuyoCount == 2
-    check step.garbagesCount == 0
+    check step.nuisancePuyoCount == 0
 
   block:
-    let step = Step.init([Col0: 2, 1, 0, 1, 0, 1], true)
+    let step = Step.init([Col0: 2, 1, 0, 1, 0, 1], hard = true)
     check step.cellCount(Red) == 0
     check step.cellCount(Yellow) == 0
     check step.cellCount(Hard) == 5
     check step.cellCount(Garbage) == 0
     check step.puyoCount == 5
     check step.colorPuyoCount == 0
-    check step.garbagesCount == 5
+    check step.nuisancePuyoCount == 5
 
   block:
     let steps = [Step.init RedGreen, Step.init([Col0: 5, 4, 5, 5, 5, 4], false)].toDeque
@@ -95,7 +91,7 @@ block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
     check steps.cellCount(Hard) == 0
     check steps.puyoCount == 30
     check steps.colorPuyoCount == 2
-    check steps.garbagesCount == 28
+    check steps.nuisancePuyoCount == 28
 
   block:
     let steps = Step.init(cross = false)
@@ -105,29 +101,29 @@ block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
     check steps.cellCount(Hard) == 0
     check steps.puyoCount == 0
     check steps.colorPuyoCount == 0
-    check steps.garbagesCount == 0
+    check steps.nuisancePuyoCount == 0
 
 # ------------------------------------------------
 # Step <-> string / URI
 # ------------------------------------------------
 
 block: # `$`, parseStep, toUriQuery
-  let step = Step.init(BluePurple, Left3)
+  block: # pair
+    let step = Step.init(BluePurple, Left3)
 
-  check $step == "bp|43"
-  check "bp|43".parseStep == Pon2Result[Step].ok step
+    check $step == "bp|43"
+    check "bp|43".parseStep == Pon2Result[Step].ok step
 
-  check step.toUriQuery(Pon2) == Pon2Result[string].ok "bp43"
-  check step.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok "QG"
-  check step.toUriQuery(Ips) == Pon2Result[string].ok "QG"
+    check step.toUriQuery(Pon2) == Pon2Result[string].ok "bp43"
+    check step.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok "QG"
+    check step.toUriQuery(Ips) == Pon2Result[string].ok "QG"
 
-  check "bp43".parseStep(Pon2) == Pon2Result[Step].ok step
-  check "QG".parseStep(IshikawaPuyo) == Pon2Result[Step].ok step
-  check "QG".parseStep(Ips) == Pon2Result[Step].ok step
+    check "bp43".parseStep(Pon2) == Pon2Result[Step].ok step
+    check "QG".parseStep(IshikawaPuyo) == Pon2Result[Step].ok step
+    check "QG".parseStep(Ips) == Pon2Result[Step].ok step
 
-block: # garbages
-  block: # Garbage
-    let step = Step.init([Col0: 2, 3, 3, 2, 2, 3], false)
+  block: # nuisance (garbage)
+    let step = Step.init [Col0: 2, 3, 3, 2, 2, 3]
     check $step == "(2,3,3,2,2,3)"
     check "(2,3,3,2,2,3)".parseStep == Pon2Result[Step].ok step
 
@@ -139,8 +135,8 @@ block: # garbages
     check "yp".parseStep(IshikawaPuyo) == Pon2Result[Step].ok step
     check "yp".parseStep(Ips) == Pon2Result[Step].ok step
 
-  block: # Hard
-    let step = Step.init([Col0: 0, 0, 0, -1, 0, 0], true)
+  block: # nuisance (hard)
+    let step = Step.init([Col0: 0, 0, 0, -1, 0, 0], hard = true)
     check $step == "[0,0,0,-1,0,0]"
     check "[0,0,0,-1,0,0]".parseStep == Pon2Result[Step].ok step
 
@@ -171,10 +167,10 @@ block: # garbages
 # ------------------------------------------------
 
 block: # `$`, parseSteps, toUriQuery
-  block: # Garbage
+  block: # pair, nuisance (garbage)
     let steps = [
       Step.init RedGreen,
-      Step.init([Col0: 1, 0, 0, 0, 0, 1], false),
+      Step.init [Col0: 1, 0, 0, 0, 0, 1],
       Step.init(YellowYellow, Up2),
     ].toDeque
 
@@ -191,9 +187,9 @@ block: # `$`, parseSteps, toUriQuery
     check "c1axG4".parseSteps(IshikawaPuyo) == Pon2Result[Steps].ok steps
     check "c1axG4".parseSteps(Ips) == Pon2Result[Steps].ok steps
 
-  block: # Hard
+  block: # nuisance (hard)
     let steps =
-      [Step.init([Col0: 0, 0, 2, 0, 1, 3], true), Step.init PurpleBlue].toDeque
+      [Step.init([Col0: 0, 0, 2, 0, 1, 3], hard = true), Step.init PurpleBlue].toDeque
 
     let str = "[0,0,2,0,1,3]\npb|"
     check $steps == str
