@@ -7,7 +7,7 @@ import std/[sugar, unittest]
 import
   ../../src/pon2/core/
     [cell, common, field, fqdn, moveresult, pair, placement, popresult, rule, step]
-import ../../src/pon2/private/[arrayutils, strutils]
+import ../../src/pon2/private/[arrayutils, assign, staticfor, strutils]
 import ../../src/pon2/private/core/[binaryfield]
 
 proc toBinaryField(str: string): BinaryField =
@@ -15,14 +15,14 @@ proc toBinaryField(str: string): BinaryField =
   let strs = str.split "\n"
 
   var cellArray {.noinit.}: array[Row, array[Col, bool]]
-  for row in Row:
-    for col in Col:
-      cellArray[row][col] = strs[row.ord][col.ord] == 'x'
+  staticFor(row, Row):
+    staticFor(col, Col):
+      cellArray[row][col].assign strs[row.ord][col.ord] == 'x'
 
-  return cellArray.toBinaryField
+  cellArray.toBinaryField
 
 func toField(str: string): Field =
-  ## Returns the Tsu field converted from the string representation.
+  ## Returns the field converted from the string representation.
   str.parseField.unsafeValue
 
 # ------------------------------------------------
@@ -1752,10 +1752,10 @@ rgrhoo""".toField
 ....o.""".toField
 
 # ------------------------------------------------
-# Drop Garbages
+# Drop Nuisance
 # ------------------------------------------------
 
-block: # dropGarbages
+block: # dropNuisance
   block:
     let field =
       """
@@ -1774,7 +1774,7 @@ block: # dropGarbages
 ..rgby
 ..rgby""".toField
 
-    check field.dup(dropGarbages(_, [Col0: 0, 2, 0, 3, 0, 4], false)) ==
+    check field.dup(dropNuisance(_, [Col0: 0, 2, 0, 3, 0, 4], hard = false)) ==
       """
 [通]
 ...oby
@@ -1810,7 +1810,7 @@ block: # dropGarbages
 ......
 ......""".toField
 
-    check field.dup(dropGarbages(_, [Col0: 0, 2, 0, 3, 5, 20], true)) ==
+    check field.dup(dropNuisance(_, [Col0: 0, 2, 0, 3, 5, 20], hard = true)) ==
       """
 [すいちゅう]
 .....h
@@ -1847,7 +1847,7 @@ rgbypr
 oooooo
 rgbypr""".toField
 
-    check field.dup(dropGarbages(_, [Col0: 0, 1, 0, 1, 0, 10], false)) ==
+    check field.dup(dropNuisance([Col0: 0, 1, 0, 1, 0, 10])) ==
       """
 [すいちゅう]
 ....pr
@@ -1872,18 +1872,18 @@ rgbypr""".toField
 block: # apply
   let
     pair = RedGreen
-    plcmt = Left3
+    placement = Left3
     counts = [Col0: 1, 2, 3, 4, 5, 6]
-    dropHard = false
+    hard = false
 
-    step1 = Step.init(pair, plcmt)
-    step2 = Step.init(counts, dropHard)
+    step1 = Step.init(pair, placement)
+    step2 = Step.init(counts, hard)
     step3 = Step.init(cross = true)
     step4 = Step.init(cross = false)
 
-  check Field.init.dup(apply(_, step1)) == Field.init.dup(place(_, pair, plcmt))
+  check Field.init.dup(apply(_, step1)) == Field.init.dup(place(_, pair, placement))
   check Field.init(Rule.Water).dup(apply(_, step2)) ==
-    Field.init(Rule.Water).dup(dropGarbages(counts, dropHard))
+    Field.init(Rule.Water).dup(dropNuisance(counts, hard))
 
   let field = Field.init(Spinner).dup(apply(_, step2))
   check field.dup(apply(_, step3)) == field.dup(crossRotate)
@@ -2019,14 +2019,14 @@ block: # move
 ...gbb""".toField
 
       pair = RedBlue
-      plcmt = Down3
+      placement = Down3
 
       chainCount = 3
       popCounts = [Cell.None: 0, 0, 2, 4, 10, 5, 0, 4]
       hardToGarbageCount = 0
       detailHardToGarbageCount = @[0, 0, 0]
 
-      nuisancePuyoCount = [Col0: 0, 1, 2, 0, 2, 1]
+      nuisanceCounts = [Col0: 0, 1, 2, 0, 2, 1]
 
       detailArray1: array[Cell, int] = [0, 0, 1, 0, 0, 5, 0, 0]
       detailArray2: array[Cell, int] = [0, 0, 0, 0, 10, 0, 0, 0]
@@ -2040,7 +2040,7 @@ block: # move
 
     block: # calc connection
       var field2 = fieldBefore
-      check field2.move(Step.init(pair, plcmt)) ==
+      check field2.move(Step.init(pair, placement)) ==
         MoveResult.init(
           chainCount, popCounts, hardToGarbageCount, detailPopCounts,
           detailHardToGarbageCount, fullPopCounts,
@@ -2049,16 +2049,16 @@ block: # move
 
     block: # not calcConnection
       var field2 = fieldBefore
-      check field2.move(pair, plcmt, false) ==
+      check field2.move(pair, placement, calcConnection = false) ==
         MoveResult.init(
           chainCount, popCounts, hardToGarbageCount, detailPopCounts,
           detailHardToGarbageCount,
         )
       check field2 == fieldAfter
 
-    block: # drop garbage
+    block: # drop nuisance (garbage)
       var field2 = fieldBefore
-      check field2.move(nuisancePuyoCount, false, false) ==
+      check field2.move(nuisanceCounts, hard = false, calcConnection = false) ==
         MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
       check field2 ==
         """
@@ -2077,9 +2077,9 @@ block: # move
 ..oorb
 .oogbb""".toField
 
-    block: # drop hard
+    block: # drop nuisance (hard)
       var field2 = fieldBefore
-      check field2.move(Step.init(nuisancePuyoCount, true), false) ==
+      check field2.move(Step.init(nuisanceCounts, hard = true), calcConnection = false) ==
         MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
       check field2 ==
         """
