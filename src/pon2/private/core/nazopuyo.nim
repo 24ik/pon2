@@ -68,9 +68,9 @@ func isSatisfiedCount*(goal: Goal, moveResult: MoveResult): bool {.inline, noini
       case main.color
       of All:
         moveResult.puyoCounts
-      of Garbages:
+      of Nuisance:
         moveResult.nuisancePuyoCounts
-      of Colors:
+      of GoalColor.Color:
         moveResult.colorPuyoCounts
       else:
         moveResult.cellCounts GoalColorToCell[main.color]
@@ -87,7 +87,7 @@ func isSatisfiedPlace*(goal: Goal, moveResult: MoveResult): bool {.inline, noini
     main = goal.mainOpt.unsafeValue
     places =
       case main.color
-      of All, Colors:
+      of All, Nuisance, GoalColor.Color:
         moveResult.placeCounts
       else:
         moveResult.placeCounts GoalColorToCell[main.color]
@@ -106,7 +106,7 @@ func isSatisfiedConnection*(
     main = goal.mainOpt.unsafeValue
     connections =
       case main.color
-      of All, Colors:
+      of All, Nuisance, GoalColor.Color:
         moveResult.connectionCounts
       else:
         moveResult.connectionCounts GoalColorToCell[main.color]

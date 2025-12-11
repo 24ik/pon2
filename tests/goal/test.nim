@@ -16,29 +16,31 @@ block: # init
   check GoalMain.init(Chain, 2, Exact) ==
     GoalMain(kind: Chain, color: GoalColor.low, val: 2, valOperator: Exact)
 
-  check Goal.init(Connection, Colors, 8, Exact, GoalColor.Green) ==
+  check Goal.init(Connection, GoalColor.Color, 8, Exact) ==
     Goal(
-      mainOpt: Opt[GoalMain].ok GoalMain.init(Connection, Colors, 8, Exact),
-      clearColorOpt: Opt[GoalColor].ok GoalColor.Green,
-    )
-  check Goal.init(Place, All, 1, AtLeast) ==
-    Goal(
-      mainOpt: Opt[GoalMain].ok GoalMain.init(Place, All, 1, AtLeast),
-      clearColorOpt: Opt[GoalColor].err,
+      mainOpt: Opt[GoalMain].ok GoalMain.init(Connection, GoalColor.Color, 8, Exact),
+      clearColorOpt: NoneGoalColor,
     )
   check Goal.init(Chain, 3, Exact, All) ==
     Goal(
       mainOpt: Opt[GoalMain].ok GoalMain.init(Chain, GoalColor.low, 3, Exact),
       clearColorOpt: Opt[GoalColor].ok All,
     )
-  check Goal.init(AccumColor, 2, AtLeast) ==
+  check Goal.init(Place, All, 1, AtLeast, Nuisance) ==
+    Goal(
+      mainOpt: Opt[GoalMain].ok GoalMain.init(Place, All, 1, AtLeast),
+      clearColorOpt: Opt[GoalColor].ok Nuisance,
+    )
+  check Goal.init(AccumColor, 2, AtLeast, GoalColor.Color) ==
     Goal(
       mainOpt: Opt[GoalMain].ok GoalMain.init(AccumColor, GoalColor.low, 2, AtLeast),
-      clearColorOpt: Opt[GoalColor].err,
+      clearColorOpt: Opt[GoalColor].ok GoalColor.Color,
     )
-  check Goal.init(GoalColor.Red) ==
-    Goal(mainOpt: Opt[GoalMain].err, clearColorOpt: Opt[GoalColor].ok GoalColor.Red)
+  check Goal.init(Opt[GoalColor].ok GoalColor.Blue) ==
+    Goal(mainOpt: NoneGoalMain, clearColorOpt: Opt[GoalColor].ok GoalColor.Blue)
   check Goal.init == NoneGoal
+  check Goal.init(GoalColor.Red) ==
+    Goal(mainOpt: NoneGoalMain, clearColorOpt: Opt[GoalColor].ok GoalColor.Red)
 
 # ------------------------------------------------
 # Property
@@ -46,12 +48,12 @@ block: # init
 
 block: # isSupported
   check Goal.init(Place, GoalColor.Red, 3, Exact).isSupported
-  check not Goal.init(Place, Garbages, 3, Exact).isSupported
-  check Goal.init(Place, Colors, 3, Exact).isSupported
+  check not Goal.init(Place, Nuisance, 3, Exact).isSupported
+  check Goal.init(Place, GoalColor.Color, 3, Exact).isSupported
 
   check Goal.init(AccumCount, GoalColor.Red, 3, AtLeast).isSupported
-  check Goal.init(AccumCount, Garbages, 3, AtLeast).isSupported
-  check Goal.init(AccumCount, Colors, 3, AtLeast).isSupported
+  check Goal.init(AccumCount, Nuisance, 3, AtLeast).isSupported
+  check Goal.init(AccumCount, GoalColor.Color, 3, AtLeast).isSupported
 
   check Goal.init(Chain, 3, Exact).isSupported
   check Goal.init(All).isSupported
@@ -113,7 +115,7 @@ block: # `$`, toUriQuery, parseGoal
 
   block: # only clear
     let
-      goal = Goal.init Colors
+      goal = Goal.init GoalColor.Color
       str = "色ぷよ全て消すべし"
       pon2Uri = "_7"
       ishikawaUri = "270"
@@ -149,7 +151,7 @@ block: # `$`, toUriQuery, parseGoal
       check goal.toUriQuery(Ips).isErr
 
     block:
-      let goal = Goal.init(AccumCount, All, 10, AtLeast, Colors)
+      let goal = Goal.init(AccumCount, All, 10, AtLeast, GoalColor.Color)
       check goal.toUriQuery(Pon2) == Pon2Result[string].ok "6_0_10_1_7"
       check goal.toUriQuery(IshikawaPuyo).isErr
       check goal.toUriQuery(Ips).isErr
