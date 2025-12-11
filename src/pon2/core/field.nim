@@ -675,8 +675,6 @@ func parseField*(str: string): Pon2Result[Field] {.inline, noinit.} =
   let errorMsg = "Invalid field: {str}".fmt
 
   var lines = str.split '\n'
-  if lines.len == 0:
-    return err errorMsg
 
   if not (lines[0].startsWith(RulePrefix) and lines[0].endsWith(RuleSuffix)):
     return err errorMsg

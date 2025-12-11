@@ -67,10 +67,10 @@ rgo...
 .....p
 .....p""".parseField.unsafeValue
     steps = [
-      Step.init(RedGreen),
+      Step.init RedGreen,
       Step.init(BlueBlue, Down3),
-      Step.init([Col0: 2, 0, 0, 1, 0, 1], true),
-      Step.init([Col0: 0, 0, 0, 0, 1, 0], false),
+      Step.init([Col0: 2, 0, 0, 1, 0, 1], hard = true),
+      Step.init [Col0: 0, 0, 0, 0, 1, 0],
       Step.init(cross = false),
       Step.init(cross = true),
     ].toDeque
@@ -97,7 +97,7 @@ rgo...
 block: # move
   let
     stepsBefore = [Step.init(BlueGreen, Right1)].toDeque
-    stepsAfter = Deque[Step].init
+    stepsAfter = Steps.init
     fieldBefore =
       """
 [だいかいてん]
