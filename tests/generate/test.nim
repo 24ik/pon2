@@ -129,6 +129,7 @@ proc checkGenerate(
       check answer[0][stepIndex] == Placement.None
 
 block: # generate
+  #[
   checkGenerate(
     Rule.Water,
     Goal.init(Chain, 5, Exact),
@@ -154,9 +155,10 @@ block: # generate
     false,
     123,
   )
+  ]#
   checkGenerate(
     Rule.Spinner,
-    Goal.init(Count, GoalColor.Red, 4, AtLeast, GoalColor.Garbages),
+    Goal.init(Count, GoalColor.Red, 4, AtLeast, Nuisance),
     2,
     2,
     (

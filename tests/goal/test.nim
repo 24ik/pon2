@@ -16,9 +16,9 @@ block: # init
   check GoalMain.init(Chain, 2, Exact) ==
     GoalMain(kind: Chain, color: GoalColor.low, val: 2, valOperator: Exact)
 
-  check Goal.init(Connection, GoalColor.Color, 8, Exact) ==
+  check Goal.init(Connection, Colored, 8, Exact) ==
     Goal(
-      mainOpt: Opt[GoalMain].ok GoalMain.init(Connection, GoalColor.Color, 8, Exact),
+      mainOpt: Opt[GoalMain].ok GoalMain.init(Connection, Colored, 8, Exact),
       clearColorOpt: NoneGoalColor,
     )
   check Goal.init(Chain, 3, Exact, All) ==
@@ -31,10 +31,10 @@ block: # init
       mainOpt: Opt[GoalMain].ok GoalMain.init(Place, All, 1, AtLeast),
       clearColorOpt: Opt[GoalColor].ok Nuisance,
     )
-  check Goal.init(AccumColor, 2, AtLeast, GoalColor.Color) ==
+  check Goal.init(AccumColor, 2, AtLeast, Colored) ==
     Goal(
       mainOpt: Opt[GoalMain].ok GoalMain.init(AccumColor, GoalColor.low, 2, AtLeast),
-      clearColorOpt: Opt[GoalColor].ok GoalColor.Color,
+      clearColorOpt: Opt[GoalColor].ok Colored,
     )
   check Goal.init(Opt[GoalColor].ok GoalColor.Blue) ==
     Goal(mainOpt: NoneGoalMain, clearColorOpt: Opt[GoalColor].ok GoalColor.Blue)
@@ -49,11 +49,11 @@ block: # init
 block: # isSupported
   check Goal.init(Place, GoalColor.Red, 3, Exact).isSupported
   check not Goal.init(Place, Nuisance, 3, Exact).isSupported
-  check Goal.init(Place, GoalColor.Color, 3, Exact).isSupported
+  check Goal.init(Place, Colored, 3, Exact).isSupported
 
   check Goal.init(AccumCount, GoalColor.Red, 3, AtLeast).isSupported
   check Goal.init(AccumCount, Nuisance, 3, AtLeast).isSupported
-  check Goal.init(AccumCount, GoalColor.Color, 3, AtLeast).isSupported
+  check Goal.init(AccumCount, Colored, 3, AtLeast).isSupported
 
   check Goal.init(Chain, 3, Exact).isSupported
   check Goal.init(All).isSupported
@@ -87,7 +87,7 @@ block: # `$`, toUriQuery, parseGoal
     let
       goal = Goal.init(Count, GoalColor.Green, 5, AtLeast)
       str = "緑ぷよ5個以上同時に消すべし"
-      pon2Uri = "2_2_5_1_"
+      pon2Uri = "2_4_5_1_"
       ishikawaUri = "H25"
 
     check $goal == str
@@ -115,9 +115,9 @@ block: # `$`, toUriQuery, parseGoal
 
   block: # only clear
     let
-      goal = Goal.init GoalColor.Color
+      goal = Goal.init Colored
       str = "色ぷよ全て消すべし"
-      pon2Uri = "_7"
+      pon2Uri = "_2"
       ishikawaUri = "270"
 
     check $goal == str
@@ -132,7 +132,7 @@ block: # `$`, toUriQuery, parseGoal
     let
       goal = Goal.init(Chain, 3, AtLeast, GoalColor.Red)
       str = "3連鎖以上する&赤ぷよ全て消すべし"
-      pon2Uri = "0_0_3_1_1"
+      pon2Uri = "0_0_3_1_3"
       ishikawaUri = "x13"
 
     check $goal == str
@@ -146,13 +146,13 @@ block: # `$`, toUriQuery, parseGoal
   block: # invalid with Ishikawa/Ips
     block:
       let goal = Goal.init(Connection, GoalColor.Yellow, -1, Exact)
-      check goal.toUriQuery(Pon2) == Pon2Result[string].ok "4_4_-1_0_"
+      check goal.toUriQuery(Pon2) == Pon2Result[string].ok "4_6_-1_0_"
       check goal.toUriQuery(IshikawaPuyo).isErr
       check goal.toUriQuery(Ips).isErr
 
     block:
-      let goal = Goal.init(AccumCount, All, 10, AtLeast, GoalColor.Color)
-      check goal.toUriQuery(Pon2) == Pon2Result[string].ok "6_0_10_1_7"
+      let goal = Goal.init(AccumCount, All, 10, AtLeast, Colored)
+      check goal.toUriQuery(Pon2) == Pon2Result[string].ok "6_0_10_1_2"
       check goal.toUriQuery(IshikawaPuyo).isErr
       check goal.toUriQuery(Ips).isErr
 

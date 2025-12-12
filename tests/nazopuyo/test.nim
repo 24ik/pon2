@@ -21,15 +21,11 @@ func mark2(nazoPuyo: NazoPuyo, placements: varargs[Placement]): MarkResult =
 # ------------------------------------------------
 
 block: # init
-  let
-    puyoPuyoT = PuyoPuyo.init
-    puyoPuyoW = PuyoPuyo.init Rule.Water
-    goal = Goal.init(Count, Colors, 10, Exact)
-  check NazoPuyo.init(puyoPuyoT, goal) == NazoPuyo(puyoPuyo: puyoPuyoT, goal: goal)
-  check NazoPuyo.init(puyoPuyoW, goal) == NazoPuyo(puyoPuyo: puyoPuyoW, goal: goal)
-
-  check NazoPuyo.init(Spinner) == NazoPuyo.init(PuyoPuyo.init Spinner, Goal.init)
-  check NazoPuyo.init == NazoPuyo.init Rule.Tsu
+  check NazoPuyo.init(PuyoPuyo.init, Goal.init) ==
+    NazoPuyo(puyoPuyo: PuyoPuyo.init, goal: Goal.init)
+  check NazoPuyo.init == NazoPuyo.init(PuyoPuyo.init, Goal.init)
+  check NazoPuyo.init(Rule.Spinner) ==
+    NazoPuyo.init(PuyoPuyo.init Rule.Spinner, Goal.init)
 
 # ------------------------------------------------
 # Mark
@@ -270,7 +266,7 @@ rg|""".parseNazoPuyo.unsafeValue
     check nazoPuyo.mark2(Right1) == Accept
     check nazoPuyo.mark2(Up2) == WrongAnswer
 
-  block: # Dead, InvalidMove, SkipMove
+  block: # Dead, InvalidPlace, PlaceSkip
     let nazoPuyo =
       """
 ぷよ全て消すべし
@@ -294,8 +290,8 @@ rg|
 by|""".parseNazoPuyo.unsafeValue
 
     check nazoPuyo.mark2(Up2) == Dead
-    check nazoPuyo.mark2(Up5) == InvalidMove
-    check nazoPuyo.mark2(Placement.None, Up3) == SkipMove
+    check nazoPuyo.mark2(Up5) == InvalidPlace
+    check nazoPuyo.mark2(Placement.None, Up3) == PlaceSkip
 
   block: # NotSupport
     let nazoPuyo =
@@ -499,7 +495,7 @@ g.....
 """
       nazoPuyo = str.parseNazoPuyo.unsafeValue
 
-      queryPon2 = "field=0_g.....&steps&goal=_1"
+      queryPon2 = "field=0_g.....&steps&goal=_3"
       queryIshikawa = "g00___210"
 
     check nazoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2

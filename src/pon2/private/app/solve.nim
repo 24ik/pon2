@@ -100,10 +100,10 @@ func child(self: SolveNode, goal: Goal, step: Step): SolveNode {.inline, noinit.
         case main.color
         of All:
           moveResult.puyoCount
-        of Colors:
-          moveResult.colorPuyoCount
-        of GoalColor.Garbages:
+        of Nuisance:
           moveResult.nuisancePuyoCount
+        of Colored:
+          moveResult.colorPuyoCount
         else:
           moveResult.cellCount GoalColorToCell[main.color]
       childPopColors = {}
@@ -133,12 +133,9 @@ func child(self: SolveNode, goal: Goal, step: Step): SolveNode {.inline, noinit.
     childStepsCounts[rotorCell].dec
 
   # garbages
-  if (
-    goal.clearColorOpt.isOk and
-    goal.clearColorOpt.unsafeValue in {All, GoalColor.Garbages}
-  ) or (
+  if (goal.clearColorOpt.isOk and goal.clearColorOpt.unsafeValue in {All, Nuisance}) or (
     goal.mainOpt.isOk and goal.mainOpt.unsafeValue.kind in {Count, AccumCount} and
-    goal.mainOpt.unsafeValue.color in {All, GoalColor.Garbages}
+    goal.mainOpt.unsafeValue.color in {All, Nuisance}
   ):
     let stepGarbageHardCount, isHard, isGarbage: int
     if step.kind == NuisanceDrop:
@@ -209,10 +206,10 @@ func isAccepted(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
         case clearColor
         of All:
           self.fieldCounts.sum
-        of Colors:
-          self.fieldCounts.sum Cell.Red .. Cell.Purple
-        of GoalColor.Garbages:
+        of Nuisance:
           self.fieldCounts[Hard] + self.fieldCounts[Garbage]
+        of Colored:
+          self.fieldCounts.sum Cell.Red .. Cell.Purple
         else:
           self.fieldCounts[GoalColorToCell[clearColor]]
 
@@ -294,7 +291,7 @@ func canPrune(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
         (self.fieldCounts[Hard] + self.fieldCounts[Garbage] > 0)
       ):
         return true
-    of GoalColor.Garbages:
+    of Nuisance:
       var poppableColorNotExist = true
 
       staticFor(cell2, Cell.Red .. Cell.Purple):
@@ -303,7 +300,7 @@ func canPrune(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
       if poppableColorNotExist and
           (self.fieldCounts[Hard] + self.fieldCounts[Garbage] > 0):
         return true
-    of Colors:
+    of Colored:
       var unpoppableColorExist = false
 
       staticFor(cell2, Cell.Red .. Cell.Purple):
@@ -352,7 +349,7 @@ func canPrune(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
     let
       nowPossibleCount =
         case main.color
-        of All, Colors, GoalColor.Garbages:
+        of All, Nuisance, Colored:
           let colorPossibleCount = sum(
             self.cellCount(Cell.Red).filter4,
             self.cellCount(Cell.Green).filter4,
@@ -363,10 +360,10 @@ func canPrune(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
           case main.color
           of All:
             colorPossibleCount + (colorPossibleCount > 0).int * self.nuisancePuyoCount
-          of Colors:
-            colorPossibleCount
-          else: # Garbages
+          of Nuisance:
             (colorPossibleCount > 0).int * self.nuisancePuyoCount
+          else: # Colored
+            colorPossibleCount
         else:
           self.cellCount(GoalColorToCell[main.color]).filter4
 
@@ -381,7 +378,7 @@ func canPrune(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
   of Place:
     let possiblePlace =
       case main.color
-      of All, Colors:
+      of All, Colored:
         sum(
           self.cellCount(Cell.Red) div 4,
           self.cellCount(Cell.Green) div 4,
@@ -437,9 +434,9 @@ func childrenAtDepth*(
     placementsSeqSeq = newSeqOfCap[seq[seq[Placement]]](childCount)
     answersSeq = newSeqOfCap[seq[seq[Placement]]](childCount)
   for _ in 1 .. childCount:
-    nodesSeq.add newSeqOfCap[SolveNode](static(Placement.enumLen))
-    placementsSeqSeq.add newSeqOfCap[seq[Placement]](static(Placement.enumLen))
-    answersSeq.add newSeqOfCap[seq[Placement]](static(Placement.enumLen))
+    nodesSeq.add newSeqOfCap[SolveNode](ActualPlacements.card)
+    placementsSeqSeq.add newSeqOfCap[seq[Placement]](ActualPlacements.card)
+    answersSeq.add newSeqOfCap[seq[Placement]](ActualPlacements.card)
 
   for childIndex, (child, placement) in children.pairs:
     if child.isAccepted goal:
@@ -513,7 +510,7 @@ func solveSingleThread*(
 
   var childAnswersSeq = newSeqOfCap[seq[seq[Placement]]](children.len)
   for _ in 1 .. children.len:
-    childAnswersSeq.add newSeqOfCap[seq[Placement]](static(Placement.enumLen))
+    childAnswersSeq.add newSeqOfCap[seq[Placement]](ActualPlacements.card)
 
   for childIndex, (child, placement) in children.pairs:
     if child.isAccepted goal:

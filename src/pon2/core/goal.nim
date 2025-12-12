@@ -27,13 +27,13 @@ type
   GoalColor* {.pure.} = enum
     ## Color in the goal.
     All = ""
+    Nuisance = "おじゃま"
+    Colored = "色"
     Red = "赤"
     Green = "緑"
     Blue = "青"
     Yellow = "黄"
     Purple = "紫"
-    Nuisance = "おじゃま"
-    Color = "色"
 
   GoalValOperator* {.pure.} = enum
     ## Operator used in a value comparison.
@@ -319,7 +319,7 @@ func parseGoal*(str: string): Pon2Result[Goal] {.inline, noinit.} =
 const
   QuerySep = "_"
   KindToIshikawaUri = "uEGIQac"
-  ColorToIshikawaUri = "01234567"
+  ColorToIshikawaUri = "06712345"
   ValToIshikawaUri = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-"
   ClearIshikawaUri = '2'
   EmptyValIshikawaUri = '0'

@@ -470,7 +470,8 @@ proc generate*(rng: var Rand, settings: GenerateSettings): Pon2Result[NazoPuyo] 
     let clearColor = settings.goal.clearColorOpt.unsafeValue
     if clearColor in GoalColor.Red .. GoalColor.Purple:
       useCellsSet.incl GoalColorToCell[clearColor]
-  useCellsSet.incl (Cell.Red .. Cell.Purple).toSeq.dup(shuffle(rng, _))[
+  var extraCells = ColoredPuyos - useCellsSet
+  useCellsSet.incl extraCells.toSeq.dup(shuffle(rng, _))[
     0 ..< settings.colorCount - useCellsSet.card
   ].toSet
   let useCells = useCellsSet.toSeq

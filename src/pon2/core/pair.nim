@@ -50,7 +50,7 @@ type Pair* {.pure.} = enum
 # Constructor
 # ------------------------------------------------
 
-const ColorCount = ColorPuyos.card
+const ColorCount = ColoredPuyos.card
 
 func init*(T: type Pair, pivot, rotor: Cell): T {.inline, noinit.} =
   ## Note that the result is undefined if the pivot or rotor are not color puyos.
@@ -85,13 +85,13 @@ func isDouble*(self: Pair): bool {.inline, noinit.} =
 func `pivot=`*(self: var Pair, colorPuyo: Cell) {.inline, noinit.} =
   ## Sets the pivot-puyo.
   ## If the `colorPuyo` is not color puyo, does nothing.
-  if colorPuyo in ColorPuyos:
+  if colorPuyo in ColoredPuyos:
     self.inc (colorPuyo.ord - self.pivot.ord) * ColorCount
 
 func `rotor=`*(self: var Pair, colorPuyo: Cell) {.inline, noinit.} =
   ## Sets the rotor-puyo.
   ## If the `colorPuyo` is not color puyo, does nothing.
-  if colorPuyo in ColorPuyos:
+  if colorPuyo in ColoredPuyos:
     self.inc colorPuyo.ord - self.rotor.ord
 
 # ------------------------------------------------
@@ -137,11 +137,11 @@ func parsePair*(str: string): Pon2Result[Pair] {.inline, noinit.} =
     return err errorMsg
 
   let pivot = ?str[0 .. 0].parseCell.context errorMsg
-  if pivot notin ColorPuyos:
+  if pivot notin ColoredPuyos:
     return err errorMsg
 
   let rotor = ?str[1 .. 1].parseCell.context errorMsg
-  if rotor notin ColorPuyos:
+  if rotor notin ColoredPuyos:
     return err errorMsg
 
   ok Pair.init(pivot, rotor)

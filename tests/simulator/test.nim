@@ -486,8 +486,8 @@ block:
   simulator.goalValOperator = AtLeast
   check simulator.nazoPuyo.goal == Goal.init All
 
-  simulator.goalClearColorOpt = Opt[GoalColor].ok Colors
-  check simulator.nazoPuyo.goal == Goal.init Colors
+  simulator.goalClearColorOpt = Opt[GoalColor].ok Colored
+  check simulator.nazoPuyo.goal == Goal.init Colored
 
   simulator.goalClearColorOpt = Opt[GoalColor].err
   check simulator.nazoPuyo.goal == NoneGoal

@@ -133,7 +133,7 @@ func nuisancePuyoCounts*(self: MoveResult): seq[int] {.inline, noinit.} =
 func colors(counts: array[Cell, int]): set[Cell] {.inline, noinit.} =
   ## Returns the set of colors that popped.
   var cells: set[Cell] = {}
-  staticFor(cell, ColorPuyos):
+  staticFor(cell, ColoredPuyos):
     if counts[cell] > 0:
       cells.incl cell
 
@@ -233,7 +233,7 @@ func score*(self: MoveResult): Pon2Result[int] {.inline, noinit.} =
       totalPuyoCount = 0
       colorCount = 0
 
-    staticFor(cell, ColorPuyos):
+    staticFor(cell, ColoredPuyos):
       connectionBonus += countsArray[cell].connectionBonus
 
       let puyoCount = self.detailPopCounts[chainIndex][cell]
