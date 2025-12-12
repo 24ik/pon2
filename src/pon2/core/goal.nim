@@ -7,6 +7,7 @@
 {.experimental: "views".}
 
 import std/[setutils, strformat, sugar]
+import regex
 import ./[fqdn]
 import ../[utils]
 import ../private/[assign, strutils, tables]
@@ -256,28 +257,16 @@ func parseGoal*(str: string): Pon2Result[Goal] {.inline, noinit.} =
     return err errorMsg
 
   # val
-  # TODO: regex
   var
-    valOpt = Opt[int].err
+    val = 0
     kindStrNoVal = kindStr
-  for charIndex, c in kindStr:
-    if not (
-      c.isDigit or
-      (c == '-' and charIndex + 1 < kindStr.len and kindStr[charIndex + 1].isDigit)
-    ):
-      continue
-
-    var endIndex = charIndex + 1
-    while endIndex < kindStr.len and kindStr[endIndex].isDigit:
-      endIndex.inc
-
-    let valStr = kindStr[charIndex ..< endIndex]
-    valOpt.ok ?valStr.parseInt.context errorMsg
-    kindStrNoVal.assign kindStr.replace(valStr, "")
-    break
-  if valOpt.isErr:
+    match = RegexMatch2()
+  if kindStr.find(re2"(-?\d+)", match):
+    let slice = match.group 0
+    val.assign kindStr[slice].parseInt.unsafeValue
+    kindStrNoVal.delete slice
+  else:
     return err errorMsg
-  let val = valOpt.unsafeValue
 
   # color
   var
