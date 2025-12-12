@@ -527,7 +527,7 @@ func move*(self: var Field, step: Step, calcConnection = true): MoveResult =
   ## This function requires that the field is settled.
   var
     chainCount = 0
-    popCounts = static(Cell.initArrayWith 0)
+    popCounts = Cell.initArrayWith 0
     hardToGarbageCount = 0
     detailPopCounts = newSeqOfCap[array[Cell, int]](MaxChainCount)
     detailHardToGarbageCount = newSeqOfCap[int](MaxChainCount)
@@ -836,7 +836,7 @@ func parseFieldIshikawa(query: string): Pon2Result[Field] {.inline, noinit.} =
       return err errorMsg
 
     let firstRow = (Height - strs.len).Row
-    var cellArray = static(Row.initArrayWith Col.initArrayWith Cell.None)
+    var cellArray = Row.initArrayWith Col.initArrayWith Cell.None
     for rowIndex, str in strs:
       for colIndex, c in str:
         let cellOrd = CellToTildeIshikawaChar.find c

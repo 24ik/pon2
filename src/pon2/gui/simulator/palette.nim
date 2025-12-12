@@ -58,12 +58,10 @@ when defined(js) or defined(nimsuggest):
       tdiv(class = "card-content p-1"):
         table:
           tbody:
-            for row, cells in static(
-              [
-                [Cell.None, Cell.Red, Cell.Green, Cell.Blue],
-                [Cell.Yellow, Cell.Purple, Garbage, Hard],
-              ]
-            ):
+            for row, cells in [
+              [Cell.None, Cell.Red, Cell.Green, Cell.Blue],
+              [Cell.Yellow, Cell.Purple, Garbage, Hard],
+            ]:
               tr:
                 for cell in cells:
                   let cellSelected = editObj.kind == EditCell and editObj.cell == cell

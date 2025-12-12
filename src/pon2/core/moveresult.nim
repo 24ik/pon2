@@ -79,12 +79,10 @@ func init*(
   )
 
 func init*(T: type MoveResult, inclFullPopCounts = true): T {.inline, noinit.} =
-  const ZeroArray = Cell.initArrayWith 0
-
   if inclFullPopCounts:
-    T.init(0, ZeroArray, 0, @[], @[], @[])
+    T.init(0, Cell.initArrayWith 0, 0, @[], @[], @[])
   else:
-    T.init(0, ZeroArray, 0, @[], @[])
+    T.init(0, Cell.initArrayWith 0, 0, @[], @[])
 
 # ------------------------------------------------
 # Count

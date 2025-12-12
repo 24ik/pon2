@@ -100,8 +100,8 @@ func connectionCounts(self: BinaryField): seq[int] {.inline, noinit.} =
 
   var
     connectIndexArray =
-      static((Height + 2).initArrayWith (Width + 2).initArrayWith DefaultConnectIndex)
-    unionFind = static(UnionFind.init Height * Width)
+      (Height + 2).initArrayWith (Width + 2).initArrayWith DefaultConnectIndex
+    unionFind = UnionFind.init Height * Width
     nextConnectIndex = DefaultConnectIndex + 1
 
   staticFor(row, Row):

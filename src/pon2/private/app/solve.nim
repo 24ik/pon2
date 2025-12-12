@@ -60,7 +60,7 @@ func init*(T: type SolveNode, puyoPuyo: PuyoPuyo): T {.inline, noinit.} =
     fieldCounts[cell2].assign puyoPuyo.field.cellCount cell2
     stepsCounts[cell2].assign puyoPuyo.steps.cellCount cell2
 
-  T.init(0, puyoPuyo.field, static(MoveResult.init), {}, 0, fieldCounts, stepsCounts)
+  T.init(0, puyoPuyo.field, MoveResult.init, {}, 0, fieldCounts, stepsCounts)
 
 # ------------------------------------------------
 # Child
@@ -616,7 +616,7 @@ when defined(js) or defined(nimsuggest):
     let chainCount = ?strs[0].parseInt.context errorMsg
 
     let popCountsStrs = strs[1].split2 Sep1
-    if popCountsStrs.len != static(Cell.enumLen):
+    if popCountsStrs.len != Cell.enumLen:
       return err errorMsg
     var popCounts {.noinit.}: array[Cell, int]
     for i, s in popCountsStrs:
@@ -627,7 +627,7 @@ when defined(js) or defined(nimsuggest):
     let detailPopCounts = collect:
       for detailPopCountsStrSeqSeq in strs[3].split2 Sep2:
         let detailPopCountsStrSeq = detailPopCountsStrSeqSeq.split2 Sep1
-        if detailPopCountsStrSeq.len != static(Cell.enumLen):
+        if detailPopCountsStrSeq.len != Cell.enumLen:
           return err errorMsg
 
         var popCounts {.noinit.}: array[Cell, int]
@@ -649,7 +649,7 @@ when defined(js) or defined(nimsuggest):
     let fullPopCounts = collect:
       for fullPopCountsStrSeqSeq in strs[5].split2 Sep3:
         let fullPopCountsStrSeqs = fullPopCountsStrSeqSeq.split2 Sep2
-        if fullPopCountsStrSeqs.len != static(Cell.enumLen):
+        if fullPopCountsStrSeqs.len != Cell.enumLen:
           return err errorMsg
 
         var counts {.noinit.}: array[Cell, seq[int]]
@@ -678,7 +678,7 @@ when defined(js) or defined(nimsuggest):
     let errorMsg = "Invalid counts: {str}".fmt
 
     let strs = str.split2 Sep1
-    if strs.len != static(Cell.enumLen):
+    if strs.len != Cell.enumLen:
       return err errorMsg
 
     var arr {.noinit.}: array[Cell, int]
