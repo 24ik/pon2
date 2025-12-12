@@ -521,9 +521,7 @@ func isSettled*(self: Field): bool {.inline, noinit.} =
 
 const MaxChainCount = Height * Width div 4
 
-template moveImpl(
-    self: var Field, calcConnection, settleAfterApply: bool, applyBody: untyped
-): MoveResult =
+func move*(self: var Field, step: Step, calcConnection = true): MoveResult =
   ## Applies `applyBody`, advances the field until chains end, and returns a moving
   ## result.
   ## This function requires that the field is settled.
@@ -538,9 +536,9 @@ template moveImpl(
   if calcConnection:
     fullPopCountsOpt.ok newSeqOfCap[array[Cell, seq[int]]](MaxChainCount)
 
-  applyBody
+  self.apply step
 
-  if settleAfterApply:
+  if step.kind == FieldRotate:
     self.settle
 
   while true:
@@ -555,7 +553,7 @@ template moveImpl(
     self.settle
 
     var cellCounts {.noinit.}: array[Cell, int]
-    cellCounts[None].assign 0
+    cellCounts[Cell.None].assign 0
     staticFor(cell2, Puyos):
       let cellCount = popResult.cellCount cell2
       cellCounts[cell2].assign cellCount
@@ -571,40 +569,6 @@ template moveImpl(
 
   # NOTE: dummy to suppress warning (not reached here)
   MoveResult.init
-
-# TODO: remove 3 moves and template
-func move*(
-    self: var Field, pair: Pair, placement: Placement, calcConnection = true
-): MoveResult {.inline, noinit.} =
-  ## Places the pair, advances the field until chains end, and returns a moving result.
-  ## This function requires that the field is settled.
-  self.moveImpl(calcConnection, settleAfterApply = false):
-    self.place pair, placement
-
-func move*(
-    self: var Field, counts: array[Col, int], hard: bool, calcConnection = true
-): MoveResult {.inline, noinit.} =
-  ## Drops hard or garbage puyos, advances the field until chains end, and returns a
-  ## moving result.
-  ## This function requires that the field is settled and the counts are non-negative.
-  self.moveImpl(calcConnection, settleAfterApply = false):
-    self.dropNuisance counts, hard
-
-func move*(
-    self: var Field, cross: bool, calcConnection = true
-): MoveResult {.inline, noinit.} =
-  ## Rotates the field, advances the field until chains end, and returns a moving
-  ## result.
-  self.moveImpl(calcConnection, settleAfterApply = true):
-    if cross: self.crossRotate else: self.rotate
-
-func move*(
-    self: var Field, step: Step, calcConnection = true
-): MoveResult {.inline, noinit.} =
-  ## Applies the step, advances the field until chains end, and returns a moving result.
-  ## This function requires that the field is settled.
-  self.moveImpl(calcConnection, settleAfterApply = step.kind == FieldRotate):
-    self.apply step
 
 # ------------------------------------------------
 # Field <-> array

@@ -1983,10 +1983,9 @@ oo.oo.
 # ------------------------------------------------
 
 block: # move
-  block:
-    let
-      fieldBefore =
-        """
+  let
+    fieldBefore =
+      """
 [通]
 ....g.
 ....g.
@@ -2001,8 +2000,8 @@ block: # move
 ...bgr
 ...orb
 ...gbb""".toField
-      fieldAfter =
-        """
+    fieldAfter =
+      """
 [通]
 ......
 ......
@@ -2018,50 +2017,50 @@ block: # move
 .....b
 ...gbb""".toField
 
-      pair = RedBlue
-      placement = Down3
+    pair = RedBlue
+    placement = Down3
 
-      chainCount = 3
-      popCounts = [Cell.None: 0, 0, 2, 4, 10, 5, 0, 4]
-      hardToGarbageCount = 0
-      detailHardToGarbageCount = @[0, 0, 0]
+    chainCount = 3
+    popCounts = [Cell.None: 0, 0, 2, 4, 10, 5, 0, 4]
+    hardToGarbageCount = 0
+    detailHardToGarbageCount = @[0, 0, 0]
 
-      nuisanceCounts = [Col0: 0, 1, 2, 0, 2, 1]
+    nuisanceCounts = [Col0: 0, 1, 2, 0, 2, 1]
 
-      detailArray1: array[Cell, int] = [0, 0, 1, 0, 0, 5, 0, 0]
-      detailArray2: array[Cell, int] = [0, 0, 0, 0, 10, 0, 0, 0]
-      detailArray3: array[Cell, int] = [0, 0, 1, 4, 0, 0, 0, 4]
-      detailPopCounts = @[detailArray1, detailArray2, detailArray3]
+    detailArray1: array[Cell, int] = [0, 0, 1, 0, 0, 5, 0, 0]
+    detailArray2: array[Cell, int] = [0, 0, 0, 0, 10, 0, 0, 0]
+    detailArray3: array[Cell, int] = [0, 0, 1, 4, 0, 0, 0, 4]
+    detailPopCounts = @[detailArray1, detailArray2, detailArray3]
 
-      fullArray1: array[Cell, seq[int]] = [@[], @[], @[], @[], @[], @[5], @[], @[]]
-      fullArray2: array[Cell, seq[int]] = [@[], @[], @[], @[], @[4, 6], @[], @[], @[]]
-      fullArray3: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[], @[], @[], @[4]]
-      fullPopCounts = @[fullArray1, fullArray2, fullArray3]
+    fullArray1: array[Cell, seq[int]] = [@[], @[], @[], @[], @[], @[5], @[], @[]]
+    fullArray2: array[Cell, seq[int]] = [@[], @[], @[], @[], @[4, 6], @[], @[], @[]]
+    fullArray3: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[], @[], @[], @[4]]
+    fullPopCounts = @[fullArray1, fullArray2, fullArray3]
 
-    block: # calc connection
-      var field2 = fieldBefore
-      check field2.move(Step.init(pair, placement)) ==
-        MoveResult.init(
-          chainCount, popCounts, hardToGarbageCount, detailPopCounts,
-          detailHardToGarbageCount, fullPopCounts,
-        )
-      check field2 == fieldAfter
+  block: # pair, calc connection
+    var field2 = fieldBefore
+    check field2.move(Step.init(pair, placement)) ==
+      MoveResult.init(
+        chainCount, popCounts, hardToGarbageCount, detailPopCounts,
+        detailHardToGarbageCount, fullPopCounts,
+      )
+    check field2 == fieldAfter
 
-    block: # not calcConnection
-      var field2 = fieldBefore
-      check field2.move(pair, placement, calcConnection = false) ==
-        MoveResult.init(
-          chainCount, popCounts, hardToGarbageCount, detailPopCounts,
-          detailHardToGarbageCount,
-        )
-      check field2 == fieldAfter
+  block: # pair, not calcConnection
+    var field2 = fieldBefore
+    check field2.move(Step.init(pair, placement), calcConnection = false) ==
+      MoveResult.init(
+        chainCount, popCounts, hardToGarbageCount, detailPopCounts,
+        detailHardToGarbageCount,
+      )
+    check field2 == fieldAfter
 
-    block: # drop nuisance (garbage)
-      var field2 = fieldBefore
-      check field2.move(nuisanceCounts, hard = false, calcConnection = false) ==
-        MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
-      check field2 ==
-        """
+  block: # drop nuisance (garbage)
+    var field2 = fieldBefore
+    check field2.move(Step.init nuisanceCounts, calcConnection = false) ==
+      MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
+    check field2 ==
+      """
 [通]
 ....g.
 ....go
@@ -2077,12 +2076,12 @@ block: # move
 ..oorb
 .oogbb""".toField
 
-    block: # drop nuisance (hard)
-      var field2 = fieldBefore
-      check field2.move(Step.init(nuisanceCounts, hard = true), calcConnection = false) ==
-        MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
-      check field2 ==
-        """
+  block: # drop nuisance (hard)
+    var field2 = fieldBefore
+    check field2.move(Step.init(nuisanceCounts, hard = true), calcConnection = false) ==
+      MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
+    check field2 ==
+      """
 [通]
 ....g.
 ....gh
@@ -2098,10 +2097,10 @@ block: # move
 ..horb
 .hhgbb""".toField
 
-    block: # rotate
-      let
-        fieldBefore2 =
-          """
+  block: # rotate
+    let
+      fieldBefore2 =
+        """
 [通]
 ......
 ......
@@ -2116,8 +2115,8 @@ block: # move
 .ro...
 .ro...
 .roo..""".toField
-        fieldAfter2 =
-          """
+      fieldAfter2 =
+        """
 [通]
 ......
 ......
@@ -2132,11 +2131,11 @@ block: # move
 ......
 ......
 ...o..""".toField
-      var field2 = fieldBefore2
-      let popCounts: array[Cell, int] = [0, 0, 3, 4, 0, 0, 0, 0]
-      check field2.move(Step.init(cross = false), false) ==
-        MoveResult.init(1, popCounts, 0, @[popCounts], @[0])
-      check field2 == fieldAfter2
+    var field2 = fieldBefore2
+    let popCounts: array[Cell, int] = [0, 0, 3, 4, 0, 0, 0, 0]
+    check field2.move(Step.init(cross = false), calcConnection = false) ==
+      MoveResult.init(1, popCounts, 0, @[popCounts], @[0])
+    check field2 == fieldAfter2
 
 # ------------------------------------------------
 # Field <-> array
