@@ -7,13 +7,14 @@
 {.experimental: "views".}
 
 import std/[sequtils, sugar]
+import ./[assign]
 
 type
   UnionFindNode* = int ## Union-find node.
 
   UnionFind* = object ## Union-find tree.
     parents: seq[UnionFindNode]
-    subtreeNodeCounts: seq[int]
+    subtreeSizes: seq[int]
 
 # ------------------------------------------------
 # Constructor
@@ -21,10 +22,10 @@ type
 
 func init*(T: type UnionFind, size: int): T {.inline, noinit.} =
   let parents = collect:
-    for i in 0 ..< size:
-      i.UnionFindNode
+    for index in 0 ..< size:
+      index.UnionFindNode
 
-  UnionFind(parents: parents, subtreeNodeCounts: 1.repeat size)
+  UnionFind(parents: parents, subtreeSizes: 1.repeat size)
 
 # ------------------------------------------------
 # Operation
@@ -37,7 +38,7 @@ func root*(self: var UnionFind, node: UnionFindNode): UnionFindNode {.inline, no
     return node
 
   # path compression
-  self.parents[node] = self.parents[self.parents[node]]
+  self.parents[node].assign self.parents[self.parents[node]]
 
   self.root self.parents[node]
 
@@ -54,14 +55,14 @@ func merge*(self: var UnionFind, node1, node2: UnionFindNode) {.inline, noinit.}
   let
     bigRoot: UnionFindNode
     smallRoot: UnionFindNode
-  if self.subtreeNodeCounts[root1] >= self.subtreeNodeCounts[root2]:
+  if self.subtreeSizes[root1] >= self.subtreeSizes[root2]:
     bigRoot = root1
     smallRoot = root2
   else:
     bigRoot = root2
     smallRoot = root1
-  self.subtreeNodeCounts[bigRoot].inc self.subtreeNodeCounts[smallRoot]
-  self.parents[smallRoot] = bigRoot
+  self.subtreeSizes[bigRoot] += self.subtreeSizes[smallRoot]
+  self.parents[smallRoot].assign bigRoot
 
 func connected*(
     self: var UnionFind, node1, node2: UnionFindNode
