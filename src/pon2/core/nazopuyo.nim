@@ -105,7 +105,7 @@ func mark*(self: NazoPuyo, endStepIndex = -1): MarkResult {.inline, noinit.} =
           of Nuisance:
             moveResult.nuisancePuyoCount
           of Colored:
-            moveResult.colorPuyoCount
+            moveResult.coloredPuyoCount
           else:
             moveResult.cellCount GoalColorToCell[main.color]
         )

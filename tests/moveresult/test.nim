@@ -62,61 +62,67 @@ block: # init
 # Count
 # ------------------------------------------------
 
-block:
-  # cellCount, puyoCount, colorPuyoCount, nuisancePuyoCount,
-  # cellCounts, puyoCounts, colorPuyoCounts, nuisancePuyoCounts
+block: # cellCount
   let
-    countP = 15
-    countY = 0
-  check moveResult1.cellCount(Purple) == countP
-  check moveResult2.cellCount(Purple) == countP
-  check moveResult1.cellCount(Yellow) == countY
-  check moveResult2.cellCount(Yellow) == countY
+    answerP = 15
+    answerY = 0
+  check moveResult1.cellCount(Purple) == answerP
+  check moveResult2.cellCount(Purple) == answerP
+  check moveResult1.cellCount(Yellow) == answerY
+  check moveResult2.cellCount(Yellow) == answerY
 
-  let countPuyo = 57
-  check moveResult1.puyoCount == countPuyo
-  check moveResult2.puyoCount == countPuyo
+block: # puyoCount
+  let answer = 57
+  check moveResult1.puyoCount == answer
+  check moveResult2.puyoCount == answer
 
-  let countColor = 44
-  check moveResult1.colorPuyoCount == countColor
-  check moveResult2.colorPuyoCount == countColor
+block: # coloredPuyoCount
+  let answer = 44
+  check moveResult1.coloredPuyoCount == answer
+  check moveResult2.coloredPuyoCount == answer
 
-  let countGarbages = 13
-  check moveResult1.nuisancePuyoCount == countGarbages
-  check moveResult2.nuisancePuyoCount == countGarbages
+block: # nuisancePuyoCounts
+  let answer = 13
+  check moveResult1.nuisancePuyoCount == answer
+  check moveResult2.nuisancePuyoCount == answer
 
+block: # cellCounts
   let
-    countsB = @[5, 0, 8]
-    countsY = @[0, 0, 0]
-  check moveResult1.cellCounts(Blue) == countsB
-  check moveResult2.cellCounts(Blue) == countsB
-  check moveResult1.cellCounts(Yellow) == countsY
-  check moveResult2.cellCounts(Yellow) == countsY
+    answerB = @[5, 0, 8]
+    answerY = @[0, 0, 0]
+  check moveResult1.cellCounts(Blue) == answerB
+  check moveResult2.cellCounts(Blue) == answerB
+  check moveResult1.cellCounts(Yellow) == answerY
+  check moveResult2.cellCounts(Yellow) == answerY
 
-  let countsPuyo = @[19, 8, 30]
-  check moveResult1.puyoCounts == countsPuyo
-  check moveResult2.puyoCounts == countsPuyo
+block: # puyoCounts
+  let answer = @[19, 8, 30]
+  check moveResult1.puyoCounts == answer
+  check moveResult2.puyoCounts == answer
 
-  let countsColor = @[18, 8, 18]
-  check moveResult1.colorPuyoCounts == countsColor
-  check moveResult2.colorPuyoCounts == countsColor
+block: # coloredPuyoCounts
+  let answer = @[18, 8, 18]
+  check moveResult1.coloredPuyoCounts == answer
+  check moveResult2.coloredPuyoCounts == answer
 
-  let countsGarbages = @[1, 0, 12]
-  check moveResult1.nuisancePuyoCounts == countsGarbages
-  check moveResult2.nuisancePuyoCounts == countsGarbages
+block: # nuisancePuyoCounts
+  let answer = @[1, 0, 12]
+  check moveResult1.nuisancePuyoCounts == answer
+  check moveResult2.nuisancePuyoCounts == answer
 
 # ------------------------------------------------
 # Color
 # ------------------------------------------------
 
-block: # colors, colorsSeq
-  let colors2 = {Red, Green, Blue, Purple}
-  check moveResult1.colors == colors2
-  check moveResult2.colors == colors2
+block: # colors
+  let answer = {Red, Green, Blue, Purple}
+  check moveResult1.colors == answer
+  check moveResult2.colors == answer
 
-  let colorsSeq2 = @[{Red, Blue, Purple}, {Red, Green}, {Red, Blue, Purple}]
-  check moveResult1.colorsSeq == colorsSeq2
-  check moveResult2.colorsSeq == colorsSeq2
+block: # colorsSeq
+  let answer = @[{Red, Blue, Purple}, {Red, Green}, {Red, Blue, Purple}]
+  check moveResult1.colorsSeq == answer
+  check moveResult2.colorsSeq == answer
 
 # ------------------------------------------------
 # Place

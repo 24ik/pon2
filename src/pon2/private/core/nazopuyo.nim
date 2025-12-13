@@ -71,7 +71,7 @@ func isSatisfiedCount*(goal: Goal, moveResult: MoveResult): bool {.inline, noini
       of Nuisance:
         moveResult.nuisancePuyoCounts
       of Colored:
-        moveResult.colorPuyoCounts
+        moveResult.coloredPuyoCounts
       else:
         moveResult.cellCounts GoalColorToCell[main.color]
 

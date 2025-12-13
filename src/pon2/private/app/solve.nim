@@ -103,7 +103,7 @@ func child(self: SolveNode, goal: Goal, step: Step): SolveNode {.inline, noinit.
         of Nuisance:
           moveResult.nuisancePuyoCount
         of Colored:
-          moveResult.colorPuyoCount
+          moveResult.coloredPuyoCount
         else:
           moveResult.cellCount GoalColorToCell[main.color]
       childPopColors = {}

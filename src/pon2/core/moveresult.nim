@@ -88,10 +88,6 @@ func init*(T: type MoveResult, inclFullPopCounts = true): T {.inline, noinit.} =
 # Count
 # ------------------------------------------------
 
-func sumColor(arr: array[Cell, int]): int {.inline, noinit.} =
-  ## Returns the total number of color puyos.
-  (arr[Red] + arr[Green] + arr[Blue]) + (arr[Yellow] + arr[Purple])
-
 func cellCount*(self: MoveResult, cell: Cell): int {.inline, noinit.} =
   ## Returns the number of `cell` that popped.
   self.popCounts[cell]
@@ -100,9 +96,9 @@ func puyoCount*(self: MoveResult): int {.inline, noinit.} =
   ## Returns the number of cells that popped.
   self.popCounts.sum
 
-func colorPuyoCount*(self: MoveResult): int {.inline, noinit.} =
+func coloredPuyoCount*(self: MoveResult): int {.inline, noinit.} =
   ## Returns the number of color puyos that popped.
-  self.popCounts.sumColor
+  ColoredPuyos.sumIt self.popCounts[it]
 
 func nuisancePuyoCount*(self: MoveResult): int {.inline, noinit.} =
   ## Returns the number of nuisance puyos that popped.
@@ -116,9 +112,9 @@ func puyoCounts*(self: MoveResult): seq[int] {.inline, noinit.} =
   ## Returns a sequence of the number of puyos that popped in each chain.
   self.detailPopCounts.mapIt it.sum
 
-func colorPuyoCounts*(self: MoveResult): seq[int] {.inline, noinit.} =
+func coloredPuyoCounts*(self: MoveResult): seq[int] {.inline, noinit.} =
   ## Returns a sequence of the number of color puyos that popped in each chain.
-  self.detailPopCounts.mapIt it.sumColor
+  self.detailPopCounts.map (counts: array[Cell, int]) => ColoredPuyos.sumIt counts[it]
 
 func nuisancePuyoCounts*(self: MoveResult): seq[int] {.inline, noinit.} =
   ## Returns a sequence of the number of nuisance puyos that popped in each chain.
@@ -161,9 +157,8 @@ func placeCounts*(
 func placeCounts*(self: MoveResult): Pon2Result[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of places where color puyos popped in each chain.
   if self.fullPopCountsOpt.isOk:
-    ok self.fullPopCountsOpt.unsafeValue.mapIt (
-      it[Red].len + it[Green].len + it[Blue].len
-    ) + (it[Yellow].len + it[Purple].len)
+    ok self.fullPopCountsOpt.unsafeValue.map (counts: array[Cell, seq[int]]) =>
+      (ColoredPuyos.sumIt counts[it].len)
   else:
     err "`placeCounts` not supported: {self}".fmt
 
@@ -193,31 +188,34 @@ func connectionCounts*(self: MoveResult): Pon2Result[seq[int]] {.inline, noinit.
 
 const
   ConnectionBonuses = collect:
-    for connection in 0 .. Height.pred * Width:
-      if connection <= 4:
+    for connection in 0 .. (Height - 1) * Width:
+      case connection
+      of 0 .. 4:
         0
-      elif connection in 5 .. 10:
+      of 5 .. 10:
         connection - 3
       else:
         10
   ChainBonuses = collect:
     for chain in 0 .. Height * Width div 4:
-      if chain <= 1:
+      case chain
+      of 0 .. 1:
         0
-      elif chain in 2 .. 5:
+      of 2 .. 5:
         8 * 2 ^ (chain - 2)
       else:
         64 + 32 * (chain - 5)
   ColorBonuses = collect:
     for color in 0 .. 5:
-      if color <= 1:
+      case color
+      of 0 .. 1:
         0
       else:
         3 * 2 ^ (color - 2)
 
 func connectionBonus(counts: seq[int]): int {.inline, noinit.} =
   ## Returns the connect bonus.
-  sum counts.mapIt ConnectionBonuses[it]
+  counts.sumIt ConnectionBonuses[it]
 
 func score*(self: MoveResult): Pon2Result[int] {.inline, noinit.} =
   ## Returns the score.
