@@ -9,7 +9,7 @@
 import std/[strformat, uri]
 import ./[cell, field, fqdn, moveresult, pair, placement, popresult, step]
 import ../[utils]
-import ../private/[assign, bitutils, strutils, tables]
+import ../private/[assign, bitops, strutils, tables]
 
 export field, moveresult, step, utils
 

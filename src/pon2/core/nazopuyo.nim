@@ -10,7 +10,7 @@ import std/[strformat, uri]
 import
   ./[cell, field, fqdn, goal, moveresult, pair, placement, popresult, puyopuyo, step]
 import ../[utils]
-import ../private/[assign, bitutils, core, strutils, tables]
+import ../private/[assign, bitops, core, strutils, tables]
 
 export goal, puyopuyo, utils
 

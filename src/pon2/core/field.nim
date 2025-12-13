@@ -12,7 +12,7 @@ import
 import ../[utils]
 import
   ../private/
-    [arrayutils, assign, bitutils, core, expand, math, staticfor, strutils, tables]
+    [arrayutils, assign, bitops, core, expand, math, staticfor, strutils, tables]
 
 export cell, common, moveresult, placement, popresult, rule, utils
 

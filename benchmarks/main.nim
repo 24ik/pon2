@@ -141,15 +141,15 @@ when isMainModule:
   do:
     discard field.pop
 
-  "dropGarbages (Tsu)".measureExecTime:
+  "dropNuisance (Tsu)".measureExecTime:
     var field = Field.init
   do:
-    field.dropGarbages [Col0: 0, 1, 2, 3, 4, 5], false
+    field.dropNuisance [Col0: 0, 1, 2, 3, 4, 5]
 
   "dropGarbages (Water)".measureExecTime:
     var field = Field.init Rule.Water
   do:
-    field.dropGarbages [Col0: 0, 1, 2, 3, 4, 5], false
+    field.dropNuisance [Col0: 0, 1, 2, 3, 4, 5]
 
   "settle (Tsu)".measureExecTime:
     var field = Field.init
@@ -179,18 +179,17 @@ gybgbb
 rgybgy
 rgybgy
 rgybgy""".parseField.unsafeValue
-      pair = BlueGreen
-      plcmt = Up2
+      step = Step.init(BlueGreen, Up2)
 
     "move (Tsu, not calcConn)".measureExecTime:
       var field = field19
     do:
-      discard field.move(pair, plcmt, false)
+      discard field.move(step, calcConnection = false)
 
     "move (Tsu, calcConn)".measureExecTime:
       var field = field19
     do:
-      discard field.move(pair, plcmt, true)
+      discard field.move step
 
   block:
     let
@@ -211,18 +210,17 @@ bgrbrg
 bgrbrp
 rgrbrp
 pbgrbr""".parseField.unsafeValue
-      pair = GreenBlue
-      plcmt = Up0
+      step = Step.init(GreenBlue, Up0)
 
     "move (Water, not calcConn)".measureExecTime:
       var field = field18
     do:
-      discard field.move(pair, plcmt, false)
+      discard field.move(step, calcConnection = false)
 
     "move (Water, calcConn)".measureExecTime:
       var field = field18
     do:
-      discard field.move(pair, plcmt, true)
+      discard field.move step
 
   "solve (Rashomon)".measureExecTime:
     let nazoPuyo =

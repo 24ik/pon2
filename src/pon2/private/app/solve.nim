@@ -6,12 +6,12 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, typetraits]
+import std/[sequtils]
 import ../../[core]
 import ../../private/[assign, core, macros, math, staticfor]
 
 when defined(js) or defined(nimsuggest):
-  import std/[strformat, sugar]
+  import std/[strformat, sugar, typetraits]
   import ../../[utils]
   import ../../private/[strutils]
 

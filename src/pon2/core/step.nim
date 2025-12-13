@@ -6,10 +6,11 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[bitops, sequtils, strformat, sugar]
+import std/[sequtils, strformat, sugar]
 import ./[cell, common, fqdn, pair, placement]
 import ../[utils]
-import ../private/[arrayutils, assign, deques, math, staticfor, strutils, tables]
+import
+  ../private/[arrayutils, assign, bitops, deques, math, staticfor, strutils, tables]
 
 export deques, pair, placement, utils
 
