@@ -12,8 +12,8 @@ export setutils except toSet
 
 template toSet*(iter: untyped): untyped =
   ## Converts the iterable to a built-in set type.
-  var res: set[iter.elementType] = {}
-  for e in iter:
-    res.incl e
+  var resultSet: set[iter.elementType] = {}
+  for elem in iter:
+    resultSet.incl elem
 
-  res
+  resultSet
