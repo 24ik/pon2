@@ -44,13 +44,13 @@ func noticeCounts*(
     highestNotice = Crown
     counts[Comet].assign 0
 
-  var score2 = score div garbageRate
+  var totalCount = score div garbageRate
   for notice in countdown(highestNotice, Notice.low):
     let
       unit = NoticeUnits[notice]
-      count = score2 div unit
+      count = totalCount div unit
 
     counts[notice].assign count
-    score2.dec unit * count
+    totalCount -= unit * count
 
   counts
