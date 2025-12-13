@@ -13,22 +13,20 @@ func initArrayWith*[T](count: static int, val: T): array[count, T] {.inline, noi
   when count == 0: # NOTE: cpp backend needs branching
     []
   else:
-    {.push warning[Uninit]: off.}
-    var arr: array[count, T] # NOTE: `noinit` does not work if T has heap-allocated type
-    for elem in arr.mitems:
+    var valArray {.noinit.}: array[count, T]
+    for elem in valArray.mitems:
+      elem.wasMoved
       elem.assign val
 
-    return arr
-    {.pop.}
+    valArray
 
 func initArrayWith*[E: enum, T](
     t: typedesc[E], val: T
 ): array[E, T] {.inline, noinit.} =
   ## Returns the array with all elements the value.
-  {.push warning[Uninit]: off.}
-  var arr: array[E, T] # NOTE: `noinit` does not work if T has heap-allocated type
-  for elem in arr.mitems:
+  var valArray {.noinit.}: array[E, T]
+  for elem in valArray.mitems:
+    elem.wasMoved
     elem.assign val
 
-  return arr
-  {.pop.}
+  valArray
