@@ -629,7 +629,7 @@ func flip*(self: var Simulator) =
 const
   DefaultGoalColor = All
   DefaultGoalVal = 0
-  DefaultGoalValOperator = Exact
+  DefaultGoalOperator = Exact
 
 func normalizeGoal*(self: var Simulator) =
   ## Normalizes the goal.
@@ -649,7 +649,7 @@ func `goalKindOpt=`*(self: var Simulator, kindOpt: Opt[GoalKind]) =
         self.nazoPuyo.goal.mainOpt.unsafeValue.kind.assign kind
       else:
         self.nazoPuyo.goal.mainOpt.ok GoalMain.init(
-          kind, DefaultGoalColor, DefaultGoalVal, DefaultGoalValOperator
+          kind, DefaultGoalColor, DefaultGoalVal, DefaultGoalOperator
         )
     else:
       if self.nazoPuyo.goal.mainOpt.isOk: self.nazoPuyo.goal.mainOpt.err else: discard
@@ -680,7 +680,7 @@ func `goalVal=`*(self: var Simulator, val: int) =
     self.nazoPuyo.goal.mainOpt.unsafeValue.val.assign val
     self.nazoPuyo.goal.normalize
 
-func `goalValOperator=`*(self: var Simulator, valOperator: GoalValOperator) =
+func `goalOperator=`*(self: var Simulator, operator: GoalOperator) =
   ## Sets the goal exact.
   if self.mode != EditorEdit:
     return
@@ -689,7 +689,7 @@ func `goalValOperator=`*(self: var Simulator, valOperator: GoalValOperator) =
     return
 
   self.editBlock:
-    self.nazoPuyo.goal.mainOpt.unsafeValue.valOperator.assign valOperator
+    self.nazoPuyo.goal.mainOpt.unsafeValue.operator.assign operator
     self.nazoPuyo.goal.normalize
 
 func `goalClearColorOpt=`*(self: var Simulator, clearColorOpt: Opt[GoalColor]) =

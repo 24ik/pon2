@@ -451,7 +451,7 @@ R""".parseNazoPuyo.unsafeValue
 # ------------------------------------------------
 
 block:
-  # normalizeGoal, `goalKindOpt=`, `goalColor=`, `goalVal=`, `goalValOperator=`,
+  # normalizeGoal, `goalKindOpt=`, `goalColor=`, `goalVal=`, `goalOperator=`,
   # `goalClearColorOpt=`
   var simulator = Simulator.init(
     NazoPuyo.init(PuyoPuyo.init, Goal.init(Color, GoalColor.Red, 2, Exact)), EditorEdit
@@ -468,7 +468,7 @@ block:
   simulator.goalVal = 3
   check simulator.nazoPuyo.goal == Goal.init(Chain, 3, Exact)
 
-  simulator.goalValOperator = AtLeast
+  simulator.goalOperator = AtLeast
   check simulator.nazoPuyo.goal == Goal.init(Chain, 3, AtLeast)
 
   simulator.goalClearColorOpt = Opt[GoalColor].ok All
@@ -483,7 +483,7 @@ block:
   simulator.goalVal = 1
   check simulator.nazoPuyo.goal == Goal.init All
 
-  simulator.goalValOperator = AtLeast
+  simulator.goalOperator = AtLeast
   check simulator.nazoPuyo.goal == Goal.init All
 
   simulator.goalClearColorOpt = Opt[GoalColor].ok Colored

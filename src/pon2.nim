@@ -374,7 +374,7 @@ when isMainModule:
         goalKindOpt = 1,
         goalColor = 1,
         goalVal = 3,
-        goalValOperator = 1,
+        goalOperator = 1,
         goalClearColorOpt = 0,
         moveCount = 2,
         colorCount = 2,
@@ -425,8 +425,7 @@ when isMainModule:
           "クリア条件の種類が不正です．"
         elif goalColor notin GoalColor.low.ord.succ .. GoalColor.high.ord.succ:
           "クリア条件の色が不正です．"
-        elif goalValOperator notin
-          GoalValOperator.low.ord.succ .. GoalValOperator.high.ord.succ:
+        elif goalOperator notin GoalOperator.low.ord.succ .. GoalOperator.high.ord.succ:
           "クリア条件の値比較の演算子が不正です．"
         elif goalClearColorOpt notin GoalColor.low.ord .. GoalColor.high.ord.succ:
           "全消し条件の色が不正です．"
@@ -486,7 +485,7 @@ when isMainModule:
               if goalKindOpt == 0: Opt[GoalMain].err
               else: Opt[GoalMain].ok GoalMain.init(
                 goalKindOpt.pred.GoalKind, goalColor.pred.GoalColor, goalVal,
-                goalValOperator.pred.GoalValOperator,
+                goalOperator.pred.GoalOperator,
               )
             ),
             clearColorOpt: (
@@ -597,7 +596,7 @@ $subcmds""",
           "goalKindOpt": 'K',
           "goalColor": 'C',
           "goalVal": 'V',
-          "goalValOperator": 'O',
+          "goalOperator": 'O',
           "goalClearColorOpt": 'L',
           "moveCount": 'm',
           "colorCount": 'c',
@@ -616,7 +615,7 @@ $subcmds""",
           "goalColor":
             "クリア条件の色（1:全 2:赤 3:緑 4:青 5:黄 6:紫 7:お邪魔 8:色）",
           "goalVal": "クリア条件の数",
-          "goalValOperator": "クリア条件の演算子（1:ちょうど 2:以上）",
+          "goalOperator": "クリア条件の演算子（1:ちょうど 2:以上）",
           "goalClearColorOpt":
             "全消し条件の色（0: 全消し条件なし 1:全 2:赤 3:緑 4:青 5:黄 6:紫 7:お邪魔 8:色）",
           "moveCount": "手数",

@@ -109,11 +109,10 @@ when defined(js) or defined(nimsuggest):
             class = "button px-2",
             onclick =
               () => (
-                self.derefSimulator(helper).goalValOperator =
-                  main.valOperator.rotateSucc
+                self.derefSimulator(helper).goalOperator = main.operator.rotateSucc
               ),
           ):
-            text ($main.valOperator).kstring
+            text ($main.operator).kstring
       tdiv(class = "block"):
         tdiv(class = "select"):
           select(

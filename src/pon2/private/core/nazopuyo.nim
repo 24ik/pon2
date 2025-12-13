@@ -17,7 +17,7 @@ func isSatisfied(goal: Goal, val: int): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   let main = goal.mainOpt.unsafeValue
 
-  case main.valOperator
+  case main.operator
   of Exact:
     val == main.val
   of AtLeast:
@@ -27,7 +27,7 @@ func isSatisfied(goal: Goal, vals: openArray[int]): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   let main = goal.mainOpt.unsafeValue
 
-  case main.valOperator
+  case main.operator
   of Exact:
     main.val in vals
   of AtLeast:

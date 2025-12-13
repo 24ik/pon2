@@ -36,7 +36,7 @@ type
     Yellow = "黄"
     Purple = "紫"
 
-  GoalValOperator* {.pure.} = enum
+  GoalOperator* {.pure.} = enum
     ## Operator used in a value comparison.
     Exact = "ちょうど"
     AtLeast = "以上"
@@ -45,7 +45,7 @@ type
     kind*: GoalKind
     color*: GoalColor
     val*: int
-    valOperator*: GoalValOperator
+    operator*: GoalOperator
 
   Goal* = object ## Nazo Puyo goal.
     mainOpt*: Opt[GoalMain]
@@ -66,29 +66,25 @@ const
 # ------------------------------------------------
 
 func init*(
-    T: type GoalMain,
-    kind: GoalKind,
-    color: GoalColor,
-    val: int,
-    valOperator: GoalValOperator,
+    T: type GoalMain, kind: GoalKind, color: GoalColor, val: int, operator: GoalOperator
 ): T {.inline, noinit.} =
-  T(kind: kind, color: color, val: val, valOperator: valOperator)
+  T(kind: kind, color: color, val: val, operator: operator)
 
 func init*(
-    T: type GoalMain, kind: GoalKind, val: int, valOperator: GoalValOperator
+    T: type GoalMain, kind: GoalKind, val: int, operator: GoalOperator
 ): T {.inline, noinit.} =
-  T.init(kind, DefaultColor, val, valOperator)
+  T.init(kind, DefaultColor, val, operator)
 
 func init*(
     T: type Goal,
     kind: GoalKind,
     color: GoalColor,
     val: int,
-    valOperator: GoalValOperator,
+    operator: GoalOperator,
     clearColorOpt = NoneGoalColor,
 ): T {.inline, noinit.} =
   T(
-    mainOpt: Opt[GoalMain].ok GoalMain.init(kind, color, val, valOperator),
+    mainOpt: Opt[GoalMain].ok GoalMain.init(kind, color, val, operator),
     clearColorOpt: clearColorOpt,
   )
 
@@ -96,29 +92,29 @@ func init*(
     T: type Goal,
     kind: GoalKind,
     val: int,
-    valOperator: GoalValOperator,
+    operator: GoalOperator,
     clearColorOpt = NoneGoalColor,
 ): T {.inline, noinit.} =
-  T.init(kind, DefaultColor, val, valOperator, clearColorOpt)
+  T.init(kind, DefaultColor, val, operator, clearColorOpt)
 
 func init*(
     T: type Goal,
     kind: GoalKind,
     color: GoalColor,
     val: int,
-    valOperator: GoalValOperator,
+    operator: GoalOperator,
     clearColor: GoalColor,
 ): T {.inline, noinit.} =
-  T.init(kind, color, val, valOperator, Opt[GoalColor].ok clearColor)
+  T.init(kind, color, val, operator, Opt[GoalColor].ok clearColor)
 
 func init*(
     T: type Goal,
     kind: GoalKind,
     val: int,
-    valOperator: GoalValOperator,
+    operator: GoalOperator,
     clearColor: GoalColor,
 ): T {.inline, noinit.} =
-  T.init(kind, DefaultColor, val, valOperator, clearColor)
+  T.init(kind, DefaultColor, val, operator, clearColor)
 
 func init*(T: type Goal, clearColorOpt = NoneGoalColor): T {.inline, noinit.} =
   T(mainOpt: NoneGoalMain, clearColorOpt: clearColorOpt)
@@ -198,7 +194,7 @@ func `$`*(self: Goal): string {.inline, noinit.} =
         let main = self.mainOpt.unsafeValue
 
         var replacer = @[("c", $main.color), ("n", $main.val)]
-        case main.valOperator
+        case main.operator
         of Exact:
           replacer.add (ExactPlaceholder, ExactStr)
           replacer.add (AtLeastPlaceholder, "")
@@ -245,13 +241,13 @@ func parseGoal*(str: string): Pon2Result[Goal] {.inline, noinit.} =
 
   # operator
   var
-    valOperator = GoalValOperator.low
+    operator = GoalOperator.low
     kindStr = strs[0]
   if ExactStr in strs[0]:
-    valOperator.assign Exact
+    operator.assign Exact
     kindStr.assign strs[0].replace(ExactStr, "")
   elif AtLeastStr in strs[0]:
-    valOperator.assign AtLeast
+    operator.assign AtLeast
     kindStr.assign strs[0].replace(AtLeastStr, "")
   else:
     return err errorMsg
@@ -299,7 +295,7 @@ func parseGoal*(str: string): Pon2Result[Goal] {.inline, noinit.} =
   else:
     return err errorMsg
 
-  ok Goal.init(kind, color, val, valOperator, clearColorOpt)
+  ok Goal.init(kind, color, val, operator, clearColorOpt)
 
 # ------------------------------------------------
 # Goal <-> URI
@@ -321,7 +317,7 @@ func toUriQuery*(self: Goal, fqdn = Pon2): Pon2Result[string] {.inline, noinit.}
       mainQuery =
         if self.mainOpt.isOk:
           let main = self.mainOpt.unsafeValue
-          [$main.kind.ord, $main.color.ord, $main.val, $main.valOperator.ord].join QuerySep
+          [$main.kind.ord, $main.color.ord, $main.val, $main.operator.ord].join QuerySep
         else:
           ""
       clearQuery =
@@ -350,7 +346,7 @@ func toUriQuery*(self: Goal, fqdn = Pon2): Pon2Result[string] {.inline, noinit.}
               return err "IshikawaPuyo/Ips format only supports clearColor alone or with Chain, but got {main.kind}".fmt
 
             (
-              KindToIshikawaUri[main.kind.ord].succ main.valOperator.ord + 2,
+              KindToIshikawaUri[main.kind.ord].succ main.operator.ord + 2,
               ValToIshikawaUri[main.val],
             )
           else:
@@ -363,7 +359,7 @@ func toUriQuery*(self: Goal, fqdn = Pon2): Pon2Result[string] {.inline, noinit.}
       let main = self.mainOpt.unsafeValue
 
       let
-        kindChar = KindToIshikawaUri[main.kind.ord].succ main.valOperator.ord
+        kindChar = KindToIshikawaUri[main.kind.ord].succ main.operator.ord
         colorChar = ColorToIshikawaUri[main.color.ord]
         valChar = ValToIshikawaUri[main.val]
 
@@ -400,10 +396,10 @@ func parseGoal*(
       color =
         ?parseOrdinal[GoalColor](mainStrs[1]).context "Invalid goal (color): {query}".fmt
       val = ?mainStrs[2].parseInt.context "Invalid goal (val): {query}".fmt
-      valOperator =
-        ?parseOrdinal[GoalValOperator](mainStrs[3]).context "Invalid goal (val operator): {query}".fmt
+      operator =
+        ?parseOrdinal[GoalOperator](mainStrs[3]).context "Invalid goal (operator): {query}".fmt
 
-    ok Goal.init(kind, color, val, valOperator, clearColorOpt)
+    ok Goal.init(kind, color, val, operator, clearColorOpt)
   of IshikawaPuyo, Ips:
     if query.len != 3:
       return err "Invalid goal: {query}".fmt
@@ -422,27 +418,27 @@ func parseGoal*(
     # kind, operator, clear
     var
       kind = GoalKind.low
-      valOperator = GoalValOperator.low
+      operator = GoalOperator.low
       clear = false
     case query[0]
     of KindToIshikawaUri[Chain.ord].succ 2:
       kind.assign Chain
-      valOperator.assign Exact
+      operator.assign Exact
       clear.assign true
     of KindToIshikawaUri[Chain.ord].succ 3:
       kind.assign Chain
-      valOperator.assign AtLeast
+      operator.assign AtLeast
       clear.assign true
     else:
       let kindIndex = KindToIshikawaUri.find query[0]
       if kindIndex >= 0:
         kind.assign kindIndex.GoalKind
-        valOperator.assign Exact
+        operator.assign Exact
       else:
         let atLeastKindIndex = KindToIshikawaUri.find query[0].pred
         if atLeastKindIndex >= 0:
           kind.assign atLeastKindIndex.GoalKind
-          valOperator.assign AtLeast
+          operator.assign AtLeast
         else:
           return err "Invalid goal (kind): {query}".fmt
 
@@ -457,4 +453,4 @@ func parseGoal*(
       clearColorOpt.ok color
       color.assign GoalColor.low
 
-    ok Goal.init(kind, color, val, valOperator, clearColorOpt)
+    ok Goal.init(kind, color, val, operator, clearColorOpt)

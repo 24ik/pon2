@@ -12,9 +12,9 @@ import ../../src/pon2/core/[fqdn, goal]
 
 block: # init
   check GoalMain.init(AccumCount, GoalColor.Yellow, 4, AtLeast) ==
-    GoalMain(kind: AccumCount, color: GoalColor.Yellow, val: 4, valOperator: AtLeast)
+    GoalMain(kind: AccumCount, color: GoalColor.Yellow, val: 4, operator: AtLeast)
   check GoalMain.init(Chain, 2, Exact) ==
-    GoalMain(kind: Chain, color: GoalColor.low, val: 2, valOperator: Exact)
+    GoalMain(kind: Chain, color: GoalColor.low, val: 2, operator: Exact)
 
   check Goal.init(Connection, Colored, 8, Exact) ==
     Goal(
