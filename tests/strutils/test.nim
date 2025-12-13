@@ -16,13 +16,13 @@ block: # parseOrdinal
   check parseOrdinal[bool]("2").isErr
 
 block: # split2
-  proc checkSplit2(str, sep: string, res: seq[string], maxsplit = -1) =
-    check str.split2(sep, maxsplit) == res
+  proc checkSplit2(str, sep: string, answer: seq[string], maxsplit = -1) =
+    check str.split2(sep, maxsplit) == answer
 
     let strs = collect:
       for s in str.split2(sep, maxsplit):
         s
-    check strs == res
+    check strs == answer
 
   ".a.bc.def.".checkSplit2 ".", @["", "a", "bc", "def", ""]
   "a---b".checkSplit2 "--", @["a", "-b"]
