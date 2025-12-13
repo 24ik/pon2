@@ -3,7 +3,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[unittest, uri]
+import std/[strformat, unittest, uri]
 import ../../src/pon2/[core]
 import ../../src/pon2/app/[key, simulator]
 import ../../src/pon2/private/[algorithm, assign]
@@ -951,161 +951,161 @@ pp|23""".parseNazoPuyo.unsafeValue
   check simulator1 == simulator2
 
   simulator1.rotatePlacementLeft
-  check simulator2.operate KeyEvent.init 'j'
+  check simulator2.operate KeyEventJ
   check simulator1 == simulator2
 
   simulator1.rotatePlacementRight
-  check simulator2.operate KeyEvent.init 'k'
+  check simulator2.operate KeyEventK
   check simulator1 == simulator2
 
   simulator1.movePlacementLeft
-  check simulator2.operate KeyEvent.init 'a'
+  check simulator2.operate KeyEventA
   check simulator1 == simulator2
 
   simulator1.movePlacementRight
-  check simulator2.operate KeyEvent.init 'd'
+  check simulator2.operate KeyEventD
   check simulator1 == simulator2
 
   simulator1.forward
-  check simulator2.operate KeyEvent.init 's'
+  check simulator2.operate KeyEventS
   check simulator1 == simulator2
 
   simulator1.forward(replay = true)
-  check simulator2.operate KeyEvent.init 'c'
+  check simulator2.operate KeyEventC
   check simulator1 == simulator2
 
   simulator1.forward(skip = true)
-  check simulator2.operate KeyEvent.init "Space"
+  check simulator2.operate KeyEventSpace
   check simulator1 == simulator2
 
   simulator1.backward
-  check simulator2.operate KeyEvent.init 'w'
+  check simulator2.operate KeyEventW
   check simulator1 == simulator2
 
   simulator1.backward
-  check simulator2.operate KeyEvent.init 'x'
+  check simulator2.operate KeyEventX
   check simulator1 == simulator2
 
   simulator1.reset
-  check simulator2.operate KeyEvent.init 'z'
+  check simulator2.operate KeyEventZ
   check simulator1 == simulator2
 
-  check not simulator2.operate KeyEvent.init "Tab"
+  check not simulator2.operate KeyEventTab
   check simulator1 == simulator2
 
   simulator1.mode = ViewerEdit
-  check simulator2.operate KeyEvent.init 't'
+  check simulator2.operate KeyEventT
   check simulator1 == simulator2
 
   simulator1.toggleInsert
-  check simulator2.operate KeyEvent.init 'g'
+  check simulator2.operate KeyEventG
   check simulator1 == simulator2
 
   simulator1.toggleFocus
-  check simulator2.operate KeyEvent.init "Tab"
+  check simulator2.operate KeyEventTab
   check simulator1 == simulator2
 
   simulator1.moveCursorRight
-  check simulator2.operate KeyEvent.init 'd'
+  check simulator2.operate KeyEventD
   check simulator1 == simulator2
 
   simulator1.moveCursorLeft
-  check simulator2.operate KeyEvent.init 'a'
+  check simulator2.operate KeyEventA
   check simulator1 == simulator2
 
   simulator1.moveCursorUp
-  check simulator2.operate KeyEvent.init 'w'
+  check simulator2.operate KeyEventW
   check simulator1 == simulator2
 
   simulator1.moveCursorDown
-  check simulator2.operate KeyEvent.init 's'
+  check simulator2.operate KeyEventS
   check simulator1 == simulator2
 
   simulator1.writeCell Cell.Red
-  check simulator2.operate KeyEvent.init 'h'
+  check simulator2.operate KeyEventH
   check simulator1 == simulator2
 
   simulator1.writeCell Cell.Green
-  check simulator2.operate KeyEvent.init 'j'
+  check simulator2.operate KeyEventJ
   check simulator1 == simulator2
 
   simulator1.writeCell Cell.Blue
-  check simulator2.operate KeyEvent.init 'k'
+  check simulator2.operate KeyEventK
   check simulator1 == simulator2
 
   simulator1.writeCell Cell.Yellow
-  check simulator2.operate KeyEvent.init 'l'
+  check simulator2.operate KeyEventL
   check simulator1 == simulator2
 
   simulator1.writeCell Cell.Purple
-  check simulator2.operate KeyEvent.init "Semicolon"
+  check simulator2.operate KeyEventSemicolon
   check simulator1 == simulator2
 
   simulator1.writeCell Garbage
-  check simulator2.operate KeyEvent.init 'o'
+  check simulator2.operate KeyEventO
   check simulator1 == simulator2
 
   simulator1.writeCell Hard
-  check simulator2.operate KeyEvent.init 'p'
+  check simulator2.operate KeyEventP
   check simulator1 == simulator2
 
   simulator1.writeCell Cell.None
-  check simulator2.operate KeyEvent.init "Space"
+  check simulator2.operate KeyEventSpace
   check simulator1 == simulator2
 
   simulator1.writeRotate(cross = false)
-  check simulator2.operate KeyEvent.init 'n'
+  check simulator2.operate KeyEventN
   check simulator1 == simulator2
 
   simulator1.writeRotate(cross = true)
-  check simulator2.operate KeyEvent.init 'm'
+  check simulator2.operate KeyEventM
   check simulator1 == simulator2
 
   simulator1.shiftFieldRight
-  check simulator2.operate KeyEvent.init 'D'
+  check simulator2.operate KeyEventShiftD
   check simulator1 == simulator2
 
   simulator1.shiftFieldLeft
-  check simulator2.operate KeyEvent.init 'A'
+  check simulator2.operate KeyEventShiftA
   check simulator1 == simulator2
 
   simulator1.shiftFieldUp
-  check simulator2.operate KeyEvent.init 'W'
+  check simulator2.operate KeyEventShiftW
   check simulator1 == simulator2
 
   simulator1.shiftFieldDown
-  check simulator2.operate KeyEvent.init 'S'
+  check simulator2.operate KeyEventShiftS
   check simulator1 == simulator2
 
   simulator1.flip
-  check simulator2.operate KeyEvent.init 'f'
+  check simulator2.operate KeyEventF
   check simulator1 == simulator2
 
   simulator1.undo
-  check simulator2.operate KeyEvent.init 'Z'
+  check simulator2.operate KeyEventShiftZ
   check simulator1 == simulator2
 
   simulator1.redo
-  check simulator2.operate KeyEvent.init 'X'
+  check simulator2.operate KeyEventShiftX
   check simulator1 == simulator2
 
   simulator1.forward
-  check simulator2.operate KeyEvent.init 'c'
+  check simulator2.operate KeyEventC
   check simulator1 == simulator2
 
   simulator1.backward
-  check simulator2.operate KeyEvent.init 'x'
+  check simulator2.operate KeyEventX
   check simulator1 == simulator2
 
   simulator1.reset
-  check simulator2.operate KeyEvent.init 'z'
+  check simulator2.operate KeyEventZ
   check simulator1 == simulator2
 
-  check not simulator2.operate KeyEvent.init 'v'
+  check not simulator2.operate KeyEventV
   check simulator1 == simulator2
 
   simulator1.mode = ViewerPlay
-  check simulator2.operate KeyEvent.init 't'
+  check simulator2.operate KeyEventT
   check simulator1 == simulator2
 
   var
@@ -1114,30 +1114,30 @@ pp|23""".parseNazoPuyo.unsafeValue
   check simulator3 == simulator4
 
   simulator3.forward(replay = true)
-  check simulator4.operate KeyEvent.init 'c'
+  check simulator4.operate KeyEventC
   check simulator3 == simulator4
 
   simulator3.reset
-  check simulator4.operate KeyEvent.init 'W'
+  check simulator4.operate KeyEventShiftW
   check simulator3 == simulator4
 
   simulator3.forward(replay = true)
-  check simulator4.operate KeyEvent.init 's'
+  check simulator4.operate KeyEventS
   check simulator3 == simulator4
 
   simulator3.backward
-  check simulator4.operate KeyEvent.init 'w'
+  check simulator4.operate KeyEventW
   check simulator3 == simulator4
 
   simulator3.backward
-  check simulator4.operate KeyEvent.init 'x'
+  check simulator4.operate KeyEventX
   check simulator3 == simulator4
 
   simulator3.reset
-  check simulator4.operate KeyEvent.init 'z'
+  check simulator4.operate KeyEventZ
   check simulator3 == simulator4
 
-  check not simulator4.operate KeyEvent.init 'Z'
+  check not simulator4.operate KeyEventShiftZ
   check simulator3 == simulator4
 
   var
@@ -1146,24 +1146,24 @@ pp|23""".parseNazoPuyo.unsafeValue
   check simulator5 == simulator6
 
   simulator5.rule = Water
-  check simulator6.operate KeyEvent.init 'e'
+  check simulator6.operate KeyEventE
   check simulator5 == simulator6
 
   simulator5.rule = Tsu
-  check simulator6.operate KeyEvent.init 'r'
+  check simulator6.operate KeyEventR
   check simulator5 == simulator6
 
   simulator5.toggleFocus
-  check simulator6.operate KeyEvent.init "Tab"
+  check simulator6.operate KeyEventTab
   check simulator5 == simulator6
 
   simulator5.writeCell Garbage
-  check simulator6.operate KeyEvent.init 'o'
+  check simulator6.operate KeyEventO
   check simulator5 == simulator6
 
-  for i in 0 .. 9:
-    simulator5.writeCount i
-    check simulator6.operate KeyEvent.init '0'.succ i
+  for digit in 0 .. 9:
+    simulator5.writeCount digit
+    check simulator6.operate KeyEvent.init "Digit{digit}".fmt
     check simulator5 == simulator6
 
 # ------------------------------------------------

@@ -900,13 +900,9 @@ func mark*(self: Simulator): MarkResult =
 # Keyboard
 # ------------------------------------------------
 
-func initDigitKeys(): seq[KeyEvent] =
-  ## Returns `DigitKeys`.
-  collect:
-    for c in '0' .. '9':
-      KeyEvent.init c
-
-const DigitKeys = initDigitKeys()
+const DigitKeys = collect:
+  for digit in 0 .. 9:
+    KeyEvent.init "Digit{digit}".fmt
 
 func operate*(self: var Simulator, key: KeyEvent): bool {.discardable.} =
   ## Performs an action specified by the key.
@@ -916,117 +912,117 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.discardable.} =
   case self.mode
   of PlayModes:
     # mode
-    if key == static(KeyEvent.init 't'):
+    if key == KeyEventT:
       if self.mode == ViewerPlay:
         self.`mode=` ViewerEdit
       else:
         self.`mode=` EditorEdit
     # rotate operating placement
-    elif key == static(KeyEvent.init 'k'):
+    elif key == KeyEventK:
       self.rotatePlacementRight
-    elif key == static(KeyEvent.init 'j'):
+    elif key == KeyEventJ:
       self.rotatePlacementLeft
     # move operating placement
-    elif key == static(KeyEvent.init 'd'):
+    elif key == KeyEventD:
       self.movePlacementRight
-    elif key == static(KeyEvent.init 'a'):
+    elif key == KeyEventA:
       self.movePlacementLeft
     # forward / backward / reset
-    elif key == static(KeyEvent.init 's'):
+    elif key == KeyEventS:
       self.forward
-    elif key in static([KeyEvent.init 'x', KeyEvent.init 'w']):
+    elif key in [KeyEventX, KeyEventW]:
       self.backward
-    elif key == static(KeyEvent.init 'z'):
+    elif key == KeyEventZ:
       self.reset
-    elif key == static(KeyEvent.init "Space"):
+    elif key == KeyEventSpace:
       self.forward(skip = true)
-    elif key == static(KeyEvent.init 'c'):
+    elif key == KeyEventC:
       self.forward(replay = true)
     else:
       handled.assign false
   of EditModes:
     # mode
-    if key == static(KeyEvent.init 't'):
+    if key == KeyEventT:
       if self.mode == ViewerEdit:
         self.`mode=` ViewerPlay
       else:
         self.`mode=` EditorPlay
-    elif key == static(KeyEvent.init 'r') and self.mode == EditorEdit:
+    elif key == KeyEventR and self.mode == EditorEdit:
       self.rule = self.rule.rotateSucc
-    elif key == static(KeyEvent.init 'e') and self.mode == EditorEdit:
+    elif key == KeyEventE and self.mode == EditorEdit:
       self.rule = self.rule.rotatePred
     # toggle insert / focus
-    elif key == static(KeyEvent.init 'g'):
+    elif key == KeyEventG:
       self.toggleInsert
-    elif key == static(KeyEvent.init "Tab"):
+    elif key == KeyEventTab:
       self.toggleFocus
     # move cursor
-    elif key == static(KeyEvent.init 'd'):
+    elif key == KeyEventD:
       self.moveCursorRight
-    elif key == static(KeyEvent.init 'a'):
+    elif key == KeyEventA:
       self.moveCursorLeft
-    elif key == static(KeyEvent.init 's'):
+    elif key == KeyEventS:
       self.moveCursorDown
-    elif key == static(KeyEvent.init 'w'):
+    elif key == KeyEventW:
       self.moveCursorUp
     # write / delete cell
-    elif key == static(KeyEvent.init 'h'):
+    elif key == KeyEventH:
       self.writeCell Cell.Red
-    elif key == static(KeyEvent.init 'j'):
+    elif key == KeyEventJ:
       self.writeCell Cell.Green
-    elif key == static(KeyEvent.init 'k'):
+    elif key == KeyEventK:
       self.writeCell Cell.Blue
-    elif key == static(KeyEvent.init 'l'):
+    elif key == KeyEventL:
       self.writeCell Cell.Yellow
-    elif key == static(KeyEvent.init "Semicolon"):
+    elif key == KeyEventSemicolon:
       self.writeCell Cell.Purple
-    elif key == static(KeyEvent.init 'o'):
+    elif key == KeyEventO:
       self.writeCell Garbage
-    elif key == static(KeyEvent.init 'p'):
+    elif key == KeyEventP:
       self.writeCell Hard
-    elif key == static(KeyEvent.init "Space"):
+    elif key == KeyEventSpace:
       self.writeCell Cell.None
     # write rotate
-    elif key == static(KeyEvent.init 'n'):
+    elif key == KeyEventN:
       self.writeRotate(cross = false)
-    elif key == static(KeyEvent.init 'm'):
+    elif key == KeyEventM:
       self.writeRotate(cross = true)
     # write count
     elif (let count = DigitKeys.find key; count >= 0):
       self.writeCount count
     # shift field
-    elif key == static(KeyEvent.init 'D'):
+    elif key == KeyEventShiftD:
       self.shiftFieldRight
-    elif key == static(KeyEvent.init 'A'):
+    elif key == KeyEventShiftA:
       self.shiftFieldLeft
-    elif key == static(KeyEvent.init 'S'):
+    elif key == KeyEventShiftS:
       self.shiftFieldDown
-    elif key == static(KeyEvent.init 'W'):
+    elif key == KeyEventShiftW:
       self.shiftFieldUp
     # flip field
-    elif key == static(KeyEvent.init 'f'):
+    elif key == KeyEventF:
       self.flip
     # undo / redo
-    elif key == static(KeyEvent.init 'Z'):
+    elif key == KeyEventShiftZ:
       self.undo
-    elif key == static(KeyEvent.init 'X'):
+    elif key == KeyEventShiftX:
       self.redo
     # forward / backward / reset
-    elif key == static(KeyEvent.init 'c'):
+    elif key == KeyEventC:
       self.forward
-    elif key == static(KeyEvent.init 'x'):
+    elif key == KeyEventX:
       self.backward
-    elif key == static(KeyEvent.init 'z'):
+    elif key == KeyEventZ:
       self.reset
     else:
       handled.assign false
   of Replay:
     # forward / backward / reset
-    if key in static([KeyEvent.init 'x', KeyEvent.init 'w']):
+    if key in [KeyEventX, KeyEventW]:
       self.backward
-    elif key in static([KeyEvent.init 'z', KeyEvent.init 'W']):
+    elif key in [KeyEventZ, KeyEventShiftW]:
       self.reset
-    elif key in static([KeyEvent.init 'c', KeyEvent.init 's']):
+    elif key in [KeyEventC, KeyEventS]:
       self.forward(replay = true)
     else:
       handled.assign false

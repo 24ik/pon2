@@ -275,10 +275,10 @@ func selectRandomQuery*(self: var Marathon, fromMatched = true) =
 proc operate*(self: var Marathon, key: KeyEvent): bool {.discardable.} =
   ## Performs an action specified by the key.
   ## Returns `true` if the key is handled.
-  if key == static(KeyEvent.init "Enter"):
+  if key == KeyEventEnter:
     self.selectRandomQuery
     return true
-  if key == static(KeyEvent.init("Enter", shift = true)):
+  if key == KeyEventShiftEnter:
     self.selectRandomQuery(fromMatched = false)
     return true
 

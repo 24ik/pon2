@@ -316,16 +316,16 @@ proc operate*(self: ref Studio, key: KeyEvent): bool {.discardable.} =
   ## Returns `true` if the key is handled.
   if self[].simulator.mode in EditorModes:
     # focus
-    if key == static(KeyEvent.init("Tab", shift = true)):
+    if key == KeyEventShiftTab:
       self[].toggleFocus
       return true
 
     if self[].focusReplay:
       # next/prev replay
-      if key == static(KeyEvent.init 'a'):
+      if key == KeyEventA:
         self[].prevReplay
         return true
-      if key == static(KeyEvent.init 'd'):
+      if key == KeyEventD:
         self[].nextReplay
         return true
 

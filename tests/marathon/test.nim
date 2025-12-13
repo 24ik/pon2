@@ -163,10 +163,10 @@ block: # operate
   marathon1.match "rg"
   var marathon2 = marathon1
 
-  marathon1.operate KeyEvent.init("Enter")
+  marathon1.operate KeyEventEnter
   marathon2.selectRandomQuery
   check marathon1 == marathon2
 
-  marathon1.operate KeyEvent.init("Enter", shift = true)
+  marathon1.operate KeyEventShiftEnter
   marathon2.selectRandomQuery(fromMatched = false)
   check marathon1 == marathon2

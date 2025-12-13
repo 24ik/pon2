@@ -207,32 +207,32 @@ pp|23""".parseNazoPuyo.unsafeValue
   studio1[] = Studio.init Simulator.init(nazoPuyo, EditorEdit)
   var studio2 = Studio.init Simulator.init(nazoPuyo, EditorEdit)
 
-  studio1.operate KeyEvent.init("Tab", shift = true)
+  studio1.operate KeyEventShiftTab
   studio2.toggleFocus
   check studio1[] == studio2
 
   studio1[].solve
   studio2.solve
 
-  studio1.operate KeyEvent.init 'a'
+  studio1.operate KeyEventA
   studio2.prevReplay
   check studio1[] == studio2
 
-  studio1.operate KeyEvent.init 'd'
+  studio1.operate KeyEventD
   studio2.nextReplay
   check studio1[] == studio2
 
-  studio1.operate KeyEvent.init 's'
+  studio1.operate KeyEventS
   block:
     Studio.privateAccess
-    studio2.replaySimulator.operate KeyEvent.init 's'
+    studio2.replaySimulator.operate KeyEventS
   check studio1[] == studio2
 
   studio1[].toggleFocus
   studio2.toggleFocus
 
-  studio1.operate KeyEvent.init 's'
+  studio1.operate KeyEventS
   block:
     Studio.privateAccess
-    studio2.simulator.operate KeyEvent.init 's'
+    studio2.simulator.operate KeyEventS
   check studio1[] == studio2
