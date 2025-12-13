@@ -124,8 +124,7 @@ func parsePuyoPuyoPon2(query: string): Pon2Result[PuyoPuyo] {.inline, noinit.} =
         return err "Invalid Puyo Puyo (multiple key: `{key}`): {query}".fmt
       fieldSet.assign true
 
-      # NOTE: assign does not work
-      puyoPuyo.field = ?val.parseField(Pon2).context "Invalid Puyo Puyo: {query}".fmt
+      puyoPuyo.field.assign ?val.parseField(Pon2).context "Invalid Puyo Puyo: {query}".fmt
     of StepsKey:
       if stepsSet:
         return err "Invalid Puyo Puyo (multiple key: `{key}`): {query}".fmt
@@ -144,8 +143,7 @@ func parsePuyoPuyoIshikawa(query: string): Pon2Result[PuyoPuyo] {.inline, noinit
   let strs = query.split FieldStepsSepIshikawaUri
 
   var puyoPuyo = PuyoPuyo.init
-  puyoPuyo.field =
-    ?strs[0].parseField(IshikawaPuyo).context "Invalid Puyo Puyo: {query}".fmt
+  puyoPuyo.field.assign ?strs[0].parseField(IshikawaPuyo).context "Invalid Puyo Puyo: {query}".fmt
 
   case strs.len
   of 1:
