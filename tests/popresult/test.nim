@@ -5,7 +5,7 @@
 
 import std/[unittest]
 import ../../src/pon2/core/[cell, common, popresult]
-import ../../src/pon2/private/[assign, strutils]
+import ../../src/pon2/private/[assign, staticfor, strutils]
 import ../../src/pon2/private/core/[binaryfield]
 
 proc toBinaryField(str: string): BinaryField =
@@ -13,8 +13,8 @@ proc toBinaryField(str: string): BinaryField =
   let strs = str.split "\n"
 
   var boolArray {.noinit.}: array[Row, array[Col, bool]]
-  for row in Row:
-    for col in Col:
+  staticFor(row, Row):
+    staticFor(col, Col):
       boolArray[row][col].assign strs[row.ord][col.ord] == 'x'
 
   return boolArray.toBinaryField
@@ -72,7 +72,7 @@ block: # cellCount, puyoCount, colorPuyoCount, nuisancePuyoCount
   check popResult.cellCount(Red) == 2
   check popResult.cellCount(Green) == 0
   check popResult.puyoCount == 6
-  check popResult.colorPuyoCount == 3
+  check popResult.coloredPuyoCount == 3
   check popResult.nuisancePuyoCount == 3
   check popResult.hardToGarbageCount == 1
 

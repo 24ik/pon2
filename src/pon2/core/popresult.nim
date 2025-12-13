@@ -21,7 +21,7 @@ type PopResult* = object ## Pop Results.
   hard: BinaryField
   hardToGarbage: BinaryField
   garbage: BinaryField
-  color: BinaryField
+  colored: BinaryField
 
 # ------------------------------------------------
 # Constructor
@@ -29,7 +29,7 @@ type PopResult* = object ## Pop Results.
 
 func init*(
     T: type PopResult,
-    red, green, blue, yellow, purple, hard, hardToGarbage, garbage, color: BinaryField,
+    red, green, blue, yellow, purple, hard, hardToGarbage, garbage, colored: BinaryField,
 ): T {.inline, noinit.} =
   T(
     red: red,
@@ -40,7 +40,7 @@ func init*(
     hard: hard,
     hardToGarbage: hardToGarbage,
     garbage: garbage,
-    color: color,
+    colored: colored,
   )
 
 func init*(T: type PopResult): T {.inline, noinit.} =
@@ -53,7 +53,7 @@ func init*(T: type PopResult): T {.inline, noinit.} =
 
 func isPopped*(self: PopResult): bool {.inline, noinit.} =
   ## Returns `true` if any puyo popped.
-  self.color != BinaryField.init
+  self.colored != BinaryField.init
 
 # ------------------------------------------------
 # Count
@@ -74,11 +74,11 @@ func cellCount*(self: PopResult, cell: Cell): int {.inline, noinit.} =
 
 func puyoCount*(self: PopResult): int {.inline, noinit.} =
   ## Returns the number of puyos that popped.
-  self.color.popcnt + self.hard.popcnt + self.garbage.popcnt
+  self.colored.popcnt + self.hard.popcnt + self.garbage.popcnt
 
-func colorPuyoCount*(self: PopResult): int {.inline, noinit.} =
-  ## Returns the number of color puyos that popped.
-  self.color.popcnt
+func coloredPuyoCount*(self: PopResult): int {.inline, noinit.} =
+  ## Returns the number of colored puyos that popped.
+  self.colored.popcnt
 
 func nuisancePuyoCount*(self: PopResult): int {.inline, noinit.} =
   ## Returns the number of nuisance puyos that popped.
