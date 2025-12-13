@@ -27,7 +27,7 @@ block: # defineExpand
 
     var fooBarA, fooBarB: int
     expandAB fooBar, foo:
-      fooBar = foo.succ + _
+      fooBar = foo + 100 + _
 
-    check fooBarA == fooA.succ + 0
-    check fooBarB == fooB.succ + 1
+    check fooBarA == fooA + 100 + 0
+    check fooBarB == fooB + 100 + 1
