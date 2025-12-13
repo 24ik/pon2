@@ -19,6 +19,7 @@ export common, placement
 
 when Sse42Available:
   import ./binaryfield/[xmm]
+  import ../[math]
   export xmm
 
   type BinaryField* = XmmBinaryField ## Binary field.

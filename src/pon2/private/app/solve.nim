@@ -209,7 +209,7 @@ func isAccepted(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
         of Nuisance:
           self.fieldCounts[Hard] + self.fieldCounts[Garbage]
         of Colored:
-          self.fieldCounts.sum Cell.Red .. Cell.Purple
+          ColoredPuyos.sumIt self.fieldCounts[it]
         else:
           self.fieldCounts[GoalColorToCell[clearColor]]
 
@@ -328,35 +328,15 @@ func canPrune(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
   # kind-specific
   case main.kind
   of Chain:
-    let possibleChain = sum(
-      self.cellCount(Cell.Red) div 4,
-      self.cellCount(Cell.Green) div 4,
-      self.cellCount(Cell.Blue) div 4,
-      self.cellCount(Cell.Yellow) div 4,
-      self.cellCount(Cell.Purple) div 4,
-    )
-    possibleChain < main.val
+    ColoredPuyos.sumIt(self.cellCount(it) div 4) < main.val
   of Color:
-    let possibleColorCount = sum(
-      (self.cellCount(Cell.Red) >= 4).int,
-      (self.cellCount(Cell.Green) >= 4).int,
-      (self.cellCount(Cell.Blue) >= 4).int,
-      (self.cellCount(Cell.Yellow) >= 4).int,
-      (self.cellCount(Cell.Purple) >= 4).int,
-    )
-    possibleColorCount < main.val
+    ColoredPuyos.sumIt((self.cellCount(it) >= 4).int) < main.val
   of Count, Connection, AccumCount:
     let
       nowPossibleCount =
         case main.color
         of All, Nuisance, Colored:
-          let colorPossibleCount = sum(
-            self.cellCount(Cell.Red).filter4,
-            self.cellCount(Cell.Green).filter4,
-            self.cellCount(Cell.Blue).filter4,
-            self.cellCount(Cell.Yellow).filter4,
-            self.cellCount(Cell.Purple).filter4,
-          )
+          let colorPossibleCount = ColoredPuyos.sumIt(self.cellCount(it).filter4)
           case main.color
           of All:
             colorPossibleCount + (colorPossibleCount > 0).int * self.nuisancePuyoCount
@@ -379,26 +359,13 @@ func canPrune(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
     let possiblePlace =
       case main.color
       of All, Colored:
-        sum(
-          self.cellCount(Cell.Red) div 4,
-          self.cellCount(Cell.Green) div 4,
-          self.cellCount(Cell.Blue) div 4,
-          self.cellCount(Cell.Yellow) div 4,
-          self.cellCount(Cell.Purple) div 4,
-        )
+        ColoredPuyos.sumIt self.cellCount(it) div 4
       else:
         self.cellCount(GoalColorToCell[main.color]) div 4
 
     possiblePlace < main.val
   of AccumColor:
-    let possibleVal = sum(
-      (self.cellCount(Cell.Red) >= 4).int,
-      (self.cellCount(Cell.Green) >= 4).int,
-      (self.cellCount(Cell.Blue) >= 4).int,
-      (self.cellCount(Cell.Yellow) >= 4).int,
-      (self.cellCount(Cell.Purple) >= 4).int,
-    )
-    possibleVal < main.val
+    ColoredPuyos.sumIt((self.cellCount(it) >= 4).int) < main.val
 
 # ------------------------------------------------
 # Child - Depth

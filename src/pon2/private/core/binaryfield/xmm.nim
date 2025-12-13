@@ -79,28 +79,6 @@ func `-=`*(f1: var XmmBinaryField, f2: XmmBinaryField) {.inline, noinit.} =
 func `*=`*(f1: var XmmBinaryField, f2: XmmBinaryField) {.inline, noinit.} =
   f1.assign f1 * f2
 
-func sum*(f1, f2, f3: XmmBinaryField): XmmBinaryField {.inline, noinit.} =
-  f1 + f2 + f3
-
-func sum*(f1, f2, f3, f4: XmmBinaryField): XmmBinaryField {.inline, noinit.} =
-  (f1 + f2) + (f3 + f4)
-
-func sum*(f1, f2, f3, f4, f5: XmmBinaryField): XmmBinaryField {.inline, noinit.} =
-  (f1 + f2 + f3) + (f4 + f5)
-
-func sum*(f1, f2, f3, f4, f5, f6: XmmBinaryField): XmmBinaryField {.inline, noinit.} =
-  (f1 + f2) + (f3 + f4) + (f5 + f6)
-
-func sum*(
-    f1, f2, f3, f4, f5, f6, f7: XmmBinaryField
-): XmmBinaryField {.inline, noinit.} =
-  (f1 + f2) + (f3 + f4) + (f5 + f6 + f7)
-
-func sum*(
-    f1, f2, f3, f4, f5, f6, f7, f8: XmmBinaryField
-): XmmBinaryField {.inline, noinit.} =
-  ((f1 + f2) + (f3 + f4)) + ((f5 + f6) + (f7 + f8))
-
 func product*(f1, f2, f3: XmmBinaryField): XmmBinaryField {.inline, noinit.} =
   f1 * f2 * f3
 
