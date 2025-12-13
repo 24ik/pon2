@@ -49,5 +49,5 @@ func del*[T](self: var Deque[T], index: int) {.inline, noinit.} =
 
 iterator mpairs*[T](self: var Deque[T]): tuple[key: int, val: var T] {.inline.} =
   ## Yields and index-value pair in the deque.
-  for i in 0 ..< self.len:
-    yield (i, self[i])
+  for index in 0 ..< self.len:
+    yield (index, self[index])
