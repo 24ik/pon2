@@ -23,11 +23,11 @@ func replaced*(node, before, after: NimNode): NimNode {.inline, noinit.} =
   of nnkEmpty, nnkLiterals:
     node
   else:
-    let rTree = node.kind.newNimNode node
+    let resultTree = node.kind.newNimNode node
     for child in node:
-      rTree.add child.replaced(before, after)
+      resultTree.add child.replaced(before, after)
 
-    rTree
+    resultTree
 
 func replace*(node: var NimNode, before, after: NimNode) {.inline, noinit.} =
   ## Replaces `before` by `after` in the node.
