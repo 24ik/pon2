@@ -52,7 +52,7 @@ func `*`(self: Field, binaryField: BinaryField): Field {.inline, noinit.} =
 
 func exist(self: Field): BinaryField {.inline, noinit.} =
   ## Returns the binary field where puyos exist.
-  sum(self.binaryFields[0], self.binaryFields[1], self.binaryFields[2])
+  self.binaryFields[0] + self.binaryFields[1] + self.binaryFields[2]
 
 func isDead*(self: Field): bool {.inline, noinit.} =
   ## Returns `true` if the field is in a defeated state.
@@ -325,7 +325,7 @@ template withFills(cell: Cell, body: untyped): untyped =
 
     expand fill:
       let fill {.inject.} =
-        if cellOrd.testBit _: BinaryField.initOne else: BinaryField.init
+        if cellOrd.testBit _: BinaryField.initValid else: BinaryField.init
 
     body
 
@@ -360,7 +360,7 @@ func placeWater(self: var Field, pair: Pair, placement: Placement) {.inline, noi
 
     existField = self.exist
     placeMask =
-      (existField xor (existField + BinaryField.initUpperWater).shiftedUpRaw).keptAir
+      (existField xor (existField + BinaryField.initWaterTop).shiftedUpRaw).keptAir
     pivotMask = (if placement in Down0 .. Down5: placeMask.shiftedUp else: placeMask).kept pivotCol
     rotorMask =
       (if placement in Up0 .. Up5: placeMask.shiftedUp else: placeMask).kept rotorCol
@@ -466,9 +466,9 @@ func dropNuisance*(
 
   case Behaviours[self.rule].phys
   of Phys.Tsu:
-    self.binaryFields[notDropHardInt].dropGarbagesTsu counts, existField
+    self.binaryFields[notDropHardInt].dropNuisanceTsu counts, existField
   of Phys.Water:
-    self.binaryFields[notDropHardInt].dropGarbagesWater self.binaryFields[hard.int],
+    self.binaryFields[notDropHardInt].dropNuisanceWater self.binaryFields[hard.int],
       self.binaryFields[2], counts, existField
 
 # ------------------------------------------------

@@ -4,7 +4,7 @@
 {.experimental: "views".}
 
 import std/[sugar, unittest]
-import ../../src/pon2/private/[assign, strutils]
+import ../../src/pon2/private/[assign, staticfor, strutils]
 import ../../src/pon2/private/core/[binaryfield]
 import ../../src/pon2/core/[behaviour, common, placement]
 
@@ -12,12 +12,12 @@ proc toBinaryField(str: string): BinaryField =
   ## Returns the binary field converted from the string representation.
   let strs = str.split "\n"
 
-  var arr {.noinit.}: array[Row, array[Col, bool]]
-  for row in Row:
-    for col in Col:
-      arr[row][col].assign strs[row.ord][col.ord] == 'x'
+  var boolArray {.noinit.}: array[Row, array[Col, bool]]
+  staticFor(row, Row):
+    staticFor(col, Col):
+      boolArray[row][col].assign strs[row.ord][col.ord] == 'x'
 
-  return arr.toBinaryField
+  return boolArray.toBinaryField
 
 # ------------------------------------------------
 # Constructor
@@ -40,8 +40,8 @@ block: # init
 ......
 ......""".toBinaryField
 
-block: # initOne
-  check BinaryField.initOne ==
+block: # initValid
+  check BinaryField.initValid ==
     """
 xxxxxx
 xxxxxx
@@ -74,8 +74,8 @@ block: # initFloor
 ......
 xxxxxx""".toBinaryField.shiftedDownRaw
 
-block: # initLowerAir
-  check BinaryField.initLowerAir ==
+block: # initAirBottom
+  check BinaryField.initAirBottom ==
     """
 ......
 ......
@@ -91,8 +91,8 @@ xxxxxx
 ......
 ......""".toBinaryField
 
-block: # initUpperWater
-  check BinaryField.initUpperWater ==
+block: # initWaterTop
+  check BinaryField.initWaterTop ==
     """
 ......
 ......
@@ -243,21 +243,6 @@ x..x..
 ......
 ......""".toBinaryField
 
-  check field.kept(Row1) ==
-    """
-......
-.x..x.
-......
-......
-......
-......
-......
-......
-......
-......
-......
-......
-......""".toBinaryField
   check field.kept(Col5) ==
     """
 ......
@@ -273,7 +258,7 @@ x..x..
 ......
 ......
 ......""".toBinaryField
-  check BinaryField.initOne.keptValid ==
+  check BinaryField.initValid.keptValid ==
     """
 xxxxxx
 xxxxxx
@@ -318,15 +303,6 @@ x..x..
 ......
 ......
 ......""".toBinaryField
-
-  check BinaryField.initOne.dup(keepValid) == BinaryField.initOne.keptValid
-
-# ------------------------------------------------
-# Clear
-# ------------------------------------------------
-
-block: # clear
-  check BinaryField.initOne.dup(clear) == BinaryField.init
 
 # ------------------------------------------------
 # Replace
@@ -387,7 +363,7 @@ x.....
 # ------------------------------------------------
 
 block: # popcnt
-  check BinaryField.initOne.keptValid.popcnt == Height * Width
+  check BinaryField.initValid.keptValid.popcnt == Height * Width
   check BinaryField.init.popcnt == 0
   check BinaryField.initFloor.popcnt == Width
 
@@ -481,21 +457,6 @@ x..x..""".toBinaryField
   check field.shiftedDownRaw.keptValid == fieldD
   check field.shiftedRightRaw.keptValid == fieldR
   check field.shiftedLeftRaw.keptValid == fieldL
-
-  check field.dup(shiftUpRaw) == field.shiftedUpRaw
-  check field.dup(shiftDownRaw) == field.shiftedDownRaw
-  check field.dup(shiftRightRaw) == field.shiftedRightRaw
-  check field.dup(shiftLeftRaw) == field.shiftedLeftRaw
-
-  check field.shiftedUp == fieldU
-  check field.shiftedDown == fieldD
-  check field.shiftedRight == fieldR
-  check field.shiftedLeft == fieldL
-
-  check field.dup(shiftUp) == field.shiftedUp
-  check field.dup(shiftDown) == field.shiftedDown
-  check field.dup(shiftRight) == field.shiftedRight
-  check field.dup(shiftLeft) == field.shiftedLeft
 
 # ------------------------------------------------
 # Flip
@@ -783,10 +744,10 @@ x.....
 ......""".toBinaryField
 
 # ------------------------------------------------
-# Drop Garbages
+# Drop Nuisance
 # ------------------------------------------------
 
-block: # dropGarbagesTsu
+block: # dropNuisanceTsu
   let
     field =
       """
@@ -819,7 +780,7 @@ block: # dropGarbagesTsu
 .x..xx
 .xx.xx""".toBinaryField
 
-  check field.dup(dropGarbagesTsu(_, [Col0: 0, 0, 1, 1, 8, 24], existField)) ==
+  check field.dup(dropNuisanceTsu(_, [Col0: 0, 0, 1, 1, 8, 24], existField)) ==
     """
 ....xx
 ....xx
@@ -835,7 +796,7 @@ block: # dropGarbagesTsu
 ..x..x
 .xxxxx""".toBinaryField
 
-block: # dropGarbagesWater
+block: # dropNuisanceWater
   block: # test1
     var
       field =
@@ -870,7 +831,7 @@ block: # dropGarbagesWater
 ......""".toBinaryField
       other2 = BinaryField.init
 
-    dropGarbagesWater(
+    dropNuisanceWater(
       field, other1, other2, [Col0: 0, 0, 1, 1, 5, 24], field + other1 + other2
     )
 
@@ -940,7 +901,7 @@ x.x..x
 x.x..x""".toBinaryField
       other2 = BinaryField.init
 
-    dropGarbagesWater(
+    dropNuisanceWater(
       field, other1, other2, [Col0: 0, 1, 0, 2, 0, 24], field + other1 + other2
     )
 
@@ -1108,7 +1069,7 @@ xx..x.
 
 block: # isDead
   block: # Tsu
-    var field = BinaryField.initOne.keptValid
+    var field = BinaryField.initValid.keptValid
     check field.isDead Tsu
 
     field[Row1, Col2] = false

@@ -66,13 +66,6 @@ func init*(T: type SolveNode, puyoPuyo: PuyoPuyo): T {.inline, noinit.} =
 # Child
 # ------------------------------------------------
 
-const
-  DummyCell = Cell.low
-  GoalColorToCell: array[GoalColor, Cell] = [
-    DummyCell, Cell.Red, Cell.Green, Cell.Blue, Cell.Yellow, Cell.Purple, DummyCell,
-    DummyCell,
-  ]
-
 func child(self: SolveNode, goal: Goal, step: Step): SolveNode {.inline, noinit.} =
   ## Returns the child node.
   ## This function requires that the field is settled.
@@ -105,7 +98,7 @@ func child(self: SolveNode, goal: Goal, step: Step): SolveNode {.inline, noinit.
         of Colored:
           moveResult.coloredPuyoCount
         else:
-          moveResult.cellCount GoalColorToCell[main.color]
+          moveResult.cellCount main.color.ord.Cell
       childPopColors = {}
       childPopCount = self.popCount.succ newCount
     else:
@@ -211,7 +204,7 @@ func isAccepted(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
         of Colored:
           ColoredPuyos.sumIt self.fieldCounts[it]
         else:
-          self.fieldCounts[GoalColorToCell[clearColor]]
+          self.fieldCounts[clearColor.ord.Cell]
 
     if fieldCount > 0:
       return false
@@ -315,7 +308,7 @@ func canPrune(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
         return true
     else:
       let
-        goalCell = GoalColorToCell[clearColor]
+        goalCell = clearColor.ord.Cell
         fieldCount = self.fieldCounts[goalCell]
 
       if fieldCount > 0 and fieldCount + self.stepsCounts[goalCell] < 4:
@@ -345,7 +338,7 @@ func canPrune(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
           else: # Colored
             colorPossibleCount
         else:
-          self.cellCount(GoalColorToCell[main.color]).filter4
+          self.cellCount(main.color.ord.Cell).filter4
 
       possibleCount =
         case main.kind
@@ -361,7 +354,7 @@ func canPrune(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
       of All, Colored:
         ColoredPuyos.sumIt self.cellCount(it) div 4
       else:
-        self.cellCount(GoalColorToCell[main.color]) div 4
+        self.cellCount(main.color.ord.Cell) div 4
 
     possiblePlace < main.val
   of AccumColor:

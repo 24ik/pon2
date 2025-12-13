@@ -185,13 +185,6 @@ func split(
 # Checker
 # ------------------------------------------------
 
-const
-  DummyCell = Cell.low
-  GoalColorToCell: array[GoalColor, Cell] = [
-    DummyCell, Cell.Red, Cell.Green, Cell.Blue, Cell.Yellow, Cell.Purple, DummyCell,
-    DummyCell,
-  ]
-
 func isValid(self: GenerateSettings): Pon2Result[void] =
   ## Returns `true` if the settings are valid.
   ## Note that this function is "weak" checker; a generation may be failed
@@ -206,11 +199,11 @@ func isValid(self: GenerateSettings): Pon2Result[void] =
   if self.goal.mainOpt.isOk:
     let main = self.goal.mainOpt.unsafeValue
     if main.color in GoalColor.Red .. GoalColor.Purple:
-      colors.incl GoalColorToCell[main.color]
+      colors.incl main.color.ord.Cell
   if self.goal.clearColorOpt.isOk:
     let clearColor = self.goal.clearColorOpt.unsafeValue
     if clearColor in GoalColor.Red .. GoalColor.Purple:
-      colors.incl GoalColorToCell[clearColor]
+      colors.incl clearColor.ord.Cell
   if self.colorCount notin max(colors.card, 1) .. 5:
     return err "`colorCount` should be in 1..5 (some goals require 2..5)"
 
@@ -465,11 +458,11 @@ proc generate*(rng: var Rand, settings: GenerateSettings): Pon2Result[NazoPuyo] 
   if settings.goal.mainOpt.isOk:
     let main = settings.goal.mainOpt.unsafeValue
     if main.color in GoalColor.Red .. GoalColor.Purple:
-      useCellsSet.incl GoalColorToCell[main.color]
+      useCellsSet.incl main.color.ord.Cell
   if settings.goal.clearColorOpt.isOk:
     let clearColor = settings.goal.clearColorOpt.unsafeValue
     if clearColor in GoalColor.Red .. GoalColor.Purple:
-      useCellsSet.incl GoalColorToCell[clearColor]
+      useCellsSet.incl clearColor.ord.Cell
   var extraCells = ColoredPuyos - useCellsSet
   useCellsSet.incl extraCells.toSeq.dup(shuffle(rng, _))[
     0 ..< settings.colorCount - useCellsSet.card
@@ -488,32 +481,32 @@ proc generate*(rng: var Rand, settings: GenerateSettings): Pon2Result[NazoPuyo] 
       continue
 
     if settings.connection2Counts.total.isOk and
-        puyoPuyo.field.connection2.colorPuyoCount !=
+        puyoPuyo.field.connection2.coloredPuyoCount !=
         settings.connection2Counts.total.unsafeValue * 2:
       continue
     if settings.connection2Counts.vertical.isOk and
-        puyoPuyo.field.connection2Vertical.colorPuyoCount !=
+        puyoPuyo.field.connection2Vertical.coloredPuyoCount !=
         settings.connection2Counts.vertical.unsafeValue * 2:
       continue
     if settings.connection2Counts.horizontal.isOk and
-        puyoPuyo.field.connection2Horizontal.colorPuyoCount !=
+        puyoPuyo.field.connection2Horizontal.coloredPuyoCount !=
         settings.connection2Counts.horizontal.unsafeValue * 2:
       continue
 
     if settings.connection3Counts.total.isOk and
-        puyoPuyo.field.connection3.colorPuyoCount !=
+        puyoPuyo.field.connection3.coloredPuyoCount !=
         settings.connection3Counts.total.unsafeValue * 3:
       continue
     if settings.connection3Counts.vertical.isOk and
-        puyoPuyo.field.connection3Vertical.colorPuyoCount !=
+        puyoPuyo.field.connection3Vertical.coloredPuyoCount !=
         settings.connection3Counts.vertical.unsafeValue * 3:
       continue
     if settings.connection3Counts.horizontal.isOk and
-        puyoPuyo.field.connection3Horizontal.colorPuyoCount !=
+        puyoPuyo.field.connection3Horizontal.coloredPuyoCount !=
         settings.connection3Counts.horizontal.unsafeValue * 3:
       continue
     if settings.connection3Counts.lShape.isOk and
-        puyoPuyo.field.connection3LShape.colorPuyoCount !=
+        puyoPuyo.field.connection3LShape.coloredPuyoCount !=
         settings.connection3Counts.lShape.unsafeValue * 3:
       continue
 

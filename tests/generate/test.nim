@@ -66,32 +66,32 @@ proc checkGenerate(
       check heights.positives.unsafeValue[col] ==
         (nazoPuyo.puyoPuyo.field[baseRow, col] != None)
 
-  check puyoCounts.colors == nazoPuyo.puyoPuyo.colorPuyoCount
+  check puyoCounts.colors == nazoPuyo.puyoPuyo.coloredPuyoCount
   check puyoCounts.garbage == nazoPuyo.puyoPuyo.cellCount Garbage
   check puyoCounts.hard == nazoPuyo.puyoPuyo.cellCount Hard
 
   if connection2Counts.total.isOk:
     check connection2Counts.total.unsafeValue ==
-      nazoPuyo.puyoPuyo.field.connection2.colorPuyoCount div 2
+      nazoPuyo.puyoPuyo.field.connection2.coloredPuyoCount div 2
   if connection2Counts.vertical.isOk:
     check connection2Counts.vertical.unsafeValue ==
-      nazoPuyo.puyoPuyo.field.connection2Vertical.colorPuyoCount div 2
+      nazoPuyo.puyoPuyo.field.connection2Vertical.coloredPuyoCount div 2
   if connection2Counts.horizontal.isOk:
     check connection2Counts.horizontal.unsafeValue ==
-      nazoPuyo.puyoPuyo.field.connection2Vertical.colorPuyoCount div 2
+      nazoPuyo.puyoPuyo.field.connection2Vertical.coloredPuyoCount div 2
 
   if connection3Counts.total.isOk:
     check connection3Counts.total.unsafeValue ==
-      nazoPuyo.puyoPuyo.field.connection3.colorPuyoCount div 3
+      nazoPuyo.puyoPuyo.field.connection3.coloredPuyoCount div 3
   if connection3Counts.vertical.isOk:
     check connection3Counts.vertical.unsafeValue ==
-      nazoPuyo.puyoPuyo.field.connection3Vertical.colorPuyoCount div 3
+      nazoPuyo.puyoPuyo.field.connection3Vertical.coloredPuyoCount div 3
   if connection3Counts.horizontal.isOk:
     check connection3Counts.horizontal.unsafeValue ==
-      nazoPuyo.puyoPuyo.field.connection3Vertical.colorPuyoCount div 3
+      nazoPuyo.puyoPuyo.field.connection3Vertical.coloredPuyoCount div 3
   if connection3Counts.lShape.isOk:
     check connection3Counts.lShape.unsafeValue ==
-      nazoPuyo.puyoPuyo.field.connection3LShape.colorPuyoCount div 3
+      nazoPuyo.puyoPuyo.field.connection3LShape.coloredPuyoCount div 3
 
   if not allowDoubleNotLast:
     check (0 ..< moveCount.pred).toSeq.all (index) =>
@@ -129,9 +129,8 @@ proc checkGenerate(
       check answer[0][stepIndex] == Placement.None
 
 block: # generate
-  #[
   checkGenerate(
-    Rule.Water,
+    Rule.Tsu,
     Goal.init(Chain, 5, Exact),
     2,
     3,
@@ -155,10 +154,9 @@ block: # generate
     false,
     123,
   )
-  ]#
   checkGenerate(
     Rule.Spinner,
-    Goal.init(Count, GoalColor.Red, 4, AtLeast, Nuisance),
+    Goal.init All,
     2,
     2,
     (
@@ -175,9 +173,9 @@ block: # generate
     ),
     newSeq[int](),
     newSeq[int](),
-    @[0],
+    @[1],
     newSeq[int](),
-    false,
+    true,
     false,
     456,
   )
