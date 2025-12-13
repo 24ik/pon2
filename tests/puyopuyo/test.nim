@@ -81,13 +81,13 @@ rgo...
   check puyoT.cellCount(Red) == 2
   check puyoT.cellCount(Garbage) == 4
   check puyoT.puyoCount == 15
-  check puyoT.colorPuyoCount == 7
+  check puyoT.coloredPuyoCount == 7
   check puyoT.nuisancePuyoCount == 8
 
   check puyoW.cellCount(Purple) == 3
   check puyoW.cellCount(Hard) == 6
   check puyoW.puyoCount == 14
-  check puyoW.colorPuyoCount == 7
+  check puyoW.coloredPuyoCount == 7
   check puyoW.nuisancePuyoCount == 7
 
 # ------------------------------------------------
