@@ -650,7 +650,7 @@ py....
 # Count
 # ------------------------------------------------
 
-block: # cellCount, puyoCount, colorPuyoCount, nuisancePuyoCount
+block: # cellCount, puyoCount, coloredPuyoCount, nuisancePuyoCount
   let
     fieldS =
       """
@@ -694,8 +694,8 @@ h..o..
   check fieldS.puyoCount == 13
   check fieldW.puyoCount == 13
 
-  check fieldS.colorPuyoCount == 7
-  check fieldW.colorPuyoCount == 7
+  check fieldS.coloredPuyoCount == 7
+  check fieldW.coloredPuyoCount == 7
 
   check fieldS.nuisancePuyoCount == 6
   check fieldW.nuisancePuyoCount == 6

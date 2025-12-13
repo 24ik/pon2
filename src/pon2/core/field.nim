@@ -183,8 +183,8 @@ func puyoCount*(self: Field): int {.inline, noinit.} =
   ## Returns the number of puyos in the field.
   self.exist.popcnt
 
-func colorPuyoCount*(self: Field): int {.inline, noinit.} =
-  ## Returns the number of color puyos in the field.
+func coloredPuyoCount*(self: Field): int {.inline, noinit.} =
+  ## Returns the number of colored puyos in the field.
   (self.binaryFields[2] + self.red).popcnt
 
 func nuisancePuyoCount*(self: Field): int {.inline, noinit.} =
