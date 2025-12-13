@@ -109,8 +109,8 @@ func puyoCount*(self: Step): int {.inline, noinit.} =
   of NuisanceDrop: self.counts.sum
   of FieldRotate: 0
 
-func colorPuyoCount*(self: Step): int {.inline, noinit.} =
-  ## Returns the number of color puyos in the step.
+func coloredPuyoCount*(self: Step): int {.inline, noinit.} =
+  ## Returns the number of colored puyos in the step.
   case self.kind
   of PairPlace: 2
   of NuisanceDrop, FieldRotate: 0
@@ -123,19 +123,19 @@ func nuisancePuyoCount*(self: Step): int {.inline, noinit.} =
 
 func cellCount*(steps: Steps, cell: Cell): int {.inline, noinit.} =
   ## Returns the number of `cell` in the steps.
-  steps.mapIt(it.cellCount cell).sum
+  steps.sumIt it.cellCount cell
 
 func puyoCount*(steps: Steps): int {.inline, noinit.} =
   ## Returns the number of puyos in the steps.
-  steps.mapIt(it.puyoCount).sum
+  steps.sumIt it.puyoCount
 
-func colorPuyoCount*(steps: Steps): int {.inline, noinit.} =
+func coloredPuyoCount*(steps: Steps): int {.inline, noinit.} =
   ## Returns the number of color puyos in the steps.
-  steps.mapIt(it.colorPuyoCount).sum
+  steps.sumIt it.coloredPuyoCount
 
 func nuisancePuyoCount*(steps: Steps): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos in the steps.
-  steps.mapIt(it.nuisancePuyoCount).sum
+  steps.sumIt it.nuisancePuyoCount
 
 # ------------------------------------------------
 # Step <-> string
@@ -193,7 +193,8 @@ func parseStep*(str: string): Pon2Result[Step] {.inline, noinit.} =
       for s in strs:
         ?s.parseInt.context errorMsg
     return ok Step.init(
-      [Col0: counts[0], counts[1], counts[2], counts[3], counts[4], counts[5]], hardDrop
+      [Col0: counts[0], counts[1], counts[2], counts[3], counts[4], counts[5]],
+      hard = hardDrop,
     )
 
   # pair
@@ -240,10 +241,8 @@ func toUriQuery*(self: Step, fqdn = Pon2): Pon2Result[string] {.inline, noinit.}
       if maxCount == 0:
         return ok "a0"
 
-      {.push warning[Uninit]: off.}
       let diffVal =
-        Col.toSeq.mapIt((self.counts[it] - maxCount + 1) * 2 ^ (Width - it.ord - 1)).sum
-      {.pop.}
+        Col.sumIt (self.counts[it] - maxCount + 1) * 2 ^ (Width - it.ord - 1)
       ok MaxCountToIshikawaUri[maxCount - 1] & ValToIshikawaUri[diffVal]
   of FieldRotate:
     case fqdn
@@ -280,7 +279,7 @@ func parseStep*(
           ?s.parseInt.context errorMsg
       return ok Step.init(
         [Col0: counts[0], counts[1], counts[2], counts[3], counts[4], counts[5]],
-        hardDrop,
+        hard = hardDrop,
       )
 
     # pair

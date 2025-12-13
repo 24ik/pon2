@@ -63,14 +63,14 @@ block: # isValid
 # Count
 # ------------------------------------------------
 
-block: # cellCount, puyoCount, colorPuyoCount, nuisancePuyoCount
+block: # cellCount, puyoCount, coloredPuyoCount, nuisancePuyoCount
   block:
     let step = Step.init YellowPurple
     check step.cellCount(Red) == 0
     check step.cellCount(Yellow) == 1
     check step.cellCount(Garbage) == 0
     check step.puyoCount == 2
-    check step.colorPuyoCount == 2
+    check step.coloredPuyoCount == 2
     check step.nuisancePuyoCount == 0
 
   block:
@@ -80,17 +80,17 @@ block: # cellCount, puyoCount, colorPuyoCount, nuisancePuyoCount
     check step.cellCount(Hard) == 5
     check step.cellCount(Garbage) == 0
     check step.puyoCount == 5
-    check step.colorPuyoCount == 0
+    check step.coloredPuyoCount == 0
     check step.nuisancePuyoCount == 5
 
   block:
-    let steps = [Step.init RedGreen, Step.init([Col0: 5, 4, 5, 5, 5, 4], false)].toDeque
+    let steps = [Step.init RedGreen, Step.init [Col0: 5, 4, 5, 5, 5, 4]].toDeque
     check steps.cellCount(Red) == 1
     check steps.cellCount(Yellow) == 0
     check steps.cellCount(Garbage) == 28
     check steps.cellCount(Hard) == 0
     check steps.puyoCount == 30
-    check steps.colorPuyoCount == 2
+    check steps.coloredPuyoCount == 2
     check steps.nuisancePuyoCount == 28
 
   block:
@@ -100,7 +100,7 @@ block: # cellCount, puyoCount, colorPuyoCount, nuisancePuyoCount
     check steps.cellCount(Garbage) == 0
     check steps.cellCount(Hard) == 0
     check steps.puyoCount == 0
-    check steps.colorPuyoCount == 0
+    check steps.coloredPuyoCount == 0
     check steps.nuisancePuyoCount == 0
 
 # ------------------------------------------------
