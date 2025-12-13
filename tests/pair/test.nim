@@ -57,12 +57,12 @@ block: # swapped, swap
 # Count
 # ------------------------------------------------
 
-block: # cellCount, puyoCount, colorPuyoCount, nuisancePuyoCount
+block: # cellCount, puyoCount, coloredPuyoCount, nuisancePuyoCount
   check YellowGreen.cellCount(Yellow) == 1
   check YellowGreen.cellCount(Green) == 1
   check YellowGreen.cellCount(Purple) == 0
   check YellowGreen.puyoCount == 2
-  check YellowGreen.colorPuyoCount == 2
+  check YellowGreen.coloredPuyoCount == 2
   check YellowGreen.nuisancePuyoCount == 0
 
 # ------------------------------------------------

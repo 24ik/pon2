@@ -14,7 +14,7 @@ import ../private/[assign]
 export cell, utils
 
 type Pair* {.pure.} = enum
-  ## The pair of two color puyos.
+  ## The pair of two colored puyos.
   # pivot: Red
   RedRed = $Red & $Red
   RedGreen = $Red & $Green
@@ -50,16 +50,14 @@ type Pair* {.pure.} = enum
 # Constructor
 # ------------------------------------------------
 
-const ColorCount = ColoredPuyos.card
-
 func init*(T: type Pair, pivot, rotor: Cell): T {.inline, noinit.} =
-  ## Note that the result is undefined if the pivot or rotor are not color puyos.
-  # no-color cell is treated as Red
+  ## Note that the result is undefined if the pivot or rotor are not colored puyos.
+  # no-colored cells are treated as Red
   let
     pivotVal = max(pivot.ord - Red.ord, 0)
     rotorVal = max(rotor.ord - Red.ord, 0)
 
-  (pivotVal * ColorCount + rotorVal).T
+  (pivotVal * ColoredPuyos.card + rotorVal).T
 
 func init*(T: type Pair): T {.inline, noinit.} =
   T.low
@@ -69,10 +67,10 @@ func init*(T: type Pair): T {.inline, noinit.} =
 # ------------------------------------------------
 
 func pivot*(self: Pair): Cell {.inline, noinit.} = ## Returns the pivot-puyo.
-  Red.succ self.ord div ColorCount
+  Red.succ self.ord div ColoredPuyos.card
 
 func rotor*(self: Pair): Cell {.inline, noinit.} = ## Returns the rotor-puyo.
-  Red.succ self.ord mod ColorCount
+  Red.succ self.ord mod ColoredPuyos.card
 
 func isDouble*(self: Pair): bool {.inline, noinit.} =
   ## Returns `true` if the pair is double (monochromatic).
@@ -86,7 +84,7 @@ func `pivot=`*(self: var Pair, colorPuyo: Cell) {.inline, noinit.} =
   ## Sets the pivot-puyo.
   ## If the `colorPuyo` is not color puyo, does nothing.
   if colorPuyo in ColoredPuyos:
-    self.inc (colorPuyo.ord - self.pivot.ord) * ColorCount
+    self.inc (colorPuyo.ord - self.pivot.ord) * ColoredPuyos.card
 
 func `rotor=`*(self: var Pair, colorPuyo: Cell) {.inline, noinit.} =
   ## Sets the rotor-puyo.
@@ -117,8 +115,8 @@ func puyoCount*(self: Pair): int {.inline, noinit.} =
   ## Returns the number of puyos in the pair.
   2
 
-func colorPuyoCount*(self: Pair): int {.inline, noinit.} =
-  ## Returns the number of color puyos in the pair.
+func coloredPuyoCount*(self: Pair): int {.inline, noinit.} =
+  ## Returns the number of colored puyos in the pair.
   2
 
 func nuisancePuyoCount*(self: Pair): int {.inline, noinit.} =
