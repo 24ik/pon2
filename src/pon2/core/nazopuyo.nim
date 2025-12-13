@@ -42,13 +42,6 @@ func init*(T: type NazoPuyo, rule = Rule.Tsu): T {.inline, noinit.} =
 # Mark
 # ------------------------------------------------
 
-const
-  DummyCell = Cell.low
-  GoalColorToCell: array[GoalColor, Cell] = [
-    DummyCell, Cell.Red, Cell.Green, Cell.Blue, Cell.Yellow, Cell.Purple, DummyCell,
-    DummyCell,
-  ]
-
 func mark*(self: NazoPuyo, endStepIndex = -1): MarkResult {.inline, noinit.} =
   ## Marks the steps in the Nazo Puyo.
   ## If `endStepIndex` is negative, all steps are used.
@@ -107,7 +100,7 @@ func mark*(self: NazoPuyo, endStepIndex = -1): MarkResult {.inline, noinit.} =
           of Colored:
             moveResult.coloredPuyoCount
           else:
-            moveResult.cellCount GoalColorToCell[main.color]
+            moveResult.cellCount main.color.ord.Cell
         )
       else:
         discard
@@ -124,9 +117,9 @@ func mark*(self: NazoPuyo, endStepIndex = -1): MarkResult {.inline, noinit.} =
             of Nuisance:
               puyoPuyo.field.nuisancePuyoCount
             of Colored:
-              puyoPuyo.field.colorPuyoCount
+              puyoPuyo.field.coloredPuyoCount
             else:
-              puyoPuyo.field.cellCount GoalColorToCell[clearColor]
+              puyoPuyo.field.cellCount clearColor.ord.Cell
 
         count == 0
       else:
