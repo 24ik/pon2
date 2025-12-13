@@ -12,14 +12,13 @@
 {.experimental: "views".}
 
 import std/[setutils]
-import ../[assign, simd, staticfor]
+import ../[assign, math, simd, staticfor]
 import ../../core/[behaviour, common, placement]
 
 export common, placement
 
 when Sse42Available:
   import ./binaryfield/[xmm]
-  import ../[math]
   export xmm
 
   type BinaryField* = XmmBinaryField ## Binary field.

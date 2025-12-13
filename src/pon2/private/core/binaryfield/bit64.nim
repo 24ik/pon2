@@ -81,42 +81,6 @@ func `*=`(self: var Bit64BinaryField, val: uint64) {.inline, noinit.} =
   staticFor(i, 0 ..< 2):
     self[i].assign self[i] and val
 
-func sum*(f1, f2, f3: Bit64BinaryField): Bit64BinaryField {.inline, noinit.} =
-  [bitor2(f1[0], f2[0], f3[0]), bitor2(f1[1], f2[1], f3[1])]
-
-func sum*(f1, f2, f3, f4: Bit64BinaryField): Bit64BinaryField {.inline, noinit.} =
-  [bitor2(f1[0], f2[0], f3[0], f4[0]), bitor2(f1[1], f2[1], f3[1], f4[1])]
-
-func sum*(f1, f2, f3, f4, f5: Bit64BinaryField): Bit64BinaryField {.inline, noinit.} =
-  [bitor2(f1[0], f2[0], f3[0], f4[0], f5[0]), bitor2(f1[1], f2[1], f3[1], f4[1], f5[1])]
-
-func sum*(
-    f1, f2, f3, f4, f5, f6: Bit64BinaryField
-): Bit64BinaryField {.inline, noinit.} =
-  [
-    bitor2(f1[0], f2[0], f3[0], f4[0], f5[0], f6[0]),
-    bitor2(f1[1], f2[1], f3[1], f4[1], f5[1], f6[1]),
-  ]
-
-func sum*(
-    f1, f2, f3, f4, f5, f6, f7: Bit64BinaryField
-): Bit64BinaryField {.inline, noinit.} =
-  [
-    bitor2(f1[0], f2[0], f3[0], f4[0], f5[0], f6[0], f7[0]),
-    bitor2(f1[1], f2[1], f3[1], f4[1], f5[1], f6[1], f7[1]),
-  ]
-
-func sum*(
-    f1, f2, f3, f4, f5, f6, f7, f8: Bit64BinaryField
-): Bit64BinaryField {.inline, noinit.} =
-  [
-    bitor2(f1[0], f2[0], f3[0], f4[0], f5[0], f6[0], f7[0], f8[0]),
-    bitor2(f1[1], f2[1], f3[1], f4[1], f5[1], f6[1], f7[1], f8[1]),
-  ]
-
-func product*(f1, f2, f3: Bit64BinaryField): Bit64BinaryField {.inline, noinit.} =
-  [bitand2(f1[0], f2[0], f3[0]), bitand2(f1[1], f2[1], f3[1])]
-
 # ------------------------------------------------
 # Keep
 # ------------------------------------------------

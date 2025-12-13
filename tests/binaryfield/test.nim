@@ -3,7 +3,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, sugar, unittest]
+import std/[sugar, unittest]
 import ../../src/pon2/private/[assign, strutils]
 import ../../src/pon2/private/core/[binaryfield]
 import ../../src/pon2/core/[behaviour, common, placement]
@@ -112,7 +112,7 @@ xxxxxx
 # Operator
 # ------------------------------------------------
 
-block: # `+`, `-`, `*`, `xor`, `+=`, `-=`, `*=`, sum, product
+block: # `+`, `-`, `*`, `xor`, `+=`, `-=`, `*=`
   let
     f1 =
       """
@@ -221,17 +221,6 @@ x.....
   f3 = f1
   f3 *= f2
   check f3 == fProduct
-
-  check sum(f1, f2, fProduct) == f1 + f2 + fProduct
-  check sum(f1, f2, fProduct, fDiff) == f1 + f2 + fProduct + fDiff
-  check sum(f1, f2, fProduct, fDiff, fXor) == f1 + f2 + fProduct + fDiff + fXor
-  check sum(f1, f2, fProduct, fDiff, fXor, f3) == f1 + f2 + fProduct + fDiff + fXor + f3
-  check sum(f1, f2, fProduct, fDiff, fXor, f3, BinaryField.init) ==
-    f1 + f2 + fProduct + fDiff + fXor + f3 + BinaryField.init
-  check sum(f1, f2, fProduct, fDiff, fXor, f3, BinaryField.init, BinaryField.initFloor) ==
-    f1 + f2 + fProduct + fDiff + fXor + f3 + BinaryField.init + BinaryField.initFloor
-
-  check product(f1, f2, fXor) == f1 * f2 * fXor
 
 # ------------------------------------------------
 # Keep

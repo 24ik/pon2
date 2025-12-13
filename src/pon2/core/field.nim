@@ -153,7 +153,7 @@ func yellow(self: Field): BinaryField {.inline, noinit.} =
 
 func purple(self: Field): BinaryField {.inline, noinit.} =
   ## Returns the binary field where purple puyos exist.
-  product(self.binaryFields[0], self.binaryFields[1], self.binaryFields[2])
+  self.binaryFields[0] * self.binaryFields[1] * self.binaryFields[2]
 
 # ------------------------------------------------
 # Count

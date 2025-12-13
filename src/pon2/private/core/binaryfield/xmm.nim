@@ -79,9 +79,6 @@ func `-=`*(f1: var XmmBinaryField, f2: XmmBinaryField) {.inline, noinit.} =
 func `*=`*(f1: var XmmBinaryField, f2: XmmBinaryField) {.inline, noinit.} =
   f1.assign f1 * f2
 
-func product*(f1, f2, f3: XmmBinaryField): XmmBinaryField {.inline, noinit.} =
-  f1 * f2 * f3
-
 # ------------------------------------------------
 # Hash
 # ------------------------------------------------
