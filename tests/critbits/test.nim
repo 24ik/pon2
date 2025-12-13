@@ -7,8 +7,8 @@ import std/[sequtils, sets, unittest]
 import ../../src/pon2/private/[critbits]
 
 block: # toCritBitTree
-  let arr = ["a", "ab", "abc", "ab", "bc", "bd"]
-  check arr.toCritBitTree.items.toSeq.toHashSet == arr.toHashSet
+  let items = ["a", "ab", "abc", "ab", "bc", "bd"]
+  check items.toCritBitTree.items.toSeq.toHashSet == items.toHashSet
 
-  let arr2 = {"a": 0, "b": 1, "c": 2}
-  check arr2.toCritBitTree.pairs.toSeq.toHashSet == arr2.toHashSet
+  let items2 = {"a": 0, "b": 1, "c": 2}
+  check items2.toCritBitTree.pairs.toSeq.toHashSet == items2.toHashSet
