@@ -129,7 +129,7 @@ proc solve*(self: NazoPuyo, calcAllAnswers = true): seq[SolveAnswer] =
     return @[]
 
   let
-    root = SolveNode.init self.puyoPuyo
+    root = SolveNode.init self
     moveCount = self.puyoPuyo.steps.len
   var answers = newSeq[SolveAnswer]()
 
@@ -204,7 +204,7 @@ when defined(js) or defined(nimsuggest):
 
         return newSeq[SolveAnswer]()
 
-      let rootNode = SolveNode.init self.puyoPuyo
+      let rootNode = SolveNode.init self
 
       var
         nodes = newSeq[SolveNode]()

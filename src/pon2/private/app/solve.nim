@@ -52,15 +52,15 @@ func init(
     stepsCounts: stepsCounts,
   )
 
-func init*(T: type SolveNode, puyoPuyo: PuyoPuyo): T {.inline, noinit.} =
+func init*(T: type SolveNode, nazoPuyo: NazoPuyo): T {.inline, noinit.} =
   var fieldCounts {.noinit.}, stepsCounts {.noinit.}: array[Cell, int]
   fieldCounts[Cell.None].assign 0
   stepsCounts[Cell.None].assign 0
-  staticFor(cell2, Hard .. Cell.Purple):
-    fieldCounts[cell2].assign puyoPuyo.field.cellCount cell2
-    stepsCounts[cell2].assign puyoPuyo.steps.cellCount cell2
+  staticFor(cell2, Puyos):
+    fieldCounts[cell2].assign nazoPuyo.puyoPuyo.field.cellCount cell2
+    stepsCounts[cell2].assign nazoPuyo.puyoPuyo.steps.cellCount cell2
 
-  T.init(0, puyoPuyo.field, MoveResult.init, {}, 0, fieldCounts, stepsCounts)
+  T.init(0, nazoPuyo.puyoPuyo.field, MoveResult.init, {}, 0, fieldCounts, stepsCounts)
 
 # ------------------------------------------------
 # Child
@@ -100,7 +100,7 @@ func child(self: SolveNode, goal: Goal, step: Step): SolveNode {.inline, noinit.
         else:
           moveResult.cellCount main.color.ord.Cell
       childPopColors = {}
-      childPopCount = self.popCount.succ newCount
+      childPopCount = self.popCount + newCount
     else:
       childPopColors = {}
       childPopCount = 0
@@ -110,8 +110,8 @@ func child(self: SolveNode, goal: Goal, step: Step): SolveNode {.inline, noinit.
 
   # moveResult
   var childFieldCounts = self.fieldCounts
-  staticFor(cell2, Cell.Red .. Cell.Purple):
-    childFieldCounts[cell2].dec moveResult.cellCount cell2
+  staticFor(cell2, ColoredPuyos):
+    childFieldCounts[cell2] -= moveResult.cellCount cell2
 
   # step
   var childStepsCounts = self.stepsCounts
@@ -120,42 +120,49 @@ func child(self: SolveNode, goal: Goal, step: Step): SolveNode {.inline, noinit.
       pivotCell = step.pair.pivot
       rotorCell = step.pair.rotor
 
-    childFieldCounts[pivotCell].inc
-    childFieldCounts[rotorCell].inc
-    childStepsCounts[pivotCell].dec
-    childStepsCounts[rotorCell].dec
+    childFieldCounts[pivotCell] += 1
+    childFieldCounts[rotorCell] += 1
+    childStepsCounts[pivotCell] -= 1
+    childStepsCounts[rotorCell] -= 1
 
-  # garbages
+  # nuisance
   if (goal.clearColorOpt.isOk and goal.clearColorOpt.unsafeValue in {All, Nuisance}) or (
     goal.mainOpt.isOk and goal.mainOpt.unsafeValue.kind in {Count, AccumCount} and
     goal.mainOpt.unsafeValue.color in {All, Nuisance}
   ):
-    let stepGarbageHardCount, isHard, isGarbage: int
+    let stepNuisanceCount, isHard, isGarbage: int
     if step.kind == NuisanceDrop:
-      stepGarbageHardCount = step.nuisancePuyoCount
+      stepNuisanceCount = step.nuisancePuyoCount
       isHard = step.hard.int
       isGarbage = (not step.hard).int
 
-      childStepsCounts[Garbage.pred isHard].dec stepGarbageHardCount
+      childStepsCounts[Garbage.pred isHard] -= stepNuisanceCount
     else:
-      stepGarbageHardCount = 0
+      stepNuisanceCount = 0
       isHard = 0
       isGarbage = 0
 
-    childFieldCounts[Hard].dec moveResult.popCounts[Hard] + moveResult.hardToGarbageCount -
-      stepGarbageHardCount * isHard
-    childFieldCounts[Garbage].dec moveResult.popCounts[Garbage] -
-      moveResult.hardToGarbageCount - stepGarbageHardCount * isGarbage
+    childFieldCounts[Hard] -=
+      moveResult.popCounts[Hard] + moveResult.hardToGarbageCount -
+      stepNuisanceCount * isHard
+    childFieldCounts[Garbage] -=
+      moveResult.popCounts[Garbage] - moveResult.hardToGarbageCount -
+      stepNuisanceCount * isGarbage
 
   # rotate
   if step.kind == FieldRotate:
     staticFor(col, Col):
       let cell = self.field[Row0, col]
-      childFieldCounts[cell].dec (cell != None).int
+      childFieldCounts[cell] -= (cell != Cell.None).int
 
   SolveNode.init(
-    self.depth.succ, childField, moveResult, childPopColors, childPopCount,
-    childFieldCounts, childStepsCounts,
+    self.depth + 1,
+    childField,
+    moveResult,
+    childPopColors,
+    childPopCount,
+    childFieldCounts,
+    childStepsCounts,
   )
 
 func children(
@@ -163,7 +170,7 @@ func children(
 ): seq[tuple[node: SolveNode, placement: Placement]] {.inline, noinit.} =
   ## Returns the children of the node.
   ## This function requires that the field is settled.
-  ## `placement` is set to `NonePlacement` if the edge is non-`PairPlace`.
+  ## `placement` is set to `Placement.None` if the edge is not `PairPlace`.
   case step.kind
   of PairPlace:
     let placements =
@@ -186,8 +193,12 @@ func cellCount(self: SolveNode, cell: Cell): int {.inline, noinit.} =
 
 func nuisancePuyoCount(self: SolveNode): int {.inline, noinit.} =
   ## Returns the number of hard and garbage puyos in the node.
-  (self.fieldCounts[Hard] + self.fieldCounts[Garbage]) +
-    (self.stepsCounts[Hard] + self.stepsCounts[Garbage])
+  sum(
+    self.fieldCounts[Hard],
+    self.fieldCounts[Garbage],
+    self.stepsCounts[Hard],
+    self.stepsCounts[Garbage],
+  )
 
 func isAccepted(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
@@ -268,16 +279,15 @@ func canPrune(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
         unpoppableColorExist = false
         poppableColorNotExist = true
 
-      staticFor(cell2, Cell.Red .. Cell.Purple):
+      staticFor(cell2, ColoredPuyos):
         let
           fieldCount = self.fieldCounts[cell2]
           count = fieldCount + self.stepsCounts[cell2]
-          countLt4 = count < 4
+          countLessThan4 = count < 4
 
-        poppableColorNotExist.assign poppableColorNotExist and countLt4
-        unpoppableColorExist.assign unpoppableColorExist or (
-          fieldCount > 0 and countLt4
-        )
+        poppableColorNotExist.assign poppableColorNotExist and countLessThan4
+        unpoppableColorExist.assign unpoppableColorExist or
+          (fieldCount > 0 and countLessThan4)
 
       if unpoppableColorExist or (
         poppableColorNotExist and
@@ -287,7 +297,7 @@ func canPrune(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
     of Nuisance:
       var poppableColorNotExist = true
 
-      staticFor(cell2, Cell.Red .. Cell.Purple):
+      staticFor(cell2, ColoredPuyos):
         poppableColorNotExist.assign poppableColorNotExist and self.cellCount(cell2) < 4
 
       if poppableColorNotExist and
@@ -296,7 +306,7 @@ func canPrune(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
     of Colored:
       var unpoppableColorExist = false
 
-      staticFor(cell2, Cell.Red .. Cell.Purple):
+      staticFor(cell2, ColoredPuyos):
         let
           fieldCount = self.fieldCounts[cell2]
           count = fieldCount + self.stepsCounts[cell2]
@@ -329,14 +339,15 @@ func canPrune(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
       nowPossibleCount =
         case main.color
         of All, Nuisance, Colored:
-          let colorPossibleCount = ColoredPuyos.sumIt(self.cellCount(it).filter4)
+          let coloredPossibleCount = ColoredPuyos.sumIt(self.cellCount(it).filter4)
           case main.color
           of All:
-            colorPossibleCount + (colorPossibleCount > 0).int * self.nuisancePuyoCount
+            coloredPossibleCount +
+              (coloredPossibleCount > 0).int * self.nuisancePuyoCount
           of Nuisance:
-            (colorPossibleCount > 0).int * self.nuisancePuyoCount
+            (coloredPossibleCount > 0).int * self.nuisancePuyoCount
           else: # Colored
-            colorPossibleCount
+            coloredPossibleCount
         else:
           self.cellCount(main.color.ord.Cell).filter4
 
@@ -383,7 +394,7 @@ func childrenAtDepth*(
   ## `answers` are empty.
   let
     step = steps[self.depth]
-    childDepth = self.depth.succ
+    childDepth = self.depth + 1
     childIsSpawned = childDepth == targetDepth
     childIsLeaf = childDepth == moveCount
     children = self.children(goal, step)
@@ -464,7 +475,7 @@ func solveSingleThread*(
 
   let
     step = steps[self.depth]
-    childDepth = self.depth.succ
+    childDepth = self.depth + 1
     childIsLeaf = childDepth == moveCount
     children = self.children(goal, step)
 
@@ -580,7 +591,7 @@ when defined(js) or defined(nimsuggest):
       return err errorMsg
     var popCounts {.noinit.}: array[Cell, int]
     for i, s in popCountsStrs:
-      popCounts[Cell.low.succ i].assign ?s.parseInt.context errorMsg
+      popCounts[i.Cell].assign ?s.parseInt.context errorMsg
 
     let hardToGarbageCount = ?strs[2].parseInt.context errorMsg
 
@@ -592,7 +603,7 @@ when defined(js) or defined(nimsuggest):
 
         var popCounts {.noinit.}: array[Cell, int]
         for i, s in detailPopCountsStrSeq:
-          popCounts[Cell.low.succ i].assign ?s.parseInt.context errorMsg
+          popCounts[i.Cell].assign ?s.parseInt.context errorMsg
 
         popCounts
 
@@ -614,7 +625,7 @@ when defined(js) or defined(nimsuggest):
 
         var counts {.noinit.}: array[Cell, seq[int]]
         for cellOrd, fullPopCountsStrSeq in fullPopCountsStrSeqs:
-          counts[Cell.low.succ cellOrd].assign fullPopCountsStrSeq.split2(Sep1).mapIt ?it.parseInt.context errorMsg
+          counts[cellOrd.Cell].assign fullPopCountsStrSeq.split2(Sep1).mapIt ?it.parseInt.context errorMsg
 
         counts
 
@@ -641,11 +652,11 @@ when defined(js) or defined(nimsuggest):
     if strs.len != Cell.enumLen:
       return err errorMsg
 
-    var arr {.noinit.}: array[Cell, int]
+    var counts {.noinit.}: array[Cell, int]
     for i, s in strs:
-      arr[Cell.low.succ i].assign ?s.parseInt.context errorMsg
+      counts[i.Cell].assign ?s.parseInt.context errorMsg
 
-    ok arr
+    ok counts
 
   func parseSolveInfo*(
       strs: seq[string]
@@ -717,8 +728,8 @@ when defined(js) or defined(nimsuggest):
         return err errorMsg
 
       let answer = collect:
-        for charIndex in countup(0, str.len.pred, 2):
-          let s = str.substr(charIndex, charIndex.succ)
+        for charIndex in countup(0, str.len - 1, 2):
+          let s = str[charIndex ..< charIndex + 2]
           if s == NonePlacementStr:
             Placement.None
           else:
