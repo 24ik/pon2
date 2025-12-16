@@ -18,8 +18,8 @@ func toAnswers(strs: varargs[string]): HashSet[SolveAnswer] =
   var answers = initHashSet[SolveAnswer]()
   for str in strs:
     let answer = collect:
-      for i in countup(0, str.len.pred, 2):
-        str.substr(i, i.succ).toPlacement
+      for i in countup(0, str.len - 1, 2):
+        str.substr(i, i + 1).toPlacement
     answers.incl answer
 
   answers
