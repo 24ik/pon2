@@ -17,7 +17,7 @@ proc toBinaryField(str: string): BinaryField =
     staticFor(col, Col):
       boolArray[row][col].assign strs[row.ord][col.ord] == 'x'
 
-  return boolArray.toBinaryField
+  boolArray.toBinaryField
 
 # ------------------------------------------------
 # Constructor

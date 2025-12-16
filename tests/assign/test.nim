@@ -16,10 +16,10 @@ block: # assign
   let myObj =
     MyObj(intVal: 5678, strVal: "def", arrayVal: ['X', 'W'], seqVal: @[{7'i8}, {}, {}])
 
-  check 1234.dup(assign(_, myObj.intVal)) == myObj.intVal
-  check "abc".dup(assign(_, myObj.strVal)) == myObj.strVal
-  check ['Z', 'Y'].dup(assign(_, myObj.arrayVal)) == myObj.arrayVal
-  check @[{4'i8}, {5'i8, 6'i8}].dup(assign(_, myObj.seqVal)) == myObj.seqVal
+  check 1234.dup(assign(myObj.intVal)) == myObj.intVal
+  check "abc".dup(assign(myObj.strVal)) == myObj.strVal
+  check ['Z', 'Y'].dup(assign(myObj.arrayVal)) == myObj.arrayVal
+  check @[{4'i8}, {5'i8, 6'i8}].dup(assign(myObj.seqVal)) == myObj.seqVal
   check MyObj(intVal: 0, strVal: "", arrayVal: ['a', 'b'], seqVal: @[]).dup(
-    assign(_, myObj)
+    assign(myObj)
   ) == myObj
