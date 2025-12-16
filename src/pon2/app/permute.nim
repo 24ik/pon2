@@ -23,34 +23,34 @@ when defined(js) or defined(nimsuggest):
 
 func allStepsSeq(
     steps: Steps,
-    stepIndex: int,
     fixIndices: openArray[int],
     allowDoubleNotLast, allowDoubleLast: bool,
+    stepIndex: int,
     cellCounts: array[Cell, int],
 ): seq[Steps] =
   ## Returns all possible steps in ascending order that can be obtained by permuting
-  ## puyos contained in the steps.
+  ## puyos after `stepIndex` contained in the steps.
   ## Non-`PairPlace` steps are left as they are.
-  ## Note that Swapped pair may give a different answer but this function does not
+  ## Note that swapped pairs may give different answers but this function does not
   ## consider it.
+  ## `cellCounts` should be set for colored puyos.
   if stepIndex == steps.len:
-    return @[Steps.init(steps.len)]
+    return @[Steps.init steps.len]
 
   let step = steps[stepIndex]
   if step.kind != PairPlace:
     return steps.allStepsSeq(
-      stepIndex.succ, fixIndices, allowDoubleNotLast, allowDoubleLast, cellCounts
-    ).mapIt it.dup(addFirst(_, step))
+      fixIndices, allowDoubleNotLast, allowDoubleLast, stepIndex + 1, cellCounts
+    ).mapIt it.dup(addFirst(step))
 
-  # NOTE: `staticFor` is preferable but we use normal `for` since
-  # we want to use `continue` for easy implementation
+  # NOTE: we use standard for-loop instead of `staticFor` for simple implementation
   var stepsSeq = newSeq[Steps]()
   for pivotCell in Cell.Red .. Cell.Purple:
     if cellCounts[pivotCell] == 0:
       continue
 
     var newCellCountsBase = cellCounts
-    newCellCountsBase[pivotCell].dec
+    newCellCountsBase[pivotCell] -= 1
 
     for rotorCell in pivotCell .. Cell.Purple:
       if newCellCountsBase[rotorCell] == 0:
@@ -65,7 +65,7 @@ func allStepsSeq(
             continue
 
       var newCellCounts = newCellCountsBase
-      newCellCounts[rotorCell].dec
+      newCellCounts[rotorCell] -= 1
 
       let
         newPairBase = Pair.init(pivotCell, rotorCell)
@@ -80,8 +80,8 @@ func allStepsSeq(
 
       stepsSeq &=
         steps.allStepsSeq(
-          stepIndex.succ, fixIndices, allowDoubleNotLast, allowDoubleLast, newCellCounts
-        ).mapIt it.dup(addFirst(_, Step.init newPair))
+          fixIndices, allowDoubleNotLast, allowDoubleLast, stepIndex + 1, newCellCounts
+        ).mapIt it.dup(addFirst(Step.init newPair))
 
   stepsSeq
 
@@ -94,10 +94,10 @@ func allStepsSeq(
   ## Note that Swapped pair may give a different answer but this function does not
   ## consider it.
   var cellCounts {.noinit.}: array[Cell, int]
-  staticFor(cell2, Cell.Red .. Cell.Purple):
+  staticFor(cell2, ColoredPuyos):
     cellCounts[cell2].assign steps.cellCount cell2
 
-  steps.allStepsSeq(0, fixIndices, allowDoubleNotLast, allowDoubleLast, cellCounts)
+  steps.allStepsSeq(fixIndices, allowDoubleNotLast, allowDoubleLast, 0, cellCounts)
 
 # ------------------------------------------------
 # Permute
@@ -161,6 +161,6 @@ when defined(js) or defined(nimsuggest):
           nazoPuyos.add nazoPuyo
 
         if not progressRef.isNil:
-          progressRef[].now.inc
+          progressRef[].now += 1
 
       return nazoPuyos

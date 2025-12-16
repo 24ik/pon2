@@ -29,7 +29,7 @@ when not defined(js):
 
 type SolveAnswer* = seq[Placement]
   ## Nazo Puyo answer.
-  ## Elements corresponding to non-`PairPlace` steps are set to `NonePlacement`.
+  ## Elements corresponding to non-`PairPlace` steps are set to `Placement.None`.
 
 when not defined(js):
   # NOTE: `ChildTargetDepth == 4` is good; see https://github.com/24ik/pon2/issues/260
@@ -47,12 +47,12 @@ when not defined(js):
   ): bool =
     ## Solves the Nazo Puyo at the node with a single thread.
     ## This function requires that the field is settled and `answers` is empty.
-    ## `answers` is set in reverse order.
-    ## `result` has no meanings; only used to get FlowVar.
+    ## `answers` are set in reverse order.
+    ## The return value has no meanings; only used to get FlowVar.
     self.solveSingleThread(
       answers[], moveCount, calcAllAnswers, goal, steps, checkPruneFirst = false
     )
-    true
+    false
 
   proc solveMultiThread(
       self: SolveNode,
@@ -93,7 +93,7 @@ when not defined(js):
         futures.add spawn node.solveSingleThread(
           answersSeq[futureIndex].addr, moveCount, calcAllAnswers, goal, steps
         )
-        futureIndex.inc
+        futureIndex += 1
 
     var
       completedCount = 0
@@ -102,7 +102,7 @@ when not defined(js):
       var futureIndex = 0
       for node in nodeToIndices.keys:
         if completedSeq[futureIndex] or not futures[futureIndex].isReady:
-          futureIndex.inc
+          futureIndex += 1
           continue
 
         let nodeIndices = nodeToIndices[node].unsafeValue
@@ -115,9 +115,9 @@ when not defined(js):
         if not calcAllAnswers and answers.len > 1:
           return
 
-        completedCount.inc
+        completedCount += 1
         completedSeq[futureIndex].assign true
-        futureIndex.inc
+        futureIndex += 1
 
       sleep SolvePollingMs
 
@@ -159,7 +159,7 @@ proc solve*(self: NazoPuyo, calcAllAnswers = true): seq[SolveAnswer] =
 when defined(js) or defined(nimsuggest):
   when not defined(pon2.build.worker):
     # NOTE: 2 and 3 show similar performance; 2 is chosen for faster `childrenAtDepth`
-    const ChildTargetDepth = 2
+    const ChildTargetDepthJs = 2
 
     func initCompleteHandler(
         nodeIndex: int,
@@ -168,10 +168,10 @@ when defined(js) or defined(nimsuggest):
         progressRef: ref tuple[now, total: int],
     ): Pon2Result[seq[string]] -> void =
       ## Returns a handler called after a web worker job completes.
-      (res: Pon2Result[seq[string]]) => (
+      (msgsResult: Pon2Result[seq[string]]) => (
         block:
-          if res.isOk:
-            let answersResult = res.unsafeValue.parseSolveAnswers
+          if msgsResult.isOk:
+            let answersResult = msgsResult.unsafeValue.parseSolveAnswers
             if answersResult.isOk:
               var answers = answersResult.unsafeValue
               for answer in answers.mitems:
@@ -182,10 +182,10 @@ when defined(js) or defined(nimsuggest):
             else:
               console.error answersResult.error.cstring
           else:
-            console.error res.error.cstring
+            console.error msgsResult.error.cstring
 
           if not progressRef.isNil:
-            progressRef[].now.inc
+            progressRef[].now += 1
       )
 
     proc asyncSolve*(
@@ -211,7 +211,7 @@ when defined(js) or defined(nimsuggest):
         placementsSeq = newSeq[seq[Placement]]()
         answers = newSeq[SolveAnswer]()
 
-      rootNode.childrenAtDepth ChildTargetDepth,
+      rootNode.childrenAtDepth ChildTargetDepthJs,
         nodes, placementsSeq, answers, self.puyoPuyo.steps.len, calcAllAnswers,
         self.goal, self.puyoPuyo.steps
 
