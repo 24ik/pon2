@@ -18,17 +18,22 @@ type GenerateSettings* = object ## Settings of Nazo Puyo generation.
   goal: Goal
   moveCount: int
   colorCount: int
-  heights: tuple[weights: Opt[array[Col, int]], positives: Opt[array[Col, bool]]]
+  heights: tuple[weightsOpt: Opt[array[Col, int]], positivesOpt: Opt[array[Col, bool]]]
   puyoCounts: tuple[colors: int, garbage: int, hard: int]
-  connection2Counts: tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int]]
+  connection2Counts:
+    tuple[totalOpt: Opt[int], verticalOpt: Opt[int], horizontalOpt: Opt[int]]
   connection3Counts:
-    tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int], lShape: Opt[int]]
+    tuple[
+      totalOpt: Opt[int],
+      verticalOpt: Opt[int],
+      horizontalOpt: Opt[int],
+      lShapeOpt: Opt[int],
+    ]
   dropGarbagesIndices: seq[int]
   dropHardsIndices: seq[int]
   rotateIndices: seq[int]
   crossRotateIndices: seq[int]
-  allowDoubleNotLast: bool
-  allowDoubleLast: bool
+  allowDoubleIndices: seq[int]
 
 # ------------------------------------------------
 # Constructor
@@ -39,13 +44,20 @@ func init*(
     rule: Rule,
     goal: Goal,
     moveCount, colorCount: int,
-    heights: tuple[weights: Opt[array[Col, int]], positives: Opt[array[Col, bool]]],
+    heights:
+      tuple[weightsOpt: Opt[array[Col, int]], positivesOpt: Opt[array[Col, bool]]],
     puyoCounts: tuple[colors: int, garbage: int, hard: int],
-    connection2Counts: tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int]],
+    connection2Counts:
+      tuple[totalOpt: Opt[int], verticalOpt: Opt[int], horizontalOpt: Opt[int]],
     connection3Counts:
-      tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int], lShape: Opt[int]],
-    dropGarbagesIndices, dropHardsIndices, rotateIndices, crossRotateIndices: seq[int],
-    allowDoubleNotLast, allowDoubleLast: bool,
+      tuple[
+        totalOpt: Opt[int],
+        verticalOpt: Opt[int],
+        horizontalOpt: Opt[int],
+        lShapeOpt: Opt[int],
+      ],
+    dropGarbagesIndices, dropHardsIndices, rotateIndices, crossRotateIndices,
+      allowDoubleIndices: seq[int],
 ): T =
   GenerateSettings(
     rule: rule,
@@ -60,8 +72,7 @@ func init*(
     dropHardsIndices: dropHardsIndices,
     rotateIndices: rotateIndices,
     crossRotateIndices: crossRotateIndices,
-    allowDoubleNotLast: allowDoubleNotLast,
-    allowDoubleLast: allowDoubleLast,
+    allowDoubleIndices: allowDoubleIndices,
   )
 
 # ------------------------------------------------
@@ -207,11 +218,12 @@ func isValid(self: GenerateSettings): Pon2Result[void] =
   if self.colorCount notin max(colors.card, 1) .. 5:
     return err "`colorCount` should be in 1..5 (some goals require 2..5)"
 
-  if self.heights.weights.isOk == self.heights.positives.isOk:
-    return err "Either `heights.weights` or `heights.positives` should have a value"
+  if self.heights.weightsOpt.isOk == self.heights.positivesOpt.isOk:
+    return
+      err "Either `heights.weightsOpt` or `heights.positivesOpt` should have a value"
 
-  if self.heights.weights.isOk and self.heights.weights.unsafeValue.anyIt it < 0:
-    return err "All elements in `heights.weights` should be non-negative"
+  if self.heights.weightsOpt.isOk and self.heights.weightsOpt.unsafeValue.anyIt it < 0:
+    return err "All elements in `heights.weightsOpt` should be non-negative"
 
   if self.puyoCounts.colors < 0:
     return err "`puyoCounts.colors` should be non-negative"
@@ -225,31 +237,31 @@ func isValid(self: GenerateSettings): Pon2Result[void] =
   if Height * Width - 1 + 2 * self.moveCount < self.puyoCounts.colors:
     return err "`puyoCounts.colors` is too small"
 
-  if self.connection2Counts.total.isOk:
-    if self.connection2Counts.total.unsafeValue < 0:
-      return err "`connection2Counts.total` should be non-negative"
+  if self.connection2Counts.totalOpt.isOk:
+    if self.connection2Counts.totalOpt.unsafeValue < 0:
+      return err "`connection2Counts.totalOpt` should be non-negative"
 
     var connection2VH = 0
-    if self.connection2Counts.vertical.isOk:
-      connection2VH.inc self.connection2Counts.vertical.unsafeValue
-    if self.connection2Counts.horizontal.isOk:
-      connection2VH.inc self.connection2Counts.horizontal.unsafeValue
-    if connection2VH > self.connection2Counts.total.unsafeValue:
-      return err "`connection2Counts.total` is too small"
+    if self.connection2Counts.verticalOpt.isOk:
+      connection2VH.inc self.connection2Counts.verticalOpt.unsafeValue
+    if self.connection2Counts.horizontalOpt.isOk:
+      connection2VH.inc self.connection2Counts.horizontalOpt.unsafeValue
+    if connection2VH > self.connection2Counts.totalOpt.unsafeValue:
+      return err "`connection2Counts.totalOpt` is too small"
 
-  if self.connection3Counts.total.isOk:
-    if self.connection3Counts.total.unsafeValue < 0:
-      return err "`connection3Counts.total` should be non-negative"
+  if self.connection3Counts.totalOpt.isOk:
+    if self.connection3Counts.totalOpt.unsafeValue < 0:
+      return err "`connection3Counts.totalOpt` should be non-negative"
 
     var connection3VHL = 0
-    if self.connection3Counts.vertical.isOk:
-      connection3VHL.inc self.connection3Counts.vertical.unsafeValue
-    if self.connection3Counts.horizontal.isOk:
-      connection3VHL.inc self.connection3Counts.horizontal.unsafeValue
-    if self.connection3Counts.lShape.isOk:
-      connection3VHL.inc self.connection3Counts.lShape.unsafeValue
-    if connection3VHL > self.connection3Counts.total.unsafeValue:
-      return err "`connection3Counts.total` is too small"
+    if self.connection3Counts.verticalOpt.isOk:
+      connection3VHL.inc self.connection3Counts.verticalOpt.unsafeValue
+    if self.connection3Counts.horizontalOpt.isOk:
+      connection3VHL.inc self.connection3Counts.horizontalOpt.unsafeValue
+    if self.connection3Counts.lShapeOpt.isOk:
+      connection3VHL.inc self.connection3Counts.lShapeOpt.unsafeValue
+    if connection3VHL > self.connection3Counts.totalOpt.unsafeValue:
+      return err "`connection3Counts.totalOpt` is too small"
 
   if self.rule != Spinner and self.rotateIndices.len > 0:
     return err "Rotate is allowed only in the Spinner rule."
@@ -281,6 +293,9 @@ func isValid(self: GenerateSettings): Pon2Result[void] =
   if notPairPlaceIndexSet.card >= self.moveCount:
     return err "at least one pair-step is required"
 
+  if self.allowDoubleIndices.anyIt it notin 0 ..< self.moveCount:
+    return err "`allowDoubleIndices` are out of range"
+
   Pon2Result[void].ok
 
 # ------------------------------------------------
@@ -309,10 +324,11 @@ func generatePuyoPuyo(
     rotateIndexSet = settings.rotateIndices.toHashSet
     crossRotateIndexSet = settings.crossRotateIndices.toHashSet
 
-    pairPlaceStepCount =
-      settings.moveCount - (
-        dropGarbagesIndexSet + dropHardsIndexSet + rotateIndexSet + crossRotateIndexSet
-      ).card
+    pairPlaceIndexSet =
+      (0 ..< settings.moveCount).toSeq.toHashSet -
+      sum(dropGarbagesIndexSet, dropHardsIndexSet, rotateIndexSet, crossRotateIndexSet)
+    pairPlaceIndices = pairPlaceIndexSet.toSeq.sorted
+    pairPlaceStepCount = pairPlaceIndices.len
 
   var
     cells = newSeq[Cell]()
@@ -355,13 +371,14 @@ func generatePuyoPuyo(
         Step.init Pair.init(cells[^(2 * i - 1)], cells[^(2 * i)])
 
     # check steps (pair-placement)
-    if not settings.allowDoubleNotLast:
-      for i in 0 ..< pairPlaceSteps.len.pred:
-        if pairPlaceSteps[i].pair.isDouble:
-          continue
-    if not settings.allowDoubleLast:
-      if pairPlaceSteps[^1].pair.isDouble:
-        continue
+    var doubleOk = true
+    for i in 0 ..< pairPlaceSteps.len:
+      if pairPlaceIndices[i] notin settings.allowDoubleIndices and
+          pairPlaceSteps[i].pair.isDouble:
+        doubleOk.assign false
+        break
+    if not doubleOk:
+      continue
 
     # steps (garbages)
     let
@@ -418,10 +435,10 @@ func generatePuyoPuyo(
   var cellCountsInField = newSeq[int]()
   while true:
     cellCountsInField.assign(
-      if settings.heights.weights.isOk:
-        ?rng.split(cells.len, settings.heights.weights.unsafeValue).context "Field generation failed"
+      if settings.heights.weightsOpt.isOk:
+        ?rng.split(cells.len, settings.heights.weightsOpt.unsafeValue).context "Field generation failed"
       else:
-        ?rng.split(cells.len, settings.heights.positives.unsafeValue).context "Field generation failed"
+        ?rng.split(cells.len, settings.heights.positivesOpt.unsafeValue).context "Field generation failed"
     )
     if cellCountsInField.allIt(
       it in 0 .. (if settings.rule == Rule.Water: WaterHeight else: Height)
@@ -480,34 +497,34 @@ proc generate*(rng: var Rand, settings: GenerateSettings): Pon2Result[NazoPuyo] 
     if puyoPuyo.field.canPop:
       continue
 
-    if settings.connection2Counts.total.isOk and
+    if settings.connection2Counts.totalOpt.isOk and
         puyoPuyo.field.connection2.coloredPuyoCount !=
-        settings.connection2Counts.total.unsafeValue * 2:
+        settings.connection2Counts.totalOpt.unsafeValue * 2:
       continue
-    if settings.connection2Counts.vertical.isOk and
+    if settings.connection2Counts.verticalOpt.isOk and
         puyoPuyo.field.connection2Vertical.coloredPuyoCount !=
-        settings.connection2Counts.vertical.unsafeValue * 2:
+        settings.connection2Counts.verticalOpt.unsafeValue * 2:
       continue
-    if settings.connection2Counts.horizontal.isOk and
+    if settings.connection2Counts.horizontalOpt.isOk and
         puyoPuyo.field.connection2Horizontal.coloredPuyoCount !=
-        settings.connection2Counts.horizontal.unsafeValue * 2:
+        settings.connection2Counts.horizontalOpt.unsafeValue * 2:
       continue
 
-    if settings.connection3Counts.total.isOk and
+    if settings.connection3Counts.totalOpt.isOk and
         puyoPuyo.field.connection3.coloredPuyoCount !=
-        settings.connection3Counts.total.unsafeValue * 3:
+        settings.connection3Counts.totalOpt.unsafeValue * 3:
       continue
-    if settings.connection3Counts.vertical.isOk and
+    if settings.connection3Counts.verticalOpt.isOk and
         puyoPuyo.field.connection3Vertical.coloredPuyoCount !=
-        settings.connection3Counts.vertical.unsafeValue * 3:
+        settings.connection3Counts.verticalOpt.unsafeValue * 3:
       continue
-    if settings.connection3Counts.horizontal.isOk and
+    if settings.connection3Counts.horizontalOpt.isOk and
         puyoPuyo.field.connection3Horizontal.coloredPuyoCount !=
-        settings.connection3Counts.horizontal.unsafeValue * 3:
+        settings.connection3Counts.horizontalOpt.unsafeValue * 3:
       continue
-    if settings.connection3Counts.lShape.isOk and
+    if settings.connection3Counts.lShapeOpt.isOk and
         puyoPuyo.field.connection3LShape.coloredPuyoCount !=
-        settings.connection3Counts.lShape.unsafeValue * 3:
+        settings.connection3Counts.lShapeOpt.unsafeValue * 3:
       continue
 
     var nazoPuyo = NazoPuyo.init(puyoPuyo, settings.goal)

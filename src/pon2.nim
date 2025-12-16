@@ -388,8 +388,7 @@ when isMainModule:
         c3v = 0,
         c3h = -1,
         c3l = -1,
-        allowDoubleNotLast = true,
-        allowDoubleLast = false,
+        allowDoubleMoves = newSeq[int](),
         sg = newSeq[int](),
         sh = newSeq[int](),
         sr = newSeq[int](),
@@ -466,15 +465,15 @@ when isMainModule:
             puyoCountColor
 
         connection2Counts = (
-          total: connection2Count.negToError,
-          vertical: connection2CountV.negToError,
-          horizontal: connection2CountH.negToError,
+          totalOpt: connection2Count.negToError,
+          verticalOpt: connection2CountV.negToError,
+          horizontalOpt: connection2CountH.negToError,
         )
         connection3Counts = (
-          total: connection3Count.negToError,
-          vertical: connection3CountV.negToError,
-          horizontal: connection3CountH.negToError,
-          lShape: connection3CountL.negToError,
+          totalOpt: connection3Count.negToError,
+          verticalOpt: connection3CountV.negToError,
+          horizontalOpt: connection3CountH.negToError,
+          lShapeOpt: connection3CountL.negToError,
         )
 
         settings = GenerateSettings.init(
@@ -496,7 +495,7 @@ when isMainModule:
           ),
           moveCount,
           colorCount,
-          (weights: heightWeights, positives: heightPositives),
+          (weightsOpt: heightWeights, positivesOpt: heightPositives),
           (colors: puyoCountColor2, garbage: puyoCountGarbage, hard: puyoCountHard),
           connection2Counts,
           connection3Counts,
@@ -504,8 +503,7 @@ when isMainModule:
           stepHards,
           stepRotate,
           stepCrossRotate,
-          allowDoubleNotLast,
-          allowDoubleLast,
+          allowDoubleMoves.mapIt it.pred,
         )
 
       let seed2: int64
@@ -598,8 +596,7 @@ $subcmds""",
           "moveCount": 'm',
           "colorCount": 'c',
           "heights": 'H',
-          "allowDoubleNotLast": 'D',
-          "allowDoubleLast": 'd',
+          "allowDoubleMoves": 'd',
           "openQuestion": 'B',
           "openAnswer": 'b',
           "seed": 's',
@@ -632,8 +629,7 @@ $subcmds""",
           "sh": "何手目で固ぷよを落下させるか",
           "sr": "何手目で大回転させるか",
           "sc": "何手目でクロス回転させるか",
-          "allowDoubleNotLast": "最終手以外のゾロを許可",
-          "allowDoubleLast": "最終手のゾロを許可",
+          "allowDoubleMoves": "何手目でゾロを許可するか",
           "openQuestion": "問題をブラウザで開く",
           "openAnswer": "解をブラウザで開く",
           "seed": "シード",

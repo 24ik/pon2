@@ -16,17 +16,23 @@ proc checkGenerate(
     goal: Goal,
     moveCount: int,
     colorCount: int,
-    heights: tuple[weights: Opt[array[Col, int]], positives: Opt[array[Col, bool]]],
+    heights:
+      tuple[weightsOpt: Opt[array[Col, int]], positivesOpt: Opt[array[Col, bool]]],
     puyoCounts: tuple[colors: int, garbage: int, hard: int],
-    connection2Counts: tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int]],
+    connection2Counts:
+      tuple[totalOpt: Opt[int], verticalOpt: Opt[int], horizontalOpt: Opt[int]],
     connection3Counts:
-      tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int], lShape: Opt[int]],
+      tuple[
+        totalOpt: Opt[int],
+        verticalOpt: Opt[int],
+        horizontalOpt: Opt[int],
+        lShapeOpt: Opt[int],
+      ],
     dropGarbagesIndices: seq[int],
     dropHardsIndices: seq[int],
     rotateIndices: seq[int],
     crossRotateIndices: seq[int],
-    allowDoubleNotLast: bool,
-    allowDoubleLast: bool,
+    allowDoubleIndices: seq[int],
     seed: int,
 ) {.raises: [Exception].} =
   var rng = seed.initRand
@@ -34,7 +40,7 @@ proc checkGenerate(
     settings = GenerateSettings.init(
       rule, goal, moveCount, colorCount, heights, puyoCounts, connection2Counts,
       connection3Counts, dropGarbagesIndices, dropHardsIndices, rotateIndices,
-      crossRotateIndices, allowDoubleNotLast, allowDoubleLast,
+      crossRotateIndices, allowDoubleIndices,
     )
     nazoPuyoResult = rng.generate settings
 
@@ -56,51 +62,48 @@ proc checkGenerate(
     case rule
     of Tsu, Spinner, CrossSpinner: Row.high
     of Water: AirHeight.Row
-  if heights.weights.isOk:
-    if heights.weights.unsafeValue != [0, 0, 0, 0, 0, 0]:
+  if heights.weightsOpt.isOk:
+    if heights.weightsOpt.unsafeValue != [0, 0, 0, 0, 0, 0]:
       for col in Col:
-        if heights.weights.unsafeValue[col] == 0:
+        if heights.weightsOpt.unsafeValue[col] == 0:
           check nazoPuyo.puyoPuyo.field[baseRow, col] == None
   else:
     for col in Col:
-      check heights.positives.unsafeValue[col] ==
+      check heights.positivesOpt.unsafeValue[col] ==
         (nazoPuyo.puyoPuyo.field[baseRow, col] != None)
 
   check puyoCounts.colors == nazoPuyo.puyoPuyo.coloredPuyoCount
   check puyoCounts.garbage == nazoPuyo.puyoPuyo.cellCount Garbage
   check puyoCounts.hard == nazoPuyo.puyoPuyo.cellCount Hard
 
-  if connection2Counts.total.isOk:
-    check connection2Counts.total.unsafeValue ==
+  if connection2Counts.totalOpt.isOk:
+    check connection2Counts.totalOpt.unsafeValue ==
       nazoPuyo.puyoPuyo.field.connection2.coloredPuyoCount div 2
-  if connection2Counts.vertical.isOk:
-    check connection2Counts.vertical.unsafeValue ==
+  if connection2Counts.verticalOpt.isOk:
+    check connection2Counts.verticalOpt.unsafeValue ==
       nazoPuyo.puyoPuyo.field.connection2Vertical.coloredPuyoCount div 2
-  if connection2Counts.horizontal.isOk:
-    check connection2Counts.horizontal.unsafeValue ==
-      nazoPuyo.puyoPuyo.field.connection2Vertical.coloredPuyoCount div 2
+  if connection2Counts.horizontalOpt.isOk:
+    check connection2Counts.horizontalOpt.unsafeValue ==
+      nazoPuyo.puyoPuyo.field.connection2Horizontal.coloredPuyoCount div 2
 
-  if connection3Counts.total.isOk:
-    check connection3Counts.total.unsafeValue ==
+  if connection3Counts.totalOpt.isOk:
+    check connection3Counts.totalOpt.unsafeValue ==
       nazoPuyo.puyoPuyo.field.connection3.coloredPuyoCount div 3
-  if connection3Counts.vertical.isOk:
-    check connection3Counts.vertical.unsafeValue ==
+  if connection3Counts.verticalOpt.isOk:
+    check connection3Counts.verticalOpt.unsafeValue ==
       nazoPuyo.puyoPuyo.field.connection3Vertical.coloredPuyoCount div 3
-  if connection3Counts.horizontal.isOk:
-    check connection3Counts.horizontal.unsafeValue ==
-      nazoPuyo.puyoPuyo.field.connection3Vertical.coloredPuyoCount div 3
-  if connection3Counts.lShape.isOk:
-    check connection3Counts.lShape.unsafeValue ==
+  if connection3Counts.horizontalOpt.isOk:
+    check connection3Counts.horizontalOpt.unsafeValue ==
+      nazoPuyo.puyoPuyo.field.connection3Horizontal.coloredPuyoCount div 3
+  if connection3Counts.lShapeOpt.isOk:
+    check connection3Counts.lShapeOpt.unsafeValue ==
       nazoPuyo.puyoPuyo.field.connection3LShape.coloredPuyoCount div 3
 
-  if not allowDoubleNotLast:
-    check (0 ..< moveCount.pred).toSeq.all (index) =>
-      nazoPuyo.puyoPuyo.steps[index].kind != PairPlace or
-      not nazoPuyo.puyoPuyo.steps[index].pair.isDouble
-
-  if not allowDoubleLast:
-    check nazoPuyo.puyoPuyo.steps[^1].kind != PairPlace or
-      not nazoPuyo.puyoPuyo.steps[^1].pair.isDouble
+  for stepIndex in allowDoubleIndices:
+    check not (
+      nazoPuyo.puyoPuyo.steps[stepIndex].kind == PairPlace and
+      nazoPuyo.puyoPuyo.steps[stepIndex].pair.isDouble
+    )
 
   for stepIndex in dropGarbagesIndices:
     check nazoPuyo.puyoPuyo.steps[stepIndex].kind == NuisanceDrop and
@@ -135,23 +138,22 @@ block: # generate
     2,
     3,
     (
-      weights: Opt[array[Col, int]].err,
-      positives: Opt[array[Col, bool]].ok [false, true, true, true, false, false],
+      weightsOpt: Opt[array[Col, int]].err,
+      positivesOpt: Opt[array[Col, bool]].ok [false, true, true, true, false, false],
     ),
     (colors: 20, garbage: 5, hard: 1),
-    (total: Opt[int].err, vertical: Opt[int].ok 0, horizontal: Opt[int].err),
+    (totalOpt: Opt[int].err, verticalOpt: Opt[int].ok 0, horizontalOpt: Opt[int].err),
     (
-      total: Opt[int].ok 2,
-      vertical: Opt[int].err,
-      horizontal: Opt[int].err,
-      lShape: Opt[int].ok 1,
+      totalOpt: Opt[int].ok 2,
+      verticalOpt: Opt[int].err,
+      horizontalOpt: Opt[int].err,
+      lShapeOpt: Opt[int].ok 1,
     ),
     @[0],
     newSeq[int](),
     newSeq[int](),
     newSeq[int](),
-    false,
-    false,
+    newSeq[int](),
     123,
   )
   checkGenerate(
@@ -160,22 +162,21 @@ block: # generate
     2,
     2,
     (
-      weights: Opt[array[Col, int]].ok [0, 0, 1, 2, 3, 0],
-      positives: Opt[array[Col, bool]].err,
+      weightsOpt: Opt[array[Col, int]].ok [0, 0, 1, 2, 3, 0],
+      positivesOpt: Opt[array[Col, bool]].err,
     ),
     (colors: 12, garbage: 3, hard: 0),
-    (total: Opt[int].ok 2, vertical: Opt[int].err, horizontal: Opt[int].err),
+    (totalOpt: Opt[int].ok 2, verticalOpt: Opt[int].err, horizontalOpt: Opt[int].err),
     (
-      total: Opt[int].ok 1,
-      vertical: Opt[int].err,
-      horizontal: Opt[int].err,
-      lShape: Opt[int].err,
+      totalOpt: Opt[int].ok 1,
+      verticalOpt: Opt[int].err,
+      horizontalOpt: Opt[int].err,
+      lShapeOpt: Opt[int].err,
     ),
     newSeq[int](),
     newSeq[int](),
     @[1],
     newSeq[int](),
-    true,
-    false,
+    @[0],
     456,
   )
