@@ -318,8 +318,7 @@ when isMainModule:
     proc runPermuter(
         urls: seq[string],
         fixMoves = newSeq[int](),
-        allowDoubleNotLast = true,
-        allowDoubleLast = false,
+        allowDoubleMoves = newSeq[int](),
         openQuestion = false,
         openAnswer = false,
     ) =
@@ -337,7 +336,7 @@ when isMainModule:
 
       var index = 0
       for nazoPuyo in simulator.nazoPuyo.permute(
-        fixMoves.mapIt it.pred, allowDoubleNotLast, allowDoubleLast
+        fixMoves.mapIt it.pred, allowDoubleMoves.mapIt it.pred
       ):
         let
           resultSimulator = Simulator.init(nazoPuyo, EditorEdit)
@@ -573,15 +572,13 @@ $subcmds""",
         cmdName = "p",
         short = {
           "fixMoves": 'f',
-          "allowDoubleNotLast": 'D',
-          "allowDoubleLast": 'd',
+          "allowDoubleMoves": 'd',
           "openQuestion": 'B',
           "openAnswer": 'b',
         },
         help = {
           "fixMoves": "何手目を固定するか",
-          "allowDoubleNotLast": "最終手以外のゾロを許可",
-          "allowDoubleLast": "最終手のゾロを許可",
+          "allowDoubleMoves": "何手目のゾロを許可するか",
           "openQuestion": "問題をブラウザで開く",
           "openAnswer": "解をブラウザで開く",
           "urls": "{なぞぷよのURL}",

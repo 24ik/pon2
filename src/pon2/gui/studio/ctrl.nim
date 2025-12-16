@@ -50,8 +50,7 @@ when defined(js) or defined(nimsuggest):
     ## Permutes the nazo puyo.
     ## This function requires that the field is settled.
     let settings = helper.getStudioSetting
-    self.asyncPermute settings.fixIndices,
-      settings.allowDoubleNotLast, settings.allowDoubleLast
+    self.asyncPermute settings.fixIndices, settings.allowDoubleIndices
 
     var interval: Interval
     {.push warning[Uninit]: off.}

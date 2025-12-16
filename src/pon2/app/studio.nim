@@ -252,11 +252,7 @@ when defined(js) or defined(nimsuggest):
 # Permute
 # ------------------------------------------------
 
-proc permute*(
-    self: var Studio,
-    fixIndices: openArray[int],
-    allowDoubleNotLast, allowDoubleLast: bool,
-) =
+proc permute*(self: var Studio, fixIndices, allowDoubleIndices: openArray[int]) =
   ## Permutes the nazo puyo.
   ## This function requires that the field is settled.
   if not self.canWork:
@@ -265,9 +261,7 @@ proc permute*(
   self.permuting.assign true
   self.replayData.stepsSeq.setLen 0
 
-  for nazoPuyo in self.simulator.nazoPuyo.permute(
-    fixIndices, allowDoubleNotLast, allowDoubleLast
-  ):
+  for nazoPuyo in self.simulator.nazoPuyo.permute(fixIndices, allowDoubleIndices):
     self.replayData.stepsSeq.add nazoPuyo.puyoPuyo.steps
   self.workPostProcess self.simulator.nazoPuyo
 
@@ -276,9 +270,7 @@ proc permute*(
 when defined(js) or defined(nimsuggest):
   when not defined(pon2.build.worker):
     proc asyncPermute*(
-        self: ref Studio,
-        fixIndices: openArray[int],
-        allowDoubleNotLast, allowDoubleLast: bool,
+        self: ref Studio, fixIndices, allowDoubleIndices: openArray[int]
     ) =
       ## Permutes the nazo puyo asynchronously with web workers.
       ## This function requires that the field is settled.
@@ -292,9 +284,7 @@ when defined(js) or defined(nimsuggest):
 
       {.push warning[Uninit]: off.}
       discard originalNazoPuyo
-        .asyncPermute(
-          fixIndices, allowDoubleNotLast, allowDoubleLast, self[].progressRef
-        )
+        .asyncPermute(fixIndices, allowDoubleIndices, self[].progressRef)
         .then(
           (nazoPuyos: seq[NazoPuyo]) => (
             block:

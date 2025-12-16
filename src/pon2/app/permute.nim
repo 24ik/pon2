@@ -23,8 +23,7 @@ when defined(js) or defined(nimsuggest):
 
 func allStepsSeq(
     steps: Steps,
-    fixIndices: openArray[int],
-    allowDoubleNotLast, allowDoubleLast: bool,
+    fixIndices, allowDoubleIndices: openArray[int],
     stepIndex: int,
     cellCounts: array[Cell, int],
 ): seq[Steps] =
@@ -39,9 +38,9 @@ func allStepsSeq(
 
   let step = steps[stepIndex]
   if step.kind != PairPlace:
-    return steps.allStepsSeq(
-      fixIndices, allowDoubleNotLast, allowDoubleLast, stepIndex + 1, cellCounts
-    ).mapIt it.dup(addFirst(step))
+    return steps.allStepsSeq(fixIndices, allowDoubleIndices, stepIndex + 1, cellCounts).mapIt it.dup(
+      addFirst(step)
+    )
 
   # NOTE: we use standard for-loop instead of `staticFor` for simple implementation
   var stepsSeq = newSeq[Steps]()
@@ -55,14 +54,8 @@ func allStepsSeq(
     for rotorCell in pivotCell .. Cell.Purple:
       if newCellCountsBase[rotorCell] == 0:
         continue
-
-      if pivotCell == rotorCell:
-        if stepIndex == steps.len.pred:
-          if not allowDoubleLast:
-            continue
-        else:
-          if not allowDoubleNotLast:
-            continue
+      if pivotCell == rotorCell and stepIndex notin allowDoubleIndices:
+        continue
 
       var newCellCounts = newCellCountsBase
       newCellCounts[rotorCell] -= 1
@@ -79,14 +72,14 @@ func allStepsSeq(
         newPair = newPairBase
 
       stepsSeq &=
-        steps.allStepsSeq(
-          fixIndices, allowDoubleNotLast, allowDoubleLast, stepIndex + 1, newCellCounts
-        ).mapIt it.dup(addFirst(Step.init newPair))
+        steps.allStepsSeq(fixIndices, allowDoubleIndices, stepIndex + 1, newCellCounts).mapIt it.dup(
+          addFirst(Step.init newPair)
+        )
 
   stepsSeq
 
 func allStepsSeq(
-    steps: Steps, fixIndices: openArray[int], allowDoubleNotLast, allowDoubleLast: bool
+    steps: Steps, fixIndices, allowDoubleIndices: openArray[int]
 ): seq[Steps] =
   ## Returns all possible steps in ascending order that can be obtained by permuting
   ## puyos contained in the steps.
@@ -97,23 +90,19 @@ func allStepsSeq(
   staticFor(cell2, ColoredPuyos):
     cellCounts[cell2].assign steps.cellCount cell2
 
-  steps.allStepsSeq(fixIndices, allowDoubleNotLast, allowDoubleLast, 0, cellCounts)
+  steps.allStepsSeq(fixIndices, allowDoubleIndices, 0, cellCounts)
 
 # ------------------------------------------------
 # Permute
 # ------------------------------------------------
 
 proc permute*(
-    self: NazoPuyo,
-    fixIndices: openArray[int],
-    allowDoubleNotLast, allowDoubleLast: bool,
+    self: NazoPuyo, fixIndices, allowDoubleIndices: openArray[int]
 ): seq[NazoPuyo] =
   ## Returns a sequence of Nazo Puyos that is obtained by permuting steps and has a
   ## unique answer.
   collect:
-    for steps in self.puyoPuyo.steps.allStepsSeq(
-      fixIndices, allowDoubleNotLast, allowDoubleLast
-    ):
+    for steps in self.puyoPuyo.steps.allStepsSeq(fixIndices, allowDoubleIndices):
       var nazoPuyo = self
       nazoPuyo.puyoPuyo.steps.assign steps
 
@@ -133,14 +122,12 @@ when defined(js) or defined(nimsuggest):
   when not defined(pon2.build.worker):
     proc asyncPermute*(
         self: NazoPuyo,
-        fixIndices: openArray[int],
-        allowDoubleNotLast, allowDoubleLast: bool,
+        fixIndices, allowDoubleIndices: openArray[int],
         progressRef: ref tuple[now, total: int] = nil,
     ): Future[seq[NazoPuyo]] {.async.} =
       ## Permutes the Nazo Puyo asynchronously with web workers.
       ## This function requires that the field is settled.
-      let stepsSeq =
-        self.puyoPuyo.steps.allStepsSeq(fixIndices, allowDoubleNotLast, allowDoubleLast)
+      let stepsSeq = self.puyoPuyo.steps.allStepsSeq(fixIndices, allowDoubleIndices)
       if not progressRef.isNil:
         if stepsSeq.len == 0:
           progressRef[] = (1, 1)

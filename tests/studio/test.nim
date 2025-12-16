@@ -151,7 +151,7 @@ bg|""".parseNazoPuyo.unsafeValue
     permuteStudio1.replayData.stepsSeq.assign stepsSeq
     permuteStudio2.replayData.stepsSeq.assign stepsSeq
 
-  studio.permute(@[], allowDoubleNotLast = true, allowDoubleLast = true)
+  studio.permute(@[], [0, 1])
   check studio == permuteStudio1
   check studio.replayStepsCount == 2
   check studio.replayStepsIndex == 0
