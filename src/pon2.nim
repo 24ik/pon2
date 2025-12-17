@@ -266,7 +266,7 @@ when isMainModule:
   when not defined(js):
     import std/[random, sequtils, strformat, sugar, uri]
     import cligen
-    import ./pon2/private/[arrayutils, assign, browsers, strutils]
+    import ./pon2/private/[assign, browsers, staticfor, strutils]
 
     # ------------------------------------------------
     # Native - Solve
@@ -377,7 +377,7 @@ when isMainModule:
         goalClearColorOpt = 0,
         moveCount = 2,
         colorCount = 2,
-        heights = "0++++0",
+        heights = "0....0",
         pc = -1,
         pg = 2,
         ph = 0,
@@ -388,123 +388,111 @@ when isMainModule:
         c3v = 0,
         c3h = -1,
         c3l = -1,
-        allowDoubleMoves = newSeq[int](),
-        sg = newSeq[int](),
-        sh = newSeq[int](),
-        sr = newSeq[int](),
-        sc = newSeq[int](),
+        md = newSeq[int](),
+        mg = newSeq[int](),
+        mh = newSeq[int](),
+        mr = newSeq[int](),
+        mc = newSeq[int](),
         openQuestion = false,
         openAnswer = false,
         seed = 0,
     ) =
       ## なぞぷよを生成する．
-      let
-        puyoCountColor = pc
-        puyoCountGarbage = pg
-        puyoCountHard = ph
-
-        connection2Count = c2
-        connection2CountV = c2v
-        connection2CountH = c2h
-        connection3Count = c3
-        connection3CountV = c3v
-        connection3CountH = c3h
-        connection3CountL = c3l
-
-        stepGarbages = sg.mapIt it.pred
-        stepHards = sh.mapIt it.pred
-        stepRotate = sr.mapIt it.pred
-        stepCrossRotate = sc.mapIt it.pred
-
-      let errorMsg =
-        if rule notin Rule.low.ord.succ .. Rule.high.ord.succ:
-          "ルールが不正です．"
-        elif goalKindOpt notin GoalKind.low.ord .. GoalKind.high.ord.succ:
-          "クリア条件の種類が不正です．"
-        elif goalColor notin GoalColor.low.ord.succ .. GoalColor.high.ord.succ:
-          "クリア条件の色が不正です．"
-        elif goalOperator notin GoalOperator.low.ord.succ .. GoalOperator.high.ord.succ:
-          "クリア条件の値比較の演算子が不正です．"
-        elif goalClearColorOpt notin GoalColor.low.ord .. GoalColor.high.ord.succ:
-          "全消し条件の色が不正です．"
-        elif heights.len != Width:
-          "高さ指定が不正です．"
-        elif puyoCountColor < 0 and goalKindOpt.pred != Chain.ord:
-          "連鎖問題でない場合は色ぷよ数の指定が必要です．"
-        else:
-          ""
-      if errorMsg != "":
-        echo errorMsg
+      # rule
+      var rule2 = Rule.low
+      if rule - 1 notin Rule.low.ord .. Rule.high.ord:
+        echo "ルールが不正です．"
         return
+      rule2.assign (rule - 1).Rule
+
+      # goal kind
+      var goalKindOpt2 = Opt[GoalKind].err
+      if goalKindOpt == 0:
+        discard
+      elif goalKindOpt - 1 notin GoalKind.low.ord .. GoalKind.high.ord:
+        echo "クリア条件の種類が不正です．"
+        return
+      else:
+        goalKindOpt2.ok (goalKindOpt - 1).GoalKind
+
+      # goal color
+      var goalColor2 = GoalColor.low
+      if goalColor - 1 notin GoalColor.low.ord .. GoalColor.high.ord:
+        echo "クリア条件の色が不正です．"
+        return
+      goalColor2.assign (goalColor - 1).GoalColor
+
+      # goal operator
+      var goalOperator2 = GoalOperator.low
+      if goalOperator - 1 notin GoalOperator.low.ord .. GoalOperator.high.ord:
+        echo "クリア条件の演算子が不正です．"
+        return
+      goalOperator2.assign (goalOperator - 1).GoalOperator
+
+      # goal clear color
+      var goalClearColorOpt2 = Opt[GoalColor].err
+      if goalClearColorOpt == 0:
+        discard
+      elif goalClearColorOpt - 1 notin GoalColor.low.ord .. GoalColor.high.ord:
+        echo "全消し条件の色が不正です．"
+        return
+      else:
+        goalClearColorOpt2.ok (goalClearColorOpt - 1).GoalColor
+
+      # goal
+      var goal =
+        if goalKindOpt2.isOk:
+          Goal.init(
+            goalKindOpt2.unsafeValue, goalColor2, goalVal, goalOperator2,
+            goalClearColorOpt2,
+          )
+        else:
+          Goal.init goalClearColorOpt2
+      goal.normalize
 
       # height
+      if heights.len != Width:
+        echo "高さ指定が不正です．"
+        return
+      var heights2 {.noinit.}: array[Col, int]
+      staticFor(col, Col):
+        heights2[col].assign if heights[col.ord].isDigit:
+          ($heights[col.ord]).parseInt.unsafeValue
+        else:
+          -1
+
+      # puyo counts
+      var puyoCounts = (colored: pc, garbage: pg, hard: ph)
+      if goalKindOpt2.isOk and goalKindOpt2.unsafeValue == Chain and
+          puyoCounts.colored < 0:
+        puyoCounts.colored.assign goalVal * 4
+
+      # connections, indices
       let
-        heightWeights: Opt[array[Col, int]]
-        heightPositives: Opt[array[Col, bool]]
-      if heights.allIt it.isDigit:
-        var weights = Col.initArrayWith 0
-        for col in Col:
-          weights[col].assign ($heights[col.ord]).parseInt.unsafeValue
-
-        heightWeights = Opt[array[Col, int]].ok weights
-        heightPositives = Opt[array[Col, bool]].err
-      else:
-        var positives = Col.initArrayWith false
-        for col in Col:
-          positives[col].assign heights[col.ord] != '0'
-
-        heightWeights = Opt[array[Col, int]].err
-        heightPositives = Opt[array[Col, bool]].ok positives
-
-      let
-        rule2 = rule.pred.Rule
-        puyoCountColor2 =
-          if puyoCountColor < 0:
-            goalVal * 4
-          else:
-            puyoCountColor
-
         connection2Counts = (
-          totalOpt: connection2Count.negToError,
-          verticalOpt: connection2CountV.negToError,
-          horizontalOpt: connection2CountH.negToError,
+          totalOpt: c2.negToError,
+          verticalOpt: c2v.negToError,
+          horizontalOpt: c2h.negToError,
         )
         connection3Counts = (
-          totalOpt: connection3Count.negToError,
-          verticalOpt: connection3CountV.negToError,
-          horizontalOpt: connection3CountH.negToError,
-          lShapeOpt: connection3CountL.negToError,
+          totalOpt: c3.negToError,
+          verticalOpt: c3v.negToError,
+          horizontalOpt: c3h.negToError,
+          lShapeOpt: c3l.negToError,
+        )
+        indices = (
+          allowDouble: md.mapIt it - 1,
+          garbage: mg.mapIt it - 1,
+          hard: mh.mapIt it - 1,
+          rotate: mr.mapIt it - 1,
+          crossRotate: mc.mapIt it - 1,
         )
 
-        settings = GenerateSettings.init(
-          rule2,
-          Goal(
-            mainOpt: (
-              if goalKindOpt == 0: Opt[GoalMain].err
-              else: Opt[GoalMain].ok GoalMain.init(
-                goalKindOpt.pred.GoalKind, goalColor.pred.GoalColor, goalVal,
-                goalOperator.pred.GoalOperator,
-              )
-            ),
-            clearColorOpt: (
-              if goalClearColorOpt == 0:
-                Opt[GoalColor].err
-              else:
-                Opt[GoalColor].ok goalClearColorOpt.pred.GoalColor
-            ),
-          ),
-          moveCount,
-          colorCount,
-          (weightsOpt: heightWeights, positivesOpt: heightPositives),
-          (colors: puyoCountColor2, garbage: puyoCountGarbage, hard: puyoCountHard),
-          connection2Counts,
-          connection3Counts,
-          stepGarbages,
-          stepHards,
-          stepRotate,
-          stepCrossRotate,
-          allowDoubleMoves.mapIt it.pred,
-        )
+      # settings
+      let settings = GenerateSettings.init(
+        rule2, goal, moveCount, colorCount, heights2, puyoCounts, connection2Counts,
+        connection3Counts, indices,
+      )
 
       let seed2: int64
       if seed == 0:
@@ -514,7 +502,7 @@ when isMainModule:
         seed2 = seed.int64
       var rng = seed2.initRand
 
-      for index in 0 ..< count:
+      for problemIndex in 0 ..< count:
         let nazoPuyoResult = rng.generate settings
         if nazoPuyoResult.isErr:
           echo "生成に失敗しました．エラー内容："
@@ -522,12 +510,12 @@ when isMainModule:
           return
 
         let
-          simulator = Simulator.init(nazoPuyoResult.unsafeValue, EditorEdit)
+          simulator = Simulator.init(nazoPuyoResult.unsafeValue, EditorPlay)
           questionUri = simulator.toUri(clearPlacements = true).unsafeValue
           answerUri = simulator.toUri.unsafeValue
 
-        echo "(Q{index.succ}) {questionUri}".fmt
-        echo "(A{index.succ}) {answerUri}".fmt
+        echo "(Q{problemIndex+1}) {questionUri}".fmt
+        echo "(A{problemIndex+1}) {answerUri}".fmt
         echo ""
 
         if openQuestion:
@@ -596,7 +584,6 @@ $subcmds""",
           "moveCount": 'm',
           "colorCount": 'c',
           "heights": 'H',
-          "allowDoubleMoves": 'd',
           "openQuestion": 'B',
           "openAnswer": 'b',
           "seed": 's',
@@ -605,31 +592,31 @@ $subcmds""",
           "count": "生成数",
           "rule": "ルール（1:通 2:大回転 3:クロス回転 4:水中）",
           "goalKindOpt":
-            "クリア条件の種類（0:メイン条件なし 1:n連鎖 2:n色同時 3:n個同時 4:n箇所 5:n連結 6:累計n色 7:累計n個）",
+            "クリア条件の種類（0:条件なし 1:n連鎖 2:n色同時 3:n個同時 4:n箇所 5:n連結 6:累計n色 7:累計n個）",
           "goalColor":
             "クリア条件の色（1:全 2:赤 3:緑 4:青 5:黄 6:紫 7:お邪魔 8:色）",
-          "goalVal": "クリア条件の数",
+          "goalVal": "クリア条件の値",
           "goalOperator": "クリア条件の演算子（1:ちょうど 2:以上）",
           "goalClearColorOpt":
-            "全消し条件の色（0: 全消し条件なし 1:全 2:赤 3:緑 4:青 5:黄 6:紫 7:お邪魔 8:色）",
+            "全消し条件の色（0: 条件なし 1:全 2:赤 3:緑 4:青 5:黄 6:紫 7:お邪魔 8:色）",
           "moveCount": "手数",
           "colorCount": "色数",
-          "heights": "高さ比率（例：「012210」「0---00」）",
+          "heights": "高さ比率（例：「012210」「0...00」）",
           "pc": "色ぷよ数（飽和連鎖問題では省略可）",
           "pg": "お邪魔ぷよ数",
           "ph": "固ぷよ数",
-          "c2": "2連結数",
+          "c2": "2連結数（負の数ならランダム．以下同じ）",
           "c2v": "縦2連結数",
           "c2h": "横2連結数",
           "c3": "3連結数",
           "c3v": "縦3連結数",
           "c3h": "横3連結数",
           "c3l": "L字3連結数",
-          "sg": "何手目でお邪魔ぷよを落下させるか",
-          "sh": "何手目で固ぷよを落下させるか",
-          "sr": "何手目で大回転させるか",
-          "sc": "何手目でクロス回転させるか",
-          "allowDoubleMoves": "何手目でゾロを許可するか",
+          "md": "何手目でゾロを許可するか",
+          "mg": "何手目でお邪魔ぷよを落下させるか",
+          "mh": "何手目で固ぷよを落下させるか",
+          "mr": "何手目で大回転させるか",
+          "mc": "何手目でクロス回転させるか",
           "openQuestion": "問題をブラウザで開く",
           "openAnswer": "解をブラウザで開く",
           "seed": "シード",
