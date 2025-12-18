@@ -21,8 +21,8 @@ type
 
   MarkResult* {.pure.} = enum
     ## Nazo Puyo marking result.
-    Accept = "クリア！"
-    WrongAnswer = ""
+    Correct = "クリア！"
+    Incorrect = ""
     Dead = "ばたんきゅ〜"
     InvalidPlace = "不可能な設置"
     PlaceSkip = "設置スキップ"
@@ -149,11 +149,11 @@ func mark*(self: NazoPuyo, endStepIndex = -1): MarkResult {.inline, noinit.} =
       )
 
     if satisfied:
-      return Accept
+      return Correct
     if puyoPuyo.field.isDead:
       return Dead
 
-  WrongAnswer
+  Incorrect
 
 # ------------------------------------------------
 # Nazo Puyo <-> string

@@ -130,10 +130,10 @@ when isMainModule:
         let (goal, steps) = ?args.parseSolveInfo.context errorMsg
 
         let node = ?args.parseSolveNode.context errorMsg
-        var answers = newSeq[SolveAnswer]()
-        node.solveSingleThread answers, steps.len, true, goal, steps
+        var solutions = newSeq[Solution]()
+        node.solveSingleThread solutions, steps.len, true, goal, steps
 
-        ok answers.toStrs
+        ok solutions.toStrs
 
       task.register
     elif defined(pon2.build.marathon):
@@ -272,7 +272,7 @@ when isMainModule:
     # Native - Solve
     # ------------------------------------------------
 
-    proc runSolver(urls: seq[string], openQuestion = false, openAnswer = false) =
+    proc runSolver(urls: seq[string], openProblem = false, openSolution = false) =
       ## なぞぷよの解を求める．
       if urls.len != 1:
         echo "URLを一つ入力してください．"
@@ -285,30 +285,30 @@ when isMainModule:
         return
       let simulator = simulatorResult.unsafeValue
 
-      if openQuestion:
+      if openProblem:
         urls[0].parseUri.openDefaultBrowser.isOkOr:
           echo "ブラウザの起動に失敗しました．"
 
       let
-        answers = simulator.nazoPuyo.solve
+        solutions = simulator.nazoPuyo.solve
         stepsSeq = collect:
-          for answer in answers:
+          for solution in solutions:
             var steps = simulator.nazoPuyo.puyoPuyo.steps
-            for stepIndex, placement in answer:
+            for stepIndex, placement in solution:
               if simulator.nazoPuyo.puyoPuyo.steps[stepIndex].kind == PairPlace:
                 steps[stepIndex].placement.assign placement
 
             steps
 
-      for answerIndex, steps in stepsSeq:
+      for solutionIndex, steps in stepsSeq:
         var nazoPuyo = simulator.nazoPuyo
         nazoPuyo.puyoPuyo.steps.assign steps
 
-        let answerUri = Simulator.init(nazoPuyo, EditorEdit).toUri.unsafeValue
-        echo "({answerIndex.succ}) {answerUri}".fmt
+        let solutionUri = Simulator.init(nazoPuyo, EditorEdit).toUri.unsafeValue
+        echo "({solutionIndex.succ}) {solutionUri}".fmt
 
-        if openAnswer:
-          answerUri.openDefaultBrowser.isOkOr:
+        if openSolution:
+          solutionUri.openDefaultBrowser.isOkOr:
             echo "ブラウザの起動に失敗しました．"
 
     # ------------------------------------------------
@@ -319,8 +319,8 @@ when isMainModule:
         urls: seq[string],
         fixMoves = newSeq[int](),
         allowDoubleMoves = newSeq[int](),
-        openQuestion = false,
-        openAnswer = false,
+        openProblem = false,
+        openSolution = false,
     ) =
       ## なぞぷよのツモを並べ替える．
       if urls.len != 1:
@@ -340,18 +340,18 @@ when isMainModule:
       ):
         let
           resultSimulator = Simulator.init(nazoPuyo, EditorEdit)
-          questionUri = resultSimulator.toUri(clearPlacements = true).unsafeValue
-          answerUri = resultSimulator.toUri.unsafeValue
+          problemUri = resultSimulator.toUri(clearPlacements = true).unsafeValue
+          solutionUri = resultSimulator.toUri.unsafeValue
 
-        echo "(Q{index.succ}) {questionUri}".fmt
-        echo "(A{index.succ}) {answerUri}".fmt
+        echo "(Q{index.succ}) {problemUri}".fmt
+        echo "(A{index.succ}) {solutionUri}".fmt
         echo ""
 
-        if openQuestion:
-          questionUri.openDefaultBrowser.isOkOr:
+        if openProblem:
+          problemUri.openDefaultBrowser.isOkOr:
             echo "ブラウザの起動に失敗しました．"
-        if openAnswer:
-          answerUri.openDefaultBrowser.isOkOr:
+        if openSolution:
+          solutionUri.openDefaultBrowser.isOkOr:
             echo "ブラウザの起動に失敗しました．"
 
         index.inc
@@ -393,8 +393,8 @@ when isMainModule:
         mh = newSeq[int](),
         mr = newSeq[int](),
         mc = newSeq[int](),
-        openQuestion = false,
-        openAnswer = false,
+        openProblem = false,
+        openSolution = false,
         seed = 0,
     ) =
       ## なぞぷよを生成する．
@@ -511,18 +511,18 @@ when isMainModule:
 
         let
           simulator = Simulator.init(nazoPuyoResult.unsafeValue, EditorPlay)
-          questionUri = simulator.toUri(clearPlacements = true).unsafeValue
-          answerUri = simulator.toUri.unsafeValue
+          problemUri = simulator.toUri(clearPlacements = true).unsafeValue
+          solutionUri = simulator.toUri.unsafeValue
 
-        echo "(Q{problemIndex+1}) {questionUri}".fmt
-        echo "(A{problemIndex+1}) {answerUri}".fmt
+        echo "(Q{problemIndex+1}) {problemUri}".fmt
+        echo "(A{problemIndex+1}) {solutionUri}".fmt
         echo ""
 
-        if openQuestion:
-          questionUri.openDefaultBrowser.isOkOr:
+        if openProblem:
+          problemUri.openDefaultBrowser.isOkOr:
             echo "ブラウザの起動に失敗しました．"
-        if openAnswer:
-          answerUri.openDefaultBrowser.isOkOr:
+        if openSolution:
+          solutionUri.openDefaultBrowser.isOkOr:
             echo "ブラウザの起動に失敗しました．"
 
     # ------------------------------------------------
@@ -546,10 +546,10 @@ $subcmds""",
       [
         runSolver,
         cmdName = "s",
-        short = {"openQuestion": 'B', "openAnswer": 'b'},
+        short = {"openProblem": 'B', "openSolution": 'b'},
         help = {
-          "openQuestion": "問題をブラウザで開く",
-          "openAnswer": "解をブラウザで開く",
+          "openProblem": "問題をブラウザで開く",
+          "openSolution": "解をブラウザで開く",
           "urls": "{なぞぷよのURL}",
         },
       ],
@@ -559,14 +559,14 @@ $subcmds""",
         short = {
           "fixMoves": 'f',
           "allowDoubleMoves": 'd',
-          "openQuestion": 'B',
-          "openAnswer": 'b',
+          "openProblem": 'B',
+          "openSolution": 'b',
         },
         help = {
           "fixMoves": "何手目を固定するか",
           "allowDoubleMoves": "何手目のゾロを許可するか",
-          "openQuestion": "問題をブラウザで開く",
-          "openAnswer": "解をブラウザで開く",
+          "openProblem": "問題をブラウザで開く",
+          "openSolution": "解をブラウザで開く",
           "urls": "{なぞぷよのURL}",
         },
       ],
@@ -584,8 +584,8 @@ $subcmds""",
           "moveCount": 'm',
           "colorCount": 'c',
           "heights": 'H',
-          "openQuestion": 'B',
-          "openAnswer": 'b',
+          "openProblem": 'B',
+          "openSolution": 'b',
           "seed": 's',
         },
         help = {
@@ -617,8 +617,8 @@ $subcmds""",
           "mh": "何手目で固ぷよを落下させるか",
           "mr": "何手目で大回転させるか",
           "mc": "何手目でクロス回転させるか",
-          "openQuestion": "問題をブラウザで開く",
-          "openAnswer": "解をブラウザで開く",
+          "openProblem": "問題をブラウザで開く",
+          "openSolution": "解をブラウザで開く",
           "seed": "シード",
         },
       ]

@@ -30,7 +30,7 @@ func allStepsSeq(
   ## Returns all possible steps in ascending order that can be obtained by permuting
   ## puyos after `stepIndex` contained in the steps.
   ## Non-`PairPlace` steps are left as they are.
-  ## Note that swapped pairs may give different answers but this function does not
+  ## Note that swapped pairs may give different solutions but this function does not
   ## consider it.
   ## `cellCounts` should be set for colored puyos.
   if stepIndex == steps.len:
@@ -84,7 +84,7 @@ func allStepsSeq(
   ## Returns all possible steps in ascending order that can be obtained by permuting
   ## puyos contained in the steps.
   ## Non-`PairPlace` steps are left as they are.
-  ## Note that Swapped pair may give a different answer but this function does not
+  ## Note that Swapped pair may give a different solution but this function does not
   ## consider it.
   var cellCounts {.noinit.}: array[Cell, int]
   staticFor(cell2, ColoredPuyos):
@@ -100,17 +100,17 @@ proc permute*(
     self: NazoPuyo, fixIndices, allowDoubleIndices: openArray[int]
 ): seq[NazoPuyo] =
   ## Returns a sequence of Nazo Puyos that is obtained by permuting steps and has a
-  ## unique answer.
+  ## unique solution.
   collect:
     for steps in self.puyoPuyo.steps.allStepsSeq(fixIndices, allowDoubleIndices):
       var nazoPuyo = self
       nazoPuyo.puyoPuyo.steps.assign steps
 
-      let answers = nazoPuyo.solve(calcAllAnswers = false)
-      if answers.len == 1:
+      let solutions = nazoPuyo.solve(calcAllSolutions = false)
+      if solutions.len == 1:
         for stepIndex, step in nazoPuyo.puyoPuyo.steps.mpairs:
           if step.kind == PairPlace:
-            step.placement.assign answers[0][stepIndex]
+            step.placement.assign solutions[0][stepIndex]
 
         nazoPuyo
 
@@ -139,11 +139,11 @@ when defined(js) or defined(nimsuggest):
         var nazoPuyo = self
         nazoPuyo.puyoPuyo.steps.assign steps
 
-        let answers = await nazoPuyo.asyncSolve(calcAllAnswers = false)
-        if answers.len == 1:
+        let solutions = await nazoPuyo.asyncSolve(calcAllSolutions = false)
+        if solutions.len == 1:
           for stepIndex, step in nazoPuyo.puyoPuyo.steps.mpairs:
             if step.kind == PairPlace:
-              step.placement.assign answers[0][stepIndex]
+              step.placement.assign solutions[0][stepIndex]
 
           nazoPuyos.add nazoPuyo
 

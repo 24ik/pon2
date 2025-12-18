@@ -113,12 +113,12 @@ proc checkGenerate(
     check nazoPuyo.puyoPuyo.steps[stepIndex].kind == FieldRotate and
       nazoPuyo.puyoPuyo.steps[stepIndex].cross
 
-  let answer = nazoPuyo.solve
-  check answer.len == 1
-  check answer[0].len == moveCount
+  let solution = nazoPuyo.solve
+  check solution.len == 1
+  check solution[0].len == moveCount
   for stepIndex, step in nazoPuyo.puyoPuyo.steps:
     if step.kind == PairPlace:
-      check step.placement == answer[0][stepIndex]
+      check step.placement == solution[0][stepIndex]
 
 block: # generate
   checkGenerate(

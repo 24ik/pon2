@@ -56,8 +56,8 @@ rpor..
 ry|
 rp|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Left2, Down1) == Accept
-    check nazoPuyo.mark2(Down2, Down1) == WrongAnswer
+    check nazoPuyo.mark2(Left2, Down1) == Correct
+    check nazoPuyo.mark2(Down2, Down1) == Incorrect
 
   block: # Color
     let nazoPuyo =
@@ -82,8 +82,8 @@ rp|""".parseNazoPuyo.unsafeValue
 gp|
 gp|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Left5, Down5) == Accept
-    check nazoPuyo.mark2(Down5, Up4) == WrongAnswer
+    check nazoPuyo.mark2(Left5, Down5) == Correct
+    check nazoPuyo.mark2(Down5, Up4) == Incorrect
 
   block: # Count
     let nazoPuyo =
@@ -108,8 +108,8 @@ rrgbb.
 rb|
 rg|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Down2, Left2) == Accept
-    check nazoPuyo.mark2(Down5, Down1) == WrongAnswer
+    check nazoPuyo.mark2(Down2, Left2) == Correct
+    check nazoPuyo.mark2(Down5, Down1) == Incorrect
 
   block: # Place
     let nazoPuyo =
@@ -134,8 +134,8 @@ yyryy.
 ry|
 ry|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Down3, Left2) == Accept
-    check nazoPuyo.mark2(Up2, Down3) == WrongAnswer
+    check nazoPuyo.mark2(Down3, Left2) == Correct
+    check nazoPuyo.mark2(Up2, Down3) == Incorrect
 
   block: # Connection
     let nazoPuyo =
@@ -160,8 +160,8 @@ gggbr.
 gg|
 bg|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Up3, Left4) == Accept
-    check nazoPuyo.mark2(Up1, Left2) == WrongAnswer
+    check nazoPuyo.mark2(Up3, Left4) == Correct
+    check nazoPuyo.mark2(Up1, Left2) == Incorrect
 
   block: # AccumColor
     let nazoPuyo =
@@ -186,8 +186,8 @@ bg|""".parseNazoPuyo.unsafeValue
 bg|
 rg|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Down2, Left5) == Accept
-    check nazoPuyo.mark2(Left3, Left5) == WrongAnswer
+    check nazoPuyo.mark2(Down2, Left5) == Correct
+    check nazoPuyo.mark2(Left3, Left5) == Incorrect
 
   block: # AccumCount
     let nazoPuyo =
@@ -212,8 +212,8 @@ ooobbb
 yy|
 yg|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Up0, Down1) == Accept
-    check nazoPuyo.mark2(Right3, Down3) == WrongAnswer
+    check nazoPuyo.mark2(Up0, Down1) == Correct
+    check nazoPuyo.mark2(Right3, Down3) == Incorrect
 
   block: # Clear
     let nazoPuyo =
@@ -238,8 +238,8 @@ yy.bbb
 by|
 by|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Left3, Down2) == Accept
-    check nazoPuyo.mark2(Left3, Placement.None) == WrongAnswer
+    check nazoPuyo.mark2(Left3, Down2) == Correct
+    check nazoPuyo.mark2(Left3, Placement.None) == Incorrect
 
   block: # Clear w/ kind
     let nazoPuyo =
@@ -263,8 +263,8 @@ orrg..
 ------
 rg|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Right1) == Accept
-    check nazoPuyo.mark2(Up2) == WrongAnswer
+    check nazoPuyo.mark2(Right1) == Correct
+    check nazoPuyo.mark2(Up2) == Incorrect
 
   block: # Dead, InvalidPlace, PlaceSkip
     let nazoPuyo =
@@ -318,7 +318,7 @@ ry|""".parseNazoPuyo.unsafeValue
 
     check nazoPuyo.mark2(Placement.None) == NotSupport
 
-  block: # initial nazopuyo is accepted
+  block: # initial nazopuyo is Corrected
     let nazoPuyo =
       """
 ぷよ全て消すべし
@@ -340,7 +340,7 @@ ry|""".parseNazoPuyo.unsafeValue
 ------
 rr|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Down1) == WrongAnswer
+    check nazoPuyo.mark2(Down1) == Incorrect
 
   block: # empty steps
     let nazoPuyo =
@@ -364,7 +364,7 @@ rrr...
 ------
 """.parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2 == WrongAnswer
+    check nazoPuyo.mark2 == Incorrect
 
   block: # w/ endStepIndex
     let nazoPuyo =
@@ -389,10 +389,10 @@ yy.bbb
 by|43
 by|3S""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark(-1) == Accept
-    check nazoPuyo.mark(0) == WrongAnswer
-    check nazoPuyo.mark(1) == WrongAnswer
-    check nazoPuyo.mark(2) == Accept
+    check nazoPuyo.mark(-1) == Correct
+    check nazoPuyo.mark(0) == Incorrect
+    check nazoPuyo.mark(1) == Incorrect
+    check nazoPuyo.mark(2) == Correct
 
 # ------------------------------------------------
 # Nazo Puyo <-> string

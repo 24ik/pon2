@@ -184,7 +184,7 @@ func children(
     @[(self.child(goal, step), Placement.None)]
 
 # ------------------------------------------------
-# Accept
+# Correct
 # ------------------------------------------------
 
 func cellCount(self: SolveNode, cell: Cell): int {.inline, noinit.} =
@@ -200,7 +200,7 @@ func nuisancePuyoCount(self: SolveNode): int {.inline, noinit.} =
     self.stepsCounts[Garbage],
   )
 
-func isAccepted(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
+func isCorrect(self: SolveNode, goal: Goal): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   # check clear
   if goal.clearColorOpt.isOk:
@@ -380,18 +380,18 @@ func childrenAtDepth*(
     targetDepth: int,
     nodes: var seq[SolveNode],
     placementsSeq: var seq[seq[Placement]],
-    answers: var seq[seq[Placement]],
+    solutions: var seq[seq[Placement]],
     moveCount: int,
-    calcAllAnswers: bool,
+    calcAllSolutions: bool,
     goal: Goal,
     steps: Steps,
 ) {.inline, noinit.} =
   ## Calculates nodes with the given depth and sets them to `nodes`.
   ## A sequence of edges to reach them is set to `placementsSeq`.
-  ## Answers that have `targetDepth` or less steps are set to `answers` in reverse
+  ## Solutions that have `targetDepth` or less steps are set to `solutions` in reverse
   ## order.
   ## This function requires that the field is settled and `nodes`, `placementsSeq`, and
-  ## `answers` are empty.
+  ## `solutions` are empty.
   let
     step = steps[self.depth]
     childDepth = self.depth + 1
@@ -403,20 +403,20 @@ func childrenAtDepth*(
   var
     nodesSeq = newSeqOfCap[seq[SolveNode]](childCount)
     placementsSeqSeq = newSeqOfCap[seq[seq[Placement]]](childCount)
-    answersSeq = newSeqOfCap[seq[seq[Placement]]](childCount)
+    solutionsSeq = newSeqOfCap[seq[seq[Placement]]](childCount)
   for _ in 1 .. childCount:
     nodesSeq.add newSeqOfCap[SolveNode](ActualPlacements.card)
     placementsSeqSeq.add newSeqOfCap[seq[Placement]](ActualPlacements.card)
-    answersSeq.add newSeqOfCap[seq[Placement]](ActualPlacements.card)
+    solutionsSeq.add newSeqOfCap[seq[Placement]](ActualPlacements.card)
 
   for childIndex, (child, placement) in children.pairs:
-    if child.isAccepted goal:
-      var answer = newSeqOfCap[Placement](childDepth)
-      answer.add placement
+    if child.isCorrect goal:
+      var solution = newSeqOfCap[Placement](childDepth)
+      solution.add placement
 
-      answers.add answer
+      solutions.add solution
 
-      if not calcAllAnswers and answers.len > 1:
+      if not calcAllSolutions and solutions.len > 1:
         return
 
       continue
@@ -434,25 +434,25 @@ func childrenAtDepth*(
       child.childrenAtDepth targetDepth,
         nodesSeq[childIndex],
         placementsSeqSeq[childIndex],
-        answersSeq[childIndex],
+        solutionsSeq[childIndex],
         moveCount,
-        calcAllAnswers,
+        calcAllSolutions,
         goal,
         steps
 
       for placements in placementsSeqSeq[childIndex].mitems:
         placements.add placement
 
-    for answer in answersSeq[childIndex].mitems:
-      answer.add placement
+    for solution in solutionsSeq[childIndex].mitems:
+      solution.add placement
 
-    if not calcAllAnswers and answers.len + answersSeq[childIndex].len > 1:
-      answers &= answersSeq[childIndex]
+    if not calcAllSolutions and solutions.len + solutionsSeq[childIndex].len > 1:
+      solutions &= solutionsSeq[childIndex]
       return
 
   nodes &= nodesSeq.concat
   placementsSeq &= placementsSeqSeq.concat
-  answers &= answersSeq.concat
+  solutions &= solutionsSeq.concat
 
 # ------------------------------------------------
 # Solve
@@ -460,16 +460,16 @@ func childrenAtDepth*(
 
 func solveSingleThread*(
     self: SolveNode,
-    answers: var seq[seq[Placement]],
+    solutions: var seq[seq[Placement]],
     moveCount: int,
-    calcAllAnswers: bool,
+    calcAllSolutions: bool,
     goal: Goal,
     steps: Steps,
     checkPruneFirst = false,
 ) {.inline, noinit.} =
   ## Solves the Nazo Puyo at the node with a single thread.
-  ## This function requires that the field is settled and `answers` is empty.
-  ## Answers in `answers` are set in reverse order.
+  ## This function requires that the field is settled and `solutions` is empty.
+  ## Solutions in `solutions` are set in reverse order.
   if checkPruneFirst and self.canPrune goal:
     return
 
@@ -479,18 +479,18 @@ func solveSingleThread*(
     childIsLeaf = childDepth == moveCount
     children = self.children(goal, step)
 
-  var childAnswersSeq = newSeqOfCap[seq[seq[Placement]]](children.len)
+  var childSolutionsSeq = newSeqOfCap[seq[seq[Placement]]](children.len)
   for _ in 1 .. children.len:
-    childAnswersSeq.add newSeqOfCap[seq[Placement]](ActualPlacements.card)
+    childSolutionsSeq.add newSeqOfCap[seq[Placement]](ActualPlacements.card)
 
   for childIndex, (child, placement) in children.pairs:
-    if child.isAccepted goal:
-      var answer = newSeqOfCap[Placement](childDepth)
-      answer.add placement
+    if child.isCorrect goal:
+      var solution = newSeqOfCap[Placement](childDepth)
+      solution.add placement
 
-      answers.add answer
+      solutions.add solution
 
-      if not calcAllAnswers and answers.len > 1:
+      if not calcAllSolutions and solutions.len > 1:
         return
 
       continue
@@ -499,22 +499,22 @@ func solveSingleThread*(
       continue
 
     child.solveSingleThread(
-      childAnswersSeq[childIndex],
+      childSolutionsSeq[childIndex],
       moveCount,
-      calcAllAnswers,
+      calcAllSolutions,
       goal,
       steps,
       checkPruneFirst = false,
     )
 
-    for answer in childAnswersSeq[childIndex].mitems:
-      answer.add placement
+    for solution in childSolutionsSeq[childIndex].mitems:
+      solution.add placement
 
-    if not calcAllAnswers and answers.len + childAnswersSeq[childIndex].len > 1:
-      answers &= childAnswersSeq[childIndex]
+    if not calcAllSolutions and solutions.len + childSolutionsSeq[childIndex].len > 1:
+      solutions &= childSolutionsSeq[childIndex]
       return
 
-  answers &= childAnswersSeq.concat
+  solutions &= childSolutionsSeq.concat
 
 # ------------------------------------------------
 # SolveNode <-> string
@@ -696,18 +696,18 @@ when defined(js) or defined(nimsuggest):
     )
 
 # ------------------------------------------------
-# SolveAnswer <-> string
+# SolveSolution <-> string
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
   const NonePlacementStr = ".."
 
-  func toStrs*(answers: seq[seq[Placement]]): seq[string] {.inline, noinit.} =
-    ## Returns the string representations of the answers.
+  func toStrs*(solutions: seq[seq[Placement]]): seq[string] {.inline, noinit.} =
+    ## Returns the string representations of the solutions.
     collect:
-      for answer in answers:
+      for solution in solutions:
         (
-          answer.mapIt(
+          solution.mapIt(
             case it
             of Placement.None:
               NonePlacementStr
@@ -716,24 +716,24 @@ when defined(js) or defined(nimsuggest):
           )
         ).join
 
-  func parseSolveAnswers*(
+  func parseSolutions*(
       strs: seq[string]
   ): Pon2Result[seq[seq[Placement]]] {.inline, noinit.} =
-    ## Returns the answers converted from the run result.
-    var answers = newSeqOfCap[seq[Placement]](strs.len)
+    ## Returns the solutions converted from the run result.
+    var solutions = newSeqOfCap[seq[Placement]](strs.len)
     for str in strs:
-      let errorMsg = "Invalid answers: {str}".fmt
+      let errorMsg = "Invalid solutions: {str}".fmt
 
       if str.len mod 2 == 1:
         return err errorMsg
 
-      let answer = collect:
+      let solution = collect:
         for charIndex in countup(0, str.len - 1, 2):
           let s = str[charIndex ..< charIndex + 2]
           if s == NonePlacementStr:
             Placement.None
           else:
             ?s.parsePlacement.context errorMsg
-      answers.add answer
+      solutions.add solution
 
-    ok answers
+    ok solutions

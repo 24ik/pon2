@@ -91,30 +91,30 @@ bg|""".parseNazoPuyo.unsafeValue
     simulator = Simulator.init(nazoPuyo, EditorEdit)
   var studio = Studio.init simulator
 
-  var answerNazoPuyo = nazoPuyo
-  answerNazoPuyo.puyoPuyo.steps[0].placement.assign Left1
-  answerNazoPuyo.puyoPuyo.steps[1].placement.assign Left1
-  let answerSimulator = Simulator.init(answerNazoPuyo, Replay)
-  var answerStudio = Studio.init simulator
-  answerStudio.toggleFocus
+  var solutionNazoPuyo = nazoPuyo
+  solutionNazoPuyo.puyoPuyo.steps[0].placement.assign Left1
+  solutionNazoPuyo.puyoPuyo.steps[1].placement.assign Left1
+  let solutionSimulator = Simulator.init(solutionNazoPuyo, Replay)
+  var solutionStudio = Studio.init simulator
+  solutionStudio.toggleFocus
   block:
     Studio.privateAccess
     StudioReplayData.privateAccess
-    answerStudio.replaySimulator.assign answerSimulator
-    answerStudio.replayData.stepsSeq.assign @[answerNazoPuyo.puyoPuyo.steps]
+    solutionStudio.replaySimulator.assign solutionSimulator
+    solutionStudio.replayData.stepsSeq.assign @[solutionNazoPuyo.puyoPuyo.steps]
 
   studio.solve
-  check studio == answerStudio
+  check studio == solutionStudio
   check studio.replayStepsCount == 1
   check studio.replayStepsIndex == 0
 
   studio.nextReplay
-  check studio == answerStudio
+  check studio == solutionStudio
   check studio.replayStepsCount == 1
   check studio.replayStepsIndex == 0
 
   studio.prevReplay
-  check studio == answerStudio
+  check studio == solutionStudio
   check studio.replayStepsCount == 1
   check studio.replayStepsIndex == 0
 

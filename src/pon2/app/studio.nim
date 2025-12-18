@@ -118,7 +118,7 @@ func toggleFocus*(self: var Studio) =
 # ------------------------------------------------
 
 func nextReplay*(self: var Studio) =
-  ## Shows the next answer.
+  ## Shows the next solution.
   if self.simulator.mode notin EditorModes or self.replayData.stepsSeq.len == 0:
     return
 
@@ -132,7 +132,7 @@ func nextReplay*(self: var Studio) =
   self.replaySimulator.assign Simulator.init(nazoPuyo, Replay)
 
 func prevReplay*(self: var Studio) =
-  ## Shows the previous answer.
+  ## Shows the previous solution.
   if self.simulator.mode notin EditorModes or self.replayData.stepsSeq.len == 0:
     return
 
@@ -192,14 +192,14 @@ func workPostProcess(self: var Studio, nazoPuyo: NazoPuyo) =
   else:
     self.focusReplay.assign false
 
-proc setAnswers(
-    self: var Studio, originalNazoPuyo: NazoPuyo, answers: seq[SolveAnswer]
+proc setSolutions(
+    self: var Studio, originalNazoPuyo: NazoPuyo, solutions: seq[Solution]
 ) =
-  ## Sets the answers.
+  ## Sets the solutions.
   let stepsSeq = collect:
-    for answer in answers:
+    for solution in solutions:
       var steps = originalNazoPuyo.puyoPuyo.steps
-      for stepIndex, placement in answer:
+      for stepIndex, placement in solution:
         if originalNazoPuyo.puyoPuyo.steps[stepIndex].kind == PairPlace:
           steps[stepIndex].placement.assign placement
 
@@ -216,7 +216,7 @@ proc solve*(self: var Studio) =
   self.solving.assign true
   self.replayData.stepsSeq.setLen 0
 
-  self.setAnswers self.simulator.nazoPuyo, self.simulator.nazoPuyo.solve
+  self.setSolutions self.simulator.nazoPuyo, self.simulator.nazoPuyo.solve
   self.workPostProcess self.simulator.nazoPuyo
 
   self.solving.assign false
@@ -238,9 +238,9 @@ when defined(js) or defined(nimsuggest):
       discard originalNazoPuyo
         .asyncSolve(self[].progressRef)
         .then(
-          (answers: seq[SolveAnswer]) => (
+          (solutions: seq[Solution]) => (
             block:
-              self[].setAnswers originalNazoPuyo, answers
+              self[].setSolutions originalNazoPuyo, solutions
               self[].workPostProcess originalNazoPuyo
               self[].solving.assign false
           )

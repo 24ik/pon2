@@ -32,13 +32,13 @@ when defined(js) or defined(nimsuggest):
     if cameraReady or self.derefSimulator(helper).mode != EditorEdit:
       return buildHtml article(
         class = (
-          if helper.simulator.markResult == Accept: "message is-success"
+          if helper.simulator.markResult == Correct: "message is-success"
           else: "message is-info"
         ).kstring
       ):
         tdiv(class = "message-body"):
           text ($goal).kstring
-          if helper.simulator.markResult == Accept:
+          if helper.simulator.markResult == Correct:
             span(class = "icon"):
               italic(class = "fa-solid fa-circle-check")
 

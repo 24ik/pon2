@@ -13,20 +13,20 @@ func toPlacement(str: string): Placement =
   ## Returns the placement converted from the string representation.
   if str == NonePlacementStr: Placement.None else: str.parsePlacement.unsafeValue
 
-func toAnswers(strs: varargs[string]): HashSet[SolveAnswer] =
-  ## Returns the answers converted from the string representation.
-  var answers = initHashSet[SolveAnswer]()
+func toSolutions(strs: varargs[string]): HashSet[Solution] =
+  ## Returns the solutions converted from the string representation.
+  var solutions = initHashSet[Solution]()
   for str in strs:
-    let answer = collect:
+    let solution = collect:
       for i in countup(0, str.len - 1, 2):
         str.substr(i, i + 1).toPlacement
-    answers.incl answer
+    solutions.incl solution
 
-  answers
+  solutions
 
-proc solve(str: string, calcAllAnswers = true): HashSet[SolveAnswer] =
-  ## Returns the answers of Tsu Nazo Puyo.
-  str.parseNazoPuyo.unsafeValue.solve(calcAllAnswers).toHashSet
+proc solve(str: string, calcAllSolutions = true): HashSet[Solution] =
+  ## Returns the solutions of Tsu Nazo Puyo.
+  str.parseNazoPuyo.unsafeValue.solve(calcAllSolutions).toHashSet
 
 block: # solve
   block: # Chain
@@ -50,7 +50,7 @@ block: # solve
 ------
 ry|
 ry|""".solve ==
-      "4S3N".toAnswers
+      "4S3N".toSolutions
 
   block: # Color
     check """
@@ -73,7 +73,7 @@ ry|""".solve ==
 ------
 gp|
 gp|""".solve ==
-      "656S".toAnswers
+      "656S".toSolutions
 
   block: # Count
     check """
@@ -96,7 +96,7 @@ rrgbb.
 ------
 rb|
 rg|""".solve ==
-      "3S32".toAnswers
+      "3S32".toSolutions
 
   block: # Place
     check """
@@ -119,7 +119,7 @@ yyryy.
 ------
 ry|
 ry|""".solve ==
-      "4S32".toAnswers
+      "4S32".toSolutions
 
   block: # Connection
     check """
@@ -142,7 +142,7 @@ gggbr.
 ------
 gg|
 bg|""".solve ==
-      "4N54".toAnswers
+      "4N54".toSolutions
 
   block: # AccumColor
     check """
@@ -165,7 +165,7 @@ bg|""".solve ==
 ------
 bg|
 rg|""".solve ==
-      "3S65".toAnswers
+      "3S65".toSolutions
 
   block: # AccumCount
     check """
@@ -188,7 +188,7 @@ ooobbb
 ------
 yy|
 yg|""".solve ==
-      toAnswers("1N2S", "124N")
+      toSolutions("1N2S", "124N")
 
   block: # clear
     check """
@@ -211,7 +211,7 @@ yy.bbb
 ------
 by|
 by|""".solve ==
-      "433S".toAnswers
+      "433S".toSolutions
 
   block: # clear w/ kind
     check """
@@ -234,7 +234,7 @@ oorboo
 ------
 rb|
 yb|""".solve ==
-      "1S5S".toAnswers
+      "1S5S".toSolutions
 
   block: # more
     check """
@@ -257,7 +257,7 @@ yb|""".solve ==
 ------
 rb|
 rb|""".solve ==
-      "1N1S".toAnswers
+      "1N1S".toSolutions
 
   block: # Water
     check """
@@ -281,7 +281,7 @@ rpor..
 ------
 ry|
 rp|""".solve ==
-      "322S".toAnswers
+      "322S".toSolutions
 
   block: # Hard
     check """
@@ -304,7 +304,7 @@ rp|""".solve ==
 ------
 gg|
 gr|""".solve ==
-      "1N2S".toAnswers
+      "1N2S".toSolutions
 
   block: # drop garbages
     check """
@@ -328,7 +328,7 @@ gr|""".solve ==
 yg|
 (0,0,0,0,1,0)
 yr|""".solve ==
-      "3S..4S".toAnswers
+      "3S..4S".toSolutions
 
   block: # rotate
     check """
@@ -351,7 +351,7 @@ yr|""".solve ==
 ------
 R
 gy|""".solve ==
-      "..32".toAnswers
+      "..32".toSolutions
 
   block: # rotate
     check """
@@ -374,7 +374,7 @@ b...o.
 ------
 bb|
 C""".solve ==
-      "6N..".toAnswers
+      "6N..".toSolutions
 
   block: # initial nazopuyo is satisfied
     check """
@@ -396,7 +396,7 @@ C""".solve ==
 ......
 ------
 rr|""".solve ==
-      toAnswers()
+      toSolutions()
     check """
 ぷよ全て消すべし
 ======
@@ -418,7 +418,7 @@ rr|""".solve ==
 (0,0,4,0,2,0)
 rr|
 rr|""".solve ==
-      "..4N4N".toAnswers
+      "..4N4N".toSolutions
 
   block: # not supported
     check """
@@ -441,7 +441,7 @@ yyryy.
 ------
 ry|
 ry|""".solve ==
-      toAnswers()
+      toSolutions()
 
   block: # early satisfy
     check """
@@ -464,9 +464,9 @@ ry|""".solve ==
 ------
 rr|
 rb|""".solve ==
-      toAnswers("1N", "5N54", "6N54")
+      toSolutions("1N", "5N54", "6N54")
 
-  block: # not calcAllAnswers
+  block: # not calcAllSolutions
     check """
 ぷよ全て消すべし
 ======
@@ -488,7 +488,7 @@ rb|""".solve ==
 rr|
 rb|""".solve(
       false
-    ) <= toAnswers("1N", "5N54", "6N54")
+    ) <= toSolutions("1N", "5N54", "6N54")
 
   block: # check spawn
     check """
@@ -514,4 +514,4 @@ gg|
 yy|
 bg|
 yg|""".solve ==
-      "23344N2121".toAnswers
+      "23344N2121".toSolutions

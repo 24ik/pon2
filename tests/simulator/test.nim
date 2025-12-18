@@ -878,7 +878,7 @@ block: # mark
 yy|
 yy|""".parseNazoPuyo.unsafeValue
   var simulator = Simulator.init nazoPuyo
-  check simulator.mark == WrongAnswer
+  check simulator.mark == Incorrect
 
   simulator.movePlacementRight
   simulator.movePlacementRight
@@ -886,35 +886,35 @@ yy|""".parseNazoPuyo.unsafeValue
   simulator.forward
   while simulator.state != Stable:
     simulator.forward
-  check simulator.mark == WrongAnswer
+  check simulator.mark == Incorrect
 
   simulator.forward
   while simulator.state != Stable:
     simulator.forward
-  check simulator.mark == Accept
+  check simulator.mark == Correct
 
   simulator.backward
-  check simulator.mark == WrongAnswer
+  check simulator.mark == Incorrect
 
   simulator.backward
-  check simulator.mark == WrongAnswer
+  check simulator.mark == Incorrect
 
   simulator.movePlacementLeft
   simulator.forward
   while simulator.state != Stable:
     simulator.forward
-  check simulator.mark == Accept
+  check simulator.mark == Correct
 
   simulator.forward
   while simulator.state != Stable:
     simulator.forward
-  check simulator.mark == Accept
+  check simulator.mark == Correct
 
   simulator.backward
-  check simulator.mark == Accept
+  check simulator.mark == Correct
 
   simulator.backward
-  check simulator.mark == WrongAnswer
+  check simulator.mark == Incorrect
 
   check Simulator.init(PuyoPuyo.init).mark == NotSupport
 

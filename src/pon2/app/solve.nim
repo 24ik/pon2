@@ -27,8 +27,8 @@ when not defined(js):
   import std/[threadpool]
   {.pop.}
 
-type SolveAnswer* = seq[Placement]
-  ## Nazo Puyo answer.
+type Solution* = seq[Placement]
+  ## Nazo Puyo solution.
   ## Elements corresponding to non-`PairPlace` steps are set to `Placement.None`.
 
 when not defined(js):
@@ -39,41 +39,41 @@ when not defined(js):
 
   proc solveSingleThread(
       self: SolveNode,
-      answers: ptr seq[SolveAnswer],
+      solutions: ptr seq[Solution],
       moveCount: int,
-      calcAllAnswers: bool,
+      calcAllSolutions: bool,
       goal: Goal,
       steps: Steps,
   ): bool =
     ## Solves the Nazo Puyo at the node with a single thread.
-    ## This function requires that the field is settled and `answers` is empty.
-    ## `answers` are set in reverse order.
+    ## This function requires that the field is settled and `solutions` is empty.
+    ## `solutions` are set in reverse order.
     ## The return value has no meanings; only used to get FlowVar.
     self.solveSingleThread(
-      answers[], moveCount, calcAllAnswers, goal, steps, checkPruneFirst = false
+      solutions[], moveCount, calcAllSolutions, goal, steps, checkPruneFirst = false
     )
     false
 
   proc solveMultiThread(
       self: SolveNode,
-      answers: var seq[SolveAnswer],
+      solutions: var seq[Solution],
       moveCount: int,
-      calcAllAnswers: bool,
+      calcAllSolutions: bool,
       goal: Goal,
       steps: Steps,
   ) =
     ## Solves the Nazo Puyo at the node with multiple threads.
-    ## This function requires that the field is settled and `answers` is empty.
+    ## This function requires that the field is settled and `solutions` is empty.
     var
       nodes = newSeq[SolveNode]()
       placementsSeq = newSeq[seq[Placement]]()
     self.childrenAtDepth ChildTargetDepth,
-      nodes, placementsSeq, answers, moveCount, calcAllAnswers, goal, steps
+      nodes, placementsSeq, solutions, moveCount, calcAllSolutions, goal, steps
 
-    for answer in answers.mitems:
-      answer.reverse
+    for solution in solutions.mitems:
+      solution.reverse
 
-    if not calcAllAnswers and answers.len > 1:
+    if not calcAllSolutions and solutions.len > 1:
       return
 
     var nodeToIndices = initTable[SolveNode, seq[int]](nodes.len)
@@ -82,16 +82,16 @@ when not defined(js):
 
     let futureCount = nodeToIndices.len
     var
-      answersSeq = collect:
+      solutionsSeq = collect:
         for _ in 1 .. futureCount:
-          newSeq[SolveAnswer]()
+          newSeq[Solution]()
       futures = newSeqOfCap[FlowVar[bool]](futureCount)
 
     block:
       var futureIndex = 0
       for node in nodeToIndices.keys:
         futures.add spawn node.solveSingleThread(
-          answersSeq[futureIndex].addr, moveCount, calcAllAnswers, goal, steps
+          solutionsSeq[futureIndex].addr, moveCount, calcAllSolutions, goal, steps
         )
         futureIndex += 1
 
@@ -108,11 +108,11 @@ when not defined(js):
         let nodeIndices = nodeToIndices[node].unsafeValue
         for nodeIndex in nodeIndices:
           {.push warning[Uninit]: off.}
-          answers &=
-            answersSeq[futureIndex].mapIt (it & placementsSeq[nodeIndex]).reversed
+          solutions &=
+            solutionsSeq[futureIndex].mapIt (it & placementsSeq[nodeIndex]).reversed
           {.pop.}
 
-        if not calcAllAnswers and answers.len > 1:
+        if not calcAllSolutions and solutions.len > 1:
           return
 
         completedCount += 1
@@ -121,7 +121,7 @@ when not defined(js):
 
       sleep SolvePollingMs
 
-proc solve*(self: NazoPuyo, calcAllAnswers = true): seq[SolveAnswer] =
+proc solve*(self: NazoPuyo, calcAllSolutions = true): seq[Solution] =
   ## Solves the Nazo Puyo.
   ## A single thread is used on JS backend; otherwise multiple threads are used.
   ## This function requires that the field is settled.
@@ -131,26 +131,26 @@ proc solve*(self: NazoPuyo, calcAllAnswers = true): seq[SolveAnswer] =
   let
     root = SolveNode.init self
     moveCount = self.puyoPuyo.steps.len
-  var answers = newSeq[SolveAnswer]()
+  var solutions = newSeq[Solution]()
 
   when defined(js):
     root.solveSingleThread(
-      answers,
+      solutions,
       moveCount,
-      calcAllAnswers,
+      calcAllSolutions,
       self.goal,
       self.puyoPuyo.steps,
       checkPruneFirst = true,
     )
 
-    for answer in answers.mitems:
-      answer.reverse
+    for solution in solutions.mitems:
+      solution.reverse
   else:
     root.solveMultiThread(
-      answers, moveCount, calcAllAnswers, self.goal, self.puyoPuyo.steps
+      solutions, moveCount, calcAllSolutions, self.goal, self.puyoPuyo.steps
     )
 
-  answers
+  solutions
 
 # ------------------------------------------------
 # Solve - Async
@@ -164,23 +164,23 @@ when defined(js) or defined(nimsuggest):
     func initCompleteHandler(
         nodeIndex: int,
         placementsSeq: seq[seq[Placement]],
-        answersSeqRef: ref seq[seq[SolveAnswer]],
+        solutionsSeqRef: ref seq[seq[Solution]],
         progressRef: ref tuple[now, total: int],
     ): Pon2Result[seq[string]] -> void =
       ## Returns a handler called after a web worker job completes.
       (msgsResult: Pon2Result[seq[string]]) => (
         block:
           if msgsResult.isOk:
-            let answersResult = msgsResult.unsafeValue.parseSolveAnswers
-            if answersResult.isOk:
-              var answers = answersResult.unsafeValue
-              for answer in answers.mitems:
-                answer &= placementsSeq[nodeIndex]
-                answer.reverse
+            let solutionsResult = msgsResult.unsafeValue.parseSolutions
+            if solutionsResult.isOk:
+              var solutions = solutionsResult.unsafeValue
+              for solution in solutions.mitems:
+                solution &= placementsSeq[nodeIndex]
+                solution.reverse
 
-              answersSeqRef[][nodeIndex].assign answers
+              solutionsSeqRef[][nodeIndex].assign solutions
             else:
-              console.error answersResult.error.cstring
+              console.error solutionsResult.error.cstring
           else:
             console.error msgsResult.error.cstring
 
@@ -191,8 +191,8 @@ when defined(js) or defined(nimsuggest):
     proc asyncSolve*(
         self: NazoPuyo,
         progressRef: ref tuple[now, total: int] = nil,
-        calcAllAnswers = true,
-    ): Future[seq[SolveAnswer]] {.async.} =
+        calcAllSolutions = true,
+    ): Future[seq[Solution]] {.async.} =
       ## Solves the Nazo Puyo asynchronously with web workers.
       ## This function requires that the field is settled.
       if not progressRef.isNil:
@@ -202,27 +202,27 @@ when defined(js) or defined(nimsuggest):
         if not progressRef.isNil:
           progressRef[] = (1, 1)
 
-        return newSeq[SolveAnswer]()
+        return newSeq[Solution]()
 
       let rootNode = SolveNode.init self
 
       var
         nodes = newSeq[SolveNode]()
         placementsSeq = newSeq[seq[Placement]]()
-        answers = newSeq[SolveAnswer]()
+        solutions = newSeq[Solution]()
 
       rootNode.childrenAtDepth ChildTargetDepthJs,
-        nodes, placementsSeq, answers, self.puyoPuyo.steps.len, calcAllAnswers,
+        nodes, placementsSeq, solutions, self.puyoPuyo.steps.len, calcAllSolutions,
         self.goal, self.puyoPuyo.steps
 
-      for answer in answers.mitems:
-        answer.reverse
+      for solution in solutions.mitems:
+        solution.reverse
 
-      if not calcAllAnswers and answers.len > 1:
+      if not calcAllSolutions and solutions.len > 1:
         if not progressRef.isNil:
           progressRef[] = (1, 1)
 
-        return answers
+        return solutions
 
       let nodeCount = nodes.len
       if not progressRef.isNil:
@@ -231,10 +231,10 @@ when defined(js) or defined(nimsuggest):
         else:
           progressRef[] = (0, nodeCount)
 
-      let answersSeqRef = new seq[seq[SolveAnswer]]
-      answersSeqRef[] = collect:
+      let solutionsSeqRef = new seq[seq[Solution]]
+      solutionsSeqRef[] = collect:
         for _ in 1 .. nodeCount:
-          newSeq[SolveAnswer]()
+          newSeq[Solution]()
 
       {.push warning[Uninit]: off.}
       {.push warning[ProveInit]: off.}
@@ -243,7 +243,7 @@ when defined(js) or defined(nimsuggest):
           webWorkerPool
           .run(node.toStrs(self.goal, self.puyoPuyo.steps))
           .then(
-            initCompleteHandler(nodeIndex, placementsSeq, answersSeqRef, progressRef)
+            initCompleteHandler(nodeIndex, placementsSeq, solutionsSeqRef, progressRef)
           )
           .catch((error: Error) => console.error error)
       {.pop.}
@@ -251,4 +251,4 @@ when defined(js) or defined(nimsuggest):
       for future in futures:
         await future
 
-      return answers & answersSeqRef[].concat
+      return solutions & solutionsSeqRef[].concat

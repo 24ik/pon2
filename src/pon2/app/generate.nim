@@ -421,12 +421,12 @@ proc generate*(rng: var Rand, settings: GenerateSettings): Pon2Result[NazoPuyo] 
         settings.connection3Counts.lShapeOpt.unsafeValue * 3:
       continue
 
-    # check answers
-    let answers = nazoPuyo.solve(calcAllAnswers = false)
-    if answers.len == 1 and answers[0].len == settings.moveCount:
+    # check solutions
+    let solutions = nazoPuyo.solve(calcAllSolutions = false)
+    if solutions.len == 1 and solutions[0].len == settings.moveCount:
       for stepIndex, step in nazoPuyo.puyoPuyo.steps.mpairs:
         if step.kind == PairPlace:
-          step.placement.assign answers[0][stepIndex]
+          step.placement.assign solutions[0][stepIndex]
 
       break
 
