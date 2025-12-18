@@ -68,9 +68,11 @@ when defined(js) or defined(nimsuggest):
     if editable:
       buildHtml button(
         class =
-          if stepHasCursor and (
-            self.derefSimulator(helper).editData.step.pivot == pivot
-          ): SelectCellClass else: CellClass,
+          if stepHasCursor and
+              (self.derefSimulator(helper).editData.steps.pivot == pivot):
+            SelectCellClass
+          else:
+            CellClass,
         style = style(StyleAttr.maxHeight, "24px"),
         onclick = self.initWriteBtnHandler(helper, stepIndex, pivot),
       ):
@@ -88,7 +90,7 @@ when defined(js) or defined(nimsuggest):
       stepHasCursor =
         editable and not helper.mobile and
         not self.derefSimulator(helper).editData.focusField and
-        self.derefSimulator(helper).editData.step.index == stepIndex
+        self.derefSimulator(helper).editData.steps.index == stepIndex
       steps = self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps
       isPlaceholder = stepIndex >= steps.len
       optPlcmtDesc = (if isPlaceholder: "" else: $steps[stepIndex].placement).kstring
@@ -157,8 +159,8 @@ when defined(js) or defined(nimsuggest):
                 "pon2-simulator-step-garbagecount-{stepIndex}-{col.ord}".fmt.kstring
               selectStyle =
                 if not self.derefSimulator(helper).editData.focusField and
-                    self.derefSimulator(helper).editData.step.index == stepIndex and
-                    self.derefSimulator(helper).editData.step.col == col:
+                    self.derefSimulator(helper).editData.steps.index == stepIndex and
+                    self.derefSimulator(helper).editData.steps.col == col:
                   style(StyleAttr.backgroundColor, SelectColor.toHtmlRgba.kstring)
                 else:
                   style()
@@ -194,7 +196,7 @@ when defined(js) or defined(nimsuggest):
       buildHtml button(
         class = (
           if not helper.mobile and not self.derefSimulator(helper).editData.focusField and
-              self.derefSimulator(helper).editData.step.index == stepIndex:
+              self.derefSimulator(helper).editData.steps.index == stepIndex:
           "button is-size-7 is-primary"
           else: "button is-size-7"
         ).kstring,
@@ -219,7 +221,7 @@ when defined(js) or defined(nimsuggest):
         for stepIndex, step in steps:
           let rowClass = (
             if not editable and self.derefSimulator(helper).state == Stable and
-                self.derefSimulator(helper).operatingIndex == stepIndex:
+                self.derefSimulator(helper).operating.index == stepIndex:
               "is-selected"
             else:
               ""

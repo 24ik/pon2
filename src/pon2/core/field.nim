@@ -12,9 +12,12 @@ import
 import ../[utils]
 import
   ../private/
-    [arrayutils, assign, bitops, core, expand, math, staticfor, strutils, tables]
+    [arrayutils, assign, bitops, core, expand, math, simd, staticfor, strutils, tables]
 
 export cell, common, moveresult, placement, popresult, rule, utils
+
+when Sse42Available:
+  export simd.`==`
 
 type Field* = object ## Puyo Puyo field.
   rule*: Rule

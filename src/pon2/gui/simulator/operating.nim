@@ -28,28 +28,28 @@ when defined(js) or defined(nimsuggest):
           self.derefSimulator(helper).mode notin PlayModes:
         Opt[Cell].ok Cell.None
       else:
-        if self.derefSimulator(helper).operatingIndex >=
+        if self.derefSimulator(helper).operating.index >=
             self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps.len:
           Opt[Cell].ok Cell.None
         else:
           let step = self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps[
-            self.derefSimulator(helper).operatingIndex
+            self.derefSimulator(helper).operating.index
           ]
           case step.kind
           of PairPlace:
             # pivot
             if index == 1 and
-                col == self.derefSimulator(helper).operatingPlacement.pivotCol:
+                col == self.derefSimulator(helper).operating.placement.pivotCol:
               Opt[Cell].ok step.pair.pivot
             # rotor
-            elif col == self.derefSimulator(helper).operatingPlacement.rotorCol:
+            elif col == self.derefSimulator(helper).operating.placement.rotorCol:
               if index == 1:
                 Opt[Cell].ok step.pair.rotor
               elif index == 0 and
-                  self.derefSimulator(helper).operatingPlacement.rotorDir == Up:
+                  self.derefSimulator(helper).operating.placement.rotorDir == Up:
                 Opt[Cell].ok step.pair.rotor
               elif index == 2 and
-                  self.derefSimulator(helper).operatingPlacement.rotorDir == Down:
+                  self.derefSimulator(helper).operating.placement.rotorDir == Down:
                 Opt[Cell].ok step.pair.rotor
               else:
                 Opt[Cell].ok Cell.None

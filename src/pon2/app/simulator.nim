@@ -35,23 +35,11 @@ type
     WillSettle
     AfterEdit
 
-  SimulatorEditObjKind* {.pure.} = enum
-    ## Kind of edit objects.
-    EditCell
-    EditRotate
-
-  SimulatorEditObj* = object ## Edit object.
-    case kind*: SimulatorEditObjKind
-    of EditCell:
-      cell*: Cell
-    of EditRotate:
-      cross*: bool
-
   SimulatorEditData* = object ## Edit information.
-    editObj*: SimulatorEditObj
-    focusField*: bool
+    selecting*: tuple[cellOpt: Opt[Cell], crossOpt: Opt[bool]]
     field*: tuple[row: Row, col: Col]
-    step*: tuple[index: int, pivot: bool, col: Col]
+    steps*: tuple[index: int, pivot: bool, col: Col]
+    focusField*: bool
     insert*: bool
 
   SimulatorDequeElem = object ## Element of Undo/Redo deques.
@@ -68,8 +56,7 @@ type
     state: SimulatorState
 
     editData: SimulatorEditData
-    operatingPlacement: Placement
-    operatingIndex: int
+    operating: tuple[index: int, placement: Placement]
 
     undoDeque: Deque[SimulatorDequeElem]
     redoDeque: Deque[SimulatorDequeElem]
@@ -92,27 +79,21 @@ static:
 const
   DefaultMode = PlayViewer
   DefaultPlacement = Up2
-  DefaultMoveResult = MoveResult.init true
+  DefaultMoveResult = MoveResult.init
   DefaultEditData = SimulatorEditData(
-    editObj: SimulatorEditObj(kind: EditCell, cell: Cell.None),
-    focusField: true,
+    selecting: (Opt[Cell].ok Cell.None, Opt[bool].err),
     field: (Row.low, Col.low),
-    step: (0, true, Col.low),
+    steps: (0, true, Col.low),
+    focusField: true,
     insert: false,
   )
-
-func init(T: type SimulatorEditObj, cell: Cell): T =
-  T(kind: EditCell, cell: cell)
-
-func init(T: type SimulatorEditObj, cross: bool): T =
-  T(kind: EditRotate, cross: cross)
 
 func init(T: type SimulatorDequeElem, simulator: Simulator): T =
   T(
     nazoPuyo: simulator.nazoPuyo,
     moveResult: simulator.moveResult,
     state: simulator.state,
-    operatingIndex: simulator.operatingIndex,
+    operatingIndex: simulator.operating.index,
   )
 
 func init*(T: type Simulator, nazoPuyo: NazoPuyo, mode = DefaultMode): T =
@@ -122,8 +103,7 @@ func init*(T: type Simulator, nazoPuyo: NazoPuyo, mode = DefaultMode): T =
     mode: mode,
     state: if mode in EditModes: AfterEdit else: Stable,
     editData: DefaultEditData,
-    operatingPlacement: DefaultPlacement,
-    operatingIndex: 0,
+    operating: (0, DefaultPlacement),
     undoDeque: Deque[SimulatorDequeElem].init,
     redoDeque: Deque[SimulatorDequeElem].init,
   )
@@ -135,21 +115,7 @@ func init*(T: type Simulator, mode = DefaultMode): T =
   T.init(NazoPuyo.init, mode)
 
 # ------------------------------------------------
-# Operator
-# ------------------------------------------------
-
-func `==`*(obj1, obj2: SimulatorEditObj): bool =
-  if obj1.kind != obj2.kind:
-    return false
-
-  case obj1.kind
-  of EditCell:
-    obj1.cell == obj2.cell
-  of EditRotate:
-    obj1.cross == obj2.cross
-
-# ------------------------------------------------
-# Undo / Redo
+# Undo / Redo / Edit
 # ------------------------------------------------
 
 func load(self: var Simulator, elem: SimulatorDequeElem) =
@@ -157,7 +123,7 @@ func load(self: var Simulator, elem: SimulatorDequeElem) =
   self.nazoPuyo.assign elem.nazoPuyo
   self.moveResult.assign elem.moveResult
   self.state.assign elem.state
-  self.operatingIndex.assign elem.operatingIndex
+  self.operating.index.assign elem.operatingIndex
 
 func undo*(self: var Simulator) =
   ## Performs undo.
@@ -179,16 +145,53 @@ func redo*(self: var Simulator) =
   self.undoDeque.addLast SimulatorDequeElem.init self
   self.load self.redoDeque.popLast
 
+func undoAll(self: var Simulator) =
+  ## Loads the data before any moves and clears the redo deque.
+  if self.undoDeque.len == 0:
+    return
+
+  if self.mode == EditEditor:
+    while self.state != AfterEdit:
+      self.load self.undoDeque.popLast
+  else:
+    self.load self.undoDeque.peekFirst
+    self.undoDeque.clear
+
+  self.redoDeque.clear
+
+template edit(self: var Simulator, body: untyped): untyped =
+  ## Runs `body` with edit wrappers.
+  let oldSimulator = self
+
+  body
+
+  if self != oldSimulator:
+    self.undoDeque.addLast SimulatorDequeElem.init oldSimulator
+    self.redoDeque.clear
+    self.state.assign AfterEdit
+
+# ------------------------------------------------
+# Mark
+# ------------------------------------------------
+
+func mark*(self: Simulator): MarkResult =
+  ## Marks the steps in the Nazo Puyo in the simulator.
+  var simulator = self
+  simulator.undoAll
+  simulator.nazoPuyo.puyoPuyo.steps.assign self.nazoPuyo.puyoPuyo.steps
+
+  simulator.nazoPuyo.mark self.operating.index
+
 # ------------------------------------------------
 # Property - Getter
 # ------------------------------------------------
 
 func rule*(self: Simulator): Rule =
-  ## Returns the rule of the Puyo Puyo or Nazo Puyo.
+  ## Returns the rule of the Nazo Puyo in the simulator.
   self.nazoPuyo.puyoPuyo.field.rule
 
 func nazoPuyo*(self: Simulator): NazoPuyo =
-  ## Returns the Nazo Puyo of the simulator.
+  ## Returns the Nazo Puyo in the simulator.
   self.nazoPuyo
 
 func moveResult*(self: Simulator): MoveResult =
@@ -204,91 +207,25 @@ func state*(self: Simulator): SimulatorState =
   self.state
 
 func editData*(self: Simulator): SimulatorEditData =
-  ## Returns the edit information.
+  ## Returns the edit information of the simulator.
   self.editData
 
-func operatingPlacement*(self: Simulator): Placement =
-  ## Returns the operating placement of the simulator.
-  self.operatingPlacement
-
-func operatingIndex*(self: Simulator): int =
-  ## Returns the index of the step operated.
-  self.operatingIndex
+func operating*(self: Simulator): tuple[index: int, placement: Placement] =
+  ## Returns the operating data of the simulator.
+  self.operating
 
 # ------------------------------------------------
 # Property - Setter
 # ------------------------------------------------
 
-func undoAll(self: var Simulator) =
-  ## Loads the data before any moves in the undo deque and clears it after the loaded
-  ## step, and clears the redo deque.
-  ## If the undo deque is empty, does nothing.
-  if self.undoDeque.len == 0:
-    return
-
-  if self.mode == EditEditor:
-    while self.state != AfterEdit:
-      self.undo
-  else:
-    self.load self.undoDeque.peekFirst
-    self.undoDeque.clear
-
-  self.redoDeque.clear
-
-func prepareEdit(self: var Simulator, clearRedoDeque = true) =
-  ## Saves the current simulator to the undo deque and clears the redo deque.
-  self.undoDeque.addLast SimulatorDequeElem.init self
-  if clearRedoDeque:
-    self.redoDeque.clear
-
-template editBlock(self: var Simulator, body: untyped) =
-  ## Saves the current simulator to the undo deque and clears the redo deque
-  ## and then runs `body`.
-  ## The state of the simulator is set to `AfterEdit`.
-  self.prepareEdit
-  body
-  self.state.assign AfterEdit
-
 func `rule=`*(self: var Simulator, rule: Rule) =
   ## Sets the rule of the simulator.
-  if self.mode != EditEditor:
-    return
-  if rule == self.rule:
-    return
-
-  case rule
-  of Tsu, Water:
-    if self.nazoPuyo.puyoPuyo.steps.anyIt it.kind == FieldRotate:
-      return
-  of Spinner:
-    if self.nazoPuyo.puyoPuyo.steps.anyIt(it.kind == FieldRotate and it.cross):
-      return
-  of CrossSpinner:
-    if self.nazoPuyo.puyoPuyo.steps.anyIt(it.kind == FieldRotate and not it.cross):
-      return
-
-  self.editBlock:
+  self.edit:
     self.nazoPuyo.puyoPuyo.field.rule.assign rule
-
-  self.undoDeque.clear
-  self.redoDeque.clear
 
 func `mode=`*(self: var Simulator, mode: SimulatorMode) =
   ## Sets the mode of the simulator.
-  case self.mode
-  of PlayViewer:
-    if mode != EditViewer:
-      return
-  of EditViewer:
-    if mode != PlayViewer:
-      return
-  of PlayEditor:
-    if mode != EditEditor:
-      return
-  of EditEditor:
-    if mode != PlayEditor:
-      return
-  of Replay:
+  if self.mode == mode:
     return
 
   self.undoAll
@@ -297,123 +234,122 @@ func `mode=`*(self: var Simulator, mode: SimulatorMode) =
   self.state.assign if mode in EditModes: AfterEdit else: Stable
 
   self.undoDeque.clear
+  self.redoDeque.clear
 
-func `editCell=`*(self: var Simulator, cell: Cell) =
-  ## Writes the cell to `editData.editObj`.
-  if self.mode notin EditModes:
-    return
+func `selectingCell=`*(self: var Simulator, cell: Cell) =
+  ## Sets the selecting cell.
+  self.editData.selecting.cellOpt.ok cell
+  self.editData.selecting.crossOpt.err
 
-  self.editData.editObj.assign SimulatorEditObj.init cell
-
-func `editCross=`*(self: var Simulator, cross: bool) =
-  ## Writes the cell to `editData.editObj`.
-  if self.mode notin EditModes:
-    return
-
-  self.editData.editObj.assign SimulatorEditObj.init cross
+func `selectingCross=`*(self: var Simulator, cross: bool) =
+  ## Sets the selecting cross.
+  self.editData.selecting.cellOpt.err
+  self.editData.selecting.crossOpt.ok cross
 
 # ------------------------------------------------
-# Edit - Cursor
+# Toggle
+# ------------------------------------------------
+
+func toggleFocus*(self: var Simulator) =
+  ## Toggles focusing field or not.
+  self.editData.focusField.toggle
+
+func toggleInsert*(self: var Simulator) =
+  ## Toggles inserting or not.
+  self.editData.insert.toggle
+
+# ------------------------------------------------
+# Placement
+# ------------------------------------------------
+
+func movePlacementRight*(self: var Simulator) =
+  ## Moves the next placement right.
+  self.operating.placement.moveRight
+
+func movePlacementLeft*(self: var Simulator) =
+  ## Moves the next placement left.
+  self.operating.placement.moveLeft
+
+func rotatePlacementRight*(self: var Simulator) =
+  ## Rotates the next placement right (clockwise).
+  self.operating.placement.rotateRight
+
+func rotatePlacementLeft*(self: var Simulator) =
+  ## Rotates the next placement left (counterclockwise).
+  self.operating.placement.rotateLeft
+
+# ------------------------------------------------
+# Cursor
 # ------------------------------------------------
 
 func moveCursorUp*(self: var Simulator) =
   ## Moves the cursor upward.
   if self.editData.focusField:
-    if self.mode notin EditModes:
-      return
-
     self.editData.field.row.rotateDec
   else:
-    if self.mode != EditEditor:
-      return
-
-    if self.editData.step.index == 0:
-      self.editData.step.index.assign self.nazoPuyo.puyoPuyo.steps.len
+    if self.editData.steps.index == 0:
+      self.editData.steps.index.assign self.nazoPuyo.puyoPuyo.steps.len
     else:
-      self.editData.step.index.dec
+      self.editData.steps.index -= 1
 
 func moveCursorDown*(self: var Simulator) =
   ## Moves the cursor downward.
   if self.editData.focusField:
-    if self.mode notin EditModes:
-      return
-
     self.editData.field.row.rotateInc
   else:
-    if self.mode != EditEditor:
-      return
-
-    if self.editData.step.index == self.nazoPuyo.puyoPuyo.steps.len:
-      self.editData.step.index.assign 0
+    if self.editData.steps.index == self.nazoPuyo.puyoPuyo.steps.len:
+      self.editData.steps.index.assign 0
     else:
-      self.editData.step.index.inc
+      self.editData.steps.index += 1
 
 func moveCursorRight*(self: var Simulator) =
   ## Moves the cursor rightward.
   if self.editData.focusField:
-    if self.mode notin EditModes:
-      return
-
     self.editData.field.col.rotateInc
   else:
-    if self.mode != EditEditor:
-      return
-
-    if self.editData.step.index >= self.nazoPuyo.puyoPuyo.steps.len or
-        self.nazoPuyo.puyoPuyo.steps[self.editData.step.index].kind == PairPlace:
-      self.editData.step.pivot.toggle
+    if self.editData.steps.index < self.nazoPuyo.puyoPuyo.steps.len:
+      case self.nazoPuyo.puyoPuyo.steps[self.editData.steps.index].kind
+      of PairPlace: self.editData.steps.pivot.toggle
+      of NuisanceDrop: self.editData.steps.col.rotateInc
+      of FieldRotate: discard
     else:
-      self.editData.step.col.rotateInc
+      self.editData.steps.pivot.toggle
 
 func moveCursorLeft*(self: var Simulator) =
   ## Moves the cursor leftward.
   if self.editData.focusField:
-    if self.mode notin EditModes:
-      return
-
     self.editData.field.col.rotateDec
   else:
-    if self.mode != EditEditor:
-      return
-
-    if self.editData.step.index >= self.nazoPuyo.puyoPuyo.steps.len or
-        self.nazoPuyo.puyoPuyo.steps[self.editData.step.index].kind == PairPlace:
-      self.editData.step.pivot.toggle
+    if self.editData.steps.index < self.nazoPuyo.puyoPuyo.steps.len:
+      case self.nazoPuyo.puyoPuyo.steps[self.editData.steps.index].kind
+      of PairPlace: self.editData.steps.pivot.toggle
+      of NuisanceDrop: self.editData.steps.col.rotateDec
+      of FieldRotate: discard
     else:
-      self.editData.step.col.rotateDec
+      self.editData.steps.pivot.toggle
 
 # ------------------------------------------------
-# Edit - Delete
+# Delete - Step
 # ------------------------------------------------
 
 func delStep*(self: var Simulator, index: int) =
-  ## Deletes the step.
-  if self.mode != EditEditor:
+  ## Deletes the step at the specified index.
+  if index notin 0 ..< self.nazoPuyo.puyoPuyo.steps.len:
     return
 
-  if index >= self.nazoPuyo.puyoPuyo.steps.len:
-    return
-
-  self.editBlock:
+  self.edit:
     self.nazoPuyo.puyoPuyo.steps.del index
-    self.editData.step.index.assign min(
-      self.editData.step.index, self.nazoPuyo.puyoPuyo.steps.len
+    self.editData.steps.index.assign min(
+      self.editData.steps.index, self.nazoPuyo.puyoPuyo.steps.len
     )
 
-func delStep*(self: var Simulator) =
-  ## Deletes the step at selecting index.
-  self.delStep self.editData.step.index
-
 # ------------------------------------------------
-# Edit - Write
+# Write - Cell - Field
 # ------------------------------------------------
 
 func writeCell(self: var Simulator, row: Row, col: Col, cell: Cell) =
-  ## Writes the cell to the field.
-  if self.mode notin EditModes:
-    return
-
-  self.editBlock:
+  ## Writes the cell to the specified position in the field.
+  self.edit:
     if self.editData.insert:
       if cell == Cell.None:
         self.nazoPuyo.puyoPuyo.field.del row, col
@@ -423,207 +359,218 @@ func writeCell(self: var Simulator, row: Row, col: Col, cell: Cell) =
       self.nazoPuyo.puyoPuyo.field[row, col] = cell
 
 func writeCell*(self: var Simulator, row: Row, col: Col) =
-  ## Writes the selecting cell to the field.
-  case self.editData.editObj.kind
-  of EditCell:
-    self.writeCell row, col, self.editData.editObj.cell
-  of EditRotate:
-    discard
+  ## Writes the selecting cell to the specified position in the field.
+  if self.editData.selecting.cellOpt.isOk:
+    self.writeCell row, col, self.editData.selecting.cellOpt.unsafeValue
+
+func writeCellToField(self: var Simulator, cell: Cell) =
+  ## Writes the cell to the selecting position in the field.
+  self.writeCell self.editData.field.row, self.editData.field.col, cell
+
+# ------------------------------------------------
+# Write - Cell - Step
+# ------------------------------------------------
 
 func writeCell(self: var Simulator, index: int, pivot: bool, cell: Cell) =
-  ## Writes the cell to the step.
-  const ZeroArray = Col.initArrayWith 0
-
-  if self.mode != EditEditor:
+  ## Writes the cell to the specified position in the steps.
+  if index < 0:
     return
 
+  # add step
   if index >= self.nazoPuyo.puyoPuyo.steps.len:
     case cell
     of Cell.None:
-      return
-    of Hard, Garbage:
-      self.editBlock:
-        self.nazoPuyo.puyoPuyo.steps.addLast Step.init(ZeroArray, cell == Hard)
-    of Cell.Red .. Cell.Purple:
-      self.editBlock:
+      discard
+    of NuisancePuyos:
+      self.edit:
+        self.nazoPuyo.puyoPuyo.steps.addLast Step.init(
+          Col.initArrayWith 0, hard = cell == Hard
+        )
+    of ColoredPuyos:
+      self.edit:
         self.nazoPuyo.puyoPuyo.steps.addLast Step.init Pair.init(cell, cell)
-  else:
-    if cell == Cell.None:
-      self.delStep index
-      return
 
-    if self.editData.insert:
-      self.editBlock:
-        case cell
-        of Cell.None:
-          discard # not reached here
-        of Hard, Garbage:
-          self.nazoPuyo.puyoPuyo.steps.insert Step.init(ZeroArray, cell == Hard), index
-        of Cell.Red .. Cell.Purple:
-          self.nazoPuyo.puyoPuyo.steps.insert Step.init(Pair.init(cell, cell)), index
-    else:
-      self.editBlock:
-        case cell
-        of Cell.None:
-          discard # not reached here
-        of Hard, Garbage:
-          let cellIsHard = cell == Hard
-          case self.nazoPuyo.puyoPuyo.steps[index].kind
-          of PairPlace, FieldRotate:
-            self.nazoPuyo.puyoPuyo.steps[index].assign Step.init(ZeroArray, cellIsHard)
-          of NuisanceDrop:
-            self.nazoPuyo.puyoPuyo.steps[index].hard.assign cellIsHard
-        of Cell.Red .. Cell.Purple:
-          case self.nazoPuyo.puyoPuyo.steps[index].kind
-          of PairPlace:
-            if pivot:
-              self.nazoPuyo.puyoPuyo.steps[index].pair.pivot = cell
-            else:
-              self.nazoPuyo.puyoPuyo.steps[index].pair.rotor = cell
-          of NuisanceDrop, FieldRotate:
-            self.nazoPuyo.puyoPuyo.steps[index].assign Step.init Pair.init(cell, cell)
-
-func writeRotate(self: var Simulator, index: int, pivot: bool, cross: bool) =
-  ## Writes the rotation to the step.
-  if self.mode != EditEditor:
-    return
-  if not ((self.rule == Spinner and not cross) or (self.rule == CrossSpinner and cross)):
     return
 
-  if index >= self.nazoPuyo.puyoPuyo.steps.len:
-    self.editBlock:
-      self.nazoPuyo.puyoPuyo.steps.addLast Step.init(cross = cross)
-  else:
-    if self.editData.insert:
-      self.editBlock:
-        self.nazoPuyo.puyoPuyo.steps.insert Step.init(cross = cross), index
-    else:
+  # delete step
+  if cell == Cell.None:
+    self.delStep index
+    return
+
+  # insert step
+  if self.editData.insert:
+    self.edit:
+      case cell
+      of Cell.None:
+        discard # dummy; not reach here
+      of NuisancePuyos:
+        self.nazoPuyo.puyoPuyo.steps.insert Step.init(
+          Col.initArrayWith 0, hard = cell == Hard
+        ), index
+      of Cell.Red .. Cell.Purple:
+        self.nazoPuyo.puyoPuyo.steps.insert Step.init(Pair.init(cell, cell)), index
+
+    return
+
+  # change step
+  self.edit:
+    case cell
+    of Cell.None:
+      discard # dummy; not reach here
+    of NuisancePuyos:
       case self.nazoPuyo.puyoPuyo.steps[index].kind
-      of PairPlace, NuisanceDrop:
-        self.editBlock:
-          self.nazoPuyo.puyoPuyo.steps[index].assign Step.init(cross = cross)
-      of FieldRotate:
-        if self.nazoPuyo.puyoPuyo.steps[index].cross != cross:
-          self.editBlock:
-            self.nazoPuyo.puyoPuyo.steps[index].cross.toggle
+      of PairPlace, FieldRotate:
+        self.nazoPuyo.puyoPuyo.steps[index].assign Step.init(
+          Col.initArrayWith 0, hard = cell == Hard
+        )
+      of NuisanceDrop:
+        self.nazoPuyo.puyoPuyo.steps[index].hard.assign cell == Hard
+    of ColoredPuyos:
+      case self.nazoPuyo.puyoPuyo.steps[index].kind
+      of PairPlace:
+        if pivot:
+          self.nazoPuyo.puyoPuyo.steps[index].pair.pivot = cell
+        else:
+          self.nazoPuyo.puyoPuyo.steps[index].pair.rotor = cell
+      of NuisanceDrop, FieldRotate:
+        self.nazoPuyo.puyoPuyo.steps[index].assign Step.init Pair.init(cell, cell)
 
 func writeCell*(self: var Simulator, index: int, pivot: bool) =
-  ## Writes the selecting cell to the step.
-  case self.editData.editObj.kind
-  of EditCell:
-    self.writeCell index, pivot, self.editData.editObj.cell
-  of EditRotate:
-    self.writeRotate index, pivot, self.editData.editObj.cross
+  ## Writes the selecting cell to the specified position in the steps.
+  if self.editData.selecting.cellOpt.isOk:
+    self.writeCell index, pivot, self.editData.selecting.cellOpt.unsafeValue
+
+func writeCellToSteps(self: var Simulator, cell: Cell) =
+  ## Writes the cell to the selecting position in the steps.
+  self.writeCell self.editData.steps.index, self.editData.steps.pivot, cell
+
+# ------------------------------------------------
+# Write - Cell
+# ------------------------------------------------
 
 func writeCell*(self: var Simulator, cell: Cell) =
-  ## Writes the cell to the field or the step.
+  ## Writes the cell to the selecting position in the field or steps.
   if self.editData.focusField:
-    self.writeCell self.editData.field.row, self.editData.field.col, cell
+    self.writeCellToField cell
   else:
-    self.writeCell self.editData.step.index, self.editData.step.pivot, cell
+    self.writeCellToSteps cell
 
-func writeRotate*(self: var Simulator, cross: bool) =
-  ## Writes the rotate to the field or the step.
-  if self.editData.focusField:
-    discard
-  else:
-    self.writeRotate self.editData.step.index, self.editData.step.pivot, cross
+# ------------------------------------------------
+# Write - Cross
+# ------------------------------------------------
 
-func writeCount*(self: var Simulator, index: int, col: Col, count: int) =
-  ## Writes the count to the step.
-  if self.mode != EditEditor:
+func writeCross(self: var Simulator, index: int, cross: bool) =
+  ## Writes the rotation to the specified position in the steps.
+  if index < 0:
     return
 
+  # add step
   if index >= self.nazoPuyo.puyoPuyo.steps.len:
+    self.edit:
+      self.nazoPuyo.puyoPuyo.steps.addLast Step.init(cross = cross)
+
+    return
+
+  # insert step
+  if self.editData.insert:
+    self.edit:
+      self.nazoPuyo.puyoPuyo.steps.insert Step.init(cross = cross), index
+
+    return
+
+  # change step
+  self.edit:
+    case self.nazoPuyo.puyoPuyo.steps[index].kind
+    of PairPlace, NuisanceDrop:
+      self.nazoPuyo.puyoPuyo.steps[index].assign Step.init(cross = cross)
+    of FieldRotate:
+      self.nazoPuyo.puyoPuyo.steps[index].cross.assign cross
+
+func writeCross*(self: var Simulator, index: int) =
+  ## Writes the selecting rotation to the specified position in the steps.
+  if self.editData.selecting.crossOpt.isOk:
+    self.writeCross index, self.editData.selecting.crossOpt.unsafeValue
+
+func writeCross*(self: var Simulator, cross: bool) =
+  ## Writes the rotation to the selecting position in the steps.
+  self.writeCross self.editData.steps.index, cross
+
+# ------------------------------------------------
+# Write - Count
+# ------------------------------------------------
+
+func writeCount*(self: var Simulator, index: int, col: Col, count: int) =
+  ## Writes the nuisance count to the specified position in the steps.
+  if index notin 0 ..< self.nazoPuyo.puyoPuyo.steps.len:
     return
   if self.nazoPuyo.puyoPuyo.steps[index].kind != NuisanceDrop:
     return
 
-  self.editBlock:
+  self.edit:
     self.nazoPuyo.puyoPuyo.steps[index].counts[col].assign count
 
 func writeCount*(self: var Simulator, count: int) =
-  ## Writes the count to the step.
-  self.writeCount self.editData.step.index, self.editData.step.col, count
+  ## Writes the nuisance count to the selecting position in the steps.
+  self.writeCount self.editData.steps.index, self.editData.steps.col, count
 
 # ------------------------------------------------
-# Edit - Shift
+# Shift
 # ------------------------------------------------
 
 func shiftFieldUp*(self: var Simulator) =
   ## Shifts the field upward.
-  if self.mode != EditEditor:
-    return
-
-  self.editBlock:
+  self.edit:
     self.nazoPuyo.puyoPuyo.field.shiftUp
 
 func shiftFieldDown*(self: var Simulator) =
   ## Shifts the field downward.
-  if self.mode != EditEditor:
-    return
-
-  self.editBlock:
+  self.edit:
     self.nazoPuyo.puyoPuyo.field.shiftDown
 
 func shiftFieldRight*(self: var Simulator) =
   ## Shifts the field rightward.
-  if self.mode != EditEditor:
-    return
-
-  self.editBlock:
+  self.edit:
     self.nazoPuyo.puyoPuyo.field.shiftRight
 
 func shiftFieldLeft*(self: var Simulator) =
   ## Shifts the field leftward.
-  if self.mode != EditEditor:
-    return
-
-  self.editBlock:
+  self.edit:
     self.nazoPuyo.puyoPuyo.field.shiftLeft
 
 # ------------------------------------------------
-# Edit - Flip
+# Flip
 # ------------------------------------------------
 
 func flipFieldVertical*(self: var Simulator) =
   ## Flips the field vertically.
-  if self.mode != EditEditor:
-    return
-
-  self.editBlock:
+  self.edit:
     self.nazoPuyo.puyoPuyo.field.flipVertical
 
 func flipFieldHorizontal*(self: var Simulator) =
   ## Flips the field horizontally.
-  if self.mode != EditEditor:
-    return
-
-  self.editBlock:
+  self.edit:
     self.nazoPuyo.puyoPuyo.field.flipHorizontal
 
 func flip*(self: var Simulator) =
   ## Flips the field or the step.
   if self.editData.focusField:
     self.flipFieldHorizontal
-  else:
-    if self.mode != EditEditor:
-      return
+    return
 
-    if self.editData.step.index >= self.nazoPuyo.puyoPuyo.steps.len:
-      return
+  if self.editData.steps.index notin 0 ..< self.nazoPuyo.puyoPuyo.steps.len:
+    return
 
-    self.editBlock:
-      case self.nazoPuyo.puyoPuyo.steps[self.editData.step.index].kind
-      of PairPlace:
-        self.nazoPuyo.puyoPuyo.steps[self.editData.step.index].pair.swap
-      of NuisanceDrop:
-        self.nazoPuyo.puyoPuyo.steps[self.editData.step.index].counts.reverse
-      of FieldRotate:
-        discard
+  self.edit:
+    case self.nazoPuyo.puyoPuyo.steps[self.editData.steps.index].kind
+    of PairPlace:
+      self.nazoPuyo.puyoPuyo.steps[self.editData.steps.index].pair.swap
+    of NuisanceDrop:
+      self.nazoPuyo.puyoPuyo.steps[self.editData.steps.index].counts.reverse
+    of FieldRotate:
+      discard
 
 # ------------------------------------------------
-# Edit - Goal
+# Goal
 # ------------------------------------------------
 
 const
@@ -633,15 +580,12 @@ const
 
 func normalizeGoal*(self: var Simulator) =
   ## Normalizes the goal.
-  ## This function only affects to the goal.
+  ## This function does not affects undo/redo.
   self.nazoPuyo.goal.normalize
 
 func `goalKindOpt=`*(self: var Simulator, kindOpt: Opt[GoalKind]) =
   ## Sets the goal kind.
-  if self.mode != EditEditor:
-    return
-
-  self.editBlock:
+  self.edit:
     if kindOpt.isOk:
       let kind = kindOpt.unsafeValue
 
@@ -658,80 +602,36 @@ func `goalKindOpt=`*(self: var Simulator, kindOpt: Opt[GoalKind]) =
 
 func `goalColor=`*(self: var Simulator, color: GoalColor) =
   ## Sets the goal color.
-  if self.mode != EditEditor:
-    return
-
   if self.nazoPuyo.goal.mainOpt.isErr:
     return
 
-  self.editBlock:
+  self.edit:
     self.nazoPuyo.goal.mainOpt.unsafeValue.color.assign color
     self.nazoPuyo.goal.normalize
 
 func `goalVal=`*(self: var Simulator, val: int) =
   ## Sets the goal value.
-  if self.mode != EditEditor:
-    return
-
   if self.nazoPuyo.goal.mainOpt.isErr:
     return
 
-  self.editBlock:
+  self.edit:
     self.nazoPuyo.goal.mainOpt.unsafeValue.val.assign val
     self.nazoPuyo.goal.normalize
 
 func `goalOperator=`*(self: var Simulator, operator: GoalOperator) =
-  ## Sets the goal exact.
-  if self.mode != EditEditor:
-    return
-
+  ## Sets the goal operator.
   if self.nazoPuyo.goal.mainOpt.isErr:
     return
 
-  self.editBlock:
+  self.edit:
     self.nazoPuyo.goal.mainOpt.unsafeValue.operator.assign operator
     self.nazoPuyo.goal.normalize
 
 func `goalClearColorOpt=`*(self: var Simulator, clearColorOpt: Opt[GoalColor]) =
   ## Sets the goal clear color.
-  if self.mode != EditEditor:
-    return
-
-  self.editBlock:
+  self.edit:
     self.nazoPuyo.goal.clearColorOpt.assign clearColorOpt
     self.nazoPuyo.goal.normalize
-
-# ------------------------------------------------
-# Edit - Other
-# ------------------------------------------------
-
-func toggleFocus*(self: var Simulator) =
-  ## Toggles focusing field or not.
-  self.editData.focusField.toggle
-
-func toggleInsert*(self: var Simulator) =
-  ## Toggles inserting or not.
-  self.editData.insert.toggle
-
-# ------------------------------------------------
-# Play - Placement
-# ------------------------------------------------
-
-func movePlacementRight*(self: var Simulator) =
-  ## Moves the next placement right.
-  self.operatingPlacement.moveRight
-
-func movePlacementLeft*(self: var Simulator) =
-  ## Moves the next placement left.
-  self.operatingPlacement.moveLeft
-
-func rotatePlacementRight*(self: var Simulator) =
-  ## Rotates the next placement right (clockwise).
-  self.operatingPlacement.rotateRight
-
-func rotatePlacementLeft*(self: var Simulator) =
-  ## Rotates the next placement left (counterclockwise).
-  self.operatingPlacement.rotateLeft
 
 # ------------------------------------------------
 # Forward / Backward
@@ -741,64 +641,68 @@ func forwardApply(self: var Simulator, replay = false, skip = false) =
   ## Forwards the simulator with `apply`.
   ## This functions requires that the initial field is settled.
   ## `skip` is prioritized over `replay`.
-  if self.operatingIndex >= self.nazoPuyo.puyoPuyo.steps.len:
-    return
-  if self.mode in EditModes:
+  if self.operating.index >= self.nazoPuyo.puyoPuyo.steps.len:
     return
 
-  self.prepareEdit(clearRedoDeque = self.mode in PlayModes)
-
-  self.moveResult.assign DefaultMoveResult
+  # prepare deques
+  self.undoDeque.addLast SimulatorDequeElem.init self
+  self.redoDeque.clear
 
   # set placement
   if self.mode in PlayModes:
-    if self.nazoPuyo.puyoPuyo.steps[self.operatingIndex].kind != PairPlace:
+    if self.nazoPuyo.puyoPuyo.steps[self.operating.index].kind != PairPlace:
       discard
     elif skip:
-      self.nazoPuyo.puyoPuyo.steps[self.operatingIndex].placement.assign Placement.None
+      self.nazoPuyo.puyoPuyo.steps[self.operating.index].placement.assign Placement.None
     elif replay:
       discard
     else:
-      self.nazoPuyo.puyoPuyo.steps[self.operatingIndex].placement.assign self.operatingPlacement
+      self.nazoPuyo.puyoPuyo.steps[self.operating.index].placement.assign self.operating.placement
 
-  let step = self.nazoPuyo.puyoPuyo.steps[self.operatingIndex]
-  self.nazoPuyo.puyoPuyo.field.apply step
+  # apply
+  self.nazoPuyo.puyoPuyo.field.apply self.nazoPuyo.puyoPuyo.steps[self.operating.index]
+
+  # set move result
+  self.moveResult.assign DefaultMoveResult
 
   # set state
-  if step.kind == FieldRotate:
+  if self.nazoPuyo.puyoPuyo.steps[self.operating.index].kind == FieldRotate:
     if self.nazoPuyo.puyoPuyo.field.isSettled:
       self.state.assign Stable
 
       if self.mode notin EditModes:
-        self.operatingIndex.inc
-        self.operatingPlacement.assign DefaultPlacement
+        self.operating.index += 1
+        self.operating.placement.assign DefaultPlacement
     else:
       self.state.assign WillSettle
   elif self.nazoPuyo.puyoPuyo.field.canPop:
     self.state.assign WillPop
   else:
     self.state.assign Stable
-    self.operatingIndex.inc
-    self.operatingPlacement.assign DefaultPlacement
+    self.operating.index += 1
+    self.operating.placement.assign DefaultPlacement
 
 func forwardPop(self: var Simulator) =
   ## Forwards the simulator with `pop`.
-  self.prepareEdit(clearRedoDeque = self.mode in PlayModes)
+  # prepare deques
+  self.undoDeque.addLast SimulatorDequeElem.init self
+  self.redoDeque.clear
 
+  # pop
   let popResult = self.nazoPuyo.puyoPuyo.field.pop
 
-  # update moving result
-  self.moveResult.chainCount.inc
+  # update move result
+  self.moveResult.chainCount += 1
   var cellCounts {.noinit.}: array[Cell, int]
   cellCounts[Cell.None].assign 0
-  staticFor(cell2, Hard .. Cell.Purple):
+  staticFor(cell2, Puyos):
     let cellCount = popResult.cellCount cell2
     cellCounts[cell2].assign cellCount
-    self.moveResult.popCounts[cell2].inc cellCount
+    self.moveResult.popCounts[cell2] += cellCount
   self.moveResult.detailPopCounts.add cellCounts
   self.moveResult.fullPopCountsOpt.unsafeValue.add popResult.connectionCounts
   let h2g = popResult.hardToGarbageCount
-  self.moveResult.hardToGarbageCount.inc h2g
+  self.moveResult.hardToGarbageCount += h2g
   self.moveResult.detailHardToGarbageCount.add h2g
 
   # check settle
@@ -806,15 +710,18 @@ func forwardPop(self: var Simulator) =
     self.state.assign Stable
 
     if self.mode notin EditModes:
-      self.operatingIndex.inc
-      self.operatingPlacement.assign DefaultPlacement
+      self.operating.index += 1
+      self.operating.placement.assign DefaultPlacement
   else:
     self.state.assign WillSettle
 
 func forwardSettle(self: var Simulator) =
   ## Forwards the simulator with `settle`.
-  self.prepareEdit(clearRedoDeque = self.mode in PlayModes)
+  # prepare deques
+  self.undoDeque.addLast SimulatorDequeElem.init self
+  self.redoDeque.clear
 
+  # settle
   self.nazoPuyo.puyoPuyo.field.settle
 
   # check pop
@@ -824,8 +731,8 @@ func forwardSettle(self: var Simulator) =
     self.state.assign Stable
 
     if self.mode notin EditModes:
-      self.operatingIndex.inc
-      self.operatingPlacement.assign DefaultPlacement
+      self.operating.index += 1
+      self.operating.placement.assign DefaultPlacement
 
 func forward*(self: var Simulator, replay = false, skip = false) =
   ## Forwards the simulator.
@@ -844,7 +751,7 @@ func forward*(self: var Simulator, replay = false, skip = false) =
     elif self.nazoPuyo.puyoPuyo.field.canPop:
       self.forwardPop
     else:
-      return
+      discard
 
 func backward*(self: var Simulator, detail = false) =
   ## Backwards the simulator.
@@ -865,44 +772,25 @@ func backward*(self: var Simulator, detail = false) =
     self.nazoPuyo.puyoPuyo.steps.assign steps
 
   if self.mode in PlayModes and self.state in {Stable, AfterEdit}:
-    self.operatingPlacement.assign DefaultPlacement
+    self.operating.placement.assign DefaultPlacement
 
 func reset*(self: var Simulator) =
   ## Backwards the simulator to the pre-move state.
-  let nowSteps = self.nazoPuyo.puyoPuyo.steps
+  let steps = self.nazoPuyo.puyoPuyo.steps
+
   self.undoAll
-  self.nazoPuyo.puyoPuyo.steps.assign nowSteps
 
-  self.operatingPlacement.assign DefaultPlacement
-
-# ------------------------------------------------
-# Mark
-# ------------------------------------------------
-
-func mark*(self: Simulator): MarkResult =
-  ## Marks the steps in the Nazo Puyo in the simulator.
-  var nazoPuyo = self.nazoPuyo
-  if self.mode == EditEditor:
-    if self.state != AfterEdit:
-      for index in 1 .. self.undoDeque.len:
-        let elem = self.undoDeque[^index]
-        if elem.state == AfterEdit:
-          nazoPuyo.assign elem.nazoPuyo
-          break
-  else:
-    if self.undoDeque.len > 0:
-      nazoPuyo.assign self.undoDeque.peekFirst.nazoPuyo
-
-  nazoPuyo.puyoPuyo.steps.assign self.nazoPuyo.puyoPuyo.steps
-  nazoPuyo.mark self.operatingIndex
+  self.nazoPuyo.puyoPuyo.steps.assign steps
+  self.operating.placement.assign DefaultPlacement
 
 # ------------------------------------------------
-# Keyboard
+# Key
 # ------------------------------------------------
 
-const DigitKeys = collect:
-  for digit in 0 .. 9:
-    KeyEvent.init "Digit{digit}".fmt
+const DigitKeyEvents = [
+  KeyEvent0, KeyEvent1, KeyEvent2, KeyEvent3, KeyEvent4, KeyEvent5, KeyEvent6,
+  KeyEvent7, KeyEvent8, KeyEvent9,
+]
 
 func operate*(self: var Simulator, key: KeyEvent): bool {.discardable.} =
   ## Performs an action specified by the key.
@@ -915,7 +803,7 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.discardable.} =
     if key == KeyEventT:
       if self.mode == PlayViewer:
         self.`mode=` EditViewer
-      else:
+      else: # PlayEditor
         self.`mode=` EditEditor
     # rotate operating placement
     elif key == KeyEventK:
@@ -945,7 +833,7 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.discardable.} =
     if key == KeyEventT:
       if self.mode == EditViewer:
         self.`mode=` PlayViewer
-      else:
+      else: # EditEditor
         self.`mode=` PlayEditor
     elif key == KeyEventR and self.mode == EditEditor:
       self.rule = self.rule.rotateSucc
@@ -984,11 +872,11 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.discardable.} =
       self.writeCell Cell.None
     # write rotate
     elif key == KeyEventN:
-      self.writeRotate(cross = false)
+      self.writeCross(cross = false)
     elif key == KeyEventM:
-      self.writeRotate(cross = true)
+      self.writeCross(cross = true)
     # write count
-    elif (let count = DigitKeys.find key; count >= 0):
+    elif (let count = DigitKeyEvents.find key; count >= 0):
       self.writeCount count
     # shift field
     elif key == KeyEventShiftD:
@@ -1076,32 +964,20 @@ func toUri*(self: Simulator, clearPlacements = false, fqdn = Pon2): Pon2Result[U
         step.placement.assign Placement.None
   let nazoPuyoQuery =
     ?nazoPuyo.toUriQuery(fqdn).context "Simulator that does not support URI conversion"
-  uri.query.assign if fqdn == Pon2:
-    "{ModeKey}={self.mode.ord}&{nazoPuyoQuery}".fmt
-  else:
-    nazoPuyoQuery
+  uri.query.assign (
+    if fqdn == Pon2: "{ModeKey}={self.mode.ord}&{nazoPuyoQuery}".fmt else: nazoPuyoQuery
+  )
 
   ok uri
 
 func parseSimulator*(uri: Uri): Pon2Result[Simulator] =
   ## Returns the simulator converted from the URI.
-  ## Viewer modes and play modes are set to the result simulator preferentially
-  ## if the FQDN is `IshikawaPuyo` or `Ips`.
-  let fqdn: SimulatorFqdn
-  case uri.hostname
-  of $Pon2:
-    fqdn = Pon2
-  of $IshikawaPuyo:
-    fqdn = IshikawaPuyo
-  of $Ips:
-    fqdn = Ips
-  else:
-    fqdn = SimulatorFqdn.low # NOTE: dummy to compile
-    return err "Invalid simulator (invalid FQDN): {uri}".fmt
-
+  ## Viewer modes are set to the result simulator preferentially if the FQDN is
+  ## `IshikawaPuyo` or `Ips`.
   if uri.scheme notin ["https", "http"]:
     return err "Invalid simulator (invalid scheme): {uri}".fmt
 
+  let fqdn = ?uri.hostname.parseSimulatorFqdn.context "Invalid simulator: {uri}".fmt
   case fqdn
   of Pon2:
     if uri.path notin Pon2Paths:
@@ -1109,28 +985,22 @@ func parseSimulator*(uri: Uri): Pon2Result[Simulator] =
 
     var
       keyVals = newSeq[tuple[key: string, value: string]]()
-      mode = Opt[SimulatorMode].err
+      modeOpt = Opt[SimulatorMode].err
     for keyVal in uri.query.decodeQuery:
       if keyVal.key == ModeKey:
-        if mode.isOk:
+        if modeOpt.isOk:
           return err "Invalid simulator (multiple mode detected): {uri}".fmt
         else:
-          let
-            modeErrorMsg = "Invalid mode: {keyVal.value}".fmt
-            modeOrd = ?keyVal.value.parseInt.context modeErrorMsg
-          if modeOrd notin SimulatorMode.low.ord .. SimulatorMode.high.ord:
-            return err modeErrorMsg
-
-          mode.ok modeOrd.SimulatorMode
+          modeOpt.ok ?parseOrdinal[SimulatorMode](keyVal.value).context "Invalid mode: {keyVal.value}".fmt
       else:
         keyVals.add keyVal
 
-    if mode.isErr:
-      mode.ok DefaultMode
+    if modeOpt.isErr:
+      modeOpt.ok DefaultMode
 
     ok Simulator.init(
       ?keyVals.encodeQuery.parseNazoPuyo(fqdn).context "Invalid simulator: {uri}".fmt,
-      mode.unsafeValue,
+      modeOpt.unsafeValue,
     )
   of IshikawaPuyo, Ips:
     let mode: SimulatorMode

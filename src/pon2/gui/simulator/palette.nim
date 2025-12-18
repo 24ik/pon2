@@ -33,21 +33,21 @@ when defined(js) or defined(nimsuggest):
   ): () -> void =
     ## Returns the handler for clicking button.
     # NOTE: cannot inline due to karax's limitation
-    () => (self.derefSimulator(helper).editCell = cell)
+    () => (self.derefSimulator(helper).selectingCell = cell)
 
   func initBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, cross: bool
   ): () -> void =
     ## Returns the handler for clicking button.
     # NOTE: cannot inline due to karax's limitation
-    () => (self.derefSimulator(helper).editCross = cross)
+    () => (self.derefSimulator(helper).selectingCross = cross)
 
   proc toPaletteVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
   ): VNode =
     ## Returns the palette node.
     let
-      editObj = self.derefSimulator(helper).editData.editObj
+      editData = self.derefSimulator(helper).editData
       btnClass = (if helper.mobile: "button is-large px-2" else: "button px-2").kstring
       selectBtnClass = (
         if helper.mobile: "button is-large is-primary px-2"
@@ -64,7 +64,9 @@ when defined(js) or defined(nimsuggest):
             ]:
               tr:
                 for cell in cells:
-                  let cellSelected = editObj.kind == EditCell and editObj.cell == cell
+                  let cellSelected =
+                    editData.selecting.cellOpt.isOk and
+                    editData.selecting.cellOpt.unsafeValue == cell
                   td:
                     button(
                       class = if cellSelected: selectBtnClass else: btnClass,
@@ -82,7 +84,9 @@ when defined(js) or defined(nimsuggest):
                 td:
                   let
                     cross = row.bool
-                    selected = editObj.kind == EditRotate and editObj.cross == cross
+                    selected =
+                      editData.selecting.crossOpt.isOk and
+                      editData.selecting.crossOpt.unsafeValue == cross
                   button(
                     class = if selected: selectBtnClass else: btnClass,
                     disabled = row != self.derefSimulator(helper).rule.ord.pred,

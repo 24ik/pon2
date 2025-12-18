@@ -22,7 +22,7 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper, doubleNext: bool, pivot: bool
   ): VNode =
     ## Returns the node of the cell in the next or double-next step.
-    let stepIndex = self.derefSimulator(helper).operatingIndex.succ 1 + doubleNext.int
+    let stepIndex = self.derefSimulator(helper).operating.index.succ 1 + doubleNext.int
 
     var cross = false
     let cellOpt =
