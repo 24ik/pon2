@@ -305,7 +305,7 @@ when isMainModule:
         nazoPuyo.puyoPuyo.steps.assign steps
 
         let solutionUri = Simulator.init(nazoPuyo, EditorEdit).toUri.unsafeValue
-        echo "({solutionIndex.succ}) {solutionUri}".fmt
+        echo "({solutionIndex + 1}) {solutionUri}".fmt
 
         if openSolution:
           solutionUri.openDefaultBrowser.isOkOr:
@@ -343,8 +343,8 @@ when isMainModule:
           problemUri = resultSimulator.toUri(clearPlacements = true).unsafeValue
           solutionUri = resultSimulator.toUri.unsafeValue
 
-        echo "(Q{index.succ}) {problemUri}".fmt
-        echo "(A{index.succ}) {solutionUri}".fmt
+        echo "(Q{index + 1}) {problemUri}".fmt
+        echo "(A{index + 1}) {solutionUri}".fmt
         echo ""
 
         if openProblem:
@@ -354,7 +354,7 @@ when isMainModule:
           solutionUri.openDefaultBrowser.isOkOr:
             echo "ブラウザの起動に失敗しました．"
 
-        index.inc
+        index += 1
 
     # ------------------------------------------------
     # Native - Generate
