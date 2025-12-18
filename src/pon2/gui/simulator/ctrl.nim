@@ -42,7 +42,7 @@ when defined(js) or defined(nimsuggest):
     buildHtml tdiv(class = "card", style = translucentStyle):
       tdiv(class = "card-content p-1"):
         case mode
-        of EditorEdit:
+        of EditEditor:
           tdiv(class = "field is-grouped is-grouped-centered", style = fieldStyle):
             tdiv(class = "control"):
               button(class = "button", onclick = () => self.derefSimulator(helper).undo):
@@ -146,7 +146,7 @@ when defined(js) or defined(nimsuggest):
                   if not helper.mobile:
                     span(style = counterStyle):
                       text "Sft+D"
-        of ViewerEdit, Replay:
+        of EditViewer, Replay:
           tdiv(class = "field is-grouped is-grouped-centered", style = fieldStyle):
             tdiv(class = "control"):
               button(
@@ -156,7 +156,7 @@ when defined(js) or defined(nimsuggest):
                   italic(class = "fa-solid fa-backward-fast")
                   if not helper.mobile:
                     span(style = counterStyle):
-                      text (if mode == ViewerEdit: "Z" else: "Sft+W").kstring
+                      text (if mode == EditViewer: "Z" else: "Sft+W").kstring
             tdiv(class = "control", style = fieldStyle):
               button(
                 class = "button", onclick = () => self.derefSimulator(helper).backward
@@ -165,7 +165,7 @@ when defined(js) or defined(nimsuggest):
                   italic(class = "fa-solid fa-backward-step")
                   if not helper.mobile:
                     span(style = counterStyle):
-                      text (if mode == ViewerEdit: "X" else: "W").kstring
+                      text (if mode == EditViewer: "X" else: "W").kstring
             tdiv(class = "control", style = fieldStyle):
               button(
                 class = "button", onclick = () => self.derefSimulator(helper).forward
@@ -174,7 +174,7 @@ when defined(js) or defined(nimsuggest):
                   italic(class = "fa-solid fa-forward-step")
                   if not helper.mobile:
                     span(style = counterStyle):
-                      text (if mode == ViewerEdit: "C" else: "S").kstring
+                      text (if mode == EditViewer: "C" else: "S").kstring
         of PlayModes:
           if helper.mobile:
             tdiv(class = "field is-grouped is-grouped-centered", style = fieldStyle):
@@ -333,7 +333,7 @@ when defined(js) or defined(nimsuggest):
               ):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-arrow-right")
-        of ViewerEdit:
+        of EditViewer:
           tdiv(class = "field is-grouped is-grouped-is-centered mb-0"):
             tdiv(class = "control"):
               button(
@@ -373,5 +373,5 @@ when defined(js) or defined(nimsuggest):
               ):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-forward-step")
-        of EditorEdit:
+        of EditEditor:
           discard

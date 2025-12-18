@@ -29,7 +29,7 @@ when defined(js) or defined(nimsuggest):
     ## Returns the goal node.
     let goal = self.derefSimulator(helper).nazoPuyo.goal
 
-    if cameraReady or self.derefSimulator(helper).mode != EditorEdit:
+    if cameraReady or self.derefSimulator(helper).mode != EditEditor:
       return buildHtml article(
         class = (
           if helper.simulator.markResult == Correct: "message is-success"

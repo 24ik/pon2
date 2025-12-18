@@ -47,11 +47,11 @@ when defined(js) or defined(nimsuggest):
 
     let playMode, editMode: SimulatorMode
     if self.derefSimulator(helper).mode in ViewerModes:
-      playMode = ViewerPlay
-      editMode = ViewerEdit
+      playMode = PlayViewer
+      editMode = EditViewer
     else:
-      playMode = EditorPlay
-      editMode = EditorEdit
+      playMode = PlayEditor
+      editMode = EditEditor
 
     buildHtml tdiv:
       tdiv(class = "field has-addons"):
@@ -75,7 +75,7 @@ when defined(js) or defined(nimsuggest):
               if not helper.mobile and self.derefSimulator(helper).mode notin EditModes:
                 span(style = counterStyle):
                   text "T"
-      if self.derefSimulator(helper).mode == EditorEdit:
+      if self.derefSimulator(helper).mode == EditEditor:
         let nowRule = self.derefSimulator(helper).rule
 
         tdiv(class = "field has-addons"):

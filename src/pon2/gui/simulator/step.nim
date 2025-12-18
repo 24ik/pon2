@@ -211,7 +211,7 @@ when defined(js) or defined(nimsuggest):
     const PlaceholderStep = Step.init
 
     let
-      editable = self.derefSimulator(helper).mode == EditorEdit and not cameraReady
+      editable = self.derefSimulator(helper).mode == EditEditor and not cameraReady
       steps = self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps
 
     buildHtml table(class = "table is-narrow"):

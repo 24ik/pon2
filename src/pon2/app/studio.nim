@@ -54,7 +54,7 @@ proc init*(T: type Studio, simulator: Simulator): T =
   )
 
 proc init*(T: type Studio): T =
-  T.init Simulator.init EditorEdit
+  T.init Simulator.init EditEditor
 
 # ------------------------------------------------
 # Property - Getter

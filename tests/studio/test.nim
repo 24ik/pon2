@@ -16,7 +16,7 @@ func `==`(progressRef1, progressRef2: ref tuple[now, total: int]): bool =
 # ------------------------------------------------
 
 block: # init
-  check Studio.init == Studio.init Simulator.init EditorEdit
+  check Studio.init == Studio.init Simulator.init EditEditor
 
 # ------------------------------------------------
 # Property - Getter
@@ -27,7 +27,7 @@ block:
   # replayStepsCount, replayStepsIndex, progressRef
   let studio = Studio.init
 
-  check studio.simulator == Simulator.init EditorEdit
+  check studio.simulator == Simulator.init EditEditor
   check studio.replaySimulator == Simulator.init Replay
   check not studio.focusReplay
   check not studio.solving
@@ -40,7 +40,7 @@ block:
 block: # simulator (var), replaySimulator (var)
   var
     studio = Studio.init
-    simulator = Simulator.init EditorEdit
+    simulator = Simulator.init EditEditor
     replaySimulator = Simulator.init Replay
 
   studio.simulator.writeCell Cell.Red
@@ -88,7 +88,7 @@ ggoggg
 ------
 bg|
 bg|""".parseNazoPuyo.unsafeValue
-    simulator = Simulator.init(nazoPuyo, EditorEdit)
+    simulator = Simulator.init(nazoPuyo, EditEditor)
   var studio = Studio.init simulator
 
   var solutionNazoPuyo = nazoPuyo
@@ -204,8 +204,8 @@ bbb...
 by|
 pp|23""".parseNazoPuyo.unsafeValue
     studio1 = new Studio
-  studio1[] = Studio.init Simulator.init(nazoPuyo, EditorEdit)
-  var studio2 = Studio.init Simulator.init(nazoPuyo, EditorEdit)
+  studio1[] = Studio.init Simulator.init(nazoPuyo, EditEditor)
+  var studio2 = Studio.init Simulator.init(nazoPuyo, EditEditor)
 
   studio1.operate KeyEventShiftTab
   studio2.toggleFocus

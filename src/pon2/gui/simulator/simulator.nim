@@ -34,7 +34,7 @@ when defined(js) or defined(nimsuggest):
       isReplaySimulator =
         helper.studioOpt.isOk and helper.studioOpt.unsafeValue.isReplaySimulator
       showGoal =
-        mode == EditorEdit or self.derefSimulator(helper).nazoPuyo.goal != NoneGoal
+        mode == EditEditor or self.derefSimulator(helper).nazoPuyo.goal != NoneGoal
 
     buildHtml tdiv:
       if showGoal:
@@ -81,7 +81,7 @@ when defined(js) or defined(nimsuggest):
                   if mode in EditModes and not helper.mobile:
                     tdiv(class = "block"):
                       self.toPaletteVNode helper
-                  if not helper.mobile or isReplaySimulator or mode == EditorEdit:
+                  if not helper.mobile or isReplaySimulator or mode == EditEditor:
                     tdiv(class = "block"):
                       self.toSideCtrlVNode helper
                   tdiv(class = "block"):
@@ -92,7 +92,7 @@ when defined(js) or defined(nimsuggest):
             if mode in EditModes:
               tdiv(class = "column is-narrow"):
                 self.toPaletteVNode helper
-            if mode != EditorEdit:
+            if mode != EditEditor:
               tdiv(class = "column is-narrow"):
                 self.toBottomCtrlVNode helper
       tdiv(

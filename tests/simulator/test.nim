@@ -14,14 +14,14 @@ import ../../src/pon2/private/[algorithm, assign]
 
 block: # init
   check Simulator.init == Simulator.init NazoPuyo.init
-  check Simulator.init(PuyoPuyo.init Rule.Water, EditorEdit).mode == EditorEdit
+  check Simulator.init(PuyoPuyo.init Rule.Water, EditEditor).mode == EditEditor
 
 # ------------------------------------------------
 # Edit - Undo / Redo
 # ------------------------------------------------
 
 block: # undo, redo
-  var simulator = Simulator.init EditorEdit
+  var simulator = Simulator.init EditEditor
 
   simulator.writeCell Cell.Green
   let nazoPuyo1 = simulator.nazoPuyo
@@ -50,7 +50,7 @@ block:
   check simulator.rule == Tsu
   check simulator.nazoPuyo == NazoPuyo.init
   check simulator.moveResult == MoveResult.init true
-  check simulator.mode == ViewerPlay
+  check simulator.mode == PlayViewer
   check simulator.state == Stable
   check simulator.editData ==
     SimulatorEditData(
@@ -68,7 +68,7 @@ block:
 # ------------------------------------------------
 
 block: # `rule=`
-  var simulator = Simulator.init EditorEdit
+  var simulator = Simulator.init EditEditor
 
   simulator.rule = Tsu
   check simulator.rule == Tsu
@@ -106,44 +106,44 @@ rb|
 (0,0,0,0,0,1)
 py|""".parseNazoPuyo.unsafeValue
 
-  block: # from ViewerPlay
+  block: # from PlayViewer
     let field0 = nazoPuyo.puyoPuyo.field
 
     var simulator = Simulator.init nazoPuyo
     simulator.forward
-    simulator.mode = ViewerEdit
+    simulator.mode = EditViewer
 
     check simulator.nazoPuyo.puyoPuyo.field == field0
 
-  block: # from ViewerEdit
+  block: # from EditViewer
     let field0 = nazoPuyo.puyoPuyo.field
 
-    var simulator = Simulator.init(nazoPuyo, ViewerEdit)
+    var simulator = Simulator.init(nazoPuyo, EditViewer)
     simulator.forward
-    simulator.mode = ViewerPlay
+    simulator.mode = PlayViewer
 
     check simulator.nazoPuyo.puyoPuyo.field == field0
 
-  block: # from EditorPlay
+  block: # from PlayEditor
     let field0 = nazoPuyo.puyoPuyo.field
 
-    var simulator = Simulator.init(nazoPuyo, EditorPlay)
+    var simulator = Simulator.init(nazoPuyo, PlayEditor)
     simulator.forward
-    simulator.mode = EditorEdit
+    simulator.mode = EditEditor
 
     check simulator.nazoPuyo.puyoPuyo.field == field0
 
-  block: # from EditorEdit
+  block: # from EditEditor
     let field0 = nazoPuyo.puyoPuyo.field
 
-    var simulator = Simulator.init(nazoPuyo, EditorEdit)
+    var simulator = Simulator.init(nazoPuyo, EditEditor)
     simulator.forward
-    simulator.mode = EditorPlay
+    simulator.mode = PlayEditor
 
     check simulator.nazoPuyo.puyoPuyo.field == field0
 
 block: # `editCell=`
-  var simulator = Simulator.init ViewerEdit
+  var simulator = Simulator.init EditViewer
 
   simulator.editCell = Cell.None
   check simulator.editData.editObj.cell == Cell.None
@@ -155,7 +155,7 @@ block: # `editCell=`
   check simulator.editData.editObj.cell == Garbage
 
 block: # `editCross=`
-  var simulator = Simulator.init ViewerEdit
+  var simulator = Simulator.init EditViewer
 
   simulator.editCross = true
   check simulator.editData.editObj.cross
@@ -190,7 +190,7 @@ block: # moveCursorUp, moveCursorDown, moveCursorRight, moveCursorLeft
 rb|
 (0,0,0,0,0,1)
 py|""".parseNazoPuyo.unsafeValue
-  var simulator = Simulator.init(nazoPuyo, EditorEdit)
+  var simulator = Simulator.init(nazoPuyo, EditEditor)
 
   simulator.moveCursorUp
   check simulator.editData.field == (Row12, Col0)
@@ -250,7 +250,7 @@ rb|3N
 py|""".parseNazoPuyo.unsafeValue
   var
     steps = nazoPuyo.puyoPuyo.steps
-    simulator = Simulator.init(nazoPuyo, EditorEdit)
+    simulator = Simulator.init(nazoPuyo, EditEditor)
 
   simulator.delStep
   steps.del 0
@@ -294,7 +294,7 @@ R""".parseNazoPuyo.unsafeValue
   var
     field = nazoPuyo.puyoPuyo.field
     steps = nazoPuyo.puyoPuyo.steps
-    simulator = Simulator.init(nazoPuyo, EditorEdit)
+    simulator = Simulator.init(nazoPuyo, EditEditor)
 
   simulator.editCell = Green
   simulator.writeCell Row3, Col4
@@ -400,7 +400,7 @@ R""".parseNazoPuyo.unsafeValue
   var
     field = nazoPuyo.puyoPuyo.field
     steps = nazoPuyo.puyoPuyo.steps
-    simulator = Simulator.init(nazoPuyo, EditorEdit)
+    simulator = Simulator.init(nazoPuyo, EditEditor)
 
   simulator.shiftFieldUp
   field.shiftUp
@@ -454,7 +454,7 @@ block:
   # normalizeGoal, `goalKindOpt=`, `goalColor=`, `goalVal=`, `goalOperator=`,
   # `goalClearColorOpt=`
   var simulator = Simulator.init(
-    NazoPuyo.init(PuyoPuyo.init, Goal.init(Color, GoalColor.Red, 2, Exact)), EditorEdit
+    NazoPuyo.init(PuyoPuyo.init, Goal.init(Color, GoalColor.Red, 2, Exact)), EditEditor
   )
   simulator.normalizeGoal
   check simulator.nazoPuyo.goal == Goal.init(Color, 2, Exact)
@@ -497,7 +497,7 @@ block:
 # ------------------------------------------------
 
 block: # toggleFocus, toggleInsert
-  var simulator = Simulator.init EditorEdit
+  var simulator = Simulator.init EditEditor
 
   simulator.toggleFocus
   check not simulator.editData.focusField
@@ -799,7 +799,7 @@ R""".parseNazoPuyo.unsafeValue
 rb|""".parseNazoPuyo.unsafeValue
     var
       field = nazoPuyo0.puyoPuyo.field
-      simulator = Simulator.init(nazoPuyo0, EditorEdit)
+      simulator = Simulator.init(nazoPuyo0, EditEditor)
     let field0 = field
     check simulator.state == AfterEdit
 
@@ -993,7 +993,7 @@ pp|23""".parseNazoPuyo.unsafeValue
   check not simulator2.operate KeyEventTab
   check simulator1 == simulator2
 
-  simulator1.mode = ViewerEdit
+  simulator1.mode = EditViewer
   check simulator2.operate KeyEventT
   check simulator1 == simulator2
 
@@ -1104,7 +1104,7 @@ pp|23""".parseNazoPuyo.unsafeValue
   check not simulator2.operate KeyEventV
   check simulator1 == simulator2
 
-  simulator1.mode = ViewerPlay
+  simulator1.mode = PlayViewer
   check simulator2.operate KeyEventT
   check simulator1 == simulator2
 
@@ -1141,8 +1141,8 @@ pp|23""".parseNazoPuyo.unsafeValue
   check simulator3 == simulator4
 
   var
-    simulator5 = Simulator.init(nazoPuyo, EditorEdit)
-    simulator6 = Simulator.init(nazoPuyo, EditorEdit)
+    simulator5 = Simulator.init(nazoPuyo, EditEditor)
+    simulator6 = Simulator.init(nazoPuyo, EditEditor)
   check simulator5 == simulator6
 
   simulator5.rule = Water
@@ -1262,9 +1262,9 @@ gy|23""".parseNazoPuyo.unsafeValue
       Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_b..&steps=rbppgy&goal=0_0_6_0_".parseUri
 
 block: # toExportUri
-  # EditorEdit
+  # EditEditor
   block:
-    var simulator = Simulator.init EditorEdit
+    var simulator = Simulator.init EditEditor
     simulator.moveCursorUp
     simulator.moveCursorUp
     simulator.moveCursorLeft
@@ -1276,11 +1276,11 @@ block: # toExportUri
     check simulator.toExportUri ==
       Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_g......&steps&goal=_".parseUri
     check simulator.toExportUri(viewer = false) ==
-      Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=2&field=0_g......&steps&goal=_".parseUri
+      Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=1&field=0_g......&steps&goal=_".parseUri
 
-  # ViewerEdit
+  # EditViewer
   block:
-    var simulator = Simulator.init ViewerEdit
+    var simulator = Simulator.init EditViewer
     simulator.moveCursorUp
     simulator.moveCursorUp
     simulator.moveCursorLeft
@@ -1290,7 +1290,7 @@ block: # toExportUri
     check simulator.toExportUri ==
       Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps&goal=_".parseUri
 
-  # ViewerPlay
+  # PlayViewer
   block:
     let nazoPuyo =
       """

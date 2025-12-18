@@ -234,7 +234,7 @@ when isMainModule:
             trailing = false, chars = {'?'}
           )
           if uri.query == "":
-            uri.query.assign "mode={EditorEdit.ord}".fmt
+            uri.query.assign "mode={EditEditor.ord}".fmt
 
           let simulatorResult = uri.parseSimulator
           if simulatorResult.isOk:
@@ -304,7 +304,7 @@ when isMainModule:
         var nazoPuyo = simulator.nazoPuyo
         nazoPuyo.puyoPuyo.steps.assign steps
 
-        let solutionUri = Simulator.init(nazoPuyo, EditorEdit).toUri.unsafeValue
+        let solutionUri = Simulator.init(nazoPuyo, PlayEditor).toUri.unsafeValue
         echo "({solutionIndex + 1}) {solutionUri}".fmt
 
         if openSolution:
@@ -339,7 +339,7 @@ when isMainModule:
         fixMoves.mapIt it.pred, allowDoubleMoves.mapIt it.pred
       ):
         let
-          resultSimulator = Simulator.init(nazoPuyo, EditorEdit)
+          resultSimulator = Simulator.init(nazoPuyo, PlayEditor)
           problemUri = resultSimulator.toUri(clearPlacements = true).unsafeValue
           solutionUri = resultSimulator.toUri.unsafeValue
 
@@ -510,7 +510,7 @@ when isMainModule:
           return
 
         let
-          simulator = Simulator.init(nazoPuyoResult.unsafeValue, EditorPlay)
+          simulator = Simulator.init(nazoPuyoResult.unsafeValue, PlayEditor)
           problemUri = simulator.toUri(clearPlacements = true).unsafeValue
           solutionUri = simulator.toUri.unsafeValue
 
