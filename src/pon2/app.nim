@@ -5,7 +5,6 @@
 ## - [generate](./app/generate.html)
 ## - [key](./app/key.html)
 ## - [marathon](./app/marathon.html)
-## - [nazopuyowrap](./app/nazopuyowrap.html)
 ## - [permute](./app/permute.html)
 ## - [simulator](./app/simulator.html)
 ## - [solve](./app/solve.html)
@@ -23,6 +22,6 @@
 {.experimental: "views".}
 
 import ./[core]
-import ./app/[generate, key, marathon, nazopuyowrap, permute, simulator, solve, studio]
+import ./app/[generate, key, marathon, permute, simulator, solve, studio]
 
-export core, generate, key, marathon, nazopuyowrap, permute, simulator, solve, studio
+export core, generate, key, marathon, permute, simulator, solve, studio

@@ -94,7 +94,9 @@ else:
     when nimvm:
       dst = src
     else:
-      when supportsCopyMem(T):
+      when not compiles(static(T.sizeof)):
+        dst = src
+      elif supportsCopyMem(T):
         when sizeof(src) <= sizeof(int):
           dst = src
         else:

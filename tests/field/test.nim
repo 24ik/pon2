@@ -3,39 +3,36 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, sugar, unittest]
+import std/[sugar, unittest]
 import
   ../../src/pon2/core/
     [cell, common, field, fqdn, moveresult, pair, placement, popresult, rule, step]
-import ../../src/pon2/private/[assign, arrayutils, strutils]
+import ../../src/pon2/private/[arrayutils, assign, staticfor, strutils]
 import ../../src/pon2/private/core/[binaryfield]
 
 proc toBinaryField(str: string): BinaryField =
   ## Returns the binary field converted from the string representation.
   let strs = str.split "\n"
 
-  var arr {.noinit.}: array[Row, array[Col, bool]]
-  for row in Row:
-    for col in Col:
-      arr[row][col] = strs[row.ord][col.ord] == 'x'
+  var cellArray {.noinit.}: array[Row, array[Col, bool]]
+  staticFor(row, Row):
+    staticFor(col, Col):
+      cellArray[row][col].assign strs[row.ord][col.ord] == 'x'
 
-  return arr.toBinaryField
+  cellArray.toBinaryField
 
-func toTsuField(str: string): TsuField =
-  ## Returns the Tsu field converted from the string representation.
-  str.parseTsuField.unsafeValue
-
-func toWaterField(str: string): WaterField =
-  ## Returns the Water field converted from the string representation.
-  str.parseWaterField.unsafeValue
+func toField(str: string): Field =
+  ## Returns the field converted from the string representation.
+  str.parseField.unsafeValue
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
 block: # init
-  check TsuField.init ==
+  check Field.init(Rule.Tsu) ==
     """
+[通]
 ......
 ......
 ......
@@ -48,10 +45,42 @@ block: # init
 ......
 ......
 ......
-......""".toTsuField
-
-  check WaterField.init ==
+......""".toField
+  check Field.init(Spinner) ==
     """
+[だいかいてん]
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......""".toField
+  check Field.init(CrossSpinner) ==
+    """
+[クロスかいてん]
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......""".toField
+  check Field.init(Rule.Water) ==
+    """
+[すいちゅう]
 ......
 ......
 ......
@@ -65,63 +94,17 @@ block: # init
 ......
 ......
 ......
-......""".toWaterField
+......""".toField
 
-# ------------------------------------------------
-# Convert
-# ------------------------------------------------
-
-block: # toTsuField, toWaterField
-  let
-    fieldT =
-      """
-r....g
-......
-......
-......
-......
-......
-......
-......
-......
-......
-......
-......
-o....h""".toTsuField
-    fieldW =
-      """
-r....g
-......
-......
-......
-......
-~~~~~~
-......
-......
-......
-......
-......
-......
-......
-o....h""".toWaterField
-
-  check fieldT.toTsuField == fieldT
-  check fieldW.toTsuField == fieldT
-
-  check fieldT.toWaterField == fieldW
-  check fieldW.toWaterField == fieldW
+  check Field.init == Field.init Rule.Tsu
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-block: # rule
-  check TsuField.init.rule == Tsu
-  check WaterField.init.rule == Water
-
 block: # isDead
-  block: # Tsu
-    check not """
+  check not """
+[通]
 oooooo
 oo.ooo
 oooooo
@@ -134,9 +117,9 @@ oooooo
 oooooo
 oooooo
 oooooo
-oooooo""".toTsuField.isDead
-
-    check """
+oooooo""".toField.isDead
+  check """
+[通]
 ......
 ..o...
 ......
@@ -149,10 +132,72 @@ oooooo""".toTsuField.isDead
 ......
 ......
 ......
-......""".toTsuField.isDead
+......""".toField.isDead
 
-  block: # Water
-    check not """
+  check not """
+[だいかいてん]
+oooooo
+oo..oo
+oooooo
+oooooo
+oooooo
+oooooo
+oooooo
+oooooo
+oooooo
+oooooo
+oooooo
+oooooo
+oooooo""".toField.isDead
+  check """
+[だいかいてん]
+......
+...o..
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......""".toField.isDead
+
+  check not """
+[クロスかいてん]
+oooooo
+oo..oo
+oooooo
+oooooo
+oooooo
+oooooo
+oooooo
+oooooo
+oooooo
+oooooo
+oooooo
+oooooo
+oooooo""".toField.isDead
+  check """
+[クロスかいてん]
+......
+..o...
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......""".toField.isDead
+
+  check not """
+[すいちゅう]
 hhhhhh
 hhhhhh
 hhhhhh
@@ -166,9 +211,9 @@ hhhhhh
 hhhhhh
 hhhhhh
 hhhhhh
-hhhhhh""".toWaterField.isDead
-
-    check """
+hhhhhh""".toField.isDead
+  check """
+[すいちゅう]
 ......
 ......
 ......
@@ -182,23 +227,23 @@ hhhhhh""".toWaterField.isDead
 ......
 ......
 ......
-......""".toWaterField.isDead
+......""".toField.isDead
 
 # ------------------------------------------------
 # Placement
 # ------------------------------------------------
 
 block: # invalidPlacements, validPlacements, validDoublePlacements
-  block: # Tsu
-    block:
-      let field = TsuField.init
-      check field.invalidPlacements == {}
-      check field.validPlacements == {Placement.low .. Placement.high}
-      check field.validDoublePlacements == DoublePlacements
+  block:
+    let field = Field.init
+    check field.invalidPlacements == {Placement.None}
+    check field.validPlacements == ActualPlacements
+    check field.validDoublePlacements == DoublePlacements
 
-    block:
-      let field =
-        """
+  block:
+    let field =
+      """
+[通]
 ......
 .r....
 ......
@@ -211,18 +256,19 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......
 ......
-......""".toTsuField
-      check field.invalidPlacements ==
-        {Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2}
-      check field.validPlacements == {
-        Up2, Up3, Up4, Up5, Right2, Right3, Right4, Down2, Down3, Down4, Down5, Left3,
-        Left4, Left5,
-      }
-      check field.validDoublePlacements == {Up2, Up3, Up4, Up5, Right2, Right3, Right4}
+......""".toField
+    check field.invalidPlacements ==
+      {Placement.None, Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2}
+    check field.validPlacements == {
+      Up2, Up3, Up4, Up5, Right2, Right3, Right4, Down2, Down3, Down4, Down5, Left3,
+      Left4, Left5,
+    }
+    check field.validDoublePlacements == {Up2, Up3, Up4, Up5, Right2, Right3, Right4}
 
-    block:
-      let field =
-        """
+  block:
+    let field =
+      """
+[通]
 ......
 .r....
 .....o
@@ -235,12 +281,13 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......
 ......
-......""".toTsuField
-      check field.invalidPlacements == {Down1}
+......""".toField
+    check field.invalidPlacements == {Placement.None, Down1}
 
-    block:
-      let field =
-        """
+  block:
+    let field =
+      """
+[だいかいてん]
 ......
 .y.h..
 ......
@@ -253,12 +300,13 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......
 ......
-......""".toTsuField
-      check field.invalidPlacements == {Down1, Down3}
+......""".toField
+    check field.invalidPlacements == {Placement.None, Down1, Down3}
 
-    block:
-      let field =
-        """
+  block:
+    let field =
+      """
+[クロスかいてん]
 .r....
 .g.b..
 ......
@@ -271,44 +319,19 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......
 ......
-......""".toTsuField
-      check field.invalidPlacements ==
-        {Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2, Down3}
+......""".toField
+    check field.invalidPlacements ==
+      {Placement.None, Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2, Down3}
 
-    block:
-      let field =
-        """
+  block:
+    let field =
+      """
+[すいちゅう]
 ....h.
 .p.o..
 ..r...
 ......
 ......
-......
-......
-......
-......
-......
-......
-......
-......""".toTsuField
-      check field.invalidPlacements ==
-        {Down1, Right3, Down3, Up4, Right4, Down4, Left4, Up5, Down5, Left5}
-
-  block: # Water
-    block:
-      let field = WaterField.init
-      check field.invalidPlacements == {}
-      check field.validPlacements == {Placement.low .. Placement.high}
-      check field.validDoublePlacements == DoublePlacements
-
-    block:
-      let field =
-        """
-......
-.r....
-......
-......
-......
 ~~~~~~
 ......
 ......
@@ -317,92 +340,12 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......
 ......
-......""".toWaterField
-      check field.invalidPlacements ==
-        {Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2}
-      check field.validPlacements == {
-        Up2, Up3, Up4, Up5, Right2, Right3, Right4, Down2, Down3, Down4, Down5, Left3,
-        Left4, Left5,
+......""".toField
+    check field.invalidPlacements ==
+      {
+        Placement.None, Down1, Right3, Down3, Up4, Right4, Down4, Left4, Up5, Down5,
+        Left5,
       }
-      check field.validDoublePlacements == {Up2, Up3, Up4, Up5, Right2, Right3, Right4}
-
-    block:
-      let field =
-        """
-......
-.h....
-.....o
-......
-......
-~~~~~~
-......
-......
-......
-......
-......
-......
-......
-......""".toWaterField
-      check field.invalidPlacements == {Down1}
-
-    block:
-      let field =
-        """
-......
-.y.p..
-......
-......
-......
-~~~~~~
-......
-......
-......
-......
-......
-......
-......
-......""".toWaterField
-      check field.invalidPlacements == {Down1, Down3}
-
-    block:
-      let field =
-        """
-.h....
-.g.b..
-......
-......
-......
-~~~~~~
-......
-......
-......
-......
-......
-......
-......
-......""".toWaterField
-      check field.invalidPlacements ==
-        {Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2, Down3}
-
-    block:
-      let field =
-        """
-....y.
-.p.o..
-..r...
-......
-......
-~~~~~~
-......
-......
-......
-......
-......
-......
-......
-......""".toWaterField
-      check field.invalidPlacements ==
-        {Down1, Right3, Down3, Up4, Right4, Down4, Left4, Up5, Down5, Left5}
 
 # ------------------------------------------------
 # Indexer
@@ -412,6 +355,7 @@ block: # `[]`, `[]=`
   var
     fieldT =
       """
+[通]
 ......
 .r....
 ...o..
@@ -424,9 +368,10 @@ block: # `[]`, `[]=`
 ......
 ......
 ......
-......""".toTsuField
+......""".toField
     fieldW =
       """
+[すいちゅう]
 ....b.
 ......
 ......
@@ -440,12 +385,12 @@ h.....
 ......
 ......
 ......
-......""".toWaterField
+......""".toField
 
   check fieldT[Row1, Col1] == Red
-  check fieldT[Row0, Col0] == None
+  check fieldT[Row0, Col0] == Cell.None
   check fieldW[Row5, Col0] == Hard
-  check fieldW[Row1, Col1] == None
+  check fieldW[Row1, Col1] == Cell.None
 
   fieldT[Row2, Col3] = Purple
   check fieldT[Row2, Col3] == Purple
@@ -461,6 +406,7 @@ block: # insert, del
   block: # Tsu
     var field =
       """
+[通]
 g.....
 g.....
 .b....
@@ -473,11 +419,12 @@ g.....
 p.....
 ......
 .o....
-.o....""".toTsuField
+.o....""".toField
 
     field.insert Row3, Col0, Red
     check field ==
       """
+[通]
 g.....
 ......
 .b....
@@ -490,11 +437,12 @@ r.....
 p.....
 ......
 .o....
-.o....""".toTsuField
+.o....""".toField
 
     field.insert Row0, Col5, Green
     check field ==
       """
+[通]
 g....g
 ......
 .b....
@@ -507,11 +455,12 @@ r.....
 p.....
 ......
 .o....
-.o....""".toTsuField
+.o....""".toField
 
     field.del Row9, Col0
     check field ==
       """
+[通]
 .....g
 g.....
 .b....
@@ -524,11 +473,12 @@ r.r.y.
 ......
 ......
 .o....
-.o....""".toTsuField
+.o....""".toField
 
   block: # Water
     var field =
       """
+[すいちゅう]
 g.....
 g.....
 .b....
@@ -542,11 +492,12 @@ g.....
 p.....
 ......
 .o....
-.o....""".toWaterField
+.o....""".toField
 
     field.insert Row4, Col0, Red
     check field ==
       """
+[すいちゅう]
 g.....
 ......
 .b....
@@ -560,11 +511,12 @@ r.r.y.
 p.....
 ......
 .o....
-.o....""".toWaterField
+.o....""".toField
 
     field.insert Row5, Col0, Green
     check field ==
       """
+[すいちゅう]
 g.....
 ......
 .b....
@@ -578,11 +530,12 @@ g..ph.
 ......
 p.....
 .o....
-.o....""".toWaterField
+.o....""".toField
 
     field.insert Row9, Col1, Yellow
     check field ==
       """
+[すいちゅう]
 g.....
 ......
 .b....
@@ -596,11 +549,12 @@ g..ph.
 .y....
 p.....
 ......
-.o....""".toWaterField
+.o....""".toField
 
-    field.insert Row4, Col4, None
+    field.insert Row4, Col4, Cell.None
     check field ==
       """
+[すいちゅう]
 g.....
 ......
 .b....
@@ -614,11 +568,12 @@ g..ph.
 .y....
 p.....
 ......
-.o....""".toWaterField
+.o....""".toField
 
     field.insert Row8, Col5, Garbage
     check field ==
       """
+[すいちゅう]
 g.....
 ......
 .b....
@@ -632,11 +587,12 @@ g..ph.
 .y....
 p.....
 ......
-.o....""".toWaterField
+.o....""".toField
 
     field.del Row4, Col0
     check field ==
       """
+[すいちゅう]
 ......
 g.....
 .b....
@@ -650,11 +606,12 @@ g..ph.
 .y....
 p.....
 ......
-.o....""".toWaterField
+.o....""".toField
 
     field.del Row5, Col0
     check field ==
       """
+[すいちゅう]
 ......
 g.....
 .b....
@@ -668,11 +625,12 @@ g.....
 py....
 ......
 ......
-.o....""".toWaterField
+.o....""".toField
 
     field.del Row12, Col5
     check field ==
       """
+[すいちゅう]
 ......
 g.....
 .b....
@@ -686,16 +644,17 @@ g.....
 py....
 ......
 ......
-.o....""".toWaterField
+.o....""".toField
 
 # ------------------------------------------------
 # Count
 # ------------------------------------------------
 
-block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
+block: # cellCount, puyoCount, coloredPuyoCount, nuisancePuyoCount
   let
-    fieldT =
+    fieldS =
       """
+[だいかいてん]
 ......
 ......
 rr....
@@ -708,9 +667,10 @@ rr....
 h..o..
 ......
 ......
-......""".toTsuField
+......""".toField
     fieldW =
       """
+[すいちゅう]
 ......
 ......
 pp....
@@ -724,21 +684,21 @@ pp....
 h..o..
 ......
 ......
-......""".toWaterField
+......""".toField
 
-  check fieldT.cellCount(Red) == 3
-  check fieldT.cellCount(Blue) == 0
+  check fieldS.cellCount(Red) == 3
+  check fieldS.cellCount(Blue) == 0
   check fieldW.cellCount(Garbage) == 5
   check fieldW.cellCount(Red) == 0
 
-  check fieldT.puyoCount == 13
+  check fieldS.puyoCount == 13
   check fieldW.puyoCount == 13
 
-  check fieldT.colorPuyoCount == 7
-  check fieldW.colorPuyoCount == 7
+  check fieldS.coloredPuyoCount == 7
+  check fieldW.coloredPuyoCount == 7
 
-  check fieldT.garbagesCount == 6
-  check fieldW.garbagesCount == 6
+  check fieldS.nuisancePuyoCount == 6
+  check fieldW.nuisancePuyoCount == 6
 
 # ------------------------------------------------
 # Connect - 2
@@ -746,8 +706,9 @@ h..o..
 
 block: # connection2, connection2Vertical, connection2Horizontal
   let
-    fieldT =
+    fieldC =
       """
+[クロスかいてん]
 bbbrry
 yggbgy
 ygbbgg
@@ -760,9 +721,10 @@ ggrbbb
 ......
 ......
 .....h
-oo...h""".toTsuField
+oo...h""".toField
     fieldW =
       """
+[すいちゅう]
 bbbrry
 yggbgy
 ygbbgg
@@ -776,10 +738,11 @@ ggrbbb
 ......
 ......
 .....h
-oo...h""".toWaterField
+oo...h""".toField
 
-  check fieldT.connection2 ==
+  check fieldC.connection2 ==
     """
+[クロスかいてん]
 ...rry
 .....y
 ......
@@ -792,9 +755,10 @@ ggr...
 ......
 ......
 ......
-......""".toTsuField
+......""".toField
   check fieldW.connection2 ==
     """
+[すいちゅう]
 ...rry
 .....y
 ......
@@ -808,10 +772,11 @@ ggr...
 ......
 ......
 ......
-......""".toWaterField
+......""".toField
 
-  check fieldT.connection2Vertical ==
+  check fieldC.connection2Vertical ==
     """
+[クロスかいてん]
 .....y
 .....y
 ......
@@ -824,9 +789,10 @@ ggr...
 ......
 ......
 ......
-......""".toTsuField
+......""".toField
   check fieldW.connection2Vertical ==
     """
+[すいちゅう]
 .....y
 .....y
 ......
@@ -840,10 +806,11 @@ ggr...
 ......
 ......
 ......
-......""".toWaterField
+......""".toField
 
-  check fieldT.connection2Horizontal ==
+  check fieldC.connection2Horizontal ==
     """
+[クロスかいてん]
 ...rr.
 ......
 ......
@@ -856,9 +823,10 @@ gg....
 ......
 ......
 ......
-......""".toTsuField
+......""".toField
   check fieldW.connection2Horizontal ==
     """
+[すいちゅう]
 ...rr.
 ......
 ......
@@ -872,7 +840,7 @@ gg....
 ......
 ......
 ......
-......""".toWaterField
+......""".toField
 
 # ------------------------------------------------
 # Connect - 3
@@ -882,6 +850,7 @@ block: # connection3, connection3Vertical, connection3Horizontal, connection3LSh
   let
     fieldT =
       """
+[通]
 bbbrry
 yggbgy
 ygbbgg
@@ -894,9 +863,10 @@ grrbbb
 ......
 .....h
 .....h
-ooo..h""".toTsuField
+ooo..h""".toField
     fieldW =
       """
+[すいちゅう]
 bbbrry
 yggbgy
 ygbbgg
@@ -910,10 +880,11 @@ grrbbb
 ......
 .....h
 .....h
-ooo..h""".toWaterField
+ooo..h""".toField
 
   check fieldT.connection3 ==
     """
+[通]
 bbb...
 ygg.g.
 yg..gg
@@ -926,9 +897,10 @@ y.....
 ......
 ......
 ......
-......""".toTsuField
+......""".toField
   check fieldW.connection3 ==
     """
+[すいちゅう]
 bbb...
 ygg.g.
 yg..gg
@@ -942,10 +914,11 @@ y.....
 ......
 ......
 ......
-......""".toWaterField
+......""".toField
 
   check fieldT.connection3Vertical ==
     """
+[通]
 ......
 y.....
 y.....
@@ -958,9 +931,10 @@ y.....
 ......
 ......
 ......
-......""".toTsuField
+......""".toField
   check fieldW.connection3Vertical ==
     """
+[すいちゅう]
 ......
 y.....
 y.....
@@ -974,10 +948,11 @@ y.....
 ......
 ......
 ......
-......""".toWaterField
+......""".toField
 
   check fieldT.connection3Horizontal ==
     """
+[通]
 bbb...
 ......
 ......
@@ -990,9 +965,10 @@ bbb...
 ......
 ......
 ......
-......""".toTsuField
+......""".toField
   check fieldW.connection3Horizontal ==
     """
+[すいちゅう]
 bbb...
 ......
 ......
@@ -1006,10 +982,11 @@ bbb...
 ......
 ......
 ......
-......""".toWaterField
+......""".toField
 
   check fieldT.connection3LShape ==
     """
+[通]
 ......
 .gg.g.
 .g..gg
@@ -1022,9 +999,10 @@ bbb...
 ......
 ......
 ......
-......""".toTsuField
+......""".toField
   check fieldW.connection3LShape ==
     """
+[すいちゅう]
 ......
 .gg.g.
 .g..gg
@@ -1038,7 +1016,7 @@ bbb...
 ......
 ......
 ......
-......""".toWaterField
+......""".toField
 
 # ------------------------------------------------
 # Shift
@@ -1046,8 +1024,9 @@ bbb...
 
 block: # shiftUp, shiftedDown, shiftRight, shiftLeft
   let
-    fieldT =
+    fieldS =
       """
+[だいかいてん]
 g.....
 .y....
 ..p...
@@ -1060,9 +1039,10 @@ g.....
 ......
 ......
 .....o
-bg...p""".toTsuField
+bg...p""".toField
     fieldW =
       """
+[すいちゅう]
 g.....
 .y....
 ..p...
@@ -1076,10 +1056,11 @@ g.....
 ......
 ......
 .....o
-bg...p""".toWaterField
+bg...p""".toField
 
-  check fieldT.dup(shiftUp) ==
+  check fieldS.dup(shiftUp) ==
     """
+[だいかいてん]
 .y....
 ..p...
 ......
@@ -1092,9 +1073,10 @@ bg...p""".toWaterField
 ......
 .....o
 bg...p
-......""".toTsuField
+......""".toField
   check fieldW.dup(shiftUp) ==
     """
+[すいちゅう]
 .y....
 ..p...
 ......
@@ -1108,10 +1090,11 @@ bg...p
 ......
 .....o
 bg...p
-......""".toWaterField
+......""".toField
 
-  check fieldT.dup(shiftDown) ==
+  check fieldS.dup(shiftDown) ==
     """
+[だいかいてん]
 ......
 g.....
 .y....
@@ -1124,9 +1107,10 @@ g.....
 ..h...
 ......
 ......
-.....o""".toTsuField
+.....o""".toField
   check fieldW.dup(shiftDown) ==
     """
+[すいちゅう]
 ......
 g.....
 .y....
@@ -1140,10 +1124,11 @@ g.....
 ..h...
 ......
 ......
-.....o""".toWaterField
+.....o""".toField
 
-  check fieldT.dup(shiftRight) ==
+  check fieldS.dup(shiftRight) ==
     """
+[だいかいてん]
 .g....
 ..y...
 ...p..
@@ -1156,9 +1141,10 @@ g.....
 ......
 ......
 ......
-.bg...""".toTsuField
+.bg...""".toField
   check fieldW.dup(shiftRight) ==
     """
+[すいちゅう]
 .g....
 ..y...
 ...p..
@@ -1172,10 +1158,11 @@ g.....
 ......
 ......
 ......
-.bg...""".toWaterField
+.bg...""".toField
 
-  check fieldT.dup(shiftLeft) ==
+  check fieldS.dup(shiftLeft) ==
     """
+[だいかいてん]
 ......
 y.....
 .p....
@@ -1188,9 +1175,10 @@ y.....
 ......
 ......
 ....o.
-g...p.""".toTsuField
+g...p.""".toField
   check fieldW.dup(shiftLeft) ==
     """
+[すいちゅう]
 ......
 y.....
 .p....
@@ -1204,7 +1192,7 @@ y.....
 ......
 ......
 ....o.
-g...p.""".toWaterField
+g...p.""".toField
 
 # ------------------------------------------------
 # Flip
@@ -1212,8 +1200,9 @@ g...p.""".toWaterField
 
 block: # flipVertical, flipHorizontal
   let
-    fieldT =
+    fieldC =
       """
+[クロスかいてん]
 p.....
 ..o...
 ......
@@ -1226,9 +1215,10 @@ p.....
 ......
 ......
 ......
-......""".toTsuField
+......""".toField
     fieldW =
       """
+[すいちゅう]
 p.....
 ..o...
 ......
@@ -1242,10 +1232,11 @@ p.....
 ......
 ......
 ......
-......""".toWaterField
+......""".toField
 
-  check fieldT.dup(flipVertical) ==
+  check fieldC.dup(flipVertical) ==
     """
+[クロスかいてん]
 ......
 ......
 ......
@@ -1258,9 +1249,10 @@ p.....
 .h....
 ......
 ..o...
-p.....""".toTsuField
+p.....""".toField
   check fieldW.dup(flipVertical) ==
     """
+[すいちゅう]
 ......
 ......
 ......
@@ -1274,10 +1266,11 @@ p.....""".toTsuField
 .h....
 ......
 ..o...
-p.....""".toWaterField
+p.....""".toField
 
-  check fieldT.dup(flipHorizontal) ==
+  check fieldC.dup(flipHorizontal) ==
     """
+[クロスかいてん]
 .....p
 ...o..
 ......
@@ -1290,9 +1283,10 @@ p.....""".toWaterField
 ......
 ......
 ......
-......""".toTsuField
+......""".toField
   check fieldW.dup(flipHorizontal) ==
     """
+[すいちゅう]
 .....p
 ...o..
 ......
@@ -1306,7 +1300,7 @@ p.....""".toWaterField
 ......
 ......
 ......
-......""".toWaterField
+......""".toField
 
 # ------------------------------------------------
 # Rotate
@@ -1316,6 +1310,7 @@ block: # rotate, crossRotate
   let
     fieldT =
       """
+[通]
 p.....
 ..o...
 ......
@@ -1328,9 +1323,10 @@ p.....
 ......
 ......
 ......
-....b.""".toTsuField
+....b.""".toField
     fieldW =
       """
+[すいちゅう]
 p.....
 ..o...
 ......
@@ -1344,10 +1340,11 @@ p.....
 ......
 ......
 ......
-....b.""".toWaterField
+....b.""".toField
 
   check fieldT.dup(rotate) ==
     """
+[通]
 ......
 .b....
 ......
@@ -1360,9 +1357,10 @@ p.....
 ......
 ..h...
 ......
-...o..""".toTsuField
+...o..""".toField
   check fieldW.dup(rotate) ==
     """
+[すいちゅう]
 ......
 .b....
 ......
@@ -1376,10 +1374,11 @@ p.....
 ......
 ..h...
 ......
-...o..""".toWaterField
+...o..""".toField
 
   check fieldT.dup(crossRotate) ==
     """
+[通]
 ......
 ....b.
 ......
@@ -1392,9 +1391,10 @@ p.....
 ......
 .....h
 ......
-o.....""".toTsuField
+o.....""".toField
   check fieldW.dup(crossRotate) ==
     """
+[すいちゅう]
 ......
 ....b.
 ......
@@ -1408,7 +1408,7 @@ o.....""".toTsuField
 ......
 .....h
 ......
-o.....""".toWaterField
+o.....""".toField
 
 # ------------------------------------------------
 # Pop
@@ -1416,8 +1416,9 @@ o.....""".toWaterField
 
 block: # pop, canPop
   var
-    fieldT =
+    fieldS =
       """
+[だいかいてん]
 yo...g
 yo..gg
 yo...g
@@ -1430,9 +1431,10 @@ pp..h.
 ..pph.
 ..phh.
 .hhh..
-......""".toTsuField
+......""".toField
     fieldW =
       """
+[すいちゅう]
 yo...g
 yo..gg
 yo...g
@@ -1446,14 +1448,14 @@ pp..h.
 ..pph.
 ..phh.
 .hhh..
-......""".toWaterField
+......""".toField
 
-  check fieldT.canPop
+  check fieldS.canPop
   check fieldW.canPop
 
   let
-    resT = fieldT.pop
-    resW = fieldW.pop
+    resultS = fieldS.pop
+    resultW = fieldW.pop
 
     yellow =
       """
@@ -1531,15 +1533,16 @@ xx....
 ......
 ......""".toBinaryField
     zero = BinaryField.init
-    popResAns = PopResult.init(
+    answer = PopResult.init(
       zero, zero, zero, yellow, purple, hard, hardToGarbage, garbage, yellow + purple
     )
 
-  check resT == popResAns
-  check resW == popResAns
+  check resultS == answer
+  check resultW == answer
 
-  check fieldT ==
+  check fieldS ==
     """
+[だいかいてん]
 yo...g
 ....gg
 .....g
@@ -1552,9 +1555,10 @@ pp..h.
 ....o.
 ....h.
 .hoh..
-......""".toTsuField
+......""".toField
   check fieldW ==
     """
+[すいちゅう]
 yo...g
 ....gg
 .....g
@@ -1568,9 +1572,9 @@ pp..h.
 ....o.
 ....h.
 .hoh..
-......""".toWaterField
+......""".toField
 
-  check not fieldT.canPop
+  check not fieldS.canPop
   check not fieldW.canPop
 
 # ------------------------------------------------
@@ -1578,9 +1582,10 @@ pp..h.
 # ------------------------------------------------
 
 block: # place
-  block: # Tsu
+  block:
     var field =
       """
+[クロスかいてん]
 .....o
 ....oo
 ....oo
@@ -1593,13 +1598,14 @@ block: # place
 ....oo
 ....oo
 ....oo
-...hoo""".toTsuField
+...hoo""".toField
 
-    check field.dup(place(_, PurplePurple, NonePlacement)) == field
+    check field.dup(place(_, PurplePurple, Placement.None)) == field
 
     field.place RedGreen, Right0
     check field ==
       """
+[クロスかいてん]
 .....o
 ....oo
 ....oo
@@ -1612,11 +1618,12 @@ block: # place
 ....oo
 ....oo
 ....oo
-rg.hoo""".toTsuField
+rg.hoo""".toField
 
     field.place BlueYellow, Down1
     check field ==
       """
+[クロスかいてん]
 .....o
 ....oo
 ....oo
@@ -1629,11 +1636,12 @@ rg.hoo""".toTsuField
 ....oo
 .b..oo
 .y..oo
-rg.hoo""".toTsuField
+rg.hoo""".toField
 
     field.place PurpleRed, Left3
     check field ==
       """
+[クロスかいてん]
 .....o
 ....oo
 ....oo
@@ -1646,11 +1654,12 @@ rg.hoo""".toTsuField
 ....oo
 .b..oo
 .y.poo
-rgrhoo""".toTsuField
+rgrhoo""".toField
 
     field.place GreenBlue, Up4
     check field ==
       """
+[クロスかいてん]
 ....go
 ....oo
 ....oo
@@ -1663,11 +1672,12 @@ rgrhoo""".toTsuField
 ....oo
 .b..oo
 .y.poo
-rgrhoo""".toTsuField
+rgrhoo""".toField
 
-    field.place YellowPurple, OptPlacement.ok Down5
+    field.place YellowPurple, Down5
     check field ==
       """
+[クロスかいてん]
 ....go
 ....oo
 ....oo
@@ -1680,11 +1690,12 @@ rgrhoo""".toTsuField
 ....oo
 .b..oo
 .y.poo
-rgrhoo""".toTsuField
+rgrhoo""".toField
 
-  block: # Water
+  block:
     var field =
       """
+[すいちゅう]
 ......
 ......
 ......
@@ -1698,13 +1709,14 @@ rgrhoo""".toTsuField
 ....o.
 ....o.
 ......
-......""".toWaterField
+......""".toField
 
-    check field.dup(place(_, PurplePurple, NonePlacement)) == field
+    check field.dup(place(_, PurplePurple, Placement.None)) == field
 
     field.place BlueYellow, Left4
     check field ==
       """
+[すいちゅう]
 ......
 ......
 ......
@@ -1718,11 +1730,12 @@ rgrhoo""".toTsuField
 ....o.
 ....o.
 ....o.
-......""".toWaterField
+......""".toField
 
-    field.place PurpleRed, OptPlacement.ok Down4
+    field.place PurpleRed, Down4
     check field ==
       """
+[すいちゅう]
 ......
 ......
 ......
@@ -1736,16 +1749,17 @@ rgrhoo""".toTsuField
 ....o.
 ....o.
 ....o.
-....o.""".toWaterField
+....o.""".toField
 
 # ------------------------------------------------
-# Drop Garbages
+# Drop Nuisance
 # ------------------------------------------------
 
-block: # dropGarbages
-  block: # Tsu, garbage
+block: # dropNuisance
+  block:
     let field =
       """
+[通]
 ....by
 ....by
 ..rgby
@@ -1758,10 +1772,11 @@ block: # dropGarbages
 ..rgby
 ..rgby
 ..rgby
-..rgby""".toTsuField
+..rgby""".toField
 
-    check field.dup(dropGarbages(_, [Col0: 0, 2, 0, 3, 0, 4], false)) ==
+    check field.dup(dropNuisance(_, [Col0: 0, 2, 0, 3, 0, 4], hard = false)) ==
       """
+[通]
 ...oby
 ...oby
 ..rgby
@@ -1774,11 +1789,12 @@ block: # dropGarbages
 ..rgby
 ..rgby
 .orgby
-.orgby""".toTsuField
+.orgby""".toField
 
-  block: # Water, hard
+  block:
     let field =
       """
+[すいちゅう]
 ......
 ......
 ......
@@ -1792,10 +1808,11 @@ block: # dropGarbages
 ......
 ......
 ......
-......""".toWaterField
+......""".toField
 
-    check field.dup(dropGarbages(_, [Col0: 0, 2, 0, 3, 5, 20], true)) ==
+    check field.dup(dropNuisance(_, [Col0: 0, 2, 0, 3, 5, 20], hard = true)) ==
       """
+[すいちゅう]
 .....h
 .....h
 .....h
@@ -1809,11 +1826,12 @@ block: # dropGarbages
 ...ybg
 ....bg
 ....bg
-....bg""".toWaterField
+....bg""".toField
 
-  block: # Water (full-water), garbage
+  block:
     let field =
       """
+[すいちゅう]
 ....pr
 ....pr
 ....pr
@@ -1827,10 +1845,11 @@ rgbypr
 hhhhhh
 rgbypr
 oooooo
-rgbypr""".toWaterField
+rgbypr""".toField
 
-    check field.dup(dropGarbages(_, [Col0: 0, 1, 0, 1, 0, 10], false)) ==
+    check field.dup(dropNuisance([Col0: 0, 1, 0, 1, 0, 10])) ==
       """
+[すいちゅう]
 ....pr
 ....pr
 ...opr
@@ -1844,7 +1863,7 @@ rgbypr
 hhhhhh
 rgbypr
 oooooo
-rgbypr""".toWaterField
+rgbypr""".toField
 
 # ------------------------------------------------
 # Apply
@@ -1853,20 +1872,20 @@ rgbypr""".toWaterField
 block: # apply
   let
     pair = RedGreen
-    plcmt = Left3
+    placement = Left3
     counts = [Col0: 1, 2, 3, 4, 5, 6]
-    dropHard = false
+    hard = false
 
-    step1 = Step.init(pair, plcmt)
-    step2 = Step.init(counts, dropHard)
+    step1 = Step.init(pair, placement)
+    step2 = Step.init(counts, hard)
     step3 = Step.init(cross = true)
     step4 = Step.init(cross = false)
 
-  check TsuField.init.dup(apply(_, step1)) == TsuField.init.dup(place(_, pair, plcmt))
-  check WaterField.init.dup(apply(_, step2)) ==
-    WaterField.init.dup(dropGarbages(counts, dropHard))
+  check Field.init.dup(apply(_, step1)) == Field.init.dup(place(_, pair, placement))
+  check Field.init(Rule.Water).dup(apply(_, step2)) ==
+    Field.init(Rule.Water).dup(dropNuisance(counts, hard))
 
-  let field = TsuField.init.dup(apply(_, step2))
+  let field = Field.init(Spinner).dup(apply(_, step2))
   check field.dup(apply(_, step3)) == field.dup(crossRotate)
   check field.dup(apply(_, step4)) == field.dup(rotate)
 
@@ -1875,9 +1894,10 @@ block: # apply
 # ------------------------------------------------
 
 block: # settle, isSettled
-  block: # Tsu
+  block:
     var field =
       """
+[クロスかいてん]
 oo..o.
 oo....
 oo....
@@ -1890,7 +1910,7 @@ o.o...
 oooh..
 ooo...
 ooo...
-o.oo..""".toTsuField
+o.oo..""".toField
 
     check not field.isSettled
 
@@ -1898,6 +1918,7 @@ o.oo..""".toTsuField
 
     check field ==
       """
+[クロスかいてん]
 o.....
 o.....
 o.....
@@ -1910,13 +1931,14 @@ ooo...
 ooo...
 ooo...
 oooh..
-ooooo.""".toTsuField
+ooooo.""".toField
 
     check field.isSettled
 
-  block: # Water
+  block:
     var field =
       """
+[すいちゅう]
 ....o.
 ....o.
 ...oo.
@@ -1930,7 +1952,7 @@ oh.oo.
 ....o.
 .o..o.
 ......
-....o.""".toWaterField
+....o.""".toField
 
     check not field.isSettled
 
@@ -1938,6 +1960,7 @@ oh.oo.
 
     check field ==
       """
+[すいちゅう]
 ......
 ......
 ......
@@ -1951,7 +1974,7 @@ oo.oo.
 ....o.
 ....o.
 ....o.
-....o.""".toWaterField
+....o.""".toField
 
     check field.isSettled
 
@@ -1960,10 +1983,10 @@ oo.oo.
 # ------------------------------------------------
 
 block: # move
-  block: # Tsu
-    let
-      fieldBefore =
-        """
+  let
+    fieldBefore =
+      """
+[通]
 ....g.
 ....g.
 ....pg
@@ -1976,9 +1999,10 @@ block: # move
 ...bgp
 ...bgr
 ...orb
-...gbb""".toTsuField
-      fieldAfter =
-        """
+...gbb""".toField
+    fieldAfter =
+      """
+[通]
 ......
 ......
 ......
@@ -1991,52 +2015,53 @@ block: # move
 ......
 .....r
 .....b
-...gbb""".toTsuField
+...gbb""".toField
 
-      pair = RedBlue
-      plcmt = Down3
+    pair = RedBlue
+    placement = Down3
 
-      chainCount = 3
-      popCounts = [None: 0, 0, 2, 4, 10, 5, 0, 4]
-      hardToGarbageCount = 0
-      detailHardToGarbageCount = @[0, 0, 0]
+    chainCount = 3
+    popCounts = [Cell.None: 0, 0, 2, 4, 10, 5, 0, 4]
+    hardToGarbageCount = 0
+    detailHardToGarbageCount = @[0, 0, 0]
 
-      garbagesCount = [Col0: 0, 1, 2, 0, 2, 1]
+    nuisanceCounts = [Col0: 0, 1, 2, 0, 2, 1]
 
-      detailArr1: array[Cell, int] = [0, 0, 1, 0, 0, 5, 0, 0]
-      detailArr2: array[Cell, int] = [0, 0, 0, 0, 10, 0, 0, 0]
-      detailArr3: array[Cell, int] = [0, 0, 1, 4, 0, 0, 0, 4]
-      detailPopCounts = @[detailArr1, detailArr2, detailArr3]
+    detailArray1: array[Cell, int] = [0, 0, 1, 0, 0, 5, 0, 0]
+    detailArray2: array[Cell, int] = [0, 0, 0, 0, 10, 0, 0, 0]
+    detailArray3: array[Cell, int] = [0, 0, 1, 4, 0, 0, 0, 4]
+    detailPopCounts = @[detailArray1, detailArray2, detailArray3]
 
-      fullArr1: array[Cell, seq[int]] = [@[], @[], @[], @[], @[], @[5], @[], @[]]
-      fullArr2: array[Cell, seq[int]] = [@[], @[], @[], @[], @[4, 6], @[], @[], @[]]
-      fullArr3: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[], @[], @[], @[4]]
-      fullPopCounts = @[fullArr1, fullArr2, fullArr3]
+    fullArray1: array[Cell, seq[int]] = [@[], @[], @[], @[], @[], @[5], @[], @[]]
+    fullArray2: array[Cell, seq[int]] = [@[], @[], @[], @[], @[4, 6], @[], @[], @[]]
+    fullArray3: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[], @[], @[], @[4]]
+    fullPopCounts = @[fullArray1, fullArray2, fullArray3]
 
-    block: # calc connection
-      var field2 = fieldBefore
-      check field2.move(Step.init(pair, plcmt)) ==
-        MoveResult.init(
-          chainCount, popCounts, hardToGarbageCount, detailPopCounts,
-          detailHardToGarbageCount, fullPopCounts,
-        )
-      check field2 == fieldAfter
+  block: # pair, calc connection
+    var field2 = fieldBefore
+    check field2.move(Step.init(pair, placement)) ==
+      MoveResult.init(
+        chainCount, popCounts, hardToGarbageCount, detailPopCounts,
+        detailHardToGarbageCount, fullPopCounts,
+      )
+    check field2 == fieldAfter
 
-    block: # not calcConnection
-      var field2 = fieldBefore
-      check field2.move(pair, plcmt, false) ==
-        MoveResult.init(
-          chainCount, popCounts, hardToGarbageCount, detailPopCounts,
-          detailHardToGarbageCount,
-        )
-      check field2 == fieldAfter
+  block: # pair, not calcConnection
+    var field2 = fieldBefore
+    check field2.move(Step.init(pair, placement), calcConnection = false) ==
+      MoveResult.init(
+        chainCount, popCounts, hardToGarbageCount, detailPopCounts,
+        detailHardToGarbageCount,
+      )
+    check field2 == fieldAfter
 
-    block: # drop garbage
-      var field2 = fieldBefore
-      check field2.move(garbagesCount, false, false) ==
-        MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
-      check field2 ==
-        """
+  block: # drop nuisance (garbage)
+    var field2 = fieldBefore
+    check field2.move(Step.init nuisanceCounts, calcConnection = false) ==
+      MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
+    check field2 ==
+      """
+[通]
 ....g.
 ....go
 ....pg
@@ -2049,14 +2074,15 @@ block: # move
 ...bgp
 ...bgr
 ..oorb
-.oogbb""".toTsuField
+.oogbb""".toField
 
-    block: # drop hard
-      var field2 = fieldBefore
-      check field2.move(Step.init(garbagesCount, true), false) ==
-        MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
-      check field2 ==
-        """
+  block: # drop nuisance (hard)
+    var field2 = fieldBefore
+    check field2.move(Step.init(nuisanceCounts, hard = true), calcConnection = false) ==
+      MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
+    check field2 ==
+      """
+[通]
 ....g.
 ....gh
 ....pg
@@ -2069,12 +2095,13 @@ block: # move
 ...bgp
 ...bgr
 ..horb
-.hhgbb""".toTsuField
+.hhgbb""".toField
 
-    block: # rotate
-      let
-        fieldBefore2 =
-          """
+  block: # rotate
+    let
+      fieldBefore2 =
+        """
+[通]
 ......
 ......
 ......
@@ -2087,9 +2114,10 @@ block: # move
 ..r...
 .ro...
 .ro...
-.roo..""".toTsuField
-        fieldAfter2 =
-          """
+.roo..""".toField
+      fieldAfter2 =
+        """
+[通]
 ......
 ......
 ......
@@ -2102,21 +2130,22 @@ block: # move
 ......
 ......
 ......
-...o..""".toTsuField
-      var field2 = fieldBefore2
-      let popCounts: array[Cell, int] = [0, 0, 3, 4, 0, 0, 0, 0]
-      check field2.move(Step.init(cross = false), false) ==
-        MoveResult.init(1, popCounts, 0, @[popCounts], @[0])
-      check field2 == fieldAfter2
+...o..""".toField
+    var field2 = fieldBefore2
+    let popCounts: array[Cell, int] = [0, 0, 3, 4, 0, 0, 0, 0]
+    check field2.move(Step.init(cross = false), calcConnection = false) ==
+      MoveResult.init(1, popCounts, 0, @[popCounts], @[0])
+    check field2 == fieldAfter2
 
 # ------------------------------------------------
 # Field <-> array
 # ------------------------------------------------
 
-block: # toArray, toTsuField, toWaterField
+block: # toArray, toField
   let
-    fieldT =
+    fieldS =
       """
+[だいかいてん]
 r.....
 .g....
 ..b...
@@ -2129,9 +2158,10 @@ r.....
 ......
 ......
 ......
-......""".toTsuField
+......""".toField
     fieldW =
       """
+[すいちゅう]
 r.....
 .g....
 ..b...
@@ -2145,12 +2175,12 @@ r.....
 ......
 ......
 ......
-......""".toWaterField
+......""".toField
 
-    arrT = fieldT.toArray
-    arrW = fieldW.toArray
+    arrayS = fieldS.toArray
+    arrayW = fieldW.toArray
 
-    arrAns = [
+    arrayAnswer = [
       [Red, None, None, None, None, None],
       [None, Green, None, None, None, None],
       [None, None, Blue, None, None, None],
@@ -2166,11 +2196,11 @@ r.....
       [None, None, None, None, None, None],
     ]
 
-  check arrT == arrAns
-  check arrW == arrAns
+  check arrayS == arrayAnswer
+  check arrayW == arrayAnswer
 
-  check arrT.toTsuField == fieldT
-  check arrW.toWaterField == fieldW
+  check arrayS.toField(Spinner) == fieldS
+  check arrayW.toField(Rule.Water) == fieldW
 
 # ------------------------------------------------
 # Field <-> string
@@ -2178,8 +2208,9 @@ r.....
 
 block: # `$`, parseTsuField, parseWaterField
   let
-    strT =
+    strC =
       """
+[クロスかいてん]
 r.....
 .g....
 ..b...
@@ -2195,6 +2226,7 @@ r.....
 ......"""
     strW =
       """
+[すいちゅう]
 r.....
 .g....
 ..b...
@@ -2210,26 +2242,24 @@ r.....
 ......
 ......"""
 
-    fieldT = strT.toTsuField
-    fieldW = strW.toWaterField
+    fieldC = strC.toField
+    fieldW = strW.toField
 
-  check $fieldT == strT
+  check $fieldC == strC
   check $fieldW == strW
 
-  check strT.parseTsuField == StrErrorResult[TsuField].ok fieldT
-  check strW.parseWaterField == StrErrorResult[WaterField].ok fieldW
-
-  check strT.parseWaterField.isErr
-  check strW.parseTsuField.isErr
+  check strC.parseField == Pon2Result[Field].ok fieldC
+  check strW.parseField == Pon2Result[Field].ok fieldW
 
 # ------------------------------------------------
 # Field <-> URI
 # ------------------------------------------------
 
-block: # toUruQuery, parseTsuField, parseWaterField
+block: # toUriQuery, parseTsuField, parseWaterField
   let
     fieldT =
       """
+[通]
 ......
 ......
 ......
@@ -2242,9 +2272,10 @@ r.....
 ....p.
 .....o
 ....h.
-......""".toTsuField
+......""".toField
     fieldW =
       """
+[すいちゅう]
 ......
 ......
 ......
@@ -2258,46 +2289,42 @@ r.....
 .....o
 ....h.
 ......
-......""".toWaterField
+......""".toField
 
   block: # Pon2
     let
-      queryTRes = fieldT.toUriQuery Pon2
-      queryWRes = fieldW.toUriQuery Pon2
+      queryTResult = fieldT.toUriQuery Pon2
+      queryWResult = fieldW.toUriQuery Pon2
 
-    check queryTRes ==
-      StrErrorResult[string].ok "t_r......g......b......y......p......o....h......."
-    check queryWRes ==
-      StrErrorResult[string].ok "w_r.....~.g......b......y......p......o....h"
+    check queryTResult ==
+      Pon2Result[string].ok "0_r......g......b......y......p......o....h......."
+    check queryWResult ==
+      Pon2Result[string].ok "3_r.....~.g......b......y......p......o....h"
 
     let
-      queryT = queryTRes.unsafeValue
-      queryW = queryWRes.unsafeValue
+      queryT = queryTResult.unsafeValue
+      queryW = queryWResult.unsafeValue
 
-    check queryT.parseTsuField(Pon2) == StrErrorResult[TsuField].ok fieldT
-    check queryW.parseWaterField(Pon2) == StrErrorResult[WaterField].ok fieldW
+    check queryT.parseField(Pon2) == Pon2Result[Field].ok fieldT
+    check queryW.parseField(Pon2) == Pon2Result[Field].ok fieldW
 
-    check queryW.parseTsuField(Pon2).isErr
-    check queryT.parseWaterField(Pon2).isErr
-
-  block: # Ishikawa, Ips
-    for fqdn in [Ishikawa, Ips]:
+  block: # IshikawaPuyo, Ips
+    for fqdn in [IshikawaPuyo, Ips]:
       let
-        queryTRes = fieldT.toUriQuery fqdn
-        queryWRes = fieldW.toUriQuery fqdn
+        queryTResult = fieldT.toUriQuery fqdn
+        queryWResult = fieldW.toUriQuery fqdn
 
-      check queryTRes == StrErrorResult[string].ok "~1.02.003.0004.00005.00000600009."
-      check queryWRes.isErr
+      check queryTResult == Pon2Result[string].ok "~1.02.003.0004.00005.00000600009."
+      check queryWResult.isErr
 
-      let queryT = queryTRes.unsafeValue
+      let queryT = queryTResult.unsafeValue
 
-      check queryT.parseTsuField(fqdn) == StrErrorResult[TsuField].ok fieldT
+      check queryT.parseField(fqdn) == Pon2Result[Field].ok fieldT
 
-      check "t-r".parseTsuField(fqdn).isErr
-
-  block: # Ishikawa, Ips (not tilde)
+  block: # IshikawaPuyo, Ips (not tilde)
     let field =
       """
+[通]
 ......
 ......
 ......
@@ -2310,19 +2337,25 @@ r.....
 ......
 ......
 ......
-.r..g.""".toTsuField
+.r..g.""".toField
 
-    for fqdn in [Ishikawa, Ips]:
-      let queryRes = field.toUriQuery(fqdn)
-      check queryRes == StrErrorResult[string].ok "10g"
-      check queryRes.unsafeValue.parseTsuField(fqdn) == StrErrorResult[TsuField].ok field
+    for fqdn in [IshikawaPuyo, Ips]:
+      let queryResult = field.toUriQuery(fqdn)
+      check queryResult == Pon2Result[string].ok "10g"
+      check queryResult.unsafeValue.parseField(fqdn) == Pon2Result[Field].ok field
 
   block: # empty field
-    check TsuField.init.toUriQuery(Pon2) == StrErrorResult[string].ok "t_"
-    check TsuField.init.toUriQuery(Ishikawa) == StrErrorResult[string].ok ""
-    check TsuField.init.toUriQuery(Ips) == StrErrorResult[string].ok ""
-    check WaterField.init.toUriQuery(Pon2) == StrErrorResult[string].ok "w_~"
+    check Field.init.toUriQuery(Pon2) == Pon2Result[string].ok "0_"
+    check Field.init.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok ""
+    check Field.init.toUriQuery(Ips) == Pon2Result[string].ok ""
+
+    check Field.init(Spinner).toUriQuery(Pon2) == Pon2Result[string].ok "1_"
+    check Field.init(CrossSpinner).toUriQuery(Pon2) == Pon2Result[string].ok "2_"
+    check Field.init(Rule.Water).toUriQuery(Pon2) == Pon2Result[string].ok "3_~"
+
+    check Field.init(Spinner).toUriQuery(IshikawaPuyo).isErr
+    check Field.init(CrossSpinner).toUriQuery(IshikawaPuyo).isErr
+    check Field.init(Rule.Water).toUriQuery(IshikawaPuyo).isErr
 
   block: # empty query
-    check "".parseTsuField(Pon2) == StrErrorResult[TsuField].ok TsuField.init
-    check "".parseWaterField(Pon2).isErr
+    check "".parseField(Pon2) == Pon2Result[Field].ok Field.init

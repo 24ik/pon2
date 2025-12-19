@@ -18,34 +18,35 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[dom, gui, utils]
 
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
+
   export vdom
 
   const
-    CellClass = "button p-0".cstring
-    SelectCellClass = "button p-0 is-primary".cstring
+    CellClass = "button p-0".kstring
+    SelectCellClass = "button p-0 is-primary".kstring
 
   func initDelBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, stepIndex: int
   ): () -> void =
     ## Returns the handler for clicking del buttons.
-    # NOTE: cannot inline due to karax's limitation
     () => self.derefSimulator(helper).delStep stepIndex
 
   func initWriteBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, index: int, pivot: bool
   ): () -> void =
     ## Returns the handler for clicking write buttons.
-    # NOTE: cannot inline due to karax's limitation
     () => self.derefSimulator(helper).writeCell(index, pivot)
 
   func initCountSelectHandler[S: Simulator or Studio or Marathon](
-      self: ref S, helper: VNodeHelper, index: int, col: Col, selectId: cstring
+      self: ref S, helper: VNodeHelper, index: int, col: Col, selectId: kstring
   ): () -> void =
     ## Returns the handler for selecting garbage counts.
-    # NOTE: cannot inline due to karax's limitation
     () => self.derefSimulator(helper).writeCount(index, col, selectId.getSelectedIndex)
 
-  proc pairPlcmtCellNode[S: Simulator or Studio or Marathon](
+  proc pairPlacementCellNode[S: Simulator or Studio or Marathon](
       self: ref S,
       helper: VNodeHelper,
       step: Step,
@@ -64,9 +65,11 @@ when defined(js) or defined(nimsuggest):
     if editable:
       buildHtml button(
         class =
-          if stepHasCursor and (
-            self.derefSimulator(helper).editData.step.pivot == pivot
-          ): SelectCellClass else: CellClass,
+          if stepHasCursor and
+              (self.derefSimulator(helper).editData.steps.pivot == pivot):
+            SelectCellClass
+          else:
+            CellClass,
         style = style(StyleAttr.maxHeight, "24px"),
         onclick = self.initWriteBtnHandler(helper, stepIndex, pivot),
       ):
@@ -76,7 +79,7 @@ when defined(js) or defined(nimsuggest):
       buildHtml figure(class = "image is-24x24"):
         img(src = imgSrc)
 
-  proc pairPlcmtNode[S: Simulator or Studio or Marathon](
+  proc pairPlacementNode[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, step: Step, stepIndex: int, editable: bool
   ): VNode =
     ## Returns the pair-placement node.
@@ -84,20 +87,18 @@ when defined(js) or defined(nimsuggest):
       stepHasCursor =
         editable and not helper.mobile and
         not self.derefSimulator(helper).editData.focusField and
-        self.derefSimulator(helper).editData.step.index == stepIndex
-      nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      steps = nazoWrap.unwrapNazoPuyo:
-        it.steps
+        self.derefSimulator(helper).editData.steps.index == stepIndex
+      steps = self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps
       isPlaceholder = stepIndex >= steps.len
-      optPlcmtDesc = (if isPlaceholder: ""
-      else: $steps[stepIndex].optPlacement).cstring
+      optPlacementDesc =
+        (if isPlaceholder: "" else: $steps[stepIndex].placement).kstring
 
     buildHtml tdiv(class = "columns is-mobile is-1"):
       # pair
       tdiv(class = "column is-narrow"):
         tdiv(class = "columns is-mobile is-gapless"):
           tdiv(class = "column is-narrow"):
-            self.pairPlcmtCellNode(
+            self.pairPlacementCellNode(
               helper,
               step,
               stepIndex,
@@ -107,7 +108,7 @@ when defined(js) or defined(nimsuggest):
               pivot = true,
             )
           tdiv(class = "column is-narrow"):
-            self.pairPlcmtCellNode(
+            self.pairPlacementCellNode(
               helper,
               step,
               stepIndex,
@@ -120,13 +121,13 @@ when defined(js) or defined(nimsuggest):
       # placement
       if not isPlaceholder:
         tdiv(class = "column is-narrow"):
-          text optPlcmtDesc
+          text optPlacementDesc
 
-  proc garbagesNode[S: Simulator or Studio or Marathon](
+  proc nuisanceNode[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, step: Step, stepIndex: int, editable: bool
   ): VNode =
-    ## Returns the garbages node.
-    let imgSrc = if step.dropHard: Hard.cellImgSrc else: Garbage.cellImgSrc
+    ## Returns the nuisance node.
+    let imgSrc = if step.hard: Hard.cellImgSrc else: Garbage.cellImgSrc
 
     buildHtml tdiv(class = "columns is-mobile is-1 is-vcentered"):
       # garbage/hard
@@ -135,7 +136,8 @@ when defined(js) or defined(nimsuggest):
           button(
             class = CellClass,
             style = style(StyleAttr.maxHeight, "24px"),
-            onclick = () => (self.derefSimulator(helper).writeCell(stepIndex, true)),
+            onclick =
+              () => (self.derefSimulator(helper).writeCell(stepIndex, pivot = true)),
           ):
             figure(class = "image is-24x24"):
               img(src = imgSrc)
@@ -148,17 +150,17 @@ when defined(js) or defined(nimsuggest):
           class = (
             if helper.mobile: "columns is-mobile is-gapless"
             else: "columns is-mobile is-1"
-          ).cstring
+          ).kstring
         ):
           for col in Col:
             let
               selectId =
-                "pon2-simulator-step-garbagecount-{stepIndex}-{col.ord}".fmt.cstring
+                "pon2-simulator-step-garbagecount-{stepIndex}-{col.ord}".fmt.kstring
               selectStyle =
                 if not self.derefSimulator(helper).editData.focusField and
-                    self.derefSimulator(helper).editData.step.index == stepIndex and
-                    self.derefSimulator(helper).editData.step.col == col:
-                  style(StyleAttr.backgroundColor, SelectColor.toHtmlRgba.cstring)
+                    self.derefSimulator(helper).editData.steps.index == stepIndex and
+                    self.derefSimulator(helper).editData.steps.col == col:
+                  style(StyleAttr.backgroundColor, SelectColor.toHtmlRgba.kstring)
                 else:
                   style()
 
@@ -173,9 +175,9 @@ when defined(js) or defined(nimsuggest):
                   ):
                     for count in 0 .. 9:
                       option(selected = count == step.counts[col]):
-                        text $count
+                        text ($count).kstring
               else:
-                text $step.counts[col]
+                text ($step.counts[col]).kstring
 
   proc rotateNode[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, step: Step, stepIndex: int, editable: bool
@@ -185,7 +187,7 @@ when defined(js) or defined(nimsuggest):
       if step.cross:
         span(class = "fa-stack", style = style(StyleAttr.fontSize, "0.5em")):
           italic(class = "fa-solid fa-arrows-rotate fa-stack-2x")
-          italic(class = "fa-solid fa-xmark fa-stack-1x")
+          italic(class = "fa-solid fa-c fa-stack-1x")
       else:
         italic(class = "fa-solid fa-arrows-rotate")
 
@@ -193,10 +195,10 @@ when defined(js) or defined(nimsuggest):
       buildHtml button(
         class = (
           if not helper.mobile and not self.derefSimulator(helper).editData.focusField and
-              self.derefSimulator(helper).editData.step.index == stepIndex:
+              self.derefSimulator(helper).editData.steps.index == stepIndex:
           "button is-size-7 is-primary"
           else: "button is-size-7"
-        ).cstring,
+        ).kstring,
         onclick = () => (self.derefSimulator(helper).writeCell(stepIndex, true)),
       ):
         icon
@@ -210,20 +212,19 @@ when defined(js) or defined(nimsuggest):
     const PlaceholderStep = Step.init
 
     let
-      editable = self.derefSimulator(helper).mode == EditorEdit and not cameraReady
-      nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      steps = nazoWrap.unwrapNazoPuyo:
-        it.steps
+      editable = self.derefSimulator(helper).mode == EditEditor and not cameraReady
+      steps = self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps
 
     buildHtml table(class = "table is-narrow"):
       tbody:
         for stepIndex, step in steps:
-          let rowClass =
+          let rowClass = (
             if not editable and self.derefSimulator(helper).state == Stable and
-                self.derefSimulator(helper).operatingIndex == stepIndex:
-              "is-selected".cstring
+                self.derefSimulator(helper).operating.index == stepIndex:
+              "is-selected"
             else:
-              "".cstring
+              ""
+          ).kstring
 
           tr(class = rowClass):
             td:
@@ -240,16 +241,16 @@ when defined(js) or defined(nimsuggest):
 
                 tdiv(class = "column is-narrow"):
                   bold:
-                    text $stepIndex.succ
+                    text ($stepIndex.succ).kstring
 
                 # step
                 tdiv(class = "column is-narrow"):
                   case step.kind
-                  of PairPlacement:
-                    self.pairPlcmtNode(helper, step, stepIndex, editable)
-                  of StepKind.Garbages:
-                    self.garbagesNode(helper, step, stepIndex, editable)
-                  of Rotate:
+                  of PairPlace:
+                    self.pairPlacementNode(helper, step, stepIndex, editable)
+                  of NuisanceDrop:
+                    self.nuisanceNode(helper, step, stepIndex, editable)
+                  of FieldRotate:
                     self.rotateNode(helper, step, stepIndex, editable)
 
         # placeholder after the last step
@@ -270,9 +271,9 @@ when defined(js) or defined(nimsuggest):
 
                 tdiv(class = "column is-narrow"):
                   bold:
-                    text $placeholderIndex.succ
+                    text ($placeholderIndex.succ).kstring
 
                 tdiv(class = "column is-narrow"):
-                  self.pairPlcmtNode(
+                  self.pairPlacementNode(
                     helper, PlaceholderStep, placeholderIndex, editable
                   )

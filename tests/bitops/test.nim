@@ -4,7 +4,7 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2/private/[bitutils]
+import ../../src/pon2/private/[bitops]
 
 # ------------------------------------------------
 # Bitwise-and
@@ -60,11 +60,11 @@ block: # `*~`
   const
     a = 987654321
     b = 12345678
-    res = a and not b
+    answer = a and not b
 
-  check a.int *~ b.int == res
-  check a.uint *~ b.uint == res.uint
-  check static(a.int *~ b.int) == res
+  check a.int *~ b.int == answer
+  check a.uint *~ b.uint == answer.uint
+  check static(a.int *~ b.int) == answer
 
 # ------------------------------------------------
 # Mask
@@ -95,19 +95,19 @@ block: # bextr
     val = 0b0101_1001
     start = 2'u32
     length = 5'u32
-    res = 0b10110
+    answer = 0b10110
 
-  check val.uint.bextr(start, length) == res.uint
-  check val.uint8.bextr(start, length) == res.uint8
-  check val.uint16.bextr(start, length) == res.uint16
-  check val.uint32.bextr(start, length) == res.uint32
-  check val.uint64.bextr(start, length) == res.uint64
+  check val.uint.bextr(start, length) == answer.uint
+  check val.uint8.bextr(start, length) == answer.uint8
+  check val.uint16.bextr(start, length) == answer.uint16
+  check val.uint32.bextr(start, length) == answer.uint32
+  check val.uint64.bextr(start, length) == answer.uint64
 
-  check val.int.bextr(start, length) == res.int
-  check val.int8.bextr(start, length) == res.int8
-  check val.int16.bextr(start, length) == res.int16
-  check val.int32.bextr(start, length) == res.int32
-  check val.int64.bextr(start, length) == res.int64
+  check val.int.bextr(start, length) == answer.int
+  check val.int8.bextr(start, length) == answer.int8
+  check val.int16.bextr(start, length) == answer.int16
+  check val.int32.bextr(start, length) == answer.int32
+  check val.int64.bextr(start, length) == answer.int64
 
   check val.uint.bextr(start, 0) == 0.uint
   check val.uint8.bextr(start, 0) == 0.uint8
@@ -121,7 +121,7 @@ block: # bextr
   check val.int32.bextr(start, 0) == 0.int32
   check val.int64.bextr(start, 0) == 0.int64
 
-  check static(val.uint.bextr(start, length)) == res.uint
+  check static(val.uint.bextr(start, length)) == answer.uint
 
 # ------------------------------------------------
 # BLSMSK
@@ -130,19 +130,19 @@ block: # bextr
 block: # blsmsk
   const
     val = 0b0010_1000
-    res = 0b0000_1111
+    answer = 0b0000_1111
 
-  check val.uint.blsmsk == res.uint
-  check val.uint8.blsmsk == res.uint8
-  check val.uint16.blsmsk == res.uint16
-  check val.uint32.blsmsk == res.uint32
-  check val.uint64.blsmsk == res.uint64
+  check val.uint.blsmsk == answer.uint
+  check val.uint8.blsmsk == answer.uint8
+  check val.uint16.blsmsk == answer.uint16
+  check val.uint32.blsmsk == answer.uint32
+  check val.uint64.blsmsk == answer.uint64
 
-  check val.int.blsmsk == res.int
-  check val.int8.blsmsk == res.int8
-  check val.int16.blsmsk == res.int16
-  check val.int32.blsmsk == res.int32
-  check val.int64.blsmsk == res.int64
+  check val.int.blsmsk == answer.int
+  check val.int8.blsmsk == answer.int8
+  check val.int16.blsmsk == answer.int16
+  check val.int32.blsmsk == answer.int32
+  check val.int64.blsmsk == answer.int64
 
   check 0.uint.blsmsk == uint.high
   check 0.uint8.blsmsk == uint8.high
@@ -156,7 +156,7 @@ block: # blsmsk
   check 0.int32.blsmsk == -1'i32
   check 0.int64.blsmsk == -1'i64
 
-  check static(val.uint.blsmsk) == res.uint
+  check static(val.uint.blsmsk) == answer.uint
 
 # ------------------------------------------------
 # TZCNT
@@ -165,19 +165,19 @@ block: # blsmsk
 block: # tzcnt
   const
     val = 0b0100_1000
-    res = 3
+    answer = 3
 
-  check val.uint.tzcnt == res
-  check val.uint8.tzcnt == res
-  check val.uint16.tzcnt == res
-  check val.uint32.tzcnt == res
-  check val.uint64.tzcnt == res
+  check val.uint.tzcnt == answer
+  check val.uint8.tzcnt == answer
+  check val.uint16.tzcnt == answer
+  check val.uint32.tzcnt == answer
+  check val.uint64.tzcnt == answer
 
-  check val.int.tzcnt == res
-  check val.int8.tzcnt == res
-  check val.int16.tzcnt == res
-  check val.int32.tzcnt == res
-  check val.int64.tzcnt == res
+  check val.int.tzcnt == answer
+  check val.int8.tzcnt == answer
+  check val.int16.tzcnt == answer
+  check val.int32.tzcnt == answer
+  check val.int64.tzcnt == answer
 
   check 0.uint.tzcnt == bitsof uint
   check 0.uint8.tzcnt == bitsof uint8
@@ -191,7 +191,7 @@ block: # tzcnt
   check 0.int32.tzcnt == bitsof int32
   check 0.int64.tzcnt == bitsof int64
 
-  check static(val.uint.tzcnt) == res
+  check static(val.uint.tzcnt) == answer
 
 # ------------------------------------------------
 # PEXT
@@ -201,24 +201,24 @@ block: # pext
   const
     val = 0b0100_1011
     mask = 0b1101_0010
-    res = 0b0000_0101
+    answer = 0b0000_0101
 
-  check val.uint16.pext(mask.uint16) == res.uint16
-  check val.uint32.pext(mask.uint32) == res.uint32
-  check val.uint64.pext(mask.uint64) == res.uint64
+  check val.uint16.pext(mask.uint16) == answer.uint16
+  check val.uint32.pext(mask.uint32) == answer.uint32
+  check val.uint64.pext(mask.uint64) == answer.uint64
 
-  check static(val.uint64.pext(mask.uint64)) == res.uint64
+  check static(val.uint64.pext(mask.uint64)) == answer.uint64
 
   let
     pextMask16 = PextMask[uint16].init mask.uint16
     pextMask32 = PextMask[uint32].init mask.uint32
     pextMask64 = PextMask[uint64].init mask.uint64
 
-  check val.uint16.pext(pextMask16) == res.uint16
-  check val.uint32.pext(pextMask32) == res.uint32
-  check val.uint64.pext(pextMask64) == res.uint64
+  check val.uint16.pext(pextMask16) == answer.uint16
+  check val.uint32.pext(pextMask32) == answer.uint32
+  check val.uint64.pext(pextMask64) == answer.uint64
 
-  check static(val.uint64.pext(PextMask[uint64].init mask.uint64)) == res.uint64
+  check static(val.uint64.pext(PextMask[uint64].init mask.uint64)) == answer.uint64
 
 block: # popcnt
   const val = 0b1100_0110_0100_1101'u16

@@ -11,8 +11,9 @@ import ../../src/pon2/core/[fqdn]
 # ------------------------------------------------
 
 block: # parseSimulatorFqdn
-  for fqdn in SimulatorFqdn:
-    let fqdnRes = parseSimulatorFqdn $fqdn
-    check fqdnRes == StrErrorResult[SimulatorFqdn].ok fqdn
+  check "24ik.github.io".parseSimulatorFqdn == Pon2Result[SimulatorFqdn].ok Pon2
+  check "ishikawapuyo.net".parseSimulatorFqdn ==
+    Pon2Result[SimulatorFqdn].ok IshikawaPuyo
+  check "ips.karou.jp".parseSimulatorFqdn == Pon2Result[SimulatorFqdn].ok Ips
 
   check "".parseSimulatorFqdn.isErr

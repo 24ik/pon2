@@ -14,7 +14,7 @@ when defined(js) or defined(nimsuggest):
   import karax/[karaxdsl, vdom, vstyles]
   import ../[helper]
   import ../../[app]
-  import ../../private/[gui, results2]
+  import ../../private/[gui]
 
   export vdom
 
@@ -22,20 +22,18 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper, doubleNext: bool, pivot: bool
   ): VNode =
     ## Returns the node of the cell in the next or double-next step.
-    let
-      stepIndex = self.derefSimulator(helper).operatingIndex.succ 1 + doubleNext.int
-      nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
+    let stepIndex = self.derefSimulator(helper).operating.index + 1 + doubleNext.int
 
     var cross = false
-    let cellOpt = nazoWrap.unwrapNazoPuyo:
-      if stepIndex < it.steps.len:
-        let step = it.steps[stepIndex]
+    let cellOpt =
+      if stepIndex < self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps.len:
+        let step = self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps[stepIndex]
         case step.kind
-        of PairPlacement:
+        of PairPlace:
           Opt[Cell].ok if pivot: step.pair.pivot else: step.pair.rotor
-        of StepKind.Garbages:
-          Opt[Cell].ok if step.dropHard: Hard else: Garbage
-        of Rotate:
+        of NuisanceDrop:
+          Opt[Cell].ok if step.hard: Hard else: Garbage
+        of FieldRotate:
           cross = step.cross
 
           if pivot:
@@ -53,7 +51,7 @@ when defined(js) or defined(nimsuggest):
           if cross:
             span(class = "fa-stack", style = style(StyleAttr.fontSize, "0.5em")):
               italic(class = "fa-solid fa-arrows-rotate fa-stack-2x")
-              italic(class = "fa-solid fa-xmark fa-stack-1x")
+              italic(class = "fa-solid fa-c fa-stack-1x")
           else:
             italic(class = "fa-solid fa-arrows-rotate")
 

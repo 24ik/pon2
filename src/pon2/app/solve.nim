@@ -7,14 +7,12 @@
 {.experimental: "views".}
 
 import ../[core]
-import ../private/[algorithm, core, macros]
+import ../private/[algorithm, core]
 import ../private/app/[solve]
 
 export core
 
 when defined(js) or defined(nimsuggest):
-  import ../private/[dom, strutils]
-
   when not defined(pon2.build.worker):
     import std/[asyncjs, jsconsole, sequtils, sugar]
     import ../private/[assign, webworkers]
@@ -23,166 +21,136 @@ when defined(js) or defined(nimsuggest):
 
 when not defined(js):
   import std/[os, sequtils, sugar]
+  import ../private/[assign, tables]
 
   {.push warning[Deprecated]: off.}
   import std/[threadpool]
   {.pop.}
 
-type SolveAnswer* = seq[OptPlacement]
-  ## Nazo Puyo answer.
-  ## Elements corresponding to non-`PairPlacement` steps are set to `NonePlacement`.
+type Solution* = seq[Placement]
+  ## Nazo Puyo solution.
+  ## Elements corresponding to non-`PairPlace` steps are set to `Placement.None`.
 
 when not defined(js):
-  proc solveSingleThread[F: TsuField or WaterField](
-      self: SolveNode[F],
-      answers: ptr seq[SolveAnswer],
+  # NOTE: `ChildTargetDepth == 4` is good; see https://github.com/24ik/pon2/issues/260
+  const
+    SolvePollingMs = 50
+    ChildTargetDepth = 4
+
+  proc solveSingleThread(
+      self: SolveNode,
+      solutions: ptr seq[Solution],
       moveCount: int,
+      calcAllSolutions: bool,
       goal: Goal,
       steps: Steps,
-      calcAllAnswers: static bool,
   ): bool =
     ## Solves the Nazo Puyo at the node with a single thread.
-    ## This function requires that the field is settled and `answers` is empty.
-    ## `answers` is set in reverse order.
-    ## `result` has no meanings; only used to get FlowVar.
-    # NOTE: non-static arguments should be placed before static ones due to `spawn` bug.
+    ## This function requires that the field is settled and `solutions` is empty.
+    ## `solutions` are set in reverse order.
+    ## The return value has no meanings; only used to get FlowVar.
     self.solveSingleThread(
-      answers[], moveCount, calcAllAnswers, goal, steps, checkPruneFirst = false
+      solutions[], moveCount, calcAllSolutions, goal, steps, checkPruneFirst = false
     )
-    true
-
-  func checkSpawnFinished(
-      futures: seq[FlowVar[bool]],
-      answers: var seq[SolveAnswer],
-      answersSeq: var seq[seq[SolveAnswer]],
-      runningNodeIndices: var set[int16],
-      optPlacementsSeq: seq[seq[OptPlacement]],
-      calcAllAnswers: static bool,
-  ): bool =
-    ## Checks all the spawned threads and reflects results if they have finished.
-    ## Returns `true` if early-returned.
-    var finishNodeIndices = set[int16]({})
-
-    for runningNodeIndex in runningNodeIndices:
-      if not futures[runningNodeIndex].isReady:
-        continue
-
-      finishNodeIndices.incl runningNodeIndex
-
-      let optPlacements = optPlacementsSeq[runningNodeIndex]
-      for answer in answersSeq[runningNodeIndex].mitems:
-        answer &= optPlacements
-        answer.reverse
-
-      when not calcAllAnswers:
-        if answers.len + answersSeq[runningNodeIndex].len > 1:
-          runningNodeIndices.excl finishNodeIndices
-          return true
-
-    runningNodeIndices.excl finishNodeIndices
     false
 
-  proc solveMultiThread[F: TsuField or WaterField](
-      self: SolveNode[F],
-      answers: var seq[SolveAnswer],
+  proc solveMultiThread(
+      self: SolveNode,
+      solutions: var seq[Solution],
       moveCount: int,
-      calcAllAnswers: static bool,
+      calcAllSolutions: bool,
       goal: Goal,
       steps: Steps,
   ) =
     ## Solves the Nazo Puyo at the node with multiple threads.
-    ## This function requires that the field is settled and `answers` is empty.
-    const
-      SpawnWaitMs = 25
-      SolveWaitMs = 50
-
-    # NOTE: `TargetDepth == 3` is good; see https://github.com/24ik/pon2/issues/198
-    # NOTE: `TargetDepth` should be less than 4 due to the limitations of Nim's built-in
-    # sets, that is used by node indices (22^3 < int16.high < 22^4)
-    const TargetDepth = 3
-
+    ## This function requires that the field is settled and `solutions` is empty.
     var
-      nodes = newSeq[SolveNode[F]]()
-      optPlacementsSeq = newSeq[seq[OptPlacement]]()
-    self.childrenAtDepth TargetDepth,
-      nodes, optPlacementsSeq, answers, moveCount, calcAllAnswers, goal, steps
+      nodes = newSeq[SolveNode]()
+      placementsSeq = newSeq[seq[Placement]]()
+    self.childrenAtDepth ChildTargetDepth,
+      nodes, placementsSeq, solutions, moveCount, calcAllSolutions, goal, steps
 
-    for answer in answers.mitems:
-      answer.reverse
+    for solution in solutions.mitems:
+      solution.reverse
 
-    when not calcAllAnswers:
-      if answers.len > 1:
-        return
+    if not calcAllSolutions and solutions.len > 1:
+      return
 
-    let nodeCount = nodes.len
+    var nodeToIndices = initTable[SolveNode, seq[int]](nodes.len)
+    for nodeIndex, node in nodes:
+      nodeToIndices.mgetOrPut(node, @[]).add nodeIndex
+
+    let futureCount = nodeToIndices.len
     var
-      answersSeq = collect:
-        for _ in 1 .. nodeCount:
-          newSeq[SolveAnswer]()
-      futures = newSeqOfCap[FlowVar[bool]](nodeCount)
-      runningNodeIndices = set[int16]({})
+      solutionsSeq = collect:
+        for _ in 1 .. futureCount:
+          newSeq[Solution]()
+      futures = newSeqOfCap[FlowVar[bool]](futureCount)
 
-    var nodeIndex = 0'i16
-    while nodeIndex < nodeCount:
-      if preferSpawn():
-        futures.add spawn nodes[nodeIndex].solveSingleThread(
-          answersSeq[nodeIndex].addr, moveCount, goal, steps, calcAllAnswers
+    block:
+      var futureIndex = 0
+      for node in nodeToIndices.keys:
+        futures.add spawn node.solveSingleThread(
+          solutionsSeq[futureIndex].addr, moveCount, calcAllSolutions, goal, steps
         )
+        futureIndex += 1
 
-        runningNodeIndices.incl nodeIndex
-        nodeIndex.inc
+    var
+      completedCount = 0
+      completedSeq = false.repeat futureCount
+    while completedCount < futureCount:
+      var futureIndex = 0
+      for node in nodeToIndices.keys:
+        if completedSeq[futureIndex] or not futures[futureIndex].isReady:
+          futureIndex += 1
+          continue
 
-        continue
+        let nodeIndices = nodeToIndices[node].unsafeValue
+        for nodeIndex in nodeIndices:
+          {.push warning[Uninit]: off.}
+          solutions &=
+            solutionsSeq[futureIndex].mapIt (it & placementsSeq[nodeIndex]).reversed
+          {.pop.}
 
-      let earlyReturned {.used.} = futures.checkSpawnFinished(
-        answers, answersSeq, runningNodeIndices, optPlacementsSeq, calcAllAnswers
-      )
-      when not calcAllAnswers:
-        if earlyReturned:
-          break
+        if not calcAllSolutions and solutions.len > 1:
+          return
 
-      sleep SpawnWaitMs
+        completedCount += 1
+        completedSeq[futureIndex].assign true
+        futureIndex += 1
 
-    while runningNodeIndices.card > 0:
-      discard futures.checkSpawnFinished(
-        answers, answersSeq, runningNodeIndices, optPlacementsSeq, calcAllAnswers
-      )
-      sleep SolveWaitMs
+      sleep SolvePollingMs
 
-    answers &= answersSeq.concat
-
-proc solve*[F: TsuField or WaterField](
-    nazo: NazoPuyo[F], calcAllAnswers: static bool = true
-): seq[SolveAnswer] =
+proc solve*(self: NazoPuyo, calcAllSolutions = true): seq[Solution] =
   ## Solves the Nazo Puyo.
   ## A single thread is used on JS backend; otherwise multiple threads are used.
   ## This function requires that the field is settled.
-  if not nazo.goal.isSupported or nazo.puyoPuyo.steps.len == 0:
+  if not self.goal.isSupported or self.puyoPuyo.steps.len == 0:
     return @[]
 
   let
-    root = SolveNode[F].init nazo.puyoPuyo
-    moveCount = nazo.puyoPuyo.steps.len
-  var answers = newSeq[SolveAnswer]()
+    root = SolveNode.init self
+    moveCount = self.puyoPuyo.steps.len
+  var solutions = newSeq[Solution]()
 
   when defined(js):
     root.solveSingleThread(
-      answers,
+      solutions,
       moveCount,
-      calcAllAnswers,
-      nazo.goal,
-      nazo.puyoPuyo.steps,
+      calcAllSolutions,
+      self.goal,
+      self.puyoPuyo.steps,
       checkPruneFirst = true,
     )
 
-    for answer in answers.mitems:
-      answer.reverse
+    for solution in solutions.mitems:
+      solution.reverse
   else:
     root.solveMultiThread(
-      answers, moveCount, calcAllAnswers, nazo.goal, nazo.puyoPuyo.steps
+      solutions, moveCount, calcAllSolutions, self.goal, self.puyoPuyo.steps
     )
 
-  answers
+  solutions
 
 # ------------------------------------------------
 # Solve - Async
@@ -190,72 +158,71 @@ proc solve*[F: TsuField or WaterField](
 
 when defined(js) or defined(nimsuggest):
   when not defined(pon2.build.worker):
+    # NOTE: 2 and 3 show similar performance; 2 is chosen for faster `childrenAtDepth`
+    const ChildTargetDepthJs = 2
+
     func initCompleteHandler(
         nodeIndex: int,
-        optPlacementsSeq: seq[seq[OptPlacement]],
-        answersSeqRef: ref seq[seq[SolveAnswer]],
+        placementsSeq: seq[seq[Placement]],
+        solutionsSeqRef: ref seq[seq[Solution]],
         progressRef: ref tuple[now, total: int],
-    ): StrErrorResult[seq[string]] -> void =
+    ): Pon2Result[seq[string]] -> void =
       ## Returns a handler called after a web worker job completes.
-      (res: StrErrorResult[seq[string]]) => (
+      (msgsResult: Pon2Result[seq[string]]) => (
         block:
-          if res.isOk:
-            let answersRes = res.unsafeValue.parseSolveAnswers
-            if answersRes.isOk:
-              var answers = answersRes.unsafeValue
-              for answer in answers.mitems:
-                answer &= optPlacementsSeq[nodeIndex]
-                answer.reverse
+          if msgsResult.isOk:
+            let solutionsResult = msgsResult.unsafeValue.parseSolutions
+            if solutionsResult.isOk:
+              var solutions = solutionsResult.unsafeValue
+              for solution in solutions.mitems:
+                solution &= placementsSeq[nodeIndex]
+                solution.reverse
 
-              answersSeqRef[][nodeIndex].assign answers
+              solutionsSeqRef[][nodeIndex].assign solutions
             else:
-              console.error answersRes.error.cstring
+              console.error solutionsResult.error.cstring
           else:
-            console.error res.error.cstring
+            console.error msgsResult.error.cstring
 
           if not progressRef.isNil:
-            progressRef[].now.inc
+            progressRef[].now += 1
       )
 
-    proc asyncSolve*[F: TsuField or WaterField](
-        nazo: NazoPuyo[F],
+    proc asyncSolve*(
+        self: NazoPuyo,
         progressRef: ref tuple[now, total: int] = nil,
-        calcAllAnswers: static bool = true,
-    ): Future[seq[SolveAnswer]] {.async.} =
+        calcAllSolutions = true,
+    ): Future[seq[Solution]] {.async.} =
       ## Solves the Nazo Puyo asynchronously with web workers.
       ## This function requires that the field is settled.
-      # NOTE: 2 and 3 show similar performance; 2 is chosen for faster `childrenAtDepth`
-      const TargetDepth = 2
-
       if not progressRef.isNil:
         progressRef[] = (0, 0)
 
-      if not nazo.goal.isSupported or nazo.puyoPuyo.steps.len == 0:
+      if not self.goal.isSupported or self.puyoPuyo.steps.len == 0:
         if not progressRef.isNil:
           progressRef[] = (1, 1)
 
-        return newSeq[SolveAnswer]()
+        return newSeq[Solution]()
 
-      let rootNode = SolveNode[F].init nazo.puyoPuyo
+      let rootNode = SolveNode.init self
 
       var
-        nodes = newSeq[SolveNode[F]]()
-        optPlacementsSeq = newSeq[seq[OptPlacement]]()
-        answers = newSeq[SolveAnswer]()
+        nodes = newSeq[SolveNode]()
+        placementsSeq = newSeq[seq[Placement]]()
+        solutions = newSeq[Solution]()
 
-      rootNode.childrenAtDepth TargetDepth,
-        nodes, optPlacementsSeq, answers, nazo.puyoPuyo.steps.len, calcAllAnswers,
-        nazo.goal, nazo.puyoPuyo.steps
+      rootNode.childrenAtDepth ChildTargetDepthJs,
+        nodes, placementsSeq, solutions, self.puyoPuyo.steps.len, calcAllSolutions,
+        self.goal, self.puyoPuyo.steps
 
-      for answer in answers.mitems:
-        answer.reverse
+      for solution in solutions.mitems:
+        solution.reverse
 
-      when not calcAllAnswers:
-        if answers.len > 1:
-          if not progressRef.isNil:
-            progressRef[] = (1, 1)
+      if not calcAllSolutions and solutions.len > 1:
+        if not progressRef.isNil:
+          progressRef[] = (1, 1)
 
-          return answers
+        return solutions
 
       let nodeCount = nodes.len
       if not progressRef.isNil:
@@ -264,19 +231,19 @@ when defined(js) or defined(nimsuggest):
         else:
           progressRef[] = (0, nodeCount)
 
-      let answersSeqRef = new seq[seq[SolveAnswer]]
-      answersSeqRef[] = collect:
+      let solutionsSeqRef = new seq[seq[Solution]]
+      solutionsSeqRef[] = collect:
         for _ in 1 .. nodeCount:
-          newSeq[SolveAnswer]()
+          newSeq[Solution]()
 
       {.push warning[Uninit]: off.}
       {.push warning[ProveInit]: off.}
       let futures = collect:
         for nodeIndex, node in nodes:
           webWorkerPool
-          .run(node.toStrs(nazo.goal, nazo.puyoPuyo.steps))
+          .run(node.toStrs(self.goal, self.puyoPuyo.steps))
           .then(
-            initCompleteHandler(nodeIndex, optPlacementsSeq, answersSeqRef, progressRef)
+            initCompleteHandler(nodeIndex, placementsSeq, solutionsSeqRef, progressRef)
           )
           .catch((error: Error) => console.error error)
       {.pop.}
@@ -284,4 +251,4 @@ when defined(js) or defined(nimsuggest):
       for future in futures:
         await future
 
-      return answers & answersSeqRef[].concat
+      return solutions & solutionsSeqRef[].concat

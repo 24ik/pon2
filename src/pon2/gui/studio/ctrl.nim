@@ -18,6 +18,10 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[dom, gui]
 
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
+
   export vdom
 
   const CheckIntervalMs = 1000
@@ -26,8 +30,7 @@ when defined(js) or defined(nimsuggest):
     ## Returns a handler to check the progress and redraw.
     () => (
       block:
-        if self[].progressRef[].now > 0 and
-            self[].progressRef[].now == self[].progressRef[].total:
+        if self[].progress.now > 0 and self[].progress.now == self[].progress.total:
           interval.clearInterval
         safeRedraw()
     )
@@ -46,8 +49,7 @@ when defined(js) or defined(nimsuggest):
     ## Permutes the nazo puyo.
     ## This function requires that the field is settled.
     let settings = helper.getStudioSetting
-    self.asyncPermute settings.fixIndices,
-      settings.allowDoubleNotLast, settings.allowDoubleLast
+    self.asyncPermute settings.fixIndices, settings.allowDoubleIndices
 
     var interval: Interval
     {.push warning[Uninit]: off.}
@@ -56,7 +58,23 @@ when defined(js) or defined(nimsuggest):
 
   proc toStudioCtrlVNode*(self: ref Studio, helper: VNodeHelper): VNode =
     ## Returns the studio controller node.
+    let workDisabled =
+      self[].simulator.nazoPuyo.goal == NoneGoal or
+      self[].simulator.nazoPuyo.puyoPuyo.steps.len == 0
+
     buildHtml tdiv:
+      if not helper.mobile:
+        tdiv(class = "block"):
+          tdiv(class = "field is-grouped"):
+            tdiv(class = "control"):
+              button(
+                class =
+                  (if self[].focusReplay: "button is-primary" else: "button").kstring,
+                onclick = () => self[].toggleFocus,
+              ):
+                text "解答を操作"
+                span(style = counterStyle):
+                  text "Sft+Tab"
       tdiv(class = "block"):
         tdiv(class = "field is-grouped"):
           tdiv(class = "control"):
@@ -65,7 +83,8 @@ when defined(js) or defined(nimsuggest):
                 if self[].solving: "button is-loading"
                 elif self[].working: "button is-static"
                 else: "button"
-              ).cstring,
+              ).kstring,
+              disabled = workDisabled,
               onclick = () => self.runSolve,
             ):
               text "解探索"
@@ -75,24 +94,25 @@ when defined(js) or defined(nimsuggest):
                 if self[].permuting: "button is-loading"
                 elif self[].working: "button is-static"
                 else: "button"
-              ).cstring,
+              ).kstring,
+              disabled = workDisabled,
               onclick = () => self.runPermute helper,
             ):
               text "ツモ並べ替え"
-          if not helper.mobile:
-            tdiv(class = "control"):
-              button(
-                class =
-                  (if self[].focusReplay: "button is-primary" else: "button").cstring,
-                onclick = () => self[].toggleFocus,
-              ):
-                text "解答を操作"
-                span(style = counterStyle):
-                  text "Sft+Tab"
+          tdiv(class = "control"):
+            button(
+              class = "button",
+              disabled = not self[].working,
+              onclick = () => self.stopWork,
+            ):
+              span(class = "icon"):
+                italic(class = "fa-solid fa-power-off")
+              span:
+                text "停止"
       tdiv(class = "block"):
         progress(
           class = "progress is-primary",
-          value = ($self[].progressRef[].now).cstring,
-          max = ($self[].progressRef[].total).cstring,
+          value = ($self[].progress.now).kstring,
+          max = ($self[].progress.total).kstring,
         ):
           discard

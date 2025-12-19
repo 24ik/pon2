@@ -6,24 +6,25 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, sugar]
-import ../private/[results2, tables]
+import std/[strformat]
+import ../[utils]
 
-export results2
+export utils
 
-type Rule* {.pure.} = enum
-  ## Puyo Puyo rule.
-  Tsu = "t"
-  Water = "w"
+type Rule* {.pure.} = enum ## Puyo Puyo rule.
+  Tsu = "通"
+  Spinner = "だいかいてん"
+  CrossSpinner = "クロスかいてん"
+  Water = "すいちゅう"
 
 # ------------------------------------------------
 # Rule <-> string
 # ------------------------------------------------
 
-const StrToRule = collect:
-  for rule in Rule:
-    {$rule: rule}
-
-func parseRule*(str: string): StrErrorResult[Rule] {.inline, noinit.} =
+func parseRule*(str: string): Pon2Result[Rule] {.inline, noinit.} =
   ## Returns the rule converted from the string representation.
-  StrToRule[str].context "Invalid rule: {str}".fmt
+  for rule in Rule:
+    if str == $rule:
+      return ok rule
+
+  err "Invalid rule: {str}".fmt

@@ -17,6 +17,10 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
+
   export vdom
 
   proc toStudioPaginationVNode*(self: ref Studio, helper: VNodeHelper): VNode =
@@ -25,7 +29,7 @@ when defined(js) or defined(nimsuggest):
       if self[].replayStepsCount == 0:
         0
       else:
-        self[].replayStepsIndex.succ
+        self[].replayStepsIndex + 1
 
     buildHtml nav(class = "pagination"):
       button(class = "button pagination-link", onclick = () => self[].prevReplay):
@@ -35,7 +39,7 @@ when defined(js) or defined(nimsuggest):
             span(style = counterStyle):
               text "A"
       button(class = "button pagination-link is-static"):
-        text "{replayNum} / {self[].replayStepsCount}".fmt
+        text "{replayNum} / {self[].replayStepsCount}".fmt.kstring
       button(class = "button pagination-link", onclick = () => self[].nextReplay):
         span(class = "icon"):
           italic(class = "fa-solid fa-forward-step")

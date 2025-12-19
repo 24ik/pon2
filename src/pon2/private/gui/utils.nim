@@ -15,14 +15,14 @@ import chroma
 
 when defined(js) or defined(nimsuggest):
   import std/[jsffi, strformat, sugar]
-  import karax/[karax, vdom, vstyles]
+  import karax/[karax, kbase, vdom, vstyles]
   import ../[assign, dom, utils]
   import ../../[app]
 
 export chroma
 
 when defined(js) or defined(nimsuggest):
-  export vstyles
+  export kbase, vstyles
 
 const
   AssetsDir* {.define: "pon2.assets".} = "../assets"
@@ -31,6 +31,7 @@ const
   GhostColor* = rgb(200, 200, 200).color
   WaterColor* = rgb(135, 248, 255).color
   DefaultColor* = rgb(225, 225, 225).color
+  DeadColor* = hsl(348, 100, 85).color
 
   CounterStyleColor = rgb(255, 140, 0).color
   TranslucentStyleColor = rgba(0, 0, 0, 16).color
@@ -42,28 +43,28 @@ const
 when defined(js) or defined(nimsuggest):
   let
     counterStyle* = style(
-      (StyleAttr.color, CounterStyleColor.toHtmlRgba.cstring),
-      (StyleAttr.fontSize, "0.6rem".cstring),
-      (StyleAttr.position, "absolute".cstring),
-      (StyleAttr.top, "-0.2em".cstring),
-      (StyleAttr.right, "0.3em".cstring),
-      (StyleAttr.pointerEvents, "none".cstring),
+      (StyleAttr.color, CounterStyleColor.toHtmlRgba.kstring),
+      (StyleAttr.fontSize, "0.6rem".kstring),
+      (StyleAttr.position, "absolute".kstring),
+      (StyleAttr.top, "-0.2em".kstring),
+      (StyleAttr.right, "0.3em".kstring),
+      (StyleAttr.pointerEvents, "none".kstring),
     )
     bottomFixStyle* = style(
-      (StyleAttr.position, "fixed".cstring),
-      (StyleAttr.bottom, "calc(16px + env(safe-area-inset-bottom))".cstring),
-      (StyleAttr.left, "50%".cstring),
-      (StyleAttr.transform, "translateX(-50%)".cstring),
-      (StyleAttr.zIndex, "100".cstring),
+      (StyleAttr.position, "fixed".kstring),
+      (StyleAttr.bottom, "calc(16px + env(safe-area-inset-bottom))".kstring),
+      (StyleAttr.left, "50%".kstring),
+      (StyleAttr.transform, "translateX(-50%)".kstring),
+      (StyleAttr.zIndex, "100".kstring),
     )
     translucentStyle* =
-      style(StyleAttr.backgroundColor, TranslucentStyleColor.toHtmlRgba.cstring)
+      style(StyleAttr.backgroundColor, TranslucentStyleColor.toHtmlRgba.kstring)
 
   # ------------------------------------------------
   # JS - Copy Button
   # ------------------------------------------------
 
-  proc showFlashMsg(elem: Element, html: cstring, showMs = 500) =
+  proc showFlashMsg(elem: Element, html: kstring, showMs = 500) =
     ## Shows the flash message `html` at `elem` for `showMs` milliseconds.
     let oldHtml = elem.innerHTML
     elem.innerHTML.assign html
@@ -75,7 +76,7 @@ when defined(js) or defined(nimsuggest):
       let btn = cast[Element](btn.dom)
       btn.disabled = true
 
-      getClipboard().writeText copyStrProc().cstring
+      getClipboard().writeText copyStrProc().kstring
       btn.showFlashMsg "<span class='icon'><i class='fa-solid fa-check'></i></span><span>コピー</span>",
         showFlashMsgMs
 
@@ -87,7 +88,7 @@ when defined(js) or defined(nimsuggest):
   # JS - Image
   # ------------------------------------------------
 
-  func cellImgSrc*(cell: Cell): cstring =
+  func cellImgSrc*(cell: Cell): kstring =
     ## Returns the image source of cells.
     let stem =
       case cell
@@ -100,9 +101,9 @@ when defined(js) or defined(nimsuggest):
       of Cell.Yellow: "yellow"
       of Cell.Purple: "purple"
 
-    "{AssetsDir}/puyo/{stem}.png".fmt.cstring
+    "{AssetsDir}/puyo/{stem}.png".fmt.kstring
 
-  func noticeImgSrc*(notice: Notice): cstring =
+  func noticeImgSrc*(notice: Notice): kstring =
     ## Returns the image source of notice garbages.
     let stem =
       case notice
@@ -114,7 +115,7 @@ when defined(js) or defined(nimsuggest):
       of Crown: "crown"
       of Comet: "comet"
 
-    "{AssetsDir}/notice/{stem}.png".fmt.cstring
+    "{AssetsDir}/notice/{stem}.png".fmt.kstring
   {.pop.}
 
   # ------------------------------------------------

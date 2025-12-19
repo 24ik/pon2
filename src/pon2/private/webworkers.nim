@@ -12,14 +12,17 @@
 {.experimental: "views".}
 
 import std/[asyncjs, jsffi, sequtils, strformat, sugar]
-import ./[assign, dom, results2, strutils, utils]
+import ./[assign, dom, strutils, utils as privateUtils]
+import ../[utils]
 
 when not defined(pon2.build.worker):
   import ./[math]
 
+export utils
+
 type
   WebWorkerTask* =
-    ((args: seq[string]) {.raises: [], gcsafe.} -> StrErrorResult[seq[string]])
+    ((args: seq[string]) {.raises: [], gcsafe.} -> Pon2Result[seq[string]])
     ## Task executed by web workers.
 
   WebWorker = object ## Web worker.
@@ -28,6 +31,7 @@ type
 
   WebWorkerPool* = object ## Web worker pool.
     workerRefs: seq[ref WebWorker]
+    isReadyRef: ref bool
 
 const
   WebWorkerPath {.define: "pon2.webworker".} = "./worker.min.js"
@@ -49,13 +53,16 @@ proc init(T: type WebWorker): T {.inline, noinit.} =
   T(workerObj: newWorkerObj(), running: false)
 
 proc init(T: type WebWorkerPool, workerCount = 1): T {.inline, noinit.} =
-  let workerRefs = collect:
-    for _ in 1 .. workerCount:
-      let workerRef = new WebWorker
-      workerRef[] = WebWorker.init
-      workerRef
+  let
+    workerRefs = collect:
+      for _ in 1 .. workerCount:
+        let workerRef = new WebWorker
+        workerRef[] = WebWorker.init
+        workerRef
+    isReadyRef = new bool
+  isReadyRef[] = true
 
-  T(workerRefs: workerRefs)
+  T(workerRefs: workerRefs, isReadyRef: isReadyRef)
 
 # ------------------------------------------------
 # Caller
@@ -63,7 +70,7 @@ proc init(T: type WebWorkerPool, workerCount = 1): T {.inline, noinit.} =
 
 const PoolPollingMs = 100
 
-func parseResult(str: string): StrErrorResult[seq[string]] {.inline, noinit.} =
+func parseResult(str: string): Pon2Result[seq[string]] {.inline, noinit.} =
   ## Returns the result of the web worker's task.
   let errorMsg = "Invalid result: {str}".fmt
 
@@ -81,17 +88,17 @@ func parseResult(str: string): StrErrorResult[seq[string]] {.inline, noinit.} =
 
 proc run(
     self: ref WebWorker, args: varargs[string]
-): Future[StrErrorResult[seq[string]]] {.inline, noinit.} =
+): Future[Pon2Result[seq[string]]] {.inline, noinit.} =
   ## Runs the task.
   ## If the worker is running, returns an error.
   if self[].running:
-    return newPromise (resolve: (response: StrErrorResult[seq[string]]) -> void) =>
-      StrErrorResult[seq[string]].err("Worker is running").resolve
+    return newPromise (resolve: (response: Pon2Result[seq[string]]) -> void) =>
+      Pon2Result[seq[string]].err("Worker is running").resolve
 
   self[].running.assign true
 
   let argsSeq = args.toSeq
-  proc handler(resolve: (response: StrErrorResult[seq[string]]) -> void) =
+  proc handler(resolve: (response: Pon2Result[seq[string]]) -> void) =
     self[].workerObj.onmessage =
       (ev: JsObject) => (
         block:
@@ -105,11 +112,17 @@ proc run(
 
 proc run*(
     self: WebWorkerPool, args: varargs[string]
-): Future[StrErrorResult[seq[string]]] {.async.} =
+): Future[Pon2Result[seq[string]]] {.async.} =
   ## Runs the task.
+  while not self.isReadyRef[]:
+    await sleep PoolPollingMs
+
   var freeWorkerIndex = -1
   block waiting:
     while freeWorkerIndex < 0:
+      if not self.isReadyRef[]:
+        break waiting
+
       for workerIndex, workerRef in self.workerRefs:
         if not workerRef[].running:
           freeWorkerIndex.assign workerIndex
@@ -117,7 +130,29 @@ proc run*(
 
       await sleep PoolPollingMs
 
+  if not self.isReadyRef[]:
+    return Pon2Result[seq[string]].ok @[]
+
   return await self.workerRefs[freeWorkerIndex].run args
+
+proc terminate*(self: WebWorkerPool) {.inline, noinit.} =
+  ## Terminates the web worker pool.
+  self.isReadyRef[] = false
+
+  for workerRef in self.workerRefs:
+    workerRef[].workerObj.terminate()
+
+  # NOTE: ensure that all `run`s already called return empty sequences
+  discard setTimeout(
+    () => (
+      block:
+        for workerRef in self.workerRefs:
+          workerRef[] = WebWorker.init
+
+        self.isReadyRef[] = true
+    ),
+    PoolPollingMs * 3,
+  )
 
 # ------------------------------------------------
 # Callee
@@ -126,7 +161,7 @@ proc run*(
 proc getSelf(): JsObject {.inline, noinit, importjs: "(self)".}
   ## Returns the web worker object.
 
-func toStr(res: StrErrorResult[seq[string]]): string {.inline, noinit.} =
+func toStr(res: Pon2Result[seq[string]]): string {.inline, noinit.} =
   ## Returns the string representation of the task result.
   if res.isOk:
     "{OkStr}{MsgSep}{res.unsafeValue.join MsgSep}".fmt

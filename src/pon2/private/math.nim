@@ -7,33 +7,53 @@
 {.experimental: "views".}
 
 import std/[math]
-import ./[assign, staticfor]
 
 export math except sum
 
-func sum*[T: SomeNumber](items: openArray[T]): T {.inline, noinit.} =
+func sum*[T](x1, x2: T): T {.inline, noinit.} =
+  ## Returns a summation of the arguments.
+  x1 + x2
+
+func sum*[T](x1, x2, x3: T): T {.inline, noinit.} =
+  ## Returns a summation of the arguments.
+  x1 + x2 + x3
+
+func sum*[T](x1, x2, x3, x4: T): T {.inline, noinit.} =
+  ## Returns a summation of the arguments.
+  (x1 + x2) + (x3 + x4)
+
+func sum*[T](x1, x2, x3, x4, x5: T): T {.inline, noinit.} =
+  ## Returns a summation of the arguments.
+  (x1 + x2 + x3) + (x4 + x5)
+
+func sum*[T](x1, x2, x3, x4, x5, x6: T): T {.inline, noinit.} =
+  ## Returns a summation of the arguments.
+  (x1 + x2) + (x3 + x4) + (x5 + x6)
+
+func sum*[T](x1, x2, x3, x4, x5, x6, x7: T): T {.inline, noinit.} =
+  ## Returns a summation of the arguments.
+  (x1 + x2) + (x3 + x4) + (x5 + x6 + x7)
+
+func sum*[T](x1, x2, x3, x4, x5, x6, x7, x8: T): T {.inline, noinit.} =
+  ## Returns a summation of the arguments.
+  ((x1 + x2) + (x3 + x4)) + ((x5 + x6) + (x7 + x8))
+
+func sum*[T: SomeNumber](numbers: openArray[T]): T {.inline, noinit.} =
   ## Returns a summation of the array.
-  var res = 0.T
-  for item in items:
-    res.assign res + item
+  var summation = 0.T
+  for number in numbers:
+    summation += number
 
-  res
+  summation
 
-func sum*[E: enum, T: SomeNumber](
-    items: array[E, T], slice: static Slice[E]
-): T {.inline, noinit.} =
-  ## Returns a summation of the array with the given slice.
-  var res = 0.T
-  staticFor(idx, slice):
-    res.assign res + items[idx]
+template sumIt*(iter, unit, body: untyped): untyped =
+  ## Returns a summation of the `body` with respect to the iterable.
+  var summation = unit
+  for it {.inject.} in iter:
+    summation += body
 
-  res
+  summation
 
-template sumIt*[E: enum, T: SomeNumber](slice: static Slice[E], body: untyped): T =
-  ## Returns a summation of the `body` with `it` injected.
-  var res = 0.T
-  staticFor(idx, slice):
-    const it {.inject.} = idx
-    res.assign res + body
-
-  res
+template sumIt*(iter, body: untyped): untyped =
+  ## Returns a summation of the `body` with respect to the iterable.
+  iter.sumIt(0, body)

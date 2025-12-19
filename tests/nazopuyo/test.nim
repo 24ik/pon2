@@ -3,60 +3,224 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sugar, unittest]
+import std/[unittest]
 import
   ../../src/pon2/core/
-    [common, field, fqdn, goal, nazopuyo, placement, popresult, puyopuyo, rule, step]
-import ../../src/pon2/private/[strutils]
+    [field, fqdn, goal, nazopuyo, placement, popresult, puyopuyo, rule, step]
+import ../../src/pon2/private/[assign, strutils]
 
-func mark2[F: TsuField or WaterField](
-    nazo: NazoPuyo[F], plcmts: varargs[Placement]
-): MarkResult =
-  var nazo2 = nazo
-  for i, plcmt in plcmts:
-    nazo2.puyoPuyo.steps[i].optPlacement.ok plcmt
+func mark2(nazoPuyo: NazoPuyo, placements: varargs[Placement]): MarkResult =
+  var nazoPuyo2 = nazoPuyo
+  for i, placement in placements:
+    nazoPuyo2.puyoPuyo.steps[i].placement.assign placement
 
-  nazo2.mark
-
-func mark2[F: TsuField or WaterField](
-    nazo: NazoPuyo[F], optPlcmts: varargs[OptPlacement]
-): MarkResult =
-  var nazo2 = nazo
-  for i, optPlcmt in optPlcmts:
-    nazo2.puyoPuyo.steps[i].optPlacement = optPlcmt
-
-  nazo2.mark
+  nazoPuyo2.mark
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
 block: # init
-  let
-    puyoPuyoT = PuyoPuyo[TsuField].init
-    puyoPuyoW = PuyoPuyo[WaterField].init
-    goal = Goal.init(Count, Colors, 10)
-
-  check NazoPuyo[TsuField].init(puyoPuyoT, goal) ==
-    NazoPuyo[TsuField](puyoPuyo: puyoPuyoT, goal: goal)
-  check NazoPuyo[WaterField].init(puyoPuyoW, goal) ==
-    NazoPuyo[WaterField](puyoPuyo: puyoPuyoW, goal: goal)
-
-  check NazoPuyo[TsuField].init ==
-    NazoPuyo[TsuField](puyoPuyo: PuyoPuyo[TsuField].init, goal: Goal.init)
-  check NazoPuyo[WaterField].init ==
-    NazoPuyo[WaterField](puyoPuyo: PuyoPuyo[WaterField].init, goal: Goal.init)
+  check NazoPuyo.init(PuyoPuyo.init, Goal.init) ==
+    NazoPuyo(puyoPuyo: PuyoPuyo.init, goal: Goal.init)
+  check NazoPuyo.init == NazoPuyo.init(PuyoPuyo.init, Goal.init)
+  check NazoPuyo.init(Rule.Spinner) ==
+    NazoPuyo.init(PuyoPuyo.init Rule.Spinner, Goal.init)
 
 # ------------------------------------------------
 # Mark
 # ------------------------------------------------
 
 block: # mark
+  block: # Chain
+    let nazoPuyo =
+      """
+ちょうど3連鎖するべし
+======
+[すいちゅう]
+......
+......
+......
+......
+......
+~~~~~~
+rpor..
+.pp...
+..y...
+..y...
+..y...
+......
+......
+......
+------
+ry|
+rp|""".parseNazoPuyo.unsafeValue
+
+    check nazoPuyo.mark2(Left2, Down1) == Correct
+    check nazoPuyo.mark2(Down2, Down1) == Incorrect
+
+  block: # Color
+    let nazoPuyo =
+      """
+ちょうど2色同時に消すべし
+======
+[通]
+......
+......
+......
+......
+......
+......
+...g..
+...po.
+...pg.
+...pg.
+...og.
+.o.pp.
+.gggp.
+------
+gp|
+gp|""".parseNazoPuyo.unsafeValue
+
+    check nazoPuyo.mark2(Left5, Down5) == Correct
+    check nazoPuyo.mark2(Down5, Up4) == Incorrect
+
+  block: # Count
+    let nazoPuyo =
+      """
+ぷよ12個以上同時に消すべし
+======
+[だいかいてん]
+......
+......
+......
+......
+......
+......
+......
+......
+......
+...r..
+..rr..
+rggb..
+rrgbb.
+------
+rb|
+rg|""".parseNazoPuyo.unsafeValue
+
+    check nazoPuyo.mark2(Down2, Left2) == Correct
+    check nazoPuyo.mark2(Down5, Down1) == Incorrect
+
+  block: # Place
+    let nazoPuyo =
+      """
+ぷよちょうど2箇所で同時に消すべし
+======
+[クロスかいてん]
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+....r.
+y...y.
+yyryy.
+------
+ry|
+ry|""".parseNazoPuyo.unsafeValue
+
+    check nazoPuyo.mark2(Down3, Left2) == Correct
+    check nazoPuyo.mark2(Up2, Down3) == Incorrect
+
+  block: # Connection
+    let nazoPuyo =
+      """
+ぷよ7連結以上で消すべし
+======
+[通]
+......
+......
+......
+......
+......
+......
+......
+......
+..o...
+grgr..
+ggrg..
+rrbb..
+gggbr.
+------
+gg|
+bg|""".parseNazoPuyo.unsafeValue
+
+    check nazoPuyo.mark2(Up3, Left4) == Correct
+    check nazoPuyo.mark2(Up1, Left2) == Incorrect
+
+  block: # AccumColor
+    let nazoPuyo =
+      """
+累計ちょうど3色消すべし
+======
+[だいかいてん]
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+...gbr
+.bgbrr
+------
+bg|
+rg|""".parseNazoPuyo.unsafeValue
+
+    check nazoPuyo.mark2(Down2, Left5) == Correct
+    check nazoPuyo.mark2(Left3, Left5) == Incorrect
+
+  block: # AccumCount
+    let nazoPuyo =
+      """
+ぷよ累計18個以上消すべし
+======
+[クロスかいてん]
+......
+......
+......
+......
+......
+......
+......
+......
+..b...
+..y...
+ggg...
+ooo...
+ooobbb
+------
+yy|
+yg|""".parseNazoPuyo.unsafeValue
+
+    check nazoPuyo.mark2(Up0, Down1) == Correct
+    check nazoPuyo.mark2(Right3, Down3) == Incorrect
+
   block: # Clear
-    let nazo = parseNazoPuyo[TsuField](
+    let nazoPuyo =
       """
 ぷよ全て消すべし
 ======
+[通]
 ......
 ......
 ......
@@ -72,17 +236,17 @@ bb.yyy
 yy.bbb
 ------
 by|
-by|"""
-    ).unsafeValue
+by|""".parseNazoPuyo.unsafeValue
 
-    check nazo.mark2(Left3, Down2) == Accept
-    check nazo.mark2(OptPlacement.ok Left3, NonePlacement) == WrongAnswer
+    check nazoPuyo.mark2(Left3, Down2) == Correct
+    check nazoPuyo.mark2(Left3, Placement.None) == Incorrect
 
-  block: # AccumColor
-    let nazo = parseNazoPuyo[TsuField](
+  block: # Clear w/ kind
+    let nazoPuyo =
       """
-3色消すべし
+2色以上同時に消す&ぷよ全て消すべし
 ======
+[だいかいてん]
 ......
 ......
 ......
@@ -93,408 +257,21 @@ by|"""
 ......
 ......
 ......
-......
-...gbr
-.bgbrr
+o..g..
+or.g..
+orrg..
 ------
-bg|
-rg|"""
-    ).unsafeValue
+rg|""".parseNazoPuyo.unsafeValue
 
-    check nazo.mark2(Down2, Left5) == Accept
-    check nazo.mark2(Left3, Left5) == WrongAnswer
+    check nazoPuyo.mark2(Right1) == Correct
+    check nazoPuyo.mark2(Up2) == Incorrect
 
-  block: # AccumColorMore
-    let nazo = parseNazoPuyo[TsuField](
-      """
-3色以上消すべし
-======
-......
-......
-......
-......
-......
-......
-......
-......
-......
-......
-......
-...gbr
-.bgbrr
-------
-bg|
-rg|"""
-    ).unsafeValue
-
-    check nazo.mark2(Down2, Left5) == Accept
-    check nazo.mark2(Left3, Left5) == WrongAnswer
-
-  block: # AccumCount
-    let nazo = parseNazoPuyo[TsuField](
-      """
-ぷよ18個消すべし
-======
-......
-......
-......
-......
-......
-......
-......
-......
-..b...
-..y...
-ggg...
-ooo...
-ooobbb
-------
-yy|
-yg|"""
-    ).unsafeValue
-
-    check nazo.mark2(Up0, Down1) == Accept
-    check nazo.mark2(Right3, Down3) == WrongAnswer
-
-  block: # AccumCountMore
-    let nazo = parseNazoPuyo[TsuField](
-      """
-ぷよ18個以上消すべし
-======
-......
-......
-......
-......
-......
-......
-......
-......
-..b...
-..y...
-ggg...
-ooo...
-ooobbb
-------
-yy|
-yg|"""
-    ).unsafeValue
-
-    check nazo.mark2(Up0, Down1) == Accept
-    check nazo.mark2(Right3, Down3) == WrongAnswer
-
-  block: # Chain
-    let nazo = parseNazoPuyo[WaterField](
-      """
-3連鎖するべし
-======
-......
-......
-......
-......
-......
-~~~~~~
-rpor..
-.pp...
-..y...
-..y...
-..y...
-......
-......
-......
-------
-ry|
-rp|"""
-    ).unsafeValue
-
-    check nazo.mark2(Left2, Down1) == Accept
-    check nazo.mark2(Down2, Down1) == WrongAnswer
-
-  block: # ChainMore
-    let nazo = parseNazoPuyo[WaterField](
-      """
-3連鎖以上するべし
-======
-......
-......
-......
-......
-......
-~~~~~~
-rpor..
-.pp...
-..y...
-..y...
-..y...
-......
-......
-......
-------
-ry|
-rp|"""
-    ).unsafeValue
-
-    check nazo.mark2(Left2, Down1) == Accept
-    check nazo.mark2(Down2, Down1) == WrongAnswer
-
-  block: # ClearChain
-    let nazo = parseNazoPuyo[TsuField](
-      """
-5連鎖&ぷよ全て消すべし
-======
-......
-......
-......
-......
-......
-......
-.....r
-..y..r
-..yy.y
-..bbby
-..hooo
-..ybby
-..yrry
-------
-by|
-by|
-by|"""
-    ).unsafeValue
-
-    check nazo.mark2(Up1, Left2, Up4) == Accept
-    check nazo.mark2(Down3, Up3, Left4) == WrongAnswer
-
-  block: # ClearChainMore
-    let nazo = parseNazoPuyo[TsuField](
-      """
-5連鎖以上&ぷよ全て消すべし
-======
-......
-......
-......
-......
-......
-......
-.....r
-..y..r
-..yy.y
-..bbby
-..hooo
-..ybby
-..yrry
-------
-by|
-by|
-by|"""
-    ).unsafeValue
-
-    check nazo.mark2(Up1, Left2, Up4) == Accept
-    check nazo.mark2(Down3, Up3, Left4) == WrongAnswer
-
-  block: # Color
-    let nazo = parseNazoPuyo[TsuField](
-      """
-2色同時に消すべし
-======
-......
-......
-......
-......
-......
-......
-...g..
-...po.
-...pg.
-...pg.
-...og.
-.o.pp.
-.gggp.
-------
-gp|
-gp|"""
-    ).unsafeValue
-    check nazo.mark2(Left5, Down5) == Accept
-    check nazo.mark2(Down5, Up4) == WrongAnswer
-
-  block: # ColorMore
-    let nazo = parseNazoPuyo[TsuField](
-      """
-2色以上同時に消すべし
-======
-......
-......
-......
-......
-......
-......
-...g..
-...po.
-...pg.
-...pg.
-...og.
-.o.pp.
-.gggp.
-------
-gp|
-gp|"""
-    ).unsafeValue
-    check nazo.mark2(Left5, Down5) == Accept
-    check nazo.mark2(Down5, Up4) == WrongAnswer
-
-  block: # Count
-    let nazo = parseNazoPuyo[TsuField](
-      """
-ぷよ12個同時に消すべし
-======
-......
-......
-......
-......
-......
-......
-......
-......
-......
-...r..
-..rr..
-rggb..
-rrgbb.
-------
-rb|
-rg|"""
-    ).unsafeValue
-    check nazo.mark2(Down2, Left2) == Accept
-    check nazo.mark2(Down5, Down1) == WrongAnswer
-
-  block: # CountMore
-    let nazo = parseNazoPuyo[TsuField](
-      """
-ぷよ12個以上同時に消すべし
-======
-......
-......
-......
-......
-......
-......
-......
-......
-......
-...r..
-..rr..
-rggb..
-rrgbb.
-------
-rb|
-rg|"""
-    ).unsafeValue
-    check nazo.mark2(Down2, Left2) == Accept
-    check nazo.mark2(Down5, Down1) == WrongAnswer
-
-  block: # Place
-    let nazo = parseNazoPuyo[TsuField](
-      """
-ぷよ2箇所同時に消すべし
-======
-......
-......
-......
-......
-......
-......
-......
-......
-......
-......
-....r.
-y...y.
-yyryy.
-------
-ry|
-ry|"""
-    ).unsafeValue
-    check nazo.mark2(Down3, Left2) == Accept
-    check nazo.mark2(Up2, Down3) == WrongAnswer
-
-  block: # PlaceMore
-    let nazo = parseNazoPuyo[TsuField](
-      """
-ぷよ2箇所以上同時に消すべし
-======
-......
-......
-......
-......
-......
-......
-......
-......
-......
-......
-....r.
-y...y.
-yyryy.
-------
-ry|
-ry|"""
-    ).unsafeValue
-    check nazo.mark2(Down3, Left2) == Accept
-    check nazo.mark2(Up2, Down3) == WrongAnswer
-
-  block: # Conn
-    let nazo = parseNazoPuyo[TsuField](
-      """
-ぷよ7連結で消すべし
-======
-......
-......
-......
-......
-......
-......
-......
-......
-..o...
-grgr..
-ggrg..
-rrbb..
-gggbr.
-------
-gg|
-bg|"""
-    ).unsafeValue
-    check nazo.mark2(Up3, Left4) == Accept
-    check nazo.mark2(Up1, Left2) == WrongAnswer
-
-  block: # ConnMore
-    let nazo = parseNazoPuyo[TsuField](
-      """
-ぷよ7連結以上で消すべし
-======
-......
-......
-......
-......
-......
-......
-......
-......
-..o...
-grgr..
-ggrg..
-rrbb..
-gggbr.
-------
-gg|
-bg|"""
-    ).unsafeValue
-    check nazo.mark2(Up3, Left4) == Accept
-    check nazo.mark2(Up1, Left2) == WrongAnswer
-
-  block: # Dead, InvalidMove, SkipMove
-    let nazo = parseNazoPuyo[TsuField](
+  block: # Dead, InvalidPlace, PlaceSkip
+    let nazoPuyo =
       """
 ぷよ全て消すべし
 ======
+[クロスかいてん]
 ......
 .....o
 .....o
@@ -510,18 +287,18 @@ bg|"""
 ..o..o
 ------
 rg|
-by|"""
-    ).unsafeValue
+by|""".parseNazoPuyo.unsafeValue
 
-    check nazo.mark2(Up2) == Dead
-    check nazo.mark2(Up5) == InvalidMove
-    check nazo.mark2(NonePlacement, OptPlacement.ok Up3) == SkipMove
+    check nazoPuyo.mark2(Up2) == Dead
+    check nazoPuyo.mark2(Up5) == InvalidPlace
+    check nazoPuyo.mark2(Placement.None, Up3) == PlaceSkip
 
   block: # NotSupport
-    let nazo = parseNazoPuyo[TsuField](
+    let nazoPuyo =
       """
-おじゃまぷよ2箇所以上同時に消すべし
+おじゃまぷよ2箇所以上で同時に消すべし
 ======
+[通]
 ......
 ......
 ......
@@ -537,16 +314,16 @@ y...y.
 yyryy.
 ------
 ry|
-ry|"""
-    ).unsafeValue
+ry|""".parseNazoPuyo.unsafeValue
 
-    check nazo.mark2(NonePlacement) == NotSupport
+    check nazoPuyo.mark2(Placement.None) == NotSupport
 
-  block: # initial nazopuyo is clear
-    let nazo = parseNazoPuyo[TsuField](
+  block: # initial nazopuyo is Corrected
+    let nazoPuyo =
       """
 ぷよ全て消すべし
 ======
+[だいかいてん]
 ......
 ......
 ......
@@ -561,16 +338,16 @@ ry|"""
 ......
 ......
 ------
-rr|"""
-    ).unsafeValue
+rr|""".parseNazoPuyo.unsafeValue
 
-    check nazo.mark2(Down1) == WrongAnswer
+    check nazoPuyo.mark2(Down1) == Incorrect
 
-  block: # zero placements
-    let nazo = parseNazoPuyo[TsuField](
+  block: # empty steps
+    let nazoPuyo =
       """
 ぷよ全て消すべし
 ======
+[クロスかいてん]
 ......
 ......
 ......
@@ -585,16 +362,16 @@ rr|"""
 ......
 rrr...
 ------
-"""
-    ).unsafeValue
+""".parseNazoPuyo.unsafeValue
 
-    check nazo.mark2 == WrongAnswer
+    check nazoPuyo.mark2 == Incorrect
 
-  block: # w/ endStepIdx
-    let nazo = parseNazoPuyo[TsuField](
+  block: # w/ endStepIndex
+    let nazoPuyo =
       """
 ぷよ全て消すべし
 ======
+[通]
 ......
 ......
 ......
@@ -610,13 +387,12 @@ bb.yyy
 yy.bbb
 ------
 by|43
-by|3S"""
-    ).unsafeValue
+by|3S""".parseNazoPuyo.unsafeValue
 
-    check nazo.mark(-1) == Accept
-    check nazo.mark(0) == WrongAnswer
-    check nazo.mark(1) == WrongAnswer
-    check nazo.mark(2) == Accept
+    check nazoPuyo.mark(-1) == Correct
+    check nazoPuyo.mark(0) == Incorrect
+    check nazoPuyo.mark(1) == Incorrect
+    check nazoPuyo.mark(2) == Correct
 
 # ------------------------------------------------
 # Nazo Puyo <-> string
@@ -628,6 +404,7 @@ block: # `$`, parseNazoPuyo
       """
 色ぷよ2連結以上で消すべし
 ======
+[だいかいてん]
 r.....
 .g....
 ..b...
@@ -648,7 +425,7 @@ rg|23
 [3,0,0,0,4,0]
 pp|4N"""
 
-    nazoPuyo = parseNazoPuyo[TsuField](str).unsafeValue
+    nazoPuyo = str.parseNazoPuyo.unsafeValue
 
   check $nazoPuyo == str
 
@@ -661,8 +438,9 @@ block: # toUriQuery, parseNazoPuyo
     let
       str =
         """
-2連鎖するべし
+ちょうど2連鎖するべし
 ======
+[通]
 ......
 ......
 ......
@@ -680,21 +458,18 @@ block: # toUriQuery, parseNazoPuyo
 by|
 (0,1,0,0,0,1)
 rg|23"""
-      nazoPuyo = parseNazoPuyo[TsuField](str).unsafeValue
+      nazoPuyo = str.parseNazoPuyo.unsafeValue
 
-      queryPon2 = "field=t_op......yg....b.r&steps=byo0_1_0_0_0_1org23&goal=5__2"
+      queryPon2 = "field=0_op......yg....b.r&steps=byo0_1_0_0_0_1org23&goal=0_0_2_0_"
       queryIshikawa = "6E004g031_E1ahce__u02"
 
-    check nazoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check nazoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check nazoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check nazoPuyo.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
-    check parseNazoPuyo[TsuField](queryPon2, Pon2) ==
-      StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo
-    check parseNazoPuyo[TsuField](queryIshikawa, Ishikawa) ==
-      StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo
-    check parseNazoPuyo[TsuField](queryIshikawa, Ips) ==
-      StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo
+    check queryPon2.parseNazoPuyo(Pon2) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(IshikawaPuyo) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(Ips) == Pon2Result[NazoPuyo].ok nazoPuyo
 
   block: # empty steps
     let
@@ -702,6 +477,7 @@ rg|23"""
         """
 赤ぷよ全て消すべし
 ======
+[通]
 ......
 ......
 ......
@@ -717,28 +493,26 @@ rg|23"""
 g.....
 ------
 """
-      nazoPuyo = parseNazoPuyo[TsuField](str).unsafeValue
+      nazoPuyo = str.parseNazoPuyo.unsafeValue
 
-      queryPon2 = "field=t_g.....&steps&goal=0_1_"
+      queryPon2 = "field=0_g.....&steps&goal=_3"
       queryIshikawa = "g00___210"
 
-    check nazoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check nazoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check nazoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check nazoPuyo.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
-    check parseNazoPuyo[TsuField](queryPon2, Pon2) ==
-      StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo
-    check parseNazoPuyo[TsuField](queryIshikawa, Ishikawa) ==
-      StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo
-    check parseNazoPuyo[TsuField](queryIshikawa, Ips) ==
-      StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo
+    check queryPon2.parseNazoPuyo(Pon2) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(IshikawaPuyo) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(Ips) == Pon2Result[NazoPuyo].ok nazoPuyo
 
   block: # empty field and steps
     let
       str =
         """
-3色同時に消すべし
+ちょうど3色同時に消すべし
 ======
+[通]
 ......
 ......
 ......
@@ -754,28 +528,26 @@ g.....
 ......
 ------
 """
-      nazoPuyo = parseNazoPuyo[TsuField](str).unsafeValue
+      nazoPuyo = str.parseNazoPuyo.unsafeValue
 
-      queryPon2 = "field=t_&steps&goal=9__3"
+      queryPon2 = "field=0_&steps&goal=1_0_3_0_"
       queryIshikawa = "___E03"
 
-    check nazoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check nazoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check nazoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check nazoPuyo.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
-    check parseNazoPuyo[TsuField](queryPon2, Pon2) ==
-      StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo
-    check parseNazoPuyo[TsuField](queryIshikawa, Ishikawa) ==
-      StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo
-    check parseNazoPuyo[TsuField](queryIshikawa, Ips) ==
-      StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo
+    check queryPon2.parseNazoPuyo(Pon2) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(IshikawaPuyo) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(Ips) == Pon2Result[NazoPuyo].ok nazoPuyo
 
   block: # empty query
     let
       str =
         """
-ぷよ全て消すべし
+クリア条件未設定
 ======
+[通]
 ......
 ......
 ......
@@ -791,14 +563,13 @@ g.....
 ......
 ------
 """
-      nazoPuyo = parseNazoPuyo[TsuField](str).unsafeValue
+      nazoPuyo = str.parseNazoPuyo.unsafeValue
 
-      queryPon2 = "field=t_&steps&goal=0_0_"
-      queryPon22 = "field=t_&steps&goal="
-      queryPon23 = "field=t_&steps"
+      queryPon2 = "field=0_&steps&goal=_"
+      queryPon22 = "field=0_&steps&goal="
+      queryPon23 = "field=0_&steps"
 
-    check nazoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
+    check nazoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
 
     for query in [queryPon2, queryPon22, queryPon23]:
-      check parseNazoPuyo[TsuField](query, Pon2) ==
-        StrErrorResult[NazoPuyo[TsuField]].ok nazoPuyo
+      check query.parseNazoPuyo(Pon2) == Pon2Result[NazoPuyo].ok nazoPuyo

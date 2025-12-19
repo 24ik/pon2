@@ -17,9 +17,11 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[assign, dom, gui, utils]
 
-  export vdom
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
 
-  const RuleDescs: array[Rule, string] = ["", "すいちゅう"]
+  export vdom
 
   proc toXLink[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
@@ -34,16 +36,15 @@ when defined(js) or defined(nimsuggest):
     var queries = newSeqOfCap[(string, string)](3)
     queries.add ("url", $self.derefSimulator(helper).toExportUri.unsafeValue)
 
-    if self.derefSimulator(helper).nazoPuyoWrap.optGoal.isOk:
-      let nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      nazoWrap.unwrapNazoPuyo:
-        let
-          ruleDesc = RuleDescs[it.field.rule]
-          moveCount = it.steps.len
-          goalDesc = $self.derefSimulator(helper).nazoPuyoWrap.optGoal.unsafeValue
+    let goal = self.derefSimulator(helper).nazoPuyo.goal
+    if goal != NoneGoal:
+      let
+        ruleDesc = $self.derefSimulator(helper).rule
+        moveCount = self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps.len
+        goalDesc = $goal
 
-        queries.add ("text", "{ruleDesc}{moveCount}手・{goalDesc}".fmt)
-        queries.add ("hashtags", "なぞぷよ")
+      queries.add ("text", "{ruleDesc}{moveCount}手・{goalDesc}".fmt)
+      queries.add ("hashtags", "なぞぷよ")
 
     uri.query.assign queries.encodeQuery
 
@@ -51,7 +52,7 @@ when defined(js) or defined(nimsuggest):
 
   proc downloadCameraReadyImg(helper: VNodeHelper) =
     let cameraReadyElem = helper.simulator.cameraReadyId.getElemJsObjById
-    cameraReadyElem.style.display = "block".cstring
+    cameraReadyElem.style.display = "block".kstring
 
     {.push warning[Uninit]: off.}
     discard cameraReadyElem
@@ -59,12 +60,12 @@ when defined(js) or defined(nimsuggest):
       .then(
         (canvas: JsObject) => (
           block:
-            cameraReadyElem.style.display = "none".cstring
+            cameraReadyElem.style.display = "none".kstring
 
             let elem = "a".createElemJsObj
             elem.href = canvas.toDataURL()
-            elem.download = "pon2.png".cstring
-            elem.target = "_blank".cstring
+            elem.download = "pon2.png".kstring
+            elem.target = "_blank".kstring
             elem.click()
         )
       ).catch
@@ -118,7 +119,7 @@ when defined(js) or defined(nimsuggest):
               class = "button is-size-7",
               target = "_blank",
               rel = "noopener noreferrer",
-              href = cstring $self.toXLink helper,
+              href = ($self.toXLink helper).kstring,
             ):
               span(class = "icon"):
                 italic(class = "fa-brands fa-x-twitter")

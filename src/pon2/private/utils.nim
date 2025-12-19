@@ -17,6 +17,16 @@ func toggle*(x: var bool) {.inline, noinit.} =
   ## Toggles the bool variable.
   x.assign not x
 
+func rotateSucc*[T: Ordinal](x: T): T {.inline, noinit.} =
+  ## Returns the successor of `x`.
+  ## If `x` is `T.high`, returns `T.low`.
+  if x == T.high: T.low else: x.succ
+
+func rotatePred*[T: Ordinal](x: T): T {.inline, noinit.} =
+  ## Returns the predecessor of `x`.
+  ## If `x` is `T.low`, returns `T.high`.
+  if x == T.low: T.high else: x.pred
+
 func rotateInc*[T: Ordinal](x: var T) {.inline, noinit.} =
   ## Increments `x`.
   ## If `x` is `T.high`, assigns `T.low` to `x`.

@@ -7,20 +7,19 @@
 {.experimental: "views".}
 
 import std/[sequtils, sugar, random]
-import ./[key, nazopuyowrap, simulator]
+import ./[key, simulator]
 import ../[core]
-import
-  ../private/[algorithm, arrayutils, assign, critbits, results2, setutils, strutils]
+import ../private/[algorithm, arrayutils, assign, critbits, setutils, strutils]
 
-export simulator
+export core, simulator
 
 type Marathon* = object ## Marathon manager.
-  simulator: Simulator
+  simulator*: Simulator
 
   matchQueries: seq[string]
   allQueries: seq[string]
 
-  isReady: bool
+  isReady*: bool
   critBitTree: CritBitTree[void]
   rng: Rand
 
@@ -28,7 +27,7 @@ type Marathon* = object ## Marathon manager.
 # Constructor
 # ------------------------------------------------
 
-func load*(self: var Marathon, queries: openArray[string], isReady = false) =
+func load*(self: var Marathon, queries: openArray[string]) =
   ## Loads steps data.
   if self.isReady:
     return
@@ -37,41 +36,23 @@ func load*(self: var Marathon, queries: openArray[string], isReady = false) =
     self.critBitTree.incl query
   self.allQueries &= queries
 
-  if isReady:
-    self.isReady.assign true
-
-func init*(
-    T: type Marathon, rng: Rand, queries: openArray[string] = [], isReady = false
-): T =
+func init*(T: type Marathon, rng: Rand, queries: openArray[string] = []): T =
   var marathon = T(
-    simulator: Simulator.init PuyoPuyo[TsuField].init,
+    simulator: Simulator.init,
     matchQueries: @[],
     allQueries: @[],
     isReady: false,
     critBitTree: CritBitTree[void].default,
     rng: rng,
   )
-  marathon.load queries, isReady
+
+  marathon.load queries
+
   marathon
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
-
-func simulator*(self: Marathon): Simulator =
-  ## Returns the simulator.
-  self.simulator
-
-func simulator*(self: var Marathon): var Simulator =
-  ## Returns the simulator.
-  self.simulator
-
-func isReady*(self: Marathon): bool =
-  ## Returns `true` if the marathon manager is ready.
-  self.isReady
-
-func `isReady=`*(self: var Marathon, isReady: bool) =
-  self.isReady.assign self.isReady or isReady
 
 func matchQueryCount*(self: Marathon): int =
   ## Returns the number of the matched queries.
@@ -90,37 +71,37 @@ func swappedPrefixes(prefix: string): seq[string] =
   var
     lastIndices = 6.initArrayWith 0 # AB, AC, AD, BC, BD, CD
     counts = 10.initArrayWith 0 # AB, AC, AD, BC, BD, CD, AA, BB, CC, DD
-  for charIndex in countup(0, prefix.len.pred, 2):
-    case prefix[charIndex .. charIndex.succ]
+  for charIndex in countup(0, prefix.len - 1, 2):
+    case prefix[charIndex .. charIndex + 1]
     of "AB", "BA":
-      counts[0].inc
+      counts[0] += 1
       lastIndices[0].assign charIndex
     of "AC", "CA":
-      counts[1].inc
+      counts[1] += 1
       lastIndices[1].assign charIndex
     of "AD", "DA":
-      counts[2].inc
+      counts[2] += 1
       lastIndices[2].assign charIndex
     of "BC", "CB":
-      counts[3].inc
+      counts[3] += 1
       lastIndices[3].assign charIndex
     of "BD", "DB":
-      counts[4].inc
+      counts[4] += 1
       lastIndices[4].assign charIndex
     of "CD", "DC":
-      counts[5].inc
+      counts[5] += 1
       lastIndices[5].assign charIndex
     of "AA":
-      counts[6].inc
+      counts[6] += 1
     of "BB":
-      counts[7].inc
+      counts[7] += 1
     of "CC":
-      counts[8].inc
+      counts[8] += 1
     of "DD":
-      counts[9].inc
+      counts[9] += 1
 
   # If a non-double pair (e.g. AB) exists and cells in the pair (e.g. A and B) only
-  # appear as the ones, one of them is not need to swap.
+  # appear in it, one of them is not need to swap.
   let
     countAbAc = counts[0] + counts[1]
     countAbAd = counts[0] + counts[2]
@@ -143,10 +124,10 @@ func swappedPrefixes(prefix: string): seq[string] =
     fixIndices.add lastIndices[5]
 
   let pairsSeq = collect:
-    for charIndex in countup(0, prefix.len.pred, 2):
+    for charIndex in countup(0, prefix.len - 1, 2):
       let
         c1 = prefix[charIndex]
-        c2 = prefix[charIndex.succ]
+        c2 = prefix[charIndex + 1]
 
       if c1 == c2 or charIndex in fixIndices:
         @[c1 & c2]
@@ -212,7 +193,7 @@ func match*(self: var Marathon, prefix: string) =
       else:
         400 # ABABACBD
     self.matchQueries.assign newSeqOfCap[string](matchCountMax)
-    for replaceData in ReplaceDataSeqArray[chars.card.pred]:
+    for replaceData in ReplaceDataSeqArray[chars.card - 1]:
       for pre in prefix.toUpperAscii.swappedPrefixes:
         {.push warning[ProveInit]: off.}
         for query in self.critBitTree.itemsWithPrefix pre.multiReplace replaceData:
@@ -243,11 +224,11 @@ func match*(self: var Marathon, prefix: string) =
 func loadSteps(self: var Marathon, query: string) =
   ## Applies the steps to the simulator.
   var steps = Steps.init query.len div 2
-  for i in countup(0, query.len.pred, 2):
-    (query[i.succ] & query[i]).parseStep(Pon2).isErrOr:
+  for i in countup(0, query.len - 1, 2):
+    (query[i + 1] & query[i]).parseStep(Pon2).isErrOr:
       steps.addLast value
 
-  self.simulator.assign Simulator.init PuyoPuyo[TsuField].init(TsuField.init, steps)
+  self.simulator.assign Simulator.init PuyoPuyo.init(Field.init, steps)
 
 func selectQuery*(self: var Marathon, index: int) =
   ## Applies the selected query to the simulator.
@@ -270,16 +251,16 @@ func selectRandomQuery*(self: var Marathon, fromMatched = true) =
       self.loadSteps self.rng.sample self.allQueries
 
 # ------------------------------------------------
-# Keyboard
+# Key
 # ------------------------------------------------
 
 proc operate*(self: var Marathon, key: KeyEvent): bool {.discardable.} =
   ## Performs an action specified by the key.
   ## Returns `true` if the key is handled.
-  if key == static(KeyEvent.init "Enter"):
+  if key == KeyEventEnter:
     self.selectRandomQuery
     return true
-  if key == static(KeyEvent.init("Enter", shift = true)):
+  if key == KeyEventShiftEnter:
     self.selectRandomQuery(fromMatched = false)
     return true
 

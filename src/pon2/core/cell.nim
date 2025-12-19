@@ -6,10 +6,10 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, sugar]
-import ../private/[results2, tables]
+import std/[strformat]
+import ../[utils]
 
-export results2
+export utils
 
 type Cell* {.pure.} = enum
   None = "."
@@ -23,16 +23,17 @@ type Cell* {.pure.} = enum
 
 const
   Puyos* = {Hard .. Purple}
-  ColorPuyos* = {Red .. Purple}
+  NuisancePuyos* = {Hard, Garbage}
+  ColoredPuyos* = {Red .. Purple}
 
 # ------------------------------------------------
 # Cell <-> string
 # ------------------------------------------------
 
-const StrToCell = collect:
-  for cell in Cell:
-    {$cell: cell}
-
-func parseCell*(str: string): StrErrorResult[Cell] {.inline, noinit.} =
+func parseCell*(str: string): Pon2Result[Cell] {.inline, noinit.} =
   ## Returns the cell converted from the string representation.
-  StrToCell[str].context "Invalid cell: {str}".fmt
+  for cell in Cell:
+    if str == $cell:
+      return ok cell
+
+  err "Invalid cell: {str}".fmt

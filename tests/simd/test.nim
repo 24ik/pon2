@@ -6,7 +6,8 @@
 import ../../src/pon2/private/[simd]
 
 when Sse42Available:
-  import std/[bitops, unittest]
+  import std/[unittest]
+  import ../../src/pon2/private/[bitops]
 
 when Sse42Available:
   # ------------------------------------------------
@@ -38,13 +39,6 @@ when Sse42Available:
   block: # `$`
     check $mm_set_epi16(1'u16, 2, 3, 45, 67, 890, 12345, 6789) ==
       "M128i[6789, 12345, 890, 67, 45, 3, 2, 1]"
-
-  block: # assign
-    var x = mm_setzero_si128()
-    let y = mm_set1_epi64x(123)
-    x.assign y
-
-    check x == y
 
   # ------------------------------------------------
   # XMM - reverse

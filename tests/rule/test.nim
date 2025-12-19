@@ -11,9 +11,8 @@ import ../../src/pon2/core/[rule]
 # ------------------------------------------------
 
 block: # parseRule
-  for rule in Rule:
-    let ruleRes = parseRule $rule
-    check ruleRes == StrErrorResult[Rule].ok rule
-
+  check "通".parseRule == Pon2Result[Rule].ok Rule.Tsu
+  check "だいかいてん".parseRule == Pon2Result[Rule].ok Spinner
+  check "クロスかいてん".parseRule == Pon2Result[Rule].ok CrossSpinner
+  check "すいちゅう".parseRule == Pon2Result[Rule].ok Rule.Water
   check "".parseRule.isErr
-  check "T".parseRule.isErr

@@ -3,7 +3,7 @@
 {.experimental: "views".}
 
 import std/[appdirs, dirs, os, osproc, random, sequtils, strformat, strutils]
-import ../src/pon2/private/[bitutils, math, paths]
+import ../src/pon2/private/[bitops, math, paths]
 import unittest2
 
 const

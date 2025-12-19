@@ -7,63 +7,68 @@
 {.experimental: "views".}
 
 import std/[random, sequtils, sets, sugar]
-import ./[nazopuyowrap, solve]
+import ./[solve]
 import ../[core]
-import ../private/[algorithm, arrayutils, assign, deques, math, results2, staticfor]
+import ../private/[algorithm, arrayutils, assign, deques, math, setutils, staticfor]
 
-export nazopuyowrap, results2
+export core
 
-type
-  GenerateGoalColor* {.pure.} = enum
-    ## Nazo Puyo goal color for generation.
-    All
-    SingleColor
-    Garbages
-    Colors
-
-  GenerateGoal* = object ## Nazo Puyo goal for generation.
-    kind: GoalKind
-    color: GenerateGoalColor
-    val: GoalVal
-
-  GenerateSettings* = object ## Settings of Nazo Puyo generation.
-    goal: GenerateGoal
-    moveCount: int
-    colorCount: int
-    heights: tuple[weights: Opt[array[Col, int]], positives: Opt[array[Col, bool]]]
-    puyoCounts: tuple[colors: int, garbage: int, hard: int]
-    connection2Counts: tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int]]
-    connection3Counts:
-      tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int], lShape: Opt[int]]
-    dropGarbagesIndices: seq[int]
-    dropHardsIndices: seq[int]
-    rotateIndices: seq[int]
-    crossRotateIndices: seq[int]
-    allowDoubleNotLast: bool
-    allowDoubleLast: bool
+type GenerateSettings* = object ## Settings of Nazo Puyo generation.
+  rule: Rule
+  goal: Goal
+  moveCount: int
+  colorCount: int
+  heights: array[Col, int]
+  puyoCounts: tuple[colored: int, garbage: int, hard: int]
+  connection2Counts:
+    tuple[totalOpt: Opt[int], verticalOpt: Opt[int], horizontalOpt: Opt[int]]
+  connection3Counts:
+    tuple[
+      totalOpt: Opt[int],
+      verticalOpt: Opt[int],
+      horizontalOpt: Opt[int],
+      lShapeOpt: Opt[int],
+    ]
+  indices:
+    tuple[
+      allowDouble: seq[int],
+      garbage: seq[int],
+      hard: seq[int],
+      rotate: seq[int],
+      crossRotate: seq[int],
+    ]
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
 func init*(
-    T: type GenerateGoal, kind: GoalKind, color: GenerateGoalColor, val: GoalVal
-): T =
-  T(kind: kind, color: color, val: val)
-
-func init*(
     T: type GenerateSettings,
-    goal: GenerateGoal,
+    rule: Rule,
+    goal: Goal,
     moveCount, colorCount: int,
-    heights: tuple[weights: Opt[array[Col, int]], positives: Opt[array[Col, bool]]],
-    puyoCounts: tuple[colors: int, garbage: int, hard: int],
-    connection2Counts: tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int]],
+    heights: array[Col, int],
+    puyoCounts: tuple[colored: int, garbage: int, hard: int],
+    connection2Counts:
+      tuple[totalOpt: Opt[int], verticalOpt: Opt[int], horizontalOpt: Opt[int]],
     connection3Counts:
-      tuple[total: Opt[int], vertical: Opt[int], horizontal: Opt[int], lShape: Opt[int]],
-    dropGarbagesIndices, dropHardsIndices, rotateIndices, crossRotateIndices: seq[int],
-    allowDoubleNotLast, allowDoubleLast: bool,
+      tuple[
+        totalOpt: Opt[int],
+        verticalOpt: Opt[int],
+        horizontalOpt: Opt[int],
+        lShapeOpt: Opt[int],
+      ],
+    indices:
+      tuple[
+        allowDouble: seq[int],
+        garbage: seq[int],
+        hard: seq[int],
+        rotate: seq[int],
+        crossRotate: seq[int],
+      ],
 ): T =
   GenerateSettings(
+    rule: rule,
     goal: goal,
     moveCount: moveCount,
     colorCount: colorCount,
@@ -71,47 +76,34 @@ func init*(
     puyoCounts: puyoCounts,
     connection2Counts: connection2Counts,
     connection3Counts: connection3Counts,
-    dropGarbagesIndices: dropGarbagesIndices,
-    dropHardsIndices: dropHardsIndices,
-    rotateIndices: rotateIndices,
-    crossRotateIndices: crossRotateIndices,
-    allowDoubleNotLast: allowDoubleNotLast,
-    allowDoubleLast: allowDoubleLast,
+    indices: indices,
   )
 
 # ------------------------------------------------
 # Split
 # ------------------------------------------------
 
-func round(rng: var Rand, x: float): int =
-  ## Probabilistic round function.
-  ## For example, `rng.round(2.7)` becomes `2` with a 30% probability and
-  ## `3` with a 70% probability.
-  let floorX = x.int
-  floorX + (rng.rand(1.0) < x - floorX.float).int
-
 func split(
     rng: var Rand, total, chunkCount: int, allowZeroChunk: bool
-): StrErrorResult[seq[int]] =
-  ## Splits the number `total` into `chunkCount` chunks.
+): Pon2Result[seq[int]] =
+  ## Returns the split values.
   if total < 0:
-    return err "`total` cannot be negative"
-
+    return err "`total` should be non-negative"
   if chunkCount < 1:
-    return err "`chunkCount` should be greater than 0"
+    return err "`chunkCount` should be positive"
 
   if chunkCount == 1:
     if total == 0 and not allowZeroChunk:
-      return err "`total` cannot be positive if `allowZeroChunk` if false"
+      return err "`total` should be positive if `allowZeroChunk` is false"
 
     return ok @[total]
 
   # separation indices
-  var sepIndices = newSeqOfCap[int](chunkCount.succ)
+  var sepIndices = newSeqOfCap[int](chunkCount + 1)
   sepIndices.add 0
 
   if allowZeroChunk:
-    for _ in 0 ..< chunkCount.pred:
+    for _ in 0 ..< chunkCount - 1:
       sepIndices.add rng.rand total
   else:
     if total < chunkCount:
@@ -119,444 +111,323 @@ func split(
 
     var indices = (1 ..< total).toSeq
     rng.shuffle indices
-    sepIndices &= indices[0 ..< chunkCount.pred]
+    sepIndices &= indices[0 ..< chunkCount - 1]
   sepIndices.sort
   sepIndices.add total
 
-  let res = collect:
+  let chunks = collect:
     for i in 0 ..< chunkCount:
-      sepIndices[i.succ] - sepIndices[i]
-  ok res
+      sepIndices[i + 1] - sepIndices[i]
+  ok chunks
 
-func split(
-    rng: var Rand, total: int, weights: openArray[int]
-): StrErrorResult[seq[int]] =
-  ## Splits the number `total` into chunks following the probability `weights`.
-  ## If `weights` are all zero, splits randomly.
-  ## Note that an infinite loop can occur.
+func split(rng: var Rand, total: int, weights: openArray[int]): Pon2Result[seq[int]] =
+  ## Returns the split values.
+  ## All `weights` should have the same sign (zero is allowed).
+  ## Positive weights represent probabilities, negative ones represent random positive
+  ## values, and the zero weight represents the zero.
+  ## If all the `weights` are zero, splits randomly.
   if total < 0:
-    return err "`total` cannot be negative"
-
+    return err "`total` should be zero or positive"
   if weights.len == 0:
     return err "`weights` should have at least one element"
 
+  if total == 0:
+    return ok 0.repeat weights.len
   if weights.len == 1:
     return ok @[total]
 
-  if weights.anyIt it < 0:
-    return err "`weights` cannot have negative element"
-
-  let weightSum = weights.sum
-  if weightSum == 0:
+  if weights.allIt it == 0:
     return rng.split(total, weights.len, allowZeroChunk = true)
 
-  var res = newSeq[int](weights.len) # NOTE: somehow `newSeqUninit` does not work
-  while true:
-    var last = total
+  if weights.allIt it >= 0:
+    let
+      weightSum = weights.sum
+      offset = rng.rand 1.0
+    var
+      chunks = newSeqOfCap[int](weights.len)
+      nowWeightSum = 0
+      prev = 0
 
-    for i in 0 ..< weights.len.pred:
-      var rounded = rng.round total * weights[i] / weightSum
-      res[i].assign rounded
-      last.dec rounded
+    for weight in weights:
+      nowWeightSum += weight
 
-    if last == 0 or (last > 0 and weights[^1] > 0):
-      res[^1].assign last
-      break
+      let now = (total * nowWeightSum / weightSum + offset).int
+      chunks.add now - prev
 
-  ok res
+      prev.assign now
 
-func split(
-    rng: var Rand, total: int, positives: openArray[bool]
-): StrErrorResult[seq[int]] =
-  ## Splits the number `total` into chunks randomly.
-  ## Elements of the result where `positives` are `true` are set to positive, and
-  ## the others are set to zero.
-  ## If `positives` are all `false`, splits randomly.
-  if total < 0:
-    return err "`total` cannot be negative"
+    return ok chunks
 
-  if positives.len == 0:
-    return err "`positive` should have at least one element"
+  if weights.allIt it <= 0:
+    let counts =
+      ?rng.split(total, weights.countIt it < 0, allowZeroChunk = false).context "Splitting by weights failed"
 
-  if positives.allIt(not it):
-    return rng.split(total, positives.len, allowZeroChunk = true)
+    var
+      chunks = newSeqOfCap[int](weights.len)
+      countsIndex = 0
+    for weight in weights:
+      if weight == 0:
+        chunks.add 0
+      else:
+        chunks.add counts[countsIndex]
+        countsIndex += 1
 
-  if positives.len == 1:
-    return ok @[total]
+    return ok chunks
 
-  let counts =
-    ?rng.split(total, positives.countIt it, allowZeroChunk = false).context "Cannot split"
-  var
-    res = newSeqOfCap[int](positives.len)
-    countsIndex = 0
-  for pos in positives:
-    if pos:
-      res.add counts[countsIndex]
-      countsIndex.inc
-    else:
-      res.add 0
-
-  ok res
-
-# ------------------------------------------------
-# Checker
-# ------------------------------------------------
-
-func isValid(self: GenerateSettings): StrErrorResult[void] =
-  ## Returns `true` if the settings are valid.
-  ## Note that this function is "weak" checker; a generation may be failed
-  ## (entering infinite loop) even though this function returns `true`.
-  if self.moveCount < 1:
-    return err "`moveCount` should be positive"
-
-  if self.colorCount notin 1 .. 5:
-    return err "`colorCount` should be in 1..5"
-
-  if self.heights.weights.isOk == self.heights.positives.isOk:
-    return err "Either `heights.weights` or `heights.positives` should have a value"
-
-  if self.heights.weights.isOk and self.heights.weights.unsafeValue.anyIt it < 0:
-    return err "All elements in `heights.weights` should be non-negative"
-
-  if self.puyoCounts.colors < 0:
-    return err "`puyoCounts.colors` should be non-negative"
-
-  if self.puyoCounts.garbage < 0:
-    return err "`puyoCounts.garbage` should be non-negative"
-
-  if self.puyoCounts.hard < 0:
-    return err "`puyoCounts.hard` should be non-negative"
-
-  if Height * Width - 1 + 2 * self.moveCount < self.puyoCounts.colors:
-    return err "`puyoCounts.colors` is too small"
-
-  if self.connection2Counts.total.isOk:
-    if self.connection2Counts.total.unsafeValue < 0:
-      return err "`connection2Counts.total` should be non-negative"
-
-    var connection2VH = 0
-    if self.connection2Counts.vertical.isOk:
-      connection2VH.inc self.connection2Counts.vertical.unsafeValue
-    if self.connection2Counts.horizontal.isOk:
-      connection2VH.inc self.connection2Counts.horizontal.unsafeValue
-    if connection2VH > self.connection2Counts.total.unsafeValue:
-      return err "`connection2Counts.total` is too small"
-
-  if self.connection3Counts.total.isOk:
-    if self.connection3Counts.total.unsafeValue < 0:
-      return err "`connection3Counts.total` should be non-negative"
-
-    var connection3VHL = 0
-    if self.connection3Counts.vertical.isOk:
-      connection3VHL.inc self.connection3Counts.vertical.unsafeValue
-    if self.connection3Counts.horizontal.isOk:
-      connection3VHL.inc self.connection3Counts.horizontal.unsafeValue
-    if self.connection3Counts.lShape.isOk:
-      connection3VHL.inc self.connection3Counts.lShape.unsafeValue
-    if connection3VHL > self.connection3Counts.total.unsafeValue:
-      return err "`connection3Counts.total` is too small"
-
-  let
-    dropGarbagesIndexSet = self.dropGarbagesIndices.toHashSet
-    dropHardsIndexSet = self.dropHardsIndices.toHashSet
-    rotateIndexSet = self.rotateIndices.toHashSet
-    crossRotateIndexSet = self.crossRotateIndices.toHashSet
-    notPairPlacementIndexSet =
-      dropGarbagesIndexSet + dropHardsIndexSet + rotateIndexSet + crossRotateIndexSet
-
-  if dropGarbagesIndexSet.card > self.puyoCounts.garbage:
-    return err "`dropGarbagesIndices` is too large"
-
-  if dropHardsIndexSet.card > self.puyoCounts.hard:
-    return err "`dropHardsIndices` is too large"
-
-  if notPairPlacementIndexSet.anyIt it notin 0 ..< self.moveCount:
-    return err "`indices` are out of range"
-
-  if notPairPlacementIndexSet.card !=
-      dropGarbagesIndexSet.card + dropHardsIndexSet.card + rotateIndexSet.card +
-      crossRotateIndexSet.card:
-    return err "all `indices` should be disjoint"
-
-  if notPairPlacementIndexSet.card >= self.moveCount:
-    return err "at least one pair-step is required"
-
-  StrErrorResult[void].ok
+  err "all `weights` should have the same sign (zero is allowed)"
 
 # ------------------------------------------------
 # Puyo Puyo
 # ------------------------------------------------
 
-func generateGarbagesCounts(rng: var Rand, total: int): array[Col, int] =
-  ## Returns random garbage counts.
-  let (baseCount, diffCount) = total.divmod Width
+func generateNuisanceCounts(rng: var Rand, total: int): array[Col, int] =
+  ## Returns a random nuisance counts.
+  let (baseCount, extraCount) = total.divmod Width
   var counts = Col.initArrayWith baseCount
 
-  for colOrd, diff in rng.split(diffCount, Width, allowZeroChunk = true).unsafeValue:
-    counts[Col.low.succ colOrd].inc diff
+  for colOrd, extra in rng.split(extraCount, Width, allowZeroChunk = true).unsafeValue:
+    counts[colOrd.Col] += extra
 
   counts
 
-func generatePuyoPuyo[F: TsuField or WaterField](
-    rng: var Rand, settings: GenerateSettings, useCells: seq[Cell]
-): StrErrorResult[PuyoPuyo[F]] =
+func generatePuyoPuyo(
+    rng: var Rand, settings: GenerateSettings, useCells: set[Cell]
+): Pon2Result[PuyoPuyo] =
   ## Returns a random Puyo Puyo.
-  ## Note that an infinite loop can occur.
-  ## This function requires the settings passes `isValid`.
+  ## This function may not return because of an infinite loop.
   let
-    dropGarbagesIndexSet = settings.dropGarbagesIndices.toHashSet
-    dropHardsIndexSet = settings.dropHardsIndices.toHashSet
-    rotateIndexSet = settings.rotateIndices.toHashSet
-    crossRotateIndexSet = settings.crossRotateIndices.toHashSet
+    garbageIndices = settings.indices.garbage.toHashSet
+    hardIndices = settings.indices.hard.toHashSet
+    rotateIndices = settings.indices.rotate.toHashSet
+    crossRotateIndices = settings.indices.crossRotate.toHashSet
+    pairPlaceIndices =
+      (0 ..< settings.moveCount).toSeq.toHashSet -
+      sum(garbageIndices, hardIndices, rotateIndices, crossRotateIndices)
+    pairPlaceIndicesSeq = pairPlaceIndices.toSeq.sorted
 
-    pairPlacementStepCount =
-      settings.moveCount - (
-        dropGarbagesIndexSet + dropHardsIndexSet + rotateIndexSet + crossRotateIndexSet
-      ).card
+  for indices in [garbageIndices, hardIndices, rotateIndices, crossRotateIndices]:
+    if indices.anyIt it notin 0 ..< settings.moveCount:
+      return err "out of range index detected"
+  if (garbageIndices * hardIndices * rotateIndices * crossRotateIndices).card > 0:
+    return err "all indices should be disjoint (except `allowDouble`)"
+  if settings.puyoCounts.garbage < garbageIndices.card:
+    return err "garbage puyo count is too small"
+  if settings.puyoCounts.hard < hardIndices.card:
+    return err "hard puyo count is too small"
+  if pairPlaceIndices.card == 0:
+    return err "at least one step should be `PairPlace`"
+  if settings.puyoCounts.colored > Height * Width - 1 + 2 * pairPlaceIndices.card:
+    return err "colored puyo count is too big"
 
+  # steps
   var
     cells = newSeq[Cell]()
-    steps = initDeque[Step](settings.moveCount)
-    garbageCountInField = 0
-    hardCountInField = 0
+    steps = Steps.init settings.moveCount
+    pairPlaceSteps = newSeq[Step](pairPlaceIndices.card)
+    fieldGarbageCount = 0
+    fieldHardCount = 0
+    stepsGarbageCount = 0
+    stepsHardCount = 0
   while true:
-    let
-      garbageCountInSteps =
-        if dropGarbagesIndexSet.card == 0:
-          0
-        else:
-          rng.rand dropGarbagesIndexSet.card .. settings.puyoCounts.garbage
-      hardCountInSteps =
-        if dropHardsIndexSet.card == 0:
-          0
-        else:
-          rng.rand dropHardsIndexSet.card .. settings.puyoCounts.hard
-
-    garbageCountInField = settings.puyoCounts.garbage - garbageCountInSteps
-    hardCountInField = settings.puyoCounts.hard - hardCountInSteps
-
-    # initialize cells
-    let
-      (chainCountMax, extraCount) = settings.puyoCounts.colors.divmod 4
-      chainCounts =
-        ?rng.split(chainCountMax, useCells.len, allowZeroChunk = false).context "Puyo Puyo generation failed"
-      extraCounts =
-        ?rng.split(extraCount, useCells.len, allowZeroChunk = true).context "Puyo Puyo generation failed"
-    cells.assign newSeqOfCap[Cell](
-      settings.puyoCounts.colors + garbageCountInField + hardCountInField
+    # calc count
+    stepsGarbageCount.assign (
+      if garbageIndices.card == 0: 0
+      else: rng.rand garbageIndices.card .. settings.puyoCounts.garbage
     )
-    for i, cell in useCells:
-      cells &= cell.repeat chainCounts[i] * 4 + extraCounts[i]
-    rng.shuffle cells
+    stepsHardCount.assign (
+      if hardIndices.card == 0: 0
+      else: rng.rand hardIndices.card .. settings.puyoCounts.hard
+    )
+    fieldGarbageCount.assign settings.puyoCounts.garbage - stepsGarbageCount
+    fieldHardCount.assign settings.puyoCounts.hard - stepsHardCount
 
-    # steps (pair-placement)
-    let pairPlacementSteps = collect:
-      for i in 1 .. pairPlacementStepCount:
-        Step.init Pair.init(cells[^(2 * i - 1)], cells[^(2 * i)])
-
-    # check steps (pair-placement)
-    if not settings.allowDoubleNotLast:
-      for i in 0 ..< pairPlacementSteps.len.pred:
-        if pairPlacementSteps[i].pair.isDouble:
-          continue
-    if not settings.allowDoubleLast:
-      if pairPlacementSteps[^1].pair.isDouble:
-        continue
-
-    # steps (garbages)
+    # prepare cells
     let
-      garbagesSteps =
-        if dropGarbagesIndexSet.card == 0:
-          newSeq[Step]()
-        else:
-          let garbageCountsInSteps =
-            ?rng.split(
-              garbageCountInSteps, dropGarbagesIndexSet.card, allowZeroChunk = false
-            ).context "Steps generation failed"
-          collect:
-            for total in garbageCountsInSteps:
-              Step.init(rng.generateGarbagesCounts(total), dropHard = false)
-      hardsSteps =
-        if dropHardsIndexSet.card == 0:
-          newSeq[Step]()
-        else:
-          let hardCountsInSteps =
-            ?rng.split(hardCountInSteps, dropHardsIndexSet.card, allowZeroChunk = false).context "Steps generation failed"
-          collect:
-            for total in hardCountsInSteps:
-              Step.init(rng.generateGarbagesCounts(total), dropHard = true)
-
-    # steps
-    var
-      garbagesStepsIndex = 0
-      hardsStepsIndex = 0
-      pairPlacementStepsIndex = 0
-    for stepIndex in 0 ..< settings.moveCount:
-      if stepIndex in dropGarbagesIndexSet:
-        steps.addLast garbagesSteps[garbagesStepsIndex]
-        garbagesStepsIndex.inc
-      elif stepIndex in dropHardsIndexSet:
-        steps.addLast hardsSteps[hardsStepsIndex]
-        hardsStepsIndex.inc
-      elif stepIndex in rotateIndexSet:
-        steps.addLast Step.init(cross = false)
-      elif stepIndex in crossRotateIndexSet:
-        steps.addLast Step.init(cross = true)
-      else:
-        steps.addLast pairPlacementSteps[pairPlacementStepsIndex]
-        pairPlacementStepsIndex.inc
-
-    # fix cells
-    cells.setLen cells.len.pred pairPlacementStepCount * 2
-    cells &= Garbage.repeat garbageCountInField
-    cells &= Hard.repeat hardCountInField
+      (chainCount, extraCount) = settings.puyoCounts.colored.divmod 4
+      chainCounts =
+        ?rng.split(chainCount, useCells.card, allowZeroChunk = false).context "colored puyo count is too small"
+      extraCounts =
+        rng.split(extraCount, useCells.card, allowZeroChunk = true).unsafeValue
+    cells.assign newSeqOfCap[Cell](
+      settings.puyoCounts.colored + fieldGarbageCount + fieldHardCount
+    )
+    var cellIndex = 0
+    for cell in useCells:
+      cells &= cell.repeat chainCounts[cellIndex] * 4 + extraCounts[cellIndex]
+      cellIndex += 1
     rng.shuffle cells
+
+    # pair-placement
+    # NOTE: use the cells from behind since cut them off later
+    pairPlaceSteps.setLen 0
+    for i in 0 ..< pairPlaceIndices.card:
+      let pair = Pair.init(cells[^(2 * i + 2)], cells[^(2 * i + 1)])
+      if pairPlaceIndicesSeq[i] notin settings.indices.allowDouble and pair.isDouble:
+        break
+
+      pairPlaceSteps.add Step.init pair
+    if pairPlaceSteps.len < pairPlaceIndices.card:
+      continue
 
     break
 
-  # field heights
-  var cellCountsInField = newSeq[int]()
-  while true:
-    cellCountsInField.assign(
-      if settings.heights.weights.isOk:
-        ?rng.split(cells.len, settings.heights.weights.unsafeValue).context "Field generation failed"
+  # nuisance
+  let
+    garbageSteps =
+      if garbageIndices.card == 0:
+        newSeq[Step]()
       else:
-        ?rng.split(cells.len, settings.heights.positives.unsafeValue).context "Field generation failed"
-    )
-    if cellCountsInField.allIt(
-      it in 0 .. (when F is TsuField: Height else: WaterHeight)
-    ):
+        collect:
+          for count in rng.split(
+            stepsGarbageCount, garbageIndices.card, allowZeroChunk = false
+          ).unsafeValue:
+            Step.init(rng.generateNuisanceCounts count, hard = false)
+    hardSteps =
+      if hardIndices.card == 0:
+        newSeq[Step]()
+      else:
+        collect:
+          for count in rng.split(
+            stepsHardCount, hardIndices.card, allowZeroChunk = false
+          ).unsafeValue:
+            Step.init(rng.generateNuisanceCounts count, hard = true)
+
+  # add steps
+  var
+    pairPlaceIndex = 0
+    garbageIndex = 0
+    hardIndex = 0
+  for stepIndex in 0 ..< settings.moveCount:
+    if stepIndex in pairPlaceIndices:
+      steps.addLast pairPlaceSteps[pairPlaceIndex]
+      pairPlaceIndex += 1
+    elif stepIndex in garbageIndices:
+      steps.addLast garbageSteps[garbageIndex]
+      garbageIndex += 1
+    elif stepIndex in hardIndices:
+      steps.addLast hardSteps[hardIndex]
+      hardIndex += 1
+    elif stepIndex in rotateIndices:
+      steps.addLast Step.init(cross = false)
+    else: # CrossRotate
+      steps.addLast Step.init(cross = true)
+
+  # prepare cells for field
+  cells.setLen cells.len - pairPlaceIndices.card * 2
+  cells &= Garbage.repeat fieldGarbageCount
+  cells &= Hard.repeat fieldHardCount
+  rng.shuffle cells
+
+  # field heights
+  var fieldCellCounts = newSeq[int]()
+  while true:
+    fieldCellCounts.assign ?rng.split(cells.len, settings.heights).context "invalid heights"
+
+    let heightMax = if settings.rule == Rule.Water: WaterHeight else: Height
+    if fieldCellCounts.allIt it in 0 .. heightMax:
       break
 
   # field
   var
-    fieldArray = Row.initArrayWith Col.initArrayWith None
+    cellArray = Row.initArrayWith Col.initArrayWith Cell.None
     cellIndex = 0
   staticFor(col, Col):
-    for i in 0 ..< cellCountsInField[col.ord]:
-      let row =
-        when F is TsuField:
-          Row.high.pred i
+    for i in 0 ..< fieldCellCounts[col.ord]:
+      cellArray[
+        if settings.rule == Rule.Water:
+          WaterTopRow.succ i
         else:
-          Row.low.succ(AirHeight).succ i
-      fieldArray[row][col].assign cells[cellIndex]
-      cellIndex.inc
-  let field = when F is TsuField: fieldArray.toTsuField else: fieldArray.toWaterField
+          Row.high.pred i
+      ][col].assign cells[cellIndex]
+      cellIndex += 1
+  let field = cellArray.toField settings.rule
 
-  ok PuyoPuyo[F].init(field, steps)
-
-# ------------------------------------------------
-# Goal
-# ------------------------------------------------
-
-const
-  DummyGoalColor = GoalColor.All
-  CellToGoalColor: array[Cell, GoalColor] = [
-    DummyGoalColor, DummyGoalColor, DummyGoalColor, GoalColor.Red, GoalColor.Green,
-    GoalColor.Blue, GoalColor.Yellow, GoalColor.Purple,
-  ]
-
-func generateGoal(
-    rng: var Rand, settings: GenerateSettings, useCells: seq[Cell]
-): Goal =
-  ## Returns a random goal.
-  var goal = Goal.init
-  goal.kind.assign settings.goal.kind
-
-  if goal.kind in ColorKinds:
-    goal.optColor.ok (
-      case settings.goal.color
-      of GenerateGoalColor.All:
-        GoalColor.All
-      of SingleColor:
-        CellToGoalColor[rng.sample useCells]
-      of GenerateGoalColor.Garbages:
-        GoalColor.Garbages
-      of GenerateGoalColor.Colors:
-        GoalColor.Colors
-    )
-
-  if goal.kind in ValKinds:
-    goal.optVal.ok settings.goal.val
-
-  goal.normalized
+  ok PuyoPuyo.init(field, steps)
 
 # ------------------------------------------------
 # Generate
 # ------------------------------------------------
 
-proc generate[F: TsuField or WaterField](
-    rng: var Rand, settings: GenerateSettings
-): StrErrorResult[NazoPuyo[F]] =
+proc generate*(rng: var Rand, settings: GenerateSettings): Pon2Result[NazoPuyo] =
   ## Returns a random Nazo Puyo that has a unique solution.
-  ?settings.isValid.context "Generation failed"
+  # check settings
+  if not settings.goal.isSupported:
+    return err "goal is not supported"
+  if settings.moveCount < 1:
+    return err "moveCount should be positive"
+  if settings.rule != Spinner and settings.indices.rotate.len > 0:
+    return err "`Rotate` is allowed only in the Spinner rule"
+  if settings.rule != CrossSpinner and settings.indices.crossRotate.len > 0:
+    return err "`CrossRotate` is allowed only in the CrossSpinner rule"
 
-  let
-    useCells =
-      (Cell.Red .. Cell.Purple).toSeq.dup(shuffle(rng, _))[0 ..< settings.colorCount]
-    goal = rng.generateGoal(settings, useCells)
-  if not goal.isSupported:
-    return err "Unsupported goal"
+  # cells
+  var useCells = set[Cell]({})
+  if settings.goal.mainOpt.isOk:
+    let main = settings.goal.mainOpt.unsafeValue
+    if main.color in GoalColor.Red .. GoalColor.Purple:
+      useCells.incl main.color.ord.Cell
+  if settings.goal.clearColorOpt.isOk:
+    let clearColor = settings.goal.clearColorOpt.unsafeValue
+    if clearColor in GoalColor.Red .. GoalColor.Purple:
+      useCells.incl clearColor.ord.Cell
+  if settings.colorCount notin useCells.card .. ColoredPuyos.card:
+    return err "colorCount is out of range"
+  if settings.colorCount > useCells.card:
+    var extraCells = ColoredPuyos - useCells
+    useCells.incl extraCells.toSeq.dup(shuffle(rng, _))[
+      0 ..< settings.colorCount - useCells.card
+    ].toSet
+
+  var nazoPuyo = NazoPuyo.init(PuyoPuyo.init, settings.goal)
 
   while true:
-    let puyoPuyoRes = generatePuyoPuyo[F](rng, settings, useCells)
-    if puyoPuyoRes.isErr:
+    nazoPuyo.puyoPuyo.assign ?rng.generatePuyoPuyo(settings, useCells).context "Puyo Puyo generation failed"
+
+    # check field
+    if nazoPuyo.puyoPuyo.field.isDead:
+      continue
+    if nazoPuyo.puyoPuyo.field.canPop:
       continue
 
-    let puyoPuyo = puyoPuyoRes.unsafeValue
-
-    if puyoPuyo.field.isDead:
+    # check connection2
+    if settings.connection2Counts.totalOpt.isOk and
+        nazoPuyo.puyoPuyo.field.connection2.coloredPuyoCount !=
+        settings.connection2Counts.totalOpt.unsafeValue * 2:
       continue
-    if puyoPuyo.field.canPop:
+    if settings.connection2Counts.verticalOpt.isOk and
+        nazoPuyo.puyoPuyo.field.connection2Vertical.coloredPuyoCount !=
+        settings.connection2Counts.verticalOpt.unsafeValue * 2:
       continue
-
-    if settings.connection2Counts.total.isOk and
-        puyoPuyo.field.connection2.colorPuyoCount !=
-        settings.connection2Counts.total.unsafeValue * 2:
-      continue
-    if settings.connection2Counts.vertical.isOk and
-        puyoPuyo.field.connection2Vertical.colorPuyoCount !=
-        settings.connection2Counts.vertical.unsafeValue * 2:
-      continue
-    if settings.connection2Counts.horizontal.isOk and
-        puyoPuyo.field.connection2Horizontal.colorPuyoCount !=
-        settings.connection2Counts.horizontal.unsafeValue * 2:
+    if settings.connection2Counts.horizontalOpt.isOk and
+        nazoPuyo.puyoPuyo.field.connection2Horizontal.coloredPuyoCount !=
+        settings.connection2Counts.horizontalOpt.unsafeValue * 2:
       continue
 
-    if settings.connection3Counts.total.isOk and
-        puyoPuyo.field.connection3.colorPuyoCount !=
-        settings.connection3Counts.total.unsafeValue * 3:
+    # check connection3
+    if settings.connection3Counts.totalOpt.isOk and
+        nazoPuyo.puyoPuyo.field.connection3.coloredPuyoCount !=
+        settings.connection3Counts.totalOpt.unsafeValue * 3:
       continue
-    if settings.connection3Counts.vertical.isOk and
-        puyoPuyo.field.connection3Vertical.colorPuyoCount !=
-        settings.connection3Counts.vertical.unsafeValue * 3:
+    if settings.connection3Counts.verticalOpt.isOk and
+        nazoPuyo.puyoPuyo.field.connection3Vertical.coloredPuyoCount !=
+        settings.connection3Counts.verticalOpt.unsafeValue * 3:
       continue
-    if settings.connection3Counts.horizontal.isOk and
-        puyoPuyo.field.connection3Horizontal.colorPuyoCount !=
-        settings.connection3Counts.horizontal.unsafeValue * 3:
+    if settings.connection3Counts.horizontalOpt.isOk and
+        nazoPuyo.puyoPuyo.field.connection3Horizontal.coloredPuyoCount !=
+        settings.connection3Counts.horizontalOpt.unsafeValue * 3:
       continue
-    if settings.connection3Counts.lShape.isOk and
-        puyoPuyo.field.connection3LShape.colorPuyoCount !=
-        settings.connection3Counts.lShape.unsafeValue * 3:
+    if settings.connection3Counts.lShapeOpt.isOk and
+        nazoPuyo.puyoPuyo.field.connection3LShape.coloredPuyoCount !=
+        settings.connection3Counts.lShapeOpt.unsafeValue * 3:
       continue
 
-    var nazo = NazoPuyo[F].init(puyoPuyo, goal)
-    let answers = nazo.solve(calcAllAnswers = false)
-    if answers.len == 1 and answers[0].len == settings.moveCount:
-      for stepIndex, optPlacement in answers[0]:
-        if nazo.puyoPuyo.steps[stepIndex].kind == PairPlacement:
-          nazo.puyoPuyo.steps[stepIndex].optPlacement.assign optPlacement
+    # check solutions
+    let solutions = nazoPuyo.solve(calcAllSolutions = false)
+    if solutions.len == 1 and solutions[0].len == settings.moveCount:
+      for stepIndex, step in nazoPuyo.puyoPuyo.steps.mpairs:
+        if step.kind == PairPlace:
+          step.placement.assign solutions[0][stepIndex]
 
-      return ok nazo
+      break
 
-  return err "Not reached here"
-
-proc generate*(
-    rng: var Rand, settings: GenerateSettings, rule: Rule
-): StrErrorResult[NazoPuyoWrap] =
-  ## Returns a random Nazo Puyo that has a unique solution.
-  case rule
-  of Tsu:
-    ok NazoPuyoWrap.init ?generate[TsuField](rng, settings)
-  of Water:
-    ok NazoPuyoWrap.init ?generate[WaterField](rng, settings)
+  ok nazoPuyo

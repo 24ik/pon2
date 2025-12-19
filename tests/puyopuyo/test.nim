@@ -3,13 +3,13 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sugar, unittest]
+import std/[unittest]
 import
   ../../src/pon2/core/[
     cell, common, field, fqdn, moveresult, pair, placement, popresult, puyopuyo, rule,
     step,
   ]
-import ../../src/pon2/private/[assign, arrayutils, strutils]
+import ../../src/pon2/private/[arrayutils, strutils]
 import ../../src/pon2/private/core/[binaryfield]
 
 # ------------------------------------------------
@@ -18,27 +18,24 @@ import ../../src/pon2/private/core/[binaryfield]
 
 block: # init
   let
-    fieldT = TsuField.init
-    fieldW = WaterField.init
+    fieldW = Field.init Rule.Water
     steps = [Step.init RedGreen].toDeque
 
-  check PuyoPuyo[TsuField].init(fieldT, steps) ==
-    PuyoPuyo[TsuField](field: fieldT, steps: steps)
-  check PuyoPuyo[WaterField].init(fieldW, steps) ==
-    PuyoPuyo[WaterField](field: fieldW, steps: steps)
-
-  check PuyoPuyo[TsuField].init == PuyoPuyo[TsuField].init(TsuField.init, Steps.init)
-  check PuyoPuyo[WaterField].init ==
-    PuyoPuyo[WaterField].init(WaterField.init, Steps.init)
+  check PuyoPuyo.init(fieldW, steps) == PuyoPuyo(field: fieldW, steps: steps)
+  check PuyoPuyo.init(CrossSpinner) == PuyoPuyo.init(
+    Field.init CrossSpinner, Steps.init
+  )
+  check PuyoPuyo.init == PuyoPuyo.init Rule.Tsu
 
 # ------------------------------------------------
 # Count
 # ------------------------------------------------
 
-block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
+block: # cellCount, puyoCount, colorPuyoCount, nuisancePuyoCount
   let
     fieldT =
       """
+[通]
 rgo...
 .go...
 ..o...
@@ -51,9 +48,10 @@ rgo...
 ......
 ......
 ......
-......""".parseTsuField.unsafeValue
+......""".parseField.unsafeValue
     fieldW =
       """
+[すいちゅう]
 ......
 ......
 ......
@@ -67,30 +65,30 @@ rgo...
 ....hh
 .....p
 .....p
-.....p""".parseWaterField.unsafeValue
+.....p""".parseField.unsafeValue
     steps = [
-      Step.init(RedGreen),
+      Step.init RedGreen,
       Step.init(BlueBlue, Down3),
-      Step.init([Col0: 2, 0, 0, 1, 0, 1], true),
-      Step.init([Col0: 0, 0, 0, 0, 1, 0], false),
+      Step.init([Col0: 2, 0, 0, 1, 0, 1], hard = true),
+      Step.init [Col0: 0, 0, 0, 0, 1, 0],
       Step.init(cross = false),
       Step.init(cross = true),
     ].toDeque
 
-    puyoT = PuyoPuyo[TsuField].init(fieldT, steps)
-    puyoW = PuyoPuyo[WaterField].init(fieldW, steps)
+    puyoT = PuyoPuyo.init(fieldT, steps)
+    puyoW = PuyoPuyo.init(fieldW, steps)
 
   check puyoT.cellCount(Red) == 2
   check puyoT.cellCount(Garbage) == 4
   check puyoT.puyoCount == 15
-  check puyoT.colorPuyoCount == 7
-  check puyoT.garbagesCount == 8
+  check puyoT.coloredPuyoCount == 7
+  check puyoT.nuisancePuyoCount == 8
 
   check puyoW.cellCount(Purple) == 3
   check puyoW.cellCount(Hard) == 6
   check puyoW.puyoCount == 14
-  check puyoW.colorPuyoCount == 7
-  check puyoW.garbagesCount == 7
+  check puyoW.coloredPuyoCount == 7
+  check puyoW.nuisancePuyoCount == 7
 
 # ------------------------------------------------
 # Move
@@ -99,9 +97,10 @@ rgo...
 block: # move
   let
     stepsBefore = [Step.init(BlueGreen, Right1)].toDeque
-    stepsAfter = Deque[Step].init
+    stepsAfter = Steps.init
     fieldBefore =
       """
+[だいかいてん]
 ......
 ......
 ......
@@ -114,9 +113,10 @@ block: # move
 .b....
 .b....
 .bgrr.
-hggoo.""".parseTsuField.unsafeValue
+hggoo.""".parseField.unsafeValue
     fieldAfter =
       """
+[だいかいてん]
 ......
 ......
 ......
@@ -129,21 +129,21 @@ hggoo.""".parseTsuField.unsafeValue
 ......
 ......
 ....r.
-o..ro.""".parseTsuField.unsafeValue
-  var puyoPuyo = PuyoPuyo[TsuField].init(fieldBefore, stepsBefore)
+o..ro.""".parseField.unsafeValue
+  var puyoPuyo = PuyoPuyo.init(fieldBefore, stepsBefore)
 
   let
-    moveRes = puyoPuyo.move false
+    moveResult = puyoPuyo.move(calcConnection = false)
     popCounts: array[Cell, int] = [0, 0, 1, 0, 4, 4, 0, 0]
 
   check puyoPuyo.field == fieldAfter
   check puyoPuyo.steps == stepsAfter
-  check moveRes == MoveResult.init(1, popCounts, 1, @[popCounts], @[1])
+  check moveResult == MoveResult.init(1, popCounts, 1, @[popCounts], @[1])
 
-  let moveRes2 = puyoPuyo.move
+  let moveResult2 = puyoPuyo.move
   check puyoPuyo.field == fieldAfter
   check puyoPuyo.steps == stepsAfter
-  check moveRes2 == MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
+  check moveResult2 == MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[], @[])
 
 # ------------------------------------------------
 # Puyo Puyo <-> string
@@ -154,6 +154,7 @@ block: # `$`, parsePuyoPuyo
     let
       str =
         """
+[クロスかいてん]
 r.....
 .g....
 ..b...
@@ -172,10 +173,10 @@ by|
 (0,1,0,0,0,2)
 rg|23
 [3,0,0,0,4,0]
-O
-X
+R
+C
 pp|4N"""
-      puyoPuyo = parsePuyoPuyo[TsuField](str).unsafeValue
+      puyoPuyo = str.parsePuyoPuyo.unsafeValue
 
     check $puyoPuyo == str
 
@@ -183,6 +184,7 @@ pp|4N"""
     let
       str =
         """
+[通]
 r.....
 .g....
 ..b...
@@ -198,7 +200,7 @@ r.....
 ......
 ------
 """
-      puyoPuyo = parsePuyoPuyo[TsuField](str).unsafeValue
+      puyoPuyo = str.parsePuyoPuyo.unsafeValue
 
     check $puyoPuyo == str
 
@@ -211,6 +213,7 @@ block: # toUriQuery, parsePuyoPuyo
     let
       str =
         """
+[通]
 ......
 ......
 ......
@@ -228,26 +231,24 @@ block: # toUriQuery, parsePuyoPuyo
 by|
 (0,1,0,0,0,1)
 rg|23"""
-      puyoPuyo = parsePuyoPuyo[TsuField](str).unsafeValue
+      puyoPuyo = str.parsePuyoPuyo.unsafeValue
 
-      queryPon2 = "field=t_op......yg....b.r&steps=byo0_1_0_0_0_1org23"
+      queryPon2 = "field=0_op......yg....b.r&steps=byo0_1_0_0_0_1org23"
       queryIshikawa = "6E004g031_E1ahce"
 
-    check puyoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check puyoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check puyoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check puyoPuyo.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
-    check parsePuyoPuyo[TsuField](queryPon2, Pon2) ==
-      StrErrorResult[PuyoPuyo[TsuField]].ok puyoPuyo
-    check parsePuyoPuyo[TsuField](queryIshikawa, Ishikawa) ==
-      StrErrorResult[PuyoPuyo[TsuField]].ok puyoPuyo
-    check parsePuyoPuyo[TsuField](queryIshikawa, Ips) ==
-      StrErrorResult[PuyoPuyo[TsuField]].ok puyoPuyo
+    check queryPon2.parsePuyoPuyo(Pon2) == Pon2Result[PuyoPuyo].ok puyoPuyo
+    check queryIshikawa.parsePuyoPuyo(IshikawaPuyo) == Pon2Result[PuyoPuyo].ok puyoPuyo
+    check queryIshikawa.parsePuyoPuyo(Ips) == Pon2Result[PuyoPuyo].ok puyoPuyo
 
   block: # empty steps
     let
       str =
         """
+[通]
 ......
 ......
 ......
@@ -263,69 +264,60 @@ rg|23"""
 .....r
 ------
 """
-      puyoPuyo = parsePuyoPuyo[TsuField](str).unsafeValue
+      puyoPuyo = str.parsePuyoPuyo.unsafeValue
 
-      queryPon2 = "field=t_r&steps"
-      queryPon22 = "field=t_r&steps="
-      queryPon23 = "field=t_r"
+      queryPon2 = "field=0_r&steps"
+      queryPon22 = "field=0_r&steps="
+      queryPon23 = "field=0_r"
       queryIshikawa = "1"
       queryIshikawa2 = "1_"
 
-    check puyoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check puyoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check puyoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check puyoPuyo.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
     for query in [queryPon2, queryPon22, queryPon23]:
-      check parsePuyoPuyo[TsuField](query, Pon2) ==
-        StrErrorResult[PuyoPuyo[TsuField]].ok puyoPuyo
+      check query.parsePuyoPuyo(Pon2) == Pon2Result[PuyoPuyo].ok puyoPuyo
     for query in [queryIshikawa, queryIshikawa2]:
-      check parsePuyoPuyo[TsuField](query, Ishikawa) ==
-        StrErrorResult[PuyoPuyo[TsuField]].ok puyoPuyo
-      check parsePuyoPuyo[TsuField](query, Ips) ==
-        StrErrorResult[PuyoPuyo[TsuField]].ok puyoPuyo
+      check query.parsePuyoPuyo(IshikawaPuyo) == Pon2Result[PuyoPuyo].ok puyoPuyo
+      check query.parsePuyoPuyo(Ips) == Pon2Result[PuyoPuyo].ok puyoPuyo
 
   block: # empty field
     let
-      puyoPuyo = PuyoPuyo[TsuField].init(TsuField.init, [Step.init GreenBlue].toDeque)
+      puyoPuyo = PuyoPuyo.init(Field.init, [Step.init GreenBlue].toDeque)
 
-      queryPon2 = "field=t_&steps=gb"
+      queryPon2 = "field=0_&steps=gb"
       queryPon22 = "steps=gb"
       queryIshikawa = "_q1"
 
-    check puyoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check puyoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check puyoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check puyoPuyo.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
     for query in [queryPon2, queryPon22]:
-      check parsePuyoPuyo[TsuField](query, Pon2) ==
-        StrErrorResult[PuyoPuyo[TsuField]].ok puyoPuyo
-    check parsePuyoPuyo[TsuField](queryIshikawa, Ishikawa) ==
-      StrErrorResult[PuyoPuyo[TsuField]].ok puyoPuyo
-    check parsePuyoPuyo[TsuField](queryIshikawa, Ips) ==
-      StrErrorResult[PuyoPuyo[TsuField]].ok puyoPuyo
+      check query.parsePuyoPuyo(Pon2) == Pon2Result[PuyoPuyo].ok puyoPuyo
+    check queryIshikawa.parsePuyoPuyo(IshikawaPuyo) == Pon2Result[PuyoPuyo].ok puyoPuyo
+    check queryIshikawa.parsePuyoPuyo(Ips) == Pon2Result[PuyoPuyo].ok puyoPuyo
 
   block: # empty field and steps
     let
-      puyoPuyo = PuyoPuyo[TsuField].init
+      puyoPuyo = PuyoPuyo.init
 
-      queryPon2 = "field=t_&steps"
-      queryPon22 = "field=t_&steps="
-      queryPon23 = "field=t_"
+      queryPon2 = "field=0_&steps"
+      queryPon22 = "field=0_&steps="
+      queryPon23 = "field=0_"
       queryPon24 = "steps"
       queryPon25 = "steps="
       queryPon26 = ""
       queryIshikawa = ""
       queryIshikawa2 = "_"
 
-    check puyoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check puyoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check puyoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check puyoPuyo.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
     for query in [queryPon2, queryPon22, queryPon23, queryPon24, queryPon25, queryPon26]:
-      check parsePuyoPuyo[TsuField](query, Pon2) ==
-        StrErrorResult[PuyoPuyo[TsuField]].ok puyoPuyo
+      check query.parsePuyoPuyo(Pon2) == Pon2Result[PuyoPuyo].ok puyoPuyo
     for query in [queryIshikawa, queryIshikawa2]:
-      check parsePuyoPuyo[TsuField](query, Ishikawa) ==
-        StrErrorResult[PuyoPuyo[TsuField]].ok puyoPuyo
-      check parsePuyoPuyo[TsuField](query, Ips) ==
-        StrErrorResult[PuyoPuyo[TsuField]].ok puyoPuyo
+      check query.parsePuyoPuyo(IshikawaPuyo) == Pon2Result[PuyoPuyo].ok puyoPuyo
+      check query.parsePuyoPuyo(Ips) == Pon2Result[PuyoPuyo].ok puyoPuyo

@@ -18,28 +18,40 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
+
   export vdom
 
   proc cellBackgroundColor[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, row: Row, col: Col, editable: bool
   ): Color =
     ## Returns the cell's background color.
+    let rule = self.derefSimulator(helper).rule
+
     if editable and not helper.mobile and self.derefSimulator(helper).editData.focusField and
         self.derefSimulator(helper).editData.field == (row, col):
       SelectColor
     elif row == Row.low:
       GhostColor
-    elif row.ord + WaterHeight >= Height and
-        self.derefSimulator(helper).nazoPuyoWrap.rule == Water:
+    elif rule == Rule.Water and row >= WaterTopRow:
       WaterColor
     else:
-      DefaultColor
+      let isDead =
+        case Behaviours[rule].dead
+        of DeadRule.Tsu:
+          row == Row1 and col == Col2
+        of Fever:
+          row == Row1 and col in {Col2, Col3}
+        of DeadRule.Water:
+          row == AirBottomRow
+      if isDead: DeadColor else: DefaultColor
 
   func initBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, row: Row, col: Col
   ): () -> void =
     ## Returns the handler for clicking buttons.
-    # NOTE: cannot inline due to karax's limitation
     () => self.derefSimulator(helper).writeCell(row, col)
 
   proc toFieldVNode*[S: Simulator or Studio or Marathon](
@@ -48,16 +60,14 @@ when defined(js) or defined(nimsuggest):
     ## Returns the field node.
     let
       editable = not cameraReady and self.derefSimulator(helper).mode in EditModes
-      nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      arr = nazoWrap.unwrapNazoPuyo:
-        it.field.toArray
-      tableBorder = (StyleAttr.border, "1px gray solid".cstring)
+      cellArray = self.derefSimulator(helper).nazoPuyo.puyoPuyo.field.toArray
+      tableBorder = (StyleAttr.border, "1px gray solid".kstring)
       tableStyle =
         if editable:
           style(
             tableBorder,
-            (StyleAttr.borderCollapse, "separate".cstring),
-            (StyleAttr.borderSpacing, "1px".cstring),
+            (StyleAttr.borderCollapse, "separate".kstring),
+            (StyleAttr.borderSpacing, "1px".kstring),
           )
         else:
           style(tableBorder)
@@ -68,10 +78,10 @@ when defined(js) or defined(nimsuggest):
           tr:
             for col in Col:
               let
-                imgSrc = arr[row][col].cellImgSrc
+                imgSrc = cellArray[row][col].cellImgSrc
                 cellStyle = style(
                   StyleAttr.backgroundColor,
-                  self.cellBackgroundColor(helper, row, col, editable).toHtmlRgba.cstring,
+                  self.cellBackgroundColor(helper, row, col, editable).toHtmlRgba.kstring,
                 )
 
               td:

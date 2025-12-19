@@ -4,7 +4,7 @@
 {.experimental: "views".}
 
 import std/[sugar, unittest]
-import ../../src/pon2/core/[common, fqdn, placement]
+import ../../src/pon2/core/[fqdn, placement]
 
 # ------------------------------------------------
 # Constructor
@@ -12,12 +12,7 @@ import ../../src/pon2/core/[common, fqdn, placement]
 
 block: # init
   check Placement.init(Col5, Left) == Left5
-
-  let dir = Down
-  check Placement.init(Col2, dir) == Down2
-
-  check Placement.init == Placement.low
-  check OptPlacement.init == NonePlacement
+  check Placement.init == None
 
 # ------------------------------------------------
 # Property
@@ -33,26 +28,26 @@ block: # pivotCol, rotorCol, rotorDir
 # ------------------------------------------------
 
 block: # movedRight, movedLeft, moveRight, moveLeft
-  for (plcmt, answer) in [(Right2, Right3), (Left5, Left5)]:
-    check plcmt.movedRight == answer
-    check plcmt.dup(moveRight) == answer
+  for (placement, answer) in [(Right2, Right3), (Left5, Left5), (None, None)]:
+    check placement.movedRight == answer
+    check placement.dup(moveRight) == answer
 
-  for (plcmt, answer) in [(Down3, Down2), (Up0, Up0)]:
-    check plcmt.movedLeft == answer
-    check plcmt.dup(moveLeft) == answer
+  for (placement, answer) in [(Down3, Down2), (Up0, Up0), (None, None)]:
+    check placement.movedLeft == answer
+    check placement.dup(moveLeft) == answer
 
 # ------------------------------------------------
 # Rotate
 # ------------------------------------------------
 
 block: # rotatedRight, rotatedLeft, rotateRight, rotateLeft
-  for (plcmt, answer) in [(Left4, Up4), (Up5, Right4)]:
-    check plcmt.rotatedRight == answer
-    check plcmt.dup(rotateRight) == answer
+  for (placement, answer) in [(Left4, Up4), (Up5, Right4), (None, None)]:
+    check placement.rotatedRight == answer
+    check placement.dup(rotateRight) == answer
 
-  for (plcmt, answer) in [(Down4, Right4), (Up0, Left1)]:
-    check plcmt.rotatedLeft == answer
-    check plcmt.dup(rotateLeft) == answer
+  for (placement, answer) in [(Down4, Right4), (Up0, Left1), (None, None)]:
+    check placement.rotatedLeft == answer
+    check placement.dup(rotateLeft) == answer
 
 # ------------------------------------------------
 # Placement <-> string / URI
@@ -60,59 +55,25 @@ block: # rotatedRight, rotatedLeft, rotateRight, rotateLeft
 
 block: # Placement <-> string
   check $Right2 == "34"
+  check "34".parsePlacement == Pon2Result[Placement].ok Right2
 
-  let plcmtRes = "34".parsePlacement
-  check plcmtRes == StrErrorResult[Placement].ok Right2
+  check $None == ""
+  check "".parsePlacement == Pon2Result[Placement].ok None
 
-  check "".parsePlacement.isErr
   check "33".parsePlacement.isErr
-
-block: # OptPlacement <-> string
-  check $OptPlacement.ok(Down5) == "6S"
-  check $NonePlacement == ""
-
-  let optPlcmtRes = "6S".parseOptPlacement
-  check optPlcmtRes == StrErrorResult[OptPlacement].ok OptPlacement.ok Down5
-
-  let optPlcmtRes2 = "".parseOptPlacement
-  check optPlcmtRes2 == StrErrorResult[OptPlacement].ok NonePlacement
-
-  check "6s".parseOptPlacement.isErr
 
 block: # Placement <-> URI
   check Right2.toUriQuery(Pon2) == "34"
-  for fqdn in [Ishikawa, Ips]:
-    check Right2.toUriQuery(fqdn) == "g"
+  check "34".parsePlacement(Pon2) == Pon2Result[Placement].ok Right2
+  check None.toUriQuery(Pon2) == ""
+  check "".parsePlacement(Pon2) == Pon2Result[Placement].ok None
 
-  let plcmtRes = "34".parsePlacement Pon2
-  check plcmtRes == StrErrorResult[Placement].ok Right2
-  for fqdn in [Ishikawa, Ips]:
-    let plcmtRes2 = "g".parsePlacement(fqdn)
-    check plcmtRes2 == StrErrorResult[Placement].ok Right2
+  for fqdn in [IshikawaPuyo, Ips]:
+    check Right2.toUriQuery(fqdn) == "g"
+    check "g".parsePlacement(fqdn) == Pon2Result[Placement].ok Right2
+    check None.toUriQuery(fqdn) == "1"
+    check "1".parsePlacement(fqdn) == Pon2Result[Placement].ok None
 
   check "g".parsePlacement(Pon2).isErr
-  check "34".parsePlacement(Ishikawa).isErr
-  check "34".parsePlacement(Ips).isErr
-
-block: # OptPlacement <-> URI
-  check OptPlacement.ok(Right2).toUriQuery(Pon2) == "34"
-  check NonePlacement.toUriQuery(Pon2) == ""
-  for fqdn in [Ishikawa, Ips]:
-    check OptPlacement.ok(Right2).toUriQuery(fqdn) == "g"
-    check NonePlacement.toUriQuery(fqdn) == "1"
-
-  let
-    optPlcmtRes = "34".parseOptPlacement Pon2
-    optPlcmtRes2 = "".parseOptPlacement Pon2
-  check optPlcmtRes == StrErrorResult[OptPlacement].ok OptPlacement.ok Right2
-  check optPlcmtRes2 == StrErrorResult[OptPlacement].ok NonePlacement
-  for fqdn in [Ishikawa, Ips]:
-    let
-      optPlcmtRes3 = "g".parseOptPlacement fqdn
-      optPlcmtRes4 = "1".parseOptPlacement fqdn
-    check optPlcmtRes3 == StrErrorResult[OptPlacement].ok OptPlacement.ok Right2
-    check optPlcmtRes4 == StrErrorResult[OptPlacement].ok NonePlacement
-
-  check "1".parseOptPlacement(Pon2).isErr
-  check "".parseOptPlacement(Ishikawa).isErr
-  check "".parseOptPlacement(Ips).isErr
+  check "34".parsePlacement(IshikawaPuyo).isErr
+  check "".parsePlacement(Ips).isErr

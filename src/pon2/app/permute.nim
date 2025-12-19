@@ -23,107 +23,96 @@ when defined(js) or defined(nimsuggest):
 
 func allStepsSeq(
     steps: Steps,
+    fixIndices, allowDoubleIndices: openArray[int],
     stepIndex: int,
-    fixIndices: openArray[int],
-    allowDoubleNotLast, allowDoubleLast: bool,
     cellCounts: array[Cell, int],
 ): seq[Steps] =
   ## Returns all possible steps in ascending order that can be obtained by permuting
-  ## puyos contained in the steps.
-  ## Non-`PairPlacement` steps are left as they are.
-  ## Note that Swapped pair may give a different answer but this function does not
+  ## puyos after `stepIndex` contained in the steps.
+  ## Non-`PairPlace` steps are left as they are.
+  ## Note that swapped pairs may give different solutions but this function does not
   ## consider it.
+  ## `cellCounts` should be set for colored puyos.
   if stepIndex == steps.len:
-    return @[Steps.init(steps.len)]
+    return @[Steps.init steps.len]
 
   let step = steps[stepIndex]
-  if step.kind != PairPlacement:
-    return steps.allStepsSeq(
-      stepIndex.succ, fixIndices, allowDoubleNotLast, allowDoubleLast, cellCounts
-    ).mapIt it.dup(addFirst(_, step))
+  if step.kind != PairPlace:
+    return steps.allStepsSeq(fixIndices, allowDoubleIndices, stepIndex + 1, cellCounts).mapIt it.dup(
+      addFirst(step)
+    )
 
-  # NOTE: `staticFor` is preferable but we use normal `for` since
-  # we want to use `continue` for easy implementation
+  # NOTE: we use standard for-loop instead of `staticFor` for simple implementation
   var stepsSeq = newSeq[Steps]()
   for pivotCell in Cell.Red .. Cell.Purple:
     if cellCounts[pivotCell] == 0:
       continue
 
-    var newCellCountsMid = cellCounts
-    newCellCountsMid[pivotCell].dec
+    var newCellCountsBase = cellCounts
+    newCellCountsBase[pivotCell] -= 1
 
     for rotorCell in pivotCell .. Cell.Purple:
-      if newCellCountsMid[rotorCell] == 0:
+      if newCellCountsBase[rotorCell] == 0:
+        continue
+      if pivotCell == rotorCell and stepIndex notin allowDoubleIndices:
         continue
 
-      if pivotCell == rotorCell:
-        if stepIndex == steps.len.pred:
-          if not allowDoubleLast:
-            continue
-        else:
-          if not allowDoubleNotLast:
-            continue
-
-      var newCellCounts = newCellCountsMid
-      newCellCounts[rotorCell].dec
+      var newCellCounts = newCellCountsBase
+      newCellCounts[rotorCell] -= 1
 
       let
-        newPairMid = Pair.init(pivotCell, rotorCell)
+        newPairBase = Pair.init(pivotCell, rotorCell)
         newPair: Pair
       if stepIndex in fixIndices:
-        if step.pair notin {newPairMid, newPairMid.swapped}:
+        if step.pair notin {newPairBase, newPairBase.swapped}:
           continue
 
         newPair = step.pair
       else:
-        newPair = newPairMid
+        newPair = newPairBase
 
       stepsSeq &=
-        steps.allStepsSeq(
-          stepIndex.succ, fixIndices, allowDoubleNotLast, allowDoubleLast, newCellCounts
-        ).mapIt it.dup(addFirst(_, Step.init newPair))
+        steps.allStepsSeq(fixIndices, allowDoubleIndices, stepIndex + 1, newCellCounts).mapIt it.dup(
+          addFirst(Step.init newPair)
+        )
 
   stepsSeq
 
 func allStepsSeq(
-    steps: Steps, fixIndices: openArray[int], allowDoubleNotLast, allowDoubleLast: bool
+    steps: Steps, fixIndices, allowDoubleIndices: openArray[int]
 ): seq[Steps] =
   ## Returns all possible steps in ascending order that can be obtained by permuting
   ## puyos contained in the steps.
-  ## Non-`PairPlacement` steps are left as they are.
-  ## Note that Swapped pair may give a different answer but this function does not
+  ## Non-`PairPlace` steps are left as they are.
+  ## Note that Swapped pair may give a different solution but this function does not
   ## consider it.
   var cellCounts {.noinit.}: array[Cell, int]
-  staticFor(cell2, Cell.Red .. Cell.Purple):
+  staticFor(cell2, ColoredPuyos):
     cellCounts[cell2].assign steps.cellCount cell2
 
-  steps.allStepsSeq(0, fixIndices, allowDoubleNotLast, allowDoubleLast, cellCounts)
+  steps.allStepsSeq(fixIndices, allowDoubleIndices, 0, cellCounts)
 
 # ------------------------------------------------
 # Permute
 # ------------------------------------------------
 
-proc permute*[F: TsuField or WaterField](
-    nazo: NazoPuyo[F],
-    fixIndices: openArray[int],
-    allowDoubleNotLast, allowDoubleLast: bool,
-): seq[NazoPuyo[F]] =
+proc permute*(
+    self: NazoPuyo, fixIndices, allowDoubleIndices: openArray[int]
+): seq[NazoPuyo] =
   ## Returns a sequence of Nazo Puyos that is obtained by permuting steps and has a
-  ## unique answer.
+  ## unique solution.
   collect:
-    for steps in nazo.puyoPuyo.steps.allStepsSeq(
-      fixIndices, allowDoubleNotLast, allowDoubleLast
-    ):
-      var nazo2 = nazo
-      nazo2.puyoPuyo.steps.assign steps
+    for steps in self.puyoPuyo.steps.allStepsSeq(fixIndices, allowDoubleIndices):
+      var nazoPuyo = self
+      nazoPuyo.puyoPuyo.steps.assign steps
 
-      let answers = nazo2.solve(calcAllAnswers = false)
-      if answers.len == 1:
-        for stepIndex, step in nazo2.puyoPuyo.steps.mpairs:
-          if step.kind == PairPlacement:
-            step.optPlacement.assign answers[0][stepIndex]
+      let solutions = nazoPuyo.solve(calcAllSolutions = false)
+      if solutions.len == 1:
+        for stepIndex, step in nazoPuyo.puyoPuyo.steps.mpairs:
+          if step.kind == PairPlace:
+            step.placement.assign solutions[0][stepIndex]
 
-        nazo2
+        nazoPuyo
 
 # ------------------------------------------------
 # Permute - Async
@@ -131,36 +120,34 @@ proc permute*[F: TsuField or WaterField](
 
 when defined(js) or defined(nimsuggest):
   when not defined(pon2.build.worker):
-    proc asyncPermute*[F: TsuField or WaterField](
-        nazo: NazoPuyo[F],
-        fixIndices: openArray[int],
-        allowDoubleNotLast, allowDoubleLast: bool,
+    proc asyncPermute*(
+        self: NazoPuyo,
+        fixIndices, allowDoubleIndices: openArray[int],
         progressRef: ref tuple[now, total: int] = nil,
-    ): Future[seq[NazoPuyo[F]]] {.async.} =
+    ): Future[seq[NazoPuyo]] {.async.} =
       ## Permutes the Nazo Puyo asynchronously with web workers.
       ## This function requires that the field is settled.
-      let stepsSeq =
-        nazo.puyoPuyo.steps.allStepsSeq(fixIndices, allowDoubleNotLast, allowDoubleLast)
+      let stepsSeq = self.puyoPuyo.steps.allStepsSeq(fixIndices, allowDoubleIndices)
       if not progressRef.isNil:
         if stepsSeq.len == 0:
           progressRef[] = (1, 1)
         else:
           progressRef[] = (0, stepsSeq.len)
 
-      var nazos = newSeq[NazoPuyo[F]]()
+      var nazoPuyos = newSeq[NazoPuyo]()
       for steps in stepsSeq:
-        var nazo2 = nazo
-        nazo2.puyoPuyo.steps.assign steps
+        var nazoPuyo = self
+        nazoPuyo.puyoPuyo.steps.assign steps
 
-        let answers = await nazo2.asyncSolve(calcAllAnswers = false)
-        if answers.len == 1:
-          for stepIndex, step in nazo2.puyoPuyo.steps.mpairs:
-            if step.kind == PairPlacement:
-              step.optPlacement.assign answers[0][stepIndex]
+        let solutions = await nazoPuyo.asyncSolve(calcAllSolutions = false)
+        if solutions.len == 1:
+          for stepIndex, step in nazoPuyo.puyoPuyo.steps.mpairs:
+            if step.kind == PairPlace:
+              step.placement.assign solutions[0][stepIndex]
 
-          nazos.add nazo2
+          nazoPuyos.add nazoPuyo
 
         if not progressRef.isNil:
-          progressRef[].now.inc
+          progressRef[].now += 1
 
-      return nazos
+      return nazoPuyos

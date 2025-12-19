@@ -27,7 +27,7 @@ const
 
 import std/[bitops, typetraits]
 import stew/[bitops2]
-import ./[arrayutils, assign, staticfor]
+import ./[assign, staticfor]
 
 export bitops, bitops2
 
@@ -59,52 +59,13 @@ when ClmulAvailable:
 # Cast
 # ------------------------------------------------
 
-func asUnsigned(x: int8): uint8 {.inline, noinit.} =
+func castUnsigned[T: SomeSignedInt](x: T): T.toUnsigned {.inline, noinit.} =
   ## Returns the unsigned integer casted from the argument.
-  cast[uint8](x)
+  cast[T.toUnsigned](x)
 
-func asUnsigned(x: int16): uint16 {.inline, noinit.} =
-  ## Returns the unsigned integer casted from the argument.
-  cast[uint16](x)
-
-func asUnsigned(x: int32): uint32 {.inline, noinit.} =
-  ## Returns the unsigned integer casted from the argument.
-  cast[uint32](x)
-
-func asUnsigned(x: int64): uint64 {.inline, noinit.} =
-  ## Returns the unsigned integer casted from the argument.
-  cast[uint64](x)
-
-func asUnsigned(x: int): uint {.inline, noinit.} =
-  ## Returns the unsigned integer casted from the argument.
-  cast[uint](x)
-
-func asSigned(x: uint8): int8 {.inline, noinit.} =
+func castSigned[T: SomeUnsignedInt](x: T): T.toSigned {.inline, noinit.} =
   ## Returns the signed integer casted from the argument.
-  cast[int8](x)
-
-func asSigned(x: uint16): int16 {.inline, noinit.} =
-  ## Returns the signed integer casted from the argument.
-  cast[int16](x)
-
-func asSigned(x: uint32): int32 {.inline, noinit.} =
-  ## Returns the signed integer casted from the argument.
-  cast[int32](x)
-
-func asSigned(x: uint64): int64 {.inline, noinit.} =
-  ## Returns the signed integer casted from the argument.
-  cast[int64](x)
-
-func asSigned(x: uint): int {.inline, noinit.} =
-  ## Returns the signed integer casted from the argument.
-  cast[int](x)
-
-# ------------------------------------------------
-# Operator
-# ------------------------------------------------
-
-func `-`[T: SomeUnsignedInt](x: T): T {.inline, noinit.} =
-  (not x).succ
+  cast[T.toSigned](x)
 
 # ------------------------------------------------
 # Bitwise-and
@@ -209,7 +170,7 @@ else:
 
 func `*~`*[T: SomeSignedInt](x1, x2: T): T {.inline, noinit.} =
   ## Bitwise-andnot operation; returns `x1 and (not x2)`.
-  (x1.asUnsigned *~ x2.asUnsigned).asSigned
+  (x1.castUnsigned *~ x2.castUnsigned).castSigned
 
 # ------------------------------------------------
 # Mask
@@ -217,7 +178,7 @@ func `*~`*[T: SomeSignedInt](x1, x2: T): T {.inline, noinit.} =
 
 func toMaskNim[T: SomeUnsignedInt](slice: Slice[int]): T {.inline, noinit.} =
   ## Returns the mask converted from the slice.
-  const MsbIndex = (T.sizeof shl 3).pred
+  const MsbIndex = T.sizeof shl 3 - 1
 
   (T.high shr (MsbIndex - slice.b)) and (T.high shl slice.a)
 
@@ -280,7 +241,7 @@ else:
 
 func toMask2Signed[T: SomeSignedInt](slice: Slice[int]): T {.inline, noinit.} =
   ## Returns the mask converted from the slice.
-  toMask2Unsigned[T.toUnsigned](slice).asSigned
+  toMask2Unsigned[T.toUnsigned](slice).castSigned
 
 func toMask2*[T: SomeInteger](slice: Slice[int]): T {.inline, noinit.} =
   ## Returns the mask converted from the slice.
@@ -295,7 +256,7 @@ func toMask2*[T: SomeInteger](slice: Slice[int]): T {.inline, noinit.} =
 
 func bextrNim[T: SomeInteger](val: T, start, length: uint32): T {.inline, noinit.} =
   ## Bit field extract.
-  (val shr start) and (1.T shl length).pred
+  (val shr start) and (1.T shl length - 1)
 
 when Bmi1Available:
   func bextr*(val: uint64, start, length: uint32): uint64 {.inline, noinit.} =
@@ -330,7 +291,7 @@ else:
 
 func bextr*[T: SomeSignedInt](val: T, start, length: uint32): T {.inline, noinit.} =
   ## Bit field extract.
-  val.asUnsigned.bextrNim(start, length).asSigned
+  val.castUnsigned.bextrNim(start, length).castSigned
 
 # ------------------------------------------------
 # BLSMSK
@@ -344,7 +305,7 @@ func blsmskNim[T: SomeSignedInt](val: T): T {.inline, noinit.} =
 func blsmskNim[T: SomeUnsignedInt](val: T): T {.inline, noinit.} =
   ## Returns the mask up to the lowest set bit.
   ## If `val` is zero, all bits of the result are one.
-  val.asSigned.blsmskNim.asUnsigned
+  val.castSigned.blsmskNim.castUnsigned
 
 when Bmi1Available:
   func blsmsk*(val: uint64): uint64 {.inline, noinit.} =
@@ -368,7 +329,7 @@ when Bmi1Available:
   func blsmsk*[T: SomeSignedInt](val: T): T {.inline, noinit.} =
     ## Returns the mask up to the lowest set bit.
     ## If `val` is zero, all bits of the result are one.
-    val.asUnsigned.blsmsk.asSigned
+    val.castUnsigned.blsmsk.castSigned
 else:
   func blsmsk*[T: SomeInteger](val: T): T {.inline, noinit.} =
     ## Returns the mask up to the lowest set bit.
@@ -405,7 +366,7 @@ func tzcnt*[T: SomeUnsignedInt](val: T): int {.inline, noinit.} =
 func tzcnt*[T: SomeSignedInt](val: T): int {.inline, noinit.} =
   ## Returns the number of trailing zeros.
   ## If `val` is zero, returns the number of bits of `T`.
-  val.asUnsigned.tzcnt
+  val.castUnsigned.tzcnt
 
 # ------------------------------------------------
 # PEXT
@@ -418,7 +379,7 @@ const
   BitCount16 = 4
 
 type PextMaskNim[T: uint64 or uint32 or uint16] = object ## Mask used by PEXT.
-  mask: T
+  val: T
   bits: array[
     when T is uint64:
       BitCount64
@@ -434,30 +395,27 @@ func initPureNim[T: uint64 or uint32 or uint16](
 ): M {.inline, noinit.} =
   ## Returns the PEXT mask.
   ## This function works on any context.
-  const
-    BitCount =
-      when T is uint64:
-        BitCount64
-      elif T is uint32:
-        BitCount32
-      else:
-        BitCount16
-    ZeroArray = BitCount.initArrayWith 0.T
+  const BitCount =
+    when T is uint64:
+      BitCount64
+    elif T is uint32:
+      BitCount32
+    else:
+      BitCount16
 
   var
-    pextMask = M(mask: mask, bits: ZeroArray)
+    bits {.noinit.}: array[BitCount, T]
     lastMask = not mask
-  staticFor(i, 0 ..< BitCount.pred):
+  staticFor(i, 0 ..< BitCount - 1):
     var bit = lastMask shl 1
     staticFor(j, 0 ..< BitCount):
       bit.assign bit xor (bit shl (1 shl j))
 
-    pextMask.bits[i].assign bit
+    bits[i].assign bit
     lastMask.assign lastMask and bit
+  bits[^1].assign ((not lastMask) + 1) shl 1
 
-  pextMask.bits[^1].assign -lastMask shl 1
-
-  pextMask
+  M(val: mask, bits: bits)
 
 when ClmulAvailable:
   func initIntrinsicNim[T: uint64 or uint32 or uint16](
@@ -465,17 +423,14 @@ when ClmulAvailable:
   ): M {.inline, noinit.} =
     ## Returns the PEXT mask.
     ## This function uses SSE2 and CLMUL.
-    const
-      BitCount =
-        when T is uint64:
-          BitCount64
-        elif T is uint32:
-          BitCount32
-        else:
-          BitCount16
-      ZeroArray = BitCount.initArrayWith 0.T
+    const BitCount =
+      when T is uint64:
+        BitCount64
+      elif T is uint32:
+        BitCount32
+      else:
+        BitCount16
 
-    var pextMask = M(mask: mask, bits: ZeroArray)
     when T is uint64:
       var mask2 = (not mask).mm_cvtsi64_si128
       let neg2 = (-2).mm_cvtsi64_si128
@@ -486,29 +441,28 @@ when ClmulAvailable:
       var mask2 = (not mask).uint32.mm_cvtsi32_si128
       let neg2 = (-2).mm_cvtsi32_si128
 
-    staticFor(i, 0 ..< BitCount.pred):
+    var bits {.noinit.}: array[BitCount, T]
+    staticFor(i, 0 ..< BitCount - 1):
       let bit = mm_clmulepi64_si128(mask2, neg2, 0)
-      pextMask.bits[i].assign(
+      bits[i].assign(
         when T is uint64:
-          bit.mm_cvtsi128_si64.asUnsigned
+          bit.mm_cvtsi128_si64.castUnsigned
         elif T is uint32:
-          bit.mm_cvtsi128_si32.asUnsigned
+          bit.mm_cvtsi128_si32.castUnsigned
         else:
-          bit.mm_cvtsi128_si32.asUnsigned.uint16
+          bit.mm_cvtsi128_si32.castUnsigned.uint16
       )
-
-      mask2 = mm_and_si128(mask2, bit)
-
-    pextMask.bits[^1].assign(
+      mask2.assign mm_and_si128(mask2, bit)
+    bits[^1].assign(
       when T is uint64:
-        (-mask2.mm_cvtsi128_si64 shl 1).asUnsigned
+        (-mask2.mm_cvtsi128_si64 shl 1).castUnsigned
       elif T is uint32:
-        (-mask2.mm_cvtsi128_si32 shl 1).asUnsigned
+        (-mask2.mm_cvtsi128_si32 shl 1).castUnsigned
       else:
-        (-mask2.mm_cvtsi128_si32 shl 1).asUnsigned.uint16
+        (-mask2.mm_cvtsi128_si32 shl 1).castUnsigned.uint16
     )
 
-    pextMask
+    M(val: mask, bits: bits)
 
 func initNim[T: uint64 or uint32 or uint16](
     M: type PextMaskNim[T], mask: T
@@ -535,13 +489,13 @@ func pextNim[T: uint64 or uint32 or uint16](
     else:
       BitCount16
 
-  var res = a and mask.mask
+  var answer = a and mask.val
 
   staticFor(i, 0 ..< BitCount):
     let bit = mask.bits[i]
-    res.assign (res *~ bit) or ((res and bit) shr (1 shl i))
+    answer.assign (answer *~ bit) or ((answer and bit) shr (1 shl i))
 
-  res
+  answer
 
 func pextNim[T: uint64 or uint32 or uint16](a, mask: T): T {.inline, noinit.} =
   ## Parallel bits extract.
@@ -604,4 +558,4 @@ else:
       self: PextMask[T]
   ): int {.inline, noinit.} =
     ## Population counts.
-    self.mask.countOnes
+    self.val.countOnes

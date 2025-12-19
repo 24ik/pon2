@@ -16,24 +16,26 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[arrayutils, assign, gui, math]
 
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
+
   export vdom
 
-when defined(js) or defined(nimsuggest):
   const ShowNoticeCount = 6
 
   proc txtMsg[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
   ): string =
     ## Returns the text message.
-    if self.derefSimulator(helper).nazoPuyoWrap.optGoal.isOk:
-      $helper.simulator.markResultOpt.unsafeValue
+    if self.derefSimulator(helper).nazoPuyo.goal == NoneGoal:
+      if self.derefSimulator(helper).state == Stable and
+          self.derefSimulator(helper).nazoPuyo.puyoPuyo.field.isDead:
+        $MarkResult.Dead
+      else:
+        ""
     else:
-      let nazoWrap = self.derefSimulator(helper).nazoPuyoWrap
-      nazoWrap.unwrapNazoPuyo:
-        if self.derefSimulator(helper).state == Stable and it.field.isDead:
-          $MarkResult.Dead
-        else:
-          ""
+      $helper.simulator.markResult
 
   proc score[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
@@ -45,17 +47,16 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper, score: int
   ): array[Notice, int] =
     ## Returns the numbers of notice garbages.
-    let originalNoticeCounts = score.noticeCounts(self.derefSimulator(helper).rule)
+    let originalNoticeCounts =
+      score.noticeCounts(Behaviours[self.derefSimulator(helper).rule].garbageRate)
 
     var
       counts = Notice.initArrayWith 0
       totalCount = 0
     for notice in countdown(Comet, Small):
-      counts[notice].assign originalNoticeCounts[notice]
-      totalCount.inc min(originalNoticeCounts[notice], ShowNoticeCount - totalCount)
-
-      if totalCount >= ShowNoticeCount:
-        break
+      let count = min(originalNoticeCounts[notice], ShowNoticeCount - totalCount)
+      counts[notice].assign count
+      totalCount.inc count
 
     counts
 
@@ -66,9 +67,10 @@ when defined(js) or defined(nimsuggest):
     let
       score = self.score helper
       noticeCounts = self.noticeCounts(helper, score)
+      showNotice = self.derefSimulator(helper).nazoPuyo.goal == NoneGoal
 
     buildHtml tdiv:
-      if self.derefSimulator(helper).nazoPuyoWrap.optGoal.isErr:
+      if showNotice:
         table:
           tbody:
             tr:
@@ -84,5 +86,5 @@ when defined(js) or defined(nimsuggest):
                     img(src = Cell.None.cellImgSrc)
               td:
                 tdiv(class = "is-size-7"):
-                  text $score
-      text self.txtMsg(helper).cstring
+                  text (" " & $score).kstring
+      text self.txtMsg(helper).kstring

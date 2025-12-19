@@ -2,9 +2,9 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[critbits, random, sequtils, sets, sugar, unittest]
+import std/[critbits, random, sequtils, sugar, unittest]
 import ../../src/pon2/[core]
-import ../../src/pon2/app/[key, marathon, nazopuyowrap, simulator]
+import ../../src/pon2/app/[key, marathon, simulator]
 
 # ------------------------------------------------
 # Operator
@@ -14,56 +14,57 @@ func `==`(tree1, tree2: CritBitTree[void]): bool =
   tree1.items.toSeq == tree2.items.toSeq
 
 # ------------------------------------------------
-# Load / Property
+# Constructor
 # ------------------------------------------------
 
-block: # load, isReady, `isReady=`, allQueryCount
+block: # load, init
+  var
+    rng1 = 123.initRand
+    marathon1 = Marathon.init rng1
+  marathon1.load ["rr", "gb"]
+
+  var
+    rng2 = 123.initRand
+    marathon2 = Marathon.init(rng2, ["rr", "gb"])
+
+  check marathon1 == marathon2
+
+# ------------------------------------------------
+# Property
+# ------------------------------------------------
+
+block: # matchQueryCount, allQueryCount
   var
     rng = 123.initRand
     marathon = Marathon.init rng
-  check not marathon.isReady
+  check marathon.matchQueryCount == 0
   check marathon.allQueryCount == 0
 
   marathon.load @["rr"]
-  check not marathon.isReady
+  check marathon.matchQueryCount == 0
   check marathon.allQueryCount == 0
 
-  marathon.load @["rg"]
-  check not marathon.isReady
+  marathon.load @["gr"]
+  check marathon.matchQueryCount == 0
   check marathon.allQueryCount == 0
 
   marathon.isReady = true
-  check marathon.isReady
-  check marathon.allQueryCount == 2
-
-  marathon.isReady = false
-  check marathon.isReady
+  check marathon.matchQueryCount == 0
   check marathon.allQueryCount == 2
 
   marathon.load @["ry"]
-  check marathon.isReady
+  check marathon.matchQueryCount == 0
   check marathon.allQueryCount == 2
 
-  check Marathon.init(rng, ["rr", "rg"], isReady = true) == marathon
-  check Marathon.init(rng, @["rr", "rg"], isReady = true) == marathon
-
-block: # simulator
-  var
-    rng = 123.initRand
-    marathon = Marathon.init rng
-
-  var sim = Simulator.init PuyoPuyo[TsuField].init
-  check marathon.simulator == sim
-
-  sim.writeCell Cell.Green
-  marathon.simulator.writeCell Cell.Green
-  check marathon.simulator == sim
+  marathon.match "r"
+  check marathon.matchQueryCount == 1
+  check marathon.allQueryCount == 2
 
 # ------------------------------------------------
 # Match
 # ------------------------------------------------
 
-block: # matchQueryCount, match
+block: # match
   var
     rng = 123.initRand
     marathon = Marathon.init(rng, ["rrgg", "rgrg", "byby", "rgrb", "grrb", "bgyy"])
@@ -126,35 +127,32 @@ block: # selectQuery, selectRandomQuery
     marathon = Marathon.init(rng, queries)
 
   marathon.selectQuery 0
-  check marathon.simulator == Simulator.init PuyoPuyo[TsuField].init
+  check marathon.simulator == Simulator.init PuyoPuyo.init
 
   marathon.match "ab"
   marathon.selectQuery 0
-  check marathon.simulator == Simulator.init PuyoPuyo[TsuField].init
+  check marathon.simulator == Simulator.init PuyoPuyo.init
 
   marathon.isReady = true
   marathon.match "ab"
 
   for i in 0 ..< 2:
     marathon.selectQuery i
-    unwrapNazoPuyo marathon.simulator.nazoPuyoWrap:
-      check not it.steps[0].pair.isDouble
+    check not marathon.simulator.nazoPuyo.puyoPuyo.steps[0].pair.isDouble
 
   for _ in 1 .. 5:
     marathon.selectRandomQuery
-    unwrapNazoPuyo marathon.simulator.nazoPuyoWrap:
-      check not it.steps[0].pair.isDouble
+    check not marathon.simulator.nazoPuyo.puyoPuyo.steps[0].pair.isDouble
 
   let stepsSeq = queries.mapIt(it.parseSteps(Pon2).unsafeValue).mapIt it.toSeq.map(
     (step: Step) => Step.init step.pair.swapped
   ).toDeque
   for _ in 1 .. 5:
     marathon.selectRandomQuery(fromMatched = false)
-    unwrapNazoPuyo marathon.simulator.nazoPuyoWrap:
-      check it.steps in stepsSeq
+    check marathon.simulator.nazoPuyo.puyoPuyo.steps in stepsSeq
 
 # ------------------------------------------------
-# Keyboard
+# Key
 # ------------------------------------------------
 
 block: # operate
@@ -166,10 +164,10 @@ block: # operate
   marathon1.match "rg"
   var marathon2 = marathon1
 
-  marathon1.operate KeyEvent.init("Enter")
+  marathon1.operate KeyEventEnter
   marathon2.selectRandomQuery
   check marathon1 == marathon2
 
-  marathon1.operate KeyEvent.init("Enter", shift = true)
+  marathon1.operate KeyEventShiftEnter
   marathon2.selectRandomQuery(fromMatched = false)
   check marathon1 == marathon2

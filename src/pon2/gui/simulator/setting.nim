@@ -11,23 +11,33 @@
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
-  import std/[sugar]
+  import std/[sequtils, sugar]
   import karax/[karaxdsl, vdom]
   import ../[helper]
   import ../../[app]
-  import ../../private/[gui]
+  import ../../private/[gui, utils]
+
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
 
   export vdom
 
   const
-    BtnClass = "button".cstring
-    SelectBtnClass = "button is-primary is-selected".cstring
+    BtnClass = "button".kstring
+    SelectBtnClass = "button is-primary is-selected".kstring
+
+  func initBtnHandler[S: Simulator or Studio or Marathon](
+      self: ref S, helper: VNodeHelper, rule: Rule
+  ): () -> void =
+    ## Returns the handler for clicking buttons.
+    () => (self.derefSimulator(helper).rule = rule)
 
   proc toSettingsVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
   ): VNode =
     ## Returns the select node.
-    let playBtnClass, editBtnClass: cstring
+    let playBtnClass, editBtnClass: kstring
     if self.derefSimulator(helper).mode in PlayModes:
       playBtnClass = SelectBtnClass
       editBtnClass = BtnClass
@@ -37,11 +47,11 @@ when defined(js) or defined(nimsuggest):
 
     let playMode, editMode: SimulatorMode
     if self.derefSimulator(helper).mode in ViewerModes:
-      playMode = ViewerPlay
-      editMode = ViewerEdit
+      playMode = PlayViewer
+      editMode = EditViewer
     else:
-      playMode = EditorPlay
-      editMode = EditorEdit
+      playMode = PlayEditor
+      editMode = EditEditor
 
     buildHtml tdiv:
       tdiv(class = "field has-addons"):
@@ -65,34 +75,50 @@ when defined(js) or defined(nimsuggest):
               if not helper.mobile and self.derefSimulator(helper).mode notin EditModes:
                 span(style = counterStyle):
                   text "T"
-      if self.derefSimulator(helper).mode == EditorEdit:
-        let tsuBtnClass, waterBtnClass: cstring
-        case self.derefSimulator(helper).rule
-        of Tsu:
-          tsuBtnClass = SelectBtnClass
-          waterBtnClass = BtnClass
-        else:
-          tsuBtnClass = BtnClass
-          waterBtnClass = SelectBtnClass
+      if self.derefSimulator(helper).mode == EditEditor:
+        let nowRule = self.derefSimulator(helper).rule
 
         tdiv(class = "field has-addons"):
-          tdiv(class = "control"):
-            button(
-              class = tsuBtnClass,
-              onclick = () => (self.derefSimulator(helper).rule = Tsu),
-            ):
-              span(class = "icon"):
-                italic(class = "fa-solid fa-2")
-                if not helper.mobile and self.derefSimulator(helper).rule != Tsu:
-                  span(style = counterStyle):
-                    text "R"
-          tdiv(class = "control"):
-            button(
-              class = waterBtnClass,
-              onclick = () => (self.derefSimulator(helper).rule = Water),
-            ):
-              span(class = "icon"):
-                italic(class = "fa-solid fa-droplet")
-                if not helper.mobile and self.derefSimulator(helper).rule != Water:
-                  span(style = counterStyle):
-                    text "R"
+          for rule in Rule:
+            let
+              selected = rule == nowRule
+              btnClass = if selected: SelectBtnClass else: BtnClass
+              steps = self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps
+              (italicClass, disabled) =
+                case rule
+                of Rule.Tsu:
+                  ("fa-solid fa-2".kstring, steps.anyIt it.kind == FieldRotate)
+                of Spinner:
+                  (
+                    "fa-solid fa-arrows-rotate".kstring,
+                    steps.anyIt (it.kind == FieldRotate and it.cross),
+                  )
+                of CrossSpinner:
+                  (
+                    "DUMMY".kstring,
+                    steps.anyIt (it.kind == FieldRotate and not it.cross),
+                  )
+                of Rule.Water:
+                  ("fa-solid fa-droplet".kstring, steps.anyIt it.kind == FieldRotate)
+
+            tdiv(class = "control"):
+              button(
+                class = btnClass,
+                disabled = disabled and not selected,
+                onclick = self.initBtnHandler(helper, rule),
+              ):
+                span(class = "icon"):
+                  case rule
+                  of CrossSpinner:
+                    span(class = "fa-stack", style = style(StyleAttr.fontSize, "0.5em")):
+                      italic(class = "fa-solid fa-arrows-rotate fa-stack-2x")
+                      italic(class = "fa-solid fa-c fa-stack-1x")
+                  else:
+                    italic(class = italicClass)
+                  if not helper.mobile:
+                    if rule == nowRule.rotateSucc:
+                      span(style = counterStyle):
+                        text "R"
+                    elif rule == nowRule.rotatePred:
+                      span(style = counterStyle):
+                        text "E"

@@ -4,8 +4,8 @@
 {.experimental: "views".}
 
 import std/[unittest]
-import ../../src/pon2/core/[cell, moveresult, notice, rule]
-import ../../src/pon2/private/[arrayutils, results2]
+import ../../src/pon2/core/[cell, moveresult, notice]
+import ../../src/pon2/private/[arrayutils]
 
 let
   chainCount = 3
@@ -13,20 +13,20 @@ let
   hardToGarbageCount = 3
   detailHardToGarbageCount = @[1, 2, 0]
 
-  detailArr1: array[Cell, int] = [0, 1, 0, 4, 0, 5, 0, 9]
-  detailArr2: array[Cell, int] = [0, 0, 0, 4, 4, 0, 0, 0]
-  detailArr3: array[Cell, int] = [0, 0, 12, 4, 0, 8, 0, 6]
-  detailPopCounts = @[detailArr1, detailArr2, detailArr3]
+  detailArray1: array[Cell, int] = [0, 1, 0, 4, 0, 5, 0, 9]
+  detailArray2: array[Cell, int] = [0, 0, 0, 4, 4, 0, 0, 0]
+  detailArray3: array[Cell, int] = [0, 0, 12, 4, 0, 8, 0, 6]
+  detailPopCounts = @[detailArray1, detailArray2, detailArray3]
 
-  fullArr1: array[Cell, seq[int]] = [@[], @[1], @[], @[4], @[], @[5], @[], @[4, 5]]
-  fullArr2: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[4], @[], @[], @[]]
-  fullArr3: array[Cell, seq[int]] = [@[], @[], @[4, 4, 4], @[4], @[], @[5], @[], @[6]]
-  fullPopCounts = @[fullArr1, fullArr2, fullArr3]
+  fullArray1: array[Cell, seq[int]] = [@[], @[1], @[], @[4], @[], @[5], @[], @[4, 5]]
+  fullArray2: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[4], @[], @[], @[]]
+  fullArray3: array[Cell, seq[int]] = [@[], @[], @[4, 4, 4], @[4], @[], @[5], @[], @[6]]
+  fullPopCounts = @[fullArray1, fullArray2, fullArray3]
 
-  moveRes1 = MoveResult.init(
+  moveResult1 = MoveResult.init(
     chainCount, popCounts, hardToGarbageCount, detailPopCounts, detailHardToGarbageCount
   )
-  moveRes2 = MoveResult.init(
+  moveResult2 = MoveResult.init(
     chainCount, popCounts, hardToGarbageCount, detailPopCounts,
     detailHardToGarbageCount, fullPopCounts,
   )
@@ -36,135 +36,137 @@ let
 # ------------------------------------------------
 
 block: # init
-  check moveRes1 ==
-    MoveResult(
-      chainCount: chainCount,
-      popCounts: popCounts,
-      hardToGarbageCount: hardToGarbageCount,
-      detailPopCounts: detailPopCounts,
-      detailHardToGarbageCount: detailHardToGarbageCount,
-      fullPopCounts: Opt[seq[array[Cell, seq[int]]]].err,
-    )
-  check moveRes2 ==
-    MoveResult(
-      chainCount: chainCount,
-      popCounts: popCounts,
-      hardToGarbageCount: hardToGarbageCount,
-      detailPopCounts: detailPopCounts,
-      detailHardToGarbageCount: detailHardToGarbageCount,
-      fullPopCounts: Opt[seq[array[Cell, seq[int]]]].ok fullPopCounts,
-    )
+  check MoveResult.init(
+    chainCount,
+    popCounts,
+    hardToGarbageCount,
+    detailPopCounts,
+    detailHardToGarbageCount,
+    Opt[seq[array[Cell, seq[int]]]].ok fullPopCounts,
+  ) == moveResult2
+  check MoveResult.init(
+    chainCount,
+    popCounts,
+    hardToGarbageCount,
+    detailPopCounts,
+    detailHardToGarbageCount,
+    Opt[seq[array[Cell, seq[int]]]].err,
+  ) == moveResult1
 
-  check MoveResult.init == MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
-  check MoveResult.init(true) ==
+  check MoveResult.init(inclFullPopCounts = false) ==
+    MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
+  check MoveResult.init(inclFullPopCounts = true) ==
     MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[], @[])
 
 # ------------------------------------------------
 # Count
 # ------------------------------------------------
 
-block:
-  # cellCount, puyoCount, colorPuyoCount, garbagesCount,
-  # cellCounts, puyoCounts, colorPuyoCounts, garbagesCounts
+block: # cellCount
   let
-    countP = 15
-    countY = 0
-  check moveRes1.cellCount(Purple) == countP
-  check moveRes2.cellCount(Purple) == countP
-  check moveRes1.cellCount(Yellow) == countY
-  check moveRes2.cellCount(Yellow) == countY
+    answerP = 15
+    answerY = 0
+  check moveResult1.cellCount(Purple) == answerP
+  check moveResult2.cellCount(Purple) == answerP
+  check moveResult1.cellCount(Yellow) == answerY
+  check moveResult2.cellCount(Yellow) == answerY
 
-  let countPuyo = 57
-  check moveRes1.puyoCount == countPuyo
-  check moveRes2.puyoCount == countPuyo
+block: # puyoCount
+  let answer = 57
+  check moveResult1.puyoCount == answer
+  check moveResult2.puyoCount == answer
 
-  let countColor = 44
-  check moveRes1.colorPuyoCount == countColor
-  check moveRes2.colorPuyoCount == countColor
+block: # coloredPuyoCount
+  let answer = 44
+  check moveResult1.coloredPuyoCount == answer
+  check moveResult2.coloredPuyoCount == answer
 
-  let countGarbages = 13
-  check moveRes1.garbagesCount == countGarbages
-  check moveRes2.garbagesCount == countGarbages
+block: # nuisancePuyoCounts
+  let answer = 13
+  check moveResult1.nuisancePuyoCount == answer
+  check moveResult2.nuisancePuyoCount == answer
 
+block: # cellCounts
   let
-    countsB = @[5, 0, 8]
-    countsY = @[0, 0, 0]
-  check moveRes1.cellCounts(Blue) == countsB
-  check moveRes2.cellCounts(Blue) == countsB
-  check moveRes1.cellCounts(Yellow) == countsY
-  check moveRes2.cellCounts(Yellow) == countsY
+    answerB = @[5, 0, 8]
+    answerY = @[0, 0, 0]
+  check moveResult1.cellCounts(Blue) == answerB
+  check moveResult2.cellCounts(Blue) == answerB
+  check moveResult1.cellCounts(Yellow) == answerY
+  check moveResult2.cellCounts(Yellow) == answerY
 
-  let countsPuyo = @[19, 8, 30]
-  check moveRes1.puyoCounts == countsPuyo
-  check moveRes2.puyoCounts == countsPuyo
+block: # puyoCounts
+  let answer = @[19, 8, 30]
+  check moveResult1.puyoCounts == answer
+  check moveResult2.puyoCounts == answer
 
-  let countsColor = @[18, 8, 18]
-  check moveRes1.colorPuyoCounts == countsColor
-  check moveRes2.colorPuyoCounts == countsColor
+block: # coloredPuyoCounts
+  let answer = @[18, 8, 18]
+  check moveResult1.coloredPuyoCounts == answer
+  check moveResult2.coloredPuyoCounts == answer
 
-  let countsGarbages = @[1, 0, 12]
-  check moveRes1.garbagesCounts == countsGarbages
-  check moveRes2.garbagesCounts == countsGarbages
+block: # nuisancePuyoCounts
+  let answer = @[1, 0, 12]
+  check moveResult1.nuisancePuyoCounts == answer
+  check moveResult2.nuisancePuyoCounts == answer
 
 # ------------------------------------------------
 # Color
 # ------------------------------------------------
 
-block: # colors, colorsSeq
-  let colors2 = {Red, Green, Blue, Purple}
-  check moveRes1.colors == colors2
-  check moveRes2.colors == colors2
+block: # colors
+  let answer = {Red, Green, Blue, Purple}
+  check moveResult1.colors == answer
+  check moveResult2.colors == answer
 
-  let colorsSeq2 = @[{Red, Blue, Purple}, {Red, Green}, {Red, Blue, Purple}]
-  check moveRes1.colorsSeq == colorsSeq2
-  check moveRes2.colorsSeq == colorsSeq2
+block: # colorsSeq
+  let answer = @[{Red, Blue, Purple}, {Red, Green}, {Red, Blue, Purple}]
+  check moveResult1.colorsSeq == answer
+  check moveResult2.colorsSeq == answer
 
 # ------------------------------------------------
 # Place
 # ------------------------------------------------
 
 block: # placeCounts
-  check moveRes1.placeCounts(Purple).isErr
-  check moveRes2.placeCounts(Purple) == StrErrorResult[seq[int]].ok @[2, 0, 1]
-  check moveRes1.placeCounts(Yellow).isErr
-  check moveRes2.placeCounts(Yellow) == StrErrorResult[seq[int]].ok @[0, 0, 0]
+  check moveResult1.placeCounts(Purple).isErr
+  check moveResult2.placeCounts(Purple) == Pon2Result[seq[int]].ok @[2, 0, 1]
+  check moveResult1.placeCounts(Yellow).isErr
+  check moveResult2.placeCounts(Yellow) == Pon2Result[seq[int]].ok @[0, 0, 0]
 
-  check moveRes1.placeCounts.isErr
-  check moveRes2.placeCounts == StrErrorResult[seq[int]].ok @[4, 2, 3]
+  check moveResult1.placeCounts.isErr
+  check moveResult2.placeCounts == Pon2Result[seq[int]].ok @[4, 2, 3]
 
 # ------------------------------------------------
 # Connect
 # ------------------------------------------------
 
 block: # connectionCounts
-  check moveRes1.connectionCounts(Purple).isErr
-  check moveRes2.connectionCounts(Purple) == StrErrorResult[seq[int]].ok @[4, 5, 6]
-  check moveRes1.connectionCounts(Yellow).isErr
-  check moveRes2.connectionCounts(Yellow) == StrErrorResult[seq[int]].ok @[]
+  check moveResult1.connectionCounts(Purple).isErr
+  check moveResult2.connectionCounts(Purple) == Pon2Result[seq[int]].ok @[4, 5, 6]
+  check moveResult1.connectionCounts(Yellow).isErr
+  check moveResult2.connectionCounts(Yellow) == Pon2Result[seq[int]].ok @[]
 
-  check moveRes1.connectionCounts.isErr
-  check moveRes2.connectionCounts ==
-    StrErrorResult[seq[int]].ok @[4, 5, 4, 5, 4, 4, 4, 5, 6]
+  check moveResult1.connectionCounts.isErr
+  check moveResult2.connectionCounts ==
+    Pon2Result[seq[int]].ok @[4, 5, 4, 5, 4, 4, 4, 5, 6]
 
 # ------------------------------------------------
 # Score
 # ------------------------------------------------
 
-let scoreAns = 8660
+let scoreAnswer = 8660
 
 block: # score
-  check moveRes1.score.isErr
-  check moveRes2.score == StrErrorResult[int].ok scoreAns
+  check moveResult1.score.isErr
+  check moveResult2.score == Pon2Result[int].ok scoreAnswer
 
 # ------------------------------------------------
 # Notice Garbage
 # ------------------------------------------------
 
 block: # noticeCounts
-  check moveRes1.noticeCounts(Tsu).isErr
-  check moveRes2.noticeCounts(Tsu) ==
-    StrErrorResult[array[Notice, int]].ok scoreAns.noticeCounts Tsu
-
-  check moveRes1.noticeCounts(Water).isErr
-  check moveRes2.noticeCounts(Water) ==
-    StrErrorResult[array[Notice, int]].ok scoreAns.noticeCounts Water
+  for garbageRate in [70, 90, 120]:
+    check moveResult1.noticeCounts(garbageRate).isErr
+    check moveResult2.noticeCounts(garbageRate) ==
+      Pon2Result[array[Notice, int]].ok scoreAnswer.noticeCounts garbageRate
