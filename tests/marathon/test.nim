@@ -14,56 +14,57 @@ func `==`(tree1, tree2: CritBitTree[void]): bool =
   tree1.items.toSeq == tree2.items.toSeq
 
 # ------------------------------------------------
-# Load / Property
+# Constructor
 # ------------------------------------------------
 
-block: # load, isReady, `isReady=`, allQueryCount
+block: # load, init
+  var
+    rng1 = 123.initRand
+    marathon1 = Marathon.init rng1
+  marathon1.load ["rr", "gb"]
+
+  var
+    rng2 = 123.initRand
+    marathon2 = Marathon.init(rng2, ["rr", "gb"])
+
+  check marathon1 == marathon2
+
+# ------------------------------------------------
+# Property
+# ------------------------------------------------
+
+block: # matchQueryCount, allQueryCount
   var
     rng = 123.initRand
     marathon = Marathon.init rng
-  check not marathon.isReady
+  check marathon.matchQueryCount == 0
   check marathon.allQueryCount == 0
 
   marathon.load @["rr"]
-  check not marathon.isReady
+  check marathon.matchQueryCount == 0
   check marathon.allQueryCount == 0
 
-  marathon.load @["rg"]
-  check not marathon.isReady
+  marathon.load @["gr"]
+  check marathon.matchQueryCount == 0
   check marathon.allQueryCount == 0
 
   marathon.isReady = true
-  check marathon.isReady
-  check marathon.allQueryCount == 2
-
-  marathon.isReady = false
-  check marathon.isReady
+  check marathon.matchQueryCount == 0
   check marathon.allQueryCount == 2
 
   marathon.load @["ry"]
-  check marathon.isReady
+  check marathon.matchQueryCount == 0
   check marathon.allQueryCount == 2
 
-  check Marathon.init(rng, ["rr", "rg"], isReady = true) == marathon
-  check Marathon.init(rng, @["rr", "rg"], isReady = true) == marathon
-
-block: # simulator
-  var
-    rng = 123.initRand
-    marathon = Marathon.init rng
-
-  var simulator = Simulator.init PuyoPuyo.init
-  check marathon.simulator == simulator
-
-  simulator.writeCell Cell.Green
-  marathon.simulator.writeCell Cell.Green
-  check marathon.simulator == simulator
+  marathon.match "r"
+  check marathon.matchQueryCount == 1
+  check marathon.allQueryCount == 2
 
 # ------------------------------------------------
 # Match
 # ------------------------------------------------
 
-block: # matchQueryCount, match
+block: # match
   var
     rng = 123.initRand
     marathon = Marathon.init(rng, ["rrgg", "rgrg", "byby", "rgrb", "grrb", "bgyy"])
@@ -151,7 +152,7 @@ block: # selectQuery, selectRandomQuery
     check marathon.simulator.nazoPuyo.puyoPuyo.steps in stepsSeq
 
 # ------------------------------------------------
-# Keyboard
+# Key
 # ------------------------------------------------
 
 block: # operate

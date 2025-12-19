@@ -46,4 +46,4 @@ when defined(js) or defined(nimsuggest):
           )
         tdiv(class = "control"):
           a(class = "button is-static"):
-            text "{rate*100:.1f}%".fmt.kstring
+            text "{rate * 100:.1f}%".fmt.kstring
