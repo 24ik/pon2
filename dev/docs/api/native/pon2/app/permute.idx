@@ -1,2 +1,2 @@
 nimTitle	permute	pon2/app/permute.html	module src/pon2/app/permute		0
-nim	permute	pon2/app/permute.html#permute,NazoPuyo[F: TsuField or WaterField],openArray[int],bool,bool	proc permute[F: TsuField or WaterField](nazo: NazoPuyo[F];\n                                   fixIndices: openArray[int];\n                                   allowDoubleNotLast, allowDoubleLast: bool): seq[\n    NazoPuyo[F]]		106
+nim	permute	pon2/app/permute.html#permute,NazoPuyo,openArray[int],openArray[int]	proc permute(self: NazoPuyo; fixIndices, allowDoubleIndices: openArray[int]): seq[\n    NazoPuyo]		99

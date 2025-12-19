@@ -71,16 +71,12 @@
   <li><a class="reference" href="#cellCount%2CPopResult%2CCell" title="cellCount(self: PopResult; cell: Cell): int">cellCount(self: PopResult; cell: Cell): int</a></li>
 
 </ul>
-<ul class="simple nested-toc-section">colorPuyoCount
-  <li><a class="reference" href="#colorPuyoCount%2CPopResult" title="colorPuyoCount(self: PopResult): int">colorPuyoCount(self: PopResult): int</a></li>
+<ul class="simple nested-toc-section">coloredPuyoCount
+  <li><a class="reference" href="#coloredPuyoCount%2CPopResult" title="coloredPuyoCount(self: PopResult): int">coloredPuyoCount(self: PopResult): int</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">connectionCounts
   <li><a class="reference" href="#connectionCounts%2CPopResult" title="connectionCounts(self: PopResult): array[Cell, seq[int]]">connectionCounts(self: PopResult): array[Cell, seq[int]]</a></li>
-
-</ul>
-<ul class="simple nested-toc-section">garbagesCount
-  <li><a class="reference" href="#garbagesCount%2CPopResult" title="garbagesCount(self: PopResult): int">garbagesCount(self: PopResult): int</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">hardToGarbageCount
@@ -90,12 +86,16 @@
 <ul class="simple nested-toc-section">init
   <li><a class="reference" href="#init%2CtypePopResult" title="init(T: type PopResult): T:type">init(T: type PopResult): T:type</a></li>
 <li><a class="reference" href="#init%2CtypePopResult%2CM128i%2CM128i%2CM128i%2CM128i%2CM128i%2CM128i%2CM128i%2CM128i%2CM128i" title="init(T: type PopResult; red, green, blue, yellow, purple, hard, hardToGarbage,
-                        garbage, color: BinaryField): T:type">init(T: type PopResult; red, green, blue, yellow, purple, hard, hardToGarbage,
-                        garbage, color: BinaryField): T:type</a></li>
+                        garbage, colored: BinaryField): T:type">init(T: type PopResult; red, green, blue, yellow, purple, hard, hardToGarbage,
+                        garbage, colored: BinaryField): T:type</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">isPopped
   <li><a class="reference" href="#isPopped%2CPopResult" title="isPopped(self: PopResult): bool">isPopped(self: PopResult): bool</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">nuisancePuyoCount
+  <li><a class="reference" href="#nuisancePuyoCount%2CPopResult" title="nuisancePuyoCount(self: PopResult): int">nuisancePuyoCount(self: PopResult): int</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">puyoCount
@@ -147,19 +147,19 @@
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Returns the number of <tt class="docutils literal"><span class="pre"><span class="Identifier">cell</span></span></tt> that popped.
+    Returns the number of <tt class="docutils literal"><span class="pre"><span class="Identifier">cell</span></span></tt> that popped. If the cell is <tt class="docutils literal"><span class="pre"><span class="Identifier">None</span></span></tt>, returns 0.
     
   </dd>
 </div>
 
 </div>
-<div id="colorPuyoCount-procs-all">
-  <div id="colorPuyoCount,PopResult">
-  <dt><pre><span class="Keyword">func</span> <a href="#colorPuyoCount%2CPopResult"><span class="Identifier">colorPuyoCount</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="popresult.html#PopResult"><span class="Identifier">PopResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+<div id="coloredPuyoCount-procs-all">
+  <div id="coloredPuyoCount,PopResult">
+  <dt><pre><span class="Keyword">func</span> <a href="#coloredPuyoCount%2CPopResult"><span class="Identifier">coloredPuyoCount</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="popresult.html#PopResult"><span class="Identifier">PopResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Returns the number of color puyos that popped.
+    Returns the number of colored puyos that popped.
     
   </dd>
 </div>
@@ -172,18 +172,6 @@
   <dd>
     
     Returns an array of a sequence that represents the numbers of connections.
-    
-  </dd>
-</div>
-
-</div>
-<div id="garbagesCount-procs-all">
-  <div id="garbagesCount,PopResult">
-  <dt><pre><span class="Keyword">func</span> <a href="#garbagesCount%2CPopResult"><span class="Identifier">garbagesCount</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="popresult.html#PopResult"><span class="Identifier">PopResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-  <dd>
-    
-    Returns the number of hard and garbage puyos that popped.
     
   </dd>
 </div>
@@ -212,7 +200,7 @@
 </div>
 <div id="init,typePopResult,M128i,M128i,M128i,M128i,M128i,M128i,M128i,M128i,M128i">
   <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypePopResult%2CM128i%2CM128i%2CM128i%2CM128i%2CM128i%2CM128i%2CM128i%2CM128i%2CM128i"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">PopResult</span><span class="Other">;</span> <span class="Identifier">red</span><span class="Other">,</span> <span class="Identifier">green</span><span class="Other">,</span> <span class="Identifier">blue</span><span class="Other">,</span> <span class="Identifier">yellow</span><span class="Other">,</span> <span class="Identifier">purple</span><span class="Other">,</span> <span class="Identifier">hard</span><span class="Other">,</span>
-                             <span class="Identifier">hardToGarbage</span><span class="Other">,</span> <span class="Identifier">garbage</span><span class="Other">,</span> <span class="Identifier">color</span><span class="Other">:</span> <a href="../private/core/binaryfield.html#BinaryField"><span class="Identifier">BinaryField</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.
+                             <span class="Identifier">hardToGarbage</span><span class="Other">,</span> <span class="Identifier">garbage</span><span class="Other">,</span> <span class="Identifier">colored</span><span class="Other">:</span> <a href="../private/core/binaryfield/xmm.html#BinaryField"><span class="Identifier">BinaryField</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.
     <span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -229,6 +217,18 @@
   <dd>
     
     Returns <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt> if any puyo popped.
+    
+  </dd>
+</div>
+
+</div>
+<div id="nuisancePuyoCount-procs-all">
+  <div id="nuisancePuyoCount,PopResult">
+  <dt><pre><span class="Keyword">func</span> <a href="#nuisancePuyoCount%2CPopResult"><span class="Identifier">nuisancePuyoCount</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="popresult.html#PopResult"><span class="Identifier">PopResult</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Returns the number of nuisance puyos that popped.
     
   </dd>
 </div>
@@ -252,7 +252,7 @@
 <div class="section" id="19">
   <h1><a class="toc-backref" href="#19">Exports</a></h1>
   <dl class="item">
-    <a href="cell.html#parseCell,string"><span class="Identifier">parseCell</span></a>, <a href="cell.html#Cell"><span class="Identifier">Cell</span></a>, <a href="cell.html#ColorPuyos"><span class="Identifier">ColorPuyos</span></a>, <a href="cell.html#Puyos"><span class="Identifier">Puyos</span></a>, <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a>, <a href="../private/results2.html#context,StrErrorResult[T],string"><span class="Identifier">context</span></a>
+    <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a>, <a href="cell.html#ColoredPuyos"><span class="Identifier">ColoredPuyos</span></a>, <a href="cell.html#parseCell,string"><span class="Identifier">parseCell</span></a>, <a href="cell.html#Cell"><span class="Identifier">Cell</span></a>, <a href="cell.html#NuisancePuyos"><span class="Identifier">NuisancePuyos</span></a>, <a href="cell.html#Puyos"><span class="Identifier">Puyos</span></a>, <a href="../utils/results2.html#context,Pon2Result[T],string"><span class="Identifier">context</span></a>
   </dl>
 </div>
 
@@ -262,7 +262,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-16 16:05:53 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-19 15:01:01 UTC</small>
       </div>
     </div>
   </div>

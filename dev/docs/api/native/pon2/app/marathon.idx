@@ -1,15 +1,10 @@
 nimTitle	marathon	pon2/app/marathon.html	module src/pon2/app/marathon		0
-nim	Marathon	pon2/app/marathon.html#Marathon	object Marathon		17
-nim	load	pon2/app/marathon.html#load,Marathon,openArray[string]	proc load(self: var Marathon; queries: openArray[string]; isReady = false)		31
-nim	init	pon2/app/marathon.html#init,typeMarathon,Rand,openArray[string]	proc init(T: type Marathon; rng: Rand; queries: openArray[string] = [];\n     isReady = false): T:type		43
-nim	simulator	pon2/app/marathon.html#simulator,Marathon	proc simulator(self: Marathon): Simulator		61
-nim	simulator	pon2/app/marathon.html#simulator,Marathon_2	proc simulator(self: var Marathon): var Simulator		65
-nim	isReady	pon2/app/marathon.html#isReady,Marathon	proc isReady(self: Marathon): bool		69
-nim	isReady=	pon2/app/marathon.html#isReady=,Marathon,bool	proc isReady=(self: var Marathon; isReady: bool)		73
-nim	matchQueryCount	pon2/app/marathon.html#matchQueryCount,Marathon	proc matchQueryCount(self: Marathon): int		76
-nim	allQueryCount	pon2/app/marathon.html#allQueryCount,Marathon	proc allQueryCount(self: Marathon): int		80
-nim	match	pon2/app/marathon.html#match,Marathon,string	proc match(self: var Marathon; prefix: string)		188
-nim	selectQuery	pon2/app/marathon.html#selectQuery,Marathon,int	proc selectQuery(self: var Marathon; index: int)		252
-nim	selectRandomQuery	pon2/app/marathon.html#selectRandomQuery,Marathon	proc selectRandomQuery(self: var Marathon; fromMatched = true)		260
-nim	operate	pon2/app/marathon.html#operate,Marathon,KeyEvent	proc operate(self: var Marathon; key: KeyEvent): bool		276
-nimgrp	simulator	pon2/app/marathon.html#simulator-procs-all	proc		61
+nim	Marathon	pon2/app/marathon.html#Marathon	object Marathon		16
+nim	load	pon2/app/marathon.html#load,Marathon,openArray[string]	proc load(self: var Marathon; queries: openArray[string])		30
+nim	init	pon2/app/marathon.html#init,typeMarathon,Rand,openArray[string]	proc init(T: type Marathon; rng: Rand; queries: openArray[string] = []): T:type		39
+nim	matchQueryCount	pon2/app/marathon.html#matchQueryCount,Marathon	proc matchQueryCount(self: Marathon): int		57
+nim	allQueryCount	pon2/app/marathon.html#allQueryCount,Marathon	proc allQueryCount(self: Marathon): int		61
+nim	match	pon2/app/marathon.html#match,Marathon,string	proc match(self: var Marathon; prefix: string)		169
+nim	selectQuery	pon2/app/marathon.html#selectQuery,Marathon,int	proc selectQuery(self: var Marathon; index: int)		233
+nim	selectRandomQuery	pon2/app/marathon.html#selectRandomQuery,Marathon	proc selectRandomQuery(self: var Marathon; fromMatched = true)		241
+nim	operate	pon2/app/marathon.html#operate,Marathon,KeyEvent	proc operate(self: var Marathon; key: KeyEvent): bool		257

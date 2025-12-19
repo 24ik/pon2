@@ -1,26 +1,29 @@
 nimTitle	goal	pon2/core/goal.html	module src/pon2/core/goal		0
-nim	GoalKind	pon2/core/goal.html#GoalKind	enum GoalKind		16
-nim	GoalColor	pon2/core/goal.html#GoalColor	enum GoalColor		36
-nim	GoalVal	pon2/core/goal.html#GoalVal	type GoalVal		47
-nim	OptGoalColor	pon2/core/goal.html#OptGoalColor	type OptGoalColor		49
-nim	OptGoalVal	pon2/core/goal.html#OptGoalVal	type OptGoalVal		50
-nim	Goal	pon2/core/goal.html#Goal	object Goal		52
-nim	NoColorKinds	pon2/core/goal.html#NoColorKinds	const NoColorKinds		58
-nim	NoValKinds	pon2/core/goal.html#NoValKinds	const NoValKinds		60
-nim	ColorKinds	pon2/core/goal.html#ColorKinds	const ColorKinds		62
-nim	ValKinds	pon2/core/goal.html#ValKinds	const ValKinds		63
-nim	init	pon2/core/goal.html#init,typeGoal,GoalKind,OptGoalColor,OptGoalVal	proc init(T: type Goal; kind: GoalKind; optColor: OptGoalColor; optVal: OptGoalVal): T:type		69
-nim	init	pon2/core/goal.html#init,typeGoal,GoalKind,GoalColor,GoalVal	proc init(T: type Goal; kind: GoalKind; color: GoalColor; val: GoalVal): T:type		74
-nim	init	pon2/core/goal.html#init,typeGoal,GoalKind,GoalColor	proc init(T: type Goal; kind: GoalKind; color: GoalColor): T:type		79
-nim	init	pon2/core/goal.html#init,typeGoal,GoalKind,GoalVal	proc init(T: type Goal; kind: GoalKind; val: GoalVal): T:type		82
-nim	init	pon2/core/goal.html#init,typeGoal	proc init(T: type Goal): T:type		85
-nim	isNormalForm	pon2/core/goal.html#isNormalForm,Goal	proc isNormalForm(self: Goal): bool		92
-nim	isSupported	pon2/core/goal.html#isSupported,Goal	proc isSupported(self: Goal): bool		98
-nim	normalize	pon2/core/goal.html#normalize,Goal	proc normalize(self: var Goal)		118
-nim	normalized	pon2/core/goal.html#normalized,Goal	proc normalized(self: Goal): Goal		135
-nim	`$`	pon2/core/goal.html#$,Goal	proc `$`(self: Goal): string		158
-nim	parseGoal	pon2/core/goal.html#parseGoal,string	proc parseGoal(str: string): StrErrorResult[Goal]		167
-nim	toUriQuery	pon2/core/goal.html#toUriQuery,Goal	proc toUriQuery(self: Goal; fqdn = Pon2): StrErrorResult[string]		232
-nim	parseGoal	pon2/core/goal.html#parseGoal,string,SimulatorFqdn	proc parseGoal(query: string; fqdn: SimulatorFqdn): StrErrorResult[Goal]		267
-nimgrp	parsegoal	pon2/core/goal.html#parseGoal-procs-all	proc		167
-nimgrp	init	pon2/core/goal.html#init-procs-all	proc		69
+nim	GoalKind	pon2/core/goal.html#GoalKind	enum GoalKind		18
+nim	GoalColor	pon2/core/goal.html#GoalColor	enum GoalColor		28
+nim	GoalOperator	pon2/core/goal.html#GoalOperator	enum GoalOperator		39
+nim	GoalMain	pon2/core/goal.html#GoalMain	object GoalMain		44
+nim	Goal	pon2/core/goal.html#Goal	object Goal		50
+nim	ColorKinds	pon2/core/goal.html#ColorKinds	const ColorKinds		55
+nim	NoColorKinds	pon2/core/goal.html#NoColorKinds	const NoColorKinds		56
+nim	NoneGoalMain	pon2/core/goal.html#NoneGoalMain	const NoneGoalMain		58
+nim	NoneGoalColor	pon2/core/goal.html#NoneGoalColor	const NoneGoalColor		59
+nim	NoneGoal	pon2/core/goal.html#NoneGoal	const NoneGoal		60
+nim	init	pon2/core/goal.html#init,typeGoalMain,GoalKind,GoalColor,int,GoalOperator	proc init(T: type GoalMain; kind: GoalKind; color: GoalColor; val: int;\n     operator: GoalOperator): T:type		68
+nim	init	pon2/core/goal.html#init,typeGoalMain,GoalKind,int,GoalOperator	proc init(T: type GoalMain; kind: GoalKind; val: int; operator: GoalOperator): T:type		73
+nim	init	pon2/core/goal.html#init,typeGoal,GoalKind,GoalColor,int,GoalOperator	proc init(T: type Goal; kind: GoalKind; color: GoalColor; val: int;\n     operator: GoalOperator; clearColorOpt = NoneGoalColor): T:type		78
+nim	init	pon2/core/goal.html#init,typeGoal,GoalKind,int,GoalOperator	proc init(T: type Goal; kind: GoalKind; val: int; operator: GoalOperator;\n     clearColorOpt = NoneGoalColor): T:type		91
+nim	init	pon2/core/goal.html#init,typeGoal,GoalKind,GoalColor,int,GoalOperator,GoalColor	proc init(T: type Goal; kind: GoalKind; color: GoalColor; val: int;\n     operator: GoalOperator; clearColor: GoalColor): T:type		100
+nim	init	pon2/core/goal.html#init,typeGoal,GoalKind,int,GoalOperator,GoalColor	proc init(T: type Goal; kind: GoalKind; val: int; operator: GoalOperator;\n     clearColor: GoalColor): T:type		110
+nim	init	pon2/core/goal.html#init,typeGoal	proc init(T: type Goal; clearColorOpt = NoneGoalColor): T:type		119
+nim	init	pon2/core/goal.html#init,typeGoal,GoalColor	proc init(T: type Goal; clearColor: GoalColor): T:type		122
+nim	isSupported	pon2/core/goal.html#isSupported,Goal	proc isSupported(self: Goal): bool		129
+nim	isNormalized	pon2/core/goal.html#isNormalized,Goal	proc isNormalized(self: Goal): bool		141
+nim	normalize	pon2/core/goal.html#normalize,Goal	proc normalize(self: var Goal)		149
+nim	normalized	pon2/core/goal.html#normalized,Goal	proc normalized(self: Goal): Goal		158
+nim	`$`	pon2/core/goal.html#$,Goal	proc `$`(self: Goal): string		187
+nim	parseGoal	pon2/core/goal.html#parseGoal,string	proc parseGoal(str: string): Pon2Result[Goal]		218
+nim	toUriQuery	pon2/core/goal.html#toUriQuery,Goal	proc toUriQuery(self: Goal; fqdn = Pon2): Pon2Result[string]		312
+nim	parseGoal	pon2/core/goal.html#parseGoal,string,SimulatorFqdn	proc parseGoal(query: string; fqdn: SimulatorFqdn): Pon2Result[Goal]		368
+nimgrp	parsegoal	pon2/core/goal.html#parseGoal-procs-all	proc		218
+nimgrp	init	pon2/core/goal.html#init-procs-all	proc		68

@@ -1,4 +1,7 @@
 nimTitle	staticfor	pon2/private/staticfor.html	module src/pon2/private/staticfor		0
-nim	staticFor	pon2/private/staticfor.html#staticFor.t,,staticSlice[E: enum],untyped	template staticFor[E: enum](index: untyped{nkIdent}; slice: static Slice[E];\n                   body: untyped): untyped		5
-nim	staticFor	pon2/private/staticfor.html#staticFor.t,,typedesc[],untyped	template staticFor(index: untyped{nkIdent}; enumType: typedesc[enum]; body: untyped): untyped		13
-nimgrp	staticfor	pon2/private/staticfor.html#staticFor-templates-all	template		5
+nim	staticFor	pon2/private/staticfor.html#staticFor.t,,staticSlice[T: Ordinal],untyped	template staticFor[T: Ordinal](elemIdent: untyped{nkIdent}; elems: static Slice[T];\n                      body: untyped): untyped		13
+nim	staticFor	pon2/private/staticfor.html#staticFor.m,,staticopenArray[int],untyped	macro staticFor(elemIdent: untyped{nkIdent}; elems: static openArray[int];\n          body: untyped): untyped		22
+nim	staticFor	pon2/private/staticfor.html#staticFor.t,,staticopenArray[T],untyped	template staticFor[T: Ordinal](elemIdent: untyped{nkIdent}; elems: static openArray[T];\n                      body: untyped): untyped		34
+nim	staticFor	pon2/private/staticfor.html#staticFor.t,,staticset[T],untyped	template staticFor[T: Ordinal](elemIdent: untyped{nkIdent}; elems: static set[T];\n                      body: untyped): untyped		43
+nim	staticFor	pon2/private/staticfor.html#staticFor.t,,typedesc[T],untyped	template staticFor[T: Ordinal](elemIdent: untyped{nkIdent}; elemType: typedesc[T];\n                      body: untyped): untyped		50
+nimgrp	staticfor	pon2/private/staticfor.html#staticFor-templates-all	template		13

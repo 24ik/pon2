@@ -1,3 +1,0 @@
-nimTitle	results2	pon2/private/results2.html	module src/pon2/private/results2		0
-nim	StrErrorResult	pon2/private/results2.html#StrErrorResult	type StrErrorResult		14
-nim	context	pon2/private/results2.html#context,StrErrorResult[T],string	proc context[T](self: StrErrorResult[T]; contextMsg: string): StrErrorResult[T]		16

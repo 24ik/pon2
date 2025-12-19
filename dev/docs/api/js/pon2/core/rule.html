@@ -59,7 +59,8 @@
     <summary><a class="reference reference-toplevel" href="#7" id="57">Types</a></summary>
     <ul class="simple simple-toc-section">
       <li><a class="reference" href="#Rule" title="Rule {.pure.} = enum
-  Tsu = &quot;t&quot;, Water = &quot;w&quot;">Rule</a></li>
+  Tsu = &quot;通&quot;, Spinner = &quot;だいかいてん&quot;,
+  CrossSpinner = &quot;クロスかいてん&quot;, Water = &quot;すいちゅう&quot;">Rule</a></li>
 
     </ul>
   </details>
@@ -69,7 +70,7 @@
     <summary><a class="reference reference-toplevel" href="#12" id="62">Procs</a></summary>
     <ul class="simple simple-toc-section">
       <ul class="simple nested-toc-section">parseRule
-  <li><a class="reference" href="#parseRule%2Cstring" title="parseRule(str: string): StrErrorResult[Rule]">parseRule(str: string): StrErrorResult[Rule]</a></li>
+  <li><a class="reference" href="#parseRule%2Cstring" title="parseRule(str: string): Pon2Result[Rule]">parseRule(str: string): Pon2Result[Rule]</a></li>
 
 </ul>
 
@@ -91,7 +92,7 @@
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
-    <a class="reference external" href="../private/results2.html">../private/results2</a>, <a class="reference external" href="../private/tables.html">../private/tables</a>
+    <a class="reference external" href="../utils.html">../utils</a>
   </dl>
 </div>
 <div class="section" id="7">
@@ -99,7 +100,8 @@
   <dl class="item">
     <div id="Rule">
   <dt><pre><a href="rule.html#Rule"><span class="Identifier">Rule</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">Tsu</span> <span class="Other">=</span> <span class="StringLit">&quot;t&quot;</span><span class="Other">,</span> <span class="Identifier">Water</span> <span class="Other">=</span> <span class="StringLit">&quot;w&quot;</span></pre></dt>
+  <span class="Identifier">Tsu</span> <span class="Other">=</span> <span class="StringLit">&quot;通&quot;</span><span class="Other">,</span> <span class="Identifier">Spinner</span> <span class="Other">=</span> <span class="StringLit">&quot;だいかいてん&quot;</span><span class="Other">,</span>
+  <span class="Identifier">CrossSpinner</span> <span class="Other">=</span> <span class="StringLit">&quot;クロスかいてん&quot;</span><span class="Other">,</span> <span class="Identifier">Water</span> <span class="Other">=</span> <span class="StringLit">&quot;すいちゅう&quot;</span></pre></dt>
   <dd>
     
     Puyo Puyo rule.
@@ -114,7 +116,7 @@
   <dl class="item">
     <div id="parseRule-procs-all">
   <div id="parseRule,string">
-  <dt><pre><span class="Keyword">func</span> <a href="#parseRule%2Cstring"><span class="Identifier">parseRule</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a><span class="Other">[</span><a href="rule.html#Rule"><span class="Identifier">Rule</span></a><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#parseRule%2Cstring"><span class="Identifier">parseRule</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a><span class="Other">[</span><a href="rule.html#Rule"><span class="Identifier">Rule</span></a><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -130,7 +132,7 @@
 <div class="section" id="19">
   <h1><a class="toc-backref" href="#19">Exports</a></h1>
   <dl class="item">
-    <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a>, <a href="../private/results2.html#context,StrErrorResult[T],string"><span class="Identifier">context</span></a>
+    <a href="../utils/results2.html#context,Pon2Result[T],string"><span class="Identifier">context</span></a>, <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a>
   </dl>
 </div>
 
@@ -140,7 +142,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-11-16 16:06:03 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-19 15:01:03 UTC</small>
       </div>
     </div>
   </div>

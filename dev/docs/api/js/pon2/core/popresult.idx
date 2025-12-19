@@ -1,12 +1,12 @@
 nimTitle	popresult	pon2/core/popresult.html	module src/pon2/core/popresult		0
 nim	PopResult	pon2/core/popresult.html#PopResult	object PopResult		15
-nim	init	pon2/core/popresult.html#init,typePopResult,M128i,M128i,M128i,M128i,M128i,M128i,M128i,M128i,M128i	proc init(T: type PopResult; red, green, blue, yellow, purple, hard, hardToGarbage,\n                        garbage, color: BinaryField): T:type		30
+nim	init	pon2/core/popresult.html#init,typePopResult,M128i,M128i,M128i,M128i,M128i,M128i,M128i,M128i,M128i	proc init(T: type PopResult; red, green, blue, yellow, purple, hard, hardToGarbage,\n                        garbage, colored: BinaryField): T:type		30
 nim	init	pon2/core/popresult.html#init,typePopResult	proc init(T: type PopResult): T:type		46
 nim	isPopped	pon2/core/popresult.html#isPopped,PopResult	proc isPopped(self: PopResult): bool		54
 nim	cellCount	pon2/core/popresult.html#cellCount,PopResult,Cell	proc cellCount(self: PopResult; cell: Cell): int		62
-nim	puyoCount	pon2/core/popresult.html#puyoCount,PopResult	proc puyoCount(self: PopResult): int		74
-nim	colorPuyoCount	pon2/core/popresult.html#colorPuyoCount,PopResult	proc colorPuyoCount(self: PopResult): int		78
-nim	garbagesCount	pon2/core/popresult.html#garbagesCount,PopResult	proc garbagesCount(self: PopResult): int		82
-nim	hardToGarbageCount	pon2/core/popresult.html#hardToGarbageCount,PopResult	proc hardToGarbageCount(self: PopResult): int		86
-nim	connectionCounts	pon2/core/popresult.html#connectionCounts,PopResult	proc connectionCounts(self: PopResult): array[Cell, seq[int]]		139
+nim	puyoCount	pon2/core/popresult.html#puyoCount,PopResult	proc puyoCount(self: PopResult): int		75
+nim	coloredPuyoCount	pon2/core/popresult.html#coloredPuyoCount,PopResult	proc coloredPuyoCount(self: PopResult): int		79
+nim	nuisancePuyoCount	pon2/core/popresult.html#nuisancePuyoCount,PopResult	proc nuisancePuyoCount(self: PopResult): int		83
+nim	hardToGarbageCount	pon2/core/popresult.html#hardToGarbageCount,PopResult	proc hardToGarbageCount(self: PopResult): int		87
+nim	connectionCounts	pon2/core/popresult.html#connectionCounts,PopResult	proc connectionCounts(self: PopResult): array[Cell, seq[int]]		140
 nimgrp	init	pon2/core/popresult.html#init-procs-all	proc		30

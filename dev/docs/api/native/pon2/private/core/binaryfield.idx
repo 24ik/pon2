@@ -1,17 +1,24 @@
 nimTitle	binaryfield	pon2/private/core/binaryfield.html	module src/pon2/private/core/binaryfield		0
-nim	BinaryField	pon2/private/core/binaryfield.html#BinaryField	type BinaryField		24
-nim	isDead	pon2/private/core/binaryfield.html#isDead,M128i,staticRule	proc isDead(self: BinaryField; rule: static Rule): bool		40
-nim	invalidPlacements	pon2/private/core/binaryfield.html#invalidPlacements,M128i	proc invalidPlacements(self: BinaryField): set[Placement]		66
-nim	validPlacements	pon2/private/core/binaryfield.html#validPlacements,M128i	proc validPlacements(self: BinaryField): set[Placement]		97
-nim	validDoublePlacements	pon2/private/core/binaryfield.html#validDoublePlacements,M128i	proc validDoublePlacements(self: BinaryField): set[Placement]		101
-nim	extractedPop	pon2/private/core/binaryfield.html#extractedPop,M128i	proc extractedPop(self: BinaryField): BinaryField		151
-nim	canPop	pon2/private/core/binaryfield.html#canPop,M128i	proc canPop(self: BinaryField): bool		163
-nim	connection2	pon2/private/core/binaryfield.html#connection2,M128i	proc connection2(self: BinaryField): BinaryField		213
-nim	connection2Vertical	pon2/private/core/binaryfield.html#connection2Vertical,M128i	proc connection2Vertical(self: BinaryField): BinaryField		217
-nim	connection2Horizontal	pon2/private/core/binaryfield.html#connection2Horizontal,M128i	proc connection2Horizontal(self: BinaryField): BinaryField		221
-nim	connection3	pon2/private/core/binaryfield.html#connection3,M128i	proc connection3(self: BinaryField): BinaryField		261
-nim	connection3Vertical	pon2/private/core/binaryfield.html#connection3Vertical,M128i	proc connection3Vertical(self: BinaryField): BinaryField		265
-nim	connection3Horizontal	pon2/private/core/binaryfield.html#connection3Horizontal,M128i	proc connection3Horizontal(self: BinaryField): BinaryField		289
-nim	connection3LShape	pon2/private/core/binaryfield.html#connection3LShape,M128i	proc connection3LShape(self: BinaryField): BinaryField		313
-nim	toArray	pon2/private/core/binaryfield.html#toArray,M128i	proc toArray(self: BinaryField): array[Row, array[Col, bool]]		321
-nim	toBinaryField	pon2/private/core/binaryfield.html#toBinaryField,array[Row,array[Col,bool]]	proc toBinaryField(valArray: array[Row, array[Col, bool]]): BinaryField		332
+nim	isDead	pon2/private/core/binaryfield.html#isDead,M128i,DeadRule	proc isDead(self: BinaryField; deadRule: DeadRule): bool		29
+nim	invalidPlacements	pon2/private/core/binaryfield.html#invalidPlacements,M128i	proc invalidPlacements(self: BinaryField): set[Placement]		56
+nim	validPlacements	pon2/private/core/binaryfield.html#validPlacements,M128i	proc validPlacements(self: BinaryField): set[Placement]		89
+nim	validDoublePlacements	pon2/private/core/binaryfield.html#validDoublePlacements,M128i	proc validDoublePlacements(self: BinaryField): set[Placement]		93
+nim	shiftedUp	pon2/private/core/binaryfield.html#shiftedUp,M128i	proc shiftedUp(self: BinaryField): BinaryField		101
+nim	shiftedDown	pon2/private/core/binaryfield.html#shiftedDown,M128i	proc shiftedDown(self: BinaryField): BinaryField		105
+nim	shiftedRight	pon2/private/core/binaryfield.html#shiftedRight,M128i	proc shiftedRight(self: BinaryField): BinaryField		109
+nim	shiftedLeft	pon2/private/core/binaryfield.html#shiftedLeft,M128i	proc shiftedLeft(self: BinaryField): BinaryField		113
+nim	shiftUp	pon2/private/core/binaryfield.html#shiftUp,M128i	proc shiftUp(self: var BinaryField)		117
+nim	shiftDown	pon2/private/core/binaryfield.html#shiftDown,M128i	proc shiftDown(self: var BinaryField)		121
+nim	shiftRight	pon2/private/core/binaryfield.html#shiftRight,M128i	proc shiftRight(self: var BinaryField)		125
+nim	shiftLeft	pon2/private/core/binaryfield.html#shiftLeft,M128i	proc shiftLeft(self: var BinaryField)		129
+nim	extractedPop	pon2/private/core/binaryfield.html#extractedPop,M128i	proc extractedPop(self: BinaryField): BinaryField		178
+nim	canPop	pon2/private/core/binaryfield.html#canPop,M128i	proc canPop(self: BinaryField): bool		190
+nim	connection2	pon2/private/core/binaryfield.html#connection2,M128i	proc connection2(self: BinaryField): BinaryField		240
+nim	connection2Vertical	pon2/private/core/binaryfield.html#connection2Vertical,M128i	proc connection2Vertical(self: BinaryField): BinaryField		244
+nim	connection2Horizontal	pon2/private/core/binaryfield.html#connection2Horizontal,M128i	proc connection2Horizontal(self: BinaryField): BinaryField		248
+nim	connection3	pon2/private/core/binaryfield.html#connection3,M128i	proc connection3(self: BinaryField): BinaryField		290
+nim	connection3LShape	pon2/private/core/binaryfield.html#connection3LShape,M128i	proc connection3LShape(self: BinaryField): BinaryField		294
+nim	connection3Vertical	pon2/private/core/binaryfield.html#connection3Vertical,M128i	proc connection3Vertical(self: BinaryField): BinaryField		298
+nim	connection3Horizontal	pon2/private/core/binaryfield.html#connection3Horizontal,M128i	proc connection3Horizontal(self: BinaryField): BinaryField		322
+nim	toArray	pon2/private/core/binaryfield.html#toArray,M128i	proc toArray(self: BinaryField): array[Row, array[Col, bool]]		350
+nim	toBinaryField	pon2/private/core/binaryfield.html#toBinaryField,array[Row,array[Col,bool]]	proc toBinaryField(boolArray: array[Row, array[Col, bool]]): BinaryField		361

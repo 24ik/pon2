@@ -1,4 +1,4 @@
 nimTitle	setting	pon2/gui/studio/setting.html	module src/pon2/gui/studio/setting		0
 nim	StudioSetting	pon2/gui/studio/setting.html#StudioSetting	object StudioSetting		9
-nim	toStudioSettingsVNode	pon2/gui/studio/setting.html#toStudioSettingsVNode,ref.Studio,VNodeHelper	proc toStudioSettingsVNode(self: ref Studio; helper: VNodeHelper): VNode		43
-nim	getStudioSetting	pon2/gui/studio/setting.html#getStudioSetting,VNodeHelper	proc getStudioSetting(helper: VNodeHelper): StudioSetting		78
+nim	toStudioSettingsVNode	pon2/gui/studio/setting.html#toStudioSettingsVNode,ref.Studio,VNodeHelper	proc toStudioSettingsVNode(self: ref Studio; helper: VNodeHelper): VNode		37
+nim	getStudioSetting	pon2/gui/studio/setting.html#getStudioSetting,VNodeHelper	proc getStudioSetting(helper: VNodeHelper): StudioSetting		67
