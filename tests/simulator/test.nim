@@ -131,7 +131,7 @@ block:
 # Property - Setter
 # ------------------------------------------------
 
-block: # `rule=`
+block: # `rule=`, setRule
   var simulator = Simulator.init EditEditor
 
   simulator.rule = Tsu
@@ -148,6 +148,10 @@ block: # `rule=`
 
   simulator.undo
   check simulator.nazoPuyo == NazoPuyo.init
+
+  simulator.setRule Spinner
+  check simulator.rule == Spinner
+  check simulator.nazoPuyo == NazoPuyo.init Spinner
 
 block: # `mode=`
   let nazoPuyo =

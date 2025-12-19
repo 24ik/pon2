@@ -246,9 +246,9 @@ func `selectingCross=`*(self: var Simulator, cross: bool) =
   self.editData.selecting.cellOpt.err
   self.editData.selecting.crossOpt.ok cross
 
-func safeSetRule(self: var Simulator, rule: Rule) =
-  ## Sets the rule.
-  ## If the new rule is not acceptable, does nothing.
+func setRule*(self: var Simulator, rule: Rule) =
+  ## Sets the rule of the simulator.
+  ## This function is a "safe" version.
   let safe: bool
   case rule
   of Rule.Tsu, Rule.Water:
@@ -265,7 +265,21 @@ func safeSetRule(self: var Simulator, rule: Rule) =
       self.selectingCross = true
 
   if safe:
-    self.`rule=` rule
+    self.edit:
+      self.nazoPuyo.puyoPuyo.field.rule.assign rule
+
+      if rule == Rule.Water:
+        for step in self.nazoPuyo.puyoPuyo.steps.mitems:
+          if step.kind != NuisanceDrop:
+            continue
+
+          var counts = [0, 0, 0, 0, 0, 0]
+          staticFor(col, Col):
+            counts[step.counts[col]] += 1
+          let fillCount = counts.find counts.max
+
+          for count in step.counts.mitems:
+            count.assign fillCount
 
 # ------------------------------------------------
 # Toggle
@@ -916,9 +930,9 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.discardable.} =
     elif self.mode == EditEditor:
       # rule
       if key == KeyEventR:
-        self.safeSetRule self.rule.rotateSucc
+        self.setRule self.rule.rotateSucc
       elif key == KeyEventE:
-        self.safeSetRule self.rule.rotatePred
+        self.setRule self.rule.rotatePred
       # toggle insert / focus
       elif key == KeyEventG:
         self.toggleInsert

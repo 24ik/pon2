@@ -47,8 +47,10 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper, score: int
   ): array[Notice, int] =
     ## Returns the numbers of notice garbages.
-    let originalNoticeCounts =
-      score.noticeCounts(Behaviours[self.derefSimulator(helper).rule].garbageRate)
+    let
+      rule = self.derefSimulator(helper).rule
+      originalNoticeCounts =
+        score.noticeCounts(Behaviours[rule].garbageRate, useComet = rule != Rule.Tsu)
 
     var
       counts = Notice.initArrayWith 0
@@ -56,7 +58,7 @@ when defined(js) or defined(nimsuggest):
     for notice in countdown(Comet, Small):
       let count = min(originalNoticeCounts[notice], ShowNoticeCount - totalCount)
       counts[notice].assign count
-      totalCount.inc count
+      totalCount += count
 
     counts
 

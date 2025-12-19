@@ -31,7 +31,7 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper, rule: Rule
   ): () -> void =
     ## Returns the handler for clicking buttons.
-    () => (self.derefSimulator(helper).rule = rule)
+    () => self.derefSimulator(helper).setRule rule
 
   proc toSettingsVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
