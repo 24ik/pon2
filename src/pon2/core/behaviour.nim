@@ -29,7 +29,7 @@ static:
   doAssert WaterGarbageRate > 0
 
 type
-  Phys* {.pure.} = enum
+  Physics* {.pure.} = enum
     ## Puyo Puyo physics of fields.
     Tsu
     Water
@@ -41,13 +41,13 @@ type
     Water
 
   Behaviour* = object ## Field behaviour.
-    phys*: Phys
+    physics*: Physics
     dead*: DeadRule
     garbageRate*: int
 
 const Behaviours*: array[Rule, Behaviour] = [
-  Behaviour(phys: Phys.Tsu, dead: DeadRule.Tsu, garbageRate: TsuGarbageRate),
-  Behaviour(phys: Phys.Tsu, dead: Fever, garbageRate: SpinnerGarbageRate),
-  Behaviour(phys: Phys.Tsu, dead: Fever, garbageRate: CrossSpinnerGarbageRate),
-  Behaviour(phys: Phys.Water, dead: DeadRule.Water, garbageRate: WaterGarbageRate),
+  Behaviour(physics: Physics.Tsu, dead: DeadRule.Tsu, garbageRate: TsuGarbageRate),
+  Behaviour(physics: Physics.Tsu, dead: Fever, garbageRate: SpinnerGarbageRate),
+  Behaviour(physics: Physics.Tsu, dead: Fever, garbageRate: CrossSpinnerGarbageRate),
+  Behaviour(physics: Physics.Water, dead: DeadRule.Water, garbageRate: WaterGarbageRate),
 ]

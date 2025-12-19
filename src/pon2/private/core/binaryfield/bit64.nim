@@ -231,12 +231,12 @@ func `[]=`*(self: var BinaryField, row: Row, col: Col, val: bool) {.inline, noin
 # Insert / Delete
 # ------------------------------------------------
 
-func isInWater(row: Row, phys: Phys): bool {.inline, noinit.} =
+func isInWater(row: Row, physics: Physics): bool {.inline, noinit.} =
   ## Returns `true` if the row is in the water.
-  phys == Phys.Water and row >= WaterTopRow
+  physics == Physics.Water and row >= WaterTopRow
 
 func insert(
-    self: var uint64, col: Col, row: Row, val: bool, phys: Phys
+    self: var uint64, col: Col, row: Row, val: bool, physics: Physics
 ) {.inline, noinit.} =
   ## Inserts the value and shifts the binary field's element.
   ## `col` should be in `Col0..Col2`.
@@ -252,7 +252,7 @@ func insert(
   let
     below: uint64
     above: uint64
-  if row.isInWater phys:
+  if row.isInWater physics:
     let belowMask = 0x3fff_0000_0000_0000'u64 shr rowColShift
     below = ((self and belowMask) shr 1).keptValid
     above = self *~ belowMask
@@ -265,18 +265,18 @@ func insert(
   self.changeBitBE rowColShift + 2, val
 
 func insert*(
-    self: var BinaryField, row: Row, col: Col, val: bool, phys: Phys
+    self: var BinaryField, row: Row, col: Col, val: bool, physics: Physics
 ) {.inline, noinit.} =
   ## Inserts the value and shifts the binary field.
   ## If (row, col) is in the air, shifts the binary field upward above where inserted.
   ## If it is in the water, shifts the binary field downward below where inserted.
   case col
   of Col0 .. Col2:
-    self[0].insert col, row, val, phys
+    self[0].insert col, row, val, physics
   of Col3 .. Col5:
-    self[1].insert col.pred 3, row, val, phys
+    self[1].insert col.pred 3, row, val, physics
 
-func del(self: var uint64, col: Col, row: Row, phys: Phys) {.inline, noinit.} =
+func del(self: var uint64, col: Col, row: Row, physics: Physics) {.inline, noinit.} =
   ## Deletes the value and shifts the binary field's element.
   ## `col` should be in `Col0..Col2`.
   ## If (row, col) is in the air, shifts the binary field's element downward above
@@ -293,7 +293,7 @@ func del(self: var uint64, col: Col, row: Row, phys: Phys) {.inline, noinit.} =
   let
     below: uint64
     above: uint64
-  if row.isInWater phys:
+  if row.isInWater physics:
     below = ((self and belowMask) shl 1).keptValid
     above = self and aboveMask
   else:
@@ -302,15 +302,17 @@ func del(self: var uint64, col: Col, row: Row, phys: Phys) {.inline, noinit.} =
 
   self.assign ((below or above) and colMask) or (self *~ colMask)
 
-func del*(self: var BinaryField, row: Row, col: Col, phys: Phys) {.inline, noinit.} =
+func del*(
+    self: var BinaryField, row: Row, col: Col, physics: Physics
+) {.inline, noinit.} =
   ## Deletes the value and shifts the binary field.
   ## If (row, col) is in the air, shifts the binary field downward above where deleted.
   ## If it is in the water, shifts the binary field upward below where deleted.
   case col
   of Col0 .. Col2:
-    self[0].del col, row, phys
+    self[0].del col, row, physics
   of Col3 .. Col5:
-    self[1].del col.pred 3, row, phys
+    self[1].del col.pred 3, row, physics
 
 # ------------------------------------------------
 # Drop Nuisance

@@ -117,14 +117,14 @@ func insert*(self: var Field, row: Row, col: Col, cell: Cell) {.inline, noinit.}
   ## If it is in the water, shifts the field downward below where inserted.
   cell.withBits:
     expand bit:
-      self.binaryFields[_].insert row, col, bit, Behaviours[self.rule].phys
+      self.binaryFields[_].insert row, col, bit, Behaviours[self.rule].physics
 
 func del*(self: var Field, row: Row, col: Col) {.inline, noinit.} =
   ## Deletes the cell and shifts the field.
   ## If (row, col) is in the air, shifts the field downward above where deleted.
   ## If it is in the water, shifts the field upward below where deleted.
   staticFor(i, 0 ..< 3):
-    self.binaryFields[i].del row, col, Behaviours[self.rule].phys
+    self.binaryFields[i].del row, col, Behaviours[self.rule].physics
 
 # ------------------------------------------------
 # Puyo Extract
@@ -395,10 +395,10 @@ func place*(self: var Field, pair: Pair, placement: Placement) {.inline, noinit.
   if placement == Placement.None:
     return
 
-  case Behaviours[self.rule].phys
-  of Phys.Tsu:
+  case Behaviours[self.rule].physics
+  of Physics.Tsu:
     self.placeTsu pair, placement
-  of Phys.Water:
+  of Physics.Water:
     self.placeWater pair, placement
 
 # ------------------------------------------------
@@ -467,10 +467,10 @@ func dropNuisance*(
     existField = self.exist
     notDropHardInt = (not hard).int
 
-  case Behaviours[self.rule].phys
-  of Phys.Tsu:
+  case Behaviours[self.rule].physics
+  of Physics.Tsu:
     self.binaryFields[notDropHardInt].dropNuisanceTsu counts, existField
-  of Phys.Water:
+  of Physics.Water:
     self.binaryFields[notDropHardInt].dropNuisanceWater self.binaryFields[hard.int],
       self.binaryFields[2], counts, existField
 
@@ -495,12 +495,12 @@ func apply*(self: var Field, step: Step) {.inline, noinit.} =
 
 func settle*(self: var Field) {.inline, noinit.} =
   ## Settles the field.
-  case Behaviours[self.rule].phys
-  of Phys.Tsu:
+  case Behaviours[self.rule].physics
+  of Physics.Tsu:
     settleTsu(
       self.binaryFields[0], self.binaryFields[1], self.binaryFields[2], self.exist
     )
-  of Phys.Water:
+  of Physics.Water:
     settleWater(
       self.binaryFields[0], self.binaryFields[1], self.binaryFields[2], self.exist
     )
@@ -508,12 +508,12 @@ func settle*(self: var Field) {.inline, noinit.} =
 func isSettled*(self: Field): bool {.inline, noinit.} =
   ## Returns `true` if the field is settled.
   ## Note that this function is only slightly lighter than `settle`.
-  case Behaviours[self.rule].phys
-  of Phys.Tsu:
+  case Behaviours[self.rule].physics
+  of Physics.Tsu:
     areSettledTsu(
       self.binaryFields[0], self.binaryFields[1], self.binaryFields[2], self.exist
     )
-  of Phys.Water:
+  of Physics.Water:
     areSettledWater(
       self.binaryFields[0], self.binaryFields[1], self.binaryFields[2], self.exist
     )
