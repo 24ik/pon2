@@ -29,7 +29,7 @@ when defined(js) or defined(nimsuggest):
       if self[].replayStepsCount == 0:
         0
       else:
-        self[].replayStepsIndex.succ
+        self[].replayStepsIndex + 1
 
     buildHtml nav(class = "pagination"):
       button(class = "button pagination-link", onclick = () => self[].prevReplay):

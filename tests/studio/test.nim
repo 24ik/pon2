@@ -5,7 +5,7 @@
 
 import std/[importutils, unittest]
 import ../../src/pon2/[core]
-import ../../src/pon2/app/[key, simulator, studio]
+import ../../src/pon2/app/[key, simulator, studio {.all.}]
 import ../../src/pon2/private/[assign]
 
 func `==`(progressRef1, progressRef2: ref tuple[now, total: int]): bool =
@@ -19,40 +19,24 @@ block: # init
   check Studio.init == Studio.init Simulator.init EditEditor
 
 # ------------------------------------------------
-# Property - Getter
+# Property
 # ------------------------------------------------
 
 block:
-  # simulator, replaySimulator, focusReplay, solving, permuting, working,
-  # replayStepsCount, replayStepsIndex, progressRef
+  # focusReplay, solving, permuting, working replayStepsCount, replayStepsIndex,
+  # progress
   let studio = Studio.init
 
-  check studio.simulator == Simulator.init EditEditor
-  check studio.replaySimulator == Simulator.init Replay
   check not studio.focusReplay
   check not studio.solving
   check not studio.permuting
   check not studio.working
   check studio.replayStepsCount == 0
   check studio.replayStepsIndex == 0
-  check studio.progressRef[] == (0, 0)
-
-block: # simulator (var), replaySimulator (var)
-  var
-    studio = Studio.init
-    simulator = Simulator.init EditEditor
-    replaySimulator = Simulator.init Replay
-
-  studio.simulator.writeCell Cell.Red
-  simulator.writeCell Cell.Red
-  check studio.simulator == simulator
-
-  studio.replaySimulator.writeCell Cell.Green
-  replaySimulator.writeCell Cell.Green
-  check studio.replaySimulator == replaySimulator
+  check studio.progress == (0, 0)
 
 # ------------------------------------------------
-# Edit - Other
+# Toggle
 # ------------------------------------------------
 
 block: # toggleFocus
@@ -177,7 +161,7 @@ bg|""".parseNazoPuyo.unsafeValue
   check studio.replayStepsIndex == 0
 
 # ------------------------------------------------
-# Keyboard
+# Key
 # ------------------------------------------------
 
 block: # operate

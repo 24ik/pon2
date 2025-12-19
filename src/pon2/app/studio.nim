@@ -19,13 +19,13 @@ when defined(js) or defined(nimsuggest):
     import ../private/[webworkers]
 
 type
-  StudioReplayData* = object ## Data for the replay simulator.
+  StudioReplayData = object ## Data for the replay simulator.
     stepsSeq: seq[Steps]
     stepsIndex: int
 
   Studio* = object ## Studio for Puyo Puyo and Nazo Puyo.
-    simulator: Simulator
-    replaySimulator: Simulator
+    simulator*: Simulator
+    replaySimulator*: Simulator
 
     focusReplay: bool
 
@@ -57,24 +57,8 @@ proc init*(T: type Studio): T =
   T.init Simulator.init EditEditor
 
 # ------------------------------------------------
-# Property - Getter
+# Property
 # ------------------------------------------------
-
-func simulator*(self: Studio): Simulator =
-  ## Returns the simulator.
-  self.simulator
-
-func simulator*(self: var Studio): var Simulator =
-  ## Returns the simulator.
-  self.simulator
-
-func replaySimulator*(self: Studio): Simulator =
-  ## Returns the replay simulator.
-  self.replaySimulator
-
-func replaySimulator*(self: var Studio): var Simulator =
-  ## Returns the replay simulator.
-  self.replaySimulator
 
 func focusReplay*(self: Studio): bool =
   ## Returns `true` if the replay simulator is focused.
@@ -100,36 +84,40 @@ func replayStepsIndex*(self: Studio): int =
   ## Returns the index of steps for the replay simulator.
   self.replayData.stepsIndex
 
-func progressRef*(self: Studio): ref tuple[now, total: int] =
+func progress*(self: Studio): tuple[now, total: int] =
   ## Returns the progress.
-  self.progressRef
+  self.progressRef[]
 
 # ------------------------------------------------
-# Edit - Other
+# Toggle
 # ------------------------------------------------
 
 func toggleFocus*(self: var Studio) =
   ## Toggles focusing to replay simulator or not.
-  if self.simulator.mode in EditorModes:
-    self.focusReplay.toggle
+  self.focusReplay.toggle
 
 # ------------------------------------------------
 # Replay
 # ------------------------------------------------
 
+func updateReplaySimulator(self: var Studio) =
+  ## Updates the replay simulator.
+  var nazoPuyo = self.replaySimulator.nazoPuyo
+  nazoPuyo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIndex]
+
+  self.replaySimulator.assign Simulator.init(nazoPuyo, Replay)
+
 func nextReplay*(self: var Studio) =
   ## Shows the next solution.
-  if self.simulator.mode notin EditorModes or self.replayData.stepsSeq.len == 0:
+  if self.replayData.stepsSeq.len == 0:
     return
 
   if self.replayData.stepsIndex == self.replayData.stepsSeq.len.pred:
     self.replayData.stepsIndex.assign 0
   else:
-    self.replayData.stepsIndex.inc
+    self.replayData.stepsIndex += 1
 
-  var nazoPuyo = self.replaySimulator.nazoPuyo
-  nazoPuyo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIndex]
-  self.replaySimulator.assign Simulator.init(nazoPuyo, Replay)
+  self.updateReplaySimulator
 
 func prevReplay*(self: var Studio) =
   ## Shows the previous solution.
@@ -139,11 +127,9 @@ func prevReplay*(self: var Studio) =
   if self.replayData.stepsIndex == 0:
     self.replayData.stepsIndex.assign self.replayData.stepsSeq.len.pred
   else:
-    self.replayData.stepsIndex.dec
+    self.replayData.stepsIndex -= 1
 
-  var nazoPuyo = self.replaySimulator.nazoPuyo
-  nazoPuyo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIndex]
-  self.replaySimulator.assign Simulator.init(nazoPuyo, Replay)
+  self.updateReplaySimulator
 
 # ------------------------------------------------
 # Terminate
@@ -298,7 +284,7 @@ when defined(js) or defined(nimsuggest):
       {.pop.}
 
 # ------------------------------------------------
-# Keyboard
+# Key
 # ------------------------------------------------
 
 proc operate*(self: ref Studio, key: KeyEvent): bool {.discardable.} =

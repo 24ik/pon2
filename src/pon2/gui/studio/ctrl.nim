@@ -30,8 +30,7 @@ when defined(js) or defined(nimsuggest):
     ## Returns a handler to check the progress and redraw.
     () => (
       block:
-        if self[].progressRef[].now > 0 and
-            self[].progressRef[].now == self[].progressRef[].total:
+        if self[].progress.now > 0 and self[].progress.now == self[].progress.total:
           interval.clearInterval
         safeRedraw()
     )
@@ -113,7 +112,7 @@ when defined(js) or defined(nimsuggest):
       tdiv(class = "block"):
         progress(
           class = "progress is-primary",
-          value = ($self[].progressRef[].now).kstring,
-          max = ($self[].progressRef[].total).kstring,
+          value = ($self[].progress.now).kstring,
+          max = ($self[].progress.total).kstring,
         ):
           discard
