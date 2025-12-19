@@ -8,9 +8,10 @@
 
 import std/[strformat, uri]
 import ./[cell, field, fqdn, moveresult, pair, placement, popresult, step]
-import ../private/[assign, bitutils, strutils, tables]
+import ../[utils]
+import ../private/[assign, bitops, strutils, tables]
 
-export field, moveresult, results2, step
+export field, moveresult, step, utils
 
 type PuyoPuyo* = object ## Puyo Puyo game.
   field*: Field
@@ -38,13 +39,13 @@ func puyoCount*(self: PuyoPuyo): int {.inline, noinit.} =
   ## Returns the number of puyos in the game.
   self.field.puyoCount + self.steps.puyoCount
 
-func colorPuyoCount*(self: PuyoPuyo): int {.inline, noinit.} =
-  ## Returns the number of color puyos in the game.
-  self.field.colorPuyoCount + self.steps.colorPuyoCount
+func coloredPuyoCount*(self: PuyoPuyo): int {.inline, noinit.} =
+  ## Returns the number of colored puyos in the game.
+  self.field.coloredPuyoCount + self.steps.coloredPuyoCount
 
-func garbagesCount*(self: PuyoPuyo): int {.inline, noinit.} =
-  ## Returns the number of hard and garbage puyos in the game.
-  self.field.garbagesCount + self.steps.garbagesCount
+func nuisancePuyoCount*(self: PuyoPuyo): int {.inline, noinit.} =
+  ## Returns the number of nuisance puyos in the game.
+  self.field.nuisancePuyoCount + self.steps.nuisancePuyoCount
 
 # ------------------------------------------------
 # Move
@@ -67,14 +68,15 @@ const FieldStepsSep = "\n------\n"
 func `$`*(self: PuyoPuyo): string {.inline, noinit.} =
   $self.field & FieldStepsSep & $self.steps
 
-func parsePuyoPuyo*(str: string): StrErrorResult[PuyoPuyo] {.inline, noinit.} =
+func parsePuyoPuyo*(str: string): Pon2Result[PuyoPuyo] {.inline, noinit.} =
   ## Returns the game converted from the string representation.
+  let errorMsg = "Invalid Puyo Puyo: {str}".fmt
+
   let strs = str.split FieldStepsSep
   if strs.len != 2:
-    return err "Invalid Puyo Puyo: {str}".fmt
+    return err errorMsg
 
   let
-    errorMsg = "Invalid Puyo Puyo: {str}".fmt
     field = ?strs[0].parseField.context errorMsg
     steps = ?strs[1].parseSteps.context errorMsg
 
@@ -90,37 +92,25 @@ const
 
   FieldStepsSepIshikawaUri = "_"
 
-func toUriQueryPon2(self: PuyoPuyo): StrErrorResult[string] {.inline, noinit.} =
-  ## Returns the URI query converted from the game.
-  let errorMsg = "Puyo Puyo that does not support URI conversion: {self}".fmt
-
-  ok [
-    (FieldKey, ?self.field.toUriQuery(Pon2).context errorMsg),
-    (StepsKey, ?self.steps.toUriQuery(Pon2).context errorMsg),
-  ].encodeQuery
-
-func toUriQueryIshikawa(self: PuyoPuyo): StrErrorResult[string] {.inline, noinit.} =
+func toUriQuery*(self: PuyoPuyo, fqdn = Pon2): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query converted from the game.
   let
     errorMsg = "Puyo Puyo that does not support URI conversion: {self}".fmt
 
-    fieldQuery = ?self.field.toUriQuery(Ishikawa).context errorMsg
-    stepsQuery = ?self.steps.toUriQuery(Ishikawa).context errorMsg
+    fieldQuery = ?self.field.toUriQuery(fqdn).context errorMsg
+    stepsQuery = ?self.steps.toUriQuery(fqdn).context errorMsg
 
   ok (
-    if stepsQuery == "": fieldQuery
-    else: fieldQuery & FieldStepsSepIshikawaUri & stepsQuery
+    case fqdn
+    of Pon2:
+      [(FieldKey, fieldQuery), (StepsKey, stepsQuery)].encodeQuery
+    of IshikawaPuyo, Ips:
+      if stepsQuery == "": fieldQuery
+      else:
+        fieldQuery & FieldStepsSepIshikawaUri & stepsQuery
   )
 
-func toUriQuery*(
-    self: PuyoPuyo, fqdn = Pon2
-): StrErrorResult[string] {.inline, noinit.} =
-  ## Returns the URI query converted from the game.
-  case fqdn
-  of Pon2: self.toUriQueryPon2
-  of Ishikawa, Ips: self.toUriQueryIshikawa
-
-func parsePuyoPuyoPon2(query: string): StrErrorResult[PuyoPuyo] {.inline, noinit.} =
+func parsePuyoPuyoPon2(query: string): Pon2Result[PuyoPuyo] {.inline, noinit.} =
   ## Returns the game converted from the URI query.
   var
     puyoPuyo = PuyoPuyo.init
@@ -131,48 +121,44 @@ func parsePuyoPuyoPon2(query: string): StrErrorResult[PuyoPuyo] {.inline, noinit
     case key
     of FieldKey:
       if fieldSet:
-        return err "Invalid Puyo Puyo (multiple `{key}`): {query}".fmt
+        return err "Invalid Puyo Puyo (multiple key: `{key}`): {query}".fmt
       fieldSet.assign true
 
-      # NOTE: assign does not work
-      puyoPuyo.field = ?val.parseField(Pon2).context "Invalid Puyo Puyo: {query}".fmt
+      puyoPuyo.field.assign ?val.parseField(Pon2).context "Invalid Puyo Puyo: {query}".fmt
     of StepsKey:
       if stepsSet:
-        return err "Invalid Puyo Puyo (multiple `{key}`): {query}".fmt
+        return err "Invalid Puyo Puyo (multiple key: `{key}`): {query}".fmt
       stepsSet.assign true
 
       puyoPuyo.steps.assign ?val.parseSteps(Pon2).context "Invalid Puyo Puyo: {query}".fmt
     else:
       return err "Invalid Puyo Puyo (Invalid key: `{key}`): {query}".fmt
 
-  if not fieldSet:
-    puyoPuyo.field = ?"".parseField(Pon2).context "Unexpected error (parsePuyoPuyoPon2)"
-  if not stepsSet:
-    puyoPuyo.steps.assign ?"".parseSteps(Pon2).context "Unexpected error (parsePuyoPuyoPon2)"
-
   ok puyoPuyo
 
-func parsePuyoPuyoIshikawa(query: string): StrErrorResult[PuyoPuyo] {.inline, noinit.} =
+func parsePuyoPuyoIshikawa(query: string): Pon2Result[PuyoPuyo] {.inline, noinit.} =
   ## Returns the game converted from the URI query.
+  let errorMsg = "Invalid Puyo Puyo: {query}".fmt
+
   let strs = query.split FieldStepsSepIshikawaUri
 
-  var steps = Steps.init
+  var puyoPuyo = PuyoPuyo.init
+  puyoPuyo.field.assign ?strs[0].parseField(IshikawaPuyo).context "Invalid Puyo Puyo: {query}".fmt
+
   case strs.len
   of 1:
     discard
   of 2:
-    steps.assign ?strs[1].parseSteps(Ishikawa).context "Invalid Puyo Puyo: {query}".fmt
+    puyoPuyo.steps.assign ?strs[1].parseSteps(IshikawaPuyo).context errorMsg
   else:
-    return err "Invalid Puyo Puyo: {query}".fmt
+    return err errorMsg
 
-  let field = ?strs[0].parseField(Ishikawa).context "Invalid Puyo Puyo: {query}".fmt
-
-  ok PuyoPuyo.init(field, steps)
+  ok puyoPuyo
 
 func parsePuyoPuyo*(
     query: string, fqdn: SimulatorFqdn
-): StrErrorResult[PuyoPuyo] {.inline, noinit.} =
+): Pon2Result[PuyoPuyo] {.inline, noinit.} =
   ## Returns the game converted from the URI query.
   case fqdn
   of Pon2: query.parsePuyoPuyoPon2
-  of Ishikawa, Ips: query.parsePuyoPuyoIshikawa
+  of IshikawaPuyo, Ips: query.parsePuyoPuyoIshikawa

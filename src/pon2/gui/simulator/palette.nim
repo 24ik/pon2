@@ -17,60 +17,61 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
+
   export vdom
 
-  const Shortcuts: array[Cell, cstring] = [
-    "Space".cstring, "P".cstring, "O".cstring, "H".cstring, "J".cstring, "K".cstring,
-    "L".cstring, ";".cstring,
+  const Shortcuts: array[Cell, kstring] = [
+    "Space".kstring, "P".kstring, "O".kstring, "H".kstring, "J".kstring, "K".kstring,
+    "L".kstring, ";".kstring,
   ]
 
   func initBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, cell: Cell
   ): () -> void =
     ## Returns the handler for clicking button.
-    # NOTE: cannot inline due to karax's limitation
-    () => (self.derefSimulator(helper).editCell = cell)
+    () => (self.derefSimulator(helper).selectingCell = cell)
 
   func initBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, cross: bool
   ): () -> void =
     ## Returns the handler for clicking button.
-    # NOTE: cannot inline due to karax's limitation
-    () => (self.derefSimulator(helper).editCross = cross)
+    () => (self.derefSimulator(helper).selectingCross = cross)
 
   proc toPaletteVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
   ): VNode =
     ## Returns the palette node.
     let
-      editObj = self.derefSimulator(helper).editData.editObj
-      btnClass = (if helper.mobile: "button is-large px-2" else: "button px-2").cstring
+      editData = self.derefSimulator(helper).editData
+      btnClass = (if helper.mobile: "button is-large px-2" else: "button px-2").kstring
       selectBtnClass = (
         if helper.mobile: "button is-large is-primary px-2"
         else: "button px-2 is-primary"
-      ).cstring
+      ).kstring
 
     buildHtml tdiv(class = "card", style = translucentStyle):
       tdiv(class = "card-content p-1"):
         table:
           tbody:
-            for row, cells in static(
-              [
-                [Cell.None, Cell.Red, Cell.Green, Cell.Blue],
-                [Cell.Yellow, Cell.Purple, Garbage, Hard],
-              ]
-            ):
+            for row, cells in [
+              [Cell.None, Cell.Red, Cell.Green, Cell.Blue],
+              [Cell.Yellow, Cell.Purple, Garbage, Hard],
+            ]:
               tr:
                 for cell in cells:
-                  let cellSelected = editObj.kind == EditCell and editObj.cell == cell
+                  let cellSelected = editData.selecting.cellOpt == Opt[Cell].ok cell
                   td:
                     button(
                       class = if cellSelected: selectBtnClass else: btnClass,
                       onclick = self.initBtnHandler(helper, cell),
                     ):
                       figure(
-                        class =
-                          (if helper.mobile: "image is-32x32" else: "image is-24x24")
+                        class = (
+                          if helper.mobile: "image is-32x32" else: "image is-24x24"
+                        ).kstring
                       ):
                         img(src = cell.cellImgSrc)
                       if not helper.mobile and not cellSelected:
@@ -79,19 +80,25 @@ when defined(js) or defined(nimsuggest):
                 td:
                   let
                     cross = row.bool
-                    selected = editObj.kind == EditRotate and editObj.cross == cross
+                    selected = editData.selecting.crossOpt == Opt[bool].ok cross
+                    rule = self.derefSimulator(helper).rule
                   button(
                     class = if selected: selectBtnClass else: btnClass,
-                    disabled = row != self.derefSimulator(helper).rule.ord.pred,
+                    disabled =
+                      not (
+                        (rule == Spinner and row == 0) or
+                        (rule == CrossSpinner and row == 1)
+                      ),
                     onclick = self.initBtnHandler(helper, cross),
                   ):
                     figure(
-                      class =
-                        (if helper.mobile: "image is-32x32" else: "image is-24x24")
+                      class = (
+                        if helper.mobile: "image is-32x32" else: "image is-24x24"
+                      ).kstring
                     ):
                       span(
                         class =
-                          (if helper.mobile: "icon is-medium" else: "icon").cstring
+                          (if helper.mobile: "icon is-medium" else: "icon").kstring
                       ):
                         if cross:
                           span(
@@ -104,4 +111,4 @@ when defined(js) or defined(nimsuggest):
                           italic(class = "fa-solid fa-arrows-rotate")
                     if not helper.mobile and not selected:
                       span(style = counterStyle):
-                        text (if cross: "M" else: "N").cstring
+                        text (if cross: "M" else: "N").kstring

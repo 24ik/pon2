@@ -18,6 +18,10 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui]
 
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
+
   export vdom
 
   proc toSimulatorVNode*[S: Simulator or Studio or Marathon](
@@ -30,15 +34,15 @@ when defined(js) or defined(nimsuggest):
       isReplaySimulator =
         helper.studioOpt.isOk and helper.studioOpt.unsafeValue.isReplaySimulator
       showGoal =
-        mode == EditorEdit or self.derefSimulator(helper).nazoPuyo.goal != NoneGoal
+        mode == EditEditor or self.derefSimulator(helper).nazoPuyo.goal != NoneGoal
 
     buildHtml tdiv:
       if showGoal:
-        tdiv(class = (if helper.mobile: "block mb-2" else: "block").cstring):
+        tdiv(class = (if helper.mobile: "block mb-2" else: "block").kstring):
           self.toGoalVNode helper
       tdiv(class = "block"):
         tdiv(
-          class = (if helper.mobile: "columns is-mobile is-1" else: "columns is-mobile").cstring,
+          class = (if helper.mobile: "columns is-mobile is-1" else: "columns is-mobile").kstring,
           style = style(StyleAttr.overflowX, "auto"),
         ):
           tdiv(class = "column is-narrow"):
@@ -65,7 +69,7 @@ when defined(js) or defined(nimsuggest):
               tdiv(
                 class = (
                   if helper.mobile: "columns is-mobile is-1" else: "columns is-mobile"
-                ).cstring
+                ).kstring
               ):
                 if wideCtrl:
                   tdiv(class = "column is-narrow"):
@@ -77,7 +81,7 @@ when defined(js) or defined(nimsuggest):
                   if mode in EditModes and not helper.mobile:
                     tdiv(class = "block"):
                       self.toPaletteVNode helper
-                  if not helper.mobile or isReplaySimulator or mode == EditorEdit:
+                  if not helper.mobile or isReplaySimulator or mode == EditEditor:
                     tdiv(class = "block"):
                       self.toSideCtrlVNode helper
                   tdiv(class = "block"):
@@ -88,13 +92,13 @@ when defined(js) or defined(nimsuggest):
             if mode in EditModes:
               tdiv(class = "column is-narrow"):
                 self.toPaletteVNode helper
-            if mode != EditorEdit:
+            if mode != EditEditor:
               tdiv(class = "column is-narrow"):
                 self.toBottomCtrlVNode helper
       tdiv(
         id = helper.simulator.cameraReadyId,
         style = style(
-          (StyleAttr.display, "none".cstring), (StyleAttr.width, "fit-content".cstring)
+          (StyleAttr.display, "none".kstring), (StyleAttr.width, "fit-content".kstring)
         ),
       ):
         if showGoal:

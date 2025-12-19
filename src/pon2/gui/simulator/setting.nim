@@ -17,23 +17,27 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[gui, utils]
 
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
+
   export vdom
 
   const
-    BtnClass = "button".cstring
-    SelectBtnClass = "button is-primary is-selected".cstring
+    BtnClass = "button".kstring
+    SelectBtnClass = "button is-primary is-selected".kstring
 
   func initBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, rule: Rule
   ): () -> void =
     ## Returns the handler for clicking buttons.
-    () => (self.derefSimulator(helper).rule = rule)
+    () => self.derefSimulator(helper).setRule rule
 
   proc toSettingsVNode*[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper
   ): VNode =
     ## Returns the select node.
-    let playBtnClass, editBtnClass: cstring
+    let playBtnClass, editBtnClass: kstring
     if self.derefSimulator(helper).mode in PlayModes:
       playBtnClass = SelectBtnClass
       editBtnClass = BtnClass
@@ -43,11 +47,11 @@ when defined(js) or defined(nimsuggest):
 
     let playMode, editMode: SimulatorMode
     if self.derefSimulator(helper).mode in ViewerModes:
-      playMode = ViewerPlay
-      editMode = ViewerEdit
+      playMode = PlayViewer
+      editMode = EditViewer
     else:
-      playMode = EditorPlay
-      editMode = EditorEdit
+      playMode = PlayEditor
+      editMode = EditEditor
 
     buildHtml tdiv:
       tdiv(class = "field has-addons"):
@@ -71,7 +75,7 @@ when defined(js) or defined(nimsuggest):
               if not helper.mobile and self.derefSimulator(helper).mode notin EditModes:
                 span(style = counterStyle):
                   text "T"
-      if self.derefSimulator(helper).mode == EditorEdit:
+      if self.derefSimulator(helper).mode == EditEditor:
         let nowRule = self.derefSimulator(helper).rule
 
         tdiv(class = "field has-addons"):
@@ -83,16 +87,19 @@ when defined(js) or defined(nimsuggest):
               (italicClass, disabled) =
                 case rule
                 of Rule.Tsu:
-                  ("fa-solid fa-2".cstring, steps.anyIt it.kind == Rotate)
+                  ("fa-solid fa-2".kstring, steps.anyIt it.kind == FieldRotate)
                 of Spinner:
                   (
-                    "fa-solid fa-arrows-rotate".cstring,
-                    steps.anyIt (it.kind == Rotate and it.cross),
+                    "fa-solid fa-arrows-rotate".kstring,
+                    steps.anyIt (it.kind == FieldRotate and it.cross),
                   )
                 of CrossSpinner:
-                  ("DUMMY".cstring, steps.anyIt (it.kind == Rotate and not it.cross))
+                  (
+                    "DUMMY".kstring,
+                    steps.anyIt (it.kind == FieldRotate and not it.cross),
+                  )
                 of Rule.Water:
-                  ("fa-solid fa-droplet".cstring, steps.anyIt it.kind == Rotate)
+                  ("fa-solid fa-droplet".kstring, steps.anyIt it.kind == FieldRotate)
 
             tdiv(class = "control"):
               button(

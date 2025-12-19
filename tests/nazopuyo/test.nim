@@ -7,19 +7,12 @@ import std/[unittest]
 import
   ../../src/pon2/core/
     [field, fqdn, goal, nazopuyo, placement, popresult, puyopuyo, rule, step]
-import ../../src/pon2/private/[strutils]
+import ../../src/pon2/private/[assign, strutils]
 
 func mark2(nazoPuyo: NazoPuyo, placements: varargs[Placement]): MarkResult =
   var nazoPuyo2 = nazoPuyo
   for i, placement in placements:
-    nazoPuyo2.puyoPuyo.steps[i].optPlacement.ok placement
-
-  nazoPuyo2.mark
-
-func mark2(nazoPuyo: NazoPuyo, optPlacements: varargs[OptPlacement]): MarkResult =
-  var nazoPuyo2 = nazoPuyo
-  for i, optPlacement in optPlacements:
-    nazoPuyo2.puyoPuyo.steps[i].optPlacement = optPlacement
+    nazoPuyo2.puyoPuyo.steps[i].placement.assign placement
 
   nazoPuyo2.mark
 
@@ -28,15 +21,11 @@ func mark2(nazoPuyo: NazoPuyo, optPlacements: varargs[OptPlacement]): MarkResult
 # ------------------------------------------------
 
 block: # init
-  let
-    puyoPuyoT = PuyoPuyo.init
-    puyoPuyoW = PuyoPuyo.init Rule.Water
-    goal = Goal.init(Count, Colors, 10, Exact)
-  check NazoPuyo.init(puyoPuyoT, goal) == NazoPuyo(puyoPuyo: puyoPuyoT, goal: goal)
-  check NazoPuyo.init(puyoPuyoW, goal) == NazoPuyo(puyoPuyo: puyoPuyoW, goal: goal)
-
-  check NazoPuyo.init(Spinner) == NazoPuyo.init(PuyoPuyo.init Spinner, Goal.init)
-  check NazoPuyo.init == NazoPuyo.init Rule.Tsu
+  check NazoPuyo.init(PuyoPuyo.init, Goal.init) ==
+    NazoPuyo(puyoPuyo: PuyoPuyo.init, goal: Goal.init)
+  check NazoPuyo.init == NazoPuyo.init(PuyoPuyo.init, Goal.init)
+  check NazoPuyo.init(Rule.Spinner) ==
+    NazoPuyo.init(PuyoPuyo.init Rule.Spinner, Goal.init)
 
 # ------------------------------------------------
 # Mark
@@ -67,8 +56,8 @@ rpor..
 ry|
 rp|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Left2, Down1) == Accept
-    check nazoPuyo.mark2(Down2, Down1) == WrongAnswer
+    check nazoPuyo.mark2(Left2, Down1) == Correct
+    check nazoPuyo.mark2(Down2, Down1) == Incorrect
 
   block: # Color
     let nazoPuyo =
@@ -93,8 +82,8 @@ rp|""".parseNazoPuyo.unsafeValue
 gp|
 gp|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Left5, Down5) == Accept
-    check nazoPuyo.mark2(Down5, Up4) == WrongAnswer
+    check nazoPuyo.mark2(Left5, Down5) == Correct
+    check nazoPuyo.mark2(Down5, Up4) == Incorrect
 
   block: # Count
     let nazoPuyo =
@@ -119,8 +108,8 @@ rrgbb.
 rb|
 rg|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Down2, Left2) == Accept
-    check nazoPuyo.mark2(Down5, Down1) == WrongAnswer
+    check nazoPuyo.mark2(Down2, Left2) == Correct
+    check nazoPuyo.mark2(Down5, Down1) == Incorrect
 
   block: # Place
     let nazoPuyo =
@@ -145,8 +134,8 @@ yyryy.
 ry|
 ry|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Down3, Left2) == Accept
-    check nazoPuyo.mark2(Up2, Down3) == WrongAnswer
+    check nazoPuyo.mark2(Down3, Left2) == Correct
+    check nazoPuyo.mark2(Up2, Down3) == Incorrect
 
   block: # Connection
     let nazoPuyo =
@@ -171,8 +160,8 @@ gggbr.
 gg|
 bg|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Up3, Left4) == Accept
-    check nazoPuyo.mark2(Up1, Left2) == WrongAnswer
+    check nazoPuyo.mark2(Up3, Left4) == Correct
+    check nazoPuyo.mark2(Up1, Left2) == Incorrect
 
   block: # AccumColor
     let nazoPuyo =
@@ -197,8 +186,8 @@ bg|""".parseNazoPuyo.unsafeValue
 bg|
 rg|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Down2, Left5) == Accept
-    check nazoPuyo.mark2(Left3, Left5) == WrongAnswer
+    check nazoPuyo.mark2(Down2, Left5) == Correct
+    check nazoPuyo.mark2(Left3, Left5) == Incorrect
 
   block: # AccumCount
     let nazoPuyo =
@@ -223,8 +212,8 @@ ooobbb
 yy|
 yg|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Up0, Down1) == Accept
-    check nazoPuyo.mark2(Right3, Down3) == WrongAnswer
+    check nazoPuyo.mark2(Up0, Down1) == Correct
+    check nazoPuyo.mark2(Right3, Down3) == Incorrect
 
   block: # Clear
     let nazoPuyo =
@@ -249,8 +238,8 @@ yy.bbb
 by|
 by|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Left3, Down2) == Accept
-    check nazoPuyo.mark2(OptPlacement.ok Left3, NonePlacement) == WrongAnswer
+    check nazoPuyo.mark2(Left3, Down2) == Correct
+    check nazoPuyo.mark2(Left3, Placement.None) == Incorrect
 
   block: # Clear w/ kind
     let nazoPuyo =
@@ -274,10 +263,10 @@ orrg..
 ------
 rg|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Right1) == Accept
-    check nazoPuyo.mark2(Up2) == WrongAnswer
+    check nazoPuyo.mark2(Right1) == Correct
+    check nazoPuyo.mark2(Up2) == Incorrect
 
-  block: # Dead, InvalidMove, SkipMove
+  block: # Dead, InvalidPlace, PlaceSkip
     let nazoPuyo =
       """
 ぷよ全て消すべし
@@ -301,8 +290,8 @@ rg|
 by|""".parseNazoPuyo.unsafeValue
 
     check nazoPuyo.mark2(Up2) == Dead
-    check nazoPuyo.mark2(Up5) == InvalidMove
-    check nazoPuyo.mark2(NonePlacement, OptPlacement.ok Up3) == SkipMove
+    check nazoPuyo.mark2(Up5) == InvalidPlace
+    check nazoPuyo.mark2(Placement.None, Up3) == PlaceSkip
 
   block: # NotSupport
     let nazoPuyo =
@@ -327,9 +316,9 @@ yyryy.
 ry|
 ry|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(NonePlacement) == NotSupport
+    check nazoPuyo.mark2(Placement.None) == NotSupport
 
-  block: # initial nazopuyo is accepted
+  block: # initial nazopuyo is Corrected
     let nazoPuyo =
       """
 ぷよ全て消すべし
@@ -351,7 +340,7 @@ ry|""".parseNazoPuyo.unsafeValue
 ------
 rr|""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2(Down1) == WrongAnswer
+    check nazoPuyo.mark2(Down1) == Incorrect
 
   block: # empty steps
     let nazoPuyo =
@@ -375,7 +364,7 @@ rrr...
 ------
 """.parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark2 == WrongAnswer
+    check nazoPuyo.mark2 == Incorrect
 
   block: # w/ endStepIndex
     let nazoPuyo =
@@ -400,10 +389,10 @@ yy.bbb
 by|43
 by|3S""".parseNazoPuyo.unsafeValue
 
-    check nazoPuyo.mark(-1) == Accept
-    check nazoPuyo.mark(0) == WrongAnswer
-    check nazoPuyo.mark(1) == WrongAnswer
-    check nazoPuyo.mark(2) == Accept
+    check nazoPuyo.mark(-1) == Correct
+    check nazoPuyo.mark(0) == Incorrect
+    check nazoPuyo.mark(1) == Incorrect
+    check nazoPuyo.mark(2) == Correct
 
 # ------------------------------------------------
 # Nazo Puyo <-> string
@@ -474,13 +463,13 @@ rg|23"""
       queryPon2 = "field=0_op......yg....b.r&steps=byo0_1_0_0_0_1org23&goal=0_0_2_0_"
       queryIshikawa = "6E004g031_E1ahce__u02"
 
-    check nazoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check nazoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check nazoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check nazoPuyo.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
-    check queryPon2.parseNazoPuyo(Pon2) == StrErrorResult[NazoPuyo].ok nazoPuyo
-    check queryIshikawa.parseNazoPuyo(Ishikawa) == StrErrorResult[NazoPuyo].ok nazoPuyo
-    check queryIshikawa.parseNazoPuyo(Ips) == StrErrorResult[NazoPuyo].ok nazoPuyo
+    check queryPon2.parseNazoPuyo(Pon2) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(IshikawaPuyo) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(Ips) == Pon2Result[NazoPuyo].ok nazoPuyo
 
   block: # empty steps
     let
@@ -506,16 +495,16 @@ g.....
 """
       nazoPuyo = str.parseNazoPuyo.unsafeValue
 
-      queryPon2 = "field=0_g.....&steps&goal=_1"
+      queryPon2 = "field=0_g.....&steps&goal=_3"
       queryIshikawa = "g00___210"
 
-    check nazoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check nazoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check nazoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check nazoPuyo.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
-    check queryPon2.parseNazoPuyo(Pon2) == StrErrorResult[NazoPuyo].ok nazoPuyo
-    check queryIshikawa.parseNazoPuyo(Ishikawa) == StrErrorResult[NazoPuyo].ok nazoPuyo
-    check queryIshikawa.parseNazoPuyo(Ips) == StrErrorResult[NazoPuyo].ok nazoPuyo
+    check queryPon2.parseNazoPuyo(Pon2) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(IshikawaPuyo) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(Ips) == Pon2Result[NazoPuyo].ok nazoPuyo
 
   block: # empty field and steps
     let
@@ -544,13 +533,13 @@ g.....
       queryPon2 = "field=0_&steps&goal=1_0_3_0_"
       queryIshikawa = "___E03"
 
-    check nazoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check nazoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check nazoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check nazoPuyo.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok queryIshikawa
+    check nazoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
-    check queryPon2.parseNazoPuyo(Pon2) == StrErrorResult[NazoPuyo].ok nazoPuyo
-    check queryIshikawa.parseNazoPuyo(Ishikawa) == StrErrorResult[NazoPuyo].ok nazoPuyo
-    check queryIshikawa.parseNazoPuyo(Ips) == StrErrorResult[NazoPuyo].ok nazoPuyo
+    check queryPon2.parseNazoPuyo(Pon2) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(IshikawaPuyo) == Pon2Result[NazoPuyo].ok nazoPuyo
+    check queryIshikawa.parseNazoPuyo(Ips) == Pon2Result[NazoPuyo].ok nazoPuyo
 
   block: # empty query
     let
@@ -580,7 +569,7 @@ g.....
       queryPon22 = "field=0_&steps&goal="
       queryPon23 = "field=0_&steps"
 
-    check nazoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
+    check nazoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
 
     for query in [queryPon2, queryPon22, queryPon23]:
-      check query.parseNazoPuyo(Pon2) == StrErrorResult[NazoPuyo].ok nazoPuyo
+      check query.parseNazoPuyo(Pon2) == Pon2Result[NazoPuyo].ok nazoPuyo

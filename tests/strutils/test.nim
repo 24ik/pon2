@@ -6,17 +6,23 @@ import std/[sugar, unittest]
 import ../../src/pon2/private/[strutils]
 
 block: # parseInt
-  check "123".parseInt == StrErrorResult[int].ok 123
+  check "123".parseInt == Pon2Result[int].ok 123
   check "xyz".parseInt.isErr
 
+block: # parseOrdinal
+  check parseOrdinal[bool]("0") == Pon2Result[bool].ok false
+  check parseOrdinal[char]($'x'.ord) == Pon2Result[char].ok 'x'
+
+  check parseOrdinal[bool]("2").isErr
+
 block: # split2
-  proc checkSplit2(str, sep: string, res: seq[string], maxsplit = -1) =
-    check str.split2(sep, maxsplit) == res
+  proc checkSplit2(str, sep: string, answer: seq[string], maxsplit = -1) =
+    check str.split2(sep, maxsplit) == answer
 
     let strs = collect:
       for s in str.split2(sep, maxsplit):
         s
-    check strs == res
+    check strs == answer
 
   ".a.bc.def.".checkSplit2 ".", @["", "a", "bc", "def", ""]
   "a---b".checkSplit2 "--", @["a", "-b"]

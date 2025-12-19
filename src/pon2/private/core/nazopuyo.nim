@@ -7,7 +7,6 @@
 {.experimental: "views".}
 
 import std/[sequtils]
-import ../[results2]
 import ../../core/[cell, goal, moveresult]
 
 # ------------------------------------------------
@@ -18,21 +17,21 @@ func isSatisfied(goal: Goal, val: int): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
   let main = goal.mainOpt.unsafeValue
 
-  case main.valOperator
+  case main.operator
   of Exact:
     val == main.val
   of AtLeast:
     val >= main.val
 
-func isSatisfied(goal: Goal, vals: openArray[int]): bool {.inline, noinit.} =
+template isSatisfied(goal: Goal, iter, body: untyped): bool =
   ## Returns `true` if the goal is satisfied.
   let main = goal.mainOpt.unsafeValue
 
-  case main.valOperator
+  case main.operator
   of Exact:
-    main.val in vals
+    iter.anyIt body == main.val
   of AtLeast:
-    vals.anyIt it >= main.val
+    iter.anyIt body >= main.val
 
 # ------------------------------------------------
 # Chain
@@ -48,18 +47,11 @@ func isSatisfiedChain*(goal: Goal, moveResult: MoveResult): bool {.inline, noini
 
 func isSatisfiedColor*(goal: Goal, moveResult: MoveResult): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
-  goal.isSatisfied moveResult.colorsSeq.mapIt it.card
+  goal.isSatisfied(moveResult.colorsSeq, it.card)
 
 # ------------------------------------------------
 # Count
 # ------------------------------------------------
-
-const
-  DummyCell = Cell.low
-  GoalColorToCell: array[GoalColor, Cell] = [
-    DummyCell, Cell.Red, Cell.Green, Cell.Blue, Cell.Yellow, Cell.Purple, DummyCell,
-    DummyCell,
-  ]
 
 func isSatisfiedCount*(goal: Goal, moveResult: MoveResult): bool {.inline, noinit.} =
   ## Returns `true` if the goal is satisfied.
@@ -69,14 +61,14 @@ func isSatisfiedCount*(goal: Goal, moveResult: MoveResult): bool {.inline, noini
       case main.color
       of All:
         moveResult.puyoCounts
-      of Garbages:
-        moveResult.garbagesCounts
-      of Colors:
-        moveResult.colorPuyoCounts
+      of Nuisance:
+        moveResult.nuisancePuyoCounts
+      of Colored:
+        moveResult.coloredPuyoCounts
       else:
-        moveResult.cellCounts GoalColorToCell[main.color]
+        moveResult.cellCounts main.color.ord.Cell
 
-  goal.isSatisfied counts
+  goal.isSatisfied(counts, it)
 
 # ------------------------------------------------
 # Place
@@ -88,12 +80,12 @@ func isSatisfiedPlace*(goal: Goal, moveResult: MoveResult): bool {.inline, noini
     main = goal.mainOpt.unsafeValue
     places =
       case main.color
-      of All, Colors:
-        moveResult.placeCounts
+      of All, Nuisance, Colored:
+        moveResult.placeCounts.unsafeValue
       else:
-        moveResult.placeCounts GoalColorToCell[main.color]
+        moveResult.placeCounts(main.color.ord.Cell).unsafeValue
 
-  goal.isSatisfied places.unsafeValue
+  goal.isSatisfied(places, it)
 
 # ------------------------------------------------
 # Connection
@@ -107,12 +99,12 @@ func isSatisfiedConnection*(
     main = goal.mainOpt.unsafeValue
     connections =
       case main.color
-      of All, Colors:
-        moveResult.connectionCounts
+      of All, Nuisance, Colored:
+        moveResult.connectionCounts.unsafeValue
       else:
-        moveResult.connectionCounts GoalColorToCell[main.color]
+        moveResult.connectionCounts(main.color.ord.Cell).unsafeValue
 
-  goal.isSatisfied connections.unsafeValue
+  goal.isSatisfied(connections, it)
 
 # ------------------------------------------------
 # AccumColor

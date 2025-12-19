@@ -7,6 +7,7 @@
 ## - [pon2/gui](./pon2/gui.html)
 ## - [pon2/app](./pon2/app.html)
 ## - [pon2/core](./pon2/core.html)
+## - [pon2/utils](./pon2/utils.html)
 ##
 ## Note that these submodules are listed in descending order of "layers".
 ## Importing a higher-level module automatically imports all modules below it.
@@ -64,16 +65,15 @@ when isMainModule:
     import std/[strformat]
 
     when defined(pon2.build.worker):
-      import ./pon2/private/[app, results2, webworkers]
+      import ./pon2/private/[app, webworkers]
     else:
       import std/[sugar]
-      import karax/[karax, karaxdsl, vdom]
-      import ./pon2/private/[dom, gui]
+      import karax/[karax, karaxdsl, kbase, vdom]
+      import ./pon2/private/[dom, gui, strutils]
       when defined(pon2.build.marathon):
         import std/[asyncjs, jsfetch, random]
-        import ./pon2/private/[strutils]
       else:
-        import ./pon2/private/[assign, strutils]
+        import ./pon2/private/[assign]
 
     # ------------------------------------------------
     # JS - Utils
@@ -91,7 +91,7 @@ when isMainModule:
                 text "エラー内容"
               tdiv(class = "control"):
                 textarea(class = "textarea is-large", readonly = true):
-                  text msg.cstring
+                  text msg.kstring
 
       proc initFooterNode(): VNode =
         ## Returns the footer node.
@@ -121,7 +121,7 @@ when isMainModule:
       # JS - Main - Worker
       # ------------------------------------------------
 
-      proc task(args: seq[string]): StrErrorResult[seq[string]] =
+      proc task(args: seq[string]): Pon2Result[seq[string]] =
         let errorMsg = "Invalid run args: {args}".fmt
 
         if args.len == 0:
@@ -130,10 +130,10 @@ when isMainModule:
         let (goal, steps) = ?args.parseSolveInfo.context errorMsg
 
         let node = ?args.parseSolveNode.context errorMsg
-        var answers = newSeq[SolveAnswer]()
-        node.solveSingleThread answers, steps.len, true, goal, steps
+        var solutions = newSeq[Solution]()
+        node.solveSingleThread solutions, steps.len, true, goal, steps
 
-        ok answers.toStrs
+        ok solutions.toStrs
 
       task.register
     elif defined(pon2.build.marathon):
@@ -194,7 +194,7 @@ when isMainModule:
           if errorMsg == "":
             let helper = VNodeHelper.init(globalMarathonRef, "pon2-main")
             section(
-              class = (if helper.mobile: "section pt-3 pl-3" else: "section").cstring
+              class = (if helper.mobile: "section pt-3 pl-3" else: "section").kstring
             ):
               globalMarathonRef.toMarathonVNode helper
           else:
@@ -234,7 +234,7 @@ when isMainModule:
             trailing = false, chars = {'?'}
           )
           if uri.query == "":
-            uri.query.assign "mode={EditorEdit.ord}".fmt
+            uri.query.assign "mode={EditEditor.ord}".fmt
 
           let simulatorResult = uri.parseSimulator
           if simulatorResult.isOk:
@@ -249,7 +249,7 @@ when isMainModule:
           if errorMsg == "":
             let (helper, replayHelper) = VNodeHelper.init2(globalStudioRef, "pon2-main")
             section(
-              class = (if helper.mobile: "section pt-3 pl-3" else: "section").cstring
+              class = (if helper.mobile: "section pt-3 pl-3" else: "section").kstring
             ):
               globalStudioRef.toStudioVNode(helper, replayHelper)
           else:
@@ -266,13 +266,13 @@ when isMainModule:
   when not defined(js):
     import std/[random, sequtils, strformat, sugar, uri]
     import cligen
-    import ./pon2/private/[arrayutils, assign, browsers, strutils]
+    import ./pon2/private/[assign, browsers, staticfor, strutils]
 
     # ------------------------------------------------
     # Native - Solve
     # ------------------------------------------------
 
-    proc runSolver(urls: seq[string], openQuestion = false, openAnswer = false) =
+    proc runSolver(urls: seq[string], openProblem = false, openSolution = false) =
       ## なぞぷよの解を求める．
       if urls.len != 1:
         echo "URLを一つ入力してください．"
@@ -285,30 +285,30 @@ when isMainModule:
         return
       let simulator = simulatorResult.unsafeValue
 
-      if openQuestion:
+      if openProblem:
         urls[0].parseUri.openDefaultBrowser.isOkOr:
           echo "ブラウザの起動に失敗しました．"
 
       let
-        answers = simulator.nazoPuyo.solve
+        solutions = simulator.nazoPuyo.solve
         stepsSeq = collect:
-          for answer in answers:
+          for solution in solutions:
             var steps = simulator.nazoPuyo.puyoPuyo.steps
-            for stepIndex, optPlacement in answer:
-              if simulator.nazoPuyo.puyoPuyo.steps[stepIndex].kind == PairPlacement:
-                steps[stepIndex].optPlacement.assign optPlacement
+            for stepIndex, placement in solution:
+              if simulator.nazoPuyo.puyoPuyo.steps[stepIndex].kind == PairPlace:
+                steps[stepIndex].placement.assign placement
 
             steps
 
-      for answerIndex, steps in stepsSeq:
+      for solutionIndex, steps in stepsSeq:
         var nazoPuyo = simulator.nazoPuyo
         nazoPuyo.puyoPuyo.steps.assign steps
 
-        let answerUri = Simulator.init(nazoPuyo, EditorEdit).toUri.unsafeValue
-        echo "({answerIndex.succ}) {answerUri}".fmt
+        let solutionUri = Simulator.init(nazoPuyo, PlayEditor).toUri.unsafeValue
+        echo "({solutionIndex + 1}) {solutionUri}".fmt
 
-        if openAnswer:
-          answerUri.openDefaultBrowser.isOkOr:
+        if openSolution:
+          solutionUri.openDefaultBrowser.isOkOr:
             echo "ブラウザの起動に失敗しました．"
 
     # ------------------------------------------------
@@ -318,10 +318,9 @@ when isMainModule:
     proc runPermuter(
         urls: seq[string],
         fixMoves = newSeq[int](),
-        allowDoubleNotLast = true,
-        allowDoubleLast = false,
-        openQuestion = false,
-        openAnswer = false,
+        allowDoubleMoves = newSeq[int](),
+        openProblem = false,
+        openSolution = false,
     ) =
       ## なぞぷよのツモを並べ替える．
       if urls.len != 1:
@@ -337,25 +336,25 @@ when isMainModule:
 
       var index = 0
       for nazoPuyo in simulator.nazoPuyo.permute(
-        fixMoves.mapIt it.pred, allowDoubleNotLast, allowDoubleLast
+        fixMoves.mapIt it.pred, allowDoubleMoves.mapIt it.pred
       ):
         let
-          resultSimulator = Simulator.init(nazoPuyo, EditorEdit)
-          questionUri = resultSimulator.toUri(clearPlacements = true).unsafeValue
-          answerUri = resultSimulator.toUri.unsafeValue
+          resultSimulator = Simulator.init(nazoPuyo, PlayEditor)
+          problemUri = resultSimulator.toUri(clearPlacements = true).unsafeValue
+          solutionUri = resultSimulator.toUri.unsafeValue
 
-        echo "(Q{index.succ}) {questionUri}".fmt
-        echo "(A{index.succ}) {answerUri}".fmt
+        echo "(Q{index + 1}) {problemUri}".fmt
+        echo "(A{index + 1}) {solutionUri}".fmt
         echo ""
 
-        if openQuestion:
-          questionUri.openDefaultBrowser.isOkOr:
+        if openProblem:
+          problemUri.openDefaultBrowser.isOkOr:
             echo "ブラウザの起動に失敗しました．"
-        if openAnswer:
-          answerUri.openDefaultBrowser.isOkOr:
+        if openSolution:
+          solutionUri.openDefaultBrowser.isOkOr:
             echo "ブラウザの起動に失敗しました．"
 
-        index.inc
+        index += 1
 
     # ------------------------------------------------
     # Native - Generate
@@ -374,11 +373,11 @@ when isMainModule:
         goalKindOpt = 1,
         goalColor = 1,
         goalVal = 3,
-        goalValOperator = 1,
+        goalOperator = 1,
         goalClearColorOpt = 0,
         moveCount = 2,
         colorCount = 2,
-        heights = "0++++0",
+        heights = "0....0",
         pc = -1,
         pg = 2,
         ph = 0,
@@ -389,126 +388,111 @@ when isMainModule:
         c3v = 0,
         c3h = -1,
         c3l = -1,
-        allowDoubleNotLast = true,
-        allowDoubleLast = false,
-        sg = newSeq[int](),
-        sh = newSeq[int](),
-        sr = newSeq[int](),
-        sc = newSeq[int](),
-        openQuestion = false,
-        openAnswer = false,
+        md = newSeq[int](),
+        mg = newSeq[int](),
+        mh = newSeq[int](),
+        mr = newSeq[int](),
+        mc = newSeq[int](),
+        openProblem = false,
+        openSolution = false,
         seed = 0,
     ) =
       ## なぞぷよを生成する．
-      let
-        puyoCountColor = pc
-        puyoCountGarbage = pg
-        puyoCountHard = ph
-
-        connection2Count = c2
-        connection2CountV = c2v
-        connection2CountH = c2h
-        connection3Count = c3
-        connection3CountV = c3v
-        connection3CountH = c3h
-        connection3CountL = c3l
-
-        stepGarbages = sg.mapIt it.pred
-        stepHards = sh.mapIt it.pred
-        stepRotate = sr.mapIt it.pred
-        stepCrossRotate = sc.mapIt it.pred
-
-      let errorMsg =
-        if rule notin Rule.low.ord.succ .. Rule.high.ord.succ:
-          "ルールが不正です．"
-        elif goalKindOpt notin GoalKind.low.ord .. GoalKind.high.ord.succ:
-          "クリア条件の種類が不正です．"
-        elif goalColor notin GoalColor.low.ord.succ .. GoalColor.high.ord.succ:
-          "クリア条件の色が不正です．"
-        elif goalValOperator notin
-          GoalValOperator.low.ord.succ .. GoalValOperator.high.ord.succ:
-          "クリア条件の値比較の演算子が不正です．"
-        elif goalClearColorOpt notin GoalColor.low.ord .. GoalColor.high.ord.succ:
-          "全消し条件の色が不正です．"
-        elif heights.len != Width:
-          "高さ指定が不正です．"
-        elif puyoCountColor < 0 and goalKindOpt.pred != Chain.ord:
-          "連鎖問題でない場合は色ぷよ数の指定が必要です．"
-        else:
-          ""
-      if errorMsg != "":
-        echo errorMsg
+      # rule
+      var rule2 = Rule.low
+      if rule - 1 notin Rule.low.ord .. Rule.high.ord:
+        echo "ルールが不正です．"
         return
+      rule2.assign (rule - 1).Rule
+
+      # goal kind
+      var goalKindOpt2 = Opt[GoalKind].err
+      if goalKindOpt == 0:
+        discard
+      elif goalKindOpt - 1 notin GoalKind.low.ord .. GoalKind.high.ord:
+        echo "クリア条件の種類が不正です．"
+        return
+      else:
+        goalKindOpt2.ok (goalKindOpt - 1).GoalKind
+
+      # goal color
+      var goalColor2 = GoalColor.low
+      if goalColor - 1 notin GoalColor.low.ord .. GoalColor.high.ord:
+        echo "クリア条件の色が不正です．"
+        return
+      goalColor2.assign (goalColor - 1).GoalColor
+
+      # goal operator
+      var goalOperator2 = GoalOperator.low
+      if goalOperator - 1 notin GoalOperator.low.ord .. GoalOperator.high.ord:
+        echo "クリア条件の演算子が不正です．"
+        return
+      goalOperator2.assign (goalOperator - 1).GoalOperator
+
+      # goal clear color
+      var goalClearColorOpt2 = Opt[GoalColor].err
+      if goalClearColorOpt == 0:
+        discard
+      elif goalClearColorOpt - 1 notin GoalColor.low.ord .. GoalColor.high.ord:
+        echo "全消し条件の色が不正です．"
+        return
+      else:
+        goalClearColorOpt2.ok (goalClearColorOpt - 1).GoalColor
+
+      # goal
+      var goal =
+        if goalKindOpt2.isOk:
+          Goal.init(
+            goalKindOpt2.unsafeValue, goalColor2, goalVal, goalOperator2,
+            goalClearColorOpt2,
+          )
+        else:
+          Goal.init goalClearColorOpt2
+      goal.normalize
 
       # height
+      if heights.len != Width:
+        echo "高さ指定が不正です．"
+        return
+      var heights2 {.noinit.}: array[Col, int]
+      staticFor(col, Col):
+        heights2[col].assign if heights[col.ord].isDigit:
+          ($heights[col.ord]).parseInt.unsafeValue
+        else:
+          -1
+
+      # puyo counts
+      var puyoCounts = (colored: pc, garbage: pg, hard: ph)
+      if goalKindOpt2.isOk and goalKindOpt2.unsafeValue == Chain and
+          puyoCounts.colored < 0:
+        puyoCounts.colored.assign goalVal * 4
+
+      # connections, indices
       let
-        heightWeights: Opt[array[Col, int]]
-        heightPositives: Opt[array[Col, bool]]
-      if heights.allIt it.isDigit:
-        var weights = Col.initArrayWith 0
-        for col in Col:
-          weights[col].assign ($heights[col.ord]).parseInt.unsafeValue
-
-        heightWeights = Opt[array[Col, int]].ok weights
-        heightPositives = Opt[array[Col, bool]].err
-      else:
-        var positives = Col.initArrayWith false
-        for col in Col:
-          positives[col].assign heights[col.ord] != '0'
-
-        heightWeights = Opt[array[Col, int]].err
-        heightPositives = Opt[array[Col, bool]].ok positives
-
-      let
-        rule2 = rule.pred.Rule
-        puyoCountColor2 =
-          if puyoCountColor < 0:
-            goalVal * 4
-          else:
-            puyoCountColor
-
         connection2Counts = (
-          total: connection2Count.negToError,
-          vertical: connection2CountV.negToError,
-          horizontal: connection2CountH.negToError,
+          totalOpt: c2.negToError,
+          verticalOpt: c2v.negToError,
+          horizontalOpt: c2h.negToError,
         )
         connection3Counts = (
-          total: connection3Count.negToError,
-          vertical: connection3CountV.negToError,
-          horizontal: connection3CountH.negToError,
-          lShape: connection3CountL.negToError,
+          totalOpt: c3.negToError,
+          verticalOpt: c3v.negToError,
+          horizontalOpt: c3h.negToError,
+          lShapeOpt: c3l.negToError,
+        )
+        indices = (
+          allowDouble: md.mapIt it - 1,
+          garbage: mg.mapIt it - 1,
+          hard: mh.mapIt it - 1,
+          rotate: mr.mapIt it - 1,
+          crossRotate: mc.mapIt it - 1,
         )
 
-        settings = GenerateSettings.init(
-          rule2,
-          Goal(
-            mainOpt: (
-              if goalKindOpt == 0: Opt[GoalMain].err
-              else: Opt[GoalMain].ok GoalMain.init(
-                goalKindOpt.pred.GoalKind, goalColor.pred.GoalColor, goalVal,
-                goalValOperator.pred.GoalValOperator,
-              )
-            ),
-            clearColorOpt: (
-              if goalClearColorOpt == 0:
-                Opt[GoalColor].err
-              else:
-                Opt[GoalColor].ok goalClearColorOpt.pred.GoalColor
-            ),
-          ),
-          moveCount,
-          colorCount,
-          (weights: heightWeights, positives: heightPositives),
-          (colors: puyoCountColor2, garbage: puyoCountGarbage, hard: puyoCountHard),
-          connection2Counts,
-          connection3Counts,
-          stepGarbages,
-          stepHards,
-          stepRotate,
-          stepCrossRotate,
-          allowDoubleNotLast,
-          allowDoubleLast,
-        )
+      # settings
+      let settings = GenerateSettings.init(
+        rule2, goal, moveCount, colorCount, heights2, puyoCounts, connection2Counts,
+        connection3Counts, indices,
+      )
 
       let seed2: int64
       if seed == 0:
@@ -518,7 +502,7 @@ when isMainModule:
         seed2 = seed.int64
       var rng = seed2.initRand
 
-      for index in 0 ..< count:
+      for problemIndex in 0 ..< count:
         let nazoPuyoResult = rng.generate settings
         if nazoPuyoResult.isErr:
           echo "生成に失敗しました．エラー内容："
@@ -526,19 +510,19 @@ when isMainModule:
           return
 
         let
-          simulator = Simulator.init(nazoPuyoResult.unsafeValue, EditorEdit)
-          questionUri = simulator.toUri(clearPlacements = true).unsafeValue
-          answerUri = simulator.toUri.unsafeValue
+          simulator = Simulator.init(nazoPuyoResult.unsafeValue, PlayEditor)
+          problemUri = simulator.toUri(clearPlacements = true).unsafeValue
+          solutionUri = simulator.toUri.unsafeValue
 
-        echo "(Q{index.succ}) {questionUri}".fmt
-        echo "(A{index.succ}) {answerUri}".fmt
+        echo "(Q{problemIndex+1}) {problemUri}".fmt
+        echo "(A{problemIndex+1}) {solutionUri}".fmt
         echo ""
 
-        if openQuestion:
-          questionUri.openDefaultBrowser.isOkOr:
+        if openProblem:
+          problemUri.openDefaultBrowser.isOkOr:
             echo "ブラウザの起動に失敗しました．"
-        if openAnswer:
-          answerUri.openDefaultBrowser.isOkOr:
+        if openSolution:
+          solutionUri.openDefaultBrowser.isOkOr:
             echo "ブラウザの起動に失敗しました．"
 
     # ------------------------------------------------
@@ -562,10 +546,10 @@ $subcmds""",
       [
         runSolver,
         cmdName = "s",
-        short = {"openQuestion": 'B', "openAnswer": 'b'},
+        short = {"openProblem": 'B', "openSolution": 'b'},
         help = {
-          "openQuestion": "問題をブラウザで開く",
-          "openAnswer": "解をブラウザで開く",
+          "openProblem": "問題をブラウザで開く",
+          "openSolution": "解をブラウザで開く",
           "urls": "{なぞぷよのURL}",
         },
       ],
@@ -574,17 +558,15 @@ $subcmds""",
         cmdName = "p",
         short = {
           "fixMoves": 'f',
-          "allowDoubleNotLast": 'D',
-          "allowDoubleLast": 'd',
-          "openQuestion": 'B',
-          "openAnswer": 'b',
+          "allowDoubleMoves": 'd',
+          "openProblem": 'B',
+          "openSolution": 'b',
         },
         help = {
           "fixMoves": "何手目を固定するか",
-          "allowDoubleNotLast": "最終手以外のゾロを許可",
-          "allowDoubleLast": "最終手のゾロを許可",
-          "openQuestion": "問題をブラウザで開く",
-          "openAnswer": "解をブラウザで開く",
+          "allowDoubleMoves": "何手目のゾロを許可するか",
+          "openProblem": "問題をブラウザで開く",
+          "openSolution": "解をブラウザで開く",
           "urls": "{なぞぷよのURL}",
         },
       ],
@@ -597,49 +579,46 @@ $subcmds""",
           "goalKindOpt": 'K',
           "goalColor": 'C',
           "goalVal": 'V',
-          "goalValOperator": 'O',
+          "goalOperator": 'O',
           "goalClearColorOpt": 'L',
           "moveCount": 'm',
           "colorCount": 'c',
           "heights": 'H',
-          "allowDoubleNotLast": 'D',
-          "allowDoubleLast": 'd',
-          "openQuestion": 'B',
-          "openAnswer": 'b',
+          "openProblem": 'B',
+          "openSolution": 'b',
           "seed": 's',
         },
         help = {
           "count": "生成数",
           "rule": "ルール（1:通 2:大回転 3:クロス回転 4:水中）",
           "goalKindOpt":
-            "クリア条件の種類（0:メイン条件なし 1:n連鎖 2:n色同時 3:n個同時 4:n箇所 5:n連結 6:累計n色 7:累計n個）",
+            "クリア条件の種類（0:条件なし 1:n連鎖 2:n色同時 3:n個同時 4:n箇所 5:n連結 6:累計n色 7:累計n個）",
           "goalColor":
             "クリア条件の色（1:全 2:赤 3:緑 4:青 5:黄 6:紫 7:お邪魔 8:色）",
-          "goalVal": "クリア条件の数",
-          "goalValOperator": "クリア条件の演算子（1:ちょうど 2:以上）",
+          "goalVal": "クリア条件の値",
+          "goalOperator": "クリア条件の演算子（1:ちょうど 2:以上）",
           "goalClearColorOpt":
-            "全消し条件の色（0: 全消し条件なし 1:全 2:赤 3:緑 4:青 5:黄 6:紫 7:お邪魔 8:色）",
+            "全消し条件の色（0: 条件なし 1:全 2:赤 3:緑 4:青 5:黄 6:紫 7:お邪魔 8:色）",
           "moveCount": "手数",
           "colorCount": "色数",
-          "heights": "高さ比率（例：「012210」「0---00」）",
-          "pc": "色ぷよ数（飽和連鎖問題では省略可）",
+          "heights": "高さ比率（例：「012210」「0...00」）",
+          "pc": "色ぷよ数（連鎖問題では省略可）",
           "pg": "お邪魔ぷよ数",
           "ph": "固ぷよ数",
-          "c2": "2連結数",
+          "c2": "2連結数（負の数ならランダム．以下同じ）",
           "c2v": "縦2連結数",
           "c2h": "横2連結数",
           "c3": "3連結数",
           "c3v": "縦3連結数",
           "c3h": "横3連結数",
           "c3l": "L字3連結数",
-          "sg": "何手目でお邪魔ぷよを落下させるか",
-          "sh": "何手目で固ぷよを落下させるか",
-          "sr": "何手目で大回転させるか",
-          "sc": "何手目でクロス回転させるか",
-          "allowDoubleNotLast": "最終手以外のゾロを許可",
-          "allowDoubleLast": "最終手のゾロを許可",
-          "openQuestion": "問題をブラウザで開く",
-          "openAnswer": "解をブラウザで開く",
+          "md": "何手目でゾロを許可するか",
+          "mg": "何手目でお邪魔ぷよを落下させるか",
+          "mh": "何手目で固ぷよを落下させるか",
+          "mr": "何手目で大回転させるか",
+          "mc": "何手目でクロス回転させるか",
+          "openProblem": "問題をブラウザで開く",
+          "openSolution": "解をブラウザで開く",
           "seed": "シード",
         },
       ]

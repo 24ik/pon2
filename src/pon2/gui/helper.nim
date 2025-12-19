@@ -12,24 +12,24 @@
 
 when defined(js) or defined(nimsuggest):
   import std/[jsffi]
-  import karax/[vdom]
+  import karax/[kbase, vdom]
   import ../[app]
-  import ../private/[dom, results2, utils]
+  import ../private/[dom, utils]
 
-  export results2
+  export app, kbase
 
   type
     SimulatorVNodeHelper* = object ## Helper for making VNode of simulators.
-      goalId*: cstring
-      cameraReadyId*: cstring
+      goalId*: kstring
+      cameraReadyId*: kstring
       markResult*: MarkResult
 
     StudioVNodeHelper* = object ## Helper for making VNode of studios.
       isReplaySimulator*: bool
-      settingId*: cstring
+      settingId*: kstring
 
     MarathonVNodeHelper* = object ## Helper for making VNode of marathon.
-      searchBarId*: cstring
+      searchBarId*: kstring
 
     VNodeHelper* = object ## Helper for making VNode.
       mobile*: bool
@@ -37,20 +37,20 @@ when defined(js) or defined(nimsuggest):
       studioOpt*: Opt[StudioVNodeHelper]
       marathonOpt*: Opt[MarathonVNodeHelper]
 
-  func init(T: type SimulatorVNodeHelper, simulator: Simulator, rootId: cstring): T =
+  func init(T: type SimulatorVNodeHelper, simulator: Simulator, rootId: kstring): T =
     T(
       goalId: "pon2-simulator-goal-" & rootId,
       cameraReadyId: "pon2-simulator-cameraready-" & rootId,
       markResult: simulator.mark,
     )
 
-  func init(T: type StudioVNodeHelper, rootId: cstring, isReplaySimulator: bool): T =
+  func init(T: type StudioVNodeHelper, rootId: kstring, isReplaySimulator: bool): T =
     T(settingId: "pon2-studio-setting-" & rootId, isReplaySimulator: isReplaySimulator)
 
-  func init(T: type MarathonVNodeHelper, rootId: cstring): T =
+  func init(T: type MarathonVNodeHelper, rootId: kstring): T =
     T(searchBarId: "pon2-marathon-searchbar-" & rootId)
 
-  proc init*(T: type VNodeHelper, simulatorRef: ref Simulator, rootId: cstring): T =
+  proc init*(T: type VNodeHelper, simulatorRef: ref Simulator, rootId: kstring): T =
     VNodeHelper(
       mobile: mobileDetected(),
       simulator: SimulatorVNodeHelper.init(simulatorRef[], rootId),
@@ -59,7 +59,7 @@ when defined(js) or defined(nimsuggest):
     )
 
   proc init2*(
-      T: type VNodeHelper, studioRef: ref Studio, rootId: cstring
+      T: type VNodeHelper, studioRef: ref Studio, rootId: kstring
   ): tuple[main, replay: VNodeHelper] =
     let
       mobile = mobileDetected()
@@ -85,7 +85,7 @@ when defined(js) or defined(nimsuggest):
       ),
     )
 
-  proc init*(T: type VNodeHelper, marathonRef: ref Marathon, rootId: cstring): T =
+  proc init*(T: type VNodeHelper, marathonRef: ref Marathon, rootId: kstring): T =
     VNodeHelper(
       mobile: mobileDetected(),
       simulator: SimulatorVNodeHelper.init(marathonRef[].simulator, rootId),

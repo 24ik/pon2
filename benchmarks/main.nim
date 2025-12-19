@@ -4,80 +4,75 @@
 {.experimental: "views".}
 
 import std/[monotimes, sequtils, stats, strformat, sugar, times]
-# import ../src/pon2/[app]
 import ../src/pon2/[core]
 import ../src/pon2/app/[solve]
-import ../src/pon2/private/[algorithm, math, results2]
+import ../src/pon2/private/[algorithm, math]
 
-func select(list: seq[Duration], n: int): Duration =
+func select[T](vals: seq[T], n: int): T =
   ## Returns the n-th smallest value in the sequence.
   ## `n` is 0-indexed.
-  if list.len <= 5:
-    return list.sorted[n]
+  if vals.len <= 5:
+    return vals.sorted[n]
 
   let
-    chunkCnt = list.len.ceilDiv 5
-    chunks = list.distribute(chunkCnt, false)
+    chunkCnt = vals.len.ceilDiv 5
+    chunks = vals.distribute(chunkCnt, spread = false)
 
     medians = collect:
       for chunk in chunks:
         chunk.sorted[chunk.len div 2]
     pivot = medians.select(medians.len div 2)
 
-    lows = list.filterIt it < pivot
-    highs = list.filterIt it > pivot
-    pivots = list.filterIt it == pivot
+    lows = vals.filterIt it < pivot
+    highs = vals.filterIt it > pivot
+    pivots = vals.filterIt it == pivot
 
   if n < lows.len:
     return lows.select n
   if n < lows.len + pivots.len:
     return pivot
-  return highs.select n - lows.len - pivots.len
 
-func median(list: seq[Duration]): Duration =
+  highs.select n - lows.len - pivots.len
+
+func median[T](vals: seq[T]): Duration =
   ## Returns the median of the sequence.
-  if list.len mod 2 == 0:
-    (list.select(list.len div 2 - 1) + list.select(list.len div 2)) div 2
+  if vals.len mod 2 == 0:
+    (vals.select(vals.len div 2 - 1) + vals.select(vals.len div 2)) div 2
   else:
-    list.select(list.len div 2)
+    vals.select(vals.len div 2)
 
-func toStr(dur: Duration): string =
+func toStr(duration: Duration): string =
   ## Returns the custom string representation of the duration.
-  if dur >= initDuration(hours = 1):
-    let hours = dur.inSeconds.float / 3600
+  if duration >= initDuration(hours = 1):
+    let hours = duration.inSeconds.float / 3600
     "{hours:.2f} hours".fmt
-  elif dur >= initDuration(minutes = 1):
-    let minutes = dur.inMilliseconds.float / 60000
+  elif duration >= initDuration(minutes = 1):
+    let minutes = duration.inMilliseconds.float / 60000
     "{minutes:.2f} mins".fmt
-  elif dur >= initDuration(seconds = 1):
-    let seconds = dur.inMilliseconds.float / 1000
+  elif duration >= initDuration(seconds = 1):
+    let seconds = duration.inMilliseconds.float / 1000
     "{seconds:.2f} s".fmt
-  elif dur >= initDuration(milliseconds = 1):
-    let milliseconds = dur.inMicroseconds.float / 1000
+  elif duration >= initDuration(milliseconds = 1):
+    let milliseconds = duration.inMicroseconds.float / 1000
     "{milliseconds:.2f} ms".fmt
-  elif dur >= initDuration(microseconds = 1):
-    let microseconds = dur.inNanoseconds.float / 1000
+  elif duration >= initDuration(microseconds = 1):
+    let microseconds = duration.inNanoseconds.float / 1000
     "{microseconds:.2f} us".fmt
-  elif dur >= initDuration(nanoseconds = 1):
-    "{dur.inNanoseconds} ns".fmt
-  elif dur == DurationZero:
+  elif duration >= initDuration(nanoseconds = 1):
+    "{duration.inNanoseconds} ns".fmt
+  elif duration == DurationZero:
     "0 ms"
   else:
-    "Negative duration is not supported, but got: {dur}".fmt
-
-func execResStr(desc: string, mean, sd, med: Duration, durCnt: int): string =
-  ## Returns the string representation of execution result.
-  # NOTE: format-string does not work in templates
-  "[{desc}] {mean.toStr} +/- {sd.toStr} (Med: {med.toStr}), #Run: {durCnt}".fmt
+    "Negative duration is not supported, but got: {duration}".fmt
 
 template measureExecTime(desc: string, setup: untyped, body: untyped): untyped =
   ## Runs the `setup` and `body` repeatedly and shows the execution time of `body`.
   var
-    durSum = DurationZero
-    durs = newSeq[Duration]()
+    durationSum = DurationZero
+    durations = newSeq[Duration]()
     stat: RunningStat
 
-  while durSum < initDuration(milliseconds = 500):
+  while durationSum < initDuration(milliseconds = 500):
     setup
 
     let t1 = getMonoTime()
@@ -86,17 +81,14 @@ template measureExecTime(desc: string, setup: untyped, body: untyped): untyped =
 
     let dur = t2 - t1
 
-    durSum += dur
-    durs.add dur
+    durationSum += dur
+    durations.add dur
     stat.push dur.inNanoseconds.float
 
-  echo execResStr(
-    desc,
-    initDuration(nanoseconds = stat.mean.int64),
-    initDuration(nanoseconds = stat.standardDeviationS.int64),
-    durs.median,
-    durs.len,
-  )
+  # NOTE: cannot use strformat due to template limitation
+  echo "[" & desc & "] " & initDuration(nanoseconds = stat.mean.int64).toStr & " +/- " &
+    initDuration(nanoseconds = stat.standardDeviationS.int64).toStr & " (Med: " &
+    durations.median.toStr & "), #Run: " & $durations.len
 
 template measureExecTime(desc: string, body: untyped): untyped =
   ## Runs the `body` repeatedly and shows the execution time of `body`.
@@ -142,15 +134,15 @@ when isMainModule:
   do:
     discard field.pop
 
-  "dropGarbages (Tsu)".measureExecTime:
+  "dropNuisance (Tsu)".measureExecTime:
     var field = Field.init
   do:
-    field.dropGarbages [Col0: 0, 1, 2, 3, 4, 5], false
+    field.dropNuisance [Col0: 0, 1, 2, 3, 4, 5]
 
   "dropGarbages (Water)".measureExecTime:
     var field = Field.init Rule.Water
   do:
-    field.dropGarbages [Col0: 0, 1, 2, 3, 4, 5], false
+    field.dropNuisance [Col0: 0, 1, 2, 3, 4, 5]
 
   "settle (Tsu)".measureExecTime:
     var field = Field.init
@@ -180,18 +172,17 @@ gybgbb
 rgybgy
 rgybgy
 rgybgy""".parseField.unsafeValue
-      pair = BlueGreen
-      plcmt = Up2
+      step = Step.init(BlueGreen, Up2)
 
-    "move (Tsu, not calcConn)".measureExecTime:
+    "move (Tsu, not calcConnection)".measureExecTime:
       var field = field19
     do:
-      discard field.move(pair, plcmt, false)
+      discard field.move(step, calcConnection = false)
 
-    "move (Tsu, calcConn)".measureExecTime:
+    "move (Tsu, calcConnection)".measureExecTime:
       var field = field19
     do:
-      discard field.move(pair, plcmt, true)
+      discard field.move step
 
   block:
     let
@@ -212,18 +203,17 @@ bgrbrg
 bgrbrp
 rgrbrp
 pbgrbr""".parseField.unsafeValue
-      pair = GreenBlue
-      plcmt = Up0
+      step = Step.init(GreenBlue, Up0)
 
-    "move (Water, not calcConn)".measureExecTime:
+    "move (Water, not calcConnection)".measureExecTime:
       var field = field18
     do:
-      discard field.move(pair, plcmt, false)
+      discard field.move(step, calcConnection = false)
 
-    "move (Water, calcConn)".measureExecTime:
+    "move (Water, calcConnection)".measureExecTime:
       var field = field18
     do:
-      discard field.move(pair, plcmt, true)
+      discard field.move step
 
   "solve (Rashomon)".measureExecTime:
     let nazoPuyo =

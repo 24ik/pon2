@@ -37,24 +37,12 @@ bg|""".parseNazoPuyo.unsafeValue
     step2 = "gg|1N\nbb|2N".parseSteps.unsafeValue
 
   # no limitations
-  check nazoPuyo.permute(@[], allowDoubleNotLast = true, allowDoubleLast = true).mapIt(
-    it.puyoPuyo.steps
-  ) == @[step2, step1gbgb]
+  check nazoPuyo.permute(@[], [1, 0]).mapIt(it.puyoPuyo.steps) == @[step2, step1gbgb]
 
   # w/ fixIndices
-  check nazoPuyo.permute(@[1], allowDoubleNotLast = true, allowDoubleLast = true).mapIt(
-    it.puyoPuyo.steps
-  ) == @[step1gbbg]
-  check nazoPuyo
-  .permute(@[0, 1], allowDoubleNotLast = true, allowDoubleLast = true)
-  .mapIt(it.puyoPuyo.steps) == @[step1bgbg]
+  check nazoPuyo.permute([1], @[0, 1]).mapIt(it.puyoPuyo.steps) == @[step1gbbg]
+  check nazoPuyo.permute(@[0, 1], @[0, 1]).mapIt(it.puyoPuyo.steps) == @[step1bgbg]
 
-  # not allow double (last)
-  check nazoPuyo.permute(@[], allowDoubleNotLast = true, allowDoubleLast = false).mapIt(
-    it.puyoPuyo.steps
-  ) == @[step1gbgb]
-
-  # not allow double (not last)
-  check nazoPuyo.permute(@[], allowDoubleNotLast = false, allowDoubleLast = true).mapIt(
-    it.puyoPuyo.steps
-  ) == @[step1gbgb]
+  # not allow double
+  check nazoPuyo.permute(@[], [0]).mapIt(it.puyoPuyo.steps) == @[step1gbgb]
+  check nazoPuyo.permute([], [1]).mapIt(it.puyoPuyo.steps) == @[step1gbgb]

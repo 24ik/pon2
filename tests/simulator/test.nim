@@ -3,10 +3,10 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[unittest, uri]
+import std/[strformat, unittest, uri]
 import ../../src/pon2/[core]
 import ../../src/pon2/app/[key, simulator]
-import ../../src/pon2/private/[algorithm, assign]
+import ../../src/pon2/private/[algorithm]
 
 # ------------------------------------------------
 # Constructor
@@ -14,14 +14,14 @@ import ../../src/pon2/private/[algorithm, assign]
 
 block: # init
   check Simulator.init == Simulator.init NazoPuyo.init
-  check Simulator.init(PuyoPuyo.init Rule.Water, EditorEdit).mode == EditorEdit
+  check Simulator.init(PuyoPuyo.init Rule.Water, EditEditor).mode == EditEditor
 
 # ------------------------------------------------
-# Edit - Undo / Redo
+# Undo / Redo / Edit
 # ------------------------------------------------
 
 block: # undo, redo
-  var simulator = Simulator.init EditorEdit
+  var simulator = Simulator.init EditEditor
 
   simulator.writeCell Cell.Green
   let nazoPuyo1 = simulator.nazoPuyo
@@ -39,36 +39,100 @@ block: # undo, redo
   check simulator.nazoPuyo == nazoPuyo1
 
 # ------------------------------------------------
+# Mark
+# ------------------------------------------------
+
+block: # mark
+  let nazoPuyo =
+    """
+ちょうど1連鎖するべし
+======
+[通]
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+.yyy..
+------
+yy|
+yy|""".parseNazoPuyo.unsafeValue
+  var simulator = Simulator.init nazoPuyo
+  check simulator.mark == Incorrect
+
+  for _ in 1 .. 3:
+    simulator.movePlacementRight
+  simulator.forward
+  while simulator.state != Stable:
+    simulator.forward
+  check simulator.mark == Incorrect
+
+  simulator.forward
+  while simulator.state != Stable:
+    simulator.forward
+  check simulator.mark == Correct
+
+  simulator.backward
+  check simulator.mark == Incorrect
+
+  simulator.backward
+  check simulator.mark == Incorrect
+
+  simulator.movePlacementLeft
+  simulator.forward
+  while simulator.state != Stable:
+    simulator.forward
+  check simulator.mark == Correct
+
+  simulator.forward
+  while simulator.state != Stable:
+    simulator.forward
+  check simulator.mark == Correct
+
+  simulator.backward
+  check simulator.mark == Correct
+
+  simulator.backward
+  check simulator.mark == Incorrect
+
+  check Simulator.init(PuyoPuyo.init).mark == NotSupport
+
+# ------------------------------------------------
 # Property - Getter
 # ------------------------------------------------
 
 block:
-  # rule, nazoPuyo, moveResult, mode, state, editData,
-  # operatingPlacement, operatingIndex
+  # rule, nazoPuyo, moveResult, mode, state, editData, operating
   let simulator = Simulator.init
 
   check simulator.rule == Tsu
   check simulator.nazoPuyo == NazoPuyo.init
-  check simulator.moveResult == MoveResult.init true
-  check simulator.mode == ViewerPlay
+  check simulator.moveResult == MoveResult.init
+  check simulator.mode == PlayViewer
   check simulator.state == Stable
   check simulator.editData ==
     SimulatorEditData(
-      editObj: SimulatorEditObj(kind: EditCell, cell: Cell.None),
-      focusField: true,
+      selecting: (Opt[Cell].ok Cell.None, Opt[bool].err),
       field: (Row.low, Col.low),
-      step: (0, true, Col.low),
+      steps: (0, true, Col.low),
+      focusField: true,
       insert: false,
     )
-  check simulator.operatingPlacement == Up2
-  check simulator.operatingIndex == 0
+  check simulator.operating == (0, Up2)
 
 # ------------------------------------------------
 # Property - Setter
 # ------------------------------------------------
 
-block: # `rule=`
-  var simulator = Simulator.init EditorEdit
+block: # `rule=`, setRule
+  var simulator = Simulator.init EditEditor
 
   simulator.rule = Tsu
   check simulator.rule == Tsu
@@ -81,6 +145,13 @@ block: # `rule=`
   simulator.rule = Water
   check simulator.rule == Water
   check simulator.nazoPuyo == NazoPuyo.init Rule.Water
+
+  simulator.undo
+  check simulator.nazoPuyo == NazoPuyo.init
+
+  simulator.setRule Spinner
+  check simulator.rule == Spinner
+  check simulator.nazoPuyo == NazoPuyo.init Spinner
 
 block: # `mode=`
   let nazoPuyo =
@@ -98,73 +169,79 @@ block: # `mode=`
 ......
 ......
 ......
+......
+......
 .....g
-......
-......
 ------
-rb|
+rb|2N
 (0,0,0,0,0,1)
 py|""".parseNazoPuyo.unsafeValue
+  var simulator = Simulator.init nazoPuyo
 
-  block: # from ViewerPlay
-    let field0 = nazoPuyo.puyoPuyo.field
+  simulator.forward(replay = true)
+  simulator.mode = EditViewer
 
-    var simulator = Simulator.init nazoPuyo
-    simulator.forward
-    simulator.mode = ViewerEdit
+  check simulator.mode == EditViewer
+  check simulator.nazoPuyo.puyoPuyo.field == nazoPuyo.puyoPuyo.field
 
-    check simulator.nazoPuyo.puyoPuyo.field == field0
+block: # `selectingCell=`, `selectingCross=`
+  var simulator = Simulator.init EditEditor
 
-  block: # from ViewerEdit
-    let field0 = nazoPuyo.puyoPuyo.field
+  simulator.selectingCross = true
+  check simulator.editData.selecting == (Opt[Cell].err, Opt[bool].ok true)
 
-    var simulator = Simulator.init(nazoPuyo, ViewerEdit)
-    simulator.forward
-    simulator.mode = ViewerPlay
-
-    check simulator.nazoPuyo.puyoPuyo.field == field0
-
-  block: # from EditorPlay
-    let field0 = nazoPuyo.puyoPuyo.field
-
-    var simulator = Simulator.init(nazoPuyo, EditorPlay)
-    simulator.forward
-    simulator.mode = EditorEdit
-
-    check simulator.nazoPuyo.puyoPuyo.field == field0
-
-  block: # from EditorEdit
-    let field0 = nazoPuyo.puyoPuyo.field
-
-    var simulator = Simulator.init(nazoPuyo, EditorEdit)
-    simulator.forward
-    simulator.mode = EditorPlay
-
-    check simulator.nazoPuyo.puyoPuyo.field == field0
-
-block: # `editCell=`
-  var simulator = Simulator.init ViewerEdit
-
-  simulator.editCell = Cell.None
-  check simulator.editData.editObj.cell == Cell.None
-
-  simulator.editCell = Cell.Red
-  check simulator.editData.editObj.cell == Cell.Red
-
-  simulator.editCell = Garbage
-  check simulator.editData.editObj.cell == Garbage
-
-block: # `editCross=`
-  var simulator = Simulator.init ViewerEdit
-
-  simulator.editCross = true
-  check simulator.editData.editObj.cross
-
-  simulator.editCross = false
-  check not simulator.editData.editObj.cross
+  simulator.selectingCell = Cell.Red
+  check simulator.editData.selecting == (Opt[Cell].ok Cell.Red, Opt[bool].err)
 
 # ------------------------------------------------
-# Edit - Cursor
+# Toggle
+# ------------------------------------------------
+
+block: # toggleFocus, toggleInsert
+  var simulator = Simulator.init EditEditor
+
+  simulator.toggleFocus
+  check not simulator.editData.focusField
+
+  simulator.toggleFocus
+  check simulator.editData.focusField
+
+  simulator.toggleInsert
+  check simulator.editData.insert
+
+  simulator.toggleInsert
+  check not simulator.editData.insert
+
+# ------------------------------------------------
+# Placement
+# ------------------------------------------------
+
+block:
+  # movePlacementRight, movePlacementLeft, rotatePlacementRight, rotatePlacementLeft
+  var
+    simulator = Simulator.init
+    placement = Up2
+
+  check simulator.operating.placement == placement
+
+  simulator.movePlacementRight
+  placement.moveRight
+  check simulator.operating.placement == placement
+
+  simulator.movePlacementLeft
+  placement.moveLeft
+  check simulator.operating.placement == placement
+
+  simulator.rotatePlacementRight
+  placement.rotateRight
+  check simulator.operating.placement == placement
+
+  simulator.rotatePlacementLeft
+  placement.rotateLeft
+  check simulator.operating.placement == placement
+
+# ------------------------------------------------
+# Cursor
 # ------------------------------------------------
 
 block: # moveCursorUp, moveCursorDown, moveCursorRight, moveCursorLeft
@@ -190,7 +267,7 @@ block: # moveCursorUp, moveCursorDown, moveCursorRight, moveCursorLeft
 rb|
 (0,0,0,0,0,1)
 py|""".parseNazoPuyo.unsafeValue
-  var simulator = Simulator.init(nazoPuyo, EditorEdit)
+  var simulator = Simulator.init(nazoPuyo, EditEditor)
 
   simulator.moveCursorUp
   check simulator.editData.field == (Row12, Col0)
@@ -207,22 +284,22 @@ py|""".parseNazoPuyo.unsafeValue
   simulator.toggleFocus
 
   simulator.moveCursorUp
-  check simulator.editData.step == (3, true, Col0)
+  check simulator.editData.steps == (3, true, Col0)
 
   simulator.moveCursorRight
-  check simulator.editData.step == (3, false, Col0)
+  check simulator.editData.steps == (3, false, Col0)
 
   simulator.moveCursorUp
-  check simulator.editData.step == (2, false, Col0)
+  check simulator.editData.steps == (2, false, Col0)
 
   simulator.moveCursorUp
-  check simulator.editData.step == (1, false, Col0)
+  check simulator.editData.steps == (1, false, Col0)
 
   simulator.moveCursorLeft
-  check simulator.editData.step == (1, false, Col5)
+  check simulator.editData.steps == (1, false, Col5)
 
 # ------------------------------------------------
-# Edit - Delete
+# Delete - Step
 # ------------------------------------------------
 
 block: # delStep
@@ -250,24 +327,111 @@ rb|3N
 py|""".parseNazoPuyo.unsafeValue
   var
     steps = nazoPuyo.puyoPuyo.steps
-    simulator = Simulator.init(nazoPuyo, EditorEdit)
+    simulator = Simulator.init(nazoPuyo, EditEditor)
 
-  simulator.delStep
+  simulator.delStep 0
   steps.del 0
   check simulator.nazoPuyo.puyoPuyo.steps == steps
 
-  simulator.delStep 1
-  steps.del 1
-  check simulator.nazoPuyo.puyoPuyo.steps == steps
-
-  simulator.delStep 1
+  simulator.delStep 2
   check simulator.nazoPuyo.puyoPuyo.steps == steps
 
 # ------------------------------------------------
-# Edit - Write
+# Write - Cell - Field
 # ------------------------------------------------
 
-block: # writeCell, writeRotate
+block: # writeCell
+  var
+    nazoPuyo = NazoPuyo.init
+    simulator = Simulator.init(nazoPuyo, EditEditor)
+
+  simulator.selectingCell = Cell.Blue
+  simulator.writeCell Row3, Col1
+
+  nazoPuyo.puyoPuyo.field[Row3, Col1] = Cell.Blue
+
+  check simulator.nazoPuyo == nazoPuyo
+
+# ------------------------------------------------
+# Write - Cell - Step
+# ------------------------------------------------
+
+block: # writeCell
+  var
+    nazoPuyo = NazoPuyo.init
+    simulator = Simulator.init(nazoPuyo, EditEditor)
+
+  simulator.selectingCell = Cell.Yellow
+  simulator.writeCell(0, pivot = false)
+
+  nazoPuyo.puyoPuyo.steps.addLast Step.init Pair.init(Cell.Yellow, Cell.Yellow)
+
+  check simulator.nazoPuyo == nazoPuyo
+
+# ------------------------------------------------
+# Write - Cell
+# ------------------------------------------------
+
+block: # writeCell
+  var
+    nazoPuyo = NazoPuyo.init
+    simulator = Simulator.init(nazoPuyo, EditEditor)
+
+  simulator.writeCell Garbage
+  nazoPuyo.puyoPuyo.field[Row0, Col0] = Garbage
+  check simulator.nazoPuyo == nazoPuyo
+
+  simulator.toggleFocus
+
+  simulator.writeCell Cell.Green
+  nazoPuyo.puyoPuyo.steps.addLast Step.init Pair.init(Cell.Green, Cell.Green)
+  check simulator.nazoPuyo == nazoPuyo
+
+# ------------------------------------------------
+# Write - Cross
+# ------------------------------------------------
+
+block: # writeCross
+  var
+    nazoPuyo = NazoPuyo.init
+    simulator = Simulator.init(nazoPuyo, EditEditor)
+
+  simulator.selectingCross = true
+  simulator.writeCross 0
+  nazoPuyo.puyoPuyo.steps.addLast Step.init(cross = true)
+  check simulator.nazoPuyo == nazoPuyo
+
+  simulator.writeCross(cross = false)
+  nazoPuyo.puyoPuyo.steps[0].cross = false
+  check simulator.nazoPuyo == nazoPuyo
+
+# ------------------------------------------------
+# Write - Count
+# ------------------------------------------------
+
+block: # writeCount, writeCountClamp
+  let steps = [Step.init([Col0: 1, 0, 0, 0, 0, 0])].toDeque
+  var
+    nazoPuyo = NazoPuyo.init(PuyoPuyo.init(Field.init, steps), Goal.init)
+    simulator = Simulator.init(nazoPuyo, EditEditor)
+
+  simulator.writeCount 0, Col1, 5
+  nazoPuyo.puyoPuyo.steps[0].counts[Col1] = 5
+  check simulator.nazoPuyo == nazoPuyo
+
+  simulator.writeCount 2
+  nazoPuyo.puyoPuyo.steps[0].counts[Col0] = 2
+  check simulator.nazoPuyo == nazoPuyo
+
+  simulator.writeCountClamp 0, Col5, 3
+  nazoPuyo.puyoPuyo.steps[0].counts = [2, 4, 2, 2, 2, 3]
+  check simulator.nazoPuyo == nazoPuyo
+
+# ------------------------------------------------
+# Write (All)
+# ------------------------------------------------
+
+block:
   let nazoPuyo =
     """
 ちょうど3連鎖するべし
@@ -294,9 +458,9 @@ R""".parseNazoPuyo.unsafeValue
   var
     field = nazoPuyo.puyoPuyo.field
     steps = nazoPuyo.puyoPuyo.steps
-    simulator = Simulator.init(nazoPuyo, EditorEdit)
+    simulator = Simulator.init(nazoPuyo, EditEditor)
 
-  simulator.editCell = Green
+  simulator.selectingCell = Green
   simulator.writeCell Row3, Col4
   field[Row3, Col4] = Green
   check simulator.nazoPuyo.puyoPuyo.field == field
@@ -305,18 +469,18 @@ R""".parseNazoPuyo.unsafeValue
   field[Row0, Col0] = Blue
   check simulator.nazoPuyo.puyoPuyo.field == field
 
-  simulator.editCross = true
+  simulator.selectingCross = true
   simulator.writeCell Row3, Col4
   check simulator.nazoPuyo.puyoPuyo.field == field
 
   simulator.toggleInsert
 
-  simulator.editCell = Green
+  simulator.selectingCell = Green
   simulator.writeCell Row6, Col4
   field.insert Row6, Col4, Green
   check simulator.nazoPuyo.puyoPuyo.field == field
 
-  simulator.editCell = Cell.None
+  simulator.selectingCell = Cell.None
   simulator.writeCell Row8, Col4
   field.del Row8, Col4
   check simulator.nazoPuyo.puyoPuyo.field == field
@@ -333,48 +497,50 @@ R""".parseNazoPuyo.unsafeValue
 
   simulator.toggleInsert
 
-  simulator.editCell = Blue
-  simulator.writeCell 2, false
+  simulator.selectingCell = Blue
+  simulator.writeCell(2, pivot = false)
   steps[2].pair.rotor = Blue
   check simulator.nazoPuyo.puyoPuyo.steps == steps
 
-  simulator.editCell = Garbage
-  simulator.writeCell 1, false
+  simulator.selectingCell = Garbage
+  simulator.writeCell(1, pivot = false)
   check simulator.nazoPuyo.puyoPuyo.steps == steps
 
-  simulator.editCell = Hard
-  simulator.writeCell 1, true
-  steps[1].dropHard.assign true
+  simulator.selectingCell = Hard
+  simulator.writeCell(1, pivot = true)
+  steps[1].hard = true
   check simulator.nazoPuyo.puyoPuyo.steps == steps
 
-  simulator.writeCell 2, true
+  simulator.writeCell(2, pivot = true)
   steps[2] = Step.init([0, 0, 0, 0, 0, 0], true)
   check simulator.nazoPuyo.puyoPuyo.steps == steps
 
-  simulator.editCell = Purple
-  simulator.writeCell 3, true
+  simulator.selectingCell = Purple
+  simulator.writeCell(3, pivot = true)
   steps[3] = Step.init PurplePurple
   check simulator.nazoPuyo.puyoPuyo.steps == steps
 
-  simulator.editCell = Yellow
-  simulator.writeCell 4, false
+  simulator.selectingCell = Yellow
+  simulator.writeCell(4, pivot = false)
   steps.addLast Step.init YellowYellow
   check simulator.nazoPuyo.puyoPuyo.steps == steps
 
-  simulator.editCross = false
-  simulator.writeCell 2, true
+  simulator.selectingCross = false
+  simulator.writeCross 2
   steps[2] = Step.init(cross = false)
   check simulator.nazoPuyo.puyoPuyo.steps == steps
 
-  simulator.writeRotate(cross = false)
-  steps[0] = Step.init(cross = false)
+  simulator.writeCross(cross = true)
+  steps[0] = Step.init(cross = true)
   check simulator.nazoPuyo.puyoPuyo.steps == steps
 
 # ------------------------------------------------
-# Edit - Shift / Flip
+# Shift / Flip
 # ------------------------------------------------
 
-block: # shiftFieldUp, shiftFieldDown, shiftFieldRight, shiftFieldLeft
+block:
+  # shiftFieldUp, shiftFieldDown, shiftFieldRight, shiftFieldLeft, flipFieldVertical,
+  # flipFieldHorizontal, flip
   let nazoPuyo =
     """
 ぷよ全て消すべし
@@ -395,12 +561,11 @@ block: # shiftFieldUp, shiftFieldDown, shiftFieldRight, shiftFieldLeft
 ......
 ------
 rg|
-(0,1,2,3,4,5)
-R""".parseNazoPuyo.unsafeValue
+(0,1,2,3,4,5)""".parseNazoPuyo.unsafeValue
   var
     field = nazoPuyo.puyoPuyo.field
     steps = nazoPuyo.puyoPuyo.steps
-    simulator = Simulator.init(nazoPuyo, EditorEdit)
+    simulator = Simulator.init(nazoPuyo, EditEditor)
 
   simulator.shiftFieldUp
   field.shiftUp
@@ -442,19 +607,18 @@ R""".parseNazoPuyo.unsafeValue
   check simulator.nazoPuyo.puyoPuyo.steps == steps
 
   simulator.moveCursorDown
-  simulator.moveCursorDown
   simulator.flip
   check simulator.nazoPuyo.puyoPuyo.steps == steps
 
 # ------------------------------------------------
-# Edit - Goal
+# Goal
 # ------------------------------------------------
 
 block:
-  # normalizeGoal, `goalKindOpt=`, `goalColor=`, `goalVal=`, `goalValOperator=`,
+  # normalizeGoal, `goalKindOpt=`, `goalColor=`, `goalVal=`, `goalOperator=`,
   # `goalClearColorOpt=`
   var simulator = Simulator.init(
-    NazoPuyo.init(PuyoPuyo.init, Goal.init(Color, GoalColor.Red, 2, Exact)), EditorEdit
+    NazoPuyo.init(PuyoPuyo.init, Goal.init(Color, GoalColor.Red, 2, Exact)), EditEditor
   )
   simulator.normalizeGoal
   check simulator.nazoPuyo.goal == Goal.init(Color, 2, Exact)
@@ -468,7 +632,7 @@ block:
   simulator.goalVal = 3
   check simulator.nazoPuyo.goal == Goal.init(Chain, 3, Exact)
 
-  simulator.goalValOperator = AtLeast
+  simulator.goalOperator = AtLeast
   check simulator.nazoPuyo.goal == Goal.init(Chain, 3, AtLeast)
 
   simulator.goalClearColorOpt = Opt[GoalColor].ok All
@@ -483,61 +647,14 @@ block:
   simulator.goalVal = 1
   check simulator.nazoPuyo.goal == Goal.init All
 
-  simulator.goalValOperator = AtLeast
+  simulator.goalOperator = AtLeast
   check simulator.nazoPuyo.goal == Goal.init All
 
-  simulator.goalClearColorOpt = Opt[GoalColor].ok Colors
-  check simulator.nazoPuyo.goal == Goal.init Colors
+  simulator.goalClearColorOpt = Opt[GoalColor].ok Colored
+  check simulator.nazoPuyo.goal == Goal.init Colored
 
   simulator.goalClearColorOpt = Opt[GoalColor].err
   check simulator.nazoPuyo.goal == NoneGoal
-
-# ------------------------------------------------
-# Edit - Other
-# ------------------------------------------------
-
-block: # toggleFocus, toggleInsert
-  var simulator = Simulator.init EditorEdit
-
-  simulator.toggleFocus
-  check not simulator.editData.focusField
-
-  simulator.toggleFocus
-  check simulator.editData.focusField
-
-  simulator.toggleInsert
-  check simulator.editData.insert
-
-  simulator.toggleInsert
-  check not simulator.editData.insert
-
-# ------------------------------------------------
-# Play - Placement
-# ------------------------------------------------
-
-block:
-  # movePlacementRight, movePlacementLeft, rotatePlacementRight, rotatePlacementLeft
-  var
-    simulator = Simulator.init
-    placement = Up2
-
-  check simulator.operatingPlacement == placement
-
-  simulator.movePlacementRight
-  placement.moveRight
-  check simulator.operatingPlacement == placement
-
-  simulator.movePlacementLeft
-  placement.moveLeft
-  check simulator.operatingPlacement == placement
-
-  simulator.rotatePlacementRight
-  placement.rotateRight
-  check simulator.operatingPlacement == placement
-
-  simulator.rotatePlacementLeft
-  placement.rotateLeft
-  check simulator.operatingPlacement == placement
 
 # ------------------------------------------------
 # Forward / Backward
@@ -696,12 +813,12 @@ R""".parseNazoPuyo.unsafeValue
 
       counts: array[Cell, int] = [0, 0, 2, 4, 0, 0, 0, 0]
       full: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[], @[], @[], @[]]
-      moveResult0 = MoveResult.init true
-      moveResult1 = MoveResult.init true
+      moveResult0 = MoveResult.init
+      moveResult1 = MoveResult.init
       moveResult2 = MoveResult.init(1, counts, 0, @[counts], @[0], @[full])
       moveResult3 = moveResult2
-      moveResult4 = MoveResult.init true
-      moveResult5 = MoveResult.init true
+      moveResult4 = MoveResult.init
+      moveResult5 = MoveResult.init
 
     var simulator = Simulator.init nazoPuyo0
     check simulator.moveResult == moveResult0
@@ -799,7 +916,7 @@ R""".parseNazoPuyo.unsafeValue
 rb|""".parseNazoPuyo.unsafeValue
     var
       field = nazoPuyo0.puyoPuyo.field
-      simulator = Simulator.init(nazoPuyo0, EditorEdit)
+      simulator = Simulator.init(nazoPuyo0, EditEditor)
     let field0 = field
     check simulator.state == AfterEdit
 
@@ -852,74 +969,7 @@ rb|""".parseNazoPuyo.unsafeValue
     check simulator.nazoPuyo.puyoPuyo.field == field
 
 # ------------------------------------------------
-# Mark
-# ------------------------------------------------
-
-block: # mark
-  let nazoPuyo =
-    """
-ちょうど1連鎖するべし
-======
-[通]
-......
-......
-......
-......
-......
-......
-......
-......
-......
-......
-......
-......
-.yyy..
-------
-yy|
-yy|""".parseNazoPuyo.unsafeValue
-  var simulator = Simulator.init nazoPuyo
-  check simulator.mark == WrongAnswer
-
-  simulator.movePlacementRight
-  simulator.movePlacementRight
-  simulator.movePlacementRight
-  simulator.forward
-  while simulator.state != Stable:
-    simulator.forward
-  check simulator.mark == WrongAnswer
-
-  simulator.forward
-  while simulator.state != Stable:
-    simulator.forward
-  check simulator.mark == Accept
-
-  simulator.backward
-  check simulator.mark == WrongAnswer
-
-  simulator.backward
-  check simulator.mark == WrongAnswer
-
-  simulator.movePlacementLeft
-  simulator.forward
-  while simulator.state != Stable:
-    simulator.forward
-  check simulator.mark == Accept
-
-  simulator.forward
-  while simulator.state != Stable:
-    simulator.forward
-  check simulator.mark == Accept
-
-  simulator.backward
-  check simulator.mark == Accept
-
-  simulator.backward
-  check simulator.mark == WrongAnswer
-
-  check Simulator.init(PuyoPuyo.init).mark == NotSupport
-
-# ------------------------------------------------
-# Keyboard
+# Key
 # ------------------------------------------------
 
 block: # operate
@@ -946,166 +996,182 @@ rg|1N
 by|
 pp|23""".parseNazoPuyo.unsafeValue
   var
-    simulator1 = Simulator.init nazoPuyo
-    simulator2 = Simulator.init nazoPuyo
+    simulator1 = Simulator.init(nazoPuyo, EditEditor)
+    simulator2 = Simulator.init(nazoPuyo, EditEditor)
+  check simulator1 == simulator2
+
+  simulator1.mode = PlayEditor
+  check simulator2.operate KeyEventT
   check simulator1 == simulator2
 
   simulator1.rotatePlacementLeft
-  check simulator2.operate KeyEvent.init 'j'
+  check simulator2.operate KeyEventJ
   check simulator1 == simulator2
 
   simulator1.rotatePlacementRight
-  check simulator2.operate KeyEvent.init 'k'
+  check simulator2.operate KeyEventK
   check simulator1 == simulator2
 
   simulator1.movePlacementLeft
-  check simulator2.operate KeyEvent.init 'a'
+  check simulator2.operate KeyEventA
   check simulator1 == simulator2
 
   simulator1.movePlacementRight
-  check simulator2.operate KeyEvent.init 'd'
+  check simulator2.operate KeyEventD
   check simulator1 == simulator2
 
   simulator1.forward
-  check simulator2.operate KeyEvent.init 's'
+  check simulator2.operate KeyEventS
   check simulator1 == simulator2
 
   simulator1.forward(replay = true)
-  check simulator2.operate KeyEvent.init 'c'
+  check simulator2.operate KeyEventC
   check simulator1 == simulator2
 
   simulator1.forward(skip = true)
-  check simulator2.operate KeyEvent.init "Space"
+  check simulator2.operate KeyEventSpace
   check simulator1 == simulator2
 
   simulator1.backward
-  check simulator2.operate KeyEvent.init 'w'
+  check simulator2.operate KeyEventW
   check simulator1 == simulator2
 
   simulator1.backward
-  check simulator2.operate KeyEvent.init 'x'
+  check simulator2.operate KeyEventX
   check simulator1 == simulator2
 
   simulator1.reset
-  check simulator2.operate KeyEvent.init 'z'
+  check simulator2.operate KeyEventZ
   check simulator1 == simulator2
 
-  check not simulator2.operate KeyEvent.init "Tab"
+  check not simulator2.operate KeyEventTab
   check simulator1 == simulator2
 
-  simulator1.mode = ViewerEdit
-  check simulator2.operate KeyEvent.init 't'
+  simulator1.mode = EditEditor
+  check simulator2.operate KeyEventT
   check simulator1 == simulator2
 
   simulator1.toggleInsert
-  check simulator2.operate KeyEvent.init 'g'
+  check simulator2.operate KeyEventG
   check simulator1 == simulator2
 
   simulator1.toggleFocus
-  check simulator2.operate KeyEvent.init "Tab"
+  check simulator2.operate KeyEventTab
   check simulator1 == simulator2
 
   simulator1.moveCursorRight
-  check simulator2.operate KeyEvent.init 'd'
+  check simulator2.operate KeyEventD
   check simulator1 == simulator2
 
   simulator1.moveCursorLeft
-  check simulator2.operate KeyEvent.init 'a'
+  check simulator2.operate KeyEventA
   check simulator1 == simulator2
 
   simulator1.moveCursorUp
-  check simulator2.operate KeyEvent.init 'w'
+  check simulator2.operate KeyEventW
   check simulator1 == simulator2
 
   simulator1.moveCursorDown
-  check simulator2.operate KeyEvent.init 's'
+  check simulator2.operate KeyEventS
   check simulator1 == simulator2
 
   simulator1.writeCell Cell.Red
-  check simulator2.operate KeyEvent.init 'h'
+  check simulator2.operate KeyEventH
   check simulator1 == simulator2
 
   simulator1.writeCell Cell.Green
-  check simulator2.operate KeyEvent.init 'j'
+  check simulator2.operate KeyEventJ
   check simulator1 == simulator2
 
   simulator1.writeCell Cell.Blue
-  check simulator2.operate KeyEvent.init 'k'
+  check simulator2.operate KeyEventK
   check simulator1 == simulator2
 
   simulator1.writeCell Cell.Yellow
-  check simulator2.operate KeyEvent.init 'l'
+  check simulator2.operate KeyEventL
   check simulator1 == simulator2
 
   simulator1.writeCell Cell.Purple
-  check simulator2.operate KeyEvent.init "Semicolon"
+  check simulator2.operate KeyEventSemicolon
   check simulator1 == simulator2
 
   simulator1.writeCell Garbage
-  check simulator2.operate KeyEvent.init 'o'
+  check simulator2.operate KeyEventO
   check simulator1 == simulator2
 
   simulator1.writeCell Hard
-  check simulator2.operate KeyEvent.init 'p'
+  check simulator2.operate KeyEventP
   check simulator1 == simulator2
 
   simulator1.writeCell Cell.None
-  check simulator2.operate KeyEvent.init "Space"
+  check simulator2.operate KeyEventSpace
   check simulator1 == simulator2
 
-  simulator1.writeRotate(cross = false)
-  check simulator2.operate KeyEvent.init 'n'
+  simulator1.rule = Spinner
+  check simulator2.operate KeyEventR
   check simulator1 == simulator2
 
-  simulator1.writeRotate(cross = true)
-  check simulator2.operate KeyEvent.init 'm'
+  simulator1.writeCross(cross = false)
+  check simulator2.operate KeyEventN
+  check simulator1 == simulator2
+
+  simulator1.writeCell Cell.None
+  check simulator2.operate KeyEventSpace
+  check simulator1 == simulator2
+
+  simulator1.rule = CrossSpinner
+  check simulator2.operate KeyEventR
+  check simulator1 == simulator2
+
+  simulator1.writeCross(cross = true)
+  check simulator2.operate KeyEventM
   check simulator1 == simulator2
 
   simulator1.shiftFieldRight
-  check simulator2.operate KeyEvent.init 'D'
+  check simulator2.operate KeyEventShiftD
   check simulator1 == simulator2
 
   simulator1.shiftFieldLeft
-  check simulator2.operate KeyEvent.init 'A'
+  check simulator2.operate KeyEventShiftA
   check simulator1 == simulator2
 
   simulator1.shiftFieldUp
-  check simulator2.operate KeyEvent.init 'W'
+  check simulator2.operate KeyEventShiftW
   check simulator1 == simulator2
 
   simulator1.shiftFieldDown
-  check simulator2.operate KeyEvent.init 'S'
+  check simulator2.operate KeyEventShiftS
   check simulator1 == simulator2
 
   simulator1.flip
-  check simulator2.operate KeyEvent.init 'f'
+  check simulator2.operate KeyEventF
   check simulator1 == simulator2
 
   simulator1.undo
-  check simulator2.operate KeyEvent.init 'Z'
+  check simulator2.operate KeyEventShiftZ
   check simulator1 == simulator2
 
   simulator1.redo
-  check simulator2.operate KeyEvent.init 'X'
+  check simulator2.operate KeyEventShiftX
   check simulator1 == simulator2
 
   simulator1.forward
-  check simulator2.operate KeyEvent.init 'c'
+  check simulator2.operate KeyEventC
   check simulator1 == simulator2
 
   simulator1.backward
-  check simulator2.operate KeyEvent.init 'x'
+  check simulator2.operate KeyEventX
   check simulator1 == simulator2
 
   simulator1.reset
-  check simulator2.operate KeyEvent.init 'z'
+  check simulator2.operate KeyEventZ
   check simulator1 == simulator2
 
-  check not simulator2.operate KeyEvent.init 'v'
+  check not simulator2.operate KeyEventV
   check simulator1 == simulator2
 
-  simulator1.mode = ViewerPlay
-  check simulator2.operate KeyEvent.init 't'
+  simulator1.mode = PlayEditor
+  check simulator2.operate KeyEventT
   check simulator1 == simulator2
 
   var
@@ -1114,56 +1180,57 @@ pp|23""".parseNazoPuyo.unsafeValue
   check simulator3 == simulator4
 
   simulator3.forward(replay = true)
-  check simulator4.operate KeyEvent.init 'c'
+  check simulator4.operate KeyEventC
   check simulator3 == simulator4
 
   simulator3.reset
-  check simulator4.operate KeyEvent.init 'W'
+  check simulator4.operate KeyEventShiftW
   check simulator3 == simulator4
 
   simulator3.forward(replay = true)
-  check simulator4.operate KeyEvent.init 's'
+  check simulator4.operate KeyEventS
   check simulator3 == simulator4
 
   simulator3.backward
-  check simulator4.operate KeyEvent.init 'w'
+  check simulator4.operate KeyEventW
   check simulator3 == simulator4
 
   simulator3.backward
-  check simulator4.operate KeyEvent.init 'x'
+  check simulator4.operate KeyEventX
   check simulator3 == simulator4
 
   simulator3.reset
-  check simulator4.operate KeyEvent.init 'z'
+  check simulator4.operate KeyEventZ
   check simulator3 == simulator4
 
-  check not simulator4.operate KeyEvent.init 'Z'
+  check not simulator4.operate KeyEventShiftZ
   check simulator3 == simulator4
 
   var
-    simulator5 = Simulator.init(nazoPuyo, EditorEdit)
-    simulator6 = Simulator.init(nazoPuyo, EditorEdit)
+    simulator5 = Simulator.init(nazoPuyo, EditEditor)
+    simulator6 = Simulator.init(nazoPuyo, EditEditor)
   check simulator5 == simulator6
 
   simulator5.rule = Water
-  check simulator6.operate KeyEvent.init 'e'
+  check simulator6.operate KeyEventE
   check simulator5 == simulator6
 
   simulator5.rule = Tsu
-  check simulator6.operate KeyEvent.init 'r'
+  check simulator6.operate KeyEventR
   check simulator5 == simulator6
 
   simulator5.toggleFocus
-  check simulator6.operate KeyEvent.init "Tab"
+  check simulator6.operate KeyEventTab
   check simulator5 == simulator6
 
   simulator5.writeCell Garbage
-  check simulator6.operate KeyEvent.init 'o'
+  check simulator6.operate KeyEventO
   check simulator5 == simulator6
 
-  for i in 0 .. 9:
-    simulator5.writeCount i
-    check simulator6.operate KeyEvent.init '0'.succ i
+  for digit in 0 .. 5:
+    simulator5.writeCountClamp simulator5.editData.steps.index,
+      simulator5.editData.steps.col, digit
+    check simulator6.operate KeyEvent.init "Digit{digit}".fmt
     check simulator5 == simulator6
 
 # ------------------------------------------------
@@ -1186,18 +1253,18 @@ block: # toUri, parseSimulator
       uriIshikawa3 = "http://ishikawapuyo.net/simu/pn.html?__200".parseUri
       uriIps2 = "http://ishikawapuyo.net/simu/pn.html?___200".parseUri
 
-    check simulator.toUri(fqdn = Pon2) == StrErrorResult[Uri].ok uriPon2
-    check simulator.toUri(fqdn = Ishikawa) == StrErrorResult[Uri].ok uriIshikawa
-    check simulator.toUri(fqdn = Ips) == StrErrorResult[Uri].ok uriIps
+    check simulator.toUri(fqdn = Pon2) == Pon2Result[Uri].ok uriPon2
+    check simulator.toUri(fqdn = IshikawaPuyo) == Pon2Result[Uri].ok uriIshikawa
+    check simulator.toUri(fqdn = Ips) == Pon2Result[Uri].ok uriIps
 
-    check uriPon2.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIshikawa.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIps.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriPon22.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriPon23.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIshikawa2.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIshikawa3.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIps2.parseSimulator == StrErrorResult[Simulator].ok simulator
+    check uriPon2.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIshikawa.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIps.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriPon22.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriPon23.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIshikawa2.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIshikawa3.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIps2.parseSimulator == Pon2Result[Simulator].ok simulator
 
   block: # Puyo Puyo
     let
@@ -1218,21 +1285,21 @@ block: # toUri, parseSimulator
       uriIshikawa5 = "https://ishikawapuyo.net/simu/ps.html".parseUri
       uriIshikawa6 = "https://ishikawapuyo.net/simu/pn.html".parseUri
 
-    check simulator.toUri(fqdn = Pon2) == StrErrorResult[Uri].ok uriPon2
-    check simulator.toUri(fqdn = Ishikawa) == StrErrorResult[Uri].ok uriIshikawa
-    check simulator.toUri(fqdn = Ips) == StrErrorResult[Uri].ok uriIps
+    check simulator.toUri(fqdn = Pon2) == Pon2Result[Uri].ok uriPon2
+    check simulator.toUri(fqdn = IshikawaPuyo) == Pon2Result[Uri].ok uriIshikawa
+    check simulator.toUri(fqdn = Ips) == Pon2Result[Uri].ok uriIps
 
-    check uriPon2.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIshikawa.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIps.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriPon22.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriPon23.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriPon24.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIshikawa2.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIshikawa3.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIshikawa4.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIshikawa5.parseSimulator == StrErrorResult[Simulator].ok simulator
-    check uriIshikawa6.parseSimulator == StrErrorResult[Simulator].ok simulator
+    check uriPon2.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIshikawa.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIps.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriPon22.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriPon23.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriPon24.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIshikawa2.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIshikawa3.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIshikawa4.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIshikawa5.parseSimulator == Pon2Result[Simulator].ok simulator
+    check uriIshikawa6.parseSimulator == Pon2Result[Simulator].ok simulator
 
   block: # clearPlacements
     let nazoPuyo =
@@ -1259,12 +1326,12 @@ pp|
 gy|23""".parseNazoPuyo.unsafeValue
 
     check Simulator.init(nazoPuyo).toUri(clearPlacements = true) ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_b..&steps=rbppgy&goal=0_0_6_0_".parseUri
+      Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_b..&steps=rbppgy&goal=0_0_6_0_".parseUri
 
 block: # toExportUri
-  # EditorEdit
+  # EditEditor
   block:
-    var simulator = Simulator.init EditorEdit
+    var simulator = Simulator.init EditEditor
     simulator.moveCursorUp
     simulator.moveCursorUp
     simulator.moveCursorLeft
@@ -1272,15 +1339,15 @@ block: # toExportUri
     simulator.forward
 
     check simulator.toUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=3&field=0_g&steps&goal=_".parseUri
+      Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=3&field=0_g&steps&goal=_".parseUri
     check simulator.toExportUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_g......&steps&goal=_".parseUri
+      Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_g......&steps&goal=_".parseUri
     check simulator.toExportUri(viewer = false) ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=2&field=0_g......&steps&goal=_".parseUri
+      Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=1&field=0_g......&steps&goal=_".parseUri
 
-  # ViewerEdit
+  # EditViewer
   block:
-    var simulator = Simulator.init ViewerEdit
+    var simulator = Simulator.init EditViewer
     simulator.moveCursorUp
     simulator.moveCursorUp
     simulator.moveCursorLeft
@@ -1288,9 +1355,9 @@ block: # toExportUri
     simulator.forward
 
     check simulator.toExportUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps&goal=_".parseUri
+      Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps&goal=_".parseUri
 
-  # ViewerPlay
+  # PlayViewer
   block:
     let nazoPuyo =
       """
@@ -1318,8 +1385,8 @@ rb|""".parseNazoPuyo.unsafeValue
     simulator.forward
 
     check simulator.toUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_rb..&steps=rb34&goal=0_0_1_0_".parseUri
+      Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_rb..&steps=rb34&goal=0_0_1_0_".parseUri
     check simulator.toExportUri ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps=rb&goal=0_0_1_0_".parseUri
+      Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps=rb&goal=0_0_1_0_".parseUri
     check simulator.toExportUri(clearPlacements = false) ==
-      StrErrorResult[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps=rb34&goal=0_0_1_0_".parseUri
+      Pon2Result[Uri].ok "https://24ik.github.io/pon2/stable/studio/?mode=0&field=0_&steps=rb34&goal=0_0_1_0_".parseUri

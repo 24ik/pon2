@@ -14,15 +14,8 @@ when defined(js):
 # ------------------------------------------------
 
 block: # init
-  check KeyEvent.init("KeyA") == KeyEvent.init('a')
-  check KeyEvent.init("KeyB", shift = true, alt = true) == KeyEvent.init(
-    'B', alt = true
-  )
-  check KeyEvent.init("KeyC", ctrl = true) ==
-    KeyEvent.init('c', shift = true, ctrl = true)
-  check KeyEvent.init("Digit1", meta = true) == KeyEvent.init('1', meta = true)
-  check KeyEvent.init("Digit2", shift = true, meta = true) ==
-    KeyEvent.init('2', shift = true, meta = true)
+  check KeyEvent.init("KeyA") == KeyEventA
+  check KeyEvent.init("KeyD", shift = true) == KeyEventShiftD
 
 # ------------------------------------------------
 # JS backend
@@ -35,9 +28,9 @@ when defined(js):
       ctrlKey: false,
       metaKey: true,
       shiftKey: false,
-      code: cstring "KeyA",
+      code: "KeyA",
       isComposing: false,
-      key: cstring "a",
+      key: "a",
       keyCode: 65,
       location: 0,
-    ).toKeyEvent == KeyEvent.init('a', alt = true, meta = true)
+    ).toKeyEvent == KeyEvent.init("KeyA", alt = true, meta = true)

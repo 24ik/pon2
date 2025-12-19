@@ -19,13 +19,13 @@ when defined(js) or defined(nimsuggest):
     import ../private/[webworkers]
 
 type
-  StudioReplayData* = object ## Data for the replay simulator.
+  StudioReplayData = object ## Data for the replay simulator.
     stepsSeq: seq[Steps]
     stepsIndex: int
 
   Studio* = object ## Studio for Puyo Puyo and Nazo Puyo.
-    simulator: Simulator
-    replaySimulator: Simulator
+    simulator*: Simulator
+    replaySimulator*: Simulator
 
     focusReplay: bool
 
@@ -54,27 +54,11 @@ proc init*(T: type Studio, simulator: Simulator): T =
   )
 
 proc init*(T: type Studio): T =
-  T.init Simulator.init EditorEdit
+  T.init Simulator.init EditEditor
 
 # ------------------------------------------------
-# Property - Getter
+# Property
 # ------------------------------------------------
-
-func simulator*(self: Studio): Simulator =
-  ## Returns the simulator.
-  self.simulator
-
-func simulator*(self: var Studio): var Simulator =
-  ## Returns the simulator.
-  self.simulator
-
-func replaySimulator*(self: Studio): Simulator =
-  ## Returns the replay simulator.
-  self.replaySimulator
-
-func replaySimulator*(self: var Studio): var Simulator =
-  ## Returns the replay simulator.
-  self.replaySimulator
 
 func focusReplay*(self: Studio): bool =
   ## Returns `true` if the replay simulator is focused.
@@ -100,50 +84,52 @@ func replayStepsIndex*(self: Studio): int =
   ## Returns the index of steps for the replay simulator.
   self.replayData.stepsIndex
 
-func progressRef*(self: Studio): ref tuple[now, total: int] =
+func progress*(self: Studio): tuple[now, total: int] =
   ## Returns the progress.
-  self.progressRef
+  self.progressRef[]
 
 # ------------------------------------------------
-# Edit - Other
+# Toggle
 # ------------------------------------------------
 
 func toggleFocus*(self: var Studio) =
   ## Toggles focusing to replay simulator or not.
-  if self.simulator.mode in EditorModes:
-    self.focusReplay.toggle
+  self.focusReplay.toggle
 
 # ------------------------------------------------
 # Replay
 # ------------------------------------------------
 
+func updateReplaySimulator(self: var Studio) =
+  ## Updates the replay simulator.
+  var nazoPuyo = self.replaySimulator.nazoPuyo
+  nazoPuyo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIndex]
+
+  self.replaySimulator.assign Simulator.init(nazoPuyo, Replay)
+
 func nextReplay*(self: var Studio) =
-  ## Shows the next answer.
-  if self.simulator.mode notin EditorModes or self.replayData.stepsSeq.len == 0:
+  ## Shows the next solution.
+  if self.replayData.stepsSeq.len == 0:
     return
 
   if self.replayData.stepsIndex == self.replayData.stepsSeq.len.pred:
     self.replayData.stepsIndex.assign 0
   else:
-    self.replayData.stepsIndex.inc
+    self.replayData.stepsIndex += 1
 
-  var nazoPuyo = self.replaySimulator.nazoPuyo
-  nazoPuyo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIndex]
-  self.replaySimulator.assign Simulator.init(nazoPuyo, Replay)
+  self.updateReplaySimulator
 
 func prevReplay*(self: var Studio) =
-  ## Shows the previous answer.
+  ## Shows the previous solution.
   if self.simulator.mode notin EditorModes or self.replayData.stepsSeq.len == 0:
     return
 
   if self.replayData.stepsIndex == 0:
     self.replayData.stepsIndex.assign self.replayData.stepsSeq.len.pred
   else:
-    self.replayData.stepsIndex.dec
+    self.replayData.stepsIndex -= 1
 
-  var nazoPuyo = self.replaySimulator.nazoPuyo
-  nazoPuyo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIndex]
-  self.replaySimulator.assign Simulator.init(nazoPuyo, Replay)
+  self.updateReplaySimulator
 
 # ------------------------------------------------
 # Terminate
@@ -192,16 +178,16 @@ func workPostProcess(self: var Studio, nazoPuyo: NazoPuyo) =
   else:
     self.focusReplay.assign false
 
-proc setAnswers(
-    self: var Studio, originalNazoPuyo: NazoPuyo, answers: seq[SolveAnswer]
+proc setSolutions(
+    self: var Studio, originalNazoPuyo: NazoPuyo, solutions: seq[Solution]
 ) =
-  ## Sets the answers.
+  ## Sets the solutions.
   let stepsSeq = collect:
-    for answer in answers:
+    for solution in solutions:
       var steps = originalNazoPuyo.puyoPuyo.steps
-      for stepIndex, optPlacement in answer:
-        if originalNazoPuyo.puyoPuyo.steps[stepIndex].kind == PairPlacement:
-          steps[stepIndex].optPlacement.assign optPlacement
+      for stepIndex, placement in solution:
+        if originalNazoPuyo.puyoPuyo.steps[stepIndex].kind == PairPlace:
+          steps[stepIndex].placement.assign placement
 
       steps
 
@@ -216,7 +202,7 @@ proc solve*(self: var Studio) =
   self.solving.assign true
   self.replayData.stepsSeq.setLen 0
 
-  self.setAnswers self.simulator.nazoPuyo, self.simulator.nazoPuyo.solve
+  self.setSolutions self.simulator.nazoPuyo, self.simulator.nazoPuyo.solve
   self.workPostProcess self.simulator.nazoPuyo
 
   self.solving.assign false
@@ -238,9 +224,9 @@ when defined(js) or defined(nimsuggest):
       discard originalNazoPuyo
         .asyncSolve(self[].progressRef)
         .then(
-          (answers: seq[SolveAnswer]) => (
+          (solutions: seq[Solution]) => (
             block:
-              self[].setAnswers originalNazoPuyo, answers
+              self[].setSolutions originalNazoPuyo, solutions
               self[].workPostProcess originalNazoPuyo
               self[].solving.assign false
           )
@@ -252,11 +238,7 @@ when defined(js) or defined(nimsuggest):
 # Permute
 # ------------------------------------------------
 
-proc permute*(
-    self: var Studio,
-    fixIndices: openArray[int],
-    allowDoubleNotLast, allowDoubleLast: bool,
-) =
+proc permute*(self: var Studio, fixIndices, allowDoubleIndices: openArray[int]) =
   ## Permutes the nazo puyo.
   ## This function requires that the field is settled.
   if not self.canWork:
@@ -265,9 +247,7 @@ proc permute*(
   self.permuting.assign true
   self.replayData.stepsSeq.setLen 0
 
-  for nazoPuyo in self.simulator.nazoPuyo.permute(
-    fixIndices, allowDoubleNotLast, allowDoubleLast
-  ):
+  for nazoPuyo in self.simulator.nazoPuyo.permute(fixIndices, allowDoubleIndices):
     self.replayData.stepsSeq.add nazoPuyo.puyoPuyo.steps
   self.workPostProcess self.simulator.nazoPuyo
 
@@ -276,9 +256,7 @@ proc permute*(
 when defined(js) or defined(nimsuggest):
   when not defined(pon2.build.worker):
     proc asyncPermute*(
-        self: ref Studio,
-        fixIndices: openArray[int],
-        allowDoubleNotLast, allowDoubleLast: bool,
+        self: ref Studio, fixIndices, allowDoubleIndices: openArray[int]
     ) =
       ## Permutes the nazo puyo asynchronously with web workers.
       ## This function requires that the field is settled.
@@ -292,9 +270,7 @@ when defined(js) or defined(nimsuggest):
 
       {.push warning[Uninit]: off.}
       discard originalNazoPuyo
-        .asyncPermute(
-          fixIndices, allowDoubleNotLast, allowDoubleLast, self[].progressRef
-        )
+        .asyncPermute(fixIndices, allowDoubleIndices, self[].progressRef)
         .then(
           (nazoPuyos: seq[NazoPuyo]) => (
             block:
@@ -308,7 +284,7 @@ when defined(js) or defined(nimsuggest):
       {.pop.}
 
 # ------------------------------------------------
-# Keyboard
+# Key
 # ------------------------------------------------
 
 proc operate*(self: ref Studio, key: KeyEvent): bool {.discardable.} =
@@ -316,16 +292,16 @@ proc operate*(self: ref Studio, key: KeyEvent): bool {.discardable.} =
   ## Returns `true` if the key is handled.
   if self[].simulator.mode in EditorModes:
     # focus
-    if key == static(KeyEvent.init("Tab", shift = true)):
+    if key == KeyEventShiftTab:
       self[].toggleFocus
       return true
 
     if self[].focusReplay:
       # next/prev replay
-      if key == static(KeyEvent.init 'a'):
+      if key == KeyEventA:
         self[].prevReplay
         return true
-      if key == static(KeyEvent.init 'd'):
+      if key == KeyEventD:
         self[].nextReplay
         return true
 

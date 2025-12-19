@@ -6,19 +6,22 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, strformat, sugar, typetraits]
-import ./[cell, common, fqdn, moveresult, pair, placement, popresult, rule, step]
+import std/[sequtils, strformat, sugar]
 import
-  ../private/[
-    arrayutils, assign, bitutils, core, macros, math, results2, staticfor, strutils,
-    tables,
-  ]
+  ./[behaviour, cell, common, fqdn, moveresult, pair, placement, popresult, rule, step]
+import ../[utils]
+import
+  ../private/
+    [arrayutils, assign, bitops, core, expand, math, simd, staticfor, strutils, tables]
 
-export cell, common, moveresult, placement, popresult, results2, rule
+export cell, common, moveresult, placement, popresult, rule, utils
+
+when Sse42Available:
+  export simd.`==`
 
 type Field* = object ## Puyo Puyo field.
   rule*: Rule
-  binaryFields: array[3, BinaryField]
+  binaryFields: array[3, BinaryField] # 0: LSB, 2: MSB
 
 defineExpand "", "0", "1", "2"
 
@@ -52,7 +55,7 @@ func `*`(self: Field, binaryField: BinaryField): Field {.inline, noinit.} =
 
 func exist(self: Field): BinaryField {.inline, noinit.} =
   ## Returns the binary field where puyos exist.
-  sum(self.binaryFields[0], self.binaryFields[1], self.binaryFields[2])
+  self.binaryFields[0] + self.binaryFields[1] + self.binaryFields[2]
 
 func isDead*(self: Field): bool {.inline, noinit.} =
   ## Returns `true` if the field is in a defeated state.
@@ -92,10 +95,10 @@ func `[]`*(self: Field, row: Row, col: Col): Cell {.inline, noinit.} =
 template withBits(cell: Cell, body: untyped): untyped =
   ## Runs `body` with `bit0`, `bit1`, and `bit2` exposed.
   block:
-    let c = cell.ord
+    let cellOrd = cell.ord
 
     expand bit:
-      let bit {.inject.} = c.testBit _
+      let bit {.inject.} = cellOrd.testBit _
 
     body
 
@@ -114,14 +117,14 @@ func insert*(self: var Field, row: Row, col: Col, cell: Cell) {.inline, noinit.}
   ## If it is in the water, shifts the field downward below where inserted.
   cell.withBits:
     expand bit:
-      self.binaryFields[_].insert row, col, bit, Behaviours[self.rule].phys
+      self.binaryFields[_].insert row, col, bit, Behaviours[self.rule].physics
 
 func del*(self: var Field, row: Row, col: Col) {.inline, noinit.} =
   ## Deletes the cell and shifts the field.
   ## If (row, col) is in the air, shifts the field downward above where deleted.
   ## If it is in the water, shifts the field upward below where deleted.
   staticFor(i, 0 ..< 3):
-    self.binaryFields[i].del row, col, Behaviours[self.rule].phys
+    self.binaryFields[i].del row, col, Behaviours[self.rule].physics
 
 # ------------------------------------------------
 # Puyo Extract
@@ -153,16 +156,16 @@ func yellow(self: Field): BinaryField {.inline, noinit.} =
 
 func purple(self: Field): BinaryField {.inline, noinit.} =
   ## Returns the binary field where purple puyos exist.
-  product(self.binaryFields[0], self.binaryFields[1], self.binaryFields[2])
+  self.binaryFields[0] * self.binaryFields[1] * self.binaryFields[2]
 
 # ------------------------------------------------
 # Count
 # ------------------------------------------------
 
 func cellCount*(self: Field, cell: Cell): int {.inline, noinit.} =
-  ## Returns the number of `cell` in the field.
+  ## Returns the number of the cell in the field.
   case cell
-  of None:
+  of Cell.None:
     Height * Width - self.exist.popcnt
   of Hard:
     self.hard.popcnt
@@ -183,12 +186,12 @@ func puyoCount*(self: Field): int {.inline, noinit.} =
   ## Returns the number of puyos in the field.
   self.exist.popcnt
 
-func colorPuyoCount*(self: Field): int {.inline, noinit.} =
-  ## Returns the number of color puyos in the field.
+func coloredPuyoCount*(self: Field): int {.inline, noinit.} =
+  ## Returns the number of colored puyos in the field.
   (self.binaryFields[2] + self.red).popcnt
 
-func garbagesCount*(self: Field): int {.inline, noinit.} =
-  ## Returns the number of hard and garbage puyos in the field.
+func nuisancePuyoCount*(self: Field): int {.inline, noinit.} =
+  ## Returns the number of nuisance puyos in the field.
   ((self.binaryFields[0] xor self.binaryFields[1]) - self.binaryFields[2]).popcnt
 
 # ------------------------------------------------
@@ -309,7 +312,7 @@ func rotate*(self: var Field) {.inline, noinit.} =
     self.binaryFields[i].rotate
 
 func crossRotate*(self: var Field) {.inline, noinit.} =
-  ## Rotates the binary field by 180 degrees in groups of three rows.
+  ## Rotates the binary field by 180 degrees in groups of three columns.
   ## Ghost cells are cleared before the rotation.
   staticFor(i, 0 ..< 3):
     self.binaryFields[i].crossRotate
@@ -321,10 +324,11 @@ func crossRotate*(self: var Field) {.inline, noinit.} =
 template withFills(cell: Cell, body: untyped): untyped =
   ## Runs `body` with `fill0`, `fill1`, and `fill2` exposed.
   block:
-    let c = cell.ord
+    let cellOrd = cell.ord
 
     expand fill:
-      let fill {.inject.} = if c.testBit _: BinaryField.initOne else: BinaryField.init
+      let fill {.inject.} =
+        if cellOrd.testBit _: BinaryField.initValid else: BinaryField.init
 
     body
 
@@ -359,7 +363,7 @@ func placeWater(self: var Field, pair: Pair, placement: Placement) {.inline, noi
 
     existField = self.exist
     placeMask =
-      (existField xor (existField + BinaryField.initUpperWater).shiftedUpRaw).keptAir
+      (existField xor (existField + BinaryField.initWaterTop).shiftedUpRaw).keptAir
     pivotMask = (if placement in Down0 .. Down5: placeMask.shiftedUp else: placeMask).kept pivotCol
     rotorMask =
       (if placement in Up0 .. Up5: placeMask.shiftedUp else: placeMask).kept rotorCol
@@ -388,19 +392,14 @@ func placeWater(self: var Field, pair: Pair, placement: Placement) {.inline, noi
 func place*(self: var Field, pair: Pair, placement: Placement) {.inline, noinit.} =
   ## Places the pair.
   ## This function requires that the field is settled.
-  case Behaviours[self.rule].phys
-  of Phys.Tsu:
-    self.placeTsu pair, placement
-  of Phys.Water:
-    self.placeWater pair, placement
+  if placement == Placement.None:
+    return
 
-func place*(
-    self: var Field, pair: Pair, optPlacement: OptPlacement
-) {.inline, noinit.} =
-  ## Places the pair.
-  ## This function requires that the field is settled.
-  if optPlacement.isOk:
-    self.place pair, optPlacement.unsafeValue
+  case Behaviours[self.rule].physics
+  of Physics.Tsu:
+    self.placeTsu pair, placement
+  of Physics.Water:
+    self.placeWater pair, placement
 
 # ------------------------------------------------
 # Pop
@@ -408,8 +407,6 @@ func place*(
 
 func pop*(self: var Field): PopResult {.inline, noinit.} =
   ## Removes puyos that should pop and returns the pop result.
-  # NOTE: `ignoreHard` option can be introduced, but (somehow) the performance
-  # was almost the same.
   let
     poppedR = self.red.extractedPop
     poppedG = self.green.extractedPop
@@ -458,23 +455,23 @@ func canPop*(self: Field): bool {.inline, noinit.} =
     self.purple.canPop
 
 # ------------------------------------------------
-# Drop Garbages
+# Drop Nuisance
 # ------------------------------------------------
 
-func dropGarbages*(
-    self: var Field, counts: array[Col, int], dropHard: bool
+func dropNuisance*(
+    self: var Field, counts: array[Col, int], hard = false
 ) {.inline, noinit.} =
-  ## Drops hard or garbage puyos.
+  ## Drops nuisance puyos.
   ## This function requires that the field is settled and the counts are non-negative.
   let
     existField = self.exist
-    notDropHardInt = (not dropHard).int
+    notDropHardInt = (not hard).int
 
-  case Behaviours[self.rule].phys
-  of Phys.Tsu:
-    self.binaryFields[notDropHardInt].dropGarbagesTsu counts, existField
-  of Phys.Water:
-    self.binaryFields[notDropHardInt].dropGarbagesWater self.binaryFields[dropHard.int],
+  case Behaviours[self.rule].physics
+  of Physics.Tsu:
+    self.binaryFields[notDropHardInt].dropNuisanceTsu counts, existField
+  of Physics.Water:
+    self.binaryFields[notDropHardInt].dropNuisanceWater self.binaryFields[hard.int],
       self.binaryFields[2], counts, existField
 
 # ------------------------------------------------
@@ -485,11 +482,11 @@ func apply*(self: var Field, step: Step) {.inline, noinit.} =
   ## Applies the step.
   ## This function requires that the field is settled.
   case step.kind
-  of PairPlacement:
-    self.place step.pair, step.optPlacement
-  of Garbages:
-    self.dropGarbages step.counts, step.dropHard
-  of Rotate:
+  of PairPlace:
+    self.place step.pair, step.placement
+  of NuisanceDrop:
+    self.dropNuisance step.counts, step.hard
+  of FieldRotate:
     if step.cross: self.crossRotate else: self.rotate
 
 # ------------------------------------------------
@@ -498,25 +495,25 @@ func apply*(self: var Field, step: Step) {.inline, noinit.} =
 
 func settle*(self: var Field) {.inline, noinit.} =
   ## Settles the field.
-  case Behaviours[self.rule].phys
-  of Phys.Tsu:
+  case Behaviours[self.rule].physics
+  of Physics.Tsu:
     settleTsu(
       self.binaryFields[0], self.binaryFields[1], self.binaryFields[2], self.exist
     )
-  of Phys.Water:
+  of Physics.Water:
     settleWater(
       self.binaryFields[0], self.binaryFields[1], self.binaryFields[2], self.exist
     )
 
 func isSettled*(self: Field): bool {.inline, noinit.} =
   ## Returns `true` if the field is settled.
-  ## Note that this function is only slightly lighter than `settle`
-  case Behaviours[self.rule].phys
-  of Phys.Tsu:
+  ## Note that this function is only slightly lighter than `settle`.
+  case Behaviours[self.rule].physics
+  of Physics.Tsu:
     areSettledTsu(
       self.binaryFields[0], self.binaryFields[1], self.binaryFields[2], self.exist
     )
-  of Phys.Water:
+  of Physics.Water:
     areSettledWater(
       self.binaryFields[0], self.binaryFields[1], self.binaryFields[2], self.exist
     )
@@ -527,93 +524,54 @@ func isSettled*(self: Field): bool {.inline, noinit.} =
 
 const MaxChainCount = Height * Width div 4
 
-template moveImpl(
-    self: var Field, calcConnection, settleAfterApply: bool, applyBody: untyped
-): MoveResult =
+func move*(self: var Field, step: Step, calcConnection = true): MoveResult =
   ## Applies `applyBody`, advances the field until chains end, and returns a moving
   ## result.
   ## This function requires that the field is settled.
   var
     chainCount = 0
-    popCounts = static(Cell.initArrayWith 0)
+    popCounts = Cell.initArrayWith 0
     hardToGarbageCount = 0
     detailPopCounts = newSeqOfCap[array[Cell, int]](MaxChainCount)
     detailHardToGarbageCount = newSeqOfCap[int](MaxChainCount)
-    fullPopCounts =
-      newSeqOfCap[array[Cell, seq[int]]](if calcConnection: MaxChainCount else: 0)
+    fullPopCountsOpt = Opt[seq[array[Cell, seq[int]]]].err
 
-  applyBody
+  if calcConnection:
+    fullPopCountsOpt.ok newSeqOfCap[array[Cell, seq[int]]](MaxChainCount)
 
-  if settleAfterApply:
+  self.apply step
+
+  if step.kind == FieldRotate:
     self.settle
 
   while true:
     let popResult = self.pop
     if not popResult.isPopped:
-      if calcConnection:
-        return MoveResult.init(
-          chainCount, popCounts, hardToGarbageCount, detailPopCounts,
-          detailHardToGarbageCount, fullPopCounts,
-        )
-      else:
-        return MoveResult.init(
-          chainCount, popCounts, hardToGarbageCount, detailPopCounts,
-          detailHardToGarbageCount,
-        )
+      return MoveResult.init(
+        chainCount, popCounts, hardToGarbageCount, detailPopCounts,
+        detailHardToGarbageCount, fullPopCountsOpt,
+      )
 
-    chainCount.inc
+    chainCount += 1
     self.settle
 
     var cellCounts {.noinit.}: array[Cell, int]
-    cellCounts[None].assign 0
-    staticFor(cell2, Hard .. Purple):
+    cellCounts[Cell.None].assign 0
+    staticFor(cell2, Puyos):
       let cellCount = popResult.cellCount cell2
       cellCounts[cell2].assign cellCount
-      popCounts[cell2].inc cellCount
+      popCounts[cell2] += cellCount
     detailPopCounts.add cellCounts
 
     let h2g = popResult.hardToGarbageCount
-    hardToGarbageCount.inc h2g
+    hardToGarbageCount += h2g
     detailHardToGarbageCount.add h2g
 
     if calcConnection:
-      fullPopCounts.add popResult.connectionCounts
+      fullPopCountsOpt.unsafeValue.add popResult.connectionCounts
 
   # NOTE: dummy to suppress warning (not reached here)
   MoveResult.init
-
-func move*(
-    self: var Field, pair: Pair, placement: Placement, calcConnection = true
-): MoveResult {.inline, noinit.} =
-  ## Places the pair, advances the field until chains end, and returns a moving result.
-  ## This function requires that the field is settled.
-  self.moveImpl(calcConnection, settleAfterApply = false):
-    self.place pair, placement
-
-func move*(
-    self: var Field, counts: array[Col, int], dropHard: bool, calcConnection = true
-): MoveResult {.inline, noinit.} =
-  ## Drops hard or garbage puyos, advances the field until chains end, and returns a
-  ## moving result.
-  ## This function requires that the field is settled and the counts are non-negative.
-  self.moveImpl(calcConnection, settleAfterApply = false):
-    self.dropGarbages counts, dropHard
-
-func move*(
-    self: var Field, cross: bool, calcConnection = true
-): MoveResult {.inline, noinit.} =
-  ## Rotates the field, advances the field until chains end, and returns a moving
-  ## result.
-  self.moveImpl(calcConnection, settleAfterApply = true):
-    if cross: self.crossRotate else: self.rotate
-
-func move*(
-    self: var Field, step: Step, calcConnection = true
-): MoveResult {.inline, noinit.} =
-  ## Applies the step, advances the field until chains end, and returns a moving result.
-  ## This function requires that the field is settled.
-  self.moveImpl(calcConnection, settleAfterApply = step.kind == Rotate):
-    self.apply step
 
 # ------------------------------------------------
 # Field <-> array
@@ -662,10 +620,9 @@ const
   RulePrefix = "["
   RuleSuffix = "]"
   WaterSep = "~~~~~~"
-  LowerAirRow = AirHeight.pred.Row
 
 func `$`*(self: Field): string {.inline, noinit.} =
-  var lines = newSeqOfCap[string](Height.succ 2)
+  var lines = newSeqOfCap[string](Height + 2)
   lines.add "{RulePrefix}{self.rule}{RuleSuffix}".fmt
 
   let
@@ -676,38 +633,34 @@ func `$`*(self: Field): string {.inline, noinit.} =
   lines &= cellsLines
 
   if self.rule == Rule.Water:
-    lines.insert WaterSep, AirHeight.succ
+    lines.insert WaterSep, WaterTopRow.ord + 1
 
   lines.join "\n"
 
-func parseField*(str: string): StrErrorResult[Field] {.inline, noinit.} =
+func parseField*(str: string): Pon2Result[Field] {.inline, noinit.} =
   ## Returns the field converted from the string representation.
   let errorMsg = "Invalid field: {str}".fmt
 
   var lines = str.split '\n'
-  if lines.len == 0:
-    return err errorMsg
 
   if not (lines[0].startsWith(RulePrefix) and lines[0].endsWith(RuleSuffix)):
     return err errorMsg
-  let rule =
-    ?lines[0][RulePrefix.len ..^ RuleSuffix.len.succ].parseRule.context errorMsg
+  let rule = ?lines[0][RulePrefix.len ..^ RuleSuffix.len + 1].parseRule.context errorMsg
   lines.delete 0
 
-  if lines.len != Height.succ (rule == Rule.Water).int:
+  if lines.len != Height + (rule == Rule.Water).int:
     return err errorMsg
 
   if rule == Rule.Water:
-    if lines[AirHeight] != WaterSep:
+    if lines[WaterTopRow.ord] != WaterSep:
       return err errorMsg
-
-    lines.delete AirHeight
+    lines.delete WaterTopRow.ord
 
   if lines.anyIt it.len != Width:
     return err errorMsg
 
   var cellArray {.noinit.}: array[Row, array[Col, Cell]]
-  for row in Row:
+  staticFor(row, Row):
     staticFor(col, Col):
       {.push warning[Uninit]: off.}
       cellArray[row][col].assign ?($lines[row.ord][col.ord]).parseCell.context errorMsg
@@ -724,36 +677,27 @@ const
   Pon2UriAirWaterSep = "~"
 
   IshikawaUriChars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-"
-  IshikawaUriCharToIndex = collect:
-    for i, c in IshikawaUriChars:
-      {c: i}
   CellToIshikawaIndex: array[Cell, int] = [0, -1, 6, 1, 2, 3, 4, 5]
-  IshikawaIndexToCell = collect:
-    for cell, index in CellToIshikawaIndex:
-      {index: cell}
 
   TildeIshikawaPrefix = '~'
   TildeIshikawaLf = '.'
-  CellToTildeIshikawaStr: array[Cell, string] = ["0", "9", "6", "1", "2", "3", "4", "5"]
-  TildeIshikawaCharToCell = collect:
-    for cell, str in CellToTildeIshikawaStr:
-      {str[0]: cell}
+  CellToTildeIshikawaChar: array[Cell, char] = ['0', '9', '6', '1', '2', '3', '4', '5']
 
-func toUriQueryPon2(self: Field): StrErrorResult[string] {.inline, noinit.} =
-  ## Returns the URI query converted from the field.
+func toUriQueryPon2(self: Field): Pon2Result[string] {.inline, noinit.} =
+  ## Returns the URI query with Pon2 format converted from the field.
   const
-    NoneChars = {($None)[0]}
+    NoneChars = {($Cell.None)[0]}
     RuleFieldSep = Pon2UriRuleFieldSep # NOTE: strformat needs this
 
   let
-    airLowerRow =
+    airBottomRow =
       case self.rule
       of Rule.Tsu, Spinner, CrossSpinner: Row.high
-      of Rule.Water: AirHeight.pred.Row
+      of Rule.Water: AirBottomRow
     cellArray = self.toArray
 
     airStrs = collect:
-      for row in Row.low .. airLowerRow:
+      for row in Row.low .. airBottomRow:
         for cell in cellArray[row]:
           $cell
     airStr = airStrs.join.strip(trailing = false, chars = NoneChars)
@@ -763,7 +707,7 @@ func toUriQueryPon2(self: Field): StrErrorResult[string] {.inline, noinit.} =
   if self.rule == Rule.Water:
     let
       waterStrs = collect:
-        for row in airLowerRow.succ .. Row.high:
+        for row in WaterTopRow .. Row.high:
           for cell in cellArray[row]:
             $cell
       waterStr = waterStrs.join.strip(leading = false, chars = NoneChars)
@@ -772,10 +716,10 @@ func toUriQueryPon2(self: Field): StrErrorResult[string] {.inline, noinit.} =
 
   ok query
 
-func toUriQueryIshikawa(self: Field): StrErrorResult[string] {.inline, noinit.} =
-  ## Returns the URI query converted from the field.
+func toUriQueryIshikawa(self: Field): Pon2Result[string] {.inline, noinit.} =
+  ## Returns the URI query with IshikawaPuyo/Ips format converted from the field.
   if self.rule != Rule.Tsu:
-    return err "non-Tsu field is not supported on Ishikawa/Ips format: {self}".fmt
+    return err "non-Tsu field is not supported on IshikawaPuyo/Ips format: {self}".fmt
 
   let cellArray = self.toArray
 
@@ -783,15 +727,17 @@ func toUriQueryIshikawa(self: Field): StrErrorResult[string] {.inline, noinit.} 
     var lines = newSeqOfCap[string](Height)
     staticFor(row, Row):
       let
-        strs = collect:
+        chars = collect:
           for cell in cellArray[row]:
-            CellToTildeIshikawaStr[cell]
-        line = strs.join.strip(leading = false, chars = {'0'})
+            CellToTildeIshikawaChar[cell]
+        line = chars.join.strip(leading = false, chars = {'0'})
 
-      lines.add if row < Row.high and line.len < Width:
-        line & TildeIshikawaLf
-      else:
-        line
+      lines.add (
+        if row < Row.high and line.len < Width:
+          line & TildeIshikawaLf
+        else:
+          line
+      )
 
     ok TildeIshikawaPrefix &
       lines.join.strip(trailing = false, chars = {TildeIshikawaLf})
@@ -799,28 +745,27 @@ func toUriQueryIshikawa(self: Field): StrErrorResult[string] {.inline, noinit.} 
     var lines = newSeqOfCap[string](Height)
     staticFor(row, Row):
       var chars = newSeqOfCap[char](Height div 2)
-      for i in 0 ..< Width div 2:
+      staticFor(col, [Col0, Col2, Col4]):
         let
-          col = (i * 2).Col
           cell1 = cellArray[row][col]
           cell2 = cellArray[row][col.succ]
 
         chars.add IshikawaUriChars[
-          CellToIshikawaIndex[cell1] * static(Cell.enumLen) + CellToIshikawaIndex[cell2]
+          CellToIshikawaIndex[cell1] * 8 + CellToIshikawaIndex[cell2]
         ]
 
       lines.add chars.join
 
     ok lines.join.strip(trailing = false, chars = {'0'})
 
-func toUriQuery*(self: Field, fqdn = Pon2): StrErrorResult[string] {.inline, noinit.} =
+func toUriQuery*(self: Field, fqdn = Pon2): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query converted from the field.
   case fqdn
   of Pon2: self.toUriQueryPon2
-  of Ishikawa, Ips: self.toUriQueryIshikawa
+  of IshikawaPuyo, Ips: self.toUriQueryIshikawa
 
-func parseFieldPon2(query: string): StrErrorResult[Field] {.inline, noinit.} =
-  ## Returns the field converted from the URI query.
+func parseFieldPon2(query: string): Pon2Result[Field] {.inline, noinit.} =
+  ## Returns the field converted from the URI query with Pon2 format.
   let errorMsg = "Invalid field: {query}".fmt
 
   if query == "":
@@ -830,10 +775,7 @@ func parseFieldPon2(query: string): StrErrorResult[Field] {.inline, noinit.} =
   if strs.len != 2:
     return err "Invalid field: {query}".fmt
 
-  let ruleOrd = ?strs[0].parseInt.context errorMsg
-  if ruleOrd notin Rule.low.ord .. Rule.high.ord:
-    return err "Invalid field: {query}".fmt
-  let rule = ruleOrd.Rule
+  let rule = ?parseOrdinal[Rule](strs[0]).context errorMsg
 
   var cellArray {.noinit.}: array[Row, array[Col, Cell]]
   case rule
@@ -841,7 +783,7 @@ func parseFieldPon2(query: string): StrErrorResult[Field] {.inline, noinit.} =
     if strs[1].len > Height * Width:
       return err errorMsg
 
-    let airStr = ($None)[0].repeat(Height * Width - strs[1].len) & strs[1]
+    let airStr = ($Cell.None)[0].repeat(Height * Width - strs[1].len) & strs[1]
 
     staticFor(row, Row):
       staticFor(col, Col):
@@ -854,15 +796,16 @@ func parseFieldPon2(query: string): StrErrorResult[Field] {.inline, noinit.} =
 
     let
       airStrRaw = airWaterStrs[0]
-      airStr = ($None)[0].repeat(AirHeight * Width - airStrRaw.len) & airStrRaw
-    staticFor(row, Row.low .. LowerAirRow):
+      airStr = ($Cell.None)[0].repeat(AirHeight * Width - airStrRaw.len) & airStrRaw
+    staticFor(row, Row.low .. AirBottomRow):
       staticFor(col, Col):
         cellArray[row][col].assign ?($airStr[row.ord * Width + col.ord]).parseCell.context errorMsg
 
     let
       waterStrRaw = airWaterStrs[1]
-      waterStr = waterStrRaw & ($None)[0].repeat(WaterHeight * Width - waterStrRaw.len)
-    staticFor(row, LowerAirRow.succ .. Row.high):
+      waterStr =
+        waterStrRaw & ($Cell.None)[0].repeat(WaterHeight * Width - waterStrRaw.len)
+    staticFor(row, WaterTopRow .. Row.high):
       staticFor(col, Col):
         cellArray[row][col].assign ?($waterStr[(row.ord - AirHeight) * Width + col.ord]).parseCell.context errorMsg
 
@@ -874,21 +817,21 @@ func splitByLen(str: string, length: int): seq[string] {.inline, noinit.} =
     @[""]
   else:
     collect:
-      for firstIndex in countup(0, str.len.pred, length):
-        str.substr(firstIndex, min(firstIndex.succ length, str.len).pred)
+      for firstIndex in countup(0, str.len - 1, length):
+        str.substr(firstIndex, firstIndex + length - 1)
 
-func parseFieldIshikawa(query: string): StrErrorResult[Field] {.inline, noinit.} =
-  ## Returns the field converted from the URI query.
+func parseFieldIshikawa(query: string): Pon2Result[Field] {.inline, noinit.} =
+  ## Returns the field converted from the URI query with IshikawaPuyo/Ips format.
   let errorMsg = "Invalid field: {query}".fmt
 
   if query.startsWith TildeIshikawaPrefix:
-    let query2 = query[1 ..^ 1]
-    if query2.len > Height * Width - 1:
+    let queryWithoutTilde = query[1 ..^ 1]
+    if queryWithoutTilde.len > Height * Width - 1:
       return err errorMsg
 
     let
       strsSeq = collect:
-        for str in query2.split TildeIshikawaLf:
+        for str in queryWithoutTilde.split TildeIshikawaLf:
           str.splitByLen Width
       strs = strsSeq.concat
 
@@ -896,12 +839,14 @@ func parseFieldIshikawa(query: string): StrErrorResult[Field] {.inline, noinit.}
       return err errorMsg
 
     let firstRow = (Height - strs.len).Row
-    var cellArray = static(Row.initArrayWith Col.initArrayWith None)
+    var cellArray = Row.initArrayWith Col.initArrayWith Cell.None
     for rowIndex, str in strs:
       for colIndex, c in str:
-        cellArray[firstRow.succ rowIndex][Col.low.succ colIndex].assign ?TildeIshikawaCharToCell[
-          c
-        ].context errorMsg
+        let cellOrd = CellToTildeIshikawaChar.find c
+        if cellOrd < 0:
+          return err errorMsg
+
+        cellArray[firstRow.succ rowIndex][Col.low.succ colIndex].assign cellOrd.Cell
 
     ok cellArray.toField Rule.Tsu
   else:
@@ -910,13 +855,24 @@ func parseFieldIshikawa(query: string): StrErrorResult[Field] {.inline, noinit.}
 
     var cellArray {.noinit.}: array[Row, array[Col, Cell]]
     for i, c in '0'.repeat(Height * Width div 2 - query.len) & query:
-      let
-        index = ?IshikawaUriCharToIndex[c].context errorMsg
-        (indexQuotient, indexRemainder) = index.divmod static(Cell.enumLen)
-        cell1 = ?IshikawaIndexToCell[indexQuotient].context errorMsg
-        cell2 = ?IshikawaIndexToCell[indexRemainder].context errorMsg
+      let index = IshikawaUriChars.find c
+      if index < 0:
+        return err errorMsg
 
-        (iQuotient, iRemainder) = i.divmod static(Width div 2)
+      let
+        (indexQuotient, indexRemainder) = index.divmod 8
+
+        cell1Ord = CellToIshikawaIndex.find indexQuotient
+        cell2Ord = CellToIshikawaIndex.find indexRemainder
+
+      if cell1Ord < 0 or cell2Ord < 0:
+        return err errorMsg
+
+      let
+        cell1 = cell1Ord.Cell
+        cell2 = cell2Ord.Cell
+
+        (iQuotient, iRemainder) = i.divmod (Width div 2)
         row = (iQuotient).Row
         col = (iRemainder * 2).Col
 
@@ -927,8 +883,8 @@ func parseFieldIshikawa(query: string): StrErrorResult[Field] {.inline, noinit.}
 
 func parseField*(
     query: string, fqdn: SimulatorFqdn
-): StrErrorResult[Field] {.inline, noinit.} =
+): Pon2Result[Field] {.inline, noinit.} =
   ## Returns the field converted from the URI query.
   case fqdn
   of Pon2: query.parseFieldPon2
-  of Ishikawa, Ips: query.parseFieldIshikawa
+  of IshikawaPuyo, Ips: query.parseFieldIshikawa

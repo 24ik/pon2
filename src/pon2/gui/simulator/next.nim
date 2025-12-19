@@ -14,7 +14,7 @@ when defined(js) or defined(nimsuggest):
   import karax/[karaxdsl, vdom, vstyles]
   import ../[helper]
   import ../../[app]
-  import ../../private/[gui, results2]
+  import ../../private/[gui]
 
   export vdom
 
@@ -22,18 +22,18 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper, doubleNext: bool, pivot: bool
   ): VNode =
     ## Returns the node of the cell in the next or double-next step.
-    let stepIndex = self.derefSimulator(helper).operatingIndex.succ 1 + doubleNext.int
+    let stepIndex = self.derefSimulator(helper).operating.index + 1 + doubleNext.int
 
     var cross = false
     let cellOpt =
       if stepIndex < self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps.len:
         let step = self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps[stepIndex]
         case step.kind
-        of PairPlacement:
+        of PairPlace:
           Opt[Cell].ok if pivot: step.pair.pivot else: step.pair.rotor
-        of StepKind.Garbages:
-          Opt[Cell].ok if step.dropHard: Hard else: Garbage
-        of Rotate:
+        of NuisanceDrop:
+          Opt[Cell].ok if step.hard: Hard else: Garbage
+        of FieldRotate:
           cross = step.cross
 
           if pivot:

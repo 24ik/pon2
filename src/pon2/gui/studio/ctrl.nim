@@ -18,6 +18,10 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[dom, gui]
 
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
+
   export vdom
 
   const CheckIntervalMs = 1000
@@ -26,8 +30,7 @@ when defined(js) or defined(nimsuggest):
     ## Returns a handler to check the progress and redraw.
     () => (
       block:
-        if self[].progressRef[].now > 0 and
-            self[].progressRef[].now == self[].progressRef[].total:
+        if self[].progress.now > 0 and self[].progress.now == self[].progress.total:
           interval.clearInterval
         safeRedraw()
     )
@@ -46,8 +49,7 @@ when defined(js) or defined(nimsuggest):
     ## Permutes the nazo puyo.
     ## This function requires that the field is settled.
     let settings = helper.getStudioSetting
-    self.asyncPermute settings.fixIndices,
-      settings.allowDoubleNotLast, settings.allowDoubleLast
+    self.asyncPermute settings.fixIndices, settings.allowDoubleIndices
 
     var interval: Interval
     {.push warning[Uninit]: off.}
@@ -67,7 +69,7 @@ when defined(js) or defined(nimsuggest):
             tdiv(class = "control"):
               button(
                 class =
-                  (if self[].focusReplay: "button is-primary" else: "button").cstring,
+                  (if self[].focusReplay: "button is-primary" else: "button").kstring,
                 onclick = () => self[].toggleFocus,
               ):
                 text "解答を操作"
@@ -81,7 +83,7 @@ when defined(js) or defined(nimsuggest):
                 if self[].solving: "button is-loading"
                 elif self[].working: "button is-static"
                 else: "button"
-              ).cstring,
+              ).kstring,
               disabled = workDisabled,
               onclick = () => self.runSolve,
             ):
@@ -92,7 +94,7 @@ when defined(js) or defined(nimsuggest):
                 if self[].permuting: "button is-loading"
                 elif self[].working: "button is-static"
                 else: "button"
-              ).cstring,
+              ).kstring,
               disabled = workDisabled,
               onclick = () => self.runPermute helper,
             ):
@@ -110,7 +112,7 @@ when defined(js) or defined(nimsuggest):
       tdiv(class = "block"):
         progress(
           class = "progress is-primary",
-          value = ($self[].progressRef[].now).cstring,
-          max = ($self[].progressRef[].total).cstring,
+          value = ($self[].progress.now).kstring,
+          max = ($self[].progress.total).kstring,
         ):
           discard

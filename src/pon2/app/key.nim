@@ -6,7 +6,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ../private/[strutils]
+import std/[strformat]
+import ../private/[macros]
 
 when defined(js) or defined(nimsuggest):
   import ../private/[dom]
@@ -32,19 +33,46 @@ func init*(
 ): T =
   KeyEvent(code: code, shift: shift, ctrl: ctrl, alt: alt, meta: meta)
 
-func init*(
-    T: type KeyEvent, c: char, shift = false, ctrl = false, alt = false, meta = false
-): T =
-  ## This constructor requires that `c` is digit or alphabet.
-  ## `shift` is ignored if 'c' is alphabet.
-  if c in '0' .. '9':
-    T.init("Digit" & c, shift, ctrl, alt, meta)
-  elif c in 'a' .. 'z':
-    T.init("Key" & c.toUpperAscii, false, ctrl, alt, meta)
-  elif c in 'A' .. 'Z':
-    T.init("Key" & c, true, ctrl, alt, meta)
-  else:
-    T.init($c, shift, ctrl, alt, meta)
+# ------------------------------------------------
+# Constants
+# ------------------------------------------------
+
+macro defineAsciiKeyEvents(): untyped =
+  ## Defines `KeyEvent0` to `KeyEvent9`, `KeyEventA` to `KeyEventZ`, and
+  ## `KeyEventShiftA` to `KeyEventShiftZ`.
+  let stmts = nnkStmtList.newNimNode
+
+  # digit
+  for digit in 0 .. 9:
+    let
+      ident = "KeyEvent{digit}".fmt.ident
+      code = "Digit{digit}".fmt.newLit
+    stmts.add quote do:
+      const `ident`* = KeyEvent.init `code`
+
+  # alphabet
+  for alphabet in 'A' .. 'Z':
+    let
+      lowerIdent = "KeyEvent{alphabet}".fmt.ident
+      upperIdent = "KeyEventShift{alphabet}".fmt.ident
+
+      code = "Key{alphabet}".fmt.newLit
+    stmts.add quote do:
+      const `lowerIdent`* = KeyEvent.init `code`
+      const `upperIdent`* = KeyEvent.init(`code`, shift = true)
+
+  stmts
+
+defineAsciiKeyEvents()
+
+const
+  KeyEventEnter* = KeyEvent.init "Enter"
+  KeyEventSemicolon* = KeyEvent.init "Semicolon"
+  KeyEventSpace* = KeyEvent.init "Space"
+  KeyEventTab* = KeyEvent.init "Tab"
+
+  KeyEventShiftEnter* = KeyEvent.init("Enter", shift = true)
+  KeyEventShiftTab* = KeyEvent.init("Tab", shift = true)
 
 # ------------------------------------------------
 # JS backend

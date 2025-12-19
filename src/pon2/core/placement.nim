@@ -8,20 +8,22 @@
 
 import std/[strformat, sugar]
 import ./[common, fqdn]
-import ../private/[macros, results2, tables]
+import ../[utils]
+import ../private/[setutils]
 
-export common, results2
+export common, utils
 
 type
   Dir* {.pure.} = enum
     ## Rotor-puyo's direction seen from the pivot-puyo.
-    Up = "^"
-    Right = ">"
-    Down = "v"
-    Left = "<"
+    Up
+    Right
+    Down
+    Left
 
   Placement* {.pure.} = enum
     ## The location where a pair is put.
+    None = ""
     Up0 = "1N"
     Up1 = "2N"
     Up2 = "3N"
@@ -45,29 +47,13 @@ type
     Left4 = "54"
     Left5 = "65"
 
-  OptPlacement* = Opt[Placement]
-
 const
-  NonePlacement* = OptPlacement.err
+  ActualPlacements* = Placement.fullSet - {None}
   DoublePlacements* = {Up0 .. Right4}
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
-
-func init*(
-    T: type Placement, pivotCol: Col, rotorDir: static Dir
-): T {.inline, noinit.} =
-  staticCase:
-    case rotorDir
-    of Up:
-      Up0.succ pivotCol.ord
-    of Right:
-      Right0.succ pivotCol.ord
-    of Down:
-      Down0.succ pivotCol.ord
-    of Left:
-      Down5.succ pivotCol.ord
 
 func init*(T: type Placement, pivotCol: Col, rotorDir: Dir): T {.inline, noinit.} =
   case rotorDir
@@ -81,10 +67,7 @@ func init*(T: type Placement, pivotCol: Col, rotorDir: Dir): T {.inline, noinit.
     Down5.succ pivotCol.ord
 
 func init*(T: type Placement): T {.inline, noinit.} =
-  T.low
-
-func init*(T: type OptPlacement): T {.inline, noinit.} =
-  NonePlacement
+  None
 
 # ------------------------------------------------
 # Property
@@ -92,8 +75,9 @@ func init*(T: type OptPlacement): T {.inline, noinit.} =
 
 func pivotCol*(self: Placement): Col {.inline, noinit.} =
   ## Returns the pivot-puyo's column.
+  ## If the placement is None, returns the undefined column.
   case self
-  of Up0, Right0, Down0: Col0
+  of None, Up0, Right0, Down0: Col0
   of Up1, Right1, Down1, Left1: Col1
   of Up2, Right2, Down2, Left2: Col2
   of Up3, Right3, Down3, Left3: Col3
@@ -102,8 +86,9 @@ func pivotCol*(self: Placement): Col {.inline, noinit.} =
 
 func rotorCol*(self: Placement): Col {.inline, noinit.} =
   ## Returns the rotor-puyo's column.
+  ## If the placement is None, returns the undefined column.
   case self
-  of Up0, Down0, Left1: Col0
+  of None, Up0, Down0, Left1: Col0
   of Up1, Right0, Down1, Left2: Col1
   of Up2, Right1, Down2, Left3: Col2
   of Up3, Right2, Down3, Left4: Col3
@@ -112,8 +97,9 @@ func rotorCol*(self: Placement): Col {.inline, noinit.} =
 
 func rotorDir*(self: Placement): Dir {.inline, noinit.} =
   ## Returns the rotor-puyo's direction.
+  ## If the placement is None, returns the undefined direction.
   case self
-  of Up0 .. Up5: Up
+  of None, Up0 .. Up5: Up
   of Right0 .. Right4: Right
   of Down0 .. Down5: Down
   of Left1 .. Left5: Left
@@ -125,13 +111,13 @@ func rotorDir*(self: Placement): Dir {.inline, noinit.} =
 func moveRight*(self: var Placement) {.inline, noinit.} =
   ## Moves the placement rightward.
   case self
-  of Up5, Right4, Down5, Left5: discard
+  of None, Up5, Right4, Down5, Left5: discard
   else: self.inc
 
 func moveLeft*(self: var Placement) {.inline, noinit.} =
   ## Moves the placement leftward.
   case self
-  of Up0, Right0, Down0, Left1: discard
+  of None, Up0, Right0, Down0, Left1: discard
   else: self.dec
 
 func movedRight*(self: Placement): Placement {.inline, noinit.} =
@@ -149,6 +135,8 @@ func movedLeft*(self: Placement): Placement {.inline, noinit.} =
 func rotateRight*(self: var Placement) {.inline, noinit.} =
   ## Rotates the placement right (clockwise).
   case self
+  of None:
+    discard
   of Up0 .. Up4, Down0:
     self.inc 6
   of Up5, Right0 .. Right4, Down1 .. Down5:
@@ -159,6 +147,8 @@ func rotateRight*(self: var Placement) {.inline, noinit.} =
 func rotateLeft*(self: var Placement) {.inline, noinit.} =
   ## Rotates the placement left (counterclockwise).
   case self
+  of None:
+    discard
   of Up0:
     self.inc 17
   of Up1 .. Up5:
@@ -180,78 +170,43 @@ func rotatedLeft*(self: Placement): Placement {.inline, noinit.} =
 # Placement <-> string
 # ------------------------------------------------
 
-const
-  NonePlacementStr = ""
-  StrToPlacement = collect:
-    for placement in Placement:
-      {$placement: placement}
-
-func `$`*(self: OptPlacement): string {.inline, noinit.} =
-  if self.isOk:
-    $self.unsafeValue
-  else:
-    NonePlacementStr
-
-func parsePlacement*(str: string): StrErrorResult[Placement] {.inline, noinit.} =
+func parsePlacement*(str: string): Pon2Result[Placement] {.inline, noinit.} =
   ## Returns the placement converted from the string representation.
-  StrToPlacement[str].context "Invalid placement: {str}".fmt
+  for placement in Placement:
+    if $placement == str:
+      return ok placement
 
-func parseOptPlacement*(str: string): StrErrorResult[OptPlacement] {.inline, noinit.} =
-  ## Returns the optional placement converted from the string representation.
-  if str == NonePlacementStr:
-    ok NonePlacement
-  else:
-    ok OptPlacement.ok ?str.parsePlacement
+  err "Invalid placement: {str}".fmt
 
 # ------------------------------------------------
 # Placement <-> URI
 # ------------------------------------------------
 
-const
-  PlacementToIshikawaUri = "02468acegikoqsuwyCEGIK"
-  NonePlacementIshikawaUri = "1"
-  IshikawaUriToPlacement = collect:
-    for placement in Placement:
-      {$PlacementToIshikawaUri[placement.ord]: placement}
+const PlacementToIshikawaUri = "102468acegikoqsuwyCEGIK"
 
 func toUriQuery*(self: Placement, fqdn = Pon2): string {.inline, noinit.} =
   ## Returns the URI query converted from the placement.
   case fqdn
   of Pon2:
     $self
-  of Ishikawa, Ips:
+  of IshikawaPuyo, Ips:
     $PlacementToIshikawaUri[self.ord]
-
-func toUriQuery*(self: OptPlacement, fqdn = Pon2): string {.inline, noinit.} =
-  ## Returns the URI query converted from the optional placement.
-  case fqdn
-  of Pon2:
-    $self
-  of Ishikawa, Ips:
-    if self.isOk:
-      $PlacementToIshikawaUri[self.value.ord]
-    else:
-      NonePlacementIshikawaUri
 
 func parsePlacement*(
     query: string, fqdn: SimulatorFqdn
-): StrErrorResult[Placement] {.inline, noinit.} =
+): Pon2Result[Placement] {.inline, noinit.} =
   ## Returns the placement converted from the URI query.
   case fqdn
   of Pon2:
     query.parsePlacement
-  of Ishikawa, Ips:
-    IshikawaUriToPlacement[query].context "Invalid placement: {query}".fmt
+  of IshikawaPuyo, Ips:
+    let errorMsg = "Invalid placement: {query}".fmt
 
-func parseOptPlacement*(
-    query: string, fqdn: SimulatorFqdn
-): StrErrorResult[OptPlacement] {.inline, noinit.} =
-  ## Returns the optional placement converted from the URI query.
-  case fqdn
-  of Pon2:
-    query.parseOptPlacement
-  of Ishikawa, Ips:
-    if query == NonePlacementIshikawaUri:
-      ok NonePlacement
+    if query.len != 1:
+      return err errorMsg
+
+    let index = PlacementToIshikawaUri.find query[0]
+    if index >= 0:
+      ok index.Placement
     else:
-      ok OptPlacement.ok ?query.parsePlacement fqdn
+      err errorMsg

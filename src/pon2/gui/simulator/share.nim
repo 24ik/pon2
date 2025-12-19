@@ -17,6 +17,10 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[assign, dom, gui, utils]
 
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
+
   export vdom
 
   proc toXLink[S: Simulator or Studio or Marathon](
@@ -48,7 +52,7 @@ when defined(js) or defined(nimsuggest):
 
   proc downloadCameraReadyImg(helper: VNodeHelper) =
     let cameraReadyElem = helper.simulator.cameraReadyId.getElemJsObjById
-    cameraReadyElem.style.display = "block".cstring
+    cameraReadyElem.style.display = "block".kstring
 
     {.push warning[Uninit]: off.}
     discard cameraReadyElem
@@ -56,12 +60,12 @@ when defined(js) or defined(nimsuggest):
       .then(
         (canvas: JsObject) => (
           block:
-            cameraReadyElem.style.display = "none".cstring
+            cameraReadyElem.style.display = "none".kstring
 
             let elem = "a".createElemJsObj
             elem.href = canvas.toDataURL()
-            elem.download = "pon2.png".cstring
-            elem.target = "_blank".cstring
+            elem.download = "pon2.png".kstring
+            elem.target = "_blank".kstring
             elem.click()
         )
       ).catch
@@ -115,7 +119,7 @@ when defined(js) or defined(nimsuggest):
               class = "button is-size-7",
               target = "_blank",
               rel = "noopener noreferrer",
-              href = cstring $self.toXLink helper,
+              href = ($self.toXLink helper).kstring,
             ):
               span(class = "icon"):
                 italic(class = "fa-brands fa-x-twitter")

@@ -7,7 +7,7 @@ import std/[sugar, unittest]
 import
   ../../src/pon2/core/
     [cell, common, field, fqdn, moveresult, pair, placement, popresult, rule, step]
-import ../../src/pon2/private/[arrayutils, strutils]
+import ../../src/pon2/private/[arrayutils, assign, staticfor, strutils]
 import ../../src/pon2/private/core/[binaryfield]
 
 proc toBinaryField(str: string): BinaryField =
@@ -15,14 +15,14 @@ proc toBinaryField(str: string): BinaryField =
   let strs = str.split "\n"
 
   var cellArray {.noinit.}: array[Row, array[Col, bool]]
-  for row in Row:
-    for col in Col:
-      cellArray[row][col] = strs[row.ord][col.ord] == 'x'
+  staticFor(row, Row):
+    staticFor(col, Col):
+      cellArray[row][col].assign strs[row.ord][col.ord] == 'x'
 
-  return cellArray.toBinaryField
+  cellArray.toBinaryField
 
 func toField(str: string): Field =
-  ## Returns the Tsu field converted from the string representation.
+  ## Returns the field converted from the string representation.
   str.parseField.unsafeValue
 
 # ------------------------------------------------
@@ -236,8 +236,8 @@ hhhhhh""".toField.isDead
 block: # invalidPlacements, validPlacements, validDoublePlacements
   block:
     let field = Field.init
-    check field.invalidPlacements == {}
-    check field.validPlacements == {Placement.low .. Placement.high}
+    check field.invalidPlacements == {Placement.None}
+    check field.validPlacements == ActualPlacements
     check field.validDoublePlacements == DoublePlacements
 
   block:
@@ -258,7 +258,7 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......""".toField
     check field.invalidPlacements ==
-      {Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2}
+      {Placement.None, Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2}
     check field.validPlacements == {
       Up2, Up3, Up4, Up5, Right2, Right3, Right4, Down2, Down3, Down4, Down5, Left3,
       Left4, Left5,
@@ -282,7 +282,7 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......
 ......""".toField
-    check field.invalidPlacements == {Down1}
+    check field.invalidPlacements == {Placement.None, Down1}
 
   block:
     let field =
@@ -301,7 +301,7 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......
 ......""".toField
-    check field.invalidPlacements == {Down1, Down3}
+    check field.invalidPlacements == {Placement.None, Down1, Down3}
 
   block:
     let field =
@@ -321,7 +321,7 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......""".toField
     check field.invalidPlacements ==
-      {Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2, Down3}
+      {Placement.None, Up0, Right0, Down0, Up1, Right1, Down1, Left1, Left2, Down3}
 
   block:
     let field =
@@ -342,7 +342,10 @@ block: # invalidPlacements, validPlacements, validDoublePlacements
 ......
 ......""".toField
     check field.invalidPlacements ==
-      {Down1, Right3, Down3, Up4, Right4, Down4, Left4, Up5, Down5, Left5}
+      {
+        Placement.None, Down1, Right3, Down3, Up4, Right4, Down4, Left4, Up5, Down5,
+        Left5,
+      }
 
 # ------------------------------------------------
 # Indexer
@@ -385,9 +388,9 @@ h.....
 ......""".toField
 
   check fieldT[Row1, Col1] == Red
-  check fieldT[Row0, Col0] == None
+  check fieldT[Row0, Col0] == Cell.None
   check fieldW[Row5, Col0] == Hard
-  check fieldW[Row1, Col1] == None
+  check fieldW[Row1, Col1] == Cell.None
 
   fieldT[Row2, Col3] = Purple
   check fieldT[Row2, Col3] == Purple
@@ -548,7 +551,7 @@ p.....
 ......
 .o....""".toField
 
-    field.insert Row4, Col4, None
+    field.insert Row4, Col4, Cell.None
     check field ==
       """
 [すいちゅう]
@@ -647,7 +650,7 @@ py....
 # Count
 # ------------------------------------------------
 
-block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
+block: # cellCount, puyoCount, coloredPuyoCount, nuisancePuyoCount
   let
     fieldS =
       """
@@ -691,11 +694,11 @@ h..o..
   check fieldS.puyoCount == 13
   check fieldW.puyoCount == 13
 
-  check fieldS.colorPuyoCount == 7
-  check fieldW.colorPuyoCount == 7
+  check fieldS.coloredPuyoCount == 7
+  check fieldW.coloredPuyoCount == 7
 
-  check fieldS.garbagesCount == 6
-  check fieldW.garbagesCount == 6
+  check fieldS.nuisancePuyoCount == 6
+  check fieldW.nuisancePuyoCount == 6
 
 # ------------------------------------------------
 # Connect - 2
@@ -1597,7 +1600,7 @@ block: # place
 ....oo
 ...hoo""".toField
 
-    check field.dup(place(_, PurplePurple, NonePlacement)) == field
+    check field.dup(place(_, PurplePurple, Placement.None)) == field
 
     field.place RedGreen, Right0
     check field ==
@@ -1671,7 +1674,7 @@ rgrhoo""".toField
 .y.poo
 rgrhoo""".toField
 
-    field.place YellowPurple, OptPlacement.ok Down5
+    field.place YellowPurple, Down5
     check field ==
       """
 [クロスかいてん]
@@ -1708,7 +1711,7 @@ rgrhoo""".toField
 ......
 ......""".toField
 
-    check field.dup(place(_, PurplePurple, NonePlacement)) == field
+    check field.dup(place(_, PurplePurple, Placement.None)) == field
 
     field.place BlueYellow, Left4
     check field ==
@@ -1729,7 +1732,7 @@ rgrhoo""".toField
 ....o.
 ......""".toField
 
-    field.place PurpleRed, OptPlacement.ok Down4
+    field.place PurpleRed, Down4
     check field ==
       """
 [すいちゅう]
@@ -1749,10 +1752,10 @@ rgrhoo""".toField
 ....o.""".toField
 
 # ------------------------------------------------
-# Drop Garbages
+# Drop Nuisance
 # ------------------------------------------------
 
-block: # dropGarbages
+block: # dropNuisance
   block:
     let field =
       """
@@ -1771,7 +1774,7 @@ block: # dropGarbages
 ..rgby
 ..rgby""".toField
 
-    check field.dup(dropGarbages(_, [Col0: 0, 2, 0, 3, 0, 4], false)) ==
+    check field.dup(dropNuisance(_, [Col0: 0, 2, 0, 3, 0, 4], hard = false)) ==
       """
 [通]
 ...oby
@@ -1807,7 +1810,7 @@ block: # dropGarbages
 ......
 ......""".toField
 
-    check field.dup(dropGarbages(_, [Col0: 0, 2, 0, 3, 5, 20], true)) ==
+    check field.dup(dropNuisance(_, [Col0: 0, 2, 0, 3, 5, 20], hard = true)) ==
       """
 [すいちゅう]
 .....h
@@ -1844,7 +1847,7 @@ rgbypr
 oooooo
 rgbypr""".toField
 
-    check field.dup(dropGarbages(_, [Col0: 0, 1, 0, 1, 0, 10], false)) ==
+    check field.dup(dropNuisance([Col0: 0, 1, 0, 1, 0, 10])) ==
       """
 [すいちゅう]
 ....pr
@@ -1869,18 +1872,18 @@ rgbypr""".toField
 block: # apply
   let
     pair = RedGreen
-    plcmt = Left3
+    placement = Left3
     counts = [Col0: 1, 2, 3, 4, 5, 6]
-    dropHard = false
+    hard = false
 
-    step1 = Step.init(pair, plcmt)
-    step2 = Step.init(counts, dropHard)
+    step1 = Step.init(pair, placement)
+    step2 = Step.init(counts, hard)
     step3 = Step.init(cross = true)
     step4 = Step.init(cross = false)
 
-  check Field.init.dup(apply(_, step1)) == Field.init.dup(place(_, pair, plcmt))
+  check Field.init.dup(apply(_, step1)) == Field.init.dup(place(_, pair, placement))
   check Field.init(Rule.Water).dup(apply(_, step2)) ==
-    Field.init(Rule.Water).dup(dropGarbages(counts, dropHard))
+    Field.init(Rule.Water).dup(dropNuisance(counts, hard))
 
   let field = Field.init(Spinner).dup(apply(_, step2))
   check field.dup(apply(_, step3)) == field.dup(crossRotate)
@@ -1980,10 +1983,9 @@ oo.oo.
 # ------------------------------------------------
 
 block: # move
-  block:
-    let
-      fieldBefore =
-        """
+  let
+    fieldBefore =
+      """
 [通]
 ....g.
 ....g.
@@ -1998,8 +2000,8 @@ block: # move
 ...bgr
 ...orb
 ...gbb""".toField
-      fieldAfter =
-        """
+    fieldAfter =
+      """
 [通]
 ......
 ......
@@ -2015,50 +2017,50 @@ block: # move
 .....b
 ...gbb""".toField
 
-      pair = RedBlue
-      plcmt = Down3
+    pair = RedBlue
+    placement = Down3
 
-      chainCount = 3
-      popCounts = [None: 0, 0, 2, 4, 10, 5, 0, 4]
-      hardToGarbageCount = 0
-      detailHardToGarbageCount = @[0, 0, 0]
+    chainCount = 3
+    popCounts = [Cell.None: 0, 0, 2, 4, 10, 5, 0, 4]
+    hardToGarbageCount = 0
+    detailHardToGarbageCount = @[0, 0, 0]
 
-      garbagesCount = [Col0: 0, 1, 2, 0, 2, 1]
+    nuisanceCounts = [Col0: 0, 1, 2, 0, 2, 1]
 
-      detailArray1: array[Cell, int] = [0, 0, 1, 0, 0, 5, 0, 0]
-      detailArray2: array[Cell, int] = [0, 0, 0, 0, 10, 0, 0, 0]
-      detailArray3: array[Cell, int] = [0, 0, 1, 4, 0, 0, 0, 4]
-      detailPopCounts = @[detailArray1, detailArray2, detailArray3]
+    detailArray1: array[Cell, int] = [0, 0, 1, 0, 0, 5, 0, 0]
+    detailArray2: array[Cell, int] = [0, 0, 0, 0, 10, 0, 0, 0]
+    detailArray3: array[Cell, int] = [0, 0, 1, 4, 0, 0, 0, 4]
+    detailPopCounts = @[detailArray1, detailArray2, detailArray3]
 
-      fullArray1: array[Cell, seq[int]] = [@[], @[], @[], @[], @[], @[5], @[], @[]]
-      fullArray2: array[Cell, seq[int]] = [@[], @[], @[], @[], @[4, 6], @[], @[], @[]]
-      fullArray3: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[], @[], @[], @[4]]
-      fullPopCounts = @[fullArray1, fullArray2, fullArray3]
+    fullArray1: array[Cell, seq[int]] = [@[], @[], @[], @[], @[], @[5], @[], @[]]
+    fullArray2: array[Cell, seq[int]] = [@[], @[], @[], @[], @[4, 6], @[], @[], @[]]
+    fullArray3: array[Cell, seq[int]] = [@[], @[], @[], @[4], @[], @[], @[], @[4]]
+    fullPopCounts = @[fullArray1, fullArray2, fullArray3]
 
-    block: # calc connection
-      var field2 = fieldBefore
-      check field2.move(Step.init(pair, plcmt)) ==
-        MoveResult.init(
-          chainCount, popCounts, hardToGarbageCount, detailPopCounts,
-          detailHardToGarbageCount, fullPopCounts,
-        )
-      check field2 == fieldAfter
+  block: # pair, calc connection
+    var field2 = fieldBefore
+    check field2.move(Step.init(pair, placement)) ==
+      MoveResult.init(
+        chainCount, popCounts, hardToGarbageCount, detailPopCounts,
+        detailHardToGarbageCount, fullPopCounts,
+      )
+    check field2 == fieldAfter
 
-    block: # not calcConnection
-      var field2 = fieldBefore
-      check field2.move(pair, plcmt, false) ==
-        MoveResult.init(
-          chainCount, popCounts, hardToGarbageCount, detailPopCounts,
-          detailHardToGarbageCount,
-        )
-      check field2 == fieldAfter
+  block: # pair, not calcConnection
+    var field2 = fieldBefore
+    check field2.move(Step.init(pair, placement), calcConnection = false) ==
+      MoveResult.init(
+        chainCount, popCounts, hardToGarbageCount, detailPopCounts,
+        detailHardToGarbageCount,
+      )
+    check field2 == fieldAfter
 
-    block: # drop garbage
-      var field2 = fieldBefore
-      check field2.move(garbagesCount, false, false) ==
-        MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
-      check field2 ==
-        """
+  block: # drop nuisance (garbage)
+    var field2 = fieldBefore
+    check field2.move(Step.init nuisanceCounts, calcConnection = false) ==
+      MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
+    check field2 ==
+      """
 [通]
 ....g.
 ....go
@@ -2074,12 +2076,12 @@ block: # move
 ..oorb
 .oogbb""".toField
 
-    block: # drop hard
-      var field2 = fieldBefore
-      check field2.move(Step.init(garbagesCount, true), false) ==
-        MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
-      check field2 ==
-        """
+  block: # drop nuisance (hard)
+    var field2 = fieldBefore
+    check field2.move(Step.init(nuisanceCounts, hard = true), calcConnection = false) ==
+      MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
+    check field2 ==
+      """
 [通]
 ....g.
 ....gh
@@ -2095,10 +2097,10 @@ block: # move
 ..horb
 .hhgbb""".toField
 
-    block: # rotate
-      let
-        fieldBefore2 =
-          """
+  block: # rotate
+    let
+      fieldBefore2 =
+        """
 [通]
 ......
 ......
@@ -2113,8 +2115,8 @@ block: # move
 .ro...
 .ro...
 .roo..""".toField
-        fieldAfter2 =
-          """
+      fieldAfter2 =
+        """
 [通]
 ......
 ......
@@ -2129,11 +2131,11 @@ block: # move
 ......
 ......
 ...o..""".toField
-      var field2 = fieldBefore2
-      let popCounts: array[Cell, int] = [0, 0, 3, 4, 0, 0, 0, 0]
-      check field2.move(Step.init(cross = false), false) ==
-        MoveResult.init(1, popCounts, 0, @[popCounts], @[0])
-      check field2 == fieldAfter2
+    var field2 = fieldBefore2
+    let popCounts: array[Cell, int] = [0, 0, 3, 4, 0, 0, 0, 0]
+    check field2.move(Step.init(cross = false), calcConnection = false) ==
+      MoveResult.init(1, popCounts, 0, @[popCounts], @[0])
+    check field2 == fieldAfter2
 
 # ------------------------------------------------
 # Field <-> array
@@ -2246,8 +2248,8 @@ r.....
   check $fieldC == strC
   check $fieldW == strW
 
-  check strC.parseField == StrErrorResult[Field].ok fieldC
-  check strW.parseField == StrErrorResult[Field].ok fieldW
+  check strC.parseField == Pon2Result[Field].ok fieldC
+  check strW.parseField == Pon2Result[Field].ok fieldW
 
 # ------------------------------------------------
 # Field <-> URI
@@ -2295,31 +2297,31 @@ r.....
       queryWResult = fieldW.toUriQuery Pon2
 
     check queryTResult ==
-      StrErrorResult[string].ok "0_r......g......b......y......p......o....h......."
+      Pon2Result[string].ok "0_r......g......b......y......p......o....h......."
     check queryWResult ==
-      StrErrorResult[string].ok "3_r.....~.g......b......y......p......o....h"
+      Pon2Result[string].ok "3_r.....~.g......b......y......p......o....h"
 
     let
       queryT = queryTResult.unsafeValue
       queryW = queryWResult.unsafeValue
 
-    check queryT.parseField(Pon2) == StrErrorResult[Field].ok fieldT
-    check queryW.parseField(Pon2) == StrErrorResult[Field].ok fieldW
+    check queryT.parseField(Pon2) == Pon2Result[Field].ok fieldT
+    check queryW.parseField(Pon2) == Pon2Result[Field].ok fieldW
 
-  block: # Ishikawa, Ips
-    for fqdn in [Ishikawa, Ips]:
+  block: # IshikawaPuyo, Ips
+    for fqdn in [IshikawaPuyo, Ips]:
       let
         queryTResult = fieldT.toUriQuery fqdn
         queryWResult = fieldW.toUriQuery fqdn
 
-      check queryTResult == StrErrorResult[string].ok "~1.02.003.0004.00005.00000600009."
+      check queryTResult == Pon2Result[string].ok "~1.02.003.0004.00005.00000600009."
       check queryWResult.isErr
 
       let queryT = queryTResult.unsafeValue
 
-      check queryT.parseField(fqdn) == StrErrorResult[Field].ok fieldT
+      check queryT.parseField(fqdn) == Pon2Result[Field].ok fieldT
 
-  block: # Ishikawa, Ips (not tilde)
+  block: # IshikawaPuyo, Ips (not tilde)
     let field =
       """
 [通]
@@ -2337,23 +2339,23 @@ r.....
 ......
 .r..g.""".toField
 
-    for fqdn in [Ishikawa, Ips]:
+    for fqdn in [IshikawaPuyo, Ips]:
       let queryResult = field.toUriQuery(fqdn)
-      check queryResult == StrErrorResult[string].ok "10g"
-      check queryResult.unsafeValue.parseField(fqdn) == StrErrorResult[Field].ok field
+      check queryResult == Pon2Result[string].ok "10g"
+      check queryResult.unsafeValue.parseField(fqdn) == Pon2Result[Field].ok field
 
   block: # empty field
-    check Field.init.toUriQuery(Pon2) == StrErrorResult[string].ok "0_"
-    check Field.init.toUriQuery(Ishikawa) == StrErrorResult[string].ok ""
-    check Field.init.toUriQuery(Ips) == StrErrorResult[string].ok ""
+    check Field.init.toUriQuery(Pon2) == Pon2Result[string].ok "0_"
+    check Field.init.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok ""
+    check Field.init.toUriQuery(Ips) == Pon2Result[string].ok ""
 
-    check Field.init(Spinner).toUriQuery(Pon2) == StrErrorResult[string].ok "1_"
-    check Field.init(CrossSpinner).toUriQuery(Pon2) == StrErrorResult[string].ok "2_"
-    check Field.init(Rule.Water).toUriQuery(Pon2) == StrErrorResult[string].ok "3_~"
+    check Field.init(Spinner).toUriQuery(Pon2) == Pon2Result[string].ok "1_"
+    check Field.init(CrossSpinner).toUriQuery(Pon2) == Pon2Result[string].ok "2_"
+    check Field.init(Rule.Water).toUriQuery(Pon2) == Pon2Result[string].ok "3_~"
 
-    check Field.init(Spinner).toUriQuery(Ishikawa).isErr
-    check Field.init(CrossSpinner).toUriQuery(Ishikawa).isErr
-    check Field.init(Rule.Water).toUriQuery(Ishikawa).isErr
+    check Field.init(Spinner).toUriQuery(IshikawaPuyo).isErr
+    check Field.init(CrossSpinner).toUriQuery(IshikawaPuyo).isErr
+    check Field.init(Rule.Water).toUriQuery(IshikawaPuyo).isErr
 
   block: # empty query
-    check "".parseField(Pon2) == StrErrorResult[Field].ok Field.init
+    check "".parseField(Pon2) == Pon2Result[Field].ok Field.init

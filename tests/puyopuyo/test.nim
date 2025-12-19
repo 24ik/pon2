@@ -31,7 +31,7 @@ block: # init
 # Count
 # ------------------------------------------------
 
-block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
+block: # cellCount, puyoCount, colorPuyoCount, nuisancePuyoCount
   let
     fieldT =
       """
@@ -67,10 +67,10 @@ rgo...
 .....p
 .....p""".parseField.unsafeValue
     steps = [
-      Step.init(RedGreen),
+      Step.init RedGreen,
       Step.init(BlueBlue, Down3),
-      Step.init([Col0: 2, 0, 0, 1, 0, 1], true),
-      Step.init([Col0: 0, 0, 0, 0, 1, 0], false),
+      Step.init([Col0: 2, 0, 0, 1, 0, 1], hard = true),
+      Step.init [Col0: 0, 0, 0, 0, 1, 0],
       Step.init(cross = false),
       Step.init(cross = true),
     ].toDeque
@@ -81,14 +81,14 @@ rgo...
   check puyoT.cellCount(Red) == 2
   check puyoT.cellCount(Garbage) == 4
   check puyoT.puyoCount == 15
-  check puyoT.colorPuyoCount == 7
-  check puyoT.garbagesCount == 8
+  check puyoT.coloredPuyoCount == 7
+  check puyoT.nuisancePuyoCount == 8
 
   check puyoW.cellCount(Purple) == 3
   check puyoW.cellCount(Hard) == 6
   check puyoW.puyoCount == 14
-  check puyoW.colorPuyoCount == 7
-  check puyoW.garbagesCount == 7
+  check puyoW.coloredPuyoCount == 7
+  check puyoW.nuisancePuyoCount == 7
 
 # ------------------------------------------------
 # Move
@@ -97,7 +97,7 @@ rgo...
 block: # move
   let
     stepsBefore = [Step.init(BlueGreen, Right1)].toDeque
-    stepsAfter = Deque[Step].init
+    stepsAfter = Steps.init
     fieldBefore =
       """
 [だいかいてん]
@@ -236,13 +236,13 @@ rg|23"""
       queryPon2 = "field=0_op......yg....b.r&steps=byo0_1_0_0_0_1org23"
       queryIshikawa = "6E004g031_E1ahce"
 
-    check puyoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check puyoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check puyoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check puyoPuyo.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
-    check queryPon2.parsePuyoPuyo(Pon2) == StrErrorResult[PuyoPuyo].ok puyoPuyo
-    check queryIshikawa.parsePuyoPuyo(Ishikawa) == StrErrorResult[PuyoPuyo].ok puyoPuyo
-    check queryIshikawa.parsePuyoPuyo(Ips) == StrErrorResult[PuyoPuyo].ok puyoPuyo
+    check queryPon2.parsePuyoPuyo(Pon2) == Pon2Result[PuyoPuyo].ok puyoPuyo
+    check queryIshikawa.parsePuyoPuyo(IshikawaPuyo) == Pon2Result[PuyoPuyo].ok puyoPuyo
+    check queryIshikawa.parsePuyoPuyo(Ips) == Pon2Result[PuyoPuyo].ok puyoPuyo
 
   block: # empty steps
     let
@@ -272,15 +272,15 @@ rg|23"""
       queryIshikawa = "1"
       queryIshikawa2 = "1_"
 
-    check puyoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check puyoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check puyoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check puyoPuyo.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
     for query in [queryPon2, queryPon22, queryPon23]:
-      check query.parsePuyoPuyo(Pon2) == StrErrorResult[PuyoPuyo].ok puyoPuyo
+      check query.parsePuyoPuyo(Pon2) == Pon2Result[PuyoPuyo].ok puyoPuyo
     for query in [queryIshikawa, queryIshikawa2]:
-      check query.parsePuyoPuyo(Ishikawa) == StrErrorResult[PuyoPuyo].ok puyoPuyo
-      check query.parsePuyoPuyo(Ips) == StrErrorResult[PuyoPuyo].ok puyoPuyo
+      check query.parsePuyoPuyo(IshikawaPuyo) == Pon2Result[PuyoPuyo].ok puyoPuyo
+      check query.parsePuyoPuyo(Ips) == Pon2Result[PuyoPuyo].ok puyoPuyo
 
   block: # empty field
     let
@@ -290,14 +290,14 @@ rg|23"""
       queryPon22 = "steps=gb"
       queryIshikawa = "_q1"
 
-    check puyoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check puyoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check puyoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check puyoPuyo.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
     for query in [queryPon2, queryPon22]:
-      check query.parsePuyoPuyo(Pon2) == StrErrorResult[PuyoPuyo].ok puyoPuyo
-    check queryIshikawa.parsePuyoPuyo(Ishikawa) == StrErrorResult[PuyoPuyo].ok puyoPuyo
-    check queryIshikawa.parsePuyoPuyo(Ips) == StrErrorResult[PuyoPuyo].ok puyoPuyo
+      check query.parsePuyoPuyo(Pon2) == Pon2Result[PuyoPuyo].ok puyoPuyo
+    check queryIshikawa.parsePuyoPuyo(IshikawaPuyo) == Pon2Result[PuyoPuyo].ok puyoPuyo
+    check queryIshikawa.parsePuyoPuyo(Ips) == Pon2Result[PuyoPuyo].ok puyoPuyo
 
   block: # empty field and steps
     let
@@ -312,12 +312,12 @@ rg|23"""
       queryIshikawa = ""
       queryIshikawa2 = "_"
 
-    check puyoPuyo.toUriQuery(Pon2) == StrErrorResult[string].ok queryPon2
-    check puyoPuyo.toUriQuery(Ishikawa) == StrErrorResult[string].ok queryIshikawa
-    check puyoPuyo.toUriQuery(Ips) == StrErrorResult[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Pon2) == Pon2Result[string].ok queryPon2
+    check puyoPuyo.toUriQuery(IshikawaPuyo) == Pon2Result[string].ok queryIshikawa
+    check puyoPuyo.toUriQuery(Ips) == Pon2Result[string].ok queryIshikawa
 
     for query in [queryPon2, queryPon22, queryPon23, queryPon24, queryPon25, queryPon26]:
-      check query.parsePuyoPuyo(Pon2) == StrErrorResult[PuyoPuyo].ok puyoPuyo
+      check query.parsePuyoPuyo(Pon2) == Pon2Result[PuyoPuyo].ok puyoPuyo
     for query in [queryIshikawa, queryIshikawa2]:
-      check query.parsePuyoPuyo(Ishikawa) == StrErrorResult[PuyoPuyo].ok puyoPuyo
-      check query.parsePuyoPuyo(Ips) == StrErrorResult[PuyoPuyo].ok puyoPuyo
+      check query.parsePuyoPuyo(IshikawaPuyo) == Pon2Result[PuyoPuyo].ok puyoPuyo
+      check query.parsePuyoPuyo(Ips) == Pon2Result[PuyoPuyo].ok puyoPuyo

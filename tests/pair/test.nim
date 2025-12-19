@@ -57,13 +57,13 @@ block: # swapped, swap
 # Count
 # ------------------------------------------------
 
-block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
+block: # cellCount, puyoCount, coloredPuyoCount, nuisancePuyoCount
   check YellowGreen.cellCount(Yellow) == 1
   check YellowGreen.cellCount(Green) == 1
   check YellowGreen.cellCount(Purple) == 0
   check YellowGreen.puyoCount == 2
-  check YellowGreen.colorPuyoCount == 2
-  check YellowGreen.garbagesCount == 0
+  check YellowGreen.coloredPuyoCount == 2
+  check YellowGreen.nuisancePuyoCount == 0
 
 # ------------------------------------------------
 # Pair <-> string / URI
@@ -71,24 +71,20 @@ block: # cellCount, puyoCount, colorPuyoCount, garbagesCount
 
 block: # Pair <-> string
   check $RedGreen == "rg"
-
-  let pairRes = "rg".parsePair
-  check pairRes == StrErrorResult[Pair].ok RedGreen
+  check "rg".parsePair == Pon2Result[Pair].ok RedGreen
 
   check "RG".parsePair.isErr
+  check "".parsePair.isErr
+  check "oo".parsePair.isErr
 
 block: # Pair <-> URI
   check RedGreen.toUriQuery(Pon2) == "rg"
-  for fqdn in [Ishikawa, Ips]:
+  check "rg".parsePair(Pon2) == Pon2Result[Pair].ok RedGreen
+
+  for fqdn in [IshikawaPuyo, Ips]:
     check RedGreen.toUriQuery(fqdn) == "c"
-
-  let pairRes = "rg".parsePair(Pon2)
-  check pairRes == StrErrorResult[Pair].ok RedGreen
-
-  for fqdn in [Ishikawa, Ips]:
-    let pairRes2 = "c".parsePair(fqdn)
-    check pairRes2 == StrErrorResult[Pair].ok RedGreen
+    check "c".parsePair(fqdn) == Pon2Result[Pair].ok RedGreen
 
   check "c".parsePair(Pon2).isErr
-  check "rg".parsePair(Ishikawa).isErr
+  check "rg".parsePair(IshikawaPuyo).isErr
   check "rg".parsePair(Ips).isErr

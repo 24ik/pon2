@@ -7,4 +7,4 @@ import std/[unittest]
 import ../../src/pon2/private/[setutils]
 
 block: # toSet
-  check ['a', 'b', 'c'].toSet == {'a', 'b', 'c'}
+  check ['a', 'b', 'c', 'a'].toSet == {'a', 'b', 'c'}

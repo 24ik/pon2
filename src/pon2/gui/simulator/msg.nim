@@ -16,9 +16,12 @@ when defined(js) or defined(nimsuggest):
   import ../../[app]
   import ../../private/[arrayutils, assign, gui, math]
 
+  {.push warning[UnusedImport]: off.}
+  import karax/[kbase]
+  {.pop.}
+
   export vdom
 
-when defined(js) or defined(nimsuggest):
   const ShowNoticeCount = 6
 
   proc txtMsg[S: Simulator or Studio or Marathon](
@@ -44,7 +47,10 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper, score: int
   ): array[Notice, int] =
     ## Returns the numbers of notice garbages.
-    let originalNoticeCounts = score.noticeCounts(self.derefSimulator(helper).rule)
+    let
+      rule = self.derefSimulator(helper).rule
+      originalNoticeCounts =
+        score.noticeCounts(Behaviours[rule].garbageRate, useComet = rule != Rule.Tsu)
 
     var
       counts = Notice.initArrayWith 0
@@ -52,7 +58,7 @@ when defined(js) or defined(nimsuggest):
     for notice in countdown(Comet, Small):
       let count = min(originalNoticeCounts[notice], ShowNoticeCount - totalCount)
       counts[notice].assign count
-      totalCount.inc count
+      totalCount += count
 
     counts
 
@@ -82,5 +88,5 @@ when defined(js) or defined(nimsuggest):
                     img(src = Cell.None.cellImgSrc)
               td:
                 tdiv(class = "is-size-7"):
-                  text " " & $score
-      text self.txtMsg(helper).cstring
+                  text (" " & $score).kstring
+      text self.txtMsg(helper).kstring
