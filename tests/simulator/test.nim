@@ -405,7 +405,7 @@ block: # writeCross
 # Write - Count
 # ------------------------------------------------
 
-block: # writeCount
+block: # writeCount, writeCountClamp
   let steps = [Step.init([Col0: 1, 0, 0, 0, 0, 0])].toDeque
   var
     nazoPuyo = NazoPuyo.init(PuyoPuyo.init(Field.init, steps), Goal.init)
@@ -415,8 +415,12 @@ block: # writeCount
   nazoPuyo.puyoPuyo.steps[0].counts[Col1] = 5
   check simulator.nazoPuyo == nazoPuyo
 
-  simulator.writeCount 3
-  nazoPuyo.puyoPuyo.steps[0].counts[Col0] = 3
+  simulator.writeCount 2
+  nazoPuyo.puyoPuyo.steps[0].counts[Col0] = 2
+  check simulator.nazoPuyo == nazoPuyo
+
+  simulator.writeCountClamp 0, Col5, 3
+  nazoPuyo.puyoPuyo.steps[0].counts = [2, 4, 2, 2, 2, 3]
   check simulator.nazoPuyo == nazoPuyo
 
 # ------------------------------------------------
@@ -988,8 +992,12 @@ rg|1N
 by|
 pp|23""".parseNazoPuyo.unsafeValue
   var
-    simulator1 = Simulator.init nazoPuyo
-    simulator2 = Simulator.init nazoPuyo
+    simulator1 = Simulator.init(nazoPuyo, EditEditor)
+    simulator2 = Simulator.init(nazoPuyo, EditEditor)
+  check simulator1 == simulator2
+
+  simulator1.mode = PlayEditor
+  check simulator2.operate KeyEventT
   check simulator1 == simulator2
 
   simulator1.rotatePlacementLeft
@@ -1035,7 +1043,7 @@ pp|23""".parseNazoPuyo.unsafeValue
   check not simulator2.operate KeyEventTab
   check simulator1 == simulator2
 
-  simulator1.mode = EditViewer
+  simulator1.mode = EditEditor
   check simulator2.operate KeyEventT
   check simulator1 == simulator2
 
@@ -1095,8 +1103,20 @@ pp|23""".parseNazoPuyo.unsafeValue
   check simulator2.operate KeyEventSpace
   check simulator1 == simulator2
 
+  simulator1.rule = Spinner
+  check simulator2.operate KeyEventR
+  check simulator1 == simulator2
+
   simulator1.writeCross(cross = false)
   check simulator2.operate KeyEventN
+  check simulator1 == simulator2
+
+  simulator1.writeCell Cell.None
+  check simulator2.operate KeyEventSpace
+  check simulator1 == simulator2
+
+  simulator1.rule = CrossSpinner
+  check simulator2.operate KeyEventR
   check simulator1 == simulator2
 
   simulator1.writeCross(cross = true)
@@ -1146,7 +1166,7 @@ pp|23""".parseNazoPuyo.unsafeValue
   check not simulator2.operate KeyEventV
   check simulator1 == simulator2
 
-  simulator1.mode = PlayViewer
+  simulator1.mode = PlayEditor
   check simulator2.operate KeyEventT
   check simulator1 == simulator2
 
@@ -1203,8 +1223,9 @@ pp|23""".parseNazoPuyo.unsafeValue
   check simulator6.operate KeyEventO
   check simulator5 == simulator6
 
-  for digit in 0 .. 9:
-    simulator5.writeCount digit
+  for digit in 0 .. 5:
+    simulator5.writeCountClamp simulator5.editData.steps.index,
+      simulator5.editData.steps.col, digit
     check simulator6.operate KeyEvent.init "Digit{digit}".fmt
     check simulator5 == simulator6
 

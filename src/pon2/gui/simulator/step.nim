@@ -38,13 +38,18 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper, index: int, pivot: bool
   ): () -> void =
     ## Returns the handler for clicking write buttons.
-    () => self.derefSimulator(helper).writeCell(index, pivot)
+    () => (
+      block:
+        self.derefSimulator(helper).writeCell(index, pivot)
+        self.derefSimulator(helper).writeCross index
+    )
 
   func initCountSelectHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, index: int, col: Col, selectId: kstring
   ): () -> void =
     ## Returns the handler for selecting garbage counts.
-    () => self.derefSimulator(helper).writeCount(index, col, selectId.getSelectedIndex)
+    () =>
+      self.derefSimulator(helper).writeCountClamp(index, col, selectId.getSelectedIndex)
 
   proc pairPlacementCellNode[S: Simulator or Studio or Marathon](
       self: ref S,
@@ -173,7 +178,7 @@ when defined(js) or defined(nimsuggest):
                     onchange =
                       self.initCountSelectHandler(helper, stepIndex, col, selectId),
                   ):
-                    for count in 0 .. 9:
+                    for count in 0 .. 5:
                       option(selected = count == step.counts[col]):
                         text ($count).kstring
               else:

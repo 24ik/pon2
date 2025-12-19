@@ -246,6 +246,27 @@ func `selectingCross=`*(self: var Simulator, cross: bool) =
   self.editData.selecting.cellOpt.err
   self.editData.selecting.crossOpt.ok cross
 
+func safeSetRule(self: var Simulator, rule: Rule) =
+  ## Sets the rule.
+  ## If the new rule is not acceptable, does nothing.
+  let safe: bool
+  case rule
+  of Rule.Tsu, Rule.Water:
+    safe = self.nazoPuyo.puyoPuyo.steps.allIt it.kind != FieldRotate
+    if safe and self.editData.selecting.crossOpt.isOk:
+      self.selectingCell = Cell.None
+  of Spinner:
+    safe = self.nazoPuyo.puyoPuyo.steps.allIt it.kind != FieldRotate or not it.cross
+    if safe and self.editData.selecting.crossOpt == Opt[bool].ok true:
+      self.selectingCross = false
+  of CrossSpinner:
+    safe = self.nazoPuyo.puyoPuyo.steps.allIt it.kind != FieldRotate or it.cross
+    if safe and self.editData.selecting.crossOpt == Opt[bool].ok false:
+      self.selectingCross = true
+
+  if safe:
+    self.`rule=` rule
+
 # ------------------------------------------------
 # Toggle
 # ------------------------------------------------
@@ -512,6 +533,30 @@ func writeCount*(self: var Simulator, index: int, col: Col, count: int) =
 func writeCount*(self: var Simulator, count: int) =
   ## Writes the nuisance count to the selecting position in the steps.
   self.writeCount self.editData.steps.index, self.editData.steps.col, count
+
+func writeCountClamp*(self: var Simulator, index: int, col: Col, count: int) =
+  ## Writes the nuisance clamped count to the specified position in the steps.
+  if index notin 0 ..< self.nazoPuyo.puyoPuyo.steps.len:
+    return
+  if self.nazoPuyo.puyoPuyo.steps[index].kind != NuisanceDrop:
+    return
+
+  self.edit:
+    case self.rule
+    of Rule.Tsu, Spinner, CrossSpinner:
+      self.nazoPuyo.puyoPuyo.steps[index].counts[col].assign count
+
+      staticFor(col2, Col):
+        self.nazoPuyo.puyoPuyo.steps[index].counts[col2].assign self.nazoPuyo.puyoPuyo.steps[
+          index
+        ].counts[col2].clamp(count - 1, count + 1)
+    of Rule.Water:
+      staticFor(col2, Col):
+        self.nazoPuyo.puyoPuyo.steps[index].counts[col2].assign count
+
+func writeCountClamp(self: var Simulator, count: int) =
+  ## Writes the nuisance clamped count to the specified position in the steps.
+  self.writeCountClamp self.editData.steps.index, self.editData.steps.col, count
 
 # ------------------------------------------------
 # Shift
@@ -787,11 +832,6 @@ func reset*(self: var Simulator) =
 # Key
 # ------------------------------------------------
 
-const DigitKeyEvents = [
-  KeyEvent0, KeyEvent1, KeyEvent2, KeyEvent3, KeyEvent4, KeyEvent5, KeyEvent6,
-  KeyEvent7, KeyEvent8, KeyEvent9,
-]
-
 func operate*(self: var Simulator, key: KeyEvent): bool {.discardable.} =
   ## Performs an action specified by the key.
   ## Returns `true` if the key is handled.
@@ -835,15 +875,6 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.discardable.} =
         self.`mode=` PlayViewer
       else: # EditEditor
         self.`mode=` PlayEditor
-    elif key == KeyEventR and self.mode == EditEditor:
-      self.rule = self.rule.rotateSucc
-    elif key == KeyEventE and self.mode == EditEditor:
-      self.rule = self.rule.rotatePred
-    # toggle insert / focus
-    elif key == KeyEventG:
-      self.toggleInsert
-    elif key == KeyEventTab:
-      self.toggleFocus
     # move cursor
     elif key == KeyEventD:
       self.moveCursorRight
@@ -870,26 +901,6 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.discardable.} =
       self.writeCell Hard
     elif key == KeyEventSpace:
       self.writeCell Cell.None
-    # write rotate
-    elif key == KeyEventN:
-      self.writeCross(cross = false)
-    elif key == KeyEventM:
-      self.writeCross(cross = true)
-    # write count
-    elif (let count = DigitKeyEvents.find key; count >= 0):
-      self.writeCount count
-    # shift field
-    elif key == KeyEventShiftD:
-      self.shiftFieldRight
-    elif key == KeyEventShiftA:
-      self.shiftFieldLeft
-    elif key == KeyEventShiftS:
-      self.shiftFieldDown
-    elif key == KeyEventShiftW:
-      self.shiftFieldUp
-    # flip field
-    elif key == KeyEventF:
-      self.flip
     # undo / redo
     elif key == KeyEventShiftZ:
       self.undo
@@ -902,6 +913,51 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.discardable.} =
       self.backward
     elif key == KeyEventZ:
       self.reset
+    elif self.mode == EditEditor:
+      # rule
+      if key == KeyEventR:
+        self.safeSetRule self.rule.rotateSucc
+      elif key == KeyEventE:
+        self.safeSetRule self.rule.rotatePred
+      # toggle insert / focus
+      elif key == KeyEventG:
+        self.toggleInsert
+      elif key == KeyEventTab:
+        self.toggleFocus
+      # write rotate
+      elif key == KeyEventN:
+        if self.rule == Spinner:
+          self.writeCross(cross = false)
+      elif key == KeyEventM:
+        if self.rule == CrossSpinner:
+          self.writeCross(cross = true)
+      # write count
+      elif key == KeyEvent0:
+        self.writeCountClamp 0
+      elif key == KeyEvent1:
+        self.writeCountClamp 1
+      elif key == KeyEvent2:
+        self.writeCountClamp 2
+      elif key == KeyEvent3:
+        self.writeCountClamp 3
+      elif key == KeyEvent4:
+        self.writeCountClamp 4
+      elif key == KeyEvent5:
+        self.writeCountClamp 5
+      # shift field
+      elif key == KeyEventShiftD:
+        self.shiftFieldRight
+      elif key == KeyEventShiftA:
+        self.shiftFieldLeft
+      elif key == KeyEventShiftS:
+        self.shiftFieldDown
+      elif key == KeyEventShiftW:
+        self.shiftFieldUp
+      # flip field
+      elif key == KeyEventF:
+        self.flip
+      else:
+        handled.assign false
     else:
       handled.assign false
   of Replay:
