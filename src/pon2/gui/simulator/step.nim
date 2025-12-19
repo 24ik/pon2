@@ -32,24 +32,21 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper, stepIndex: int
   ): () -> void =
     ## Returns the handler for clicking del buttons.
-    # NOTE: cannot inline due to karax's limitation
     () => self.derefSimulator(helper).delStep stepIndex
 
   func initWriteBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, index: int, pivot: bool
   ): () -> void =
     ## Returns the handler for clicking write buttons.
-    # NOTE: cannot inline due to karax's limitation
     () => self.derefSimulator(helper).writeCell(index, pivot)
 
   func initCountSelectHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, index: int, col: Col, selectId: kstring
   ): () -> void =
     ## Returns the handler for selecting garbage counts.
-    # NOTE: cannot inline due to karax's limitation
     () => self.derefSimulator(helper).writeCount(index, col, selectId.getSelectedIndex)
 
-  proc pairPlcmtCellNode[S: Simulator or Studio or Marathon](
+  proc pairPlacementCellNode[S: Simulator or Studio or Marathon](
       self: ref S,
       helper: VNodeHelper,
       step: Step,
@@ -82,7 +79,7 @@ when defined(js) or defined(nimsuggest):
       buildHtml figure(class = "image is-24x24"):
         img(src = imgSrc)
 
-  proc pairPlcmtNode[S: Simulator or Studio or Marathon](
+  proc pairPlacementNode[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, step: Step, stepIndex: int, editable: bool
   ): VNode =
     ## Returns the pair-placement node.
@@ -93,14 +90,15 @@ when defined(js) or defined(nimsuggest):
         self.derefSimulator(helper).editData.steps.index == stepIndex
       steps = self.derefSimulator(helper).nazoPuyo.puyoPuyo.steps
       isPlaceholder = stepIndex >= steps.len
-      optPlcmtDesc = (if isPlaceholder: "" else: $steps[stepIndex].placement).kstring
+      optPlacementDesc =
+        (if isPlaceholder: "" else: $steps[stepIndex].placement).kstring
 
     buildHtml tdiv(class = "columns is-mobile is-1"):
       # pair
       tdiv(class = "column is-narrow"):
         tdiv(class = "columns is-mobile is-gapless"):
           tdiv(class = "column is-narrow"):
-            self.pairPlcmtCellNode(
+            self.pairPlacementCellNode(
               helper,
               step,
               stepIndex,
@@ -110,7 +108,7 @@ when defined(js) or defined(nimsuggest):
               pivot = true,
             )
           tdiv(class = "column is-narrow"):
-            self.pairPlcmtCellNode(
+            self.pairPlacementCellNode(
               helper,
               step,
               stepIndex,
@@ -123,12 +121,12 @@ when defined(js) or defined(nimsuggest):
       # placement
       if not isPlaceholder:
         tdiv(class = "column is-narrow"):
-          text optPlcmtDesc
+          text optPlacementDesc
 
-  proc garbagesNode[S: Simulator or Studio or Marathon](
+  proc nuisanceNode[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, step: Step, stepIndex: int, editable: bool
   ): VNode =
-    ## Returns the garbages node.
+    ## Returns the nuisance node.
     let imgSrc = if step.hard: Hard.cellImgSrc else: Garbage.cellImgSrc
 
     buildHtml tdiv(class = "columns is-mobile is-1 is-vcentered"):
@@ -138,7 +136,8 @@ when defined(js) or defined(nimsuggest):
           button(
             class = CellClass,
             style = style(StyleAttr.maxHeight, "24px"),
-            onclick = () => (self.derefSimulator(helper).writeCell(stepIndex, true)),
+            onclick =
+              () => (self.derefSimulator(helper).writeCell(stepIndex, pivot = true)),
           ):
             figure(class = "image is-24x24"):
               img(src = imgSrc)
@@ -248,9 +247,9 @@ when defined(js) or defined(nimsuggest):
                 tdiv(class = "column is-narrow"):
                   case step.kind
                   of PairPlace:
-                    self.pairPlcmtNode(helper, step, stepIndex, editable)
+                    self.pairPlacementNode(helper, step, stepIndex, editable)
                   of NuisanceDrop:
-                    self.garbagesNode(helper, step, stepIndex, editable)
+                    self.nuisanceNode(helper, step, stepIndex, editable)
                   of FieldRotate:
                     self.rotateNode(helper, step, stepIndex, editable)
 
@@ -275,6 +274,6 @@ when defined(js) or defined(nimsuggest):
                     text ($placeholderIndex.succ).kstring
 
                 tdiv(class = "column is-narrow"):
-                  self.pairPlcmtNode(
+                  self.pairPlacementNode(
                     helper, PlaceholderStep, placeholderIndex, editable
                   )

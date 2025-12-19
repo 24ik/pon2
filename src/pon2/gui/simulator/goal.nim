@@ -90,7 +90,7 @@ when defined(js) or defined(nimsuggest):
               ):
                 option(selected = main.color == All):
                   text "全"
-                for color in GoalColor.All.succ .. GoalColor.high:
+                for color in All.succ .. GoalColor.high:
                   option(selected = main.color == color):
                     text ($color).kstring
         tdiv(class = "block mb-1"):
@@ -126,7 +126,7 @@ when defined(js) or defined(nimsuggest):
           ):
             option(selected = goal.clearColorOpt == Opt[GoalColor].ok All):
               text "全"
-            for color in GoalColor.All.succ .. GoalColor.high:
+            for color in All.succ .. GoalColor.high:
               option(selected = goal.clearColorOpt == Opt[GoalColor].ok color):
                 text ($color).kstring
         button(

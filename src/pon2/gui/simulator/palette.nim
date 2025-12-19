@@ -32,14 +32,12 @@ when defined(js) or defined(nimsuggest):
       self: ref S, helper: VNodeHelper, cell: Cell
   ): () -> void =
     ## Returns the handler for clicking button.
-    # NOTE: cannot inline due to karax's limitation
     () => (self.derefSimulator(helper).selectingCell = cell)
 
   func initBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, cross: bool
   ): () -> void =
     ## Returns the handler for clicking button.
-    # NOTE: cannot inline due to karax's limitation
     () => (self.derefSimulator(helper).selectingCross = cross)
 
   proc toPaletteVNode*[S: Simulator or Studio or Marathon](
@@ -64,9 +62,7 @@ when defined(js) or defined(nimsuggest):
             ]:
               tr:
                 for cell in cells:
-                  let cellSelected =
-                    editData.selecting.cellOpt.isOk and
-                    editData.selecting.cellOpt.unsafeValue == cell
+                  let cellSelected = editData.selecting.cellOpt == Opt[Cell].ok cell
                   td:
                     button(
                       class = if cellSelected: selectBtnClass else: btnClass,
@@ -84,12 +80,15 @@ when defined(js) or defined(nimsuggest):
                 td:
                   let
                     cross = row.bool
-                    selected =
-                      editData.selecting.crossOpt.isOk and
-                      editData.selecting.crossOpt.unsafeValue == cross
+                    selected = editData.selecting.crossOpt == Opt[bool].ok cross
+                    rule = self.derefSimulator(helper).rule
                   button(
                     class = if selected: selectBtnClass else: btnClass,
-                    disabled = row != self.derefSimulator(helper).rule.ord.pred,
+                    disabled =
+                      not (
+                        (rule == Spinner and row == 0) or
+                        (rule == CrossSpinner and row == 1)
+                      ),
                     onclick = self.initBtnHandler(helper, cross),
                   ):
                     figure(

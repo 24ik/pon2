@@ -35,24 +35,23 @@ when defined(js) or defined(nimsuggest):
       SelectColor
     elif row == Row.low:
       GhostColor
-    elif rule == Rule.Water and row.ord + WaterHeight >= Height:
+    elif rule == Rule.Water and row >= WaterTopRow:
       WaterColor
     else:
       let isDead =
-        case rule
-        of Rule.Tsu:
+        case Behaviours[rule].dead
+        of DeadRule.Tsu:
           row == Row1 and col == Col2
-        of Spinner, CrossSpinner:
+        of Fever:
           row == Row1 and col in {Col2, Col3}
-        of Rule.Water:
-          row.ord == AirHeight.pred
+        of DeadRule.Water:
+          row == AirBottomRow
       if isDead: DeadColor else: DefaultColor
 
   func initBtnHandler[S: Simulator or Studio or Marathon](
       self: ref S, helper: VNodeHelper, row: Row, col: Col
   ): () -> void =
     ## Returns the handler for clicking buttons.
-    # NOTE: cannot inline due to karax's limitation
     () => self.derefSimulator(helper).writeCell(row, col)
 
   proc toFieldVNode*[S: Simulator or Studio or Marathon](
