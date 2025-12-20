@@ -1,12 +1,12 @@
 nimTitle	nazopuyo	pon2/core/nazopuyo.html	module src/pon2/core/nazopuyo		0
-nim	NazoPuyo	pon2/core/nazopuyo.html#NazoPuyo	object NazoPuyo		17
-nim	MarkResult	pon2/core/nazopuyo.html#MarkResult	enum MarkResult		21
-nim	init	pon2/core/nazopuyo.html#init,typeNazoPuyo,PuyoPuyo,Goal	proc init(T: type NazoPuyo; puyoPuyo: PuyoPuyo; goal: Goal): T:type		34
-nim	init	pon2/core/nazopuyo.html#init,typeNazoPuyo	proc init(T: type NazoPuyo; rule = Rule.Tsu): T:type		37
-nim	mark	pon2/core/nazopuyo.html#mark,NazoPuyo,int	proc mark(self: NazoPuyo; endStepIndex = -1): MarkResult		51
-nim	`$`	pon2/core/nazopuyo.html#$,NazoPuyo	proc `$`(self: NazoPuyo): string		171
-nim	parseNazoPuyo	pon2/core/nazopuyo.html#parseNazoPuyo,string	proc parseNazoPuyo(str: string): StrErrorResult[NazoPuyo]		174
-nim	toUriQuery	pon2/core/nazopuyo.html#toUriQuery,NazoPuyo	proc toUriQuery(self: NazoPuyo; fqdn = Pon2): StrErrorResult[string]		216
-nim	parseNazoPuyo	pon2/core/nazopuyo.html#parseNazoPuyo,string,SimulatorFqdn	proc parseNazoPuyo(query: string; fqdn: SimulatorFqdn): StrErrorResult[NazoPuyo]		265
-nimgrp	init	pon2/core/nazopuyo.html#init-procs-all	proc		34
-nimgrp	parsenazopuyo	pon2/core/nazopuyo.html#parseNazoPuyo-procs-all	proc		174
+nim	NazoPuyo	pon2/core/nazopuyo.html#NazoPuyo	object NazoPuyo		18
+nim	MarkResult	pon2/core/nazopuyo.html#MarkResult	enum MarkResult		22
+nim	init	pon2/core/nazopuyo.html#init,typeNazoPuyo,PuyoPuyo,Goal	proc init(T: type NazoPuyo; puyoPuyo: PuyoPuyo; goal: Goal): T:type		35
+nim	init	pon2/core/nazopuyo.html#init,typeNazoPuyo	proc init(T: type NazoPuyo; rule = Rule.Tsu): T:type		38
+nim	mark	pon2/core/nazopuyo.html#mark,NazoPuyo,int	proc mark(self: NazoPuyo; endStepIndex = -1): MarkResult		45
+nim	`$`	pon2/core/nazopuyo.html#$,NazoPuyo	proc `$`(self: NazoPuyo): string		164
+nim	parseNazoPuyo	pon2/core/nazopuyo.html#parseNazoPuyo,string	proc parseNazoPuyo(str: string): Pon2Result[NazoPuyo]		167
+nim	toUriQuery	pon2/core/nazopuyo.html#toUriQuery,NazoPuyo	proc toUriQuery(self: NazoPuyo; fqdn = Pon2): Pon2Result[string]		209
+nim	parseNazoPuyo	pon2/core/nazopuyo.html#parseNazoPuyo,string,SimulatorFqdn	proc parseNazoPuyo(query: string; fqdn: SimulatorFqdn): Pon2Result[NazoPuyo]		253
+nimgrp	init	pon2/core/nazopuyo.html#init-procs-all	proc		35
+nimgrp	parsenazopuyo	pon2/core/nazopuyo.html#parseNazoPuyo-procs-all	proc		167

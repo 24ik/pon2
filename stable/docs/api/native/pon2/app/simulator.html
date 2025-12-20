@@ -60,21 +60,13 @@
     <ul class="simple simple-toc-section">
       <li><a class="reference" href="#Simulator" title="Simulator = object">Simulator</a></li>
 <li><a class="reference" href="#SimulatorEditData" title="SimulatorEditData = object
-  editObj*: SimulatorEditObj
-  focusField*: bool
+  selecting*: tuple[cellOpt: Opt[Cell], crossOpt: Opt[bool]]
   field*: tuple[row: Row, col: Col]
-  step*: tuple[index: int, pivot: bool, col: Col]
+  steps*: tuple[index: int, pivot: bool, col: Col]
+  focusField*: bool
   insert*: bool">SimulatorEditData</a></li>
-<li><a class="reference" href="#SimulatorEditObj" title="SimulatorEditObj = object
-  case kind*: SimulatorEditObjKind
-  of EditCell:
-    cell*: Cell
-  of EditRotate:
-    cross*: bool">SimulatorEditObj</a></li>
-<li><a class="reference" href="#SimulatorEditObjKind" title="SimulatorEditObjKind {.pure.} = enum
-  EditCell, EditRotate">SimulatorEditObjKind</a></li>
 <li><a class="reference" href="#SimulatorMode" title="SimulatorMode {.pure.} = enum
-  ViewerPlay, ViewerEdit, EditorPlay, EditorEdit, Replay">SimulatorMode</a></li>
+  PlayViewer, PlayEditor, EditViewer, EditEditor, Replay">SimulatorMode</a></li>
 <li><a class="reference" href="#SimulatorState" title="SimulatorState {.pure.} = enum
   Stable, WillPop, WillSettle, AfterEdit">SimulatorState</a></li>
 
@@ -85,11 +77,11 @@
   <details open>
     <summary><a class="reference reference-toplevel" href="#10" id="60">Consts</a></summary>
     <ul class="simple simple-toc-section">
-      <li><a class="reference" href="#EditModes" title="EditModes = {SimulatorMode.ViewerEdit, SimulatorMode.EditorEdit}">EditModes</a></li>
-<li><a class="reference" href="#EditorModes" title="EditorModes = {SimulatorMode.EditorPlay, SimulatorMode.EditorEdit}">EditorModes</a></li>
-<li><a class="reference" href="#PlayModes" title="PlayModes = {SimulatorMode.ViewerPlay, SimulatorMode.EditorPlay}">PlayModes</a></li>
+      <li><a class="reference" href="#EditModes" title="EditModes = {SimulatorMode.EditViewer, SimulatorMode.EditEditor}">EditModes</a></li>
+<li><a class="reference" href="#EditorModes" title="EditorModes = {SimulatorMode.PlayEditor, SimulatorMode.EditEditor}">EditorModes</a></li>
+<li><a class="reference" href="#PlayModes" title="PlayModes = {SimulatorMode.PlayViewer, SimulatorMode.PlayEditor}">PlayModes</a></li>
 <li><a class="reference" href="#Pon2Path" title="Pon2Path {.define: &quot;pon2.path&quot;.} = &quot;/pon2/stable/studio/&quot;">Pon2Path</a></li>
-<li><a class="reference" href="#ViewerModes" title="ViewerModes = {SimulatorMode.ViewerPlay, SimulatorMode.ViewerEdit}">ViewerModes</a></li>
+<li><a class="reference" href="#ViewerModes" title="ViewerModes = {SimulatorMode.PlayViewer, SimulatorMode.EditViewer}">ViewerModes</a></li>
 
     </ul>
   </details>
@@ -98,25 +90,12 @@
   <details open>
     <summary><a class="reference reference-toplevel" href="#12" id="62">Procs</a></summary>
     <ul class="simple simple-toc-section">
-      <ul class="simple nested-toc-section">==
-  <li><a class="reference" href="#%3D%3D%2CSimulatorEditObj%2CSimulatorEditObj" title="`==`(obj1, obj2: SimulatorEditObj): bool">`==`(obj1, obj2: SimulatorEditObj): bool</a></li>
-
-</ul>
-<ul class="simple nested-toc-section">backward
+      <ul class="simple nested-toc-section">backward
   <li><a class="reference" href="#backward%2CSimulator" title="backward(self: var Simulator; detail = false)">backward(self: var Simulator; detail = false)</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">delStep
-  <li><a class="reference" href="#delStep%2CSimulator" title="delStep(self: var Simulator)">delStep(self: var Simulator)</a></li>
-<li><a class="reference" href="#delStep%2CSimulator%2Cint" title="delStep(self: var Simulator; index: int)">delStep(self: var Simulator; index: int)</a></li>
-
-</ul>
-<ul class="simple nested-toc-section">editCell=
-  <li><a class="reference" href="#editCell%3D%2CSimulator%2CCell" title="editCell=(self: var Simulator; cell: Cell)">editCell=(self: var Simulator; cell: Cell)</a></li>
-
-</ul>
-<ul class="simple nested-toc-section">editCross=
-  <li><a class="reference" href="#editCross%3D%2CSimulator%2Cbool" title="editCross=(self: var Simulator; cross: bool)">editCross=(self: var Simulator; cross: bool)</a></li>
+  <li><a class="reference" href="#delStep%2CSimulator%2Cint" title="delStep(self: var Simulator; index: int)">delStep(self: var Simulator; index: int)</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">editData
@@ -151,12 +130,12 @@
   <li><a class="reference" href="#goalKindOpt%3D%2CSimulator%2COpt%5BGoalKind%5D" title="goalKindOpt=(self: var Simulator; kindOpt: Opt[GoalKind])">goalKindOpt=(self: var Simulator; kindOpt: Opt[GoalKind])</a></li>
 
 </ul>
-<ul class="simple nested-toc-section">goalVal=
-  <li><a class="reference" href="#goalVal%3D%2CSimulator%2Cint" title="goalVal=(self: var Simulator; val: int)">goalVal=(self: var Simulator; val: int)</a></li>
+<ul class="simple nested-toc-section">goalOperator=
+  <li><a class="reference" href="#goalOperator%3D%2CSimulator%2CGoalOperator" title="goalOperator=(self: var Simulator; operator: GoalOperator)">goalOperator=(self: var Simulator; operator: GoalOperator)</a></li>
 
 </ul>
-<ul class="simple nested-toc-section">goalValOperator=
-  <li><a class="reference" href="#goalValOperator%3D%2CSimulator%2CGoalValOperator" title="goalValOperator=(self: var Simulator; valOperator: GoalValOperator)">goalValOperator=(self: var Simulator; valOperator: GoalValOperator)</a></li>
+<ul class="simple nested-toc-section">goalVal=
+  <li><a class="reference" href="#goalVal%3D%2CSimulator%2Cint" title="goalVal=(self: var Simulator; val: int)">goalVal=(self: var Simulator; val: int)</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">init
@@ -217,16 +196,12 @@
   <li><a class="reference" href="#operate%2CSimulator%2CKeyEvent" title="operate(self: var Simulator; key: KeyEvent): bool">operate(self: var Simulator; key: KeyEvent): bool</a></li>
 
 </ul>
-<ul class="simple nested-toc-section">operatingIndex
-  <li><a class="reference" href="#operatingIndex%2CSimulator" title="operatingIndex(self: Simulator): int">operatingIndex(self: Simulator): int</a></li>
-
-</ul>
-<ul class="simple nested-toc-section">operatingPlacement
-  <li><a class="reference" href="#operatingPlacement%2CSimulator" title="operatingPlacement(self: Simulator): Placement">operatingPlacement(self: Simulator): Placement</a></li>
+<ul class="simple nested-toc-section">operating
+  <li><a class="reference" href="#operating%2CSimulator" title="operating(self: Simulator): tuple[index: int, placement: Placement]">operating(self: Simulator): tuple[index: int, placement: Placement]</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">parseSimulator
-  <li><a class="reference" href="#parseSimulator%2CUri" title="parseSimulator(uri: Uri): StrErrorResult[Simulator]">parseSimulator(uri: Uri): StrErrorResult[Simulator]</a></li>
+  <li><a class="reference" href="#parseSimulator%2CUri" title="parseSimulator(uri: Uri): Pon2Result[Simulator]">parseSimulator(uri: Uri): Pon2Result[Simulator]</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">redo
@@ -253,6 +228,18 @@
   <li><a class="reference" href="#rule%3D%2CSimulator%2CRule" title="rule=(self: var Simulator; rule: Rule)">rule=(self: var Simulator; rule: Rule)</a></li>
 
 </ul>
+<ul class="simple nested-toc-section">selectingCell=
+  <li><a class="reference" href="#selectingCell%3D%2CSimulator%2CCell" title="selectingCell=(self: var Simulator; cell: Cell)">selectingCell=(self: var Simulator; cell: Cell)</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">selectingCross=
+  <li><a class="reference" href="#selectingCross%3D%2CSimulator%2Cbool" title="selectingCross=(self: var Simulator; cross: bool)">selectingCross=(self: var Simulator; cross: bool)</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">setRule
+  <li><a class="reference" href="#setRule%2CSimulator%2CRule" title="setRule(self: var Simulator; rule: Rule)">setRule(self: var Simulator; rule: Rule)</a></li>
+
+</ul>
 <ul class="simple nested-toc-section">shiftFieldDown
   <li><a class="reference" href="#shiftFieldDown%2CSimulator" title="shiftFieldDown(self: var Simulator)">shiftFieldDown(self: var Simulator)</a></li>
 
@@ -274,8 +261,8 @@
 
 </ul>
 <ul class="simple nested-toc-section">toExportUri
-  <li><a class="reference" href="#toExportUri%2CSimulator" title="toExportUri(self: Simulator; viewer = true; clearPlacements = true; fqdn = Pon2): StrErrorResult[
-    Uri]">toExportUri(self: Simulator; viewer = true; clearPlacements = true; fqdn = Pon2): StrErrorResult[
+  <li><a class="reference" href="#toExportUri%2CSimulator" title="toExportUri(self: Simulator; viewer = true; clearPlacements = true; fqdn = Pon2): Pon2Result[
+    Uri]">toExportUri(self: Simulator; viewer = true; clearPlacements = true; fqdn = Pon2): Pon2Result[
     Uri]</a></li>
 
 </ul>
@@ -288,7 +275,7 @@
 
 </ul>
 <ul class="simple nested-toc-section">toUri
-  <li><a class="reference" href="#toUri%2CSimulator" title="toUri(self: Simulator; clearPlacements = false; fqdn = Pon2): StrErrorResult[Uri]">toUri(self: Simulator; clearPlacements = false; fqdn = Pon2): StrErrorResult[Uri]</a></li>
+  <li><a class="reference" href="#toUri%2CSimulator" title="toUri(self: Simulator; clearPlacements = false; fqdn = Pon2): Pon2Result[Uri]">toUri(self: Simulator; clearPlacements = false; fqdn = Pon2): Pon2Result[Uri]</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">undo
@@ -306,8 +293,13 @@
 <li><a class="reference" href="#writeCount%2CSimulator%2Cint%2CCol%2Cint" title="writeCount(self: var Simulator; index: int; col: Col; count: int)">writeCount(self: var Simulator; index: int; col: Col; count: int)</a></li>
 
 </ul>
-<ul class="simple nested-toc-section">writeRotate
-  <li><a class="reference" href="#writeRotate%2CSimulator%2Cbool" title="writeRotate(self: var Simulator; cross: bool)">writeRotate(self: var Simulator; cross: bool)</a></li>
+<ul class="simple nested-toc-section">writeCountClamp
+  <li><a class="reference" href="#writeCountClamp%2CSimulator%2Cint%2CCol%2Cint" title="writeCountClamp(self: var Simulator; index: int; col: Col; count: int)">writeCountClamp(self: var Simulator; index: int; col: Col; count: int)</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">writeCross
+  <li><a class="reference" href="#writeCross%2CSimulator%2Cbool" title="writeCross(self: var Simulator; cross: bool)">writeCross(self: var Simulator; cross: bool)</a></li>
+<li><a class="reference" href="#writeCross%2CSimulator%2Cint" title="writeCross(self: var Simulator; index: int)">writeCross(self: var Simulator; index: int)</a></li>
 
 </ul>
 
@@ -333,7 +325,7 @@
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
-    <a class="reference external" href="key.html">key</a>, <a class="reference external" href="../core.html">../core</a>, <a class="reference external" href="../private/algorithm.html">../private/algorithm</a>, <a class="reference external" href="../private/arrayutils.html">../private/arrayutils</a>, <a class="reference external" href="../private/assign.html">../private/assign</a>, <a class="reference external" href="../private/deques.html">../private/deques</a>, <a class="reference external" href="../private/results2.html">../private/results2</a>, <a class="reference external" href="../private/staticfor.html">../private/staticfor</a>, <a class="reference external" href="../private/strutils.html">../private/strutils</a>, <a class="reference external" href="../private/tables.html">../private/tables</a>, <a class="reference external" href="../private/utils.html">../private/utils</a>
+    <a class="reference external" href="key.html">key</a>, <a class="reference external" href="../core.html">../core</a>, <a class="reference external" href="../private/algorithm.html">../private/algorithm</a>, <a class="reference external" href="../private/arrayutils.html">../private/arrayutils</a>, <a class="reference external" href="../private/assign.html">../private/assign</a>, <a class="reference external" href="../private/deques.html">../private/deques</a>, <a class="reference external" href="../private/staticfor.html">../private/staticfor</a>, <a class="reference external" href="../private/strutils.html">../private/strutils</a>, <a class="reference external" href="../private/tables.html">../private/tables</a>, <a class="reference external" href="../private/utils.html">../private/utils</a>
   </dl>
 </div>
 <div class="section" id="7">
@@ -349,10 +341,10 @@
 </div>
 <div id="SimulatorEditData">
   <dt><pre><a href="simulator.html#SimulatorEditData"><span class="Identifier">SimulatorEditData</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">editObj</span><span class="Operator">*</span><span class="Other">:</span> <a href="simulator.html#SimulatorEditObj"><span class="Identifier">SimulatorEditObj</span></a>
-  <span class="Identifier">focusField</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
+  <span class="Identifier">selecting</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">cellOpt</span><span class="Other">:</span> <span class="Identifier">Opt</span><span class="Other">[</span><a href="../core/cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">crossOpt</span><span class="Other">:</span> <span class="Identifier">Opt</span><span class="Other">[</span><span class="Identifier">bool</span><span class="Other">]</span><span class="Other">]</span>
   <span class="Identifier">field</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">row</span><span class="Other">:</span> <a href="../core/common.html#Row"><span class="Identifier">Row</span></a><span class="Other">,</span> <span class="Identifier">col</span><span class="Other">:</span> <a href="../core/common.html#Col"><span class="Identifier">Col</span></a><span class="Other">]</span>
-  <span class="Identifier">step</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">index</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">,</span> <span class="Identifier">pivot</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">,</span> <span class="Identifier">col</span><span class="Other">:</span> <a href="../core/common.html#Col"><span class="Identifier">Col</span></a><span class="Other">]</span>
+  <span class="Identifier">steps</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">index</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">,</span> <span class="Identifier">pivot</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">,</span> <span class="Identifier">col</span><span class="Other">:</span> <a href="../core/common.html#Col"><span class="Identifier">Col</span></a><span class="Other">]</span>
+  <span class="Identifier">focusField</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
   <span class="Identifier">insert</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span></pre></dt>
   <dd>
     
@@ -360,31 +352,9 @@
     
   </dd>
 </div>
-<div id="SimulatorEditObj">
-  <dt><pre><a href="simulator.html#SimulatorEditObj"><span class="Identifier">SimulatorEditObj</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Keyword">case</span> <span class="Identifier">kind</span><span class="Operator">*</span><span class="Other">:</span> <a href="simulator.html#SimulatorEditObjKind"><span class="Identifier">SimulatorEditObjKind</span></a>
-  <span class="Keyword">of</span> <span class="Identifier">EditCell</span><span class="Other">:</span>
-    <span class="Identifier">cell</span><span class="Operator">*</span><span class="Other">:</span> <a href="../core/cell.html#Cell"><span class="Identifier">Cell</span></a>
-  <span class="Keyword">of</span> <span class="Identifier">EditRotate</span><span class="Other">:</span>
-    <span class="Identifier">cross</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span></pre></dt>
-  <dd>
-    
-    Edit object.
-    
-  </dd>
-</div>
-<div id="SimulatorEditObjKind">
-  <dt><pre><a href="simulator.html#SimulatorEditObjKind"><span class="Identifier">SimulatorEditObjKind</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">EditCell</span><span class="Other">,</span> <span class="Identifier">EditRotate</span></pre></dt>
-  <dd>
-    
-    Kind of edit objects.
-    
-  </dd>
-</div>
 <div id="SimulatorMode">
   <dt><pre><a href="simulator.html#SimulatorMode"><span class="Identifier">SimulatorMode</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">ViewerPlay</span><span class="Other">,</span> <span class="Identifier">ViewerEdit</span><span class="Other">,</span> <span class="Identifier">EditorPlay</span><span class="Other">,</span> <span class="Identifier">EditorEdit</span><span class="Other">,</span> <span class="Identifier">Replay</span></pre></dt>
+  <span class="Identifier">PlayViewer</span><span class="Other">,</span> <span class="Identifier">PlayEditor</span><span class="Other">,</span> <span class="Identifier">EditViewer</span><span class="Other">,</span> <span class="Identifier">EditEditor</span><span class="Other">,</span> <span class="Identifier">Replay</span></pre></dt>
   <dd>
     
     Simulator's mode.
@@ -407,7 +377,7 @@
   <h1><a class="toc-backref" href="#10">Consts</a></h1>
   <dl class="item">
     <div id="EditModes">
-  <dt><pre><a href="simulator.html#EditModes"><span class="Identifier">EditModes</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">SimulatorMode.ViewerEdit</span><span class="Other">,</span> <span class="DecNumber">SimulatorMode.EditorEdit</span><span class="Other">}</span></pre></dt>
+  <dt><pre><a href="simulator.html#EditModes"><span class="Identifier">EditModes</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">SimulatorMode.EditViewer</span><span class="Other">,</span> <span class="DecNumber">SimulatorMode.EditEditor</span><span class="Other">}</span></pre></dt>
   <dd>
     
     
@@ -415,7 +385,7 @@
   </dd>
 </div>
 <div id="EditorModes">
-  <dt><pre><a href="simulator.html#EditorModes"><span class="Identifier">EditorModes</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">SimulatorMode.EditorPlay</span><span class="Other">,</span> <span class="DecNumber">SimulatorMode.EditorEdit</span><span class="Other">}</span></pre></dt>
+  <dt><pre><a href="simulator.html#EditorModes"><span class="Identifier">EditorModes</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">SimulatorMode.PlayEditor</span><span class="Other">,</span> <span class="DecNumber">SimulatorMode.EditEditor</span><span class="Other">}</span></pre></dt>
   <dd>
     
     
@@ -423,7 +393,7 @@
   </dd>
 </div>
 <div id="PlayModes">
-  <dt><pre><a href="simulator.html#PlayModes"><span class="Identifier">PlayModes</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">SimulatorMode.ViewerPlay</span><span class="Other">,</span> <span class="DecNumber">SimulatorMode.EditorPlay</span><span class="Other">}</span></pre></dt>
+  <dt><pre><a href="simulator.html#PlayModes"><span class="Identifier">PlayModes</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">SimulatorMode.PlayViewer</span><span class="Other">,</span> <span class="DecNumber">SimulatorMode.PlayEditor</span><span class="Other">}</span></pre></dt>
   <dd>
     
     
@@ -439,7 +409,7 @@
   </dd>
 </div>
 <div id="ViewerModes">
-  <dt><pre><a href="simulator.html#ViewerModes"><span class="Identifier">ViewerModes</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">SimulatorMode.ViewerPlay</span><span class="Other">,</span> <span class="DecNumber">SimulatorMode.ViewerEdit</span><span class="Other">}</span></pre></dt>
+  <dt><pre><a href="simulator.html#ViewerModes"><span class="Identifier">ViewerModes</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">SimulatorMode.PlayViewer</span><span class="Other">,</span> <span class="DecNumber">SimulatorMode.EditViewer</span><span class="Other">}</span></pre></dt>
   <dd>
     
     
@@ -452,19 +422,7 @@
 <div class="section" id="12">
   <h1><a class="toc-backref" href="#12">Procs</a></h1>
   <dl class="item">
-    <div id="==-procs-all">
-  <div id="==,SimulatorEditObj,SimulatorEditObj">
-  <dt><pre><span class="Keyword">func</span> <a href="#%3D%3D%2CSimulatorEditObj%2CSimulatorEditObj"><span class="Identifier">`==`</span></a><span class="Other">(</span><span class="Identifier">obj1</span><span class="Other">,</span> <span class="Identifier">obj2</span><span class="Other">:</span> <a href="simulator.html#SimulatorEditObj"><span class="Identifier">SimulatorEditObj</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-  <dd>
-    
-    
-    
-  </dd>
-</div>
-
-</div>
-<div id="backward-procs-all">
+    <div id="backward-procs-all">
   <div id="backward,Simulator">
   <dt><pre><span class="Keyword">func</span> <a href="#backward%2CSimulator"><span class="Identifier">backward</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">detail</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
@@ -477,44 +435,12 @@
 
 </div>
 <div id="delStep-procs-all">
-  <div id="delStep,Simulator">
-  <dt><pre><span class="Keyword">func</span> <a href="#delStep%2CSimulator"><span class="Identifier">delStep</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-  <dd>
-    
-    Deletes the step at selecting index.
-    
-  </dd>
-</div>
-<div id="delStep,Simulator,int">
+  <div id="delStep,Simulator,int">
   <dt><pre><span class="Keyword">func</span> <a href="#delStep%2CSimulator%2Cint"><span class="Identifier">delStep</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">index</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Deletes the step.
-    
-  </dd>
-</div>
-
-</div>
-<div id="editCell=-procs-all">
-  <div id="editCell=,Simulator,Cell">
-  <dt><pre><span class="Keyword">func</span> <a href="#editCell%3D%2CSimulator%2CCell"><span class="Identifier">editCell=</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">cell</span><span class="Other">:</span> <a href="../core/cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-  <dd>
-    
-    Writes the cell to <tt class="docutils literal"><span class="pre"><span class="Identifier">editData</span><span class="Operator">.</span><span class="Identifier">editObj</span></span></tt>.
-    
-  </dd>
-</div>
-
-</div>
-<div id="editCross=-procs-all">
-  <div id="editCross=,Simulator,bool">
-  <dt><pre><span class="Keyword">func</span> <a href="#editCross%3D%2CSimulator%2Cbool"><span class="Identifier">editCross=</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">cross</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-  <dd>
-    
-    Writes the cell to <tt class="docutils literal"><span class="pre"><span class="Identifier">editData</span><span class="Operator">.</span><span class="Identifier">editObj</span></span></tt>.
+    Deletes the step at the specified index.
     
   </dd>
 </div>
@@ -526,7 +452,7 @@
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Returns the edit information.
+    Returns the edit information of the simulator.
     
   </dd>
 </div>
@@ -614,24 +540,24 @@
 </div>
 
 </div>
+<div id="goalOperator=-procs-all">
+  <div id="goalOperator=,Simulator,GoalOperator">
+  <dt><pre><span class="Keyword">func</span> <a href="#goalOperator%3D%2CSimulator%2CGoalOperator"><span class="Identifier">goalOperator=</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">operator</span><span class="Other">:</span> <a href="../core/goal.html#GoalOperator"><span class="Identifier">GoalOperator</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Sets the goal operator.
+    
+  </dd>
+</div>
+
+</div>
 <div id="goalVal=-procs-all">
   <div id="goalVal=,Simulator,int">
   <dt><pre><span class="Keyword">func</span> <a href="#goalVal%3D%2CSimulator%2Cint"><span class="Identifier">goalVal=</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Sets the goal value.
-    
-  </dd>
-</div>
-
-</div>
-<div id="goalValOperator=-procs-all">
-  <div id="goalValOperator=,Simulator,GoalValOperator">
-  <dt><pre><span class="Keyword">func</span> <a href="#goalValOperator%3D%2CSimulator%2CGoalValOperator"><span class="Identifier">goalValOperator=</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">valOperator</span><span class="Other">:</span> <a href="../core/goal.html#GoalValOperator"><span class="Identifier">GoalValOperator</span></a><span class="Other">)</span> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-  <dd>
-    
-    Sets the goal exact.
     
   </dd>
 </div>
@@ -782,7 +708,7 @@
   <dt><pre><span class="Keyword">func</span> <a href="#nazoPuyo%2CSimulator"><span class="Identifier">nazoPuyo</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../core/nazopuyo.html#NazoPuyo"><span class="Identifier">NazoPuyo</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Returns the Nazo Puyo of the simulator.
+    Returns the Nazo Puyo in the simulator.
     
   </dd>
 </div>
@@ -793,7 +719,7 @@
   <dt><pre><span class="Keyword">func</span> <a href="#normalizeGoal%2CSimulator"><span class="Identifier">normalizeGoal</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Normalizes the goal. This function only affects to the goal.
+    Normalizes the goal. This function does not affects undo/redo.
     
   </dd>
 </div>
@@ -811,24 +737,13 @@
 </div>
 
 </div>
-<div id="operatingIndex-procs-all">
-  <div id="operatingIndex,Simulator">
-  <dt><pre><span class="Keyword">func</span> <a href="#operatingIndex%2CSimulator"><span class="Identifier">operatingIndex</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<div id="operating-procs-all">
+  <div id="operating,Simulator">
+  <dt><pre><span class="Keyword">func</span> <a href="#operating%2CSimulator"><span class="Identifier">operating</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">index</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">,</span> <span class="Identifier">placement</span><span class="Other">:</span> <a href="../core/placement.html#Placement"><span class="Identifier">Placement</span></a><span class="Other">]</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Returns the index of the step operated.
-    
-  </dd>
-</div>
-
-</div>
-<div id="operatingPlacement-procs-all">
-  <div id="operatingPlacement,Simulator">
-  <dt><pre><span class="Keyword">func</span> <a href="#operatingPlacement%2CSimulator"><span class="Identifier">operatingPlacement</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../core/placement.html#Placement"><span class="Identifier">Placement</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-  <dd>
-    
-    Returns the operating placement of the simulator.
+    Returns the operating data of the simulator.
     
   </dd>
 </div>
@@ -836,11 +751,11 @@
 </div>
 <div id="parseSimulator-procs-all">
   <div id="parseSimulator,Uri">
-  <dt><pre><span class="Keyword">func</span> <a href="#parseSimulator%2CUri"><span class="Identifier">parseSimulator</span></a><span class="Other">(</span><span class="Identifier">uri</span><span class="Other">:</span> <span class="Identifier">Uri</span><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a><span class="Other">[</span><a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#parseSimulator%2CUri"><span class="Identifier">parseSimulator</span></a><span class="Other">(</span><span class="Identifier">uri</span><span class="Other">:</span> <span class="Identifier">Uri</span><span class="Other">)</span><span class="Other">:</span> <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a><span class="Other">[</span><a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Returns the simulator converted from the URI. Viewer modes and play modes are set to the result simulator preferentially if the FQDN is <tt class="docutils literal"><span class="pre"><span class="Identifier">Ishikawa</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Identifier">Ips</span></span></tt>.
+    Returns the simulator converted from the URI. Viewer modes are set to the result simulator preferentially if the FQDN is <tt class="docutils literal"><span class="pre"><span class="Identifier">IshikawaPuyo</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Identifier">Ips</span></span></tt>.
     
   </dd>
 </div>
@@ -897,7 +812,7 @@
   <dt><pre><span class="Keyword">func</span> <a href="#rule%2CSimulator"><span class="Identifier">rule</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../core/rule.html#Rule"><span class="Identifier">Rule</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Returns the rule of the Puyo Puyo or Nazo Puyo.
+    Returns the rule of the Nazo Puyo in the simulator.
     
   </dd>
 </div>
@@ -909,6 +824,42 @@
   <dd>
     
     Sets the rule of the simulator.
+    
+  </dd>
+</div>
+
+</div>
+<div id="selectingCell=-procs-all">
+  <div id="selectingCell=,Simulator,Cell">
+  <dt><pre><span class="Keyword">func</span> <a href="#selectingCell%3D%2CSimulator%2CCell"><span class="Identifier">selectingCell=</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">cell</span><span class="Other">:</span> <a href="../core/cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Sets the selecting cell.
+    
+  </dd>
+</div>
+
+</div>
+<div id="selectingCross=-procs-all">
+  <div id="selectingCross=,Simulator,bool">
+  <dt><pre><span class="Keyword">func</span> <a href="#selectingCross%3D%2CSimulator%2Cbool"><span class="Identifier">selectingCross=</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">cross</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Sets the selecting cross.
+    
+  </dd>
+</div>
+
+</div>
+<div id="setRule-procs-all">
+  <div id="setRule,Simulator,Rule">
+  <dt><pre><span class="Keyword">func</span> <a href="#setRule%2CSimulator%2CRule"><span class="Identifier">setRule</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">rule</span><span class="Other">:</span> <a href="../core/rule.html#Rule"><span class="Identifier">Rule</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Sets the rule of the simulator. This function is a &quot;safe&quot; version.
     
   </dd>
 </div>
@@ -972,7 +923,7 @@
 <div id="toExportUri-procs-all">
   <div id="toExportUri,Simulator">
   <dt><pre><span class="Keyword">func</span> <a href="#toExportUri%2CSimulator"><span class="Identifier">toExportUri</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">viewer</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">;</span> <span class="Identifier">clearPlacements</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">;</span>
-                 <span class="Identifier">fqdn</span> <span class="Other">=</span> <span class="Identifier">Pon2</span><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a><span class="Other">[</span><span class="Identifier">Uri</span><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+                 <span class="Identifier">fqdn</span> <span class="Other">=</span> <span class="Identifier">Pon2</span><span class="Other">)</span><span class="Other">:</span> <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a><span class="Other">[</span><span class="Identifier">Uri</span><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -1006,7 +957,7 @@
 </div>
 <div id="toUri-procs-all">
   <div id="toUri,Simulator">
-  <dt><pre><span class="Keyword">func</span> <a href="#toUri%2CSimulator"><span class="Identifier">toUri</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">clearPlacements</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span> <span class="Identifier">fqdn</span> <span class="Other">=</span> <span class="Identifier">Pon2</span><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a><span class="Other">[</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#toUri%2CSimulator"><span class="Identifier">toUri</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">clearPlacements</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span> <span class="Identifier">fqdn</span> <span class="Other">=</span> <span class="Identifier">Pon2</span><span class="Other">)</span><span class="Other">:</span> <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a><span class="Other">[</span>
     <span class="Identifier">Uri</span><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -1033,7 +984,7 @@
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Writes the cell to the field or the step.
+    Writes the cell to the selecting position in the field or steps.
     
   </dd>
 </div>
@@ -1042,7 +993,7 @@
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Writes the selecting cell to the step.
+    Writes the selecting cell to the specified position in the steps.
     
   </dd>
 </div>
@@ -1051,7 +1002,7 @@
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Writes the selecting cell to the field.
+    Writes the selecting cell to the specified position in the field.
     
   </dd>
 </div>
@@ -1063,7 +1014,7 @@
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Writes the count to the step.
+    Writes the nuisance count to the selecting position in the steps.
     
   </dd>
 </div>
@@ -1072,19 +1023,40 @@
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Writes the count to the step.
+    Writes the nuisance count to the specified position in the steps.
     
   </dd>
 </div>
 
 </div>
-<div id="writeRotate-procs-all">
-  <div id="writeRotate,Simulator,bool">
-  <dt><pre><span class="Keyword">func</span> <a href="#writeRotate%2CSimulator%2Cbool"><span class="Identifier">writeRotate</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">cross</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+<div id="writeCountClamp-procs-all">
+  <div id="writeCountClamp,Simulator,int,Col,int">
+  <dt><pre><span class="Keyword">func</span> <a href="#writeCountClamp%2CSimulator%2Cint%2CCol%2Cint"><span class="Identifier">writeCountClamp</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">index</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">col</span><span class="Other">:</span> <a href="../core/common.html#Col"><span class="Identifier">Col</span></a><span class="Other">;</span> <span class="Identifier">count</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Writes the nuisance clamped count to the specified position in the steps.
+    
+  </dd>
+</div>
+
+</div>
+<div id="writeCross-procs-all">
+  <div id="writeCross,Simulator,bool">
+  <dt><pre><span class="Keyword">func</span> <a href="#writeCross%2CSimulator%2Cbool"><span class="Identifier">writeCross</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">cross</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Writes the rotate to the field or the step.
+    Writes the rotation to the selecting position in the steps.
+    
+  </dd>
+</div>
+<div id="writeCross,Simulator,int">
+  <dt><pre><span class="Keyword">func</span> <a href="#writeCross%2CSimulator%2Cint"><span class="Identifier">writeCross</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">index</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Writes the selecting rotation to the specified position in the steps.
     
   </dd>
 </div>
@@ -1096,7 +1068,7 @@
 <div class="section" id="19">
   <h1><a class="toc-backref" href="#19">Exports</a></h1>
   <dl class="item">
-    <a href="../core/step.html#puyoCount,Steps"><span class="Identifier">puyoCount</span></a>, <a href="../core/puyopuyo.html#$,PuyoPuyo"><span class="Identifier">$</span></a>, <a href="../core/step.html#cellCount,Step,Cell"><span class="Identifier">cellCount</span></a>, <a href="../core/pair.html#puyoCount,Pair"><span class="Identifier">puyoCount</span></a>, <a href="../core/placement.html#moveLeft,Placement"><span class="Identifier">moveLeft</span></a>, <a href="../core/rule.html#DeadRule"><span class="Identifier">DeadRule</span></a>, <a href="../core/moveresult.html#score,MoveResult"><span class="Identifier">score</span></a>, <a href="../core/step.html#colorPuyoCount,Step"><span class="Identifier">colorPuyoCount</span></a>, <a href="../core/field.html#puyoCount,Field"><span class="Identifier">puyoCount</span></a>, <a href="../core/field.html#del,Field,Row,Col"><span class="Identifier">del</span></a>, <a href="../core/placement.html#rotatedLeft,Placement"><span class="Identifier">rotatedLeft</span></a>, <a href="../core/field.html#$,Field"><span class="Identifier">$</span></a>, <a href="../core/popresult.html#garbagesCount,PopResult"><span class="Identifier">garbagesCount</span></a>, <a href="../core/step.html#init,typeStep,Pair,OptPlacement"><span class="Identifier">init</span></a>, <a href="../core/pair.html#cellCount,Pair,Cell"><span class="Identifier">cellCount</span></a>, <a href="../core/field.html#Field"><span class="Identifier">Field</span></a>, <a href="../core/moveresult.html#puyoCount,MoveResult"><span class="Identifier">puyoCount</span></a>, <a href="../core/pair.html#swapped,Pair"><span class="Identifier">swapped</span></a>, <a href="../private/deques.html#init,typeDeque[E]"><span class="Identifier">init</span></a>, <a href="../core/moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a>, <a href="../core/rule.html#parseRule,string"><span class="Identifier">parseRule</span></a>, <a href="../core/nazopuyo.html#mark,NazoPuyo,int"><span class="Identifier">mark</span></a>, <a href="../core/field.html#validDoublePlacements,Field"><span class="Identifier">validDoublePlacements</span></a>, <a href="../core/placement.html#pivotCol,Placement"><span class="Identifier">pivotCol</span></a>, <a href="../core/popresult.html#init,typePopResult,M128i,M128i,M128i,M128i,M128i,M128i,M128i,M128i,M128i"><span class="Identifier">init</span></a>, <a href="../core/nazopuyo.html#parseNazoPuyo,string"><span class="Identifier">parseNazoPuyo</span></a>, <a href="../core/rule.html#Phys"><span class="Identifier">Phys</span></a>, <a href="../core/popresult.html#isPopped,PopResult"><span class="Identifier">isPopped</span></a>, <a href="../core/step.html#init,typeStep,bool"><span class="Identifier">init</span></a>, <a href="../core/step.html#parseStep,string"><span class="Identifier">parseStep</span></a>, <a href="../core/step.html#garbagesCount,Steps"><span class="Identifier">garbagesCount</span></a>, <a href="../core/common.html#Width"><span class="Identifier">Width</span></a>, <a href="../core/moveresult.html#init,typeMoveResult,int,array[Cell,int],int,seq[array[Cell,int]],seq[int],seq[array[Cell,seq[int]]]"><span class="Identifier">init</span></a>, <a href="../core/field.html#move,Field,Step"><span class="Identifier">move</span></a>, <a href="../core/rule.html#Rule"><span class="Identifier">Rule</span></a>, <a href="../core/pair.html#Pair"><span class="Identifier">Pair</span></a>, <a href="../core/step.html#toUriQuery,Steps"><span class="Identifier">toUriQuery</span></a>, <a href="../core/step.html#cellCount,Steps,Cell"><span class="Identifier">cellCount</span></a>, <a href="../core/goal.html#isNormalized,Goal"><span class="Identifier">isNormalized</span></a>, <a href="../core/placement.html#movedLeft,Placement"><span class="Identifier">movedLeft</span></a>, <a href="../core/goal.html#GoalMain"><span class="Identifier">GoalMain</span></a>, <a href="../core/placement.html#rotateRight,Placement"><span class="Identifier">rotateRight</span></a>, <a href="../core/pair.html#colorPuyoCount,Pair"><span class="Identifier">colorPuyoCount</span></a>, <a href="../core/common.html#AirHeight"><span class="Identifier">AirHeight</span></a>, <a href="../core/popresult.html#puyoCount,PopResult"><span class="Identifier">puyoCount</span></a>, <a href="../core/nazopuyo.html#MarkResult"><span class="Identifier">MarkResult</span></a>, <a href="../core/field.html#connection2Vertical,Field"><span class="Identifier">connection2Vertical</span></a>, <a href="../core/moveresult.html#colorsSeq,MoveResult"><span class="Identifier">colorsSeq</span></a>, <a href="../private/deques.html#del,Deque[T],int"><span class="Identifier">del</span></a>, <a href="../core/goal.html#init,typeGoalMain,GoalKind,int,GoalValOperator"><span class="Identifier">init</span></a>, <a href="../core/field.html#shiftRight,Field"><span class="Identifier">shiftRight</span></a>, <a href="../core/pair.html#rotor,Pair"><span class="Identifier">rotor</span></a>, <a href="../core/step.html#isValid,Step"><span class="Identifier">isValid</span></a>, <a href="../core/placement.html#Placement"><span class="Identifier">Placement</span></a>, <a href="../core/field.html#colorPuyoCount,Field"><span class="Identifier">colorPuyoCount</span></a>, <a href="../core/puyopuyo.html#init,typePuyoPuyo"><span class="Identifier">init</span></a>, <a href="../core/puyopuyo.html#move,PuyoPuyo"><span class="Identifier">move</span></a>, <a href="../core/field.html#canPop,Field"><span class="Identifier">canPop</span></a>, <a href="../core/step.html#$,Steps"><span class="Identifier">$</span></a>, <a href="../core/step.html#Steps"><span class="Identifier">Steps</span></a>, <a href="../core/placement.html#toUriQuery,OptPlacement"><span class="Identifier">toUriQuery</span></a>, <a href="../core/placement.html#parseOptPlacement,string,SimulatorFqdn"><span class="Identifier">parseOptPlacement</span></a>, <a href="../core/field.html#garbagesCount,Field"><span class="Identifier">garbagesCount</span></a>, <a href="../core/placement.html#parseOptPlacement,string"><span class="Identifier">parseOptPlacement</span></a>, <a href="../core/placement.html#Dir"><span class="Identifier">Dir</span></a>, <a href="../core/step.html#init,typeStep,array[Col,int],bool"><span class="Identifier">init</span></a>, <a href="../core/moveresult.html#cellCount,MoveResult,Cell"><span class="Identifier">cellCount</span></a>, <a href="../core/field.html#dropGarbages,Field,array[Col,int],bool"><span class="Identifier">dropGarbages</span></a>, <a href="../core/field.html#invalidPlacements,Field"><span class="Identifier">invalidPlacements</span></a>, <a href="../core/field.html#connection3,Field"><span class="Identifier">connection3</span></a>, <a href="../core/field.html#[]=,Field,Row,Col,Cell"><span class="Identifier">[]=</span></a>, <a href="../core/step.html#Step"><span class="Identifier">Step</span></a>, <a href="../core/field.html#shiftUp,Field"><span class="Identifier">shiftUp</span></a>, <a href="../core/step.html#puyoCount,Step"><span class="Identifier">puyoCount</span></a>, <a href="../core/placement.html#$,OptPlacement"><span class="Identifier">$</span></a>, <a href="../core/goal.html#parseGoal,string"><span class="Identifier">parseGoal</span></a>, <a href="../core/field.html#connection2Horizontal,Field"><span class="Identifier">connection2Horizontal</span></a>, <a href="../core/placement.html#init,typePlacement,Col,staticDir"><span class="Identifier">init</span></a>, <a href="../core/placement.html#rotatedRight,Placement"><span class="Identifier">rotatedRight</span></a>, <a href="../core/moveresult.html#placeCounts,MoveResult"><span class="Identifier">placeCounts</span></a>, <a href="../core/field.html#toUriQuery,Field"><span class="Identifier">toUriQuery</span></a>, <a href="../core/placement.html#rotateLeft,Placement"><span class="Identifier">rotateLeft</span></a>, <a href="../core/fqdn.html#SimulatorFqdn"><span class="Identifier">SimulatorFqdn</span></a>, <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a>, <a href="../core/field.html#cellCount,Field,Cell"><span class="Identifier">cellCount</span></a>, <a href="../core/step.html#init,typeStep,Pair"><span class="Identifier">init</span></a>, <a href="../core/goal.html#init,typeGoalMain,GoalKind,GoalColor,int,GoalValOperator"><span class="Identifier">init</span></a>, <a href="../core/step.html#parseSteps,string"><span class="Identifier">parseSteps</span></a>, <a href="../core/placement.html#NonePlacement"><span class="Identifier">NonePlacement</span></a>, <a href="../core/field.html#validPlacements,Field"><span class="Identifier">validPlacements</span></a>, <a href="../core/puyopuyo.html#toUriQuery,PuyoPuyo"><span class="Identifier">toUriQuery</span></a>, <a href="../core/placement.html#DoublePlacements"><span class="Identifier">DoublePlacements</span></a>, <a href="../core/placement.html#movedRight,Placement"><span class="Identifier">movedRight</span></a>, <a href="../core/step.html#init,typeStep"><span class="Identifier">init</span></a>, <a href="../core/nazopuyo.html#toUriQuery,NazoPuyo"><span class="Identifier">toUriQuery</span></a>, <a href="../core/popresult.html#PopResult"><span class="Identifier">PopResult</span></a>, <a href="../core/pair.html#parsePair,string,SimulatorFqdn"><span class="Identifier">parsePair</span></a>, <a href="../core/notice.html#Notice"><span class="Identifier">Notice</span></a>, <a href="../core/popresult.html#cellCount,PopResult,Cell"><span class="Identifier">cellCount</span></a>, <a href="../core/moveresult.html#init,typeMoveResult"><span class="Identifier">init</span></a>, <a href="../core/step.html#StepKind"><span class="Identifier">StepKind</span></a>, <a href="../core/goal.html#init,typeGoal,GoalKind,int,GoalValOperator,GoalColor"><span class="Identifier">init</span></a>, <a href="../core/moveresult.html#cellCounts,MoveResult,Cell"><span class="Identifier">cellCounts</span></a>, <a href="../core/field.html#place,Field,Pair,OptPlacement"><span class="Identifier">place</span></a>, <a href="../core/pair.html#isDouble,Pair"><span class="Identifier">isDouble</span></a>, <a href="../core/pair.html#swap,Pair"><span class="Identifier">swap</span></a>, <a href="../core/common.html#WaterHeight"><span class="Identifier">WaterHeight</span></a>, <a href="../core/field.html#connection2,Field"><span class="Identifier">connection2</span></a>, <a href="../core/common.html#Col"><span class="Identifier">Col</span></a>, <a href="../private/deques.html#insert,Deque[T],sinkT,int"><span class="Identifier">insert</span></a>, <a href="../core/field.html#toArray,Field"><span class="Identifier">toArray</span></a>, <a href="../core/fqdn.html#parseSimulatorFqdn,string"><span class="Identifier">parseSimulatorFqdn</span></a>, <a href="../core/placement.html#init,typePlacement,Col,Dir"><span class="Identifier">init</span></a>, <a href="../core/puyopuyo.html#parsePuyoPuyo,string"><span class="Identifier">parsePuyoPuyo</span></a>, <a href="../core/moveresult.html#connectionCounts,MoveResult,Cell"><span class="Identifier">connectionCounts</span></a>, <a href="../core/placement.html#rotorDir,Placement"><span class="Identifier">rotorDir</span></a>, <a href="../core/goal.html#init,typeGoal,GoalColor"><span class="Identifier">init</span></a>, <a href="../core/cell.html#Puyos"><span class="Identifier">Puyos</span></a>, <a href="../core/nazopuyo.html#parseNazoPuyo,string,SimulatorFqdn"><span class="Identifier">parseNazoPuyo</span></a>, <a href="../core/puyopuyo.html#parsePuyoPuyo,string,SimulatorFqdn"><span class="Identifier">parsePuyoPuyo</span></a>, <a href="../core/field.html#[],Field,Row,Col"><span class="Identifier">[]</span></a>, <a href="../core/field.html#apply,Field,Step"><span class="Identifier">apply</span></a>, <a href="../core/puyopuyo.html#puyoCount,PuyoPuyo"><span class="Identifier">puyoCount</span></a>, <a href="../core/goal.html#GoalValOperator"><span class="Identifier">GoalValOperator</span></a>, <a href="../core/placement.html#init,typeOptPlacement"><span class="Identifier">init</span></a>, <a href="../core/rule.html#Behaviour"><span class="Identifier">Behaviour</span></a>, <a href="../core/field.html#toField,array[Row,array[Col,Cell]],Rule"><span class="Identifier">toField</span></a>, <a href="../core/notice.html#noticeCounts,int,Rule"><span class="Identifier">noticeCounts</span></a>, <a href="../core/pair.html#pivot=,Pair,Cell"><span class="Identifier">pivot=</span></a>, <a href="../core/common.html#Height"><span class="Identifier">Height</span></a>, <a href="../private/results2.html#context,StrErrorResult[T],string"><span class="Identifier">context</span></a>, <a href="../core/goal.html#$,Goal"><span class="Identifier">$</span></a>, <a href="../core/placement.html#parsePlacement,string"><span class="Identifier">parsePlacement</span></a>, <a href="../core/field.html#connection3LShape,Field"><span class="Identifier">connection3LShape</span></a>, <a href="../core/puyopuyo.html#garbagesCount,PuyoPuyo"><span class="Identifier">garbagesCount</span></a>, <a href="../core/goal.html#isSupported,Goal"><span class="Identifier">isSupported</span></a>, <a href="../core/goal.html#parseGoal,string,SimulatorFqdn"><span class="Identifier">parseGoal</span></a>, <a href="../core/placement.html#OptPlacement"><span class="Identifier">OptPlacement</span></a>, <a href="../core/moveresult.html#init,typeMoveResult,int,array[Cell,int],int,seq[array[Cell,int]],seq[int]"><span class="Identifier">init</span></a>, <a href="../core/step.html#==,Step,Step"><span class="Identifier">==</span></a>, <a href="../core/field.html#isSettled,Field"><span class="Identifier">isSettled</span></a>, <a href="../core/moveresult.html#connectionCounts,MoveResult"><span class="Identifier">connectionCounts</span></a>, <a href="../core/step.html#colorPuyoCount,Steps"><span class="Identifier">colorPuyoCount</span></a>, <a href="../core/moveresult.html#placeCounts,MoveResult,Cell"><span class="Identifier">placeCounts</span></a>, <a href="../core/field.html#rotate,Field"><span class="Identifier">rotate</span></a>, <a href="../core/popresult.html#init,typePopResult"><span class="Identifier">init</span></a>, <a href="../core/placement.html#toUriQuery,Placement"><span class="Identifier">toUriQuery</span></a>, <a href="../core/placement.html#init,typePlacement"><span class="Identifier">init</span></a>, <a href="../core/goal.html#init,typeGoal,GoalKind,GoalColor,int,GoalValOperator"><span class="Identifier">init</span></a>, <a href="../core/moveresult.html#colorPuyoCounts,MoveResult"><span class="Identifier">colorPuyoCounts</span></a>, <a href="../core/cell.html#Cell"><span class="Identifier">Cell</span></a>, <a href="../core/placement.html#parsePlacement,string,SimulatorFqdn"><span class="Identifier">parsePlacement</span></a>, <a href="../core/goal.html#init,typeGoal,GoalKind,int,GoalValOperator"><span class="Identifier">init</span></a>, <a href="../core/common.html#Row"><span class="Identifier">Row</span></a>, <a href="../core/step.html#garbagesCount,Step"><span class="Identifier">garbagesCount</span></a>, <a href="../core/goal.html#NoColorKinds"><span class="Identifier">NoColorKinds</span></a>, <a href="../core/field.html#init,typeField,Rule"><span class="Identifier">init</span></a>, <a href="../core/goal.html#init,typeGoal,GoalKind,GoalColor,int,GoalValOperator,GoalColor"><span class="Identifier">init</span></a>, <a href="../core/step.html#parseStep,string,SimulatorFqdn"><span class="Identifier">parseStep</span></a>, <a href="../private/deques.html#mpairs.i,Deque[T]"><span class="Identifier">mpairs</span></a>, <a href="../core/field.html#connection3Horizontal,Field"><span class="Identifier">connection3Horizontal</span></a>, <a href="../core/field.html#flipHorizontal,Field"><span class="Identifier">flipHorizontal</span></a>, <a href="../core/field.html#parseField,string,SimulatorFqdn"><span class="Identifier">parseField</span></a>, <a href="../core/pair.html#parsePair,string"><span class="Identifier">parsePair</span></a>, <a href="../core/field.html#isDead,Field"><span class="Identifier">isDead</span></a>, <a href="../core/pair.html#garbagesCount,Pair"><span class="Identifier">garbagesCount</span></a>, <a href="../core/moveresult.html#puyoCounts,MoveResult"><span class="Identifier">puyoCounts</span></a>, <a href="../core/pair.html#init,typePair,Cell,Cell"><span class="Identifier">init</span></a>, <a href="../core/field.html#shiftDown,Field"><span class="Identifier">shiftDown</span></a>, <a href="../core/placement.html#rotorCol,Placement"><span class="Identifier">rotorCol</span></a>, <a href="../core/puyopuyo.html#colorPuyoCount,PuyoPuyo"><span class="Identifier">colorPuyoCount</span></a>, <a href="../core/goal.html#init,typeGoal"><span class="Identifier">init</span></a>, <a href="../core/field.html#move,Field,Pair,Placement"><span class="Identifier">move</span></a>, <a href="../core/puyopuyo.html#PuyoPuyo"><span class="Identifier">PuyoPuyo</span></a>, <a href="../core/puyopuyo.html#init,typePuyoPuyo,Field,Steps"><span class="Identifier">init</span></a>, <a href="../core/field.html#flipVertical,Field"><span class="Identifier">flipVertical</span></a>, <a href="../core/pair.html#pivot,Pair"><span class="Identifier">pivot</span></a>, <a href="../core/rule.html#Behaviours"><span class="Identifier">Behaviours</span></a>, <a href="../core/field.html#shiftLeft,Field"><span class="Identifier">shiftLeft</span></a>, <a href="../core/step.html#parseSteps,string,SimulatorFqdn"><span class="Identifier">parseSteps</span></a>, <a href="../core/nazopuyo.html#NazoPuyo"><span class="Identifier">NazoPuyo</span></a>, <a href="../core/step.html#$,Step"><span class="Identifier">$</span></a>, <a href="../core/step.html#init,typeStep,Pair,Placement"><span class="Identifier">init</span></a>, <a href="../core/cell.html#ColorPuyos"><span class="Identifier">ColorPuyos</span></a>, <a href="../core/field.html#move,Field,bool"><span class="Identifier">move</span></a>, <a href="../core/moveresult.html#colors,MoveResult"><span class="Identifier">colors</span></a>, <a href="../core/goal.html#toUriQuery,Goal"><span class="Identifier">toUriQuery</span></a>, <a href="../core/nazopuyo.html#init,typeNazoPuyo"><span class="Identifier">init</span></a>, <a href="../core/field.html#parseField,string"><span class="Identifier">parseField</span></a>, <a href="../core/pair.html#toUriQuery,Pair"><span class="Identifier">toUriQuery</span></a>, <a href="../core/cell.html#parseCell,string"><span class="Identifier">parseCell</span></a>, <a href="../core/puyopuyo.html#cellCount,PuyoPuyo,Cell"><span class="Identifier">cellCount</span></a>, <a href="../core/goal.html#ColorKinds"><span class="Identifier">ColorKinds</span></a>, <a href="../core/goal.html#normalized,Goal"><span class="Identifier">normalized</span></a>, <a href="../core/field.html#place,Field,Pair,Placement"><span class="Identifier">place</span></a>, <a href="../core/field.html#insert,Field,Row,Col,Cell"><span class="Identifier">insert</span></a>, <a href="../core/popresult.html#connectionCounts,PopResult"><span class="Identifier">connectionCounts</span></a>, <a href="../core/goal.html#GoalColor"><span class="Identifier">GoalColor</span></a>, <a href="../core/nazopuyo.html#$,NazoPuyo"><span class="Identifier">$</span></a>, <a href="../core/goal.html#Goal"><span class="Identifier">Goal</span></a>, <a href="../core/field.html#crossRotate,Field"><span class="Identifier">crossRotate</span></a>, <a href="../core/moveresult.html#colorPuyoCount,MoveResult"><span class="Identifier">colorPuyoCount</span></a>, <a href="../core/pair.html#rotor=,Pair,Cell"><span class="Identifier">rotor=</span></a>, <a href="../core/pair.html#init,typePair"><span class="Identifier">init</span></a>, <a href="../core/field.html#connection3Vertical,Field"><span class="Identifier">connection3Vertical</span></a>, <a href="../core/moveresult.html#noticeCounts,MoveResult,Rule"><span class="Identifier">noticeCounts</span></a>, <a href="../core/field.html#settle,Field"><span class="Identifier">settle</span></a>, <a href="../private/deques.html#toDeque,openArray[T]"><span class="Identifier">toDeque</span></a>, <a href="../core/step.html#toUriQuery,Step"><span class="Identifier">toUriQuery</span></a>, <a href="../core/moveresult.html#garbagesCount,MoveResult"><span class="Identifier">garbagesCount</span></a>, <a href="../core/placement.html#moveRight,Placement"><span class="Identifier">moveRight</span></a>, <a href="../core/popresult.html#hardToGarbageCount,PopResult"><span class="Identifier">hardToGarbageCount</span></a>, <a href="../core/moveresult.html#garbagesCounts,MoveResult"><span class="Identifier">garbagesCounts</span></a>, <a href="../core/popresult.html#colorPuyoCount,PopResult"><span class="Identifier">colorPuyoCount</span></a>, <a href="../core/nazopuyo.html#init,typeNazoPuyo,PuyoPuyo,Goal"><span class="Identifier">init</span></a>, <a href="../core/field.html#move,Field,array[Col,int],bool"><span class="Identifier">move</span></a>, <a href="../core/field.html#pop,Field"><span class="Identifier">pop</span></a>, <a href="../core/goal.html#NoneGoal"><span class="Identifier">NoneGoal</span></a>, <a href="../core/goal.html#normalize,Goal"><span class="Identifier">normalize</span></a>, <a href="../core/goal.html#GoalKind"><span class="Identifier">GoalKind</span></a>, <a href="../private/results2.html#StrErrorResult_2"><span class="Identifier">StrErrorResult</span></a>, <a href="../private/results2.html#context,StrErrorResult[T],string_2"><span class="Identifier">context</span></a>
+    <a href="../core/step.html#puyoCount,Steps"><span class="Identifier">puyoCount</span></a>, <a href="../core/nazopuyo.html#$,NazoPuyo"><span class="Identifier">$</span></a>, <a href="../core/step.html#cellCount,Step,Cell"><span class="Identifier">cellCount</span></a>, <a href="../core/pair.html#puyoCount,Pair"><span class="Identifier">puyoCount</span></a>, <a href="../core/placement.html#parsePlacement,string"><span class="Identifier">parsePlacement</span></a>, <a href="../core/placement.html#moveLeft,Placement"><span class="Identifier">moveLeft</span></a>, <a href="../core/behaviour.html#DeadRule"><span class="Identifier">DeadRule</span></a>, <a href="../core/moveresult.html#score,MoveResult"><span class="Identifier">score</span></a>, <a href="../core/field.html#puyoCount,Field"><span class="Identifier">puyoCount</span></a>, <a href="../core/field.html#del,Field,Row,Col"><span class="Identifier">del</span></a>, <a href="../core/placement.html#rotatedLeft,Placement"><span class="Identifier">rotatedLeft</span></a>, <a href="../core/puyopuyo.html#$,PuyoPuyo"><span class="Identifier">$</span></a>, <a href="../core/step.html#init,typeStep,bool"><span class="Identifier">init</span></a>, <a href="../core/pair.html#cellCount,Pair,Cell"><span class="Identifier">cellCount</span></a>, <a href="../core/field.html#Field"><span class="Identifier">Field</span></a>, <a href="../core/moveresult.html#puyoCount,MoveResult"><span class="Identifier">puyoCount</span></a>, <a href="../core/step.html#nuisancePuyoCount,Step"><span class="Identifier">nuisancePuyoCount</span></a>, <a href="../core/pair.html#swapped,Pair"><span class="Identifier">swapped</span></a>, <a href="../core/step.html#init,typeStep,Pair"><span class="Identifier">init</span></a>, <a href="../core/moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a>, <a href="../core/rule.html#parseRule,string"><span class="Identifier">parseRule</span></a>, <a href="../core/nazopuyo.html#mark,NazoPuyo,int"><span class="Identifier">mark</span></a>, <a href="../core/field.html#validDoublePlacements,Field"><span class="Identifier">validDoublePlacements</span></a>, <a href="../core/moveresult.html#coloredPuyoCount,MoveResult"><span class="Identifier">coloredPuyoCount</span></a>, <a href="../core/placement.html#pivotCol,Placement"><span class="Identifier">pivotCol</span></a>, <a href="../core/nazopuyo.html#init,typeNazoPuyo,PuyoPuyo,Goal"><span class="Identifier">init</span></a>, <a href="../private/simd.html#==,M128i,M128i"><span class="Identifier">==</span></a>, <a href="../core/nazopuyo.html#parseNazoPuyo,string"><span class="Identifier">parseNazoPuyo</span></a>, <a href="../core/moveresult.html#coloredPuyoCounts,MoveResult"><span class="Identifier">coloredPuyoCounts</span></a>, <a href="../core/step.html#init,typeStep,array[Col,int]"><span class="Identifier">init</span></a>, <a href="../core/step.html#parseStep,string"><span class="Identifier">parseStep</span></a>, <a href="../core/cell.html#NuisancePuyos"><span class="Identifier">NuisancePuyos</span></a>, <a href="../core/common.html#Width"><span class="Identifier">Width</span></a>, <a href="../core/pair.html#init,typePair,Cell,Cell"><span class="Identifier">init</span></a>, <a href="../core/goal.html#$,Goal"><span class="Identifier">$</span></a>, <a href="../core/rule.html#Rule"><span class="Identifier">Rule</span></a>, <a href="../core/goal.html#GoalOperator"><span class="Identifier">GoalOperator</span></a>, <a href="../core/pair.html#Pair"><span class="Identifier">Pair</span></a>, <a href="../core/puyopuyo.html#toUriQuery,PuyoPuyo"><span class="Identifier">toUriQuery</span></a>, <a href="../core/step.html#cellCount,Steps,Cell"><span class="Identifier">cellCount</span></a>, <a href="../core/goal.html#isNormalized,Goal"><span class="Identifier">isNormalized</span></a>, <a href="../core/step.html#$,Steps"><span class="Identifier">$</span></a>, <a href="../core/placement.html#movedLeft,Placement"><span class="Identifier">movedLeft</span></a>, <a href="../core/goal.html#GoalMain"><span class="Identifier">GoalMain</span></a>, <a href="../core/placement.html#rotateRight,Placement"><span class="Identifier">rotateRight</span></a>, <a href="../core/common.html#AirHeight"><span class="Identifier">AirHeight</span></a>, <a href="../core/popresult.html#puyoCount,PopResult"><span class="Identifier">puyoCount</span></a>, <a href="../core/nazopuyo.html#MarkResult"><span class="Identifier">MarkResult</span></a>, <a href="../core/field.html#connection2Vertical,Field"><span class="Identifier">connection2Vertical</span></a>, <a href="../core/moveresult.html#colorsSeq,MoveResult"><span class="Identifier">colorsSeq</span></a>, <a href="../private/deques.html#del,Deque[T],int"><span class="Identifier">del</span></a>, <a href="../core/field.html#init,typeField,Rule"><span class="Identifier">init</span></a>, <a href="../core/field.html#shiftRight,Field"><span class="Identifier">shiftRight</span></a>, <a href="../core/pair.html#rotor,Pair"><span class="Identifier">rotor</span></a>, <a href="../core/step.html#isValid,Step"><span class="Identifier">isValid</span></a>, <a href="../core/placement.html#init,typePlacement"><span class="Identifier">init</span></a>, <a href="../core/field.html#canPop,Field"><span class="Identifier">canPop</span></a>, <a href="../core/step.html#$,Step"><span class="Identifier">$</span></a>, <a href="../core/step.html#Steps"><span class="Identifier">Steps</span></a>, <a href="../core/placement.html#toUriQuery,Placement"><span class="Identifier">toUriQuery</span></a>, <a href="../core/placement.html#ActualPlacements"><span class="Identifier">ActualPlacements</span></a>, <a href="../core/placement.html#Dir"><span class="Identifier">Dir</span></a>, <a href="../core/moveresult.html#init,typeMoveResult,int,array[Cell,int],int,seq[array[Cell,int]],seq[int],Opt[seq[array[Cell,seq[int]]]]"><span class="Identifier">init</span></a>, <a href="../core/moveresult.html#cellCount,MoveResult,Cell"><span class="Identifier">cellCount</span></a>, <a href="../core/field.html#invalidPlacements,Field"><span class="Identifier">invalidPlacements</span></a>, <a href="../core/field.html#connection3,Field"><span class="Identifier">connection3</span></a>, <a href="../core/field.html#[]=,Field,Row,Col,Cell"><span class="Identifier">[]=</span></a>, <a href="../core/field.html#shiftUp,Field"><span class="Identifier">shiftUp</span></a>, <a href="../core/step.html#puyoCount,Step"><span class="Identifier">puyoCount</span></a>, <a href="../core/goal.html#NoneGoalColor"><span class="Identifier">NoneGoalColor</span></a>, <a href="../core/goal.html#parseGoal,string"><span class="Identifier">parseGoal</span></a>, <a href="../core/field.html#connection2Horizontal,Field"><span class="Identifier">connection2Horizontal</span></a>, <a href="../core/goal.html#init,typeGoal,GoalColor"><span class="Identifier">init</span></a>, <a href="../core/placement.html#rotatedRight,Placement"><span class="Identifier">rotatedRight</span></a>, <a href="../core/field.html#dropNuisance,Field,array[Col,int]"><span class="Identifier">dropNuisance</span></a>, <a href="../core/moveresult.html#placeCounts,MoveResult"><span class="Identifier">placeCounts</span></a>, <a href="../core/step.html#toUriQuery,Steps"><span class="Identifier">toUriQuery</span></a>, <a href="../core/placement.html#rotateLeft,Placement"><span class="Identifier">rotateLeft</span></a>, <a href="../core/fqdn.html#SimulatorFqdn"><span class="Identifier">SimulatorFqdn</span></a>, <a href="../core/step.html#nuisancePuyoCount,Steps"><span class="Identifier">nuisancePuyoCount</span></a>, <a href="../core/field.html#cellCount,Field,Cell"><span class="Identifier">cellCount</span></a>, <a href="../core/goal.html#init,typeGoalMain,GoalKind,GoalColor,int,GoalOperator"><span class="Identifier">init</span></a>, <a href="../core/nazopuyo.html#init,typeNazoPuyo"><span class="Identifier">init</span></a>, <a href="../core/step.html#parseSteps,string"><span class="Identifier">parseSteps</span></a>, <a href="../core/puyopuyo.html#nuisancePuyoCount,PuyoPuyo"><span class="Identifier">nuisancePuyoCount</span></a>, <a href="../core/field.html#validPlacements,Field"><span class="Identifier">validPlacements</span></a>, <a href="../core/pair.html#toUriQuery,Pair"><span class="Identifier">toUriQuery</span></a>, <a href="../core/placement.html#DoublePlacements"><span class="Identifier">DoublePlacements</span></a>, <a href="../core/placement.html#movedRight,Placement"><span class="Identifier">movedRight</span></a>, <a href="../core/goal.html#init,typeGoal,GoalKind,int,GoalOperator"><span class="Identifier">init</span></a>, <a href="../core/nazopuyo.html#toUriQuery,NazoPuyo"><span class="Identifier">toUriQuery</span></a>, <a href="../core/pair.html#parsePair,string,SimulatorFqdn"><span class="Identifier">parsePair</span></a>, <a href="../core/notice.html#Notice"><span class="Identifier">Notice</span></a>, <a href="../core/step.html#coloredPuyoCount,Step"><span class="Identifier">coloredPuyoCount</span></a>, <a href="../core/popresult.html#cellCount,PopResult,Cell"><span class="Identifier">cellCount</span></a>, <a href="../core/popresult.html#nuisancePuyoCount,PopResult"><span class="Identifier">nuisancePuyoCount</span></a>, <a href="../core/common.html#WaterTopRow"><span class="Identifier">WaterTopRow</span></a>, <a href="../core/step.html#StepKind"><span class="Identifier">StepKind</span></a>, <a href="../core/goal.html#init,typeGoal,GoalKind,GoalColor,int,GoalOperator"><span class="Identifier">init</span></a>, <a href="../core/moveresult.html#cellCounts,MoveResult,Cell"><span class="Identifier">cellCounts</span></a>, <a href="../core/behaviour.html#Physics"><span class="Identifier">Physics</span></a>, <a href="../core/pair.html#isDouble,Pair"><span class="Identifier">isDouble</span></a>, <a href="../core/pair.html#swap,Pair"><span class="Identifier">swap</span></a>, <a href="../core/common.html#WaterHeight"><span class="Identifier">WaterHeight</span></a>, <a href="../core/step.html#coloredPuyoCount,Steps"><span class="Identifier">coloredPuyoCount</span></a>, <a href="../core/field.html#connection2,Field"><span class="Identifier">connection2</span></a>, <a href="../core/common.html#Col"><span class="Identifier">Col</span></a>, <a href="../core/step.html#Step"><span class="Identifier">Step</span></a>, <a href="../core/puyopuyo.html#coloredPuyoCount,PuyoPuyo"><span class="Identifier">coloredPuyoCount</span></a>, <a href="../private/deques.html#insert,Deque[T],sinkT,int"><span class="Identifier">insert</span></a>, <a href="../core/field.html#toArray,Field"><span class="Identifier">toArray</span></a>, <a href="../core/fqdn.html#parseSimulatorFqdn,string"><span class="Identifier">parseSimulatorFqdn</span></a>, <a href="../core/moveresult.html#init,typeMoveResult,int,array[Cell,int],int,seq[array[Cell,int]],seq[int],seq[array[Cell,seq[int]]]"><span class="Identifier">init</span></a>, <a href="../core/puyopuyo.html#parsePuyoPuyo,string"><span class="Identifier">parsePuyoPuyo</span></a>, <a href="../core/cell.html#Cell"><span class="Identifier">Cell</span></a>, <a href="../core/moveresult.html#connectionCounts,MoveResult,Cell"><span class="Identifier">connectionCounts</span></a>, <a href="../core/placement.html#rotorDir,Placement"><span class="Identifier">rotorDir</span></a>, <a href="../private/deques.html#init,typeDeque[E]"><span class="Identifier">init</span></a>, <a href="../core/cell.html#Puyos"><span class="Identifier">Puyos</span></a>, <a href="../core/nazopuyo.html#parseNazoPuyo,string,SimulatorFqdn"><span class="Identifier">parseNazoPuyo</span></a>, <a href="../core/goal.html#NoneGoalMain"><span class="Identifier">NoneGoalMain</span></a>, <a href="../core/puyopuyo.html#parsePuyoPuyo,string,SimulatorFqdn"><span class="Identifier">parsePuyoPuyo</span></a>, <a href="../core/field.html#[],Field,Row,Col"><span class="Identifier">[]</span></a>, <a href="../core/field.html#apply,Field,Step"><span class="Identifier">apply</span></a>, <a href="../core/puyopuyo.html#puyoCount,PuyoPuyo"><span class="Identifier">puyoCount</span></a>, <a href="../core/moveresult.html#nuisancePuyoCounts,MoveResult"><span class="Identifier">nuisancePuyoCounts</span></a>, <a href="../core/cell.html#ColoredPuyos"><span class="Identifier">ColoredPuyos</span></a>, <a href="../core/behaviour.html#Behaviour"><span class="Identifier">Behaviour</span></a>, <a href="../core/field.html#toField,array[Row,array[Col,Cell]],Rule"><span class="Identifier">toField</span></a>, <a href="../core/notice.html#noticeCounts,int,int"><span class="Identifier">noticeCounts</span></a>, <a href="../core/pair.html#pivot=,Pair,Cell"><span class="Identifier">pivot=</span></a>, <a href="../core/common.html#Height"><span class="Identifier">Height</span></a>, <a href="../utils/results2.html#context,Pon2Result[T],string"><span class="Identifier">context</span></a>, <a href="../core/field.html#$,Field"><span class="Identifier">$</span></a>, <a href="../core/field.html#connection3LShape,Field"><span class="Identifier">connection3LShape</span></a>, <a href="../core/goal.html#isSupported,Goal"><span class="Identifier">isSupported</span></a>, <a href="../core/goal.html#parseGoal,string,SimulatorFqdn"><span class="Identifier">parseGoal</span></a>, <a href="../core/moveresult.html#init,typeMoveResult,int,array[Cell,int],int,seq[array[Cell,int]],seq[int]"><span class="Identifier">init</span></a>, <a href="../core/step.html#==,Step,Step"><span class="Identifier">==</span></a>, <a href="../core/field.html#isSettled,Field"><span class="Identifier">isSettled</span></a>, <a href="../core/moveresult.html#connectionCounts,MoveResult"><span class="Identifier">connectionCounts</span></a>, <a href="../core/popresult.html#PopResult"><span class="Identifier">PopResult</span></a>, <a href="../core/moveresult.html#placeCounts,MoveResult,Cell"><span class="Identifier">placeCounts</span></a>, <a href="../core/field.html#rotate,Field"><span class="Identifier">rotate</span></a>, <a href="../core/popresult.html#init,typePopResult"><span class="Identifier">init</span></a>, <a href="../core/pair.html#nuisancePuyoCount,Pair"><span class="Identifier">nuisancePuyoCount</span></a>, <a href="../core/field.html#toUriQuery,Field"><span class="Identifier">toUriQuery</span></a>, <a href="../core/goal.html#init,typeGoal,GoalKind,GoalColor,int,GoalOperator,GoalColor"><span class="Identifier">init</span></a>, <a href="../core/step.html#init,typeStep"><span class="Identifier">init</span></a>, <a href="../core/popresult.html#coloredPuyoCount,PopResult"><span class="Identifier">coloredPuyoCount</span></a>, <a href="../core/common.html#Row"><span class="Identifier">Row</span></a>, <a href="../core/popresult.html#isPopped,PopResult"><span class="Identifier">isPopped</span></a>, <a href="../core/goal.html#NoColorKinds"><span class="Identifier">NoColorKinds</span></a>, <a href="../core/moveresult.html#nuisancePuyoCount,MoveResult"><span class="Identifier">nuisancePuyoCount</span></a>, <a href="../core/goal.html#init,typeGoalMain,GoalKind,int,GoalOperator"><span class="Identifier">init</span></a>, <a href="../core/placement.html#init,typePlacement,Col,Dir"><span class="Identifier">init</span></a>, <a href="../core/step.html#parseStep,string,SimulatorFqdn"><span class="Identifier">parseStep</span></a>, <a href="../private/deques.html#mpairs.i,Deque[T]"><span class="Identifier">mpairs</span></a>, <a href="../core/field.html#connection3Horizontal,Field"><span class="Identifier">connection3Horizontal</span></a>, <a href="../core/placement.html#Placement"><span class="Identifier">Placement</span></a>, <a href="../core/field.html#flipHorizontal,Field"><span class="Identifier">flipHorizontal</span></a>, <a href="../core/field.html#parseField,string,SimulatorFqdn"><span class="Identifier">parseField</span></a>, <a href="../core/pair.html#parsePair,string"><span class="Identifier">parsePair</span></a>, <a href="../core/field.html#isDead,Field"><span class="Identifier">isDead</span></a>, <a href="../core/moveresult.html#puyoCounts,MoveResult"><span class="Identifier">puyoCounts</span></a>, <a href="../core/goal.html#init,typeGoal,GoalKind,int,GoalOperator,GoalColor"><span class="Identifier">init</span></a>, <a href="../core/field.html#shiftDown,Field"><span class="Identifier">shiftDown</span></a>, <a href="../core/placement.html#rotorCol,Placement"><span class="Identifier">rotorCol</span></a>, <a href="../core/puyopuyo.html#init,typePuyoPuyo"><span class="Identifier">init</span></a>, <a href="../core/puyopuyo.html#PuyoPuyo"><span class="Identifier">PuyoPuyo</span></a>, <a href="../core/pair.html#init,typePair"><span class="Identifier">init</span></a>, <a href="../core/field.html#flipVertical,Field"><span class="Identifier">flipVertical</span></a>, <a href="../core/pair.html#pivot,Pair"><span class="Identifier">pivot</span></a>, <a href="../core/behaviour.html#Behaviours"><span class="Identifier">Behaviours</span></a>, <a href="../core/field.html#shiftLeft,Field"><span class="Identifier">shiftLeft</span></a>, <a href="../core/step.html#parseSteps,string,SimulatorFqdn"><span class="Identifier">parseSteps</span></a>, <a href="../core/nazopuyo.html#NazoPuyo"><span class="Identifier">NazoPuyo</span></a>, <a href="../core/moveresult.html#init,typeMoveResult"><span class="Identifier">init</span></a>, <a href="../core/field.html#move,Field,Step"><span class="Identifier">move</span></a>, <a href="../core/moveresult.html#colors,MoveResult"><span class="Identifier">colors</span></a>, <a href="../core/placement.html#parsePlacement,string,SimulatorFqdn"><span class="Identifier">parsePlacement</span></a>, <a href="../core/field.html#nuisancePuyoCount,Field"><span class="Identifier">nuisancePuyoCount</span></a>, <a href="../core/goal.html#toUriQuery,Goal"><span class="Identifier">toUriQuery</span></a>, <a href="../core/puyopuyo.html#init,typePuyoPuyo,Field,Steps"><span class="Identifier">init</span></a>, <a href="../core/field.html#parseField,string"><span class="Identifier">parseField</span></a>, <a href="../core/common.html#AirBottomRow"><span class="Identifier">AirBottomRow</span></a>, <a href="../core/cell.html#parseCell,string"><span class="Identifier">parseCell</span></a>, <a href="../core/puyopuyo.html#cellCount,PuyoPuyo,Cell"><span class="Identifier">cellCount</span></a>, <a href="../core/goal.html#ColorKinds"><span class="Identifier">ColorKinds</span></a>, <a href="../core/goal.html#normalized,Goal"><span class="Identifier">normalized</span></a>, <a href="../core/field.html#place,Field,Pair,Placement"><span class="Identifier">place</span></a>, <a href="../core/field.html#insert,Field,Row,Col,Cell"><span class="Identifier">insert</span></a>, <a href="../core/popresult.html#connectionCounts,PopResult"><span class="Identifier">connectionCounts</span></a>, <a href="../core/goal.html#GoalColor"><span class="Identifier">GoalColor</span></a>, <a href="../core/goal.html#Goal"><span class="Identifier">Goal</span></a>, <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a>, <a href="../core/field.html#crossRotate,Field"><span class="Identifier">crossRotate</span></a>, <a href="../core/pair.html#rotor=,Pair,Cell"><span class="Identifier">rotor=</span></a>, <a href="../core/goal.html#init,typeGoal"><span class="Identifier">init</span></a>, <a href="../core/field.html#connection3Vertical,Field"><span class="Identifier">connection3Vertical</span></a>, <a href="../core/moveresult.html#noticeCounts,MoveResult,int"><span class="Identifier">noticeCounts</span></a>, <a href="../core/field.html#settle,Field"><span class="Identifier">settle</span></a>, <a href="../private/deques.html#toDeque,openArray[T]"><span class="Identifier">toDeque</span></a>, <a href="../core/step.html#toUriQuery,Step"><span class="Identifier">toUriQuery</span></a>, <a href="../core/pair.html#coloredPuyoCount,Pair"><span class="Identifier">coloredPuyoCount</span></a>, <a href="../core/placement.html#moveRight,Placement"><span class="Identifier">moveRight</span></a>, <a href="../core/popresult.html#hardToGarbageCount,PopResult"><span class="Identifier">hardToGarbageCount</span></a>, <a href="../core/popresult.html#init,typePopResult,M128i,M128i,M128i,M128i,M128i,M128i,M128i,M128i,M128i"><span class="Identifier">init</span></a>, <a href="../core/puyopuyo.html#move,PuyoPuyo"><span class="Identifier">move</span></a>, <a href="../core/field.html#pop,Field"><span class="Identifier">pop</span></a>, <a href="../core/goal.html#NoneGoal"><span class="Identifier">NoneGoal</span></a>, <a href="../core/field.html#coloredPuyoCount,Field"><span class="Identifier">coloredPuyoCount</span></a>, <a href="../core/goal.html#normalize,Goal"><span class="Identifier">normalize</span></a>, <a href="../core/goal.html#GoalKind"><span class="Identifier">GoalKind</span></a>
   </dl>
 </div>
 
@@ -1106,7 +1078,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-07 16:41:23 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-20 04:26:43 UTC</small>
       </div>
     </div>
   </div>

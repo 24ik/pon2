@@ -1,5 +1,6 @@
 nimTitle	cell	pon2/core/cell.html	module src/pon2/core/cell		0
 nim	Cell	pon2/core/cell.html#Cell	enum Cell		14
 nim	Puyos	pon2/core/cell.html#Puyos	const Puyos		25
-nim	ColorPuyos	pon2/core/cell.html#ColorPuyos	const ColorPuyos		26
-nim	parseCell	pon2/core/cell.html#parseCell,string	proc parseCell(str: string): StrErrorResult[Cell]		36
+nim	NuisancePuyos	pon2/core/cell.html#NuisancePuyos	const NuisancePuyos		26
+nim	ColoredPuyos	pon2/core/cell.html#ColoredPuyos	const ColoredPuyos		27
+nim	parseCell	pon2/core/cell.html#parseCell,string	proc parseCell(str: string): Pon2Result[Cell]		33

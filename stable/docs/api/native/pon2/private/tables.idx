@@ -1,2 +1,2 @@
 nimTitle	tables	pon2/private/tables.html	module src/pon2/private/tables		0
-nim	`[]`	pon2/private/tables.html#[],,K	proc `[]`[K, V](table: Table[K, V] or TableRef[K, V] or OrderedTable[K, V] or\n    OrderedTableRef[K, V]; key: K): StrErrorResult[V]		15
+nim	`[]`	pon2/private/tables.html#[],,K	proc `[]`[K, V](table: Table[K, V] or TableRef[K, V] or OrderedTable[K, V] or\n    OrderedTableRef[K, V]; key: K): Pon2Result[V]		15

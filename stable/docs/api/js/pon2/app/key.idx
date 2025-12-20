@@ -1,6 +1,72 @@
 nimTitle	key	pon2/app/key.html	module src/pon2/app/key		0
-nim	KeyEvent	pon2/app/key.html#KeyEvent	object KeyEvent		14
-nim	init	pon2/app/key.html#init,typeKeyEvent,string	proc init(T: type KeyEvent; code: string; shift = false; ctrl = false; alt = false;\n     meta = false): T:type		25
-nim	init	pon2/app/key.html#init,typeKeyEvent,char	proc init(T: type KeyEvent; c: char; shift = false; ctrl = false; alt = false;\n     meta = false): T:type		35
-nim	toKeyEvent	pon2/app/key.html#toKeyEvent,KeyboardEvent	proc toKeyEvent(event: KeyboardEvent): KeyEvent		54
-nimgrp	init	pon2/app/key.html#init-procs-all	proc		25
+nim	KeyEvent	pon2/app/key.html#KeyEvent	object KeyEvent		15
+nim	init	pon2/app/key.html#init,typeKeyEvent,string	proc init(T: type KeyEvent; code: string; shift = false; ctrl = false; alt = false;\n     meta = false): T:type		26
+nim	KeyEvent0	pon2/app/key.html#KeyEvent0	const KeyEvent0		51
+nim	KeyEvent1	pon2/app/key.html#KeyEvent1	const KeyEvent1		51
+nim	KeyEvent2	pon2/app/key.html#KeyEvent2	const KeyEvent2		51
+nim	KeyEvent3	pon2/app/key.html#KeyEvent3	const KeyEvent3		51
+nim	KeyEvent4	pon2/app/key.html#KeyEvent4	const KeyEvent4		51
+nim	KeyEvent5	pon2/app/key.html#KeyEvent5	const KeyEvent5		51
+nim	KeyEvent6	pon2/app/key.html#KeyEvent6	const KeyEvent6		51
+nim	KeyEvent7	pon2/app/key.html#KeyEvent7	const KeyEvent7		51
+nim	KeyEvent8	pon2/app/key.html#KeyEvent8	const KeyEvent8		51
+nim	KeyEvent9	pon2/app/key.html#KeyEvent9	const KeyEvent9		51
+nim	KeyEventA	pon2/app/key.html#KeyEventA	const KeyEventA		61
+nim	KeyEventShiftA	pon2/app/key.html#KeyEventShiftA	const KeyEventShiftA		62
+nim	KeyEventB	pon2/app/key.html#KeyEventB	const KeyEventB		61
+nim	KeyEventShiftB	pon2/app/key.html#KeyEventShiftB	const KeyEventShiftB		62
+nim	KeyEventC	pon2/app/key.html#KeyEventC	const KeyEventC		61
+nim	KeyEventShiftC	pon2/app/key.html#KeyEventShiftC	const KeyEventShiftC		62
+nim	KeyEventD	pon2/app/key.html#KeyEventD	const KeyEventD		61
+nim	KeyEventShiftD	pon2/app/key.html#KeyEventShiftD	const KeyEventShiftD		62
+nim	KeyEventE	pon2/app/key.html#KeyEventE	const KeyEventE		61
+nim	KeyEventShiftE	pon2/app/key.html#KeyEventShiftE	const KeyEventShiftE		62
+nim	KeyEventF	pon2/app/key.html#KeyEventF	const KeyEventF		61
+nim	KeyEventShiftF	pon2/app/key.html#KeyEventShiftF	const KeyEventShiftF		62
+nim	KeyEventG	pon2/app/key.html#KeyEventG	const KeyEventG		61
+nim	KeyEventShiftG	pon2/app/key.html#KeyEventShiftG	const KeyEventShiftG		62
+nim	KeyEventH	pon2/app/key.html#KeyEventH	const KeyEventH		61
+nim	KeyEventShiftH	pon2/app/key.html#KeyEventShiftH	const KeyEventShiftH		62
+nim	KeyEventI	pon2/app/key.html#KeyEventI	const KeyEventI		61
+nim	KeyEventShiftI	pon2/app/key.html#KeyEventShiftI	const KeyEventShiftI		62
+nim	KeyEventJ	pon2/app/key.html#KeyEventJ	const KeyEventJ		61
+nim	KeyEventShiftJ	pon2/app/key.html#KeyEventShiftJ	const KeyEventShiftJ		62
+nim	KeyEventK	pon2/app/key.html#KeyEventK	const KeyEventK		61
+nim	KeyEventShiftK	pon2/app/key.html#KeyEventShiftK	const KeyEventShiftK		62
+nim	KeyEventL	pon2/app/key.html#KeyEventL	const KeyEventL		61
+nim	KeyEventShiftL	pon2/app/key.html#KeyEventShiftL	const KeyEventShiftL		62
+nim	KeyEventM	pon2/app/key.html#KeyEventM	const KeyEventM		61
+nim	KeyEventShiftM	pon2/app/key.html#KeyEventShiftM	const KeyEventShiftM		62
+nim	KeyEventN	pon2/app/key.html#KeyEventN	const KeyEventN		61
+nim	KeyEventShiftN	pon2/app/key.html#KeyEventShiftN	const KeyEventShiftN		62
+nim	KeyEventO	pon2/app/key.html#KeyEventO	const KeyEventO		61
+nim	KeyEventShiftO	pon2/app/key.html#KeyEventShiftO	const KeyEventShiftO		62
+nim	KeyEventP	pon2/app/key.html#KeyEventP	const KeyEventP		61
+nim	KeyEventShiftP	pon2/app/key.html#KeyEventShiftP	const KeyEventShiftP		62
+nim	KeyEventQ	pon2/app/key.html#KeyEventQ	const KeyEventQ		61
+nim	KeyEventShiftQ	pon2/app/key.html#KeyEventShiftQ	const KeyEventShiftQ		62
+nim	KeyEventR	pon2/app/key.html#KeyEventR	const KeyEventR		61
+nim	KeyEventShiftR	pon2/app/key.html#KeyEventShiftR	const KeyEventShiftR		62
+nim	KeyEventS	pon2/app/key.html#KeyEventS	const KeyEventS		61
+nim	KeyEventShiftS	pon2/app/key.html#KeyEventShiftS	const KeyEventShiftS		62
+nim	KeyEventT	pon2/app/key.html#KeyEventT	const KeyEventT		61
+nim	KeyEventShiftT	pon2/app/key.html#KeyEventShiftT	const KeyEventShiftT		62
+nim	KeyEventU	pon2/app/key.html#KeyEventU	const KeyEventU		61
+nim	KeyEventShiftU	pon2/app/key.html#KeyEventShiftU	const KeyEventShiftU		62
+nim	KeyEventV	pon2/app/key.html#KeyEventV	const KeyEventV		61
+nim	KeyEventShiftV	pon2/app/key.html#KeyEventShiftV	const KeyEventShiftV		62
+nim	KeyEventW	pon2/app/key.html#KeyEventW	const KeyEventW		61
+nim	KeyEventShiftW	pon2/app/key.html#KeyEventShiftW	const KeyEventShiftW		62
+nim	KeyEventX	pon2/app/key.html#KeyEventX	const KeyEventX		61
+nim	KeyEventShiftX	pon2/app/key.html#KeyEventShiftX	const KeyEventShiftX		62
+nim	KeyEventY	pon2/app/key.html#KeyEventY	const KeyEventY		61
+nim	KeyEventShiftY	pon2/app/key.html#KeyEventShiftY	const KeyEventShiftY		62
+nim	KeyEventZ	pon2/app/key.html#KeyEventZ	const KeyEventZ		61
+nim	KeyEventShiftZ	pon2/app/key.html#KeyEventShiftZ	const KeyEventShiftZ		62
+nim	KeyEventEnter	pon2/app/key.html#KeyEventEnter	const KeyEventEnter		69
+nim	KeyEventSemicolon	pon2/app/key.html#KeyEventSemicolon	const KeyEventSemicolon		70
+nim	KeyEventSpace	pon2/app/key.html#KeyEventSpace	const KeyEventSpace		71
+nim	KeyEventTab	pon2/app/key.html#KeyEventTab	const KeyEventTab		72
+nim	KeyEventShiftEnter	pon2/app/key.html#KeyEventShiftEnter	const KeyEventShiftEnter		74
+nim	KeyEventShiftTab	pon2/app/key.html#KeyEventShiftTab	const KeyEventShiftTab		75
+nim	toKeyEvent	pon2/app/key.html#toKeyEvent,KeyboardEvent	proc toKeyEvent(event: KeyboardEvent): KeyEvent		82

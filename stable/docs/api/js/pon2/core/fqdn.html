@@ -59,7 +59,7 @@
     <summary><a class="reference reference-toplevel" href="#7" id="57">Types</a></summary>
     <ul class="simple simple-toc-section">
       <li><a class="reference" href="#SimulatorFqdn" title="SimulatorFqdn {.pure.} = enum
-  Pon2 = Pon2Fqdn, Ishikawa = &quot;ishikawapuyo.net&quot;, Ips = &quot;ips.karou.jp&quot;">SimulatorFqdn</a></li>
+  Pon2 = Pon2Fqdn, IshikawaPuyo = &quot;ishikawapuyo.net&quot;, Ips = &quot;ips.karou.jp&quot;">SimulatorFqdn</a></li>
 
     </ul>
   </details>
@@ -69,7 +69,7 @@
     <summary><a class="reference reference-toplevel" href="#12" id="62">Procs</a></summary>
     <ul class="simple simple-toc-section">
       <ul class="simple nested-toc-section">parseSimulatorFqdn
-  <li><a class="reference" href="#parseSimulatorFqdn%2Cstring" title="parseSimulatorFqdn(str: string): StrErrorResult[SimulatorFqdn]">parseSimulatorFqdn(str: string): StrErrorResult[SimulatorFqdn]</a></li>
+  <li><a class="reference" href="#parseSimulatorFqdn%2Cstring" title="parseSimulatorFqdn(str: string): Pon2Result[SimulatorFqdn]">parseSimulatorFqdn(str: string): Pon2Result[SimulatorFqdn]</a></li>
 
 </ul>
 
@@ -95,7 +95,7 @@
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
-    <a class="reference external" href="../private/results2.html">../private/results2</a>, <a class="reference external" href="../private/tables.html">../private/tables</a>
+    <a class="reference external" href="../utils.html">../utils</a>
   </dl>
 </div>
 <div class="section" id="7">
@@ -103,10 +103,10 @@
   <dl class="item">
     <div id="SimulatorFqdn">
   <dt><pre><a href="fqdn.html#SimulatorFqdn"><span class="Identifier">SimulatorFqdn</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">Pon2</span> <span class="Other">=</span> <span class="Identifier">Pon2Fqdn</span><span class="Other">,</span> <span class="Identifier">Ishikawa</span> <span class="Other">=</span> <span class="StringLit">&quot;ishikawapuyo.net&quot;</span><span class="Other">,</span> <span class="Identifier">Ips</span> <span class="Other">=</span> <span class="StringLit">&quot;ips.karou.jp&quot;</span></pre></dt>
+  <span class="Identifier">Pon2</span> <span class="Other">=</span> <span class="Identifier">Pon2Fqdn</span><span class="Other">,</span> <span class="Identifier">IshikawaPuyo</span> <span class="Other">=</span> <span class="StringLit">&quot;ishikawapuyo.net&quot;</span><span class="Other">,</span> <span class="Identifier">Ips</span> <span class="Other">=</span> <span class="StringLit">&quot;ips.karou.jp&quot;</span></pre></dt>
   <dd>
     
-    FQDN of the web simulator.
+    FQDN of web simulators.
     
   </dd>
 </div>
@@ -118,7 +118,7 @@
   <dl class="item">
     <div id="parseSimulatorFqdn-procs-all">
   <div id="parseSimulatorFqdn,string">
-  <dt><pre><span class="Keyword">func</span> <a href="#parseSimulatorFqdn%2Cstring"><span class="Identifier">parseSimulatorFqdn</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a><span class="Other">[</span><a href="fqdn.html#SimulatorFqdn"><span class="Identifier">SimulatorFqdn</span></a><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#parseSimulatorFqdn%2Cstring"><span class="Identifier">parseSimulatorFqdn</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a><span class="Other">[</span><a href="fqdn.html#SimulatorFqdn"><span class="Identifier">SimulatorFqdn</span></a><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
     <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -134,7 +134,7 @@
 <div class="section" id="19">
   <h1><a class="toc-backref" href="#19">Exports</a></h1>
   <dl class="item">
-    <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a>, <a href="../private/results2.html#context,StrErrorResult[T],string"><span class="Identifier">context</span></a>
+    <a href="../utils/results2.html#context,Pon2Result[T],string"><span class="Identifier">context</span></a>, <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a>
   </dl>
 </div>
 
@@ -144,7 +144,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-07 16:41:24 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-20 04:26:45 UTC</small>
       </div>
     </div>
   </div>

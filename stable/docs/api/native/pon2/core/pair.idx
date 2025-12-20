@@ -1,20 +1,20 @@
 nimTitle	pair	pon2/core/pair.html	module src/pon2/core/pair		0
-nim	Pair	pon2/core/pair.html#Pair	enum Pair		15
-nim	init	pon2/core/pair.html#init,typePair,Cell,Cell	proc init(T: type Pair; pivot, rotor: Cell): T:type		52
-nim	init	pon2/core/pair.html#init,typePair	proc init(T: type Pair): T:type		61
-nim	pivot	pon2/core/pair.html#pivot,Pair	proc pivot(self: Pair): Cell		68
-nim	rotor	pon2/core/pair.html#rotor,Pair	proc rotor(self: Pair): Cell		71
-nim	isDouble	pon2/core/pair.html#isDouble,Pair	proc isDouble(self: Pair): bool		74
-nim	pivot=	pon2/core/pair.html#pivot=,Pair,Cell	proc pivot=(self: var Pair; colorPuyo: Cell)		82
-nim	rotor=	pon2/core/pair.html#rotor=,Pair,Cell	proc rotor=(self: var Pair; colorPuyo: Cell)		88
-nim	swapped	pon2/core/pair.html#swapped,Pair	proc swapped(self: Pair): Pair		98
-nim	swap	pon2/core/pair.html#swap,Pair	proc swap(self: var Pair)		102
-nim	cellCount	pon2/core/pair.html#cellCount,Pair,Cell	proc cellCount(self: Pair; cell: Cell): int		109
-nim	puyoCount	pon2/core/pair.html#puyoCount,Pair	proc puyoCount(self: Pair): int		113
-nim	colorPuyoCount	pon2/core/pair.html#colorPuyoCount,Pair	proc colorPuyoCount(self: Pair): int		117
-nim	garbagesCount	pon2/core/pair.html#garbagesCount,Pair	proc garbagesCount(self: Pair): int		121
-nim	parsePair	pon2/core/pair.html#parsePair,string	proc parsePair(str: string): StrErrorResult[Pair]		133
-nim	toUriQuery	pon2/core/pair.html#toUriQuery,Pair	proc toUriQuery(self: Pair; fqdn = Pon2): string		147
-nim	parsePair	pon2/core/pair.html#parsePair,string,SimulatorFqdn	proc parsePair(query: string; fqdn: SimulatorFqdn): StrErrorResult[Pair]		155
-nimgrp	init	pon2/core/pair.html#init-procs-all	proc		52
-nimgrp	parsepair	pon2/core/pair.html#parsePair-procs-all	proc		133
+nim	Pair	pon2/core/pair.html#Pair	enum Pair		16
+nim	init	pon2/core/pair.html#init,typePair,Cell,Cell	proc init(T: type Pair; pivot, rotor: Cell): T:type		53
+nim	init	pon2/core/pair.html#init,typePair	proc init(T: type Pair): T:type		62
+nim	pivot	pon2/core/pair.html#pivot,Pair	proc pivot(self: Pair): Cell		69
+nim	rotor	pon2/core/pair.html#rotor,Pair	proc rotor(self: Pair): Cell		72
+nim	isDouble	pon2/core/pair.html#isDouble,Pair	proc isDouble(self: Pair): bool		75
+nim	pivot=	pon2/core/pair.html#pivot=,Pair,Cell	proc pivot=(self: var Pair; colorPuyo: Cell)		83
+nim	rotor=	pon2/core/pair.html#rotor=,Pair,Cell	proc rotor=(self: var Pair; colorPuyo: Cell)		89
+nim	swapped	pon2/core/pair.html#swapped,Pair	proc swapped(self: Pair): Pair		99
+nim	swap	pon2/core/pair.html#swap,Pair	proc swap(self: var Pair)		103
+nim	cellCount	pon2/core/pair.html#cellCount,Pair,Cell	proc cellCount(self: Pair; cell: Cell): int		110
+nim	puyoCount	pon2/core/pair.html#puyoCount,Pair	proc puyoCount(self: Pair): int		114
+nim	coloredPuyoCount	pon2/core/pair.html#coloredPuyoCount,Pair	proc coloredPuyoCount(self: Pair): int		118
+nim	nuisancePuyoCount	pon2/core/pair.html#nuisancePuyoCount,Pair	proc nuisancePuyoCount(self: Pair): int		122
+nim	parsePair	pon2/core/pair.html#parsePair,string	proc parsePair(str: string): Pon2Result[Pair]		130
+nim	toUriQuery	pon2/core/pair.html#toUriQuery,Pair	proc toUriQuery(self: Pair; fqdn = Pon2): string		153
+nim	parsePair	pon2/core/pair.html#parsePair,string,SimulatorFqdn	proc parsePair(query: string; fqdn: SimulatorFqdn): Pon2Result[Pair]		161
+nimgrp	init	pon2/core/pair.html#init-procs-all	proc		53
+nimgrp	parsepair	pon2/core/pair.html#parsePair-procs-all	proc		130

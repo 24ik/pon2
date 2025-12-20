@@ -62,21 +62,17 @@
   mainOpt*: Opt[GoalMain]
   clearColorOpt*: Opt[GoalColor]">Goal</a></li>
 <li><a class="reference" href="#GoalColor" title="GoalColor {.pure.} = enum
-  All = &quot;&quot;, Red = &quot;赤&quot;, Green = &quot;緑&quot;, Blue = &quot;青&quot;, Yellow = &quot;黄&quot;,
-  Purple = &quot;紫&quot;, Garbages = &quot;おじゃま&quot;, Colors = &quot;色&quot;">GoalColor</a></li>
+  All = &quot;&quot;, Nuisance = &quot;おじゃま&quot;, Colored = &quot;色&quot;, Red = &quot;赤&quot;,
+  Green = &quot;緑&quot;, Blue = &quot;青&quot;, Yellow = &quot;黄&quot;, Purple = &quot;紫&quot;">GoalColor</a></li>
 <li><a class="reference" href="#GoalKind" title="GoalKind {.pure.} = enum
-  Chain = &quot;n連鎖する&quot;, Color = &quot;n色同時に消す&quot;,
-  Count = &quot;cぷよn個同時に消す&quot;,
-  Place = &quot;cぷよn箇所で同時に消す&quot;,
-  Connection = &quot;cぷよn連結で消す&quot;, AccumColor = &quot;累計n色消す&quot;,
-  AccumCount = &quot;cぷよ累計n個消す&quot;">GoalKind</a></li>
+  Chain, Color, Count, Place, Connection, AccumColor, AccumCount">GoalKind</a></li>
 <li><a class="reference" href="#GoalMain" title="GoalMain = object
   kind*: GoalKind
   color*: GoalColor
   val*: int
-  valOperator*: GoalValOperator">GoalMain</a></li>
-<li><a class="reference" href="#GoalValOperator" title="GoalValOperator {.pure.} = enum
-  Exact = &quot;ちょうど&quot;, AtLeast = &quot;以上&quot;">GoalValOperator</a></li>
+  operator*: GoalOperator">GoalMain</a></li>
+<li><a class="reference" href="#GoalOperator" title="GoalOperator {.pure.} = enum
+  Exact = &quot;ちょうど&quot;, AtLeast = &quot;以上&quot;">GoalOperator</a></li>
 
     </ul>
   </details>
@@ -90,8 +86,11 @@
 <li><a class="reference" href="#NoColorKinds" title="NoColorKinds = {GoalKind.Chain..GoalKind.Color, GoalKind.AccumColor}">NoColorKinds</a></li>
 <li><a class="reference" href="#NoneGoal" title="NoneGoal = (mainOpt: (oResultPrivate: false, vResultPrivate: (
     kind: GoalKind.Chain, color: GoalColor.All, val: 0,
-    valOperator: GoalValOperator.Exact)), clearColorOpt: (oResultPrivate: false,
+    operator: GoalOperator.Exact)), clearColorOpt: (oResultPrivate: false,
     vResultPrivate: GoalColor.All))">NoneGoal</a></li>
+<li><a class="reference" href="#NoneGoalColor" title="NoneGoalColor = (oResultPrivate: false, vResultPrivate: GoalColor.All)">NoneGoalColor</a></li>
+<li><a class="reference" href="#NoneGoalMain" title="NoneGoalMain = (oResultPrivate: false, vResultPrivate: (kind: GoalKind.Chain,
+    color: GoalColor.All, val: 0, operator: GoalOperator.Exact))">NoneGoalMain</a></li>
 
     </ul>
   </details>
@@ -105,22 +104,24 @@
 
 </ul>
 <ul class="simple nested-toc-section">init
-  <li><a class="reference" href="#init%2CtypeGoal" title="init(T: type Goal): T:type">init(T: type Goal): T:type</a></li>
-<li><a class="reference" href="#init%2CtypeGoal%2CGoalColor" title="init(T: type Goal; clearColor: GoalColor): T:type">init(T: type Goal; clearColor: GoalColor): T:type</a></li>
-<li><a class="reference" href="#init%2CtypeGoal%2CGoalKind%2CGoalColor%2Cint%2CGoalValOperator" title="init(T: type Goal; kind: GoalKind; color: GoalColor; val: int;
-     valOperator: GoalValOperator): T:type">init(T: type Goal; kind: GoalKind; color: GoalColor; val: int;
-     valOperator: GoalValOperator): T:type</a></li>
-<li><a class="reference" href="#init%2CtypeGoal%2CGoalKind%2CGoalColor%2Cint%2CGoalValOperator%2CGoalColor" title="init(T: type Goal; kind: GoalKind; color: GoalColor; val: int;
-     valOperator: GoalValOperator; clearColor: GoalColor): T:type">init(T: type Goal; kind: GoalKind; color: GoalColor; val: int;
-     valOperator: GoalValOperator; clearColor: GoalColor): T:type</a></li>
-<li><a class="reference" href="#init%2CtypeGoal%2CGoalKind%2Cint%2CGoalValOperator" title="init(T: type Goal; kind: GoalKind; val: int; valOperator: GoalValOperator): T:type">init(T: type Goal; kind: GoalKind; val: int; valOperator: GoalValOperator): T:type</a></li>
-<li><a class="reference" href="#init%2CtypeGoal%2CGoalKind%2Cint%2CGoalValOperator%2CGoalColor" title="init(T: type Goal; kind: GoalKind; val: int; valOperator: GoalValOperator;
-     clearColor: GoalColor): T:type">init(T: type Goal; kind: GoalKind; val: int; valOperator: GoalValOperator;
+  <li><a class="reference" href="#init%2CtypeGoal%2CGoalColor" title="init(T: type Goal; clearColor: GoalColor): T:type">init(T: type Goal; clearColor: GoalColor): T:type</a></li>
+<li><a class="reference" href="#init%2CtypeGoal" title="init(T: type Goal; clearColorOpt = NoneGoalColor): T:type">init(T: type Goal; clearColorOpt = NoneGoalColor): T:type</a></li>
+<li><a class="reference" href="#init%2CtypeGoal%2CGoalKind%2CGoalColor%2Cint%2CGoalOperator%2CGoalColor" title="init(T: type Goal; kind: GoalKind; color: GoalColor; val: int;
+     operator: GoalOperator; clearColor: GoalColor): T:type">init(T: type Goal; kind: GoalKind; color: GoalColor; val: int;
+     operator: GoalOperator; clearColor: GoalColor): T:type</a></li>
+<li><a class="reference" href="#init%2CtypeGoal%2CGoalKind%2CGoalColor%2Cint%2CGoalOperator" title="init(T: type Goal; kind: GoalKind; color: GoalColor; val: int;
+     operator: GoalOperator; clearColorOpt = NoneGoalColor): T:type">init(T: type Goal; kind: GoalKind; color: GoalColor; val: int;
+     operator: GoalOperator; clearColorOpt = NoneGoalColor): T:type</a></li>
+<li><a class="reference" href="#init%2CtypeGoal%2CGoalKind%2Cint%2CGoalOperator%2CGoalColor" title="init(T: type Goal; kind: GoalKind; val: int; operator: GoalOperator;
+     clearColor: GoalColor): T:type">init(T: type Goal; kind: GoalKind; val: int; operator: GoalOperator;
      clearColor: GoalColor): T:type</a></li>
-<li><a class="reference" href="#init%2CtypeGoalMain%2CGoalKind%2CGoalColor%2Cint%2CGoalValOperator" title="init(T: type GoalMain; kind: GoalKind; color: GoalColor; val: int;
-     valOperator: GoalValOperator): T:type">init(T: type GoalMain; kind: GoalKind; color: GoalColor; val: int;
-     valOperator: GoalValOperator): T:type</a></li>
-<li><a class="reference" href="#init%2CtypeGoalMain%2CGoalKind%2Cint%2CGoalValOperator" title="init(T: type GoalMain; kind: GoalKind; val: int; valOperator: GoalValOperator): T:type">init(T: type GoalMain; kind: GoalKind; val: int; valOperator: GoalValOperator): T:type</a></li>
+<li><a class="reference" href="#init%2CtypeGoal%2CGoalKind%2Cint%2CGoalOperator" title="init(T: type Goal; kind: GoalKind; val: int; operator: GoalOperator;
+     clearColorOpt = NoneGoalColor): T:type">init(T: type Goal; kind: GoalKind; val: int; operator: GoalOperator;
+     clearColorOpt = NoneGoalColor): T:type</a></li>
+<li><a class="reference" href="#init%2CtypeGoalMain%2CGoalKind%2CGoalColor%2Cint%2CGoalOperator" title="init(T: type GoalMain; kind: GoalKind; color: GoalColor; val: int;
+     operator: GoalOperator): T:type">init(T: type GoalMain; kind: GoalKind; color: GoalColor; val: int;
+     operator: GoalOperator): T:type</a></li>
+<li><a class="reference" href="#init%2CtypeGoalMain%2CGoalKind%2Cint%2CGoalOperator" title="init(T: type GoalMain; kind: GoalKind; val: int; operator: GoalOperator): T:type">init(T: type GoalMain; kind: GoalKind; val: int; operator: GoalOperator): T:type</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">isNormalized
@@ -140,12 +141,12 @@
 
 </ul>
 <ul class="simple nested-toc-section">parseGoal
-  <li><a class="reference" href="#parseGoal%2Cstring%2CSimulatorFqdn" title="parseGoal(query: string; fqdn: SimulatorFqdn): StrErrorResult[Goal]">parseGoal(query: string; fqdn: SimulatorFqdn): StrErrorResult[Goal]</a></li>
-<li><a class="reference" href="#parseGoal%2Cstring" title="parseGoal(str: string): StrErrorResult[Goal]">parseGoal(str: string): StrErrorResult[Goal]</a></li>
+  <li><a class="reference" href="#parseGoal%2Cstring%2CSimulatorFqdn" title="parseGoal(query: string; fqdn: SimulatorFqdn): Pon2Result[Goal]">parseGoal(query: string; fqdn: SimulatorFqdn): Pon2Result[Goal]</a></li>
+<li><a class="reference" href="#parseGoal%2Cstring" title="parseGoal(str: string): Pon2Result[Goal]">parseGoal(str: string): Pon2Result[Goal]</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">toUriQuery
-  <li><a class="reference" href="#toUriQuery%2CGoal" title="toUriQuery(self: Goal; fqdn = Pon2): StrErrorResult[string]">toUriQuery(self: Goal; fqdn = Pon2): StrErrorResult[string]</a></li>
+  <li><a class="reference" href="#toUriQuery%2CGoal" title="toUriQuery(self: Goal; fqdn = Pon2): Pon2Result[string]">toUriQuery(self: Goal; fqdn = Pon2): Pon2Result[string]</a></li>
 
 </ul>
 
@@ -167,7 +168,7 @@
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
-    <a class="reference external" href="fqdn.html">fqdn</a>, <a class="reference external" href="../private/assign.html">../private/assign</a>, <a class="reference external" href="../private/results2.html">../private/results2</a>, <a class="reference external" href="../private/strutils.html">../private/strutils</a>, <a class="reference external" href="../private/tables.html">../private/tables</a>
+    <a class="reference external" href="fqdn.html">fqdn</a>, <a class="reference external" href="../utils.html">../utils</a>, <a class="reference external" href="../private/assign.html">../private/assign</a>, <a class="reference external" href="../private/strutils.html">../private/strutils</a>, <a class="reference external" href="../private/tables.html">../private/tables</a>
   </dl>
 </div>
 <div class="section" id="7">
@@ -179,27 +180,23 @@
   <span class="Identifier">clearColorOpt</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Opt</span><span class="Other">[</span><a href="goal.html#GoalColor"><span class="Identifier">GoalColor</span></a><span class="Other">]</span></pre></dt>
   <dd>
     
-    Nazo Puyo goal to clear.
+    Nazo Puyo goal.
     
   </dd>
 </div>
 <div id="GoalColor">
   <dt><pre><a href="goal.html#GoalColor"><span class="Identifier">GoalColor</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">All</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">,</span> <span class="Identifier">Red</span> <span class="Other">=</span> <span class="StringLit">&quot;赤&quot;</span><span class="Other">,</span> <span class="Identifier">Green</span> <span class="Other">=</span> <span class="StringLit">&quot;緑&quot;</span><span class="Other">,</span> <span class="Identifier">Blue</span> <span class="Other">=</span> <span class="StringLit">&quot;青&quot;</span><span class="Other">,</span> <span class="Identifier">Yellow</span> <span class="Other">=</span> <span class="StringLit">&quot;黄&quot;</span><span class="Other">,</span>
-  <span class="Identifier">Purple</span> <span class="Other">=</span> <span class="StringLit">&quot;紫&quot;</span><span class="Other">,</span> <span class="Identifier">Garbages</span> <span class="Other">=</span> <span class="StringLit">&quot;おじゃま&quot;</span><span class="Other">,</span> <span class="Identifier">Colors</span> <span class="Other">=</span> <span class="StringLit">&quot;色&quot;</span></pre></dt>
+  <span class="Identifier">All</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">,</span> <span class="Identifier">Nuisance</span> <span class="Other">=</span> <span class="StringLit">&quot;おじゃま&quot;</span><span class="Other">,</span> <span class="Identifier">Colored</span> <span class="Other">=</span> <span class="StringLit">&quot;色&quot;</span><span class="Other">,</span> <span class="Identifier">Red</span> <span class="Other">=</span> <span class="StringLit">&quot;赤&quot;</span><span class="Other">,</span>
+  <span class="Identifier">Green</span> <span class="Other">=</span> <span class="StringLit">&quot;緑&quot;</span><span class="Other">,</span> <span class="Identifier">Blue</span> <span class="Other">=</span> <span class="StringLit">&quot;青&quot;</span><span class="Other">,</span> <span class="Identifier">Yellow</span> <span class="Other">=</span> <span class="StringLit">&quot;黄&quot;</span><span class="Other">,</span> <span class="Identifier">Purple</span> <span class="Other">=</span> <span class="StringLit">&quot;紫&quot;</span></pre></dt>
   <dd>
     
-    'c' in the <tt class="docutils literal"><span class="pre"><span class="Identifier">GoalKind</span></span></tt>.
+    Color in the goal.
     
   </dd>
 </div>
 <div id="GoalKind">
   <dt><pre><a href="goal.html#GoalKind"><span class="Identifier">GoalKind</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">Chain</span> <span class="Other">=</span> <span class="StringLit">&quot;n連鎖する&quot;</span><span class="Other">,</span> <span class="Identifier">Color</span> <span class="Other">=</span> <span class="StringLit">&quot;n色同時に消す&quot;</span><span class="Other">,</span>
-  <span class="Identifier">Count</span> <span class="Other">=</span> <span class="StringLit">&quot;cぷよn個同時に消す&quot;</span><span class="Other">,</span>
-  <span class="Identifier">Place</span> <span class="Other">=</span> <span class="StringLit">&quot;cぷよn箇所で同時に消す&quot;</span><span class="Other">,</span>
-  <span class="Identifier">Connection</span> <span class="Other">=</span> <span class="StringLit">&quot;cぷよn連結で消す&quot;</span><span class="Other">,</span> <span class="Identifier">AccumColor</span> <span class="Other">=</span> <span class="StringLit">&quot;累計n色消す&quot;</span><span class="Other">,</span>
-  <span class="Identifier">AccumCount</span> <span class="Other">=</span> <span class="StringLit">&quot;cぷよ累計n個消す&quot;</span></pre></dt>
+  <span class="Identifier">Chain</span><span class="Other">,</span> <span class="Identifier">Color</span><span class="Other">,</span> <span class="Identifier">Count</span><span class="Other">,</span> <span class="Identifier">Place</span><span class="Other">,</span> <span class="Identifier">Connection</span><span class="Other">,</span> <span class="Identifier">AccumColor</span><span class="Other">,</span> <span class="Identifier">AccumCount</span></pre></dt>
   <dd>
     
     Kind of the goal to clear the Nazo Puyo.
@@ -211,19 +208,19 @@
   <span class="Identifier">kind</span><span class="Operator">*</span><span class="Other">:</span> <a href="goal.html#GoalKind"><span class="Identifier">GoalKind</span></a>
   <span class="Identifier">color</span><span class="Operator">*</span><span class="Other">:</span> <a href="goal.html#GoalColor"><span class="Identifier">GoalColor</span></a>
   <span class="Identifier">val</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
-  <span class="Identifier">valOperator</span><span class="Operator">*</span><span class="Other">:</span> <a href="goal.html#GoalValOperator"><span class="Identifier">GoalValOperator</span></a></pre></dt>
+  <span class="Identifier">operator</span><span class="Operator">*</span><span class="Other">:</span> <a href="goal.html#GoalOperator"><span class="Identifier">GoalOperator</span></a></pre></dt>
   <dd>
     
     Main part of the Nazo Puyo goal.
     
   </dd>
 </div>
-<div id="GoalValOperator">
-  <dt><pre><a href="goal.html#GoalValOperator"><span class="Identifier">GoalValOperator</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
+<div id="GoalOperator">
+  <dt><pre><a href="goal.html#GoalOperator"><span class="Identifier">GoalOperator</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
   <span class="Identifier">Exact</span> <span class="Other">=</span> <span class="StringLit">&quot;ちょうど&quot;</span><span class="Other">,</span> <span class="Identifier">AtLeast</span> <span class="Other">=</span> <span class="StringLit">&quot;以上&quot;</span></pre></dt>
   <dd>
     
-    Operator used in comparison of the value.
+    Operator used in a value comparison.
     
   </dd>
 </div>
@@ -238,7 +235,7 @@
               <span class="DecNumber">GoalKind.AccumCount</span><span class="Other">}</span></pre></dt>
   <dd>
     
-    All goal kinds containing 'c'.
+    
     
   </dd>
 </div>
@@ -246,15 +243,32 @@
   <dt><pre><a href="goal.html#NoColorKinds"><span class="Identifier">NoColorKinds</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">GoalKind.Chain</span><span class="Other">..</span><span class="DecNumber">GoalKind.Color</span><span class="Other">,</span> <span class="DecNumber">GoalKind.AccumColor</span><span class="Other">}</span></pre></dt>
   <dd>
     
-    All goal kinds not containing 'c'.
+    
     
   </dd>
 </div>
 <div id="NoneGoal">
   <dt><pre><a href="goal.html#NoneGoal"><span class="Identifier">NoneGoal</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">mainOpt</span><span class="Other">:</span> <span class="Other">(</span><span class="Identifier">oResultPrivate</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">vResultPrivate</span><span class="Other">:</span> <span class="Other">(</span>
     <span class="Identifier">kind</span><span class="Other">:</span> <span class="DecNumber">GoalKind.Chain</span><span class="Other">,</span> <span class="Identifier">color</span><span class="Other">:</span> <span class="DecNumber">GoalColor.All</span><span class="Other">,</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="DecNumber">0</span><span class="Other">,</span>
-    <span class="Identifier">valOperator</span><span class="Other">:</span> <span class="DecNumber">GoalValOperator.Exact</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span> <span class="Identifier">clearColorOpt</span><span class="Other">:</span> <span class="Other">(</span><span class="Identifier">oResultPrivate</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+    <span class="Identifier">operator</span><span class="Other">:</span> <span class="DecNumber">GoalOperator.Exact</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span> <span class="Identifier">clearColorOpt</span><span class="Other">:</span> <span class="Other">(</span><span class="Identifier">oResultPrivate</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
     <span class="Identifier">vResultPrivate</span><span class="Other">:</span> <span class="DecNumber">GoalColor.All</span><span class="Other">)</span><span class="Other">)</span></pre></dt>
+  <dd>
+    
+    
+    
+  </dd>
+</div>
+<div id="NoneGoalColor">
+  <dt><pre><a href="goal.html#NoneGoalColor"><span class="Identifier">NoneGoalColor</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">oResultPrivate</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">vResultPrivate</span><span class="Other">:</span> <span class="DecNumber">GoalColor.All</span><span class="Other">)</span></pre></dt>
+  <dd>
+    
+    
+    
+  </dd>
+</div>
+<div id="NoneGoalMain">
+  <dt><pre><a href="goal.html#NoneGoalMain"><span class="Identifier">NoneGoalMain</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">oResultPrivate</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">vResultPrivate</span><span class="Other">:</span> <span class="Other">(</span><span class="Identifier">kind</span><span class="Other">:</span> <span class="DecNumber">GoalKind.Chain</span><span class="Other">,</span>
+    <span class="Identifier">color</span><span class="Other">:</span> <span class="DecNumber">GoalColor.All</span><span class="Other">,</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="DecNumber">0</span><span class="Other">,</span> <span class="Identifier">operator</span><span class="Other">:</span> <span class="DecNumber">GoalOperator.Exact</span><span class="Other">)</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -279,15 +293,7 @@
 
 </div>
 <div id="init-procs-all">
-  <div id="init,typeGoal">
-  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeGoal"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">Goal</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-  <dd>
-    
-    
-    
-  </dd>
-</div>
-<div id="init,typeGoal,GoalColor">
+  <div id="init,typeGoal,GoalColor">
   <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeGoal%2CGoalColor"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">Goal</span><span class="Other">;</span> <span class="Identifier">clearColor</span><span class="Other">:</span> <a href="goal.html#GoalColor"><span class="Identifier">GoalColor</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
@@ -296,18 +302,18 @@
     
   </dd>
 </div>
-<div id="init,typeGoal,GoalKind,GoalColor,int,GoalValOperator">
-  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeGoal%2CGoalKind%2CGoalColor%2Cint%2CGoalValOperator"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">Goal</span><span class="Other">;</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="goal.html#GoalKind"><span class="Identifier">GoalKind</span></a><span class="Other">;</span> <span class="Identifier">color</span><span class="Other">:</span> <a href="goal.html#GoalColor"><span class="Identifier">GoalColor</span></a><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span>
-          <span class="Identifier">valOperator</span><span class="Other">:</span> <a href="goal.html#GoalValOperator"><span class="Identifier">GoalValOperator</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<div id="init,typeGoal">
+  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeGoal"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">Goal</span><span class="Other">;</span> <span class="Identifier">clearColorOpt</span> <span class="Other">=</span> <span class="Identifier">NoneGoalColor</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
     
   </dd>
 </div>
-<div id="init,typeGoal,GoalKind,GoalColor,int,GoalValOperator,GoalColor">
-  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeGoal%2CGoalKind%2CGoalColor%2Cint%2CGoalValOperator%2CGoalColor"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">Goal</span><span class="Other">;</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="goal.html#GoalKind"><span class="Identifier">GoalKind</span></a><span class="Other">;</span> <span class="Identifier">color</span><span class="Other">:</span> <a href="goal.html#GoalColor"><span class="Identifier">GoalColor</span></a><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span>
-          <span class="Identifier">valOperator</span><span class="Other">:</span> <a href="goal.html#GoalValOperator"><span class="Identifier">GoalValOperator</span></a><span class="Other">;</span> <span class="Identifier">clearColor</span><span class="Other">:</span> <a href="goal.html#GoalColor"><span class="Identifier">GoalColor</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
+<div id="init,typeGoal,GoalKind,GoalColor,int,GoalOperator,GoalColor">
+  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeGoal%2CGoalKind%2CGoalColor%2Cint%2CGoalOperator%2CGoalColor"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">Goal</span><span class="Other">;</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="goal.html#GoalKind"><span class="Identifier">GoalKind</span></a><span class="Other">;</span> <span class="Identifier">color</span><span class="Other">:</span> <a href="goal.html#GoalColor"><span class="Identifier">GoalColor</span></a><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span>
+          <span class="Identifier">operator</span><span class="Other">:</span> <a href="goal.html#GoalOperator"><span class="Identifier">GoalOperator</span></a><span class="Other">;</span> <span class="Identifier">clearColor</span><span class="Other">:</span> <a href="goal.html#GoalColor"><span class="Identifier">GoalColor</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
     <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -315,8 +321,9 @@
     
   </dd>
 </div>
-<div id="init,typeGoal,GoalKind,int,GoalValOperator">
-  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeGoal%2CGoalKind%2Cint%2CGoalValOperator"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">Goal</span><span class="Other">;</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="goal.html#GoalKind"><span class="Identifier">GoalKind</span></a><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">valOperator</span><span class="Other">:</span> <a href="goal.html#GoalValOperator"><span class="Identifier">GoalValOperator</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.
+<div id="init,typeGoal,GoalKind,GoalColor,int,GoalOperator">
+  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeGoal%2CGoalKind%2CGoalColor%2Cint%2CGoalOperator"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">Goal</span><span class="Other">;</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="goal.html#GoalKind"><span class="Identifier">GoalKind</span></a><span class="Other">;</span> <span class="Identifier">color</span><span class="Other">:</span> <a href="goal.html#GoalColor"><span class="Identifier">GoalColor</span></a><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span>
+          <span class="Identifier">operator</span><span class="Other">:</span> <a href="goal.html#GoalOperator"><span class="Identifier">GoalOperator</span></a><span class="Other">;</span> <span class="Identifier">clearColorOpt</span> <span class="Other">=</span> <span class="Identifier">NoneGoalColor</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.
     <span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -324,8 +331,8 @@
     
   </dd>
 </div>
-<div id="init,typeGoal,GoalKind,int,GoalValOperator,GoalColor">
-  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeGoal%2CGoalKind%2Cint%2CGoalValOperator%2CGoalColor"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">Goal</span><span class="Other">;</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="goal.html#GoalKind"><span class="Identifier">GoalKind</span></a><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">valOperator</span><span class="Other">:</span> <a href="goal.html#GoalValOperator"><span class="Identifier">GoalValOperator</span></a><span class="Other">;</span>
+<div id="init,typeGoal,GoalKind,int,GoalOperator,GoalColor">
+  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeGoal%2CGoalKind%2Cint%2CGoalOperator%2CGoalColor"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">Goal</span><span class="Other">;</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="goal.html#GoalKind"><span class="Identifier">GoalKind</span></a><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">operator</span><span class="Other">:</span> <a href="goal.html#GoalOperator"><span class="Identifier">GoalOperator</span></a><span class="Other">;</span>
           <span class="Identifier">clearColor</span><span class="Other">:</span> <a href="goal.html#GoalColor"><span class="Identifier">GoalColor</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -333,18 +340,27 @@
     
   </dd>
 </div>
-<div id="init,typeGoalMain,GoalKind,GoalColor,int,GoalValOperator">
-  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeGoalMain%2CGoalKind%2CGoalColor%2Cint%2CGoalValOperator"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">GoalMain</span><span class="Other">;</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="goal.html#GoalKind"><span class="Identifier">GoalKind</span></a><span class="Other">;</span> <span class="Identifier">color</span><span class="Other">:</span> <a href="goal.html#GoalColor"><span class="Identifier">GoalColor</span></a><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span>
-          <span class="Identifier">valOperator</span><span class="Other">:</span> <a href="goal.html#GoalValOperator"><span class="Identifier">GoalValOperator</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<div id="init,typeGoal,GoalKind,int,GoalOperator">
+  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeGoal%2CGoalKind%2Cint%2CGoalOperator"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">Goal</span><span class="Other">;</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="goal.html#GoalKind"><span class="Identifier">GoalKind</span></a><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">operator</span><span class="Other">:</span> <a href="goal.html#GoalOperator"><span class="Identifier">GoalOperator</span></a><span class="Other">;</span>
+          <span class="Identifier">clearColorOpt</span> <span class="Other">=</span> <span class="Identifier">NoneGoalColor</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
     
   </dd>
 </div>
-<div id="init,typeGoalMain,GoalKind,int,GoalValOperator">
-  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeGoalMain%2CGoalKind%2Cint%2CGoalValOperator"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">GoalMain</span><span class="Other">;</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="goal.html#GoalKind"><span class="Identifier">GoalKind</span></a><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span>
-          <span class="Identifier">valOperator</span><span class="Other">:</span> <a href="goal.html#GoalValOperator"><span class="Identifier">GoalValOperator</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<div id="init,typeGoalMain,GoalKind,GoalColor,int,GoalOperator">
+  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeGoalMain%2CGoalKind%2CGoalColor%2Cint%2CGoalOperator"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">GoalMain</span><span class="Other">;</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="goal.html#GoalKind"><span class="Identifier">GoalKind</span></a><span class="Other">;</span> <span class="Identifier">color</span><span class="Other">:</span> <a href="goal.html#GoalColor"><span class="Identifier">GoalColor</span></a><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span>
+          <span class="Identifier">operator</span><span class="Other">:</span> <a href="goal.html#GoalOperator"><span class="Identifier">GoalOperator</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    
+    
+  </dd>
+</div>
+<div id="init,typeGoalMain,GoalKind,int,GoalOperator">
+  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypeGoalMain%2CGoalKind%2Cint%2CGoalOperator"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">GoalMain</span><span class="Other">;</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="goal.html#GoalKind"><span class="Identifier">GoalKind</span></a><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">operator</span><span class="Other">:</span> <a href="goal.html#GoalOperator"><span class="Identifier">GoalOperator</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.
+    <span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -403,8 +419,8 @@
 </div>
 <div id="parseGoal-procs-all">
   <div id="parseGoal,string,SimulatorFqdn">
-  <dt><pre><span class="Keyword">func</span> <a href="#parseGoal%2Cstring%2CSimulatorFqdn"><span class="Identifier">parseGoal</span></a><span class="Other">(</span><span class="Identifier">query</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">fqdn</span><span class="Other">:</span> <a href="fqdn.html#SimulatorFqdn"><span class="Identifier">SimulatorFqdn</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a><span class="Other">[</span><a href="goal.html#Goal"><span class="Identifier">Goal</span></a><span class="Other">]</span> {.
-    <span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">func</span> <a href="#parseGoal%2Cstring%2CSimulatorFqdn"><span class="Identifier">parseGoal</span></a><span class="Other">(</span><span class="Identifier">query</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">fqdn</span><span class="Other">:</span> <a href="fqdn.html#SimulatorFqdn"><span class="Identifier">SimulatorFqdn</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a><span class="Other">[</span><a href="goal.html#Goal"><span class="Identifier">Goal</span></a><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
+    <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the goal converted from the URI query.
@@ -412,8 +428,8 @@
   </dd>
 </div>
 <div id="parseGoal,string">
-  <dt><pre><span class="Keyword">func</span> <a href="#parseGoal%2Cstring"><span class="Identifier">parseGoal</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a><span class="Other">[</span><a href="goal.html#Goal"><span class="Identifier">Goal</span></a><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">func</span> <a href="#parseGoal%2Cstring"><span class="Identifier">parseGoal</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a><span class="Other">[</span><a href="goal.html#Goal"><span class="Identifier">Goal</span></a><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the goal converted from the string representation.
@@ -424,8 +440,8 @@
 </div>
 <div id="toUriQuery-procs-all">
   <div id="toUriQuery,Goal">
-  <dt><pre><span class="Keyword">func</span> <a href="#toUriQuery%2CGoal"><span class="Identifier">toUriQuery</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="goal.html#Goal"><span class="Identifier">Goal</span></a><span class="Other">;</span> <span class="Identifier">fqdn</span> <span class="Other">=</span> <span class="Identifier">Pon2</span><span class="Other">)</span><span class="Other">:</span> <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
-    <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">func</span> <a href="#toUriQuery%2CGoal"><span class="Identifier">toUriQuery</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="goal.html#Goal"><span class="Identifier">Goal</span></a><span class="Other">;</span> <span class="Identifier">fqdn</span> <span class="Other">=</span> <span class="Identifier">Pon2</span><span class="Other">)</span><span class="Other">:</span> <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the URI query converted from the requirement.
@@ -440,7 +456,7 @@
 <div class="section" id="19">
   <h1><a class="toc-backref" href="#19">Exports</a></h1>
   <dl class="item">
-    <a href="../private/results2.html#StrErrorResult"><span class="Identifier">StrErrorResult</span></a>, <a href="../private/results2.html#context,StrErrorResult[T],string"><span class="Identifier">context</span></a>
+    <a href="../utils/results2.html#context,Pon2Result[T],string"><span class="Identifier">context</span></a>, <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a>
   </dl>
 </div>
 
@@ -450,7 +466,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-07 16:41:25 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-20 04:26:46 UTC</small>
       </div>
     </div>
   </div>

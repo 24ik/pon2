@@ -1,3 +1,3 @@
 nimTitle	permute	pon2/app/permute.html	module src/pon2/app/permute		0
-nim	permute	pon2/app/permute.html#permute,NazoPuyo,openArray[int],bool,bool	proc permute(self: NazoPuyo; fixIndices: openArray[int];\n        allowDoubleNotLast, allowDoubleLast: bool): seq[NazoPuyo]		106
-nim	asyncPermute	pon2/app/permute.html#asyncPermute,NazoPuyo,openArray[int],bool,bool,ref.tuple[int,int]	proc asyncPermute(self: NazoPuyo; fixIndices: openArray[int];\n             allowDoubleNotLast, allowDoubleLast: bool;\n             progressRef: ref tuple[now, total: int] = nil): Future[\n    seq[NazoPuyo]]		139
+nim	permute	pon2/app/permute.html#permute,NazoPuyo,openArray[int],openArray[int]	proc permute(self: NazoPuyo; fixIndices, allowDoubleIndices: openArray[int]): seq[\n    NazoPuyo]		99
+nim	asyncPermute	pon2/app/permute.html#asyncPermute,NazoPuyo,openArray[int],openArray[int],ref.tuple[int,int]	proc asyncPermute(self: NazoPuyo; fixIndices, allowDoubleIndices: openArray[int];\n             progressRef: ref tuple[now, total: int] = nil): Future[\n    seq[NazoPuyo]]		127

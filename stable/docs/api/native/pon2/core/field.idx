@@ -1,51 +1,45 @@
 nimTitle	field	pon2/core/field.html	module src/pon2/core/field		0
-nim	Field	pon2/core/field.html#Field	object Field		19
-nim	init	pon2/core/field.html#init,typeField,Rule	proc init(T: type Field; rule: Rule = Rule.Tsu): Field		34
-nim	isDead	pon2/core/field.html#isDead,Field	proc isDead(self: Field): bool		57
-nim	invalidPlacements	pon2/core/field.html#invalidPlacements,Field	proc invalidPlacements(self: Field): set[Placement]		65
-nim	validPlacements	pon2/core/field.html#validPlacements,Field	proc validPlacements(self: Field): set[Placement]		69
-nim	validDoublePlacements	pon2/core/field.html#validDoublePlacements,Field	proc validDoublePlacements(self: Field): set[Placement]		73
-nim	`[]`	pon2/core/field.html#[],Field,Row,Col	proc `[]`(self: Field; row: Row; col: Col): Cell		85
-nim	`[]=`	pon2/core/field.html#[]=,Field,Row,Col,Cell	proc `[]=`(self: var Field; row: Row; col: Col; cell: Cell)		102
-nim	insert	pon2/core/field.html#insert,Field,Row,Col,Cell	proc insert(self: var Field; row: Row; col: Col; cell: Cell)		111
-nim	del	pon2/core/field.html#del,Field,Row,Col	proc del(self: var Field; row: Row; col: Col)		119
-nim	cellCount	pon2/core/field.html#cellCount,Field,Cell	proc cellCount(self: Field; cell: Cell): int		162
-nim	puyoCount	pon2/core/field.html#puyoCount,Field	proc puyoCount(self: Field): int		182
-nim	colorPuyoCount	pon2/core/field.html#colorPuyoCount,Field	proc colorPuyoCount(self: Field): int		186
-nim	garbagesCount	pon2/core/field.html#garbagesCount,Field	proc garbagesCount(self: Field): int		190
-nim	connection2	pon2/core/field.html#connection2,Field	proc connection2(self: Field): Field		198
-nim	connection2Vertical	pon2/core/field.html#connection2Vertical,Field	proc connection2Vertical(self: Field): Field		206
-nim	connection2Horizontal	pon2/core/field.html#connection2Horizontal,Field	proc connection2Horizontal(self: Field): Field		215
-nim	connection3	pon2/core/field.html#connection3,Field	proc connection3(self: Field): Field		228
-nim	connection3Vertical	pon2/core/field.html#connection3Vertical,Field	proc connection3Vertical(self: Field): Field		236
-nim	connection3Horizontal	pon2/core/field.html#connection3Horizontal,Field	proc connection3Horizontal(self: Field): Field		245
-nim	connection3LShape	pon2/core/field.html#connection3LShape,Field	proc connection3LShape(self: Field): Field		254
-nim	shiftUp	pon2/core/field.html#shiftUp,Field	proc shiftUp(self: var Field)		267
-nim	shiftDown	pon2/core/field.html#shiftDown,Field	proc shiftDown(self: var Field)		272
-nim	shiftRight	pon2/core/field.html#shiftRight,Field	proc shiftRight(self: var Field)		277
-nim	shiftLeft	pon2/core/field.html#shiftLeft,Field	proc shiftLeft(self: var Field)		282
-nim	flipVertical	pon2/core/field.html#flipVertical,Field	proc flipVertical(self: var Field)		291
-nim	flipHorizontal	pon2/core/field.html#flipHorizontal,Field	proc flipHorizontal(self: var Field)		296
-nim	rotate	pon2/core/field.html#rotate,Field	proc rotate(self: var Field)		305
-nim	crossRotate	pon2/core/field.html#crossRotate,Field	proc crossRotate(self: var Field)		311
-nim	place	pon2/core/field.html#place,Field,Pair,Placement	proc place(self: var Field; pair: Pair; placement: Placement)		388
-nim	place	pon2/core/field.html#place,Field,Pair,OptPlacement	proc place(self: var Field; pair: Pair; optPlacement: OptPlacement)		397
-nim	pop	pon2/core/field.html#pop,Field	proc pop(self: var Field): PopResult		409
-nim	canPop	pon2/core/field.html#canPop,Field	proc canPop(self: Field): bool		454
-nim	dropGarbages	pon2/core/field.html#dropGarbages,Field,array[Col,int],bool	proc dropGarbages(self: var Field; counts: array[Col, int]; dropHard: bool)		464
-nim	apply	pon2/core/field.html#apply,Field,Step	proc apply(self: var Field; step: Step)		484
-nim	settle	pon2/core/field.html#settle,Field	proc settle(self: var Field)		499
-nim	isSettled	pon2/core/field.html#isSettled,Field	proc isSettled(self: Field): bool		511
-nim	move	pon2/core/field.html#move,Field,Pair,Placement	proc move(self: var Field; pair: Pair; placement: Placement; calcConnection = true): MoveResult		585
-nim	move	pon2/core/field.html#move,Field,array[Col,int],bool	proc move(self: var Field; counts: array[Col, int]; dropHard: bool;\n     calcConnection = true): MoveResult		593
-nim	move	pon2/core/field.html#move,Field,bool	proc move(self: var Field; cross: bool; calcConnection = true): MoveResult		602
-nim	move	pon2/core/field.html#move,Field,Step	proc move(self: var Field; step: Step; calcConnection = true): MoveResult		610
-nim	toArray	pon2/core/field.html#toArray,Field	proc toArray(self: Field): array[Row, array[Col, Cell]]		622
-nim	toField	pon2/core/field.html#toField,array[Row,array[Col,Cell]],Rule	proc toField(cellArray: array[Row, array[Col, Cell]]; rule: Rule): Field		638
-nim	`$`	pon2/core/field.html#$,Field	proc `$`(self: Field): string		667
-nim	parseField	pon2/core/field.html#parseField,string	proc parseField(str: string): StrErrorResult[Field]		683
-nim	toUriQuery	pon2/core/field.html#toUriQuery,Field	proc toUriQuery(self: Field; fqdn = Pon2): StrErrorResult[string]		816
-nim	parseField	pon2/core/field.html#parseField,string,SimulatorFqdn	proc parseField(query: string; fqdn: SimulatorFqdn): StrErrorResult[Field]		928
-nimgrp	place	pon2/core/field.html#place-procs-all	proc		388
-nimgrp	move	pon2/core/field.html#move-procs-all	proc		585
-nimgrp	parsefield	pon2/core/field.html#parseField-procs-all	proc		683
+nim	Field	pon2/core/field.html#Field	object Field		22
+nim	init	pon2/core/field.html#init,typeField,Rule	proc init(T: type Field; rule: Rule = Rule.Tsu): Field		37
+nim	isDead	pon2/core/field.html#isDead,Field	proc isDead(self: Field): bool		60
+nim	invalidPlacements	pon2/core/field.html#invalidPlacements,Field	proc invalidPlacements(self: Field): set[Placement]		68
+nim	validPlacements	pon2/core/field.html#validPlacements,Field	proc validPlacements(self: Field): set[Placement]		72
+nim	validDoublePlacements	pon2/core/field.html#validDoublePlacements,Field	proc validDoublePlacements(self: Field): set[Placement]		76
+nim	`[]`	pon2/core/field.html#[],Field,Row,Col	proc `[]`(self: Field; row: Row; col: Col): Cell		88
+nim	`[]=`	pon2/core/field.html#[]=,Field,Row,Col,Cell	proc `[]=`(self: var Field; row: Row; col: Col; cell: Cell)		105
+nim	insert	pon2/core/field.html#insert,Field,Row,Col,Cell	proc insert(self: var Field; row: Row; col: Col; cell: Cell)		114
+nim	del	pon2/core/field.html#del,Field,Row,Col	proc del(self: var Field; row: Row; col: Col)		122
+nim	cellCount	pon2/core/field.html#cellCount,Field,Cell	proc cellCount(self: Field; cell: Cell): int		165
+nim	puyoCount	pon2/core/field.html#puyoCount,Field	proc puyoCount(self: Field): int		185
+nim	coloredPuyoCount	pon2/core/field.html#coloredPuyoCount,Field	proc coloredPuyoCount(self: Field): int		189
+nim	nuisancePuyoCount	pon2/core/field.html#nuisancePuyoCount,Field	proc nuisancePuyoCount(self: Field): int		193
+nim	connection2	pon2/core/field.html#connection2,Field	proc connection2(self: Field): Field		201
+nim	connection2Vertical	pon2/core/field.html#connection2Vertical,Field	proc connection2Vertical(self: Field): Field		209
+nim	connection2Horizontal	pon2/core/field.html#connection2Horizontal,Field	proc connection2Horizontal(self: Field): Field		218
+nim	connection3	pon2/core/field.html#connection3,Field	proc connection3(self: Field): Field		231
+nim	connection3Vertical	pon2/core/field.html#connection3Vertical,Field	proc connection3Vertical(self: Field): Field		239
+nim	connection3Horizontal	pon2/core/field.html#connection3Horizontal,Field	proc connection3Horizontal(self: Field): Field		248
+nim	connection3LShape	pon2/core/field.html#connection3LShape,Field	proc connection3LShape(self: Field): Field		257
+nim	shiftUp	pon2/core/field.html#shiftUp,Field	proc shiftUp(self: var Field)		270
+nim	shiftDown	pon2/core/field.html#shiftDown,Field	proc shiftDown(self: var Field)		275
+nim	shiftRight	pon2/core/field.html#shiftRight,Field	proc shiftRight(self: var Field)		280
+nim	shiftLeft	pon2/core/field.html#shiftLeft,Field	proc shiftLeft(self: var Field)		285
+nim	flipVertical	pon2/core/field.html#flipVertical,Field	proc flipVertical(self: var Field)		294
+nim	flipHorizontal	pon2/core/field.html#flipHorizontal,Field	proc flipHorizontal(self: var Field)		299
+nim	rotate	pon2/core/field.html#rotate,Field	proc rotate(self: var Field)		308
+nim	crossRotate	pon2/core/field.html#crossRotate,Field	proc crossRotate(self: var Field)		314
+nim	place	pon2/core/field.html#place,Field,Pair,Placement	proc place(self: var Field; pair: Pair; placement: Placement)		392
+nim	pop	pon2/core/field.html#pop,Field	proc pop(self: var Field): PopResult		408
+nim	canPop	pon2/core/field.html#canPop,Field	proc canPop(self: Field): bool		451
+nim	dropNuisance	pon2/core/field.html#dropNuisance,Field,array[Col,int]	proc dropNuisance(self: var Field; counts: array[Col, int]; hard = false)		461
+nim	apply	pon2/core/field.html#apply,Field,Step	proc apply(self: var Field; step: Step)		481
+nim	settle	pon2/core/field.html#settle,Field	proc settle(self: var Field)		496
+nim	isSettled	pon2/core/field.html#isSettled,Field	proc isSettled(self: Field): bool		508
+nim	move	pon2/core/field.html#move,Field,Step	proc move(self: var Field; step: Step; calcConnection = true): MoveResult		527
+nim	toArray	pon2/core/field.html#toArray,Field	proc toArray(self: Field): array[Row, array[Col, Cell]]		580
+nim	toField	pon2/core/field.html#toField,array[Row,array[Col,Cell]],Rule	proc toField(cellArray: array[Row, array[Col, Cell]]; rule: Rule): Field		596
+nim	`$`	pon2/core/field.html#$,Field	proc `$`(self: Field): string		624
+nim	parseField	pon2/core/field.html#parseField,string	proc parseField(str: string): Pon2Result[Field]		640
+nim	toUriQuery	pon2/core/field.html#toUriQuery,Field	proc toUriQuery(self: Field; fqdn = Pon2): Pon2Result[string]		761
+nim	parseField	pon2/core/field.html#parseField,string,SimulatorFqdn	proc parseField(query: string; fqdn: SimulatorFqdn): Pon2Result[Field]		884
+nimgrp	parsefield	pon2/core/field.html#parseField-procs-all	proc		640

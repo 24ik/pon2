@@ -388,6 +388,24 @@ framePtr = F.prev;
 var F = {procname: "module macros", prev: framePtr, filename: "/home/runner/work/pon2/pon2/.nim_runtime/lib/core/macros.nim", line: 0};
 framePtr = F;
 framePtr = F.prev;
+var F = {procname: "module underscored_calls", prev: framePtr, filename: "/home/runner/work/pon2/pon2/.nim_runtime/lib/std/private/underscored_calls.nim", line: 0};
+framePtr = F;
+framePtr = F.prev;
+var F = {procname: "module underscored_calls", prev: framePtr, filename: "/home/runner/work/pon2/pon2/.nim_runtime/lib/std/private/underscored_calls.nim", line: 0};
+framePtr = F;
+framePtr = F.prev;
+var F = {procname: "module sugar", prev: framePtr, filename: "/home/runner/work/pon2/pon2/.nim_runtime/lib/pure/sugar.nim", line: 0};
+framePtr = F;
+framePtr = F.prev;
+var F = {procname: "module sugar", prev: framePtr, filename: "/home/runner/work/pon2/pon2/.nim_runtime/lib/pure/sugar.nim", line: 0};
+framePtr = F;
+framePtr = F.prev;
+var F = {procname: "module macros", prev: framePtr, filename: "/home/runner/work/pon2/pon2/src/pon2/private/macros.nim", line: 0};
+framePtr = F;
+framePtr = F.prev;
+var F = {procname: "module macros", prev: framePtr, filename: "/home/runner/work/pon2/pon2/src/pon2/private/macros.nim", line: 0};
+framePtr = F;
+framePtr = F.prev;
 var F = {procname: "module parseutils", prev: framePtr, filename: "/home/runner/work/pon2/pon2/.nim_runtime/lib/pure/parseutils.nim", line: 0};
 framePtr = F;
 framePtr = F.prev;
@@ -472,28 +490,22 @@ framePtr = F.prev;
 var F = {procname: "module strformat", prev: framePtr, filename: "/home/runner/work/pon2/pon2/.nim_runtime/lib/pure/strformat.nim", line: 0};
 framePtr = F;
 framePtr = F.prev;
-var F = {procname: "module underscored_calls", prev: framePtr, filename: "/home/runner/work/pon2/pon2/.nim_runtime/lib/std/private/underscored_calls.nim", line: 0};
-framePtr = F;
-framePtr = F.prev;
-var F = {procname: "module underscored_calls", prev: framePtr, filename: "/home/runner/work/pon2/pon2/.nim_runtime/lib/std/private/underscored_calls.nim", line: 0};
-framePtr = F;
-framePtr = F.prev;
-var F = {procname: "module sugar", prev: framePtr, filename: "/home/runner/work/pon2/pon2/.nim_runtime/lib/pure/sugar.nim", line: 0};
-framePtr = F;
-framePtr = F.prev;
-var F = {procname: "module sugar", prev: framePtr, filename: "/home/runner/work/pon2/pon2/.nim_runtime/lib/pure/sugar.nim", line: 0};
-framePtr = F;
-framePtr = F.prev;
 var F = {procname: "module results", prev: framePtr, filename: "/home/runner/.nimble/pkgs2/results-0.5.1-a9c011f74bc9ed5c91103917b9f382b12e82a9e7/results.nim", line: 0};
 framePtr = F;
 framePtr = F.prev;
 var F = {procname: "module results", prev: framePtr, filename: "/home/runner/.nimble/pkgs2/results-0.5.1-a9c011f74bc9ed5c91103917b9f382b12e82a9e7/results.nim", line: 0};
 framePtr = F;
 framePtr = F.prev;
-var F = {procname: "module results2", prev: framePtr, filename: "/home/runner/work/pon2/pon2/src/pon2/private/results2.nim", line: 0};
+var F = {procname: "module results2", prev: framePtr, filename: "/home/runner/work/pon2/pon2/src/pon2/utils/results2.nim", line: 0};
 framePtr = F;
 framePtr = F.prev;
-var F = {procname: "module results2", prev: framePtr, filename: "/home/runner/work/pon2/pon2/src/pon2/private/results2.nim", line: 0};
+var F = {procname: "module results2", prev: framePtr, filename: "/home/runner/work/pon2/pon2/src/pon2/utils/results2.nim", line: 0};
+framePtr = F;
+framePtr = F.prev;
+var F = {procname: "module utils", prev: framePtr, filename: "/home/runner/work/pon2/pon2/src/pon2/utils.nim", line: 0};
+framePtr = F;
+framePtr = F.prev;
+var F = {procname: "module utils", prev: framePtr, filename: "/home/runner/work/pon2/pon2/src/pon2/utils.nim", line: 0};
 framePtr = F;
 framePtr = F.prev;
 var F = {procname: "module strutils", prev: framePtr, filename: "/home/runner/work/pon2/pon2/src/pon2/private/strutils.nim", line: 0};
@@ -502,10 +514,10 @@ framePtr = F.prev;
 var F = {procname: "module strutils", prev: framePtr, filename: "/home/runner/work/pon2/pon2/src/pon2/private/strutils.nim", line: 0};
 framePtr = F;
 framePtr = F.prev;
-var F = {procname: "module macros", prev: framePtr, filename: "/home/runner/work/pon2/pon2/src/pon2/private/macros.nim", line: 0};
+var F = {procname: "module expand", prev: framePtr, filename: "/home/runner/work/pon2/pon2/src/pon2/private/expand.nim", line: 0};
 framePtr = F;
 framePtr = F.prev;
-var F = {procname: "module macros", prev: framePtr, filename: "/home/runner/work/pon2/pon2/src/pon2/private/macros.nim", line: 0};
+var F = {procname: "module expand", prev: framePtr, filename: "/home/runner/work/pon2/pon2/src/pon2/private/expand.nim", line: 0};
 framePtr = F;
 framePtr = F.prev;
 
@@ -609,19 +621,19 @@ function addChars__stdZprivateZdigitsutils_u202(result_p0, result_p0_Idx, x_p1, 
       var iHEX60gensym4_318767326 = 0;
       F.line = 128;
       F.filename = "iterators_1.nim";
-      var i_687865988 = 0;
+      var i_687865967 = 0;
       Label3: {
         F.line = 129;
           Label4: while (true) {
-          if (!(i_687865988 < n_p3)) break Label4;
+          if (!(i_687865967 < n_p3)) break Label4;
             F.line = 50;
             F.filename = "digitsutils.nim";
-            iHEX60gensym4_318767326 = i_687865988;
+            iHEX60gensym4_318767326 = i_687865967;
             F.line = 47;
             result_p0[result_p0_Idx][chckIndx(addInt(old_318767312, iHEX60gensym4_318767326), 0, (result_p0[result_p0_Idx]).length - 1)] = x_p1.charCodeAt(chckIndx(addInt(start_p2, iHEX60gensym4_318767326), 0, (x_p1).length - 1));
             F.line = 131;
             F.filename = "iterators_1.nim";
-            i_687865988 = addInt(i_687865988, 1);
+            i_687865967 = addInt(i_687865967, 1);
           }
       };
     };
@@ -713,13 +725,13 @@ function auxWriteStackTrace__system_u2098(f_p0) {
     
     Label5: {
       var j_33556576 = 0;
-      var colontmp__687865980 = 0;
-      colontmp__687865980 = (i_33556541 - 1);
-      var res_687865982 = colontmp__687865980;
+      var colontmp__687865959 = 0;
+      colontmp__687865959 = (i_33556541 - 1);
+      var res_687865961 = colontmp__687865959;
       Label6: {
           Label7: while (true) {
-          if (!(0 <= res_687865982)) break Label7;
-            j_33556576 = res_687865982;
+          if (!(0 <= res_687865961)) break Label7;
+            j_33556576 = res_687865961;
             result_33556532[0].push.apply(result_33556532[0], cstrToNimstr(tempFrames_33556543[j_33556576].Field2));;
             if ((0 < tempFrames_33556543[j_33556576].Field1)) {
             result_33556532[0].push.apply(result_33556532[0], [40]);;
@@ -735,7 +747,7 @@ function auxWriteStackTrace__system_u2098(f_p0) {
             result_33556532[0].push.apply(result_33556532[0], [32,97,116,32]);;
             add__system_u1954(result_33556532, 0, tempFrames_33556543[j_33556576].Field0);
             result_33556532[0].push.apply(result_33556532[0], [10]);;
-            res_687865982 -= 1;
+            res_687865961 -= 1;
           }
       };
     };
@@ -867,58 +879,44 @@ function failedAssertImpl__stdZassertions_u84(msg_p0) {
 
   
 }
-var F = {procname: "module macros_examples_1", prev: framePtr, filename: "/home/runner/work/pon2/pon2/pages/docs/api/js/nimcache/runnableExamples/macros_examples_1.nim", line: 0};
+var F = {procname: "module expand_examples_1", prev: framePtr, filename: "/home/runner/work/pon2/pon2/pages/docs/api/js/nimcache/runnableExamples/expand_examples_1.nim", line: 0};
 framePtr = F;
-F.line = 45;
-F.filename = "macros.nim";
+F.line = 20;
+F.filename = "expand.nim";
 var xFoo_687865914 = 10;
-F.line = 45;
+F.line = 20;
 var xBar_687865915 = 20;
-F.line = 45;
+F.line = 20;
 var yFoo_687865916 = 100;
-F.line = 45;
+F.line = 20;
 var yBar_687865917 = 200;
 if (!((xFoo_687865914 == 10))) {
-F.line = 45;
-failedAssertImpl__stdZassertions_u84(makeNimstrLit("/home/runner/work/pon2/pon2/pages/docs/api/js/nimcache/runnableExamples/macros_examples_1.nim(43, 5) `xFoo == 0.succ * 10` "));
+F.line = 20;
+failedAssertImpl__stdZassertions_u84(makeNimstrLit("/home/runner/work/pon2/pon2/pages/docs/api/js/nimcache/runnableExamples/expand_examples_1.nim(43, 5) `xFoo == (0 + 1) * 10` "));
 }
 
 if (!((yFoo_687865916 == 100))) {
-F.line = 45;
-failedAssertImpl__stdZassertions_u84(makeNimstrLit("/home/runner/work/pon2/pon2/pages/docs/api/js/nimcache/runnableExamples/macros_examples_1.nim(44, 5) `yFoo == 0.succ * 100` "));
+F.line = 20;
+failedAssertImpl__stdZassertions_u84(makeNimstrLit("/home/runner/work/pon2/pon2/pages/docs/api/js/nimcache/runnableExamples/expand_examples_1.nim(44, 5) `yFoo == (0 + 1) * 100` "));
 }
 
 if (!((xBar_687865915 == 20))) {
-F.line = 45;
-failedAssertImpl__stdZassertions_u84(makeNimstrLit("/home/runner/work/pon2/pon2/pages/docs/api/js/nimcache/runnableExamples/macros_examples_1.nim(43, 5) `xBar == 1.succ * 10` "));
+F.line = 20;
+failedAssertImpl__stdZassertions_u84(makeNimstrLit("/home/runner/work/pon2/pon2/pages/docs/api/js/nimcache/runnableExamples/expand_examples_1.nim(43, 5) `xBar == (1 + 1) * 10` "));
 }
 
 if (!((yBar_687865917 == 200))) {
-F.line = 45;
-failedAssertImpl__stdZassertions_u84(makeNimstrLit("/home/runner/work/pon2/pon2/pages/docs/api/js/nimcache/runnableExamples/macros_examples_1.nim(44, 5) `yBar == 1.succ * 100` "));
+F.line = 20;
+failedAssertImpl__stdZassertions_u84(makeNimstrLit("/home/runner/work/pon2/pon2/pages/docs/api/js/nimcache/runnableExamples/expand_examples_1.nim(44, 5) `yBar == (1 + 1) * 100` "));
 }
 
 framePtr = F.prev;
-var F = {procname: "module macros_examples_1", prev: framePtr, filename: "/home/runner/work/pon2/pon2/pages/docs/api/js/nimcache/runnableExamples/macros_examples_1.nim", line: 0};
+var F = {procname: "module expand_examples_1", prev: framePtr, filename: "/home/runner/work/pon2/pon2/pages/docs/api/js/nimcache/runnableExamples/expand_examples_1.nim", line: 0};
 framePtr = F;
 framePtr = F.prev;
-var F = {procname: "module macros_examples_2", prev: framePtr, filename: "/home/runner/work/pon2/pon2/pages/docs/api/js/nimcache/runnableExamples/macros_examples_2.nim", line: 0};
-framePtr = F;
-Label2: {
-  if (false) {
-  F.line = 150;
-  F.filename = "macros.nim";
-  failedAssertImpl__stdZassertions_u84(makeNimstrLit("/home/runner/work/pon2/pon2/pages/docs/api/js/nimcache/runnableExamples/macros_examples_2.nim(17, 7) `x == Foo` "));
-  }
-  
-};
-framePtr = F.prev;
-var F = {procname: "module macros_examples_2", prev: framePtr, filename: "/home/runner/work/pon2/pon2/pages/docs/api/js/nimcache/runnableExamples/macros_examples_2.nim", line: 0};
+var F = {procname: "module expand_group0_examples", prev: framePtr, filename: "/home/runner/work/pon2/pon2/pages/docs/api/js/nimcache/runnableExamples/expand_group0_examples.nim", line: 0};
 framePtr = F;
 framePtr = F.prev;
-var F = {procname: "module macros_group0_examples", prev: framePtr, filename: "/home/runner/work/pon2/pon2/pages/docs/api/js/nimcache/runnableExamples/macros_group0_examples.nim", line: 0};
-framePtr = F;
-framePtr = F.prev;
-var F = {procname: "module macros_group0_examples", prev: framePtr, filename: "/home/runner/work/pon2/pon2/pages/docs/api/js/nimcache/runnableExamples/macros_group0_examples.nim", line: 0};
+var F = {procname: "module expand_group0_examples", prev: framePtr, filename: "/home/runner/work/pon2/pon2/pages/docs/api/js/nimcache/runnableExamples/expand_group0_examples.nim", line: 0};
 framePtr = F;
 framePtr = F.prev;
