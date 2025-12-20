@@ -1,0 +1,39 @@
+nimTitle	xmm	pon2/private/core/binaryfield/xmm.html	module src/pon2/private/core/binaryfield/xmm		0
+nim	BinaryField	pon2/private/core/binaryfield/xmm.html#BinaryField	type BinaryField		15
+nim	init	pon2/private/core/binaryfield/xmm.html#init,typeBinaryField	proc init(T: type BinaryField): T:type		38
+nim	initValid	pon2/private/core/binaryfield/xmm.html#initValid,typeBinaryField	proc initValid(T: type BinaryField): T:type		42
+nim	initFloor	pon2/private/core/binaryfield/xmm.html#initFloor,typeBinaryField	proc initFloor(T: type BinaryField): T:type		46
+nim	initAirBottom	pon2/private/core/binaryfield/xmm.html#initAirBottom,typeBinaryField	proc initAirBottom(T: type BinaryField): T:type		50
+nim	initWaterTop	pon2/private/core/binaryfield/xmm.html#initWaterTop,typeBinaryField	proc initWaterTop(T: type BinaryField): T:type		54
+nim	`+`	pon2/private/core/binaryfield/xmm.html#+,M128i,M128i	proc `+`(f1, f2: BinaryField): BinaryField		62
+nim	`-`	pon2/private/core/binaryfield/xmm.html#-,M128i,M128i	proc `-`(f1, f2: BinaryField): BinaryField		65
+nim	`*`	pon2/private/core/binaryfield/xmm.html#*,M128i,M128i	proc `*`(f1, f2: BinaryField): BinaryField		68
+nim	`xor`	pon2/private/core/binaryfield/xmm.html#xor,M128i,M128i	proc `xor`(f1, f2: BinaryField): BinaryField		71
+nim	`+=`	pon2/private/core/binaryfield/xmm.html#+=,M128i,M128i	proc `+=`(f1: var BinaryField; f2: BinaryField)		74
+nim	`-=`	pon2/private/core/binaryfield/xmm.html#-=,M128i,M128i	proc `-=`(f1: var BinaryField; f2: BinaryField)		77
+nim	`*=`	pon2/private/core/binaryfield/xmm.html#*=,M128i,M128i	proc `*=`(f1: var BinaryField; f2: BinaryField)		80
+nim	hash	pon2/private/core/binaryfield/xmm.html#hash,M128i	proc hash(self: BinaryField): Hash		87
+nim	kept	pon2/private/core/binaryfield/xmm.html#kept,M128i,Col	proc kept(self: BinaryField; col: Col): BinaryField		114
+nim	keptValid	pon2/private/core/binaryfield/xmm.html#keptValid,M128i	proc keptValid(self: BinaryField): BinaryField		118
+nim	keptVisible	pon2/private/core/binaryfield/xmm.html#keptVisible,M128i	proc keptVisible(self: BinaryField): BinaryField		122
+nim	keptAir	pon2/private/core/binaryfield/xmm.html#keptAir,M128i	proc keptAir(self: BinaryField): BinaryField		126
+nim	replace	pon2/private/core/binaryfield/xmm.html#replace,M128i,Col,M128i	proc replace(self: var BinaryField; col: Col; after: BinaryField)		134
+nim	popcnt	pon2/private/core/binaryfield/xmm.html#popcnt,M128i	proc popcnt(self: BinaryField): int		143
+nim	shiftedUpRaw	pon2/private/core/binaryfield/xmm.html#shiftedUpRaw,M128i	proc shiftedUpRaw(self: BinaryField): BinaryField		156
+nim	shiftedDownRaw	pon2/private/core/binaryfield/xmm.html#shiftedDownRaw,M128i	proc shiftedDownRaw(self: BinaryField): BinaryField		160
+nim	shiftedRightRaw	pon2/private/core/binaryfield/xmm.html#shiftedRightRaw,M128i	proc shiftedRightRaw(self: BinaryField): BinaryField		164
+nim	shiftedLeftRaw	pon2/private/core/binaryfield/xmm.html#shiftedLeftRaw,M128i	proc shiftedLeftRaw(self: BinaryField): BinaryField		168
+nim	flipVertical	pon2/private/core/binaryfield/xmm.html#flipVertical,M128i	proc flipVertical(self: var BinaryField)		176
+nim	flipHorizontal	pon2/private/core/binaryfield/xmm.html#flipHorizontal,M128i	proc flipHorizontal(self: var BinaryField)		182
+nim	rotate	pon2/private/core/binaryfield/xmm.html#rotate,M128i	proc rotate(self: var BinaryField)		192
+nim	crossRotate	pon2/private/core/binaryfield/xmm.html#crossRotate,M128i	proc crossRotate(self: var BinaryField)		199
+nim	`[]`	pon2/private/core/binaryfield/xmm.html#[],M128i,Row,Col	proc `[]`(self: BinaryField; row: Row; col: Col): bool		214
+nim	`[]=`	pon2/private/core/binaryfield/xmm.html#[]=,M128i,Row,Col,bool	proc `[]=`(self: var BinaryField; row: Row; col: Col; val: bool)		221
+nim	insert	pon2/private/core/binaryfield/xmm.html#insert,M128i,Row,Col,bool,Physics	proc insert(self: var BinaryField; row: Row; col: Col; val: bool; physics: Physics)		277
+nim	del	pon2/private/core/binaryfield/xmm.html#del,M128i,Row,Col,Physics	proc del(self: var BinaryField; row: Row; col: Col; physics: Physics)		324
+nim	dropNuisanceTsu	pon2/private/core/binaryfield/xmm.html#dropNuisanceTsu,M128i,array[Col,int],M128i	proc dropNuisanceTsu(self: var BinaryField; counts: array[Col, int];\n                existField: BinaryField)		347
+nim	dropNuisanceWater	pon2/private/core/binaryfield/xmm.html#dropNuisanceWater,M128i,M128i,M128i,array[Col,int],M128i	proc dropNuisanceWater(self, other1, other2: var BinaryField;\n                  counts: array[Col, int]; existField: BinaryField)		363
+nim	settleTsu	pon2/private/core/binaryfield/xmm.html#settleTsu,M128i,M128i,M128i,M128i	proc settleTsu(field0, field1, field2: var BinaryField; existField: BinaryField)		438
+nim	settleWater	pon2/private/core/binaryfield/xmm.html#settleWater,M128i,M128i,M128i,M128i	proc settleWater(field0, field1, field2: var BinaryField; existField: BinaryField)		463
+nim	areSettledTsu	pon2/private/core/binaryfield/xmm.html#areSettledTsu,M128i,M128i,M128i,M128i	proc areSettledTsu(field0, field1, field2, existField: BinaryField): bool		473
+nim	areSettledWater	pon2/private/core/binaryfield/xmm.html#areSettledWater,M128i,M128i,M128i,M128i	proc areSettledWater(field0, field1, field2, existField: BinaryField): bool		484

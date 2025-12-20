@@ -1,0 +1,5 @@
+nimTitle	solve	pon2/private/app/solve.html	module src/pon2/private/app/solve		0
+nim	SolveNode	pon2/private/app/solve.html#SolveNode	object SolveNode		20
+nim	init	pon2/private/app/solve.html#init,typeSolveNode,NazoPuyo	proc init(T: type SolveNode; nazoPuyo: NazoPuyo): T:type		55
+nim	childrenAtDepth	pon2/private/app/solve.html#childrenAtDepth,SolveNode,int,seq[SolveNode],seq[seq[Placement]],seq[seq[Placement]],int,bool,Goal,Steps	proc childrenAtDepth(self: SolveNode; targetDepth: int; nodes: var seq[SolveNode];\n                placementsSeq: var seq[seq[Placement]];\n                solutions: var seq[seq[Placement]]; moveCount: int;\n                calcAllSolutions: bool; goal: Goal; steps: Steps)		378
+nim	solveSingleThread	pon2/private/app/solve.html#solveSingleThread,SolveNode,seq[seq[Placement]],int,bool,Goal,Steps	proc solveSingleThread(self: SolveNode; solutions: var seq[seq[Placement]];\n                  moveCount: int; calcAllSolutions: bool; goal: Goal;\n                  steps: Steps; checkPruneFirst = false)		461

@@ -1,0 +1,2 @@
+nimTitle	ctrl	pon2/gui/studio/ctrl.html	module src/pon2/gui/studio/ctrl		0
+nim	toStudioCtrlVNode	pon2/gui/studio/ctrl.html#toStudioCtrlVNode,ref.Studio,VNodeHelper	proc toStudioCtrlVNode(self: ref Studio; helper: VNodeHelper): VNode		59

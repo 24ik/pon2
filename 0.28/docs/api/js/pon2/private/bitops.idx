@@ -1,0 +1,46 @@
+nimTitle	bitops	pon2/private/bitops.html	module src/pon2/private/bitops		0
+nim	Bmi1Available	pon2/private/bitops.html#Bmi1Available	const Bmi1Available		24
+nim	Bmi2Available	pon2/private/bitops.html#Bmi2Available	const Bmi2Available		25
+nim	ClmulAvailable	pon2/private/bitops.html#ClmulAvailable	const ClmulAvailable		26
+nim	bitand2	pon2/private/bitops.html#bitand2,T,T	proc bitand2[T: SomeInteger](x1, x2: T): T		74
+nim	bitand2	pon2/private/bitops.html#bitand2,T,T,T	proc bitand2[T: SomeInteger](x1, x2, x3: T): T		78
+nim	bitand2	pon2/private/bitops.html#bitand2,T,T,T,T	proc bitand2[T: SomeInteger](x1, x2, x3, x4: T): T		82
+nim	bitand2	pon2/private/bitops.html#bitand2,T,T,T,T,T	proc bitand2[T: SomeInteger](x1, x2, x3, x4, x5: T): T		86
+nim	bitand2	pon2/private/bitops.html#bitand2,T,T,T,T,T,T	proc bitand2[T: SomeInteger](x1, x2, x3, x4, x5, x6: T): T		90
+nim	bitand2	pon2/private/bitops.html#bitand2,T,T,T,T,T,T,T	proc bitand2[T: SomeInteger](x1, x2, x3, x4, x5, x6, x7: T): T		94
+nim	bitand2	pon2/private/bitops.html#bitand2,T,T,T,T,T,T,T,T	proc bitand2[T: SomeInteger](x1, x2, x3, x4, x5, x6, x7, x8: T): T		98
+nim	bitor2	pon2/private/bitops.html#bitor2,T,T	proc bitor2[T: SomeInteger](x1, x2: T): T		106
+nim	bitor2	pon2/private/bitops.html#bitor2,T,T,T	proc bitor2[T: SomeInteger](x1, x2, x3: T): T		110
+nim	bitor2	pon2/private/bitops.html#bitor2,T,T,T,T	proc bitor2[T: SomeInteger](x1, x2, x3, x4: T): T		114
+nim	bitor2	pon2/private/bitops.html#bitor2,T,T,T,T,T	proc bitor2[T: SomeInteger](x1, x2, x3, x4, x5: T): T		118
+nim	bitor2	pon2/private/bitops.html#bitor2,T,T,T,T,T,T	proc bitor2[T: SomeInteger](x1, x2, x3, x4, x5, x6: T): T		122
+nim	bitor2	pon2/private/bitops.html#bitor2,T,T,T,T,T,T,T	proc bitor2[T: SomeInteger](x1, x2, x3, x4, x5, x6, x7: T): T		126
+nim	bitor2	pon2/private/bitops.html#bitor2,T,T,T,T,T,T,T,T	proc bitor2[T: SomeInteger](x1, x2, x3, x4, x5, x6, x7, x8: T): T		130
+nim	`*~`	pon2/private/bitops.html#*~,uint64,uint64	proc `*~`(x1, x2: uint64): uint64		143
+nim	`*~`	pon2/private/bitops.html#*~,uint32,uint32	proc `*~`(x1, x2: uint32): uint32		150
+nim	`*~`	pon2/private/bitops.html#*~,T,T	proc `*~`[T: uint or uint16 or uint8](x1, x2: T): T		157
+nim	`*~`	pon2/private/bitops.html#*~,T,T_2	proc `*~`[T: SomeSignedInt](x1, x2: T): T		171
+nim	toMask2	pon2/private/bitops.html#toMask2,Slice[int]	proc toMask2[T: SomeInteger](slice: Slice[int]): T		246
+nim	bextr	pon2/private/bitops.html#bextr,uint64,uint32,uint32	proc bextr(val: uint64; start, length: uint32): uint64		262
+nim	bextr	pon2/private/bitops.html#bextr,uint32,uint32,uint32	proc bextr(val: uint32; start, length: uint32): uint32		269
+nim	bextr	pon2/private/bitops.html#bextr,T,uint32,uint32	proc bextr[T: uint or uint16 or uint8](val: T; start, length: uint32): T		276
+nim	bextr	pon2/private/bitops.html#bextr,T,uint32,uint32_2	proc bextr[T: SomeSignedInt](val: T; start, length: uint32): T		292
+nim	blsmsk	pon2/private/bitops.html#blsmsk,uint64	proc blsmsk(val: uint64): uint64		311
+nim	blsmsk	pon2/private/bitops.html#blsmsk,uint32	proc blsmsk(val: uint32): uint32		316
+nim	blsmsk	pon2/private/bitops.html#blsmsk,T	proc blsmsk[T: uint or uint16 or uint8](val: T): T		321
+nim	blsmsk	pon2/private/bitops.html#blsmsk,T_2	proc blsmsk[T: SomeSignedInt](val: T): T		329
+nim	tzcnt	pon2/private/bitops.html#tzcnt,T	proc tzcnt[T: SomeUnsignedInt](val: T): int		348
+nim	tzcnt	pon2/private/bitops.html#tzcnt,T_2	proc tzcnt[T: SomeSignedInt](val: T): int		366
+nim	PextMask	pon2/private/bitops.html#PextMask	type PextMask		505
+nim	init	pon2/private/bitops.html#init,typePextMask[T: uint64 or uint32 or uint16],T	proc init[T: uint64 or uint32 or uint16](M: type PextMask[T]; mask: T): M:type		507
+nim	pext	pon2/private/bitops.html#pext,uint64,	proc pext(a: uint64; mask: uint64 or PextMask[uint64]): uint64		512
+nim	pext	pon2/private/bitops.html#pext,uint32,	proc pext(a: uint32; mask: uint32 or PextMask[uint32]): uint32		519
+nim	pext	pon2/private/bitops.html#pext,uint16,	proc pext(a: uint16; mask: uint16 or PextMask[uint16]): uint16		526
+nim	popcnt	pon2/private/bitops.html#popcnt,PextMask[T: uint64 or uint32 or uint16]	proc popcnt[T: uint64 or uint32 or uint16](self: PextMask[T]): int		533
+nimgrp	blsmsk	pon2/private/bitops.html#blsmsk-procs-all	proc		311
+nimgrp	bitand2	pon2/private/bitops.html#bitand2-procs-all	proc		74
+nimgrp	tzcnt	pon2/private/bitops.html#tzcnt-procs-all	proc		348
+nimgrp	*~	pon2/private/bitops.html#*~-procs-all	proc		143
+nimgrp	bitor2	pon2/private/bitops.html#bitor2-procs-all	proc		106
+nimgrp	bextr	pon2/private/bitops.html#bextr-procs-all	proc		262
+nimgrp	pext	pon2/private/bitops.html#pext-procs-all	proc		512

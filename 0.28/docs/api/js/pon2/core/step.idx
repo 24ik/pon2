@@ -1,0 +1,35 @@
+nimTitle	step	pon2/core/step.html	module src/pon2/core/step		0
+nim	StepKind	pon2/core/step.html#StepKind	enum StepKind		18
+nim	Step	pon2/core/step.html#Step	object Step		24
+nim	Steps	pon2/core/step.html#Steps	type Steps		35
+nim	init	pon2/core/step.html#init,typeStep,Pair	proc init(T: type Step; pair: Pair; placement = Placement.None): T:type		41
+nim	init	pon2/core/step.html#init,typeStep,array[Col,int]	proc init(T: type Step; counts: array[Col, int]; hard = false): T:type		44
+nim	init	pon2/core/step.html#init,typeStep,bool	proc init(T: type Step; cross: bool): T:type		47
+nim	init	pon2/core/step.html#init,typeStep	proc init(T: type Step): T:type		50
+nim	`==`	pon2/core/step.html#==,Step,Step	proc `==`(step1, step2: Step): bool		57
+nim	isValid	pon2/core/step.html#isValid,Step	proc isValid(self: Step; originalCompatible = false): bool		73
+nim	cellCount	pon2/core/step.html#cellCount,Step,Cell	proc cellCount(self: Step; cell: Cell): int		92
+nim	puyoCount	pon2/core/step.html#puyoCount,Step	proc puyoCount(self: Step): int		105
+nim	coloredPuyoCount	pon2/core/step.html#coloredPuyoCount,Step	proc coloredPuyoCount(self: Step): int		112
+nim	nuisancePuyoCount	pon2/core/step.html#nuisancePuyoCount,Step	proc nuisancePuyoCount(self: Step): int		118
+nim	cellCount	pon2/core/step.html#cellCount,Steps,Cell	proc cellCount(steps: Steps; cell: Cell): int		124
+nim	puyoCount	pon2/core/step.html#puyoCount,Steps	proc puyoCount(steps: Steps): int		128
+nim	coloredPuyoCount	pon2/core/step.html#coloredPuyoCount,Steps	proc coloredPuyoCount(steps: Steps): int		132
+nim	nuisancePuyoCount	pon2/core/step.html#nuisancePuyoCount,Steps	proc nuisancePuyoCount(steps: Steps): int		136
+nim	`$`	pon2/core/step.html#$,Step	proc `$`(self: Step): string		154
+nim	parseStep	pon2/core/step.html#parseStep,string	proc parseStep(str: string): Pon2Result[Step]		173
+nim	toUriQuery	pon2/core/step.html#toUriQuery,Step	proc toUriQuery(self: Step; fqdn = Pon2): Pon2Result[string]		224
+nim	parseStep	pon2/core/step.html#parseStep,string,SimulatorFqdn	proc parseStep(query: string; fqdn: SimulatorFqdn): Pon2Result[Step]		254
+nim	`$`	pon2/core/step.html#$,Steps	proc `$`(self: Steps): string		332
+nim	parseSteps	pon2/core/step.html#parseSteps,string	proc parseSteps(str: string): Pon2Result[Steps]		339
+nim	toUriQuery	pon2/core/step.html#toUriQuery,Steps	proc toUriQuery(self: Steps; fqdn = Pon2): Pon2Result[string]		356
+nim	parseSteps	pon2/core/step.html#parseSteps,string,SimulatorFqdn	proc parseSteps(query: string; fqdn: SimulatorFqdn): Pon2Result[Steps]		364
+nimgrp	touriquery	pon2/core/step.html#toUriQuery-procs-all	proc		224
+nimgrp	parsestep	pon2/core/step.html#parseStep-procs-all	proc		173
+nimgrp	parsesteps	pon2/core/step.html#parseSteps-procs-all	proc		339
+nimgrp	$	pon2/core/step.html#$-procs-all	proc		154
+nimgrp	cellcount	pon2/core/step.html#cellCount-procs-all	proc		92
+nimgrp	nuisancepuyocount	pon2/core/step.html#nuisancePuyoCount-procs-all	proc		118
+nimgrp	init	pon2/core/step.html#init-procs-all	proc		41
+nimgrp	puyocount	pon2/core/step.html#puyoCount-procs-all	proc		105
+nimgrp	coloredpuyocount	pon2/core/step.html#coloredPuyoCount-procs-all	proc		112

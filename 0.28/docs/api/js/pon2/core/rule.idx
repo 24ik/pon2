@@ -1,0 +1,3 @@
+nimTitle	rule	pon2/core/rule.html	module src/pon2/core/rule		0
+nim	Rule	pon2/core/rule.html#Rule	enum Rule		14
+nim	parseRule	pon2/core/rule.html#parseRule,string	proc parseRule(str: string): Pon2Result[Rule]		24
