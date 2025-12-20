@@ -236,6 +236,10 @@
   <li><a class="reference" href="#selectingCross%3D%2CSimulator%2Cbool" title="selectingCross=(self: var Simulator; cross: bool)">selectingCross=(self: var Simulator; cross: bool)</a></li>
 
 </ul>
+<ul class="simple nested-toc-section">setRule
+  <li><a class="reference" href="#setRule%2CSimulator%2CRule" title="setRule(self: var Simulator; rule: Rule)">setRule(self: var Simulator; rule: Rule)</a></li>
+
+</ul>
 <ul class="simple nested-toc-section">shiftFieldDown
   <li><a class="reference" href="#shiftFieldDown%2CSimulator" title="shiftFieldDown(self: var Simulator)">shiftFieldDown(self: var Simulator)</a></li>
 
@@ -287,6 +291,10 @@
 <ul class="simple nested-toc-section">writeCount
   <li><a class="reference" href="#writeCount%2CSimulator%2Cint" title="writeCount(self: var Simulator; count: int)">writeCount(self: var Simulator; count: int)</a></li>
 <li><a class="reference" href="#writeCount%2CSimulator%2Cint%2CCol%2Cint" title="writeCount(self: var Simulator; index: int; col: Col; count: int)">writeCount(self: var Simulator; index: int; col: Col; count: int)</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">writeCountClamp
+  <li><a class="reference" href="#writeCountClamp%2CSimulator%2Cint%2CCol%2Cint" title="writeCountClamp(self: var Simulator; index: int; col: Col; count: int)">writeCountClamp(self: var Simulator; index: int; col: Col; count: int)</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">writeCross
@@ -845,6 +853,18 @@
 </div>
 
 </div>
+<div id="setRule-procs-all">
+  <div id="setRule,Simulator,Rule">
+  <dt><pre><span class="Keyword">func</span> <a href="#setRule%2CSimulator%2CRule"><span class="Identifier">setRule</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">rule</span><span class="Other">:</span> <a href="../core/rule.html#Rule"><span class="Identifier">Rule</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Sets the rule of the simulator. This function is a &quot;safe&quot; version.
+    
+  </dd>
+</div>
+
+</div>
 <div id="shiftFieldDown-procs-all">
   <div id="shiftFieldDown,Simulator">
   <dt><pre><span class="Keyword">func</span> <a href="#shiftFieldDown%2CSimulator"><span class="Identifier">shiftFieldDown</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
@@ -1009,6 +1029,18 @@
 </div>
 
 </div>
+<div id="writeCountClamp-procs-all">
+  <div id="writeCountClamp,Simulator,int,Col,int">
+  <dt><pre><span class="Keyword">func</span> <a href="#writeCountClamp%2CSimulator%2Cint%2CCol%2Cint"><span class="Identifier">writeCountClamp</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">index</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">col</span><span class="Other">:</span> <a href="../core/common.html#Col"><span class="Identifier">Col</span></a><span class="Other">;</span> <span class="Identifier">count</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Writes the nuisance clamped count to the specified position in the steps.
+    
+  </dd>
+</div>
+
+</div>
 <div id="writeCross-procs-all">
   <div id="writeCross,Simulator,bool">
   <dt><pre><span class="Keyword">func</span> <a href="#writeCross%2CSimulator%2Cbool"><span class="Identifier">writeCross</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="simulator.html#Simulator"><span class="Identifier">Simulator</span></a><span class="Other">;</span> <span class="Identifier">cross</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
@@ -1046,7 +1078,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-19 15:01:05 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-20 04:24:22 UTC</small>
       </div>
     </div>
   </div>
