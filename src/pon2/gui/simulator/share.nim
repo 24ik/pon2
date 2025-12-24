@@ -56,7 +56,7 @@ when defined(js) or defined(nimsuggest):
 
     {.push warning[Uninit]: off.}
     discard cameraReadyElem
-      .html2canvas(scale = 3)
+      .html2canvas(helper.simulator.cameraReadyId, 3)
       .then(
         (canvas: JsObject) => (
           block:

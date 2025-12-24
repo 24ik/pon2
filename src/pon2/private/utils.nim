@@ -53,11 +53,13 @@ when defined(js) or defined(nimsuggest):
     r"iPhone|Android.+Mobile".newRegExp in navigator.userAgent
 
   proc html2canvas*(
-    elem: JsObject
-  ): Future[JsObject] {.inline, noinit, async, importjs: "html2canvas(#)".}
+    elem: JsObject, id: cstring, scale = 1
+  ): Future[JsObject] {.
+    inline,
+    noinit,
+    async,
+    importjs:
+      "html2canvas(#, {onclone: (doc) => {const cloneElem = doc.getElementById(#); cloneElem.setAttribute('data-theme', 'light'); cloneElem.style.backgroundColor = 'white'; cloneElem.style.color = 'black';}, scale: #})"
+  .}
     ## Runs html2canvas and returns the canvas.
-
-  proc html2canvas*(
-    elem: JsObject, scale: int
-  ): Future[JsObject] {.inline, noinit, async, importjs: "html2canvas(#, {scale: #})".}
-    ## Runs html2canvas and returns the canvas.
+    ## The target element is set to the light mode.
