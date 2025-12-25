@@ -241,7 +241,7 @@ when defined(js) or defined(nimsuggest):
                   class = "button", onclick = () => self.derefSimulator(helper).backward
                 ):
                   span(class = "icon"):
-                    italic(class = "fa-solid fa-arrow-up")
+                    italic(class = "fa-solid fa-backward-step")
                     span(style = counterStyle):
                       text "W"
               tdiv(class = "control"):
@@ -303,7 +303,7 @@ when defined(js) or defined(nimsuggest):
                 onclick = () => self.derefSimulator(helper).backward,
               ):
                 span(class = "icon"):
-                  italic(class = "fa-solid fa-arrow-up")
+                  italic(class = "fa-solid fa-backward-step")
             tdiv(class = "control"):
               button(
                 class = "button is-large",
