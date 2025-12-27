@@ -719,7 +719,10 @@ func forwardApply(self: var Simulator, replay = false, skip = false) =
       self.nazoPuyo.puyoPuyo.steps[self.operating.index].placement.assign self.operating.placement
 
   # apply
-  self.nazoPuyo.puyoPuyo.field.apply self.nazoPuyo.puyoPuyo.steps[self.operating.index]
+  self.nazoPuyo.puyoPuyo.field.apply(
+    self.nazoPuyo.puyoPuyo.steps[self.operating.index],
+    requireSettled = self.operating.index != 0,
+  )
 
   # set move result
   self.moveResult.assign DefaultMoveResult

@@ -24,6 +24,7 @@ defineExpand "2", "0", "1"
 
 const
   ValidMaskElem = 0x3ffe_3ffe_3ffe_0000'u64
+  FloorMaskElem = 0x0001_0001_0001_0000'u64
   WaterMaskElemBase = toMask2[uint64](1 .. WaterHeight)
   WaterMaskElem = bitor2(
     WaterMaskElemBase,
@@ -46,15 +47,15 @@ func initValid*(T: type BinaryField): T {.inline, noinit.} =
 
 func initFloor*(T: type BinaryField): T {.inline, noinit.} =
   ## Returns the binary field with floor bits one.
-  T.init 0x0001_0001_0001_0000'u64
+  T.init FloorMaskElem
 
 func initAirBottom*(T: type BinaryField): T {.inline, noinit.} =
   ## Returns the binary field with the bottom of the air bits one.
-  T.init 0x0001_0001_0001_0000'u64 shl (WaterHeight + 1)
+  T.init FloorMaskElem shl (WaterHeight + 1)
 
 func initWaterTop*(T: type BinaryField): T {.inline, noinit.} =
   ## Returns the binary field with the top of the water bits one.
-  T.init 0x0001_0001_0001_0000'u64 shl WaterHeight
+  T.init FloorMaskElem shl WaterHeight
 
 # ------------------------------------------------
 # Operator
@@ -315,6 +316,37 @@ func del*(
     self[1].del col.pred 3, row, physics
 
 # ------------------------------------------------
+# Place
+# ------------------------------------------------
+
+func placeMaskTsu(existFieldVal: uint64, col: Col): uint64 {.inline, noinit.} =
+  ## Returns the mask value where a next puyo is placed with Tsu physics.
+  ## This function accepts an unsettled field.
+  ## `col` should be in `Col0..Col2`.
+  let colMask = 0xffff_0000_0000_0000'u64 shr (col.ord shl 4)
+
+  (
+    0x8000_0000_0000_0000'u64 shr
+    (((existFieldVal or FloorMaskElem) and colMask).leadingZeros - 1)
+  ).keptValid
+
+func placeMaskTsu(existField: BinaryField, col: Col): BinaryField {.inline, noinit.} =
+  ## Returns the mask where a next puyo is placed with Tsu physics.
+  ## This function accepts an unsettled field.
+  case col
+  of Col0 .. Col2:
+    [existField[0].placeMaskTsu col, 0]
+  of Col3 .. Col5:
+    [0, existField[1].placeMaskTsu col.pred 3]
+
+func placeMasksTsu*(
+    existField: BinaryField, col1, col2: Col
+): (BinaryField, BinaryField) {.inline, noinit.} =
+  ## Returns the masks where a next puyo is placed with Tsu physics.
+  ## This function accepts an unsettled field.
+  (existField.placeMaskTsu(col1), existField.placeMaskTsu(col2))
+
+# ------------------------------------------------
 # Drop Nuisance
 # ------------------------------------------------
 
@@ -370,13 +402,13 @@ func dropNuisanceTsu*(
   self[1].assign bitor2(self[1], garbages3, garbages4, garbages5)
 
 func dropNuisanceWater*(
-    self, other1, other2: var BinaryField,
-    counts: array[Col, int],
-    existField: BinaryField,
+    self, other1, other2: var BinaryField, counts: array[Col, int]
 ) {.inline, noinit.} =
   ## Drops cells by Water physics.
   ## `other1` and `other2` are only shifted.
   ## This function requires that the mask is settled and the counts are non-negative.
+  let existField = self + other1 + other2
+
   expand6 afterSelf, afterOther1, afterOther2, Col:
     let afterSelf, afterOther1, afterOther2: uint64
 
@@ -427,6 +459,115 @@ func dropNuisanceWater*(
 
   other2[0].assign bitor2(afterOther20, afterOther21, afterOther22)
   other2[1].assign bitor2(afterOther23, afterOther24, afterOther25)
+
+func dropNuisanceTsuSafe*(
+    self: var BinaryField, counts: array[Col, int], existField: BinaryField
+) {.inline, noinit.} =
+  ## Drops cells by Tsu physics.
+  ## This function requires that the counts are non-negative.
+  let existFloor = existField + BinaryField.initFloor
+
+  expand6 Col, mask:
+    let mask = block:
+      const
+        RawMask = staticCase:
+          case Col
+          of Col0, Col3: 0xffff_0000_0000_0000'u64
+          of Col1, Col4: 0x0000_ffff_0000_0000'u64
+          of Col2, Col5: 0x0000_0000_ffff_0000'u64
+        Mask = RawMask.keptValid
+        FieldIndex = staticCase:
+          case Col
+          of Col0 .. Col2: 0
+          of Col3 .. Col5: 1
+
+      let maskBase =
+        uint64.high shl (64 - (existFloor[FieldIndex] and RawMask).leadingZeros)
+
+      (maskBase xor (maskBase shl counts[Col])) and Mask
+
+  self[0].assign bitor2(self[0], mask0, mask1, mask2)
+  self[1].assign bitor2(self[1], mask3, mask4, mask5)
+
+func dropNuisanceWaterSafe*(
+    self, other1, other2: var BinaryField, counts: array[Col, int]
+) {.inline, noinit.} =
+  ## Drops cells by Water physics.
+  ## `other1` and `other2` are only shifted.
+  ## This function requires that the counts are non-negative.
+  let existField = self + other1 + other2
+
+  staticFor(fieldIndex, 0 ..< 2):
+    const ColBase = [Col0, Col3][fieldIndex]
+
+    for colOffset in 0 ..< 3:
+      let col = ColBase.succ colOffset
+
+      # if any puyo exists in the top row or the count is zero, does nothing
+      if counts[col] == 0 or existField[Row.low, col]:
+        continue
+
+      let aboveGhostRowIndex = col.shiftAmount + 13
+
+      # if any puyo exists in the air, drop nuisance onto it
+      staticFor(row, Row.low.succ .. AirBottomRow):
+        if existField[row, col]:
+          let
+            beginIndex = aboveGhostRowIndex - row.ord
+            endIndex = min(beginIndex + counts[col], aboveGhostRowIndex)
+          self[fieldIndex].setMask beginIndex ..< endIndex
+
+          continue
+
+      # find the base row of PEXT
+      var
+        emptyCellCount = 0
+        baseRow = Row.high
+      for row in WaterTopRow .. Row.high:
+        if not existField[row, col]:
+          emptyCellCount += 1
+          if emptyCellCount == counts[col]:
+            baseRow.assign row
+            break
+
+      # shift the field partly
+      let
+        baseRowIndex = aboveGhostRowIndex - 1 - baseRow.ord
+        pextMask = existField[fieldIndex].masked baseRowIndex ..< aboveGhostRowIndex
+        newValBaseShifted = self[fieldIndex].pext(pextMask) shl baseRowIndex
+        newValBase = newValBaseShifted or self[fieldIndex].masked 0 ..< baseRowIndex
+
+      # drop nuisance
+      let
+        colMask =
+          case col
+          of Col0, Col3: MaskLeft
+          of Col1, Col4: MaskCenter
+          of Col2, Col5: MaskRight
+        water = WaterMaskElem and colMask
+        air = AirMaskElem and colMask
+
+        waterNuisanceVal = water *~ (water shr emptyCellCount)
+        nuisanceVal =
+          if emptyCellCount == counts[col]:
+            waterNuisanceVal
+          else:
+            waterNuisanceVal or (air *~ (air shl (counts[col] - emptyCellCount)))
+
+      # update values
+      self[fieldIndex].assign bitor2(
+        newValBase, nuisanceVal, self[fieldIndex] *~ colMask
+      )
+      other1[fieldIndex].assign bitor2(
+        other1[fieldIndex].pext(pextMask) shl baseRowIndex,
+        other1[fieldIndex].masked 0 ..< baseRowIndex,
+        other1[fieldIndex] *~ colMask,
+      )
+      other2[fieldIndex].assign bitor2(
+        other2[fieldIndex].pext(pextMask) shl baseRowIndex,
+        other2[fieldIndex].masked 0 ..< baseRowIndex,
+        other2[fieldIndex] *~ colMask,
+      )
 
 # ------------------------------------------------
 # Settle

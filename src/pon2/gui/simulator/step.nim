@@ -246,7 +246,7 @@ when defined(js) or defined(nimsuggest):
 
                 tdiv(class = "column is-narrow"):
                   bold:
-                    text ($stepIndex.succ).kstring
+                    text ($(stepIndex + 1)).kstring
 
                 # step
                 tdiv(class = "column is-narrow"):
@@ -276,7 +276,7 @@ when defined(js) or defined(nimsuggest):
 
                 tdiv(class = "column is-narrow"):
                   bold:
-                    text ($placeholderIndex.succ).kstring
+                    text ($(placeholderIndex + 1)).kstring
 
                 tdiv(class = "column is-narrow"):
                   self.pairPlacementNode(

@@ -1582,7 +1582,7 @@ pp..h.
 # ------------------------------------------------
 
 block: # place
-  block:
+  block: # not water
     var field =
       """
 [クロスかいてん]
@@ -1600,7 +1600,8 @@ block: # place
 ....oo
 ...hoo""".toField
 
-    check field.dup(place(_, PurplePurple, Placement.None)) == field
+    check field.dup(place(_, PurplePurple, Placement.None, requireSettled = true)) ==
+      field
 
     field.place RedGreen, Right0
     check field ==
@@ -1620,7 +1621,7 @@ block: # place
 ....oo
 rg.hoo""".toField
 
-    field.place BlueYellow, Down1
+    field.place(BlueYellow, Down1, requireSettled = true)
     check field ==
       """
 [クロスかいてん]
@@ -1638,7 +1639,7 @@ rg.hoo""".toField
 .y..oo
 rg.hoo""".toField
 
-    field.place PurpleRed, Left3
+    field.place(PurpleRed, Left3, requireSettled = true)
     check field ==
       """
 [クロスかいてん]
@@ -1656,7 +1657,7 @@ rg.hoo""".toField
 .y.poo
 rgrhoo""".toField
 
-    field.place GreenBlue, Up4
+    field.place(GreenBlue, Up4, requireSettled = true)
     check field ==
       """
 [クロスかいてん]
@@ -1674,7 +1675,7 @@ rgrhoo""".toField
 .y.poo
 rgrhoo""".toField
 
-    field.place YellowPurple, Down5
+    field.place(YellowPurple, Down5, requireSettled = true)
     check field ==
       """
 [クロスかいてん]
@@ -1692,7 +1693,7 @@ rgrhoo""".toField
 .y.poo
 rgrhoo""".toField
 
-  block:
+  block: # water
     var field =
       """
 [すいちゅう]
@@ -1711,9 +1712,10 @@ rgrhoo""".toField
 ......
 ......""".toField
 
-    check field.dup(place(_, PurplePurple, Placement.None)) == field
+    check field.dup(place(_, PurplePurple, Placement.None, requireSettled = true)) ==
+      field
 
-    field.place BlueYellow, Left4
+    field.place(BlueYellow, Left4, requireSettled = true)
     check field ==
       """
 [すいちゅう]
@@ -1732,7 +1734,7 @@ rgrhoo""".toField
 ....o.
 ......""".toField
 
-    field.place PurpleRed, Down4
+    field.place(PurpleRed, Down4, requireSettled = true)
     check field ==
       """
 [すいちゅう]
@@ -1748,6 +1750,179 @@ rgrhoo""".toField
 ....o.
 ....o.
 ....o.
+....o.
+....o.""".toField
+
+  block: # not settled
+    var field =
+      """
+[通]
+....oo
+...oo.
+....o.
+....o.
+...oo.
+....o.
+....o.
+....o.
+...oo.
+....o.
+..o.o.
+...oo.
+.oo.o.""".toField
+
+    check field.dup(place(_, YellowRed, Placement.None)) == field
+
+    field.place YellowRed, Right0
+    check field ==
+      """
+[通]
+....oo
+...oo.
+....o.
+....o.
+...oo.
+....o.
+....o.
+....o.
+...oo.
+....o.
+..o.o.
+.r.oo.
+yoo.o.""".toField
+
+    field.place BluePurple, Down2
+    check field ==
+      """
+[通]
+....oo
+...oo.
+....o.
+....o.
+...oo.
+....o.
+....o.
+....o.
+..boo.
+..p.o.
+..o.o.
+.r.oo.
+yoo.o.""".toField
+
+    field.place GreenPurple, Left3
+    check field ==
+      """
+[通]
+...goo
+...oo.
+....o.
+....o.
+...oo.
+....o.
+....o.
+..p.o.
+..boo.
+..p.o.
+..o.o.
+.r.oo.
+yoo.o.""".toField
+
+    check field.dup(place(_, BlueBlue, Right4)) == field
+
+  block: # not settled, water
+    var field =
+      """
+[すいちゅう]
+.....o
+......
+......
+......
+..o...
+~~~~~~
+.o..o.
+.oooo.
+....o.
+..o.o.
+....o.
+.o..o.
+....o.
+....o.""".toField
+
+    check field.dup(place(_, PurplePurple, Placement.None)) == field
+
+    field.place RedGreen, Right0
+    check field ==
+      """
+[すいちゅう]
+.....o
+......
+......
+......
+..o...
+~~~~~~
+rg..o.
+.oooo.
+.o..o.
+..o.o.
+....o.
+.o..o.
+....o.
+....o.""".toField
+
+    field.place BlueYellow, Up2
+    check field ==
+      """
+[すいちゅう]
+.....o
+......
+..y...
+..b...
+..o...
+~~~~~~
+rg..o.
+.oooo.
+.o..o.
+..o.o.
+....o.
+.o..o.
+....o.
+....o.""".toField
+
+    field.place PurpleRed, Right3
+    check field ==
+      """
+[すいちゅう]
+.....o
+......
+..y...
+..b...
+..o.r.
+~~~~~~
+rg.po.
+.oooo.
+.o..o.
+..o.o.
+....o.
+.o..o.
+....o.
+....o.""".toField
+
+    field.place GreenBlue, Right4
+    check field ==
+      """
+[すいちゅう]
+.....o
+......
+..y...
+..b.g.
+..o.r.
+~~~~~~
+rg.po.
+.oooo.
+.o..o.
+..o.o.
+....o.
+.o..o.
 ....o.
 ....o.""".toField
 
@@ -1865,6 +2040,76 @@ rgbypr
 oooooo
 rgbypr""".toField
 
+  block:
+    let field =
+      """
+[だいかいてん]
+.....b
+......
+......
+......
+......
+....b.
+....y.
+......
+...p..
+......
+...g..
+......
+..r...""".toField
+    check field.dup(dropNuisance([Col0: 0, 2, 0, 1, 10, 3], requireSettled = false)) ==
+      """
+[だいかいてん]
+....ob
+....o.
+....o.
+....o.
+....o.
+....b.
+....y.
+...o..
+...p..
+......
+...g..
+.o....
+.or...""".toField
+
+  block:
+    let field =
+      """
+[すいちゅう]
+......
+...b..
+......
+..r...
+......
+~~~~~~
+......
+..y.r.
+.....g
+....yb
+.....r
+..b...
+...g.p
+....pb""".toField
+    check field.dup(dropNuisance([Col0: 0, 1, 1, 2, 4, 5], requireSettled = false)) ==
+      """
+[すいちゅう]
+...o..
+...b..
+..o...
+..r..o
+.....o
+~~~~~~
+.o..oo
+..y.oo
+....oo
+....og
+....rb
+..b.yr
+...g.p
+....pb""".toField
+
 # ------------------------------------------------
 # Apply
 # ------------------------------------------------
@@ -1881,8 +2126,9 @@ block: # apply
     step3 = Step.init(cross = true)
     step4 = Step.init(cross = false)
 
-  check Field.init.dup(apply(_, step1)) == Field.init.dup(place(_, pair, placement))
-  check Field.init(Rule.Water).dup(apply(_, step2)) ==
+  check Field.init.dup(apply(_, step1)) ==
+    Field.init.dup(place(_, pair, placement, requireSettled = true))
+  check Field.init(Rule.Water).dup(apply(_, step2, requireSettled = true)) ==
     Field.init(Rule.Water).dup(dropNuisance(counts, hard))
 
   let field = Field.init(Spinner).dup(apply(_, step2))
@@ -2039,7 +2285,7 @@ block: # move
 
   block: # pair, calc connection
     var field2 = fieldBefore
-    check field2.move(Step.init(pair, placement)) ==
+    check field2.move(Step.init(pair, placement), requireSettled = true) ==
       MoveResult.init(
         chainCount, popCounts, hardToGarbageCount, detailPopCounts,
         detailHardToGarbageCount, fullPopCounts,
@@ -2057,8 +2303,9 @@ block: # move
 
   block: # drop nuisance (garbage)
     var field2 = fieldBefore
-    check field2.move(Step.init nuisanceCounts, calcConnection = false) ==
-      MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
+    check field2.move(
+      Step.init nuisanceCounts, calcConnection = false, requireSettled = true
+    ) == MoveResult.init(0, Cell.initArrayWith 0, 0, @[], @[])
     check field2 ==
       """
 [通]
@@ -2133,8 +2380,9 @@ block: # move
 ...o..""".toField
     var field2 = fieldBefore2
     let popCounts: array[Cell, int] = [0, 0, 3, 4, 0, 0, 0, 0]
-    check field2.move(Step.init(cross = false), calcConnection = false) ==
-      MoveResult.init(1, popCounts, 0, @[popCounts], @[0])
+    check field2.move(
+      Step.init(cross = false), calcConnection = false, requireSettled = true
+    ) == MoveResult.init(1, popCounts, 0, @[popCounts], @[0])
     check field2 == fieldAfter2
 
 # ------------------------------------------------
