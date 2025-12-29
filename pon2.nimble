@@ -1,6 +1,6 @@
 # Package
 
-version = "0.28.2"
+version = "0.28.3"
 author = "Keisuke Izumiya"
 description = "Application of Puyo Puyo and Nazo Puyo"
 license = "Apache-2.0"
@@ -15,15 +15,12 @@ bin = @["pon2"]
 requires "nim ^= 2.2.6"
 
 requires "chroma ^= 1.0.0"
-requires "chronos ^= 4.0.4"
 requires "cligen ^= 1.9.5"
 requires "karax ^= 1.5.0"
 requires "nimsimd ^= 1.3.2"
-requires "puppy ^= 2.1.2"
 requires "regex ^= 0.26.3"
 requires "results ^= 0.5.1"
 requires "stew ^= 0.4.2"
-requires "suru ^= 0.3.2"
 requires "unittest2 ^= 0.2.5"
 
 
