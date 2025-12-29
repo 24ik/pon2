@@ -119,6 +119,16 @@ when isMainModule:
     "invalidPlacements".measureExecTime:
       discard field.invalidPlacements
 
+  "place (requireSettled, Tsu)".measureExecTime:
+    var field = Field.init
+  do:
+    field.place(RedGreen, Right2, requireSettled = true)
+
+  "place (requireSettled, Water)".measureExecTime:
+    var field = Field.init Rule.Water
+  do:
+    field.place(RedGreen, Right2, requireSettled = true)
+
   "place (Tsu)".measureExecTime:
     var field = Field.init
   do:
@@ -134,12 +144,22 @@ when isMainModule:
   do:
     discard field.pop
 
+  "dropNuisance (requireSettled, Tsu)".measureExecTime:
+    var field = Field.init
+  do:
+    field.dropNuisance([Col0: 0, 1, 2, 3, 4, 5], requireSettled = true)
+
+  "dropNuisance (requireSettled, Water)".measureExecTime:
+    var field = Field.init Rule.Water
+  do:
+    field.dropNuisance([Col0: 0, 1, 2, 3, 4, 5], requireSettled = true)
+
   "dropNuisance (Tsu)".measureExecTime:
     var field = Field.init
   do:
     field.dropNuisance [Col0: 0, 1, 2, 3, 4, 5]
 
-  "dropGarbages (Water)".measureExecTime:
+  "dropNuisance (Water)".measureExecTime:
     var field = Field.init Rule.Water
   do:
     field.dropNuisance [Col0: 0, 1, 2, 3, 4, 5]
@@ -177,12 +197,12 @@ rgybgy""".parseField.unsafeValue
     "move (Tsu, not calcConnection)".measureExecTime:
       var field = field19
     do:
-      discard field.move(step, calcConnection = false)
+      discard field.move(step, calcConnection = false, requireSettled = true)
 
     "move (Tsu, calcConnection)".measureExecTime:
       var field = field19
     do:
-      discard field.move step
+      discard field.move(step, requireSettled = true)
 
   block:
     let
@@ -208,12 +228,12 @@ pbgrbr""".parseField.unsafeValue
     "move (Water, not calcConnection)".measureExecTime:
       var field = field18
     do:
-      discard field.move(step, calcConnection = false)
+      discard field.move(step, calcConnection = false, requireSettled = true)
 
     "move (Water, calcConnection)".measureExecTime:
       var field = field18
     do:
-      discard field.move step
+      discard field.move(step, requireSettled = true)
 
   "solve (Rashomon)".measureExecTime:
     let nazoPuyo =

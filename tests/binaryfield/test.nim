@@ -744,6 +744,69 @@ x.....
 ......""".toBinaryField
 
 # ------------------------------------------------
+# Place
+# ------------------------------------------------
+
+block: # placeMasksTsu
+  let field =
+    """
+....xx
+...xx.
+....x.
+....x.
+....x.
+....xx
+....x.
+....x.
+....x.
+....x.
+..x.x.
+....xx
+.xx.xx""".toBinaryField
+
+  block:
+    var
+      answer1 = BinaryField.init
+      answer2 = BinaryField.init
+    answer1[Row12, Col0] = true
+    answer2[Row11, Col1] = true
+    check field.placeMasksTsu(Col0, Col1) == (answer1, answer2)
+
+  block:
+    var
+      answer1 = BinaryField.init
+      answer2 = BinaryField.init
+    answer1[Row9, Col2] = true
+    answer2[Row0, Col3] = true
+    check field.placeMasksTsu(Col2, Col3) == (answer1, answer2)
+
+  check field.placeMasksTsu(Col4, Col5) == (BinaryField.init, BinaryField.init)
+
+block: # placeWaterHelper
+  let field =
+    """
+.....x
+......
+......
+......
+..x...
+.x..x.
+.x.xx.
+....x.
+.x..x.
+....x.
+..x.x.
+....x.
+....x.""".toBinaryField
+
+  check field.placeWaterHelper(Col0) == 5
+  check field.placeWaterHelper(Col1) == 7
+  check field.placeWaterHelper(Col2) == 4
+  check field.placeWaterHelper(Col3) == 5
+  check field.placeWaterHelper(Col4) == -1
+  check field.placeWaterHelper(Col5) == 0
+
+# ------------------------------------------------
 # Drop Nuisance
 # ------------------------------------------------
 
@@ -831,9 +894,7 @@ block: # dropNuisanceWater
 ......""".toBinaryField
       other2 = BinaryField.init
 
-    dropNuisanceWater(
-      field, other1, other2, [Col0: 0, 0, 1, 1, 5, 24], field + other1 + other2
-    )
+    dropNuisanceWater(field, other1, other2, [Col0: 0, 0, 1, 1, 5, 24])
 
     check field ==
       """
@@ -901,9 +962,7 @@ x.x..x
 x.x..x""".toBinaryField
       other2 = BinaryField.init
 
-    dropNuisanceWater(
-      field, other1, other2, [Col0: 0, 1, 0, 2, 0, 24], field + other1 + other2
-    )
+    dropNuisanceWater(field, other1, other2, [Col0: 0, 1, 0, 2, 0, 24])
 
     check field ==
       """
@@ -936,6 +995,123 @@ x.x..x
 .x.xx.
 x.x..x""".toBinaryField
     check other2 == BinaryField.init
+
+block: # dropNuisanceTsuSafe
+  let
+    field =
+      """
+.....x
+......
+......
+......
+......
+....x.
+....x.
+......
+...x..
+......
+......
+......
+..x...""".toBinaryField
+    existField =
+      """
+.....x
+......
+......
+......
+......
+....x.
+....x.
+......
+...x..
+......
+...x..
+......
+..x...""".toBinaryField
+
+  check field.dup(dropNuisanceTsuSafe(_, [Col0: 0, 2, 0, 1, 10, 3], existField)) ==
+    """
+....xx
+....x.
+....x.
+....x.
+....x.
+....x.
+....x.
+...x..
+...x..
+......
+......
+.x....
+.xx...""".toBinaryField
+
+block: # dropNuisanceWaterSafe
+  var
+    field =
+      """
+......
+......
+......
+..x...
+......
+......
+....x.
+......
+....xx
+......
+..x...
+...x.x
+......""".toBinaryField
+    other1 =
+      """
+......
+...x..
+......
+......
+......
+......
+..x...
+.....x
+......
+.....x
+......
+......
+....xx""".toBinaryField
+    other2 = BinaryField.init
+
+  field.dropNuisanceWaterSafe(other1, other2, [0, 1, 1, 2, 4, 5])
+
+  check field ==
+    """
+...x..
+......
+..x...
+..x..x
+.....x
+.x..xx
+....xx
+....xx
+....x.
+....xx
+..x.x.
+...x.x
+......""".toBinaryField
+  check other1 ==
+    """
+......
+...x..
+......
+......
+......
+......
+..x...
+......
+.....x
+......
+.....x
+......
+....xx""".toBinaryField
+  check other2 == BinaryField.init
 
 # ------------------------------------------------
 # Settle

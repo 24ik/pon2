@@ -1,6 +1,6 @@
 # Package
 
-version = "0.28.2"
+version = "0.28.3"
 author = "Keisuke Izumiya"
 description = "Application of Puyo Puyo and Nazo Puyo"
 license = "Apache-2.0"
@@ -15,15 +15,12 @@ bin = @["pon2"]
 requires "nim ^= 2.2.6"
 
 requires "chroma ^= 1.0.0"
-requires "chronos ^= 4.0.4"
 requires "cligen ^= 1.9.5"
 requires "karax ^= 1.5.0"
 requires "nimsimd ^= 1.3.2"
-requires "puppy ^= 2.1.2"
 requires "regex ^= 0.26.3"
 requires "results ^= 0.5.1"
 requires "stew ^= 0.4.2"
-requires "suru ^= 0.3.2"
 requires "unittest2 ^= 0.2.5"
 
 
@@ -34,6 +31,7 @@ import std/[os, sequtils, strformat, strutils]
 task pages, "Generate Web Pages":
   const
     Pon2Path {.define: "pon2.path".} = ""
+    Pon2Commit {.define: "pon2.commit".} = "main"
     danger {.booldefine.} = true
     minify {.booldefine.} = true
     verbose {.booldefine.} = false
@@ -73,8 +71,8 @@ task pages, "Generate Web Pages":
   "src/pon2.nim".compile "pages/marathon/index.min.js", "-d:pon2.build.marathon"
 
   # documentation
-  exec "nim doc --project --outdir:pages/docs/api/native src/pon2.nim"
-  exec "nim doc --project --outdir:pages/docs/api/js --backend:js src/pon2.nim"
+  exec "nim doc --project --index:on --git.url:https://github.com/24ik/pon2 --git.commit:{Pon2Commit} --git.devel:{Pon2Commit} --outdir:pages/docs/api/native src/pon2.nim".fmt
+  exec "nim doc --project --index:on --git.url:https://github.com/24ik/pon2 --git.commit:{Pon2Commit} --git.devel:{Pon2Commit} --outdir:pages/docs/api/js --backend:js src/pon2.nim".fmt
 
   # assets
   cpDir "assets", "pages/assets"

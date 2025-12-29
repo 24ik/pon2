@@ -66,15 +66,19 @@ func init*(T: type SolveNode, nazoPuyo: NazoPuyo): T {.inline, noinit.} =
 # Child
 # ------------------------------------------------
 
-func child(self: SolveNode, goal: Goal, step: Step): SolveNode {.inline, noinit.} =
+func child(
+    self: SolveNode, goal: Goal, step: Step, requireSettled: bool
+): SolveNode {.inline, noinit.} =
   ## Returns the child node.
-  ## This function requires that the field is settled.
+  ## If `requireSettled` is `true`, this function requires that the field is settled
+  ## but becomes faster.
   # move
   var childField = self.field
   let moveResult = childField.move(
     step,
     calcConnection =
       goal.mainOpt.isOk and goal.mainOpt.unsafeValue.kind in {Place, Connection},
+    requireSettled = requireSettled,
   )
 
   # accum
@@ -166,10 +170,11 @@ func child(self: SolveNode, goal: Goal, step: Step): SolveNode {.inline, noinit.
   )
 
 func children(
-    self: SolveNode, goal: Goal, step: Step
+    self: SolveNode, goal: Goal, step: Step, requireSettled: bool
 ): seq[tuple[node: SolveNode, placement: Placement]] {.inline, noinit.} =
   ## Returns the children of the node.
-  ## This function requires that the field is settled.
+  ## If `requireSettled` is `true`, this function requires that the field is settled
+  ## but becomes faster.
   ## `placement` is set to `Placement.None` if the edge is not `PairPlace`.
   case step.kind
   of PairPlace:
@@ -179,9 +184,9 @@ func children(
       else:
         self.field.validPlacements
 
-    placements.mapIt (self.child(goal, Step.init(step.pair, it)), it)
+    placements.mapIt (self.child(goal, Step.init(step.pair, it), requireSettled), it)
   of NuisanceDrop, FieldRotate:
-    @[(self.child(goal, step), Placement.None)]
+    @[(self.child(goal, step, requireSettled), Placement.None)]
 
 # ------------------------------------------------
 # Correct
@@ -390,14 +395,13 @@ func childrenAtDepth*(
   ## A sequence of edges to reach them is set to `placementsSeq`.
   ## Solutions that have `targetDepth` or less steps are set to `solutions` in reverse
   ## order.
-  ## This function requires that the field is settled and `nodes`, `placementsSeq`, and
-  ## `solutions` are empty.
+  ## `nodes`, `placementsSeq`, and `solutions` should be empty.
   let
     step = steps[self.depth]
     childDepth = self.depth + 1
     childIsSpawned = childDepth == targetDepth
     childIsLeaf = childDepth == moveCount
-    children = self.children(goal, step)
+    children = self.children(goal, step, requireSettled = self.depth != 0)
     childCount = children.len
 
   var
@@ -468,7 +472,7 @@ func solveSingleThread*(
     checkPruneFirst = false,
 ) {.inline, noinit.} =
   ## Solves the Nazo Puyo at the node with a single thread.
-  ## This function requires that the field is settled and `solutions` is empty.
+  ## `solutions` should be empty.
   ## Solutions in `solutions` are set in reverse order.
   if checkPruneFirst and self.canPrune goal:
     return
@@ -477,7 +481,7 @@ func solveSingleThread*(
     step = steps[self.depth]
     childDepth = self.depth + 1
     childIsLeaf = childDepth == moveCount
-    children = self.children(goal, step)
+    children = self.children(goal, step, requireSettled = self.depth != 0)
 
   var childSolutionsSeq = newSeqOfCap[seq[seq[Placement]]](children.len)
   for _ in 1 .. children.len:

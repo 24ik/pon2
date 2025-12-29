@@ -1,8 +1,7 @@
-## The `pon2` module provides the applications and the APIs of
-## [Puyo Puyo](https://puyo.sega.jp/) and
-## [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
+## This module provides applications and APIs dedicated to
+## [Puyo Puyo](https://puyo.sega.jp/) and [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 ##
-## To access the APIs, either `import pon2` as an "all-in-one" or import the following
+## To access the APIs, import either `pon2` as an "all-in-one", or the following
 ## submodules individually:
 ## - [pon2/gui](./pon2/gui.html)
 ## - [pon2/app](./pon2/app.html)

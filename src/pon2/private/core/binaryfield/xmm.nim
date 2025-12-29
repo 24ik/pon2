@@ -7,7 +7,7 @@
 {.experimental: "views".}
 
 import std/[hashes, sugar]
-import ../../[assign, bitops, expand, simd, staticfor]
+import ../../[arrayutils, assign, bitops, expand, simd, staticfor]
 import ../../../core/[behaviour, common]
 
 export hashes, simd
@@ -126,6 +126,10 @@ func keptVisible*(self: BinaryField): BinaryField {.inline, noinit.} =
 func keptAir*(self: BinaryField): BinaryField {.inline, noinit.} =
   ## Returns the binary field with only the air area.
   self * BinaryField.init AirMaskElem
+
+func keptValid(self: uint16): uint16 {.inline, noinit.} =
+  ## Returns the value with only the valid area.
+  self and ValidMaskElem
 
 # ------------------------------------------------
 # Replace
@@ -341,6 +345,35 @@ func del*(
   self.assign valArray.addr.mm_load_si128
 
 # ------------------------------------------------
+# Place
+# ------------------------------------------------
+
+func placeMasksTsu*(
+    existField: BinaryField, col1, col2: Col
+): (BinaryField, BinaryField) {.inline, noinit.} =
+  ## Returns the masks where a next puyo is placed with Tsu physics.
+  ## This function accepts an unsettled field.
+  # XMM -> mem
+  let existFloor = existField + BinaryField.initFloor
+  var existFloorArray {.noinit, align(16).}: array[8, uint16]
+  existFloorArray.addr.mm_store_si128 existFloor
+
+  # calc mask
+  let
+    arrayIndex1 = 7 - col1.ord
+    arrayIndex2 = 7 - col2.ord
+
+    mask1 = (0x8000'u16 shr (existFloorArray[arrayIndex1].leadingZeros - 1)).keptValid
+    mask2 = (0x8000'u16 shr (existFloorArray[arrayIndex2].leadingZeros - 1)).keptValid
+  var
+    valArray1 {.align(16).} = 8.initArrayWith 0'u16
+    valArray2 {.align(16).} = 8.initArrayWith 0'u16
+  valArray1[arrayIndex1].assign mask1
+  valArray2[arrayIndex2].assign mask2
+
+  (valArray1.addr.mm_load_si128, valArray2.addr.mm_load_si128)
+
+# ------------------------------------------------
 # Drop Nuisance
 # ------------------------------------------------
 
@@ -361,13 +394,13 @@ func dropNuisanceTsu*(
   self += valArray.addr.mm_load_si128
 
 func dropNuisanceWater*(
-    self, other1, other2: var BinaryField,
-    counts: array[Col, int],
-    existField: BinaryField,
+    self, other1, other2: var BinaryField, counts: array[Col, int]
 ) {.inline, noinit.} =
   ## Drops cells by Water physics.
   ## `other1` and `other2` are only shifted.
   ## This function requires that the mask is settled and the counts are non-negative.
+  let existField = self + other1 + other2
+
   var
     valArraySelf {.noinit, align(16).}: array[8, uint16]
     valArrayOther1 {.noinit, align(16).}: array[8, uint16]
@@ -406,20 +439,124 @@ func dropNuisanceWater*(
   other1.assign valArrayOther1.addr.mm_load_si128
   other2.assign valArrayOther2.addr.mm_load_si128
 
+func dropNuisanceTsuSafe*(
+    self: var BinaryField, counts: array[Col, int], existField: BinaryField
+) {.inline, noinit.} =
+  ## Drops cells by Tsu physics.
+  ## This function requires that the counts are non-negative.
+  # XMM -> mem
+  let existFloor = existField + BinaryField.initFloor
+  var existFloorArray {.noinit, align(16).}: array[8, uint16]
+  existFloorArray.addr.mm_store_si128 existFloor
+
+  # calc mask
+  var valArray {.noinit, align(16).}: array[8, uint16]
+  valArray[0].assign 0
+  valArray[1].assign 0
+  staticFor(col, Col):
+    let
+      arrayIndex = 7 - col.ord
+      maskBase = uint16.high shl (16 - existFloorArray[arrayIndex].leadingZeros)
+      mask = (maskBase xor (maskBase shl counts[col])).keptValid
+
+    valArray[arrayIndex].assign mask
+
+  self += valArray.addr.mm_load_si128
+
+func dropNuisanceWaterSafe*(
+    self, other1, other2: var BinaryField, counts: array[Col, int]
+) {.inline, noinit.} =
+  ## Drops cells by Water physics.
+  ## `other1` and `other2` are only shifted.
+  ## This function requires that the counts are non-negative.
+  let existField = self + other1 + other2
+
+  # XMM -> mem
+  var
+    valArrayExist {.noinit, align(16).}: array[8, uint16]
+    valArraySelf {.noinit, align(16).}: array[8, uint16]
+    valArrayOther1 {.noinit, align(16).}: array[8, uint16]
+    valArrayOther2 {.noinit, align(16).}: array[8, uint16]
+  valArrayExist.addr.mm_store_si128 existField
+  valArraySelf.addr.mm_store_si128 self
+  valArrayOther1.addr.mm_store_si128 other1
+  valArrayOther2.addr.mm_store_si128 other2
+
+  for col in Col:
+    # if any puyo exists in the top row or the count is zero, does nothing
+    if counts[col] == 0 or existField[Row.low, col]:
+      continue
+
+    let arrayIndex = 7 - col.ord
+
+    # if any puyo exists in the air, drop nuisance onto it
+    staticFor(row, Row.low.succ .. AirBottomRow):
+      if existField[row, col]:
+        let
+          beginIndex = 14 - row.ord
+          endIndex = min(beginIndex + counts[col], 14)
+        valArraySelf[arrayIndex].assign valArraySelf[arrayIndex] or
+          toMask2[uint16](beginIndex ..< endIndex)
+
+        continue
+
+    # find the base row of PEXT
+    var
+      emptyCellCount = 0
+      baseRow = Row.high
+    for row in WaterTopRow .. Row.high:
+      if not existField[row, col]:
+        emptyCellCount += 1
+        if emptyCellCount == counts[col]:
+          baseRow.assign row
+          break
+
+    # shift the field partly
+    let
+      baseRowIndex = 13 - baseRow.ord
+      pextMask = valArrayExist[arrayIndex].masked baseRowIndex .. 15
+      newValBaseShifted = valArraySelf[arrayIndex].pext(pextMask) shl baseRowIndex
+      newValBase =
+        newValBaseShifted or valArraySelf[arrayIndex].masked 0 ..< baseRowIndex
+
+    # drop nuisance
+    let
+      waterNuisanceVal = WaterMaskElem *~ (WaterMaskElem shr emptyCellCount)
+      nuisanceVal =
+        if emptyCellCount == counts[col]:
+          waterNuisanceVal
+        else:
+          waterNuisanceVal or
+            (AirMaskElem *~ (AirMaskElem shl (counts[col] - emptyCellCount)))
+
+    # update array
+    valArraySelf[arrayIndex].assign newValBase or nuisanceVal
+    valArrayOther1[arrayIndex].assign (
+      valArrayOther1[arrayIndex].pext(pextMask) shl baseRowIndex
+    ) or valArrayOther1[arrayIndex].masked 0 ..< baseRowIndex
+    valArrayOther2[arrayIndex].assign (
+      valArrayOther2[arrayIndex].pext(pextMask) shl baseRowIndex
+    ) or valArrayOther2[arrayIndex].masked 0 ..< baseRowIndex
+
+  # mem -> XMM
+  self.assign valArraySelf.addr.mm_load_si128
+  other1.assign valArrayOther1.addr.mm_load_si128
+  other2.assign valArrayOther2.addr.mm_load_si128
+
 # ------------------------------------------------
 # Settle
 # ------------------------------------------------
 
 func write(
-    self: out array[Col, PextMask[uint16]], existField: BinaryField
+    masks: out array[Col, PextMask[uint16]], existField: BinaryField
 ) {.inline, noinit.} =
-  ## Initializes the masks.
+  ## Initializes the PEXT masks.
   var valArray {.noinit, align(16).}: array[8, uint16]
   valArray.addr.mm_store_si128 existField
 
   staticFor(col, Col):
     {.push warning[ProveInit]: off.}
-    self[col].assign PextMask[uint16].init valArray[7 - col.ord]
+    masks[col].assign PextMask[uint16].init valArray[7 - col.ord]
     {.pop.}
 
 func settleTsu(

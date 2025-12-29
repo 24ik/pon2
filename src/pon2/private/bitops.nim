@@ -187,7 +187,7 @@ when Bmi2Available:
     ## Returns the mask converted from the slice.
     let
       subtracter = uint64.high.bzhi_u64 slice.a.uint32
-      base = uint64.high.bzhi_u64 slice.b.uint32.succ
+      base = uint64.high.bzhi_u64 slice.b.uint32 + 1
 
     base *~ subtracter
 
@@ -195,7 +195,7 @@ when Bmi2Available:
     ## Returns the mask converted from the slice.
     let
       subtracter = uint32.high.bzhi_u32 slice.a.uint32
-      base = uint32.high.bzhi_u32 slice.b.uint32.succ
+      base = uint32.high.bzhi_u32 slice.b.uint32 + 1
 
     base *~ subtracter
 
@@ -300,7 +300,7 @@ func bextr*[T: SomeSignedInt](val: T, start, length: uint32): T {.inline, noinit
 func blsmskNim[T: SomeSignedInt](val: T): T {.inline, noinit.} =
   ## Returns the mask up to the lowest set bit.
   ## If `val` is zero, all bits of the result are one.
-  val.pred xor val
+  (val - 1) xor val
 
 func blsmskNim[T: SomeUnsignedInt](val: T): T {.inline, noinit.} =
   ## Returns the mask up to the lowest set bit.

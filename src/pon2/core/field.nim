@@ -332,14 +332,26 @@ template withFills(cell: Cell, body: untyped): untyped =
 
     body
 
-func placeTsu(self: var Field, pair: Pair, placement: Placement) {.inline, noinit.} =
-  ## Places the pair with Tsu Physics.
-  ## This function requires that the field is settled.
-  let
-    existField = self.exist
-    placeMask = existField xor (existField + BinaryField.initFloor).shiftedUp
+func placeTsu(
+    self: var Field, pair: Pair, placement: Placement, requireSettled: bool
+) {.inline, noinit.} =
+  ## Places the pair with Tsu physics.
+  ## This function requires that the placement is not none.
+  ## If `requireSettled` is `true`, this function also requires that the field is
+  ## settled but becomes faster.
+  let existField = self.exist
+
+  let pivotMask, rotorMask: BinaryField
+  if requireSettled:
+    let placeMask = existField xor (existField + BinaryField.initFloor).shiftedUp
     pivotMask = (if placement in Down0 .. Down5: placeMask.shiftedUp else: placeMask).kept placement.pivotCol
     rotorMask = (if placement in Up0 .. Up5: placeMask.shiftedUp else: placeMask).kept placement.rotorCol
+  else:
+    let (pivotMaskBase, rotorMaskBase) =
+      existField.placeMasksTsu(placement.pivotCol, placement.rotorCol)
+    pivotMask =
+      if placement in Down0 .. Down5: pivotMaskBase.shiftedUp else: pivotMaskBase
+    rotorMask = if placement in Up0 .. Up5: rotorMaskBase.shiftedUp else: rotorMaskBase
 
   let pivot0, pivot1, pivot2: BinaryField
   pair.pivot.withFills:
@@ -356,7 +368,7 @@ func placeTsu(self: var Field, pair: Pair, placement: Placement) {.inline, noini
 
 func placeWater(self: var Field, pair: Pair, placement: Placement) {.inline, noinit.} =
   ## Places the pair with Water physics.
-  ## This function requires that the field is settled.
+  ## This function requires that the placement is not none and the field is settled.
   let
     pivotCol = placement.pivotCol
     rotorCol = placement.rotorCol
@@ -389,17 +401,66 @@ func placeWater(self: var Field, pair: Pair, placement: Placement) {.inline, noi
     staticFor(i, 0 ..< 3):
       self.binaryFields[i].replace rotorCol, self.binaryFields[i].shiftedDownRaw
 
-func place*(self: var Field, pair: Pair, placement: Placement) {.inline, noinit.} =
+func placeWaterSafe(self: var Field, cell: Cell, col: Col) {.inline, noinit.} =
+  ## Places the cell with Water physics.
+  let helperVal = self.exist.placeWaterHelper col
+
+  # if the water is full and the air is empty, place the cell at air-bottom
+  if helperVal == -1:
+    self[AirBottomRow, col] = cell
+    return
+
+  let helperRow = helperVal.Row
+  case helperRow
+  of Row.low: # puyo exists at the top row
+    discard
+  of Row.low.succ .. AirBottomRow: # puyo exists in the air
+    self[helperRow.pred, col] = cell
+  of WaterTopRow .. Row.high: # puyo exists in the water (but not full)
+    for row in countdown(helperRow, WaterTopRow.succ):
+      self[row, col] = self[row.pred, col]
+    self[WaterTopRow, col] = cell
+
+func placeWaterSafe(
+    self: var Field, pair: Pair, placement: Placement
+) {.inline, noinit.} =
+  ## Places the pair with Water physics.
+  ## This function requires that the placement is not none.
+  let
+    cell1, cell2: Cell
+    col1, col2: Col
+  case placement
+  of Down0 .. Down5:
+    cell1 = pair.rotor
+    cell2 = pair.pivot
+    col1 = placement.rotorCol
+    col2 = placement.pivotCol
+  else:
+    cell1 = pair.pivot
+    cell2 = pair.rotor
+    col1 = placement.pivotCol
+    col2 = placement.rotorCol
+
+  self.placeWaterSafe cell1, col1
+  self.placeWaterSafe cell2, col2
+
+func place*(
+    self: var Field, pair: Pair, placement: Placement, requireSettled = false
+) {.inline, noinit.} =
   ## Places the pair.
-  ## This function requires that the field is settled.
+  ## If `requireSettled` is `true`, this function requires that the field is settled
+  ## but becomes faster.
   if placement == Placement.None:
     return
 
   case Behaviours[self.rule].physics
   of Physics.Tsu:
-    self.placeTsu pair, placement
+    self.placeTsu pair, placement, requireSettled
   of Physics.Water:
-    self.placeWater pair, placement
+    if requireSettled:
+      self.placeWater pair, placement
+    else:
+      self.placeWaterSafe pair, placement
 
 # ------------------------------------------------
 # Pop
@@ -459,33 +520,44 @@ func canPop*(self: Field): bool {.inline, noinit.} =
 # ------------------------------------------------
 
 func dropNuisance*(
-    self: var Field, counts: array[Col, int], hard = false
+    self: var Field, counts: array[Col, int], hard = false, requireSettled = false
 ) {.inline, noinit.} =
   ## Drops nuisance puyos.
-  ## This function requires that the field is settled and the counts are non-negative.
-  let
-    existField = self.exist
-    notDropHardInt = (not hard).int
+  ## This function requires that the counts are non-negative.
+  ## If `requireSettled` is `true`, this function also requires that the field is
+  ## settled but becomes faster.
+  let notDropHardInt = (not hard).int
 
   case Behaviours[self.rule].physics
   of Physics.Tsu:
-    self.binaryFields[notDropHardInt].dropNuisanceTsu counts, existField
+    let existField = self.exist
+
+    if requireSettled:
+      self.binaryFields[notDropHardInt].dropNuisanceTsu counts, existField
+    else:
+      self.binaryFields[notDropHardInt].dropNuisanceTsuSafe counts, existField
   of Physics.Water:
-    self.binaryFields[notDropHardInt].dropNuisanceWater self.binaryFields[hard.int],
-      self.binaryFields[2], counts, existField
+    if requireSettled:
+      self.binaryFields[notDropHardInt].dropNuisanceWater self.binaryFields[hard.int],
+        self.binaryFields[2], counts
+    else:
+      self.binaryFields[notDropHardInt].dropNuisanceWaterSafe self.binaryFields[
+        hard.int
+      ], self.binaryFields[2], counts
 
 # ------------------------------------------------
 # Apply
 # ------------------------------------------------
 
-func apply*(self: var Field, step: Step) {.inline, noinit.} =
+func apply*(self: var Field, step: Step, requireSettled = false) {.inline, noinit.} =
   ## Applies the step.
-  ## This function requires that the field is settled.
+  ## If `requireSettled` is `true`, this function requires that the field is settled
+  ## but becomes faster.
   case step.kind
   of PairPlace:
-    self.place step.pair, step.placement
+    self.place(step.pair, step.placement, requireSettled)
   of NuisanceDrop:
-    self.dropNuisance step.counts, step.hard
+    self.dropNuisance(step.counts, step.hard, requireSettled)
   of FieldRotate:
     if step.cross: self.crossRotate else: self.rotate
 
@@ -524,10 +596,13 @@ func isSettled*(self: Field): bool {.inline, noinit.} =
 
 const MaxChainCount = Height * Width div 4
 
-func move*(self: var Field, step: Step, calcConnection = true): MoveResult =
+func move*(
+    self: var Field, step: Step, calcConnection = true, requireSettled = false
+): MoveResult =
   ## Applies `applyBody`, advances the field until chains end, and returns a moving
   ## result.
-  ## This function requires that the field is settled.
+  ## If `requireSettled` is `true`, this function requires that the field is settled
+  ## but becomes faster.
   var
     chainCount = 0
     popCounts = Cell.initArrayWith 0
@@ -539,7 +614,7 @@ func move*(self: var Field, step: Step, calcConnection = true): MoveResult =
   if calcConnection:
     fullPopCountsOpt.ok newSeqOfCap[array[Cell, seq[int]]](MaxChainCount)
 
-  self.apply step
+  self.apply step, requireSettled
 
   if step.kind == FieldRotate:
     self.settle

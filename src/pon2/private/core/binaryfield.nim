@@ -150,6 +150,24 @@ func dilatedHorizontal(self: BinaryField): BinaryField {.inline, noinit.} =
   sum(self, self.shiftedRightRaw, self.shiftedLeftRaw)
 
 # ------------------------------------------------
+# Place
+# ------------------------------------------------
+
+func placeWaterHelper*(existField: BinaryField, col: Col): int {.inline, noinit.} =
+  ## Returns the highest row where a cell exists in the air.
+  ## If not, returns the highest row where no cell exists.
+  ## If the water is full (and the air is empty), returns -1.
+  staticFor(row, Row.low .. AirBottomRow):
+    if existField[row, col]:
+      return row.ord
+
+  staticFor(row, WaterTopRow .. Row.high):
+    if not existField[row, col]:
+      return row.ord
+
+  -1
+
+# ------------------------------------------------
 # Pop
 # ------------------------------------------------
 
