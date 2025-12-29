@@ -48,6 +48,14 @@ To run the full test, run:
 nimble test
 ```
 
+### Benchmarking
+
+To measure performance, run:
+
+```shell
+nim c -r benchmarks/main.nim
+```
+
 ### Generating Web Pages
 
 To generate files in the `pages` directory, run:
@@ -63,6 +71,7 @@ nimble pages
 
 ## License
 
-This project is licensed under the [Apache-2.0 License](https://www.apache.org/licenses/LICENSE-2.0).
+This project is licensed under the
+[Apache-2.0 License](https://www.apache.org/licenses/LICENSE-2.0).
 
 See [LICENSE](./LICENSE) and [NOTICE](./NOTICE) for more details.
