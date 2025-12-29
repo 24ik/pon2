@@ -31,6 +31,7 @@ import std/[os, sequtils, strformat, strutils]
 task pages, "Generate Web Pages":
   const
     Pon2Path {.define: "pon2.path".} = ""
+    Pon2Commit {.define: "pon2.commit".} = "main"
     danger {.booldefine.} = true
     minify {.booldefine.} = true
     verbose {.booldefine.} = false
@@ -70,8 +71,8 @@ task pages, "Generate Web Pages":
   "src/pon2.nim".compile "pages/marathon/index.min.js", "-d:pon2.build.marathon"
 
   # documentation
-  exec "nim doc --project --outdir:pages/docs/api/native src/pon2.nim"
-  exec "nim doc --project --outdir:pages/docs/api/js --backend:js src/pon2.nim"
+  exec "nim doc --project --index:on --git.url:https://github.com/24ik/pon2 --git.commit:{Pon2Commit} --git.devel:{Pon2Commit} --outdir:pages/docs/api/native src/pon2.nim".fmt
+  exec "nim doc --project --index:on --git.url:https://github.com/24ik/pon2 --git.commit:{Pon2Commit} --git.devel:{Pon2Commit} --outdir:pages/docs/api/js --backend:js src/pon2.nim".fmt
 
   # assets
   cpDir "assets", "pages/assets"
