@@ -1,4 +1,4 @@
-## This module implements GUI application for [Puyo Puyo](https://puyo.sega.jp/) and
+## This module implements GUIs dedicated to [Puyo Puyo](https://puyo.sega.jp/) and
 ## [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 ##
 ## Submodule Documentations:

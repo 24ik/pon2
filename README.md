@@ -1,42 +1,48 @@
 # Pon! Tsu
 
-Pon! Tsu is an application and library of [Puyo Puyo](https://puyo.sega.jp/)
+Pon! Tsu is an application and library dedicated to [Puyo Puyo](https://puyo.sega.jp/)
 and [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 
-Features:
-- Solve Nazo Puyos.
-- Generate Nazo Puyos.
-- Permute pairs in Nazo Puyos to find unique-solution questions.
-- [Edit Nazo Puyos](https://24ik.github.io/pon2/stable/studio/).
-- [Play a marathon mode](https://24ik.github.io/pon2/stable/marathon/).
+## Features
+
+- **Solve** Nazo Puyo puzzles.
+- **Generate** new Nazo Puyo puzzles.
+- **Permute** pairs in Nazo Puyo to find problems with unique solutions.
+- **[Edit Nazo Puyo](https://24ik.github.io/pon2/stable/studio/)** via the web interface.
+- **[Play Marathon](https://24ik.github.io/pon2/stable/marathon/)** in your browser.
 
 ## Installation
 
-### Downloading Built Binary
+### Download Pre-built Binaries
 
-The built binary is available at the
-[latest release](https://github.com/24ik/pon2/releases/latest).
+You can download the latest pre-built binaries from the
+[Releases page](https://github.com/24ik/pon2/releases/latest).
 
 ### Manual Installation
+
+To install via [Nimble](https://nim-lang.github.io/nimble/), run:
 
 ```shell
 nimble install pon2 -p:-d:danger
 ```
 
-The list of compile options is available in the
+A full list of compilation options is available in the
 [API documentation](https://24ik.github.io/pon2/stable/docs/api/).
 
 ## Usage
 
-See the usage by running `pon2`.
+Run `pon2` in your terminal to see the available commands and usage instructions.
 
 ## For Developers
 
-### API Usage
+### API Reference
 
-See the [API documentation](https://24ik.github.io/pon2/stable/docs/api/).
+Detailed documentation is available here:
+[API documentation](https://24ik.github.io/pon2/stable/docs/api/).
 
 ### Running Tests
+
+To run the full test, run:
 
 ```shell
 nimble test
@@ -44,14 +50,19 @@ nimble test
 
 ### Generating Web Pages
 
-Run `nimble pages` to generate files in the `pages` directory.
+To generate files in the `pages` directory, run:
 
-### Contribution
+```shell
+nimble pages
+```
 
-Please work on a new branch and then submit a PR for the `main` branch.
+### Contributing
+
+1. Create a new branch for your feature or bug fix.
+1. Submit a Pull Request (PR) to the `main` branch.
 
 ## License
 
-Apache-2.0
+This project is licensed under the [Apache-2.0 License](https://www.apache.org/licenses/LICENSE-2.0).
 
-See [LICENSE](./LICENSE) and [NOTICE](./NOTICE) for details.
+See [LICENSE](./LICENSE) and [NOTICE](./NOTICE) for more details.

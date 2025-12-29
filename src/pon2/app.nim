@@ -1,5 +1,5 @@
-## This module implements applications for [Puyo Puyo](https://puyo.sega.jp/) and
-## [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
+## This module implements applications dedicated to
+## [Puyo Puyo](https://puyo.sega.jp/) and [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 ##
 ## Submodule Documentations:
 ## - [generate](./app/generate.html)
