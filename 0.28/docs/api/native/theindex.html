@@ -120,7 +120,7 @@
           </ul></dd>
 <dt><a name="apply" href="#apply"><span>apply:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="field: proc apply(self: var Field; step: Step)" href="pon2/core/field.html#apply%2CField%2CStep">field: proc apply(self: var Field; step: Step)</a></li>
+          data-doc-search-tag="field: proc apply(self: var Field; step: Step; requireSettled = false)" href="pon2/core/field.html#apply%2CField%2CStep">field: proc apply(self: var Field; step: Step; requireSettled = false)</a></li>
           </ul></dd>
 <dt><a name="areSettledTsu" href="#areSettledTsu"><span>areSettledTsu:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -394,7 +394,9 @@
           </ul></dd>
 <dt><a name="dropNuisance" href="#dropNuisance"><span>dropNuisance:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="field: proc dropNuisance(self: var Field; counts: array[Col, int]; hard = false)" href="pon2/core/field.html#dropNuisance%2CField%2Carray%5BCol%2Cint%5D">field: proc dropNuisance(self: var Field; counts: array[Col, int]; hard = false)</a></li>
+          data-doc-search-tag="field: proc dropNuisance(self: var Field; counts: array[Col, int]; hard = false;
+             requireSettled = false)" href="pon2/core/field.html#dropNuisance%2CField%2Carray%5BCol%2Cint%5D">field: proc dropNuisance(self: var Field; counts: array[Col, int]; hard = false;
+             requireSettled = false)</a></li>
           </ul></dd>
 <dt><a name="dropNuisanceTsu" href="#dropNuisanceTsu"><span>dropNuisanceTsu:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -402,11 +404,21 @@
                 existField: BinaryField)" href="pon2/private/core/binaryfield/xmm.html#dropNuisanceTsu%2CM128i%2Carray%5BCol%2Cint%5D%2CM128i">xmm: proc dropNuisanceTsu(self: var BinaryField; counts: array[Col, int];
                 existField: BinaryField)</a></li>
           </ul></dd>
+<dt><a name="dropNuisanceTsuSafe" href="#dropNuisanceTsuSafe"><span>dropNuisanceTsuSafe:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="xmm: proc dropNuisanceTsuSafe(self: var BinaryField; counts: array[Col, int];
+                    existField: BinaryField)" href="pon2/private/core/binaryfield/xmm.html#dropNuisanceTsuSafe%2CM128i%2Carray%5BCol%2Cint%5D%2CM128i">xmm: proc dropNuisanceTsuSafe(self: var BinaryField; counts: array[Col, int];
+                    existField: BinaryField)</a></li>
+          </ul></dd>
 <dt><a name="dropNuisanceWater" href="#dropNuisanceWater"><span>dropNuisanceWater:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="xmm: proc dropNuisanceWater(self, other1, other2: var BinaryField;
-                  counts: array[Col, int]; existField: BinaryField)" href="pon2/private/core/binaryfield/xmm.html#dropNuisanceWater%2CM128i%2CM128i%2CM128i%2Carray%5BCol%2Cint%5D%2CM128i">xmm: proc dropNuisanceWater(self, other1, other2: var BinaryField;
-                  counts: array[Col, int]; existField: BinaryField)</a></li>
+          data-doc-search-tag="xmm: proc dropNuisanceWater(self, other1, other2: var BinaryField; counts: array[Col, int])" href="pon2/private/core/binaryfield/xmm.html#dropNuisanceWater%2CM128i%2CM128i%2CM128i%2Carray%5BCol%2Cint%5D">xmm: proc dropNuisanceWater(self, other1, other2: var BinaryField; counts: array[Col, int])</a></li>
+          </ul></dd>
+<dt><a name="dropNuisanceWaterSafe" href="#dropNuisanceWaterSafe"><span>dropNuisanceWaterSafe:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="xmm: proc dropNuisanceWaterSafe(self, other1, other2: var BinaryField;
+                      counts: array[Col, int])" href="pon2/private/core/binaryfield/xmm.html#dropNuisanceWaterSafe%2CM128i%2CM128i%2CM128i%2Carray%5BCol%2Cint%5D">xmm: proc dropNuisanceWaterSafe(self, other1, other2: var BinaryField;
+                      counts: array[Col, int])</a></li>
           </ul></dd>
 <dt><a name="editData" href="#editData"><span>editData:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -1080,7 +1092,7 @@
           </ul></dd>
 <dt><a name="move" href="#move"><span>move:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="field: proc move(self: var Field; step: Step; calcConnection = true): MoveResult" href="pon2/core/field.html#move%2CField%2CStep">field: proc move(self: var Field; step: Step; calcConnection = true): MoveResult</a></li>
+          data-doc-search-tag="field: proc move(self: var Field; step: Step; calcConnection = true; requireSettled = false): MoveResult" href="pon2/core/field.html#move%2CField%2CStep">field: proc move(self: var Field; step: Step; calcConnection = true; requireSettled = false): MoveResult</a></li>
           <li><a class="reference external"
           data-doc-search-tag="puyopuyo: proc move(self: var PuyoPuyo; calcConnection = true): MoveResult" href="pon2/core/puyopuyo.html#move%2CPuyoPuyo">puyopuyo: proc move(self: var PuyoPuyo; calcConnection = true): MoveResult</a></li>
           </ul></dd>
@@ -1346,7 +1358,7 @@
           </ul></dd>
 <dt><a name="place" href="#place"><span>place:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="field: proc place(self: var Field; pair: Pair; placement: Placement)" href="pon2/core/field.html#place%2CField%2CPair%2CPlacement">field: proc place(self: var Field; pair: Pair; placement: Placement)</a></li>
+          data-doc-search-tag="field: proc place(self: var Field; pair: Pair; placement: Placement; requireSettled = false)" href="pon2/core/field.html#place%2CField%2CPair%2CPlacement">field: proc place(self: var Field; pair: Pair; placement: Placement; requireSettled = false)</a></li>
           </ul></dd>
 <dt><a name="placeCounts" href="#placeCounts"><span>placeCounts:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -1354,9 +1366,19 @@
           <li><a class="reference external"
           data-doc-search-tag="moveresult: proc placeCounts(self: MoveResult; cell: Cell): Pon2Result[seq[int]]" href="pon2/core/moveresult.html#placeCounts%2CMoveResult%2CCell">moveresult: proc placeCounts(self: MoveResult; cell: Cell): Pon2Result[seq[int]]</a></li>
           </ul></dd>
+<dt><a name="placeMasksTsu" href="#placeMasksTsu"><span>placeMasksTsu:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="xmm: proc placeMasksTsu(existField: BinaryField; col1, col2: Col): (BinaryField,
+    BinaryField)" href="pon2/private/core/binaryfield/xmm.html#placeMasksTsu%2CM128i%2CCol%2CCol">xmm: proc placeMasksTsu(existField: BinaryField; col1, col2: Col): (BinaryField,
+    BinaryField)</a></li>
+          </ul></dd>
 <dt><a name="Placement" href="#Placement"><span>Placement:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="placement: enum Placement" href="pon2/core/placement.html#Placement">placement: enum Placement</a></li>
+          </ul></dd>
+<dt><a name="placeWaterHelper" href="#placeWaterHelper"><span>placeWaterHelper:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="binaryfield: proc placeWaterHelper(existField: BinaryField; col: Col): int" href="pon2/private/core/binaryfield.html#placeWaterHelper%2CM128i%2CCol">binaryfield: proc placeWaterHelper(existField: BinaryField; col: Col): int</a></li>
           </ul></dd>
 <dt><a name="PlayModes" href="#PlayModes"><span>PlayModes:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -1942,7 +1964,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-25 15:04:20 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-30 04:12:16 UTC</small>
       </div>
     </div>
   </div>

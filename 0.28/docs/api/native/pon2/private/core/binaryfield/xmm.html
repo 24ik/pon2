@@ -121,10 +121,20 @@
                 existField: BinaryField)</a></li>
 
 </ul>
+<ul class="simple nested-toc-section">dropNuisanceTsuSafe
+  <li><a class="reference" href="#dropNuisanceTsuSafe%2CM128i%2Carray%5BCol%2Cint%5D%2CM128i" title="dropNuisanceTsuSafe(self: var BinaryField; counts: array[Col, int];
+                    existField: BinaryField)">dropNuisanceTsuSafe(self: var BinaryField; counts: array[Col, int];
+                    existField: BinaryField)</a></li>
+
+</ul>
 <ul class="simple nested-toc-section">dropNuisanceWater
-  <li><a class="reference" href="#dropNuisanceWater%2CM128i%2CM128i%2CM128i%2Carray%5BCol%2Cint%5D%2CM128i" title="dropNuisanceWater(self, other1, other2: var BinaryField;
-                  counts: array[Col, int]; existField: BinaryField)">dropNuisanceWater(self, other1, other2: var BinaryField;
-                  counts: array[Col, int]; existField: BinaryField)</a></li>
+  <li><a class="reference" href="#dropNuisanceWater%2CM128i%2CM128i%2CM128i%2Carray%5BCol%2Cint%5D" title="dropNuisanceWater(self, other1, other2: var BinaryField; counts: array[Col, int])">dropNuisanceWater(self, other1, other2: var BinaryField; counts: array[Col, int])</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">dropNuisanceWaterSafe
+  <li><a class="reference" href="#dropNuisanceWaterSafe%2CM128i%2CM128i%2CM128i%2Carray%5BCol%2Cint%5D" title="dropNuisanceWaterSafe(self, other1, other2: var BinaryField;
+                      counts: array[Col, int])">dropNuisanceWaterSafe(self, other1, other2: var BinaryField;
+                      counts: array[Col, int])</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">flipHorizontal
@@ -179,6 +189,12 @@
   <li><a class="reference" href="#keptVisible%2CM128i" title="keptVisible(self: BinaryField): BinaryField">keptVisible(self: BinaryField): BinaryField</a></li>
 
 </ul>
+<ul class="simple nested-toc-section">placeMasksTsu
+  <li><a class="reference" href="#placeMasksTsu%2CM128i%2CCol%2CCol" title="placeMasksTsu(existField: BinaryField; col1, col2: Col): (BinaryField,
+    BinaryField)">placeMasksTsu(existField: BinaryField; col1, col2: Col): (BinaryField,
+    BinaryField)</a></li>
+
+</ul>
 <ul class="simple nested-toc-section">popcnt
   <li><a class="reference" href="#popcnt%2CM128i" title="popcnt(self: BinaryField): int">popcnt(self: BinaryField): int</a></li>
 
@@ -231,14 +247,16 @@
 
   </div>
   <div class="nine columns" id="content">
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L1" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L1" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
     <div id="tocRoot"></div>
     
     <p class="module-desc">This module implements binary fields with XMM register. </p>
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
-    <a class="reference external" href="../../assign.html">../../assign</a>, <a class="reference external" href="../../bitops.html">../../bitops</a>, <a class="reference external" href="../../expand.html">../../expand</a>, <a class="reference external" href="../../simd.html">../../simd</a>, <a class="reference external" href="../../staticfor.html">../../staticfor</a>, <a class="reference external" href="../../../core/behaviour.html">../../../core/behaviour</a>, <a class="reference external" href="../../../core/common.html">../../../core/common</a>
+    <a class="reference external" href="../../arrayutils.html">../../arrayutils</a>, <a class="reference external" href="../../assign.html">../../assign</a>, <a class="reference external" href="../../bitops.html">../../bitops</a>, <a class="reference external" href="../../expand.html">../../expand</a>, <a class="reference external" href="../../simd.html">../../simd</a>, <a class="reference external" href="../../staticfor.html">../../staticfor</a>, <a class="reference external" href="../../../core/behaviour.html">../../../core/behaviour</a>, <a class="reference external" href="../../../core/common.html">../../../core/common</a>
   </dl>
 </div>
 <div class="section" id="7">
@@ -249,7 +267,9 @@
   <dd>
     
     Binary field with XMM register.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L15" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L15" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -265,7 +285,9 @@
   <dd>
     
     
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L68" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L68" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -277,7 +299,9 @@
   <dd>
     
     
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L80" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L80" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -289,7 +313,9 @@
   <dd>
     
     
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L62" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L62" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -301,7 +327,9 @@
   <dd>
     
     
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L74" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L74" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -313,7 +341,9 @@
   <dd>
     
     
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L65" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L65" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -325,7 +355,9 @@
   <dd>
     
     
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L77" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L77" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -337,7 +369,9 @@
   <dd>
     
     
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L218" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L218" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -349,7 +383,9 @@
   <dd>
     
     
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L225" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L225" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -361,7 +397,9 @@
   <dd>
     
     Returns <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt> if all binary fields are settled by Tsu physics. Note that this function is only slightly lighter than <tt class="docutils literal"><span class="pre"><span class="Identifier">settleTsu</span></span></tt>.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L610" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L610" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -373,7 +411,9 @@
   <dd>
     
     Returns <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt> if all binary fields are settled by Tsu physics. Note that this function is only slightly lighter than <tt class="docutils literal"><span class="pre"><span class="Identifier">settleWater</span></span></tt>.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L621" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L621" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -385,7 +425,9 @@
   <dd>
     
     Rotates the binary field by 180 degrees in groups of three rows. Ghost cells are cleared before the rotation.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L203" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L203" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -397,7 +439,9 @@
   <dd>
     
     Deletes the value and shifts the binary field. If (row, col) is in the air, shifts the binary field downward above where deleted. If it is in the water, shifts the binary field upward below where deleted.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L328" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L328" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -410,20 +454,54 @@
   <dd>
     
     Drops cells by Tsu physics. This function requires that the mask is settled and the counts are non-negative.
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L380" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L380" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
+  </dd>
+</div>
+
+</div>
+<div id="dropNuisanceTsuSafe-procs-all">
+  <div id="dropNuisanceTsuSafe,M128i,array[Col,int],M128i">
+  <dt><pre><span class="Keyword">func</span> <a href="#dropNuisanceTsuSafe%2CM128i%2Carray%5BCol%2Cint%5D%2CM128i"><span class="Identifier">dropNuisanceTsuSafe</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="xmm.html#BinaryField"><span class="Identifier">BinaryField</span></a><span class="Other">;</span> <span class="Identifier">counts</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Col</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">;</span>
+                         <span class="Identifier">existField</span><span class="Other">:</span> <a href="xmm.html#BinaryField"><span class="Identifier">BinaryField</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
     
+    Drops cells by Tsu physics. This function requires that the counts are non-negative.
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L442" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L442" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
 </div>
 <div id="dropNuisanceWater-procs-all">
-  <div id="dropNuisanceWater,M128i,M128i,M128i,array[Col,int],M128i">
-  <dt><pre><span class="Keyword">func</span> <a href="#dropNuisanceWater%2CM128i%2CM128i%2CM128i%2Carray%5BCol%2Cint%5D%2CM128i"><span class="Identifier">dropNuisanceWater</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">,</span> <span class="Identifier">other1</span><span class="Other">,</span> <span class="Identifier">other2</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="xmm.html#BinaryField"><span class="Identifier">BinaryField</span></a><span class="Other">;</span>
-                       <span class="Identifier">counts</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Col</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">existField</span><span class="Other">:</span> <a href="xmm.html#BinaryField"><span class="Identifier">BinaryField</span></a><span class="Other">)</span> {.
-    <span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <div id="dropNuisanceWater,M128i,M128i,M128i,array[Col,int]">
+  <dt><pre><span class="Keyword">func</span> <a href="#dropNuisanceWater%2CM128i%2CM128i%2CM128i%2Carray%5BCol%2Cint%5D"><span class="Identifier">dropNuisanceWater</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">,</span> <span class="Identifier">other1</span><span class="Other">,</span> <span class="Identifier">other2</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="xmm.html#BinaryField"><span class="Identifier">BinaryField</span></a><span class="Other">;</span>
+                       <span class="Identifier">counts</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Col</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Drops cells by Water physics. <tt class="docutils literal"><span class="pre"><span class="Identifier">other1</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">other2</span></span></tt> are only shifted. This function requires that the mask is settled and the counts are non-negative.
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L396" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L396" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
+  </dd>
+</div>
+
+</div>
+<div id="dropNuisanceWaterSafe-procs-all">
+  <div id="dropNuisanceWaterSafe,M128i,M128i,M128i,array[Col,int]">
+  <dt><pre><span class="Keyword">func</span> <a href="#dropNuisanceWaterSafe%2CM128i%2CM128i%2CM128i%2Carray%5BCol%2Cint%5D"><span class="Identifier">dropNuisanceWaterSafe</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">,</span> <span class="Identifier">other1</span><span class="Other">,</span> <span class="Identifier">other2</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="xmm.html#BinaryField"><span class="Identifier">BinaryField</span></a><span class="Other">;</span>
+                           <span class="Identifier">counts</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Col</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
     
+    Drops cells by Water physics. <tt class="docutils literal"><span class="pre"><span class="Identifier">other1</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">other2</span></span></tt> are only shifted. This function requires that the counts are non-negative.
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L466" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L466" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -435,7 +513,9 @@
   <dd>
     
     Flips the binary field horizontally.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L186" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L186" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -447,7 +527,9 @@
   <dd>
     
     Flips the binary field vertically.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L180" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L180" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -459,7 +541,9 @@
   <dd>
     
     Returns the hash of the binary field.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L87" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L87" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -470,7 +554,9 @@
   <dd>
     
     Returns the binary field with all elements zero.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L38" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L38" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -481,7 +567,9 @@
   <dd>
     
     Returns the binary field with the bottom of the air bits one.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L50" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L50" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -492,7 +580,9 @@
   <dd>
     
     Returns the binary field with floor bits one.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L46" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L46" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -503,7 +593,9 @@
   <dd>
     
     Returns the binary field with all valid elements one.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L42" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L42" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -514,7 +606,9 @@
   <dd>
     
     Returns the binary field with the top of the water bits one.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L54" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L54" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -527,7 +621,9 @@
   <dd>
     
     Inserts the value and shifts the binary field. If (row, col) is in the air, shifts the binary field upward above where inserted. If it is in the water, shifts the binary field downward below where inserted.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L281" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L281" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -539,7 +635,9 @@
   <dd>
     
     Returns the binary field with only the given column.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L114" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L114" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -551,7 +649,9 @@
   <dd>
     
     Returns the binary field with only the air area.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L126" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L126" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -563,7 +663,9 @@
   <dd>
     
     Returns the binary field with only the valid area.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L118" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L118" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -575,7 +677,23 @@
   <dd>
     
     Returns the binary field with only the visible area.
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L122" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L122" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
+  </dd>
+</div>
+
+</div>
+<div id="placeMasksTsu-procs-all">
+  <div id="placeMasksTsu,M128i,Col,Col">
+  <dt><pre><span class="Keyword">func</span> <a href="#placeMasksTsu%2CM128i%2CCol%2CCol"><span class="Identifier">placeMasksTsu</span></a><span class="Other">(</span><span class="Identifier">existField</span><span class="Other">:</span> <a href="xmm.html#BinaryField"><span class="Identifier">BinaryField</span></a><span class="Other">;</span> <span class="Identifier">col1</span><span class="Other">,</span> <span class="Identifier">col2</span><span class="Other">:</span> <a href="../../../core/common.html#Col"><span class="Identifier">Col</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Other">(</span><a href="xmm.html#BinaryField"><span class="Identifier">BinaryField</span></a><span class="Other">,</span>
+    <a href="xmm.html#BinaryField"><span class="Identifier">BinaryField</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
     
+    Returns the masks where a next puyo is placed with Tsu physics. This function accepts an unsettled field.
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L351" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L351" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -587,7 +705,9 @@
   <dd>
     
     Returns the population count.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L147" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L147" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -599,7 +719,9 @@
   <dd>
     
     Replaces the column of the binary field by <tt class="docutils literal"><span class="pre"><span class="Identifier">after</span></span></tt>.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L138" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L138" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -611,7 +733,9 @@
   <dd>
     
     Rotates the binary field by 180 degrees. Ghost cells are cleared before the rotation.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L196" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L196" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -623,7 +747,9 @@
   <dd>
     
     Settles the binary fields by Tsu physics.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L575" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L575" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -636,7 +762,9 @@
   <dd>
     
     Settles the binary fields by Water physics.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L600" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L600" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -648,7 +776,9 @@
   <dd>
     
     Returns the binary field shifted downward.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L164" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L164" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -660,7 +790,9 @@
   <dd>
     
     Returns the binary field shifted leftward.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L172" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L172" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -672,7 +804,9 @@
   <dd>
     
     Returns the binary field shifted rightward.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L168" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L168" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -684,7 +818,9 @@
   <dd>
     
     Returns the binary field shifted upward.
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L160" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L160" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -696,7 +832,9 @@
   <dd>
     
     
-    
+    <a href="https://github.com/24ik/pon2/tree/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L71" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v0.28.3/src/pon2/private/core/binaryfield/xmm.nim#L71" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -717,7 +855,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-25 15:04:18 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-30 04:12:14 UTC</small>
       </div>
     </div>
   </div>
