@@ -1,0 +1,2 @@
+nimTitle	marathon	pon2/gui/marathon/marathon.html	module src/pon2/gui/marathon/marathon		0
+nim	toMarathonVNode	pon2/gui/marathon/marathon.html#toMarathonVNode,ref.Marathon,VNodeHelper	proc toMarathonVNode(self: ref Marathon; helper: VNodeHelper): VNode		23

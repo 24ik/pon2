@@ -1,0 +1,2 @@
+nimTitle	expand	pon2/private/expand.html	module src/pon2/private/expand		0
+nim	defineExpand	pon2/private/expand.html#defineExpand.m,untyped,varargs[untyped]	macro defineExpand(macroIdentSuffix: untyped; expandSuffixes: varargs[untyped]): untyped		16

@@ -1,0 +1,2 @@
+nimTitle	search	pon2/gui/marathon/search.html	module src/pon2/gui/marathon/search		0
+nim	toMarathonSearchVNode	pon2/gui/marathon/search.html#toMarathonSearchVNode,ref.Marathon,VNodeHelper	proc toMarathonSearchVNode(self: ref Marathon; helper: VNodeHelper): VNode		25

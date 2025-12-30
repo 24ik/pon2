@@ -1,0 +1,21 @@
+nimTitle	studio	pon2/app/studio.html	module src/pon2/app/studio		0
+nim	Studio	pon2/app/studio.html#Studio	object Studio		26
+nim	init	pon2/app/studio.html#init,typeStudio,Simulator	proc init(T: type Studio; simulator: Simulator): T:type		42
+nim	init	pon2/app/studio.html#init,typeStudio	proc init(T: type Studio): T:type		56
+nim	focusReplay	pon2/app/studio.html#focusReplay,Studio	proc focusReplay(self: Studio): bool		63
+nim	solving	pon2/app/studio.html#solving,Studio	proc solving(self: Studio): bool		67
+nim	permuting	pon2/app/studio.html#permuting,Studio	proc permuting(self: Studio): bool		71
+nim	working	pon2/app/studio.html#working,Studio	proc working(self: Studio): bool		75
+nim	replayStepsCount	pon2/app/studio.html#replayStepsCount,Studio	proc replayStepsCount(self: Studio): int		79
+nim	replayStepsIndex	pon2/app/studio.html#replayStepsIndex,Studio	proc replayStepsIndex(self: Studio): int		83
+nim	progress	pon2/app/studio.html#progress,Studio	proc progress(self: Studio): tuple[now, total: int]		87
+nim	toggleFocus	pon2/app/studio.html#toggleFocus,Studio	proc toggleFocus(self: var Studio)		95
+nim	nextReplay	pon2/app/studio.html#nextReplay,Studio	proc nextReplay(self: var Studio)		110
+nim	prevReplay	pon2/app/studio.html#prevReplay,Studio	proc prevReplay(self: var Studio)		122
+nim	stopWork	pon2/app/studio.html#stopWork,ref.Studio	proc stopWork(self: ref Studio)		140
+nim	solve	pon2/app/studio.html#solve,Studio	proc solve(self: var Studio)		196
+nim	asyncSolve	pon2/app/studio.html#asyncSolve,ref.Studio	proc asyncSolve(self: ref Studio)		212
+nim	permute	pon2/app/studio.html#permute,Studio,openArray[int],openArray[int]	proc permute(self: var Studio; fixIndices, allowDoubleIndices: openArray[int])		241
+nim	asyncPermute	pon2/app/studio.html#asyncPermute,ref.Studio,openArray[int],openArray[int]	proc asyncPermute(self: ref Studio; fixIndices, allowDoubleIndices: openArray[int])		258
+nim	operate	pon2/app/studio.html#operate,ref.Studio,KeyEvent	proc operate(self: ref Studio; key: KeyEvent): bool		290
+nimgrp	init	pon2/app/studio.html#init-procs-all	proc		42

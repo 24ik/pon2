@@ -1,0 +1,6 @@
+nimTitle	assign	pon2/private/assign.html	module src/pon2/private/assign		0
+nim	assign	pon2/private/assign.html#assign,seq[T],openArray[T]	proc assign[T](dst: var seq[T]; src: openArray[T])		29
+nim	assign	pon2/private/assign.html#assign,openArray[T],openArray[T]	proc assign[T](dst: var openArray[T]; src: openArray[T])		31
+nim	assign	pon2/private/assign.html#assign,T,T	proc assign[T](dst: var T; src: T)		33
+nim	assign	pon2/private/assign.html#assign,string,string	proc assign(dst: var string; src: string)		82
+nimgrp	assign	pon2/private/assign.html#assign-procs-all	proc		29

@@ -1,0 +1,5 @@
+nimTitle	behaviour	pon2/core/behaviour.html	module src/pon2/core/behaviour		0
+nim	Physics	pon2/core/behaviour.html#Physics	enum Physics		32
+nim	DeadRule	pon2/core/behaviour.html#DeadRule	enum DeadRule		37
+nim	Behaviour	pon2/core/behaviour.html#Behaviour	object Behaviour		43
+nim	Behaviours	pon2/core/behaviour.html#Behaviours	const Behaviours		48

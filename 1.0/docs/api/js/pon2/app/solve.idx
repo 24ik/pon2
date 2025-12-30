@@ -1,0 +1,4 @@
+nimTitle	solve	pon2/app/solve.html	module src/pon2/app/solve		0
+nim	Solution	pon2/app/solve.html#Solution	type Solution		30
+nim	solve	pon2/app/solve.html#solve,NazoPuyo	proc solve(self: NazoPuyo; calcAllSolutions = true): seq[Solution]		124
+nim	asyncSolve	pon2/app/solve.html#asyncSolve,NazoPuyo,ref.tuple[int,int]	proc asyncSolve(self: NazoPuyo; progressRef: ref tuple[now, total: int] = nil;\n           calcAllSolutions = true): Future[seq[Solution]]		195
