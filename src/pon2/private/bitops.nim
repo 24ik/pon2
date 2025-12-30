@@ -1,10 +1,10 @@
 ## This module implements bit operations.
 ##
 ## Compile Options:
-## | Option                 | Description                            | Default |
-## | ---------------------- | -------------------------------------- | ------- |
-## | `-d:pon2.bmi=<int>`    | BMI level. (2: BMI2, 1: BMI1, 0: None) | `2`     |
-## | `-d:pon2.clmul=<bool>` | Uses CLMUL.                            | `true`  |
+## | Option                | Description                         | Default |
+## | --------------------- | ----------------------------------- | ------- |
+## | `-d:pon2.bmi=<int>`   | BMI level. (2:BMI2, 1:BMI1, 0:None) | `2`     |
+## | `-d:pon2.clmul=<int>` | CLMUL level. (1:Use, 0:None)        | `1`     |
 ##
 
 {.push raises: [].}
@@ -14,16 +14,17 @@
 
 const
   BmiLevel {.define: "pon2.bmi".} = 2
-  ClmulUse {.define: "pon2.clmul".} = true
+  ClmulLevel {.define: "pon2.clmul".} = 1
 
 static:
   doAssert BmiLevel in 0 .. 2
+  doAssert ClmulLevel in 0 .. 1
 
 const
   X86_64 = defined(amd64) or defined(i386)
   Bmi1Available* = BmiLevel >= 1 and X86_64
   Bmi2Available* = BmiLevel >= 2 and X86_64
-  ClmulAvailable* = ClmulUse and X86_64
+  ClmulAvailable* = ClmulLevel >= 1 and X86_64
 
 import std/[bitops, typetraits]
 import stew/[bitops2]
