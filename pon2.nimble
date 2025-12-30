@@ -1,6 +1,6 @@
 # Package
 
-version = "0.28.4"
+version = "1.0.0"
 author = "Keisuke Izumiya"
 description = "Application and Library Dedicated to Puyo Puyo and Nazo Puyo"
 license = "Apache-2.0 OR MIT"
