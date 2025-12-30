@@ -58,13 +58,13 @@ nim	goalColor=	pon2/app/simulator.html#goalColor=,Simulator,GoalColor	proc goalC
 nim	goalVal=	pon2/app/simulator.html#goalVal=,Simulator,int	proc goalVal=(self: var Simulator; val: int)		671
 nim	goalOperator=	pon2/app/simulator.html#goalOperator=,Simulator,GoalOperator	proc goalOperator=(self: var Simulator; operator: GoalOperator)		680
 nim	goalClearColorOpt=	pon2/app/simulator.html#goalClearColorOpt=,Simulator,Opt[GoalColor]	proc goalClearColorOpt=(self: var Simulator; clearColorOpt: Opt[GoalColor])		689
-nim	forward	pon2/app/simulator.html#forward,Simulator	proc forward(self: var Simulator; replay = false; skip = false)		796
-nim	backward	pon2/app/simulator.html#backward,Simulator	proc backward(self: var Simulator; detail = false)		815
-nim	reset	pon2/app/simulator.html#reset,Simulator	proc reset(self: var Simulator)		836
-nim	operate	pon2/app/simulator.html#operate,Simulator,KeyEvent	proc operate(self: var Simulator; key: KeyEvent): bool		849
-nim	toUri	pon2/app/simulator.html#toUri,Simulator	proc toUri(self: Simulator; clearPlacements = false; fqdn = Pon2): Pon2Result[Uri]		1010
-nim	parseSimulator	pon2/app/simulator.html#parseSimulator,Uri	proc parseSimulator(uri: Uri): Pon2Result[Simulator]		1043
-nim	toExportUri	pon2/app/simulator.html#toExportUri,Simulator	proc toExportUri(self: Simulator; viewer = true; clearPlacements = true; fqdn = Pon2): Pon2Result[\n    Uri]		1089
+nim	forward	pon2/app/simulator.html#forward,Simulator	proc forward(self: var Simulator; replay = false; skip = false)		799
+nim	backward	pon2/app/simulator.html#backward,Simulator	proc backward(self: var Simulator; detail = false)		818
+nim	reset	pon2/app/simulator.html#reset,Simulator	proc reset(self: var Simulator)		839
+nim	operate	pon2/app/simulator.html#operate,Simulator,KeyEvent	proc operate(self: var Simulator; key: KeyEvent): bool		852
+nim	toUri	pon2/app/simulator.html#toUri,Simulator	proc toUri(self: Simulator; clearPlacements = false; fqdn = Pon2): Pon2Result[Uri]		1013
+nim	parseSimulator	pon2/app/simulator.html#parseSimulator,Uri	proc parseSimulator(uri: Uri): Pon2Result[Simulator]		1046
+nim	toExportUri	pon2/app/simulator.html#toExportUri,Simulator	proc toExportUri(self: Simulator; viewer = true; clearPlacements = true; fqdn = Pon2): Pon2Result[\n    Uri]		1092
 nimgrp	writecell	pon2/app/simulator.html#writeCell-procs-all	proc		396
 nimgrp	writecross	pon2/app/simulator.html#writeCross-procs-all	proc		524
 nimgrp	writecount	pon2/app/simulator.html#writeCount-procs-all	proc		537

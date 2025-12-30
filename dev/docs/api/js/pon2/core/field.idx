@@ -28,18 +28,18 @@ nim	flipVertical	pon2/core/field.html#flipVertical,Field	proc flipVertical(self:
 nim	flipHorizontal	pon2/core/field.html#flipHorizontal,Field	proc flipHorizontal(self: var Field)		299
 nim	rotate	pon2/core/field.html#rotate,Field	proc rotate(self: var Field)		308
 nim	crossRotate	pon2/core/field.html#crossRotate,Field	proc crossRotate(self: var Field)		314
-nim	place	pon2/core/field.html#place,Field,Pair,Placement	proc place(self: var Field; pair: Pair; placement: Placement)		392
-nim	pop	pon2/core/field.html#pop,Field	proc pop(self: var Field): PopResult		408
-nim	canPop	pon2/core/field.html#canPop,Field	proc canPop(self: Field): bool		451
-nim	dropNuisance	pon2/core/field.html#dropNuisance,Field,array[Col,int]	proc dropNuisance(self: var Field; counts: array[Col, int]; hard = false)		461
-nim	apply	pon2/core/field.html#apply,Field,Step	proc apply(self: var Field; step: Step)		481
-nim	settle	pon2/core/field.html#settle,Field	proc settle(self: var Field)		496
-nim	isSettled	pon2/core/field.html#isSettled,Field	proc isSettled(self: Field): bool		508
-nim	move	pon2/core/field.html#move,Field,Step	proc move(self: var Field; step: Step; calcConnection = true): MoveResult		527
-nim	toArray	pon2/core/field.html#toArray,Field	proc toArray(self: Field): array[Row, array[Col, Cell]]		580
-nim	toField	pon2/core/field.html#toField,array[Row,array[Col,Cell]],Rule	proc toField(cellArray: array[Row, array[Col, Cell]]; rule: Rule): Field		596
-nim	`$`	pon2/core/field.html#$,Field	proc `$`(self: Field): string		624
-nim	parseField	pon2/core/field.html#parseField,string	proc parseField(str: string): Pon2Result[Field]		640
-nim	toUriQuery	pon2/core/field.html#toUriQuery,Field	proc toUriQuery(self: Field; fqdn = Pon2): Pon2Result[string]		761
-nim	parseField	pon2/core/field.html#parseField,string,SimulatorFqdn	proc parseField(query: string; fqdn: SimulatorFqdn): Pon2Result[Field]		884
-nimgrp	parsefield	pon2/core/field.html#parseField-procs-all	proc		640
+nim	place	pon2/core/field.html#place,Field,Pair,Placement	proc place(self: var Field; pair: Pair; placement: Placement; requireSettled = false)		447
+nim	pop	pon2/core/field.html#pop,Field	proc pop(self: var Field): PopResult		469
+nim	canPop	pon2/core/field.html#canPop,Field	proc canPop(self: Field): bool		512
+nim	dropNuisance	pon2/core/field.html#dropNuisance,Field,array[Col,int]	proc dropNuisance(self: var Field; counts: array[Col, int]; hard = false;\n             requireSettled = false)		522
+nim	apply	pon2/core/field.html#apply,Field,Step	proc apply(self: var Field; step: Step; requireSettled = false)		552
+nim	settle	pon2/core/field.html#settle,Field	proc settle(self: var Field)		568
+nim	isSettled	pon2/core/field.html#isSettled,Field	proc isSettled(self: Field): bool		580
+nim	move	pon2/core/field.html#move,Field,Step	proc move(self: var Field; step: Step; calcConnection = true; requireSettled = false): MoveResult		599
+nim	toArray	pon2/core/field.html#toArray,Field	proc toArray(self: Field): array[Row, array[Col, Cell]]		655
+nim	toField	pon2/core/field.html#toField,array[Row,array[Col,Cell]],Rule	proc toField(cellArray: array[Row, array[Col, Cell]]; rule: Rule): Field		671
+nim	`$`	pon2/core/field.html#$,Field	proc `$`(self: Field): string		699
+nim	parseField	pon2/core/field.html#parseField,string	proc parseField(str: string): Pon2Result[Field]		715
+nim	toUriQuery	pon2/core/field.html#toUriQuery,Field	proc toUriQuery(self: Field; fqdn = Pon2): Pon2Result[string]		836
+nim	parseField	pon2/core/field.html#parseField,string,SimulatorFqdn	proc parseField(query: string; fqdn: SimulatorFqdn): Pon2Result[Field]		959
+nimgrp	parsefield	pon2/core/field.html#parseField-procs-all	proc		715
