@@ -81,7 +81,7 @@
 
 </ul>
 <ul class="simple nested-toc-section">apply
-  <li><a class="reference" href="#apply%2CField%2CStep" title="apply(self: var Field; step: Step)">apply(self: var Field; step: Step)</a></li>
+  <li><a class="reference" href="#apply%2CField%2CStep" title="apply(self: var Field; step: Step; requireSettled = false)">apply(self: var Field; step: Step; requireSettled = false)</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">canPop
@@ -133,7 +133,9 @@
 
 </ul>
 <ul class="simple nested-toc-section">dropNuisance
-  <li><a class="reference" href="#dropNuisance%2CField%2Carray%5BCol%2Cint%5D" title="dropNuisance(self: var Field; counts: array[Col, int]; hard = false)">dropNuisance(self: var Field; counts: array[Col, int]; hard = false)</a></li>
+  <li><a class="reference" href="#dropNuisance%2CField%2Carray%5BCol%2Cint%5D" title="dropNuisance(self: var Field; counts: array[Col, int]; hard = false;
+             requireSettled = false)">dropNuisance(self: var Field; counts: array[Col, int]; hard = false;
+             requireSettled = false)</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">flipHorizontal
@@ -165,7 +167,7 @@
 
 </ul>
 <ul class="simple nested-toc-section">move
-  <li><a class="reference" href="#move%2CField%2CStep" title="move(self: var Field; step: Step; calcConnection = true): MoveResult">move(self: var Field; step: Step; calcConnection = true): MoveResult</a></li>
+  <li><a class="reference" href="#move%2CField%2CStep" title="move(self: var Field; step: Step; calcConnection = true; requireSettled = false): MoveResult">move(self: var Field; step: Step; calcConnection = true; requireSettled = false): MoveResult</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">nuisancePuyoCount
@@ -178,7 +180,7 @@
 
 </ul>
 <ul class="simple nested-toc-section">place
-  <li><a class="reference" href="#place%2CField%2CPair%2CPlacement" title="place(self: var Field; pair: Pair; placement: Placement)">place(self: var Field; pair: Pair; placement: Placement)</a></li>
+  <li><a class="reference" href="#place%2CField%2CPair%2CPlacement" title="place(self: var Field; pair: Pair; placement: Placement; requireSettled = false)">place(self: var Field; pair: Pair; placement: Placement; requireSettled = false)</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">pop
@@ -245,7 +247,9 @@
 
   </div>
   <div class="nine columns" id="content">
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L1" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L1" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
     <div id="tocRoot"></div>
     
     <p class="module-desc">This module implements fields. </p>
@@ -264,7 +268,9 @@
   <dd>
     
     Puyo Puyo field.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L22" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L22" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -280,7 +286,9 @@
   <dd>
     
     
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L699" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L699" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -292,7 +300,9 @@
   <dd>
     
     
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L88" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L88" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -304,19 +314,23 @@
   <dd>
     
     
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L105" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L105" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
 </div>
 <div id="apply-procs-all">
   <div id="apply,Field,Step">
-  <dt><pre><span class="Keyword">func</span> <a href="#apply%2CField%2CStep"><span class="Identifier">apply</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="field.html#Field"><span class="Identifier">Field</span></a><span class="Other">;</span> <span class="Identifier">step</span><span class="Other">:</span> <a href="step.html#Step"><span class="Identifier">Step</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">func</span> <a href="#apply%2CField%2CStep"><span class="Identifier">apply</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="field.html#Field"><span class="Identifier">Field</span></a><span class="Other">;</span> <span class="Identifier">step</span><span class="Other">:</span> <a href="step.html#Step"><span class="Identifier">Step</span></a><span class="Other">;</span> <span class="Identifier">requireSettled</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
+    <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Applies the step. This function requires that the field is settled.
-    
+    Applies the step. If <tt class="docutils literal"><span class="pre"><span class="Identifier">requireSettled</span></span></tt> is <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt>, this function requires that the field is settled but becomes faster.
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L552" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L552" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -328,7 +342,9 @@
   <dd>
     
     Returns <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt> if any puyos can pop. Note that this function is only slightly lighter than <tt class="docutils literal"><span class="pre"><span class="Identifier">pop</span></span></tt>.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L512" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L512" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -340,7 +356,9 @@
   <dd>
     
     Returns the number of the cell in the field.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L165" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L165" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -352,7 +370,9 @@
   <dd>
     
     Returns the number of colored puyos in the field.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L189" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L189" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -364,7 +384,9 @@
   <dd>
     
     Returns the field where exactly two color puyos are connected.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L201" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L201" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -376,7 +398,9 @@
   <dd>
     
     Returns the field where exactly two color puyos are connected horizontally.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L218" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L218" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -388,7 +412,9 @@
   <dd>
     
     Returns the field where exactly two color puyos are connected vertically.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L209" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L209" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -400,7 +426,9 @@
   <dd>
     
     Returns the field where exactly three color puyos are connected.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L231" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L231" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -412,7 +440,9 @@
   <dd>
     
     Returns the field where exactly three color puyos are connected horizontally.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L248" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L248" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -424,7 +454,9 @@
   <dd>
     
     Returns the field where exactly three color puyos are connected by L-shape.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L257" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L257" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -436,7 +468,9 @@
   <dd>
     
     Returns the field where exactly three color puyos are connected vertically.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L239" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L239" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -448,7 +482,9 @@
   <dd>
     
     Rotates the binary field by 180 degrees in groups of three columns. Ghost cells are cleared before the rotation.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L314" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L314" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -460,19 +496,24 @@
   <dd>
     
     Deletes the cell and shifts the field. If (row, col) is in the air, shifts the field downward above where deleted. If it is in the water, shifts the field upward below where deleted.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L122" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L122" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
 </div>
 <div id="dropNuisance-procs-all">
   <div id="dropNuisance,Field,array[Col,int]">
-  <dt><pre><span class="Keyword">func</span> <a href="#dropNuisance%2CField%2Carray%5BCol%2Cint%5D"><span class="Identifier">dropNuisance</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="field.html#Field"><span class="Identifier">Field</span></a><span class="Other">;</span> <span class="Identifier">counts</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Col</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">hard</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span> {.
-    <span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">func</span> <a href="#dropNuisance%2CField%2Carray%5BCol%2Cint%5D"><span class="Identifier">dropNuisance</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="field.html#Field"><span class="Identifier">Field</span></a><span class="Other">;</span> <span class="Identifier">counts</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Col</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">hard</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span>
+                  <span class="Identifier">requireSettled</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Drops nuisance puyos. This function requires that the field is settled and the counts are non-negative.
-    
+    Drops nuisance puyos. This function requires that the counts are non-negative. If <tt class="docutils literal"><span class="pre"><span class="Identifier">requireSettled</span></span></tt> is <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt>, this function also requires that the field is settled but becomes faster.
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L522" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L522" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -484,7 +525,9 @@
   <dd>
     
     Flips the field horizontally.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L299" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L299" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -496,7 +539,9 @@
   <dd>
     
     Flips the field vertically.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L294" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L294" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -508,7 +553,9 @@
   <dd>
     
     
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L37" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L37" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -520,7 +567,9 @@
   <dd>
     
     Inserts the cell and shifts the field. If (row, col) is in the air, shifts the field upward above where inserted. If it is in the water, shifts the field downward below where inserted.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L114" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L114" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -532,7 +581,9 @@
   <dd>
     
     Returns the invalid placements.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L68" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L68" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -544,7 +595,9 @@
   <dd>
     
     Returns <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt> if the field is in a defeated state.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L60" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L60" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -556,19 +609,24 @@
   <dd>
     
     Returns <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt> if the field is settled. Note that this function is only slightly lighter than <tt class="docutils literal"><span class="pre"><span class="Identifier">settle</span></span></tt>.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L580" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L580" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
 </div>
 <div id="move-procs-all">
   <div id="move,Field,Step">
-  <dt><pre><span class="Keyword">func</span> <a href="#move%2CField%2CStep"><span class="Identifier">move</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="field.html#Field"><span class="Identifier">Field</span></a><span class="Other">;</span> <span class="Identifier">step</span><span class="Other">:</span> <a href="step.html#Step"><span class="Identifier">Step</span></a><span class="Other">;</span> <span class="Identifier">calcConnection</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">func</span> <a href="#move%2CField%2CStep"><span class="Identifier">move</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="field.html#Field"><span class="Identifier">Field</span></a><span class="Other">;</span> <span class="Identifier">step</span><span class="Other">:</span> <a href="step.html#Step"><span class="Identifier">Step</span></a><span class="Other">;</span> <span class="Identifier">calcConnection</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">;</span>
+          <span class="Identifier">requireSettled</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="moveresult.html#MoveResult"><span class="Identifier">MoveResult</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Applies <tt class="docutils literal"><span class="pre"><span class="Identifier">applyBody</span></span></tt>, advances the field until chains end, and returns a moving result. This function requires that the field is settled.
-    
+    Applies <tt class="docutils literal"><span class="pre"><span class="Identifier">applyBody</span></span></tt>, advances the field until chains end, and returns a moving result. If <tt class="docutils literal"><span class="pre"><span class="Identifier">requireSettled</span></span></tt> is <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt>, this function requires that the field is settled but becomes faster.
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L599" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L599" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -580,7 +638,9 @@
   <dd>
     
     Returns the number of nuisance puyos in the field.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L193" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L193" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -592,7 +652,9 @@
   <dd>
     
     Returns the field converted from the URI query.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L959" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L959" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 <div id="parseField,string">
@@ -601,19 +663,24 @@
   <dd>
     
     Returns the field converted from the string representation.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L715" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L715" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
 </div>
 <div id="place-procs-all">
   <div id="place,Field,Pair,Placement">
-  <dt><pre><span class="Keyword">func</span> <a href="#place%2CField%2CPair%2CPlacement"><span class="Identifier">place</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="field.html#Field"><span class="Identifier">Field</span></a><span class="Other">;</span> <span class="Identifier">pair</span><span class="Other">:</span> <a href="pair.html#Pair"><span class="Identifier">Pair</span></a><span class="Other">;</span> <span class="Identifier">placement</span><span class="Other">:</span> <a href="placement.html#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">func</span> <a href="#place%2CField%2CPair%2CPlacement"><span class="Identifier">place</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="field.html#Field"><span class="Identifier">Field</span></a><span class="Other">;</span> <span class="Identifier">pair</span><span class="Other">:</span> <a href="pair.html#Pair"><span class="Identifier">Pair</span></a><span class="Other">;</span> <span class="Identifier">placement</span><span class="Other">:</span> <a href="placement.html#Placement"><span class="Identifier">Placement</span></a><span class="Other">;</span>
+           <span class="Identifier">requireSettled</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+                                     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Places the pair. This function requires that the field is settled.
-    
+    Places the pair. If <tt class="docutils literal"><span class="pre"><span class="Identifier">requireSettled</span></span></tt> is <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt>, this function requires that the field is settled but becomes faster.
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L447" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L447" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -625,7 +692,9 @@
   <dd>
     
     Removes puyos that should pop and returns the pop result.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L469" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L469" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -637,7 +706,9 @@
   <dd>
     
     Returns the number of puyos in the field.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L185" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L185" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -648,7 +719,9 @@
   <dd>
     
     Rotates the binary field by 180 degrees. Ghost cells are cleared before the rotation.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L308" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L308" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -659,7 +732,9 @@
   <dd>
     
     Settles the field.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L568" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L568" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -671,7 +746,9 @@
   <dd>
     
     Shifts the field downward.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L275" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L275" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -683,7 +760,9 @@
   <dd>
     
     Shifts the field leftward.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L285" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L285" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -695,7 +774,9 @@
   <dd>
     
     Shifts the field rightward.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L280" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L280" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -707,7 +788,9 @@
   <dd>
     
     Shifts the field upward.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L270" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L270" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -719,7 +802,9 @@
   <dd>
     
     Returns the array converted from the field.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L655" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L655" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -731,7 +816,9 @@
   <dd>
     
     Returns the field converted from the array.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L671" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L671" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -743,7 +830,9 @@
   <dd>
     
     Returns the URI query converted from the field.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L836" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L836" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -755,7 +844,9 @@
   <dd>
     
     Returns the valid placements for double pairs.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L76" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L76" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -767,7 +858,9 @@
   <dd>
     
     Returns the valid placements.
-    
+    <a href="https://github.com/24ik/pon2/tree/main/src/pon2/core/field.nim#L72" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/main/src/pon2/core/field.nim#L72" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
   </dd>
 </div>
 
@@ -788,7 +881,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-25 15:04:52 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-30 04:12:51 UTC</small>
       </div>
     </div>
   </div>
