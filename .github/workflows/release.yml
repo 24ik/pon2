@@ -45,13 +45,23 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }}
-          path: ./pon2.exe
+          path: |
+            ./pon2.exe
+            ./LICENSE-APACHE
+            ./LICENSE-MIT
+            ./NOTICE
+            ./THIRD-PARTY
         if: runner.os == 'Windows'
 
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }}
-          path: ./pon2
+          path: |
+            ./pon2
+            ./LICENSE-APACHE
+            ./LICENSE-MIT
+            ./NOTICE
+            ./THIRD-PARTY
         if: runner.os != 'Windows'
 
   release-publish:

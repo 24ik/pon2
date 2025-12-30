@@ -3,8 +3,8 @@
 ## Compile Options:
 ## | Option                 | Description                            | Default |
 ## | ---------------------- | -------------------------------------- | ------- |
-## | `-d:pon2.bmi=<int>`    | BMI level. (2: BMI2, 1: BMI1, 0: None) | 2       |
-## | `-d:pon2.clmul=<bool>` | Uses CLMUL.                            | true    |
+## | `-d:pon2.bmi=<int>`    | BMI level. (2: BMI2, 1: BMI1, 0: None) | `2`     |
+## | `-d:pon2.clmul=<bool>` | Uses CLMUL.                            | `true`  |
 ##
 
 {.push raises: [].}
