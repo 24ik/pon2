@@ -1,9 +1,9 @@
 ## This module implements web workers.
 ##
 ## Compile Options:
-## | Option                    | Description            | Default           |
-## | ------------------------- | ---------------------- | ----------------- |
-## | `-d:pon2.webworker=<str>` | Web workers directory. | `./worker.min.js` |
+## | Option                    | Description       | Default           |
+## | ------------------------- | ----------------- | ----------------- |
+## | `-d:pon2.webworker=<str>` | Web workers file. | `./worker.min.js` |
 ##
 
 {.push raises: [].}

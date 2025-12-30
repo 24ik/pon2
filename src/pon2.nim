@@ -1,5 +1,5 @@
-## This module provides applications and APIs dedicated to
-## [Puyo Puyo](https://puyo.sega.jp/) and [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
+## This module provides APIs dedicated to [Puyo Puyo](https://puyo.sega.jp/) and
+## [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 ##
 ## To access the APIs, import either `pon2` as an "all-in-one", or the following
 ## submodules individually:
@@ -20,11 +20,12 @@
 ## | `-d:pon2.garbagerate.spinner=<int>`      | Garbage rate in Spinner rule.          | `120`                  |
 ## | `-d:pon2.garbagerate.crossspinner=<int>` | Garbage rate in Cross Spinner rule.    | `120`                  |
 ## | `-d:pon2.garbagerate.water=<int>`        | Garbage rate in Water rule.            | `90`                   |
-## | `-d:pon2.simd=<int>`                     | SIMD level. (1: SSE4.2, 0: None)       | 1                      |
-## | `-d:pon2.bmi=<int>`                      | BMI level. (2: BMI2, 1: BMI1, 0: None) | 2                      |
+## | `-d:pon2.simd=<int>`                     | SIMD level. (1: SSE4.2, 0: None)       | `1`                    |
+## | `-d:pon2.bmi=<int>`                      | BMI level. (2: BMI2, 1: BMI1, 0: None) | `2`                    |
 ## | `-d:pon2.clmul=<bool>`                   | Uses CLMUL.                            | `true`                 |
 ## | `-d:pon2.path=<str>`                     | Path of the web studio.                | `/pon2/stable/studio/` |
 ## | `-d:pon2.assets=<str>`                   | Assets directory.                      | `../assets`            |
+## | `-d:pon2.webworker=<str>`                | Web workers file.                      | `./worker.min.js`      |
 ## | `-d:pon2.build.marathon`                 | Builds marathon pages.                 | `<undefined>`          |
 ## | `-d:pon2.build.worker`                   | Builds web workers.                    | `<undefined>`          |
 ##

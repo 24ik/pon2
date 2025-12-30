@@ -1,9 +1,9 @@
 # Package
 
-version = "0.28.3"
+version = "0.28.4"
 author = "Keisuke Izumiya"
-description = "Application of Puyo Puyo and Nazo Puyo"
-license = "Apache-2.0"
+description = "Application and Library Dedicated to Puyo Puyo and Nazo Puyo"
+license = "Apache-2.0 OR MIT"
 
 srcDir = "src"
 installExt = @["nim"]

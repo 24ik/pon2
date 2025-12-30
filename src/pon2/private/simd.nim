@@ -3,7 +3,7 @@
 ## Compile Options:
 ## | Option               | Description                      | Default |
 ## | -------------------- | -------------------------------- | ------- |
-## | `-d:pon2.simd=<int>` | SIMD level. (1: SSE4.2, 0: None) | 1       |
+## | `-d:pon2.simd=<int>` | SIMD level. (1: SSE4.2, 0: None) | `1`     |
 ##
 
 {.push raises: [].}

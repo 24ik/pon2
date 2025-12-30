@@ -71,7 +71,11 @@ nimble pages
 
 ## License
 
-This project is licensed under the
-[Apache-2.0 License](https://www.apache.org/licenses/LICENSE-2.0).
+Pon! Tsu is licensed under either of
 
-See [LICENSE](./LICENSE) and [NOTICE](./NOTICE) for more details.
+* Apache License, Version 2.0
+* MIT License
+
+at your option.
+See [LICENSE-APACHE](./LICENSE-APACHE), [LICENSE-MIT](./LICENSE-MIT),
+and [NOTICE](./NOTICE) for more details.
