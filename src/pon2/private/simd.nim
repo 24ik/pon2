@@ -1,9 +1,9 @@
 ## This module implements SIMD operations.
 ##
 ## Compile Options:
-## | Option               | Description                      | Default |
-## | -------------------- | -------------------------------- | ------- |
-## | `-d:pon2.simd=<int>` | SIMD level. (1: SSE4.2, 0: None) | `1`     |
+## | Option               | Description                    | Default |
+## | -------------------- | ------------------------------ | ------- |
+## | `-d:pon2.simd=<int>` | SIMD level. (1:SSE4.2, 0:None) | `1`     |
 ##
 
 {.push raises: [].}

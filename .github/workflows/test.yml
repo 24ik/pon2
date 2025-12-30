@@ -42,7 +42,3 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - run: nimble -y test
-        if: runner.os != 'macOS'
-
-      - run: nimble -y -d:pon2.testcpp=false test
-        if: runner.os == 'macOS'
