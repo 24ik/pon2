@@ -3,6 +3,7 @@
 ##
 ## Submodule Documentations:
 ## - [generate](./app/generate.html)
+## - [grimoire](./app/grimoire.html)
 ## - [key](./app/key.html)
 ## - [marathon](./app/marathon.html)
 ## - [permute](./app/permute.html)
@@ -22,6 +23,6 @@
 {.experimental: "views".}
 
 import ./[core]
-import ./app/[generate, key, marathon, permute, simulator, solve, studio]
+import ./app/[generate, grimoire, key, marathon, permute, simulator, solve, studio]
 
-export core, generate, key, marathon, permute, simulator, solve, studio
+export core, generate, grimoire, key, marathon, permute, simulator, solve, studio
