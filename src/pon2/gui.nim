@@ -2,6 +2,7 @@
 ## [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 ##
 ## Submodule Documentations:
+## - [grimoire](./gui/grimoire.html)
 ## - [helper](./gui/helper.html)
 ## - [marathon](./gui/marathon.html)
 ## - [simulator](./gui/simulator.html)
@@ -19,6 +20,6 @@
 {.experimental: "views".}
 
 import ./[app]
-import ./gui/[helper, marathon, simulator, studio]
+import ./gui/[grimoire, helper, marathon, simulator, studio]
 
-export app, helper, marathon, simulator, studio
+export app, grimoire, helper, marathon, simulator, studio

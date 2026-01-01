@@ -2,6 +2,7 @@
 ##
 ## Submodule Documentations:
 ## - [deref](./gui/deref.html)
+## - [hash](./gui/hash.html)
 ## - [utils](./gui/utils.html)
 ##
 
@@ -10,6 +11,6 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./gui/[deref, utils]
+import ./gui/[deref, hash, utils]
 
-export deref, utils
+export deref, hash, utils

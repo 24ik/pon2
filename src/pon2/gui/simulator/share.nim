@@ -11,11 +11,11 @@
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
-  import std/[asyncjs, jsffi, strformat, sugar, uri]
+  import std/[asyncjs, jsffi, strformat, sugar]
   import karax/[karaxdsl, vdom]
   import ../[helper]
   import ../../[app]
-  import ../../private/[assign, dom, gui, utils]
+  import ../../private/[assign, dom, gui, uri, utils]
 
   {.push warning[UnusedImport]: off.}
   import karax/[kbase]
@@ -23,7 +23,7 @@ when defined(js) or defined(nimsuggest):
 
   export vdom
 
-  proc toXLink[S: Simulator or Studio or Marathon](
+  proc toXLink[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper
   ): Uri =
     ## Returns the URI to post to X.
@@ -71,7 +71,7 @@ when defined(js) or defined(nimsuggest):
       ).catch
     {.pop.}
 
-  proc toShareVNode*[S: Simulator or Studio or Marathon](
+  proc toShareVNode*[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper
   ): VNode =
     ## Returns the share node.

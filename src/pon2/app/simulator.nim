@@ -11,11 +11,12 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, strformat, sugar, uri]
+import std/[sequtils, strformat, sugar]
 import ./[key]
 import ../[core]
 import
-  ../private/[algorithm, arrayutils, assign, deques, staticfor, strutils, tables, utils]
+  ../private/
+    [algorithm, arrayutils, assign, deques, staticfor, strutils, tables, uri, utils]
 
 export core, uri
 

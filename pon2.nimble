@@ -18,6 +18,7 @@ requires "chroma ^= 1.0.0"
 requires "cligen ^= 1.9.5"
 requires "karax ^= 1.5.0"
 requires "nimsimd ^= 1.3.2"
+requires "parsetoml ^= 0.7.2"
 requires "regex ^= 0.26.3"
 requires "results ^= 0.5.1"
 requires "stew ^= 0.4.2"
@@ -69,6 +70,9 @@ task pages, "Generate Web Pages":
 
   # marathon
   "src/pon2.nim".compile "pages/marathon/index.min.js", "-d:pon2.build.marathon"
+
+  # grimoire
+  "src/pon2.nim".compile "pages/grimoire/index.min.js", "-d:pon2.build.grimoire"
 
   # documentation
   exec "nim doc --project --index:on --git.url:https://github.com/24ik/pon2 --git.commit:{Pon2Commit} --git.devel:{Pon2Commit} --outdir:pages/docs/api/native src/pon2.nim".fmt

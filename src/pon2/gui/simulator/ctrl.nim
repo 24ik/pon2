@@ -23,7 +23,7 @@ when defined(js) or defined(nimsuggest):
 
   export vdom
 
-  proc toSideCtrlVNode*[S: Simulator or Studio or Marathon](
+  proc toSideCtrlVNode*[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper
   ): VNode =
     ## Returns the controller node replaced next the field.
@@ -281,7 +281,7 @@ when defined(js) or defined(nimsuggest):
                     span(style = counterStyle):
                       text "D"
 
-  proc toBottomCtrlVNode*[S: Simulator or Studio or Marathon](
+  proc toBottomCtrlVNode*[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper
   ): VNode =
     ## Returns the controller node replaced bottom of the window.
@@ -334,7 +334,7 @@ when defined(js) or defined(nimsuggest):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-arrow-right")
         of EditViewer:
-          tdiv(class = "field is-grouped is-grouped-is-centered mb-0"):
+          tdiv(class = "field is-grouped is-grouped-centered mb-0"):
             tdiv(class = "control"):
               button(
                 class = "button is-large px-4 py-2",
@@ -342,7 +342,7 @@ when defined(js) or defined(nimsuggest):
               ):
                 span(class = "icon is-medium"):
                   italic(class = "fa-solid fa-backward-step")
-          tdiv(class = "field is-grouped is-grouped-is-centered"):
+          tdiv(class = "field is-grouped is-grouped-centered"):
             tdiv(class = "control"):
               button(
                 class = "button is-large px-4 py-2",

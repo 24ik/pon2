@@ -27,6 +27,7 @@
 ## | `-d:pon2.assets=<str>`                   | Assets directory.                   | `../assets`            |
 ## | `-d:pon2.webworker=<str>`                | Web workers file.                   | `./worker.min.js`      |
 ## | `-d:pon2.build.marathon`                 | Builds marathon pages.              | `<undefined>`          |
+## | `-d:pon2.build.grimoire`                 | Builds grimoire pages.              | `<undefined>`          |
 ## | `-d:pon2.build.worker`                   | Builds web workers.                 | `<undefined>`          |
 ##
 
@@ -44,15 +45,15 @@ else:
 
   export gui
 
-proc getNimbleFile(): Path =
-  ## Returns the path to `pon2.nimble`.
+proc projectRootPath(): Path =
+  ## Returns the project root path.
   let
     head = srcPath().splitPath.head
     (head2, tail2) = head.splitPath
 
-  (if tail2 == "src".Path: head2 else: head).joinPath "pon2.nimble".Path
+  if tail2 == "src".Path: head2 else: head
 
-const Pon2Ver* = ($getNimbleFile()).staticRead.newStringStream.loadConfig.getSectionValue(
+const Pon2Ver* = ($projectRootPath().joinPath "pon2.nimble".Path).staticRead.newStringStream.loadConfig.getSectionValue(
   "", "version"
 )
 
@@ -67,32 +68,22 @@ when isMainModule:
     when defined(pon2.build.worker):
       import ./pon2/private/[app, webworkers]
     else:
-      import std/[sugar]
       import karax/[karax, karaxdsl, kbase, vdom]
-      import ./pon2/private/[dom, gui, strutils]
+      import ./pon2/private/[assign, dom, gui, strutils]
       when defined(pon2.build.marathon):
-        import std/[asyncjs, jsfetch, random]
+        import std/[asyncjs, jsfetch, random, sugar]
+      elif defined(pon2.build.grimoire):
+        import std/[asyncjs, jsconsole, jsfetch, sequtils, staticos, sugar]
+        import parsetoml
+        import ./pon2/private/[algorithm]
       else:
-        import ./pon2/private/[assign]
+        import std/[sugar]
 
     # ------------------------------------------------
     # JS - Utils
     # ------------------------------------------------
 
     when not defined(pon2.build.worker):
-      proc initErrorNode(msg: string): VNode =
-        ## Returns the error node.
-        buildHtml section(class = "section"):
-          tdiv(class = "content"):
-            h1(class = "title"):
-              text("Pon!通 URL形式エラー")
-            tdiv(class = "field"):
-              label(class = "label"):
-                text "エラー内容"
-              tdiv(class = "control"):
-                textarea(class = "textarea is-large", readonly = true):
-                  text msg.kstring
-
       proc initFooterNode(): VNode =
         ## Returns the footer node.
         buildHtml footer(class = "footer"):
@@ -111,6 +102,31 @@ when isMainModule:
                     italic(class = "fab fa-github")
                   span:
                     text "GitHub"
+
+      proc initErrorNode(msg: string): VNode =
+        ## Returns the error node.
+        buildHtml section(class = "section"):
+          tdiv(class = "content"):
+            h1(class = "title"):
+              text("Pon!通 エラー")
+            tdiv(class = "block"):
+              tdiv(class = "content"):
+                p:
+                  text "不具合と思われる場合は，開発者（"
+                  a(
+                    href = "https://x.com/orangep24",
+                    target = "_blank",
+                    rel = "noopener noreferrer",
+                  ):
+                    text "こちら"
+                  text "）までご連絡ください．"
+            tdiv(class = "block"):
+              tdiv(class = "field"):
+                label(class = "label"):
+                  text "エラー内容"
+                tdiv(class = "control"):
+                  textarea(class = "textarea is-large", readonly = true):
+                    text msg.kstring
 
     # ------------------------------------------------
     # JS - Main
@@ -174,7 +190,7 @@ when isMainModule:
                 globalMarathonRef[].load ($s).splitLines
                 completes.add true
                 if completes.len == ChunkCount:
-                  globalMarathonRef[].isReady = true
+                  globalMarathonRef[].isReady.assign true
                   safeRedraw()
             )
           )
@@ -200,6 +216,169 @@ when isMainModule:
           else:
             errorMsg.initErrorNode
 
+          initFooterNode()
+
+      renderer.setRenderer
+    elif defined(pon2.build.grimoire):
+      # ------------------------------------------------
+      # JS - Main - Grimoire
+      # ------------------------------------------------
+
+      proc keyHandler(grimoireRef: ref Grimoire, event: Event) =
+        ## Runs the keyboard event handler.
+        let
+          keyboardEvent = cast[KeyboardEvent](event)
+          focusInput = document.activeElement.className == "input"
+        if not focusInput:
+          if grimoireRef[].simulator.operate keyboardEvent.toKeyEvent:
+            safeRedraw()
+            event.preventDefault
+
+      proc parseEntries(str: string): Pon2Result[seq[GrimoireEntry]] =
+        ## Returns the entries converted from the toml string.
+        # parse toml
+        let table: TomlValueRef
+        try:
+          table = str.parseString
+        except TomlError as ex:
+          table = nil
+          return err ex.msg
+
+        # source
+        let sourceVal = table.getOrDefault "source"
+        if sourceVal.isNil or sourceVal.kind != String:
+          return err "`source` key with a string value is required"
+        let source = sourceVal.getStr
+
+        # entries
+        let entriesVal = table.getOrDefault "entries"
+        if entriesVal.isNil or entriesVal.kind != Array:
+          return err "`entries` key with an array value is required"
+        let entryElems = entriesVal.getElems
+
+        # parse entries
+        var entries = newSeqOfCap[GrimoireEntry](entryElems.len)
+        for entryIndex, entryElem in entryElems:
+          # query
+          let queryVal = entryElem.getOrDefault "query"
+          if queryVal.isNil or queryVal.kind != String:
+            return
+              err "[entry-{entryIndex}] `query` key with a string value is required".fmt
+          let query = queryVal.getStr
+
+          # title
+          let
+            titleVal = entryElem.getOrDefault "title"
+            title: string
+          if titleVal.isNil:
+            title = ""
+          elif titleVal.kind == String:
+            title = titleVal.getStr
+          else:
+            title = ""
+            return err "[entry-{entryIndex}] `title` value should be string".fmt
+
+          # creators
+          let
+            creatorsVal = entryElem.getOrDefault "creators"
+            creators: seq[string]
+          if creatorsVal.isNil:
+            creators = @[]
+          elif creatorsVal.kind == String:
+            creators = @[creatorsVal.getStr]
+          elif creatorsVal.kind == Array:
+            let creatorsElems = creatorsVal.getElems
+            if creatorsElems.anyIt it.kind != String:
+              return
+                err "[entry-{entryIndex}] all `creators` values should be string".fmt
+            creators = creatorsElems.mapIt it.getStr
+          else:
+            return
+              err "[entry-{entryIndex}] `creators` value should be string or array".fmt
+
+          # source detail
+          let
+            sourceDetailVal = entryElem.getOrDefault "sourceDetail"
+            sourceDetail: string
+          if sourceDetailVal.isNil:
+            sourceDetail = ""
+          elif sourceDetailVal.kind == String:
+            sourceDetail = sourceDetailVal.getStr
+          else:
+            sourceDetail = ""
+            return err "[entry-{entryIndex}] `sourceDetail` value should be string".fmt
+
+          entries.add GrimoireEntry.init(query, title, creators, source, sourceDetail)
+
+        ok entries
+
+      let globalGrimoireRef = new Grimoire
+      globalGrimoireRef[] = Grimoire.init
+
+      const FileNames = staticWalkDir(
+          $projectRootPath().joinPath("assets".Path).joinPath("grimoire".Path)
+        )
+        .mapIt($it.path.Path.splitPath.tail)
+        .filterIt(it.endsWith ".toml").sorted
+      var
+        errorMsgs = newSeqOfCap[string](FileNames.len)
+        completes = newSeqOfCap[bool](FileNames.len)
+
+      for fileName in FileNames:
+        {.push warning[Uninit]: off.}
+        {.push warning[ProveInit]: off.}
+        discard "{AssetsDir}/grimoire/{fileName}".fmt.cstring.fetch
+          .then((r: Response) => r.text)
+          .then(
+            (s: cstring) => (
+              block:
+                let entriesResult = ($s).parseEntries
+                if entriesResult.isOk:
+                  globalGrimoireRef[].add entriesResult.unsafeValue
+                else:
+                  errorMsgs.add "[{fileName}] {entriesResult.error}".fmt
+
+                completes.add true
+                if completes.len == FileNames.len:
+                  globalGrimoireRef[].isReady = true
+                  safeRedraw()
+            )
+          )
+          .catch((error: Error) => console.error(error))
+        {.pop.}
+        {.pop.}
+
+      var
+        matchedEntryIndices = globalGrimoireRef[].matchedEntryIndices
+        matchedEntryIndicesSeq = matchedEntryIndices.toSeq
+
+      document.onkeydown = (event: Event) => globalGrimoireRef.keyHandler event
+
+      proc renderer(routerData: RouterData): VNode =
+        ## Returns the root node.
+        let errorMsg = errorMsgs.join "\n"
+        if errorMsg.len > 0:
+          return buildHtml tdiv:
+            errorMsg.initErrorNode
+            initFooterNode()
+
+        let hashData = routerData.hashPart.parseGrimoireHashData
+        globalGrimoireRef[].match hashData.matcher
+
+        if globalGrimoireRef[].matchedEntryIndices != matchedEntryIndices:
+          matchedEntryIndices.assign globalGrimoireRef[].matchedEntryIndices
+          matchedEntryIndicesSeq.assign matchedEntryIndices.toSeq
+
+        let helper = VNodeHelper.init(
+          globalGrimoireRef, "pon2-main", hashData.matcher, matchedEntryIndicesSeq,
+          hashData.pageIndex,
+        )
+
+        buildHtml tdiv:
+          section(
+            class = (if helper.mobile: "section pt-3 pl-3" else: "section").kstring
+          ):
+            globalGrimoireRef.toGrimoireVNode helper
           initFooterNode()
 
       renderer.setRenderer
@@ -264,9 +443,9 @@ when isMainModule:
   # ------------------------------------------------
 
   when not defined(js):
-    import std/[random, sequtils, strformat, sugar, uri]
+    import std/[random, sequtils, strformat, sugar]
     import cligen
-    import ./pon2/private/[assign, browsers, staticfor, strutils]
+    import ./pon2/private/[assign, browsers, staticfor, strutils, uri]
 
     # ------------------------------------------------
     # Native - Solve

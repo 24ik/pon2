@@ -18,7 +18,7 @@ when defined(js) or defined(nimsuggest):
 
   export vdom
 
-  proc toOperatingCellVNode[S: Simulator or Studio or Marathon](
+  proc toOperatingCellVNode[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper, index: int, col: Col
   ): VNode =
     ## Returns the node of the cell in the operating area.
@@ -80,7 +80,7 @@ when defined(js) or defined(nimsuggest):
           else:
             italic(class = "fa-solid fa-arrows-rotate")
 
-  proc toOperatingVNode*[S: Simulator or Studio or Marathon](
+  proc toOperatingVNode*[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper
   ): VNode =
     ## Returns the operating node.

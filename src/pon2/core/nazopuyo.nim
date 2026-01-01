@@ -6,11 +6,11 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, uri]
+import std/[strformat]
 import
   ./[cell, field, fqdn, goal, moveresult, pair, placement, popresult, puyopuyo, step]
 import ../[utils]
-import ../private/[assign, bitops, core, strutils, tables]
+import ../private/[assign, bitops, core, strutils, tables, uri]
 
 export goal, puyopuyo, utils
 

@@ -6,54 +6,86 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[random, sugar]
+import std/[sequtils, sets, sugar]
 import ./[simulator]
 import ../[core]
-import ../private/[arrayutils, assign, setutils, tables]
+import ../private/[algorithm, arrayutils, assign, setutils, suffixarray, tables]
+import ../private/app/[grimoire]
 
 type
-  NazoPuyoEntry* = object ## Entry of the Nazo Puyo Grimoire.
+  GrimoireEntry* = object ## Entry of the Nazo Puyo Grimoire.
     query*: string
-    author*: string
+    moveCount*: int
+    goal*: Goal
     title*: string
+    creators*: seq[string]
     source*: string
+    sourceDetail*: string
 
-  NazoPuyoGrimoire* = object ## Nazo Puyo Grimoire.
+  Grimoire* = object ## Nazo Puyo Grimoire.
     simulator*: Simulator
 
-    allEntries: seq[NazoPuyoEntry]
-    matchedEntryIndices: seq[int]
+    entries: seq[GrimoireEntry]
+    matchedEntryIndices: set[int16]
+    allIndices: set[int16]
 
     moveCountToIndices: seq[set[int16]]
     kindToIndices: array[GoalKind, set[int16]]
-    noneKindIndices: set[int16]
-    clearColorToIndices: array[GoalColor, set[int16]]
-    noneClearColorIndices: set[int16]
-    authorToIndices: Table[string, set[int16]]
-    titleToIndices: Table[string, set[int16]]
-    sourceToIndices: Table[string, set[int16]]
+    noKindIndices: set[int16]
+    hasClearColorToIndices: array[2, set[int16]]
+    titleSuffixArray: SuffixArray
+    titleIndexToIndices: seq[set[int16]]
+    creatorSuffixArray: SuffixArray
+    creatorIndexToIndices: seq[set[int16]]
+    sourceSuffixArray: SuffixArray
+    sourceIndexToIndices: seq[set[int16]]
 
-    isReady*: bool
-    rng: Rand
+    sortedSources: seq[string]
+    isReady: bool
 
-  NazoPuyoMatcher* = object ## Matcher of the Nazo Puyo Grimoire.
-    moveCountOpt: Opt[int]
-    kindOptOpt: Opt[Opt[GoalKind]]
-    clearColorOptOpt: Opt[Opt[GoalColor]]
-    authorOpt: Opt[string]
-    titleOpt: Opt[string]
-    sourceOpt: Opt[string]
+  GrimoireMatcher* = object ## Matcher of the Nazo Puyo Grimoire.
+    moveCountOpt*: Opt[int]
+    kindOptOpt*: Opt[Opt[GoalKind]]
+    hasClearColorOpt*: Opt[bool]
+    titleOpt*: Opt[string]
+    creatorOpt*: Opt[string]
+    sourceOpt*: Opt[string]
 
 # ------------------------------------------------
 # Constructor
 # ------------------------------------------------
 
 func init*(
-    T: type NazoPuyoEntry, query: string, author = "", title = "", source = ""
+    T: type GrimoireEntry,
+    query: string,
+    title = "",
+    creators = newSeq[string](),
+    source = "",
+    sourceDetail = "",
 ): T =
-  T(query: query, author: author, title: title, source: source)
+  let
+    nazoPuyoResult = query.parseNazoPuyo Pon2
+    moveCount: int
+    goal: Goal
+  if nazoPuyoResult.isOk:
+    let nazoPuyo = nazoPuyoResult.unsafeValue
+    moveCount = nazoPuyo.puyoPuyo.steps.len
+    goal = nazoPuyo.goal
+  else:
+    moveCount = 0
+    goal = Goal.init
 
-func add(self: var NazoPuyoGrimoire, entry: NazoPuyoEntry) =
+  T(
+    query: query,
+    moveCount: moveCount,
+    goal: goal,
+    title: title,
+    creators: creators,
+    source: source,
+    sourceDetail: sourceDetail,
+  )
+
+func add(self: var Grimoire, entry: GrimoireEntry) =
   ## Adds the entry to the grimoire.
   if self.isReady:
     return
@@ -64,12 +96,12 @@ func add(self: var NazoPuyoGrimoire, entry: NazoPuyoEntry) =
     return
   let nazoPuyo = nazoPuyoResult.unsafeValue
 
-  let entryIndex = self.allEntries.len.int16
-  self.allEntries.add entry
+  let entryIndex = self.entries.len.int16
+  self.entries.add entry
 
   # moveCount
   let moveCount = nazoPuyo.puyoPuyo.steps.len
-  if moveCount + 1 > self.moveCountToIndices.len:
+  if self.moveCountToIndices.len < moveCount + 1:
     self.moveCountToIndices.setLen moveCount + 1
   self.moveCountToIndices[moveCount].incl entryIndex
 
@@ -77,41 +109,34 @@ func add(self: var NazoPuyoGrimoire, entry: NazoPuyoEntry) =
   if nazoPuyo.goal.mainOpt.isOk:
     self.kindToIndices[nazoPuyo.goal.mainOpt.unsafeValue.kind].incl entryIndex
   else:
-    self.noneKindIndices.incl entryIndex
+    self.noKindIndices.incl entryIndex
 
   # clear color
-  if nazoPuyo.goal.clearColorOpt.isOk:
-    self.clearColorToIndices[nazoPuyo.goal.clearColorOpt.unsafeValue].incl entryIndex
-  else:
-    self.noneClearColorIndices.incl entryIndex
+  self.hasClearColorToIndices[nazoPuyo.goal.clearColorOpt.isOk.int].incl entryIndex
 
-  # author, title, source
-  self.authorToIndices.mgetOrPut(entry.author, set[int16]({})).incl entryIndex
-  self.titleToIndices.mgetOrPut(entry.title, set[int16]({})).incl entryIndex
-  self.sourceToIndices.mgetOrPut(entry.source, set[int16]({})).incl entryIndex
-
-func add*(self: var NazoPuyoGrimoire, entries: openArray[NazoPuyoEntry]) =
+func add*(self: var Grimoire, entries: openArray[GrimoireEntry]) =
   ## Adds the entries to the grimoire.
   for entry in entries:
     self.add entry
 
-func init*(
-    T: type NazoPuyoGrimoire, rng: Rand, entries: openArray[NazoPuyoEntry] = []
-): T =
+func init*(T: type Grimoire, entries: openArray[GrimoireEntry] = []): T =
   var grimoire = T(
     simulator: Simulator.init,
-    allEntries: @[],
-    matchedEntryIndices: @[],
+    entries: @[],
+    matchedEntryIndices: set[int16]({}),
+    allIndices: set[int16]({}),
     moveCountToIndices: @[],
     kindToIndices: GoalKind.initArrayWith set[int16]({}),
-    noneKindIndices: set[int16]({}),
-    clearColorToIndices: GoalColor.initArrayWith set[int16]({}),
-    noneClearColorIndices: set[int16]({}),
-    authorToIndices: initTable[string, set[int16]](),
-    titleToIndices: initTable[string, set[int16]](),
-    sourceToIndices: initTable[string, set[int16]](),
+    noKindIndices: set[int16]({}),
+    hasClearColorToIndices: 2.initArrayWith set[int16]({}),
+    titleSuffixArray: SuffixArray.init newSeq[string](),
+    titleIndexToIndices: @[],
+    creatorSuffixArray: SuffixArray.init newSeq[string](),
+    creatorIndexToIndices: @[],
+    sourceSuffixArray: SuffixArray.init newSeq[string](),
+    sourceIndexToIndices: @[],
+    sortedSources: @[],
     isReady: false,
-    rng: rng,
   )
 
   grimoire.add entries
@@ -119,86 +144,161 @@ func init*(
   grimoire
 
 func init*(
-    T: type NazoPuyoMatcher,
+    T: type GrimoireMatcher,
     moveCountOpt = Opt[int].err,
     kindOptOpt = Opt[Opt[GoalKind]].err,
-    clearColorOptOpt = Opt[Opt[GoalColor]].err,
-    authorOpt = Opt[string].err,
+    hasClearColorOpt = Opt[bool].err,
     titleOpt = Opt[string].err,
+    creatorOpt = Opt[string].err,
     sourceOpt = Opt[string].err,
 ): T =
   T(
     moveCountOpt: moveCountOpt,
     kindOptOpt: kindOptOpt,
-    clearColorOptOpt: clearColorOptOpt,
-    authorOpt: authorOpt,
-    titleOpt: titleOpt,
-    sourceOpt: sourceOpt,
+    hasClearColorOpt: hasClearColorOpt,
+    titleOpt: titleOpt.map (title: string) => title.normalized,
+    creatorOpt: creatorOpt.map (creator: string) => creator.normalized,
+    sourceOpt: sourceOpt.map (source: string) => source.normalized,
   )
 
 # ------------------------------------------------
 # Property
 # ------------------------------------------------
 
-func `[]`*(self: NazoPuyoGrimoire, index: int): NazoPuyo =
-  self.allEntries[index].query.parseNazoPuyo(Pon2).unsafeValue
+func `[]`*(self: Grimoire, index: int): GrimoireEntry =
+  self.entries[index]
 
-func len*(self: NazoPuyoGrimoire): int =
+func isReady*(self: Grimoire): bool =
+  ## Returns `true` if the grimoire is ready.
+  self.isReady
+
+func `isReady=`*(self: var Grimoire, isReady: bool) =
+  ## Performs the preprocessing of the grimoire and sets `isReady`.
+  # prepare indices, sorted sources
+  var
+    titleToIndices = initTable[string, set[int16]]()
+    creatorToIndices = initTable[string, set[int16]]()
+    sourceToIndices = initTable[string, set[int16]]()
+    sourcesSet = initHashSet[string]()
+  for entryIndex, entry in self.entries:
+    let entryIndex16 = entryIndex.int16
+
+    if entry.title.len > 0:
+      titleToIndices.mgetOrPut(entry.title.normalized, {}).incl entryIndex16
+    for creator in entry.creators:
+      creatorToIndices.mgetOrPut(creator.normalized, {}).incl entryIndex16
+    if entry.source.len > 0:
+      sourceToIndices.mgetOrPut(entry.source.normalized, {}).incl entryIndex16
+      sourcesSet.incl entry.source
+
+  # title
+  let titleCount = titleToIndices.len
+  var titles = newSeqOfCap[string](titleCount)
+  self.titleIndexToIndices.assign newSeqOfCap[set[int16]](titleCount)
+  for (title, indices) in titleToIndices.pairs:
+    titles.add title
+    self.titleIndexToIndices.add indices
+  self.titleSuffixArray.assign SuffixArray.init titles
+
+  # creator
+  let creatorCount = creatorToIndices.len
+  var creators = newSeqOfCap[string](creatorCount)
+  self.creatorIndexToIndices.assign newSeqOfCap[set[int16]](creatorCount)
+  for (creator, indices) in creatorToIndices.pairs:
+    creators.add creator
+    self.creatorIndexToIndices.add indices
+  self.creatorSuffixArray.assign SuffixArray.init creators
+
+  # source
+  let sourceCount = sourceToIndices.len
+  var sources = newSeqOfCap[string](sourceCount)
+  self.sourceIndexToIndices.assign newSeqOfCap[set[int16]](sourceCount)
+  for (source, indices) in sourceToIndices.pairs:
+    sources.add source
+    self.sourceIndexToIndices.add indices
+  self.sourceSuffixArray.assign SuffixArray.init sources
+
+  # sort source
+  self.sortedSources.assign sourcesSet.toSeq.sorted
+
+  # match all
+  self.allIndices.assign (0'i16 ..< self.entries.len.int16).toSet
+  self.matchedEntryIndices.assign self.allIndices
+
+  self.isReady.assign isReady
+
+func len*(self: Grimoire): int =
   ## Returns the number of the entries.
-  if self.isReady: self.allEntries.len else: 0
+  self.entries.len
 
-func matchedEntryIndices*(self: NazoPuyoGrimoire): seq[int] =
-  ## Returns the number of the matched entry.
-  if self.isReady:
-    self.matchedEntryIndices
-  else:
-    @[]
+func matchedEntryIndices*(self: Grimoire): set[int16] =
+  ## Returns the sorted indices of the matched entries.
+  self.matchedEntryIndices
+
+func moveCountMax*(self: Grimoire): int =
+  ## Returns the max move count of the Nazo Puyo in the grimoire.
+  self.moveCountToIndices.len - 1
+
+func sources*(self: Grimoire): seq[string] =
+  ## Returns the sorted sources.
+  self.sortedSources
 
 # ------------------------------------------------
 # Match
 # ------------------------------------------------
 
-func match*(self: var NazoPuyoGrimoire, matcher: NazoPuyoMatcher) =
+func match*(self: var Grimoire, matcher: GrimoireMatcher) =
   ## Searches by the matcher.
   if not self.isReady:
     return
 
-  var indices = (0'i16 ..< self.allEntries.len.int16).toSet
+  self.matchedEntryIndices.assign self.allIndices
 
+  # move count
   if matcher.moveCountOpt.isOk:
     let moveCount = matcher.moveCountOpt.unsafeValue
     if moveCount in 0 ..< self.moveCountToIndices.len:
-      indices *= self.moveCountToIndices[moveCount]
+      self.matchedEntryIndices *= self.moveCountToIndices[moveCount]
     else:
-      indices.assign {}
+      self.matchedEntryIndices.assign {}
+      return
 
+  # kind
   if matcher.kindOptOpt.isOk:
     let kindOpt = matcher.kindOptOpt.unsafeValue
     if kindOpt.isOk:
-      indices *= self.kindToIndices[kindOpt.unsafeValue]
+      self.matchedEntryIndices *= self.kindToIndices[kindOpt.unsafeValue]
     else:
-      indices *= self.noneKindIndices
+      self.matchedEntryIndices *= self.noKindIndices
 
-  if matcher.clearColorOptOpt.isOk:
-    let clearColorOpt = matcher.clearColorOptOpt.unsafeValue
-    if clearColorOpt.isOk:
-      indices *= self.clearColorToIndices[clearColorOpt.unsafeValue]
-    else:
-      indices *= self.noneClearColorIndices
+  # clear color
+  if matcher.hasClearColorOpt.isOk:
+    let hasClearColor = matcher.hasClearColorOpt.unsafeValue
+    self.matchedEntryIndices *= self.hasClearColorToIndices[hasClearColor.int]
 
-  if matcher.authorOpt.isOk:
-    let author = matcher.authorOpt.unsafeValue
-    indices *= self.authorToIndices.getOrDefault(author, {})
-
+  # title
   if matcher.titleOpt.isOk:
     let title = matcher.titleOpt.unsafeValue
-    indices *= self.titleToIndices.getOrDefault(title, {})
 
+    var indices = set[int16]({})
+    for titleIndex in self.titleSuffixArray.findAll title:
+      indices += self.titleIndexToIndices[titleIndex]
+    self.matchedEntryIndices *= indices
+
+  # creator
+  if matcher.creatorOpt.isOk:
+    let creator = matcher.creatorOpt.unsafeValue
+
+    var indices = set[int16]({})
+    for creatorIndex in self.creatorSuffixArray.findAll creator:
+      indices += self.creatorIndexToIndices[creatorIndex]
+    self.matchedEntryIndices *= indices
+
+  # source
   if matcher.sourceOpt.isOk:
     let source = matcher.sourceOpt.unsafeValue
-    indices *= self.sourceToIndices.getOrDefault(source, {})
 
-  let indicesSeq = collect:
-    for index in indices:
-      index.int
-  self.matchedEntryIndices.assign indicesSeq
+    var indices = set[int16]({})
+    for sourceIndex in self.sourceSuffixArray.findAll source:
+      indices += self.sourceIndexToIndices[sourceIndex]
+    self.matchedEntryIndices *= indices

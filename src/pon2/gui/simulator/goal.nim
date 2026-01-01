@@ -23,13 +23,7 @@ when defined(js) or defined(nimsuggest):
 
   export vdom
 
-  const KindDescs: array[GoalKind, kstring] = [
-    "n連鎖する", "n色同時に消す", "cぷよn個同時に消す",
-    "cぷよn箇所で同時に消す", "cぷよn連結で消す", "累計n色消す",
-    "cぷよ累計n個消す",
-  ]
-
-  proc toGoalVNode*[S: Simulator or Studio or Marathon](
+  proc toGoalVNode*[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper, cameraReady = false
   ): VNode =
     ## Returns the goal node.
@@ -72,12 +66,12 @@ when defined(js) or defined(nimsuggest):
               ),
           ):
             option(selected = goal.mainOpt.isErr):
-              text "メイン条件未設定"
+              text "メイン条件なし"
             for kind in GoalKind:
               option(
                 selected = goal.mainOpt.isOk and goal.mainOpt.unsafeValue.kind == kind
               ):
-                text KindDescs[kind]
+                text ($kind).kstring
       if goal.mainOpt.isOk:
         let main = goal.mainOpt.unsafeValue
 

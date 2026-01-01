@@ -27,13 +27,13 @@ when defined(js) or defined(nimsuggest):
     BtnClass = "button".kstring
     SelectBtnClass = "button is-primary is-selected".kstring
 
-  func initBtnHandler[S: Simulator or Studio or Marathon](
+  func initBtnHandler[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper, rule: Rule
   ): () -> void =
     ## Returns the handler for clicking buttons.
     () => self.derefSimulator(helper).setRule rule
 
-  proc toSettingsVNode*[S: Simulator or Studio or Marathon](
+  proc toSettingsVNode*[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper
   ): VNode =
     ## Returns the select node.

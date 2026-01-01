@@ -1,0 +1,141 @@
+## This module implements hash part processings.
+##
+
+{.push raises: [].}
+{.experimental: "strictDefs".}
+{.experimental: "strictFuncs".}
+{.push experimental: "views".}
+
+# ------------------------------------------------
+# JS backend
+# ------------------------------------------------
+
+when defined(js) or defined(nimsuggest):
+  import ../../[app]
+  import ../../private/[assign, dom, strutils, uri]
+
+  # ------------------------------------------------
+  # Grimoire
+  # ------------------------------------------------
+
+  type GrimoireHashData* = object
+    matcher*: GrimoireMatcher
+    pageIndex*: int
+
+  const
+    MoveCountKey = "movecount"
+    KindKey = "kind"
+    ClearColorKey = "clearcolor"
+    TitleKey = "title"
+    CreatorKey = "creator"
+    SourceKey = "source"
+    PageKey = "page"
+
+    ErrVal = "~"
+
+  func parseGrimoireHashData*(hashPart: cstring): GrimoireHashData =
+    ## Returns the grimoire matcher and the page index converted from the hash part.
+    var
+      moveCountOpt = Opt[int].err
+      kindOptOpt = Opt[Opt[GoalKind]].err
+      hasClearColorOpt = Opt[bool].err
+      titleOpt = Opt[string].err
+      creatorOpt = Opt[string].err
+      sourceOpt = Opt[string].err
+      pageIndex = 0
+
+    for (key, val) in ($hashPart).substr(1).decodeQuery:
+      let decodedVal = val.decodeUrl
+      case key
+      of MoveCountKey:
+        decodedVal.parseInt.isErrOr:
+          if value > 0:
+            moveCountOpt.ok value
+      of KindKey:
+        if decodedVal == ErrVal:
+          kindOptOpt.ok Opt[GoalKind].err
+        else:
+          parseOrdinal[GoalKind](decodedVal).isErrOr:
+            kindOptOpt.ok Opt[GoalKind].ok value
+      of ClearColorKey:
+        decodedVal.parseInt.isErrOr:
+          hasClearColorOpt.ok value.bool
+      of TitleKey:
+        titleOpt.ok decodedVal
+      of CreatorKey:
+        creatorOpt.ok decodedVal
+      of SourceKey:
+        sourceOpt.ok decodedVal
+      of PageKey:
+        decodedVal.parseInt.isErrOr:
+          if value > 0:
+            pageIndex.assign value
+      else:
+        discard
+
+    GrimoireHashData(
+      matcher: GrimoireMatcher.init(
+        moveCountOpt, kindOptOpt, hasClearColorOpt, titleOpt, creatorOpt, sourceOpt
+      ),
+      pageIndex: pageIndex,
+    )
+
+  proc updateHash(key, val: string) =
+    ## Updates the hash part with the key and value.
+    let newHashBody =
+      ($window.location.hash).substr(1).updatedQuery(key, val, removeEmptyVal = true)
+
+    window.location.hash.assign (if newHashBody.len == 0: ""
+    else: '#' & newHashBody).cstring
+
+  proc updateGrimoireHashWithMoveCount*(moveCountOpt: Opt[int]) =
+    ## Updates the hash part with the move count.
+    MoveCountKey.updateHash if moveCountOpt.isOk:
+      $moveCountOpt.unsafeValue
+    else:
+      ""
+
+  proc updateGrimoireHashWithKind*(kindOptOpt: Opt[Opt[GoalKind]]) =
+    ## Updates the hash part with the goal kind.
+    KindKey.updateHash (
+      if kindOptOpt.isOk:
+        let kindOpt = kindOptOpt.unsafeValue
+        if kindOpt.isOk:
+          $kindOpt.unsafeValue.ord
+        else:
+          ErrVal
+      else:
+        ""
+    )
+
+  proc updateGrimoireHashWithClearColor*(hasClearColorOpt: Opt[bool]) =
+    ## Updates the hash part with the clear color.
+    ClearColorKey.updateHash if hasClearColorOpt.isOk:
+      $hasClearColorOpt.unsafeValue.ord
+    else:
+      ""
+
+  proc updateGrimoireHashWithTitle*(titleOpt: Opt[string]) =
+    ## Updates the hash part with the title.
+    TitleKey.updateHash if titleOpt.isOk:
+      $titleOpt.unsafeValue.encodeUrl
+    else:
+      ""
+
+  proc updateGrimoireHashWithCreator*(creatorOpt: Opt[string]) =
+    ## Updates the hash part with the creator.
+    CreatorKey.updateHash if creatorOpt.isOk:
+      $creatorOpt.unsafeValue.encodeUrl
+    else:
+      ""
+
+  proc updateGrimoireHashWithSource*(sourceOpt: Opt[string]) =
+    ## Updates the hash part with the source.
+    SourceKey.updateHash if sourceOpt.isOk:
+      $sourceOpt.unsafeValue.encodeUrl
+    else:
+      ""
+
+  proc updateGrimoireHashWithPageIndex*(pageIndex: int) =
+    ## Updates the hash part with the page index.
+    PageKey.updateHash $pageIndex

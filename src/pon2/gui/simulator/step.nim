@@ -28,13 +28,13 @@ when defined(js) or defined(nimsuggest):
     CellClass = "button p-0".kstring
     SelectCellClass = "button p-0 is-primary".kstring
 
-  func initDelBtnHandler[S: Simulator or Studio or Marathon](
+  func initDelBtnHandler[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper, stepIndex: int
   ): () -> void =
     ## Returns the handler for clicking del buttons.
     () => self.derefSimulator(helper).delStep stepIndex
 
-  func initWriteBtnHandler[S: Simulator or Studio or Marathon](
+  func initWriteBtnHandler[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper, index: int, pivot: bool
   ): () -> void =
     ## Returns the handler for clicking write buttons.
@@ -44,14 +44,14 @@ when defined(js) or defined(nimsuggest):
         self.derefSimulator(helper).writeCross index
     )
 
-  func initCountSelectHandler[S: Simulator or Studio or Marathon](
+  func initCountSelectHandler[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper, index: int, col: Col, selectId: kstring
   ): () -> void =
     ## Returns the handler for selecting garbage counts.
     () =>
       self.derefSimulator(helper).writeCountClamp(index, col, selectId.getSelectedIndex)
 
-  proc pairPlacementCellNode[S: Simulator or Studio or Marathon](
+  proc pairPlacementCellNode[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S,
       helper: VNodeHelper,
       step: Step,
@@ -84,7 +84,7 @@ when defined(js) or defined(nimsuggest):
       buildHtml figure(class = "image is-24x24"):
         img(src = imgSrc)
 
-  proc pairPlacementNode[S: Simulator or Studio or Marathon](
+  proc pairPlacementNode[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper, step: Step, stepIndex: int, editable: bool
   ): VNode =
     ## Returns the pair-placement node.
@@ -128,7 +128,7 @@ when defined(js) or defined(nimsuggest):
         tdiv(class = "column is-narrow"):
           text optPlacementDesc
 
-  proc nuisanceNode[S: Simulator or Studio or Marathon](
+  proc nuisanceNode[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper, step: Step, stepIndex: int, editable: bool
   ): VNode =
     ## Returns the nuisance node.
@@ -184,7 +184,7 @@ when defined(js) or defined(nimsuggest):
               else:
                 text ($step.counts[col]).kstring
 
-  proc rotateNode[S: Simulator or Studio or Marathon](
+  proc rotateNode[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper, step: Step, stepIndex: int, editable: bool
   ): VNode =
     ## Returns the rotate node.
@@ -210,7 +210,7 @@ when defined(js) or defined(nimsuggest):
     else:
       icon
 
-  proc toStepsVNode*[S: Simulator or Studio or Marathon](
+  proc toStepsVNode*[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper, cameraReady = false
   ): VNode =
     ## Returns the steps view.
