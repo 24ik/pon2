@@ -12,9 +12,9 @@ import ../[utils]
 
 export utils
 
-type LocalStorage* = object ## Local storage.
+type LocalStorage* = object ## Local storage. This type has no real data.
 
-var localStorage* = LocalStorage()
+let localStorage* = LocalStorage()
 
 proc pathPrefixAdded(key: string): cstring {.inline, noinit.} =
   ## Returns the key with the path prefix added.
@@ -30,10 +30,10 @@ proc `[]`*(self: LocalStorage, key: string): Pon2Result[cstring] {.inline, noini
   else:
     err "key not found: {key}".fmt
 
-proc `[]=`*(self: var LocalStorage, key: string, val: cstring) {.inline, noinit.} =
+proc `[]=`*(self: LocalStorage, key: string, val: cstring) {.inline, noinit.} =
   key.pathPrefixAdded.setItem val
 
-proc del*(self: var LocalStorage, key: string) {.inline, noinit.} =
+proc del*(self: LocalStorage, key: string) {.inline, noinit.} =
   ## Deletes the key.
   ## If the key is not contained in the local storage, does nothing.
   key.pathPrefixAdded.removeItem
