@@ -14,8 +14,7 @@ export utils
 
 type LocalStorage* = object ## Local storage.
 
-func init*(T: type LocalStorage): T {.inline, noinit.} =
-  LocalStorage()
+var localStorage* = LocalStorage()
 
 proc pathPrefixAdded(key: string): cstring {.inline, noinit.} =
   ## Returns the key with the path prefix added.
