@@ -173,7 +173,7 @@ when isMainModule:
       let globalMarathonRef = new Marathon
       globalMarathonRef[] = Marathon.init rng
 
-      const ChunkCount = 16
+      const ChunkCount = 4
       var
         errorMsgs = newSeqOfCap[string](ChunkCount)
         completes = newSeqOfCap[bool](ChunkCount)
@@ -181,7 +181,7 @@ when isMainModule:
       for chunkIndex in 0 ..< ChunkCount:
         {.push warning[Uninit]: off.}
         {.push warning[ProveInit]: off.}
-        discard "{AssetsDir}/marathon/swap{chunkIndex:02}.txt".fmt.cstring.fetch
+        discard "{AssetsDir}/marathon/swap{chunkIndex}.txt".fmt.cstring.fetch
           .then((r: Response) => r.text)
           .then(
             (s: cstring) => (
@@ -256,7 +256,7 @@ when isMainModule:
           let queryVal = entryElem.getOrDefault "query"
           if queryVal.isNil or queryVal.kind != String:
             return
-              err "[entry-{entryIndex}] `query` key with a string value is required".fmt
+              err "[Entry {entryIndex}] `query` key with a string value is required".fmt
           let query = queryVal.getStr
 
           # title
@@ -269,7 +269,7 @@ when isMainModule:
             title = titleVal.getStr
           else:
             title = ""
-            return err "[entry-{entryIndex}] `title` value should be string".fmt
+            return err "[Entry {entryIndex}] `title` value should be string".fmt
 
           # creators
           let
@@ -283,11 +283,11 @@ when isMainModule:
             let creatorsElems = creatorsVal.getElems
             if creatorsElems.anyIt it.kind != String:
               return
-                err "[entry-{entryIndex}] all `creators` values should be string".fmt
+                err "[Entry {entryIndex}] all `creators` values should be string".fmt
             creators = creatorsElems.mapIt it.getStr
           else:
             return
-              err "[entry-{entryIndex}] `creators` value should be string or array".fmt
+              err "[Entry {entryIndex}] `creators` value should be string or array".fmt
 
           # source
           let
@@ -299,7 +299,7 @@ when isMainModule:
             source = sourceVal.getStr
           else:
             source = ""
-            return err "[entry-{entryIndex}] `source` value should be string".fmt
+            return err "[Entry {entryIndex}] `source` value should be string".fmt
 
           # source detail
           let
@@ -311,7 +311,7 @@ when isMainModule:
             sourceDetail = sourceDetailVal.getStr
           else:
             sourceDetail = ""
-            return err "[entry-{entryIndex}] `sourceDetail` value should be string".fmt
+            return err "[Entry {entryIndex}] `sourceDetail` value should be string".fmt
 
           entries.add GrimoireEntry.init(query, title, creators, source, sourceDetail)
 
