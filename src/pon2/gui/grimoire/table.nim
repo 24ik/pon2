@@ -73,6 +73,11 @@ when defined(js) or defined(nimsuggest):
           span(class = "icon"):
             italic(class = "fa-solid fa-forward-fast")
 
+  func initPlayHandler(self: ref Grimoire, entry: GrimoireEntry): () -> void =
+    ## Returns the click handler of the play button.
+    () =>
+      self[].simulator.assign Simulator.init entry.query.parseNazoPuyo(Pon2).unsafeValue
+
   proc toGrimoireTableVNode(
       self: ref Grimoire, helper: VNodeHelper, clampedPageIndex: int
   ): VNode =
@@ -110,15 +115,7 @@ when defined(js) or defined(nimsuggest):
 
             tr:
               td:
-                button(
-                  class = "button",
-                  onclick =
-                    () => (
-                      self[].simulator.assign Simulator.init(
-                        entry.query.parseNazoPuyo(Pon2).unsafeValue
-                      )
-                    ),
-                ):
+                button(class = "button", onclick = self.initPlayHandler entry):
                   span(class = "icon"):
                     italic(class = "fa-solid fa-gamepad")
               td:

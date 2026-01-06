@@ -73,9 +73,8 @@ when isMainModule:
       when defined(pon2.build.marathon):
         import std/[asyncjs, jsfetch, random, sugar]
       elif defined(pon2.build.grimoire):
-        import std/[asyncjs, jsconsole, jsfetch, sequtils, staticos, sugar]
+        import std/[asyncjs, jsconsole, jsfetch, sequtils, sugar]
         import parsetoml
-        import ./pon2/private/[algorithm]
       else:
         import std/[sugar]
 
@@ -244,12 +243,6 @@ when isMainModule:
           table = nil
           return err ex.msg
 
-        # source
-        let sourceVal = table.getOrDefault "source"
-        if sourceVal.isNil or sourceVal.kind != String:
-          return err "`source` key with a string value is required"
-        let source = sourceVal.getStr
-
         # entries
         let entriesVal = table.getOrDefault "entries"
         if entriesVal.isNil or entriesVal.kind != Array:
@@ -296,6 +289,18 @@ when isMainModule:
             return
               err "[entry-{entryIndex}] `creators` value should be string or array".fmt
 
+          # source
+          let
+            sourceVal = entryElem.getOrDefault "source"
+            source: string
+          if sourceVal.isNil:
+            source = ""
+          elif sourceVal.kind == String:
+            source = sourceVal.getStr
+          else:
+            source = ""
+            return err "[entry-{entryIndex}] `source` value should be string".fmt
+
           # source detail
           let
             sourceDetailVal = entryElem.getOrDefault "sourceDetail"
@@ -315,38 +320,28 @@ when isMainModule:
       let globalGrimoireRef = new Grimoire
       globalGrimoireRef[] = Grimoire.init
 
-      const FileNames = staticWalkDir(
-          $projectRootPath().joinPath("assets".Path).joinPath("grimoire".Path)
-        )
-        .mapIt($it.path.Path.splitPath.tail)
-        .filterIt(it.endsWith ".toml").sorted
-      var
-        errorMsgs = newSeqOfCap[string](FileNames.len)
-        completes = newSeqOfCap[bool](FileNames.len)
+      var errorMsg = ""
 
-      for fileName in FileNames:
-        {.push warning[Uninit]: off.}
-        {.push warning[ProveInit]: off.}
-        discard "{AssetsDir}/grimoire/{fileName}".fmt.cstring.fetch
-          .then((r: Response) => r.text)
-          .then(
-            (s: cstring) => (
-              block:
-                let entriesResult = ($s).parseEntries
-                if entriesResult.isOk:
-                  globalGrimoireRef[].add entriesResult.unsafeValue
-                else:
-                  errorMsgs.add "[{fileName}] {entriesResult.error}".fmt
+      {.push warning[Uninit]: off.}
+      {.push warning[ProveInit]: off.}
+      discard "{AssetsDir}/grimoire/data.toml".fmt.cstring.fetch
+        .then((r: Response) => r.text)
+        .then(
+          (s: cstring) => (
+            block:
+              let entriesResult = ($s).parseEntries
+              if entriesResult.isOk:
+                globalGrimoireRef[].add entriesResult.unsafeValue
+              else:
+                errorMsg.assign entriesResult.error
 
-                completes.add true
-                if completes.len == FileNames.len:
-                  globalGrimoireRef[].isReady = true
-                  safeRedraw()
-            )
+              globalGrimoireRef[].isReady = true
+              safeRedraw()
           )
-          .catch((error: Error) => console.error(error))
-        {.pop.}
-        {.pop.}
+        )
+        .catch((error: Error) => console.error(error))
+      {.pop.}
+      {.pop.}
 
       var
         matchedEntryIndices = globalGrimoireRef[].matchedEntryIndices
@@ -356,7 +351,6 @@ when isMainModule:
 
       proc renderer(routerData: RouterData): VNode =
         ## Returns the root node.
-        let errorMsg = errorMsgs.join "\n"
         if errorMsg.len > 0:
           return buildHtml tdiv:
             errorMsg.initErrorNode

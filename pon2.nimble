@@ -27,7 +27,7 @@ requires "unittest2 ^= 0.2.5"
 
 # Tasks
 
-import std/[os, sequtils, strformat, strutils]
+import std/[algorithm, os, sequtils, strformat, strutils]
 
 task pages, "Generate Web Pages":
   const
@@ -80,3 +80,9 @@ task pages, "Generate Web Pages":
 
   # assets
   cpDir "assets", "pages/assets"
+  var contents = newSeq[string]()
+  for file in "assets/grimoire".listFiles.sorted:
+    contents.add file.readFile
+  "pages/assets/grimoire".rmDir
+  "pages/assets/grimoire".mkDir
+  "pages/assets/grimoire/data.toml".writeFile contents.join "\n"
