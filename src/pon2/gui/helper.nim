@@ -34,7 +34,9 @@ when defined(js) or defined(nimsuggest):
     GrimoireVNodeHelper* = object ## Helper for making VNode of grimoire.
       searchId*: kstring
       matcher*: GrimoireMatcher
+      matchSolvedOpt*: Opt[bool]
       matchedEntryIndices*: seq[int16]
+      solvedEntryIndices*: set[int16]
       pageIndex*: int
 
     VNodeHelper* = object ## Helper for making VNode.
@@ -61,13 +63,17 @@ when defined(js) or defined(nimsuggest):
       T: type GrimoireVNodeHelper,
       rootId: kstring,
       matcher: GrimoireMatcher,
+      matchSolvedOpt: Opt[bool],
       matchedEntryIndices: seq[int16],
+      solvedEntryIndices: set[int16],
       pageIndex: int,
   ): T =
     T(
       searchId: "pon2-grimoire-search-" & rootId,
       matcher: matcher,
+      matchSolvedOpt: matchSolvedOpt,
       matchedEntryIndices: matchedEntryIndices,
+      solvedEntryIndices: solvedEntryIndices,
       pageIndex: pageIndex,
     )
 
@@ -123,7 +129,9 @@ when defined(js) or defined(nimsuggest):
       grimoireRef: ref Grimoire,
       rootId: kstring,
       matcher: GrimoireMatcher,
+      matchSolvedOpt: Opt[bool],
       matchedEntryIndices: seq[int16],
+      solvedEntryIndices: set[int16],
       pageIndex: int,
   ): T =
     VNodeHelper(
@@ -132,6 +140,7 @@ when defined(js) or defined(nimsuggest):
       studioOpt: Opt[StudioVNodeHelper].err,
       marathonOpt: Opt[MarathonVNodeHelper].err,
       grimoireOpt: Opt[GrimoireVNodeHelper].ok GrimoireVNodeHelper.init(
-        rootId, matcher, matchedEntryIndices, pageIndex
+        rootId, matcher, matchSolvedOpt, matchedEntryIndices, solvedEntryIndices,
+        pageIndex,
       ),
     )

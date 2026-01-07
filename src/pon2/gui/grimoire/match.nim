@@ -24,6 +24,10 @@ when defined(js) or defined(nimsuggest):
 
   export vdom
 
+  func toSolvedId(helper: VNodeHelper): kstring =
+    ## Returns the ID of the solve status.
+    "pon2-grimoire-search-solved-" & helper.grimoireOpt.unsafeValue.searchId
+
   func toMoveCountId(helper: VNodeHelper): kstring =
     ## Returns the ID of the move count.
     "pon2-grimoire-search-movecount-" & helper.grimoireOpt.unsafeValue.searchId
@@ -55,6 +59,7 @@ when defined(js) or defined(nimsuggest):
   proc toGrimoireMatchVNode*(self: ref Grimoire, helper: VNodeHelper): VNode =
     ## Returns the grimoire match node.
     let
+      solvedId = helper.toSolvedId
       moveCountId = helper.toMoveCountId
       kindId = helper.toKindId
       clearColorId = helper.toClearColorId
@@ -64,6 +69,40 @@ when defined(js) or defined(nimsuggest):
       sourceDatalistId = helper.toSourceDatalistId
 
     buildHtml tdiv:
+      tdiv(class = "field is-grouped"):
+        label(`for` = solvedId):
+          bold:
+            text "クリア状況"
+        tdiv(class = "select"):
+          select(
+            id = solvedId,
+            disabled = not self[].isReady,
+            onchange =
+              () => (
+                block:
+                  let
+                    index = solvedId.getSelectedIndex
+                    solvedOpt =
+                      if index == 0:
+                        Opt[bool].err
+                      else:
+                        Opt[bool].ok (index - 1).bool
+                  solvedOpt.updateGrimoireHashWithSolved
+                  0.updateGrimoireHashWithPageIndex
+              ),
+          ):
+            option(selected = helper.grimoireOpt.unsafeValue.matchSolvedOpt.isErr):
+              text "全て"
+            option(
+              selected =
+                helper.grimoireOpt.unsafeValue.matchSolvedOpt == Opt[bool].ok false
+            ):
+              text "未クリア"
+            option(
+              selected =
+                helper.grimoireOpt.unsafeValue.matchSolvedOpt == Opt[bool].ok true
+            ):
+              text "クリア済"
       tdiv(class = "field is-grouped"):
         label(`for` = moveCountId):
           bold:

@@ -4,7 +4,7 @@
 {.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
-{.push experimental: "views".}
+{.experimental: "views".}
 
 # ------------------------------------------------
 # JS backend
@@ -20,6 +20,7 @@ when defined(js) or defined(nimsuggest):
 
   type GrimoireHashData* = object
     matcher*: GrimoireMatcher
+    matchSolvedOpt*: Opt[bool]
     pageIndex*: int
 
   const
@@ -29,6 +30,7 @@ when defined(js) or defined(nimsuggest):
     TitleKey = "title"
     CreatorKey = "creator"
     SourceKey = "source"
+    SolvedKey = "solved"
     PageKey = "page"
 
     ErrVal = "~"
@@ -42,6 +44,7 @@ when defined(js) or defined(nimsuggest):
       titleOpt = Opt[string].err
       creatorOpt = Opt[string].err
       sourceOpt = Opt[string].err
+      solvedOpt = Opt[bool].err
       pageIndex = 0
 
     for (key, val) in ($hashPart).substr(1).decodeQuery:
@@ -66,6 +69,9 @@ when defined(js) or defined(nimsuggest):
         creatorOpt.ok decodedVal
       of SourceKey:
         sourceOpt.ok decodedVal
+      of SolvedKey:
+        decodedVal.parseInt.isErrOr:
+          solvedOpt.ok value.bool
       of PageKey:
         decodedVal.parseInt.isErrOr:
           if value > 0:
@@ -77,6 +83,7 @@ when defined(js) or defined(nimsuggest):
       matcher: GrimoireMatcher.init(
         moveCountOpt, kindOptOpt, hasClearColorOpt, titleOpt, creatorOpt, sourceOpt
       ),
+      matchSolvedOpt: solvedOpt,
       pageIndex: pageIndex,
     )
 
@@ -133,6 +140,13 @@ when defined(js) or defined(nimsuggest):
     ## Updates the hash part with the source.
     SourceKey.updateHash if sourceOpt.isOk:
       $sourceOpt.unsafeValue.encodeUrl
+    else:
+      ""
+
+  proc updateGrimoireHashWithSolved*(solvedOpt: Opt[bool]) =
+    ## Updates the hash part with the solved status.
+    SolvedKey.updateHash if solvedOpt.isOk:
+      $solvedOpt.unsafeValue.ord
     else:
       ""
 

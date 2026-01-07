@@ -233,6 +233,13 @@ when isMainModule:
             safeRedraw()
             event.preventDefault
 
+      # global grimoire
+      let globalGrimoireRef = new Grimoire
+      globalGrimoireRef[] = Grimoire.init
+
+      # set key handler
+      document.onkeydown = (event: Event) => globalGrimoireRef.keyHandler event
+
       proc parseEntries(str: string): Pon2Result[seq[GrimoireEntry]] =
         ## Returns the entries converted from the toml string.
         # parse toml
@@ -317,11 +324,8 @@ when isMainModule:
 
         ok entries
 
-      let globalGrimoireRef = new Grimoire
-      globalGrimoireRef[] = Grimoire.init
-
+      # load nazo puyo data
       var errorMsg = ""
-
       {.push warning[Uninit]: off.}
       {.push warning[ProveInit]: off.}
       discard "{AssetsDir}/grimoire/data.toml".fmt.cstring.fetch
@@ -343,31 +347,76 @@ when isMainModule:
       {.pop.}
       {.pop.}
 
-      var
-        matchedEntryIndices = globalGrimoireRef[].matchedEntryIndices
-        matchedEntryIndicesSeq = matchedEntryIndices.toSeq
+      # load solve data
+      let solvedEntryIndicesResult = GrimoireLocalStorage.solvedEntryIndices
+      var solvedEntryIndices =
+        if solvedEntryIndicesResult.isOk:
+          solvedEntryIndicesResult.unsafeValue
+        else:
+          console.error solvedEntryIndicesResult.error.cstring
+          {}
 
-      document.onkeydown = (event: Event) => globalGrimoireRef.keyHandler event
+      var
+        matchedEntryIndices = set[int16]({})
+        matchedEntryIndicesSeq = newSeq[int16]()
 
       proc renderer(routerData: RouterData): VNode =
         ## Returns the root node.
+        # error node
         if errorMsg.len > 0:
           return buildHtml tdiv:
             errorMsg.initErrorNode
             initFooterNode()
 
+        # load hash data
         let hashData = routerData.hashPart.parseGrimoireHashData
         globalGrimoireRef[].match hashData.matcher
 
-        if globalGrimoireRef[].matchedEntryIndices != matchedEntryIndices:
-          matchedEntryIndices.assign globalGrimoireRef[].matchedEntryIndices
-          matchedEntryIndicesSeq.assign matchedEntryIndices.toSeq
+        # filter matched entry indices with `solved` query
+        let newEntryIndices =
+          if hashData.matchSolvedOpt.isErr:
+            globalGrimoireRef[].matchedEntryIndices
+          elif hashData.matchSolvedOpt.unsafeValue:
+            globalGrimoireRef[].matchedEntryIndices * solvedEntryIndices
+          else:
+            globalGrimoireRef[].matchedEntryIndices - solvedEntryIndices
 
-        let helper = VNodeHelper.init(
-          globalGrimoireRef, "pon2-main", hashData.matcher, matchedEntryIndicesSeq,
-          hashData.pageIndex,
+        # update global matched entry indices
+        if newEntryIndices != matchedEntryIndices:
+          matchedEntryIndices.assign newEntryIndices
+          matchedEntryIndicesSeq.assign newEntryIndices.toSeq
+
+        # make helper
+        var helper = VNodeHelper.init(
+          globalGrimoireRef, "pon2-main", hashData.matcher, hashData.matchSolvedOpt,
+          matchedEntryIndicesSeq, solvedEntryIndices, hashData.pageIndex,
         )
 
+        # update solve data
+        let selectedEntryIndexResult = GrimoireLocalStorage.selectedEntryIndex
+        if selectedEntryIndexResult.isOk:
+          let selectedEntryIndex = selectedEntryIndexResult.unsafeValue
+
+          if helper.simulator.markResult == Correct and
+              globalGrimoireRef[].simulator.mode in PlayModes and
+              selectedEntryIndex notin solvedEntryIndices:
+            solvedEntryIndices.incl selectedEntryIndex
+            GrimoireLocalStorage.solvedEntryIndices = solvedEntryIndices
+            helper.grimoireOpt.unsafeValue.solvedEntryIndices.assign solvedEntryIndices
+
+            # update matched indices if needed
+            if selectedEntryIndex in matchedEntryIndices and hashData.matchSolvedOpt.isOk:
+              if hashData.matchSolvedOpt.unsafeValue:
+                matchedEntryIndices.incl selectedEntryIndex
+              else:
+                matchedEntryIndices.excl selectedEntryIndex
+
+              matchedEntryIndicesSeq.assign newEntryIndices.toSeq
+              helper.grimoireOpt.unsafeValue.matchedEntryIndices.assign matchedEntryIndicesSeq
+        else:
+          console.error selectedEntryIndexResult.error.cstring
+
+        # make VNode
         buildHtml tdiv:
           section(
             class = (if helper.mobile: "section pt-3 pl-3" else: "section").kstring

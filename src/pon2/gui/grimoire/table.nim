@@ -73,10 +73,15 @@ when defined(js) or defined(nimsuggest):
           span(class = "icon"):
             italic(class = "fa-solid fa-forward-fast")
 
-  func initPlayHandler(self: ref Grimoire, entry: GrimoireEntry): () -> void =
+  func initPlayHandler(
+      self: ref Grimoire, entry: GrimoireEntry, entryIndex: int16
+  ): () -> void =
     ## Returns the click handler of the play button.
-    () =>
-      self[].simulator.assign Simulator.init entry.query.parseNazoPuyo(Pon2).unsafeValue
+    () => (
+      block:
+        self[].simulator.assign Simulator.init entry.query.parseNazoPuyo(Pon2).unsafeValue
+        GrimoireLocalStorage.selectedEntryIndex = entryIndex
+    )
 
   proc toGrimoireTableVNode(
       self: ref Grimoire, helper: VNodeHelper, clampedPageIndex: int
@@ -93,8 +98,10 @@ when defined(js) or defined(nimsuggest):
       table(class = "table is-striped is-hoverable has-text-centered"):
         thead:
           tr:
-            th(class = "has-text-centered"):
+            th:
               discard
+            th(class = "has-text-centered"):
+              text "済"
             th(class = "has-text-centered"):
               text "No."
             th(class = "has-text-centered"):
@@ -110,14 +117,21 @@ when defined(js) or defined(nimsuggest):
         tbody:
           for index in beginIndex ..< endIndex:
             let
-              entry = self[][helper.grimoireOpt.unsafeValue.matchedEntryIndices[index]]
+              entryIndex = helper.grimoireOpt.unsafeValue.matchedEntryIndices[index]
+              entry = self[][entryIndex]
               goalDescs = ($entry.goal).split '&'
 
             tr:
               td:
-                button(class = "button", onclick = self.initPlayHandler entry):
+                button(
+                  class = "button", onclick = self.initPlayHandler(entry, entryIndex)
+                ):
                   span(class = "icon"):
                     italic(class = "fa-solid fa-gamepad")
+              td:
+                if entryIndex in helper.grimoireOpt.unsafeValue.solvedEntryIndices:
+                  span(class = "icon"):
+                    italic(class = "fa-solid fa-circle-check")
               td:
                 text ($(index + 1)).kstring
               td:

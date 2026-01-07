@@ -3,6 +3,7 @@
 ## Submodule Documentations:
 ## - [deref](./gui/deref.html)
 ## - [hash](./gui/hash.html)
+## - [localstorage](./gui/localstorage.html)
 ## - [utils](./gui/utils.html)
 ##
 
@@ -11,6 +12,6 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./gui/[deref, hash, utils]
+import ./gui/[deref, hash, localstorage, utils]
 
-export deref, hash, utils
+export deref, hash, localstorage, utils
