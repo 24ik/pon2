@@ -13,7 +13,7 @@
 when defined(js) or defined(nimsuggest):
   import std/[jsffi, strformat]
   import karax/[karax, karaxdsl, vdom]
-  import ./[match, table]
+  import ./[exchange, match, table]
   import ../[helper, simulator]
   import ../../[app]
   import ../../private/[gui]
@@ -31,3 +31,5 @@ when defined(js) or defined(nimsuggest):
             self.toGrimoireMatchResultVNode helper
       tdiv(class = "block"):
         self.toSimulatorVNode helper
+      tdiv(class = "block"):
+        self.toGrimoireExchangeVNode helper

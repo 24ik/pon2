@@ -33,6 +33,8 @@ when defined(js) or defined(nimsuggest):
 
     GrimoireVNodeHelper* = object ## Helper for making VNode of grimoire.
       searchId*: kstring
+      exportId*: kstring
+      importId*: kstring
       matcher*: GrimoireMatcher
       matchSolvedOpt*: Opt[bool]
       matchedEntryIndices*: seq[int16]
@@ -70,6 +72,8 @@ when defined(js) or defined(nimsuggest):
   ): T =
     T(
       searchId: "pon2-grimoire-search-" & rootId,
+      exportId: "pon2-grimoire-export-" & rootId,
+      importId: "pon2-grimoire-import-" & rootId,
       matcher: matcher,
       matchSolvedOpt: matchSolvedOpt,
       matchedEntryIndices: matchedEntryIndices,

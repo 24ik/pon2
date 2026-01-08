@@ -11,9 +11,9 @@
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
-  import std/[jsconsole, json, jsonutils, sugar]
+  import std/[asyncjs, jsconsole, json, jsonutils, sequtils, strformat, sugar]
   import ../../[utils]
-  import ../../private/[localstorage, strutils]
+  import ../../private/[bitops, localstorage, math, staticfor, strutils, zlib]
 
   export utils
 
@@ -32,6 +32,16 @@ when defined(js) or defined(nimsuggest):
   const
     SolvedKey = "solved"
     SelectedKey = "selected"
+    ImportedKey = "imported"
+
+  proc jsonToSet(str: string): Pon2Result[set[int16]] =
+    ## Returns the set converted from the json string.
+    try:
+      {.push warning[Uninit]: off.}
+      return ok str.parseJson.jsonTo set[int16]
+      {.pop.}
+    except:
+      return err "cannot convert to set\n{getCurrentExceptionMsg()}".fmt
 
   proc solvedEntryIndices*(
       localStorage: GrimoireLocalStorageType
@@ -41,12 +51,7 @@ when defined(js) or defined(nimsuggest):
     if valResult.isErr:
       return ok set[int16]({})
 
-    try:
-      {.push warning[Uninit]: off.}
-      return ok ($valResult.unsafeValue).parseJson.jsonTo set[int16]
-      {.pop.}
-    except Exception as ex:
-      return err "cannot get solved entry indices\n" & ex.msg
+    ($valResult.unsafeValue).jsonToSet.context "cannot get solved entry indices"
 
   proc `solvedEntryIndices=`*(
       localStorage: GrimoireLocalStorageType, entryIndices: set[int16]
@@ -57,8 +62,8 @@ when defined(js) or defined(nimsuggest):
       str.toUgly entryIndices.toJson
 
       LocalStorage[GrimoirePrefix & SolvedKey] = str.cstring
-    except Exception as ex:
-      console.error ex
+    except:
+      console.error getCurrentExceptionMsg().cstring
 
   proc selectedEntryIndex*(localStorage: GrimoireLocalStorageType): Pon2Result[int16] =
     ## Returns the selected entry index.
@@ -74,3 +79,72 @@ when defined(js) or defined(nimsuggest):
   ) =
     ## Sets the selected entry index.
     LocalStorage[GrimoirePrefix & SelectedKey] = ($entryIndex).cstring
+
+  # ------------------------------------------------
+  # Grimoire - Export
+  # ------------------------------------------------
+
+  func toBytes(indices: set[int16]): seq[byte] =
+    ## Returns the bytes converted from the indices.
+    if indices.card == 0:
+      return @[]
+
+    let indicesSeq = indices.toSeq
+    var bytes = 0.byte.repeat (indicesSeq[^1] div 8) + 1
+    for index in indices:
+      let (arrayIndex, bitIndex) = index.divmod 8
+      bytes[arrayIndex].setBit bitIndex
+
+    bytes
+
+  proc exportedStr*(
+      localStorage: GrimoireLocalStorageType
+  ): Future[Pon2Result[string]] {.async.} =
+    ## Returns a string to export grimoire local storage.
+    let indicesResult = localStorage.solvedEntryIndices
+    if indicesResult.isOk:
+      let compressedResult = await indicesResult.unsafeValue.toBytes.zlibCompressed
+      if compressedResult.isOk:
+        return Pon2Result[string].ok compressedResult.unsafeValue
+      else:
+        return Pon2Result[string].err "cannot export\n{compressedResult.error}".fmt
+    else:
+      return Pon2Result[string].err "cannot export\n{indicesResult.error}".fmt
+
+  # ------------------------------------------------
+  # Grimoire - Import
+  # ------------------------------------------------
+
+  func toIndices(bytes: seq[byte]): set[int16] =
+    ## Returns the indices converted from the bytes.
+    var indices = set[int16]({})
+    for index, val in bytes:
+      if val == 0:
+        continue
+
+      let baseVal = index * 8
+      staticFor(bitIndex, 0 ..< 8):
+        if val.getBit bitIndex:
+          indices.incl (baseVal + bitIndex).int16
+
+    indices
+
+  proc importStr*(
+      localStorage: GrimoireLocalStorageType, str: string
+  ): Future[Pon2Result[void]] {.async.} =
+    ## Imports a string to update the grimoire local storage.
+    let bytesResult = await str.zlibDecompressed
+    if bytesResult.isOk:
+      localStorage.solvedEntryIndices = bytesResult.unsafeValue.toIndices
+      LocalStorage[GrimoirePrefix & ImportedKey] = "1"
+      return Pon2Result[void].ok
+    else:
+      return Pon2Result[void].err "cannot import\n{bytesResult.error}".fmt
+
+  proc imported*(localStorage: GrimoireLocalStorageType): bool =
+    ## Returns `true` if the local storage is updated by `importStr`.
+    (GrimoirePrefix & ImportedKey) in LocalStorage
+
+  proc `imported=`*(localStorage: GrimoireLocalStorageType, imported: bool) =
+    ## Sets the import status.
+    LocalStorage.del GrimoirePrefix & ImportedKey

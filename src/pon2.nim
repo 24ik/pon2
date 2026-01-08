@@ -86,21 +86,24 @@ when isMainModule:
       proc initFooterNode(): VNode =
         ## Returns the footer node.
         buildHtml footer(class = "footer"):
-          tdiv(class = "content has-text-centered"):
-            p:
-              text "Pon!通 Version {Pon2Ver}".fmt
-            tdiv(class = "field is-grouped is-grouped-centered"):
-              tdiv(class = "control"):
-                a(
-                  class = "button",
-                  href = "https://github.com/24ik/pon2",
-                  target = "_blank",
-                  rel = "noopener noreferrer",
-                ):
-                  span(class = "icon"):
-                    italic(class = "fab fa-github")
-                  span:
-                    text "GitHub"
+          tdiv(class = "columns is-mobile is-centered is-vcentered"):
+            tdiv(class = "column is-narrow"):
+              tdiv(class = "content has-text-centered"):
+                p:
+                  text "Pon!通 Ver. {Pon2Ver}".fmt
+            tdiv(class = "column is-narrow"):
+              tdiv(class = "field is-grouped is-grouped-centered"):
+                tdiv(class = "control"):
+                  a(
+                    class = "button",
+                    href = "https://github.com/24ik/pon2",
+                    target = "_blank",
+                    rel = "noopener noreferrer",
+                  ):
+                    span(class = "icon"):
+                      italic(class = "fab fa-github")
+                    span:
+                      text "GitHub"
 
       proc initErrorNode(msg: string): VNode =
         ## Returns the error node.
@@ -356,6 +359,7 @@ when isMainModule:
           console.error solvedEntryIndicesResult.error.cstring
           {}
 
+      GrimoireLocalStorage.selectedEntryIndex = -1
       var
         matchedEntryIndices = set[int16]({})
         matchedEntryIndicesSeq = newSeq[int16]()
@@ -367,6 +371,13 @@ when isMainModule:
           return buildHtml tdiv:
             errorMsg.initErrorNode
             initFooterNode()
+
+        # check imported
+        if GrimoireLocalStorage.imported:
+          GrimoireLocalStorage.solvedEntryIndices.isErrOr:
+            solvedEntryIndices.assign value
+
+          GrimoireLocalStorage.imported = false
 
         # load hash data
         let hashData = routerData.hashPart.parseGrimoireHashData
@@ -397,7 +408,7 @@ when isMainModule:
         if selectedEntryIndexResult.isOk:
           let selectedEntryIndex = selectedEntryIndexResult.unsafeValue
 
-          if helper.simulator.markResult == Correct and
+          if selectedEntryIndex >= 0 and helper.simulator.markResult == Correct and
               globalGrimoireRef[].simulator.mode in PlayModes and
               selectedEntryIndex notin solvedEntryIndices:
             solvedEntryIndices.incl selectedEntryIndex

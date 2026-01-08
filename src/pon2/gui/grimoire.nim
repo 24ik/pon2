@@ -11,6 +11,6 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./grimoire/[grimoire, match, table]
+import ./grimoire/[exchange, grimoire, match, table]
 
-export grimoire, match, table
+export exchange, grimoire, match, table
