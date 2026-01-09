@@ -171,3 +171,5 @@ when defined(js) or defined(nimsuggest):
         self.toPaginationVNode(helper, pageCount, clampedPageIndex)
       tdiv(class = "block"):
         self.toGrimoireTableVNode(helper, clampedPageIndex)
+      tdiv(class = "block"):
+        self.toPaginationVNode(helper, pageCount, clampedPageIndex)
