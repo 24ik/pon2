@@ -81,7 +81,7 @@ task pages, "Generate Web Pages":
   # assets
   cpDir "assets", "pages/assets"
   var contents = newSeq[string]()
-  for file in "assets/grimoire".listFiles.sorted:
+  for file in "assets/grimoire".listFiles.filterIt(it.endsWith ".toml").sorted:
     contents.add file.readFile
   "pages/assets/grimoire".rmDir
   "pages/assets/grimoire".mkDir
