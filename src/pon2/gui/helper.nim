@@ -52,7 +52,7 @@ when defined(js) or defined(nimsuggest):
     T(
       goalId: "pon2-simulator-goal-" & rootId,
       cameraReadyId: "pon2-simulator-cameraready-" & rootId,
-      markResult: simulator.mark,
+      markResult: if simulator.mode in EditModes: Incorrect else: simulator.mark,
     )
 
   func init(T: type StudioVNodeHelper, rootId: kstring, isReplaySimulator: bool): T =
