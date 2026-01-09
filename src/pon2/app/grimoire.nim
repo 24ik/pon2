@@ -15,6 +15,7 @@ import ../private/app/[grimoire]
 type
   GrimoireEntry* = object ## Entry of the Nazo Puyo Grimoire.
     query*: string
+    rule*: Rule
     moveCount*: int
     goal*: Goal
     title*: string
@@ -29,6 +30,7 @@ type
     matchedEntryIndices: set[int16]
     allIndices: set[int16]
 
+    ruleToIndices: array[Rule, set[int16]]
     moveCountToIndices: seq[set[int16]]
     kindToIndices: array[GoalKind, set[int16]]
     noKindIndices: set[int16]
@@ -44,6 +46,7 @@ type
     isReady: bool
 
   GrimoireMatcher* = object ## Matcher of the Nazo Puyo Grimoire.
+    ruleOpt*: Opt[Rule]
     moveCountOpt*: Opt[int]
     kindOptOpt*: Opt[Opt[GoalKind]]
     hasClearColorOpt*: Opt[bool]
@@ -65,18 +68,22 @@ func init*(
 ): T =
   let
     nazoPuyoResult = query.parseNazoPuyo Pon2
+    rule: Rule
     moveCount: int
     goal: Goal
   if nazoPuyoResult.isOk:
     let nazoPuyo = nazoPuyoResult.unsafeValue
+    rule = nazoPuyo.puyoPuyo.field.rule
     moveCount = nazoPuyo.puyoPuyo.steps.len
     goal = nazoPuyo.goal
   else:
     moveCount = 0
+    rule = Rule.low
     goal = Goal.init
 
   T(
     query: query,
+    rule: rule,
     moveCount: moveCount,
     goal: goal,
     title: title,
@@ -98,6 +105,9 @@ func add(self: var Grimoire, entry: GrimoireEntry) =
 
   let entryIndex = self.entries.len.int16
   self.entries.add entry
+
+  # rule
+  self.ruleToIndices[nazoPuyo.puyoPuyo.field.rule].incl entryIndex
 
   # moveCount
   let moveCount = nazoPuyo.puyoPuyo.steps.len
@@ -125,6 +135,7 @@ func init*(T: type Grimoire, entries: openArray[GrimoireEntry] = []): T =
     entries: @[],
     matchedEntryIndices: set[int16]({}),
     allIndices: set[int16]({}),
+    ruleToIndices: Rule.initArrayWith set[int16]({}),
     moveCountToIndices: @[],
     kindToIndices: GoalKind.initArrayWith set[int16]({}),
     noKindIndices: set[int16]({}),
@@ -145,6 +156,7 @@ func init*(T: type Grimoire, entries: openArray[GrimoireEntry] = []): T =
 
 func init*(
     T: type GrimoireMatcher,
+    ruleOpt = Opt[Rule].err,
     moveCountOpt = Opt[int].err,
     kindOptOpt = Opt[Opt[GoalKind]].err,
     hasClearColorOpt = Opt[bool].err,
@@ -153,6 +165,7 @@ func init*(
     sourceOpt = Opt[string].err,
 ): T =
   T(
+    ruleOpt: ruleOpt,
     moveCountOpt: moveCountOpt,
     kindOptOpt: kindOptOpt,
     hasClearColorOpt: hasClearColorOpt,
@@ -253,6 +266,11 @@ func match*(self: var Grimoire, matcher: GrimoireMatcher) =
     return
 
   self.matchedEntryIndices.assign self.allIndices
+
+  # rule
+  if matcher.ruleOpt.isOk:
+    let rule = matcher.ruleOpt.unsafeValue
+    self.matchedEntryIndices *= self.ruleToIndices[rule]
 
   # move count
   if matcher.moveCountOpt.isOk:

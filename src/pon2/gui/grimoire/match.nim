@@ -28,6 +28,10 @@ when defined(js) or defined(nimsuggest):
     ## Returns the ID of the solve status.
     "pon2-grimoire-search-solved-" & helper.grimoireOpt.unsafeValue.searchId
 
+  func toRuleId(helper: VNodeHelper): kstring =
+    ## Returns the ID of the rule.
+    "pon2-grimoire-search-rule-" & helper.grimoireOpt.unsafeValue.searchId
+
   func toMoveCountId(helper: VNodeHelper): kstring =
     ## Returns the ID of the move count.
     "pon2-grimoire-search-movecount-" & helper.grimoireOpt.unsafeValue.searchId
@@ -60,6 +64,7 @@ when defined(js) or defined(nimsuggest):
     ## Returns the grimoire match node.
     let
       solvedId = helper.toSolvedId
+      ruleId = helper.toRuleId
       moveCountId = helper.toMoveCountId
       kindId = helper.toKindId
       clearColorId = helper.toClearColorId
@@ -103,6 +108,34 @@ when defined(js) or defined(nimsuggest):
                 helper.grimoireOpt.unsafeValue.matchSolvedOpt == Opt[bool].ok true
             ):
               text "クリア済"
+      tdiv(class = "field is-grouped"):
+        label(`for` = moveCountId):
+          bold:
+            text "ルール"
+        tdiv(class = "select"):
+          select(
+            id = ruleId,
+            disabled = not self[].isReady,
+            onchange =
+              () => (
+                block:
+                  let
+                    index = ruleId.getSelectedIndex
+                    ruleOpt =
+                      if index == 0: Opt[Rule].err
+                      else: Opt[Rule].ok (index - 1).Rule
+                  ruleOpt.updateGrimoireHashWithRule
+                  0.updateGrimoireHashWithPageIndex
+              ),
+          ):
+            option(selected = helper.grimoireOpt.unsafeValue.matcher.ruleOpt.isErr):
+              text "全て"
+            for rule in Rule:
+              option(
+                selected =
+                  helper.grimoireOpt.unsafeValue.matcher.ruleOpt == Opt[Rule].ok rule
+              ):
+                text ($rule).kstring
       tdiv(class = "field is-grouped"):
         label(`for` = moveCountId):
           bold:

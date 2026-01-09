@@ -24,6 +24,7 @@ block: # init, add
   check entry1 ==
     GrimoireEntry(
       query: query,
+      rule: Tsu,
       moveCount: 1,
       goal: Goal.init(Chain, 2, Exact),
       title: title,
@@ -40,12 +41,14 @@ block: # init, add
   check grimoire1 == grimoire2
 
   let
+    ruleOpt = Opt[Rule].err
     moveCountOpt = Opt[int].ok 3
     kindOptOpt = Opt[Opt[GoalKind]].err
     hasClearColorOpt = Opt[bool].ok true
     sourceOpt = Opt[string].err
 
   check GrimoireMatcher.init(
+    ruleOpt,
     moveCountOpt,
     kindOptOpt,
     hasClearColorOpt,
@@ -54,6 +57,7 @@ block: # init, add
     sourceOpt,
   ) ==
     GrimoireMatcher(
+      ruleOpt: ruleOpt,
       moveCountOpt: moveCountOpt,
       kindOptOpt: kindOptOpt,
       hasClearColorOpt: hasClearColorOpt,
@@ -127,6 +131,9 @@ block:
       "早大なぞぷよマスターズ2020", "早大なぞぷよマスターズ2022",
       "早大なぞぷよマスターズ2024", "早大なぞぷよマスターズ2025",
     ]
+
+  grimoire.match GrimoireMatcher.init(ruleOpt = Opt[Rule].ok Water)
+  check grimoire.matchedEntryIndices == {3'i16}
 
   grimoire.match GrimoireMatcher.init(moveCountOpt = Opt[int].ok 1)
   check grimoire.matchedEntryIndices == {0'i16}

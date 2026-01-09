@@ -107,6 +107,8 @@ when defined(js) or defined(nimsuggest):
             th(class = "has-text-centered"):
               text "タイトル"
             th(class = "has-text-centered"):
+              text "ルール"
+            th(class = "has-text-centered"):
               text "手数"
             th(class = "has-text-centered"):
               text "クリア条件"
@@ -136,6 +138,8 @@ when defined(js) or defined(nimsuggest):
                 text ($(index + 1)).kstring
               td:
                 text entry.title.kstring
+              td:
+                text ($entry.rule).kstring
               td:
                 text ($entry.moveCount).kstring
               td:

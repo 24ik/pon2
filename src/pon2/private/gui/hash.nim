@@ -24,6 +24,7 @@ when defined(js) or defined(nimsuggest):
     pageIndex*: int
 
   const
+    RuleKey = "rule"
     MoveCountKey = "movecount"
     KindKey = "kind"
     ClearColorKey = "clearcolor"
@@ -38,6 +39,7 @@ when defined(js) or defined(nimsuggest):
   func parseGrimoireHashData*(hashPart: cstring): GrimoireHashData =
     ## Returns the grimoire matcher and the page index converted from the hash part.
     var
+      ruleOpt = Opt[Rule].err
       moveCountOpt = Opt[int].err
       kindOptOpt = Opt[Opt[GoalKind]].err
       hasClearColorOpt = Opt[bool].err
@@ -50,6 +52,9 @@ when defined(js) or defined(nimsuggest):
     for (key, val) in ($hashPart).substr(1).decodeQuery:
       let decodedVal = val.decodeUrl
       case key
+      of RuleKey:
+        parseOrdinal[Rule](decodedVal).isErrOr:
+          ruleOpt.ok value
       of MoveCountKey:
         decodedVal.parseInt.isErrOr:
           if value > 0:
@@ -81,7 +86,8 @@ when defined(js) or defined(nimsuggest):
 
     GrimoireHashData(
       matcher: GrimoireMatcher.init(
-        moveCountOpt, kindOptOpt, hasClearColorOpt, titleOpt, creatorOpt, sourceOpt
+        ruleOpt, moveCountOpt, kindOptOpt, hasClearColorOpt, titleOpt, creatorOpt,
+        sourceOpt,
       ),
       matchSolvedOpt: solvedOpt,
       pageIndex: pageIndex,
@@ -94,6 +100,13 @@ when defined(js) or defined(nimsuggest):
 
     window.location.hash.assign (if newHashBody.len == 0: ""
     else: '#' & newHashBody).cstring
+
+  proc updateGrimoireHashWithRule*(ruleOpt: Opt[Rule]) =
+    ## Updates the hash part with the rule.
+    RuleKey.updateHash if ruleOpt.isOk:
+      $ruleOpt.unsafeValue.ord
+    else:
+      ""
 
   proc updateGrimoireHashWithMoveCount*(moveCountOpt: Opt[int]) =
     ## Updates the hash part with the move count.
