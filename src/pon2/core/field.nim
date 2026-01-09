@@ -901,7 +901,7 @@ func parseFieldIshikawa(query: string): Pon2Result[Field] {.inline, noinit.} =
 
   if query.startsWith TildeIshikawaPrefix:
     let queryWithoutTilde = query[1 ..^ 1]
-    if queryWithoutTilde.len > Height * Width - 1:
+    if queryWithoutTilde.len > Height * Width:
       return err errorMsg
 
     let
