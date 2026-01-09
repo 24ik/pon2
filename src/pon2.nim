@@ -66,15 +66,19 @@ when isMainModule:
     import std/[strformat]
 
     when defined(pon2.build.worker):
-      import ./pon2/private/[app, webworkers]
+      import ./pon2/private/[webworkers]
+      when defined(pon2.build.grimoire):
+        import ./pon2/private/[gui]
+      else:
+        import ./pon2/private/[app]
     else:
       import karax/[karax, karaxdsl, kbase, vdom]
       import ./pon2/private/[assign, dom, gui, strutils]
       when defined(pon2.build.marathon):
         import std/[asyncjs, jsfetch, random, sugar]
       elif defined(pon2.build.grimoire):
-        import std/[asyncjs, jsconsole, jsfetch, sequtils, sugar]
-        import parsetoml
+        import std/[asyncjs, jsconsole, jsfetch, os, sequtils, staticos, sugar]
+        import ./pon2/private/[webworkers]
       else:
         import std/[sugar]
 
@@ -160,23 +164,37 @@ when isMainModule:
     # ------------------------------------------------
 
     when defined(pon2.build.worker):
-      # ------------------------------------------------
-      # JS - Main - Worker
-      # ------------------------------------------------
+      when defined(pon2.build.grimoire):
+        # ------------------------------------------------
+        # JS - Main - Worker - Grimoire
+        # ------------------------------------------------
 
-      proc task(args: seq[string]): Pon2Result[seq[string]] =
-        let errorMsg = "Invalid run args: {args}".fmt
+        proc task(args: seq[string]): Pon2Result[seq[string]] =
+          let errorMsg = "Invalid run args: {args}".fmt
 
-        if args.len == 0:
-          return err errorMsg
+          if args.len == 0:
+            return err errorMsg
 
-        let (goal, steps) = ?args.parseSolveInfo.context errorMsg
+          args[0].toGrimoireEntryStrs
 
-        let node = ?args.parseSolveNode.context errorMsg
-        var solutions = newSeq[Solution]()
-        node.solveSingleThread solutions, steps.len, true, goal, steps
+      else:
+        # ------------------------------------------------
+        # JS - Main - Worker - Studio
+        # ------------------------------------------------
 
-        ok solutions.toStrs
+        proc task(args: seq[string]): Pon2Result[seq[string]] =
+          let errorMsg = "Invalid run args: {args}".fmt
+
+          if args.len == 0:
+            return err errorMsg
+
+          let (goal, steps) = ?args.parseSolveInfo.context errorMsg
+
+          let node = ?args.parseSolveNode.context errorMsg
+          var solutions = newSeq[Solution]()
+          node.solveSingleThread solutions, steps.len, true, goal, steps
+
+          ok solutions.toStrs
 
       task.register
     elif defined(pon2.build.marathon):
@@ -268,112 +286,41 @@ when isMainModule:
       # set key handler
       document.onkeydown = (event: Event) => globalGrimoireRef.keyHandler event
 
-      proc parseEntries(str: string): Pon2Result[seq[GrimoireEntry]] =
-        ## Returns the entries converted from the toml string.
-        # parse toml
-        let table: TomlValueRef
-        try:
-          table = str.parseString
-        except TomlError as ex:
-          table = nil
-          return err ex.msg
-
-        # entries
-        let entriesVal = table.getOrDefault "entries"
-        if entriesVal.isNil or entriesVal.kind != Array:
-          return err "`entries` key with an array value is required"
-        let entryElems = entriesVal.getElems
-
-        # parse entries
-        var entries = newSeqOfCap[GrimoireEntry](entryElems.len)
-        for entryIndex, entryElem in entryElems:
-          # query
-          let queryVal = entryElem.getOrDefault "query"
-          if queryVal.isNil or queryVal.kind != String:
-            return
-              err "[Entry {entryIndex}] `query` key with a string value is required".fmt
-          let query = queryVal.getStr
-
-          # title
-          let
-            titleVal = entryElem.getOrDefault "title"
-            title: string
-          if titleVal.isNil:
-            title = ""
-          elif titleVal.kind == String:
-            title = titleVal.getStr
-          else:
-            title = ""
-            return err "[Entry {entryIndex}] `title` value should be string".fmt
-
-          # creators
-          let
-            creatorsVal = entryElem.getOrDefault "creators"
-            creators: seq[string]
-          if creatorsVal.isNil:
-            creators = @[]
-          elif creatorsVal.kind == String:
-            creators = @[creatorsVal.getStr]
-          elif creatorsVal.kind == Array:
-            let creatorsElems = creatorsVal.getElems
-            if creatorsElems.anyIt it.kind != String:
-              return
-                err "[Entry {entryIndex}] all `creators` values should be string".fmt
-            creators = creatorsElems.mapIt it.getStr
-          else:
-            return
-              err "[Entry {entryIndex}] `creators` value should be string or array".fmt
-
-          # source
-          let
-            sourceVal = entryElem.getOrDefault "source"
-            source: string
-          if sourceVal.isNil:
-            source = ""
-          elif sourceVal.kind == String:
-            source = sourceVal.getStr
-          else:
-            source = ""
-            return err "[Entry {entryIndex}] `source` value should be string".fmt
-
-          # source detail
-          let
-            sourceDetailVal = entryElem.getOrDefault "sourceDetail"
-            sourceDetail: string
-          if sourceDetailVal.isNil:
-            sourceDetail = ""
-          elif sourceDetailVal.kind == String:
-            sourceDetail = sourceDetailVal.getStr
-          else:
-            sourceDetail = ""
-            return err "[Entry {entryIndex}] `sourceDetail` value should be string".fmt
-
-          entries.add GrimoireEntry.init(query, title, creators, source, sourceDetail)
-
-        ok entries
+      const FileNames = "{projectRootPath()}/assets/grimoire".fmt.staticWalkDir.mapIt(
+        it.path.splitPath.tail
+      ).filterIt it.endsWith ".toml"
+      var
+        errorMsgs = newSeqOfCap[string](FileNames.len)
+        completes = newSeqOfCap[bool](FileNames.len)
 
       # load nazo puyo data
-      var errorMsg = ""
-      {.push warning[Uninit]: off.}
-      {.push warning[ProveInit]: off.}
-      discard "{AssetsDir}/grimoire/data.toml".fmt.cstring.fetch
-        .then((r: Response) => r.text)
-        .then(
-          (s: cstring) => (
-            block:
-              let entriesResult = ($s).parseEntries
-              if entriesResult.isOk:
-                globalGrimoireRef[].add entriesResult.unsafeValue
-              else:
-                errorMsg.assign entriesResult.error
+      for fileName in FileNames:
+        let errorMsg = "error on file {fileName}".fmt
 
-              globalGrimoireRef[].isReady = true
-              safeRedraw()
+        {.push warning[Uninit]: off.}
+        {.push warning[ProveInit]: off.}
+        discard "{AssetsDir}/grimoire/{fileName}".fmt.cstring.fetch
+          .then((r: Response) => r.text)
+          .then((s: cstring) => webWorkerPool.run $s)
+          .then(
+            (strsResult: Pon2Result[seq[string]]) => (
+              block:
+                if strsResult.isOk:
+                  let entriesResult = strsResult.unsafeValue.parseGrimoireEntries
+                  if entriesResult.isOk:
+                    globalGrimoireRef[].add entriesResult.unsafeValue
+                    completes.add true
+                    if completes.len == FileNames.len:
+                      globalGrimoireRef[].isReady = true
+                      safeRedraw()
+                  else:
+                    errorMsgs.add errorMsg & '\n' & entriesResult.error
+                else:
+                  errorMsgs.add errorMsg & '\n' & strsResult.error
+            )
           )
-        )
-        .catch((error: Error) => console.error(error))
-      {.pop.}
-      {.pop.}
+          .catch((error: Error) => errorMsgs.add errorMsg & $error.message)
+        {.pop.}
 
       # load solve data
       let solvedEntryIndicesResult = GrimoireLocalStorage.solvedEntryIndices
@@ -392,6 +339,7 @@ when isMainModule:
       proc renderer(routerData: RouterData): VNode =
         ## Returns the root node.
         # error node
+        let errorMsg = errorMsgs.join "\n"
         if errorMsg.len > 0:
           return buildHtml tdiv:
             errorMsg.initErrorNode

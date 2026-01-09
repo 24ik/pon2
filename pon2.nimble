@@ -73,6 +73,7 @@ task pages, "Generate Web Pages":
 
   # grimoire
   "src/pon2.nim".compile "pages/grimoire/index.min.js", "-d:pon2.build.grimoire"
+  "src/pon2.nim".compile "pages/grimoire/worker.min.js", "-d:pon2.build.grimoire", "-d:pon2.build.worker"
 
   # documentation
   exec "nim doc --project --index:on --git.url:https://github.com/24ik/pon2 --git.commit:{Pon2Commit} --git.devel:{Pon2Commit} --outdir:pages/docs/api/native src/pon2.nim".fmt
@@ -80,9 +81,3 @@ task pages, "Generate Web Pages":
 
   # assets
   cpDir "assets", "pages/assets"
-  var contents = newSeq[string]()
-  for file in "assets/grimoire".listFiles.filterIt(it.endsWith ".toml").sorted:
-    contents.add file.readFile
-  "pages/assets/grimoire".rmDir
-  "pages/assets/grimoire".mkDir
-  "pages/assets/grimoire/data.toml".writeFile contents.join "\n"
