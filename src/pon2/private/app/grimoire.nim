@@ -7,26 +7,28 @@
 {.experimental: "views".}
 
 import std/[unicode]
+import ../[assign]
 
 func normalized*(str: string): string =
   ## Returns the normalized string.
   var normalized = str.len.newStringOfCap
   for rune in str.toRunes:
-    let addStr = block:
-      let val = rune.int32
+    var val = rune.int32
 
-      case val
-      of 65 .. 90: # upper -> lower
-        $(val + 32).Rune
-      of 0x3000: # zenkaku space -> hankaku space
-        $(0x0020.Rune)
-      of 0xff01 .. 0xff5e: # zenkaku ascii -> hankaku ascii
-        $(val - 0xfee0).Rune
-      of 0x30a1 .. 0x30f6: # katakana -> hiragana
-        $(val - 0x60).Rune
-      else:
-        $rune
+    # zenkaku -> hankaku
+    if val == 0x3000: # zenkaku space -> hankaku space
+      val.assign 0x0020
+    elif val in 0xff01 .. 0xff5e: # zenkaku ascii -> hankaku ascii
+      val -= 0xfee0
 
-    normalized &= addStr
+    # upper -> lower
+    if val in 65 .. 90:
+      val += 32
+
+    # katakana -> hiragana
+    if val in 0x30a1 .. 0x30f6:
+      val -= 0x60
+
+    normalized &= $val.Rune
 
   normalized
