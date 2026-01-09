@@ -13,7 +13,7 @@
 when defined(js) or defined(nimsuggest):
   import std/[jsffi, strformat]
   import karax/[karax, karaxdsl, vdom]
-  import ./[exchange, match, table]
+  import ./[exchange, match, navbar, table]
   import ../[helper, simulator]
   import ../../[app]
   import ../../private/[gui]
@@ -23,6 +23,7 @@ when defined(js) or defined(nimsuggest):
   proc toGrimoireVNode*(self: ref Grimoire, helper: VNodeHelper): VNode =
     ## Returns the grimoire node.
     buildHtml tdiv:
+      self.toGrimoireNavbarVNode helper
       tdiv(class = "block"):
         tdiv(class = "columns"):
           tdiv(class = "column is-narrow"):
