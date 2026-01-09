@@ -86,24 +86,49 @@ when isMainModule:
       proc initFooterNode(): VNode =
         ## Returns the footer node.
         buildHtml footer(class = "footer"):
-          tdiv(class = "columns is-mobile is-centered is-vcentered"):
-            tdiv(class = "column is-narrow"):
-              tdiv(class = "content has-text-centered"):
-                p:
-                  text "Pon!通 Ver. {Pon2Ver}".fmt
-            tdiv(class = "column is-narrow"):
-              tdiv(class = "field is-grouped is-grouped-centered"):
-                tdiv(class = "control"):
-                  a(
-                    class = "button",
-                    href = "https://github.com/24ik/pon2",
-                    target = "_blank",
-                    rel = "noopener noreferrer",
-                  ):
-                    span(class = "icon"):
-                      italic(class = "fab fa-github")
-                    span:
-                      text "GitHub"
+          tdiv(class = "block"):
+            tdiv(class = "columns is-mobile is-centered"):
+              tdiv(class = "column is-narrow"):
+                tdiv(class = "content"):
+                  ul:
+                    li:
+                      a(
+                        href = "../studio/",
+                        target = "_blank",
+                        rel = "noopener noreferrer",
+                      ):
+                        text "なぞぷよエディタ"
+                    li:
+                      a(
+                        href = "../marathon/",
+                        target = "_blank",
+                        rel = "noopener noreferrer",
+                      ):
+                        text "とこぷよ"
+                    li:
+                      a(
+                        href = "../grimoire/",
+                        target = "_blank",
+                        rel = "noopener noreferrer",
+                      ):
+                        text "なぞぷよグリモワール"
+              tdiv(class = "column is-narrow"):
+                tdiv(class = "field is-grouped is-grouped-centered"):
+                  tdiv(class = "control"):
+                    a(
+                      class = "button",
+                      href = "https://github.com/24ik/pon2",
+                      target = "_blank",
+                      rel = "noopener noreferrer",
+                    ):
+                      span(class = "icon"):
+                        italic(class = "fab fa-github")
+                      span:
+                        text "GitHub"
+          tdiv(class = "block"):
+            tdiv(class = "content has-text-centered"):
+              p:
+                text "Pon!通 Ver. {Pon2Ver}".fmt
 
       proc initErrorNode(msg: string): VNode =
         ## Returns the error node.
