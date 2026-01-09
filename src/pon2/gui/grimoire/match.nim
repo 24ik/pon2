@@ -15,7 +15,7 @@ when defined(js) or defined(nimsuggest):
   import karax/[karax, karaxdsl, vdom]
   import ../[helper]
   import ../../[app]
-  import ../../private/[dom]
+  import ../../private/[dom, strutils]
   import ../../private/gui/[hash]
 
   {.push warning[UnusedImport]: off.}
@@ -222,7 +222,7 @@ when defined(js) or defined(nimsuggest):
             () => (
               block:
                 let
-                  title = $titleId.getVNodeById.getInputText
+                  title = ($titleId.getVNodeById.getInputText).strip
                   titleOpt =
                     if title == "":
                       Opt[string].err
@@ -245,7 +245,7 @@ when defined(js) or defined(nimsuggest):
             () => (
               block:
                 let
-                  creator = $creatorId.getVNodeById.getInputText
+                  creator = ($creatorId.getVNodeById.getInputText).strip
                   creatorOpt =
                     if creator == "":
                       Opt[string].err
@@ -269,7 +269,7 @@ when defined(js) or defined(nimsuggest):
             () => (
               block:
                 let
-                  source = $sourceId.getVNodeById.getInputText
+                  source = ($sourceId.getVNodeById.getInputText).strip
                   sourceOpt =
                     if source == "":
                       Opt[string].err

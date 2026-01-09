@@ -49,7 +49,7 @@ when defined(js) or defined(nimsuggest):
     if importInput.isNil:
       return
 
-    let inputTxt = $importInput.getInputText
+    let inputTxt = ($importInput.getInputText).strip
     if inputTxt.len == 0:
       return
 

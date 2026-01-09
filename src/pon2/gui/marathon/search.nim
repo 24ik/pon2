@@ -15,6 +15,7 @@ when defined(js) or defined(nimsuggest):
   import karax/[karax, karaxdsl, vdom]
   import ../[helper]
   import ../../[app]
+  import ../../private/[strutils]
 
   {.push warning[UnusedImport]: off.}
   import karax/[kbase]
@@ -41,7 +42,9 @@ when defined(js) or defined(nimsuggest):
             maxlength = "16",
             oninput =
               () =>
-              self[].match $helper.marathonOpt.unsafeValue.searchBarId.getVNodeById.getInputText,
+              self[].match (
+                $helper.marathonOpt.unsafeValue.searchBarId.getVNodeById.getInputText
+              ).strip,
             disabled = not self[].isReady,
           )
         tdiv(class = "control"):
