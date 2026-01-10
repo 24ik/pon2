@@ -104,6 +104,13 @@ when isMainModule:
                         text "なぞぷよエディタ"
                     li:
                       a(
+                        href = "../grimoire/",
+                        target = "_blank",
+                        rel = "noopener noreferrer",
+                      ):
+                        text "なぞぷよグリモワール"
+                    li:
+                      a(
                         href = "../marathon/",
                         target = "_blank",
                         rel = "noopener noreferrer",
@@ -111,11 +118,12 @@ when isMainModule:
                         text "とこぷよ"
                     li:
                       a(
-                        href = "../grimoire/",
+                        href =
+                          "https://docs.google.com/forms/d/e/1FAIpQLSfhFQm7x4mDQCcPfZMDfxr03PGSGoQJb_euGjxyraLbs7EIvA/viewform?usp=header",
                         target = "_blank",
                         rel = "noopener noreferrer",
                       ):
-                        text "なぞぷよグリモワール"
+                        text "グリモワール問題追加フォーム"
               tdiv(class = "column is-narrow"):
                 tdiv(class = "field is-grouped is-grouped-centered"):
                   tdiv(class = "control"):
