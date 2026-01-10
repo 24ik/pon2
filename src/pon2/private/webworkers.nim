@@ -178,5 +178,11 @@ when not defined(pon2.build.worker):
   # NOTE: divide by 2 because we assume hyper-threading or big.LITTLE
   # NOTE: clamp to counter anti-fingerprinting (we assume the lower bound is 4-core)
   let
-    workerCount = getNavigator().hardwareConcurrency.to(int).ceilDiv(2).clamp(3, 16)
+    concurrencyJs = getNavigator().hardwareConcurrency
+    concurrency =
+      if concurrencyJs.isNull or concurrencyJs.isUndefined:
+        0
+      else:
+        concurrencyJs.to int
+    workerCount = concurrency.ceilDiv(2).clamp(3, 16)
     webWorkerPool* = WebWorkerPool.init workerCount
