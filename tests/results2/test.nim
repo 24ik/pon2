@@ -6,6 +6,10 @@
 import std/[unittest]
 import ../../src/pon2/utils/[results2]
 
+block: # value
+  check Result[string, int].ok("abc").value("def") == "abc"
+  check Result[string, int].err(4).value("def") == "def"
+
 block: # context
   let
     val = 5

@@ -24,6 +24,8 @@ when defined(js) or defined(nimsuggest):
 
   export vdom
 
+  const InputMaxLen = 16
+
   func toSolvedId(helper: VNodeHelper): kstring =
     ## Returns the ID of the solve status.
     "pon2-grimoire-search-solved-" & helper.grimoireOpt.unsafeValue.searchId
@@ -250,7 +252,11 @@ when defined(js) or defined(nimsuggest):
           id = titleId,
           class = "input",
           `type` = "text",
-          maxlength = "16",
+          maxlength = ($InputMaxLen).kstring,
+          value = helper.grimoireOpt.unsafeValue.matcher.titleOpt
+            .value("")
+            .substr(0, InputMaxLen - 1).kstring,
+          disabled = not self[].isReady,
           oninput =
             () => (
               block:
@@ -273,7 +279,11 @@ when defined(js) or defined(nimsuggest):
           id = creatorId,
           class = "input",
           `type` = "text",
-          maxlength = "16",
+          maxlength = ($InputMaxLen).kstring,
+          disabled = not self[].isReady,
+          value = helper.grimoireOpt.unsafeValue.matcher.creatorOpt
+            .value("")
+            .substr(0, InputMaxLen - 1).kstring,
           oninput =
             () => (
               block:
@@ -297,7 +307,11 @@ when defined(js) or defined(nimsuggest):
           list = sourceDatalistId,
           class = "input",
           `type` = "text",
-          maxlength = "16",
+          maxlength = ($InputMaxLen).kstring,
+          value = helper.grimoireOpt.unsafeValue.matcher.sourceOpt
+            .value("")
+            .substr(0, InputMaxLen - 1).kstring,
+          disabled = not self[].isReady,
           oninput =
             () => (
               block:
