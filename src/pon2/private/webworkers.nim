@@ -175,7 +175,8 @@ proc register*(task: WebWorkerTask) {.inline, noinit.} =
     getSelf().postMessage ($event.data.to cstring).split2(MsgSep).task.toStr.cstring
 
 when not defined(pon2.build.worker):
-  let webWorkerPool* = WebWorkerPool.init getNavigator().hardwareConcurrency
-  .to(int)
-  .ceilDiv(2)
-  .clamp(1, 16)
+  # NOTE: divide by 2 because we assume hyper-threading or big.LITTLE
+  # NOTE: clamp to counter anti-fingerprinting (we assume the lower bound is 4-core)
+  let
+    workerCount = getNavigator().hardwareConcurrency.to(int).ceilDiv(2).clamp(3, 16)
+    webWorkerPool* = WebWorkerPool.init workerCount
