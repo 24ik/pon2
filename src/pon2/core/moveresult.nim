@@ -6,7 +6,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[sequtils, strformat, sugar]
+import std/[sequtils, sugar]
 import ./[cell, common, notice]
 import ../[utils]
 import ../private/[arrayutils, math, staticfor]
@@ -152,7 +152,7 @@ func placeCounts*(
   if self.fullPopCountsOpt.isOk:
     ok self.fullPopCountsOpt.unsafeValue.mapIt it[cell].len
   else:
-    err "`placeCounts` not supported: {self}".fmt
+    err "`placeCounts` not supported: " & $self
 
 func placeCounts*(self: MoveResult): Pon2Result[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of places where color puyos popped in each chain.
@@ -160,7 +160,7 @@ func placeCounts*(self: MoveResult): Pon2Result[seq[int]] {.inline, noinit.} =
     ok self.fullPopCountsOpt.unsafeValue.map (counts: array[Cell, seq[int]]) =>
       (ColoredPuyos.sumIt counts[it].len)
   else:
-    err "`placeCounts` not supported: {self}".fmt
+    err "`placeCounts` not supported: " & $self
 
 # ------------------------------------------------
 # Connect
@@ -173,14 +173,14 @@ func connectionCounts*(
   if self.fullPopCountsOpt.isOk:
     ok concat self.fullPopCountsOpt.unsafeValue.mapIt it[cell]
   else:
-    err "`connectionCounts` not supported: {self}".fmt
+    err "`connectionCounts` not supported: " & $self
 
 func connectionCounts*(self: MoveResult): Pon2Result[seq[int]] {.inline, noinit.} =
   ## Returns a sequence of the number of connections of color puyos that popped.
   if self.fullPopCountsOpt.isOk:
     ok concat self.fullPopCountsOpt.unsafeValue.mapIt it[Red .. Purple].concat
   else:
-    err "`connectionCounts` not supported: {self}".fmt
+    err "`connectionCounts` not supported: " & $self
 
 # ------------------------------------------------
 # Score
@@ -220,7 +220,7 @@ func connectionBonus(counts: seq[int]): int {.inline, noinit.} =
 func score*(self: MoveResult): Pon2Result[int] {.inline, noinit.} =
   ## Returns the score.
   if self.fullPopCountsOpt.isErr:
-    return err "`score` not supported: {self}".fmt
+    return err "`score` not supported: " & $self
 
   var totalScore = 0
   for chainIndex, countsArray in self.fullPopCountsOpt.unsafeValue:
@@ -258,5 +258,5 @@ func noticeCounts*(
 ): Pon2Result[array[Notice, int]] {.inline, noinit.} =
   ## Returns the number of notice garbages.
   Pon2Result[array[Notice, int]].ok (
-    ?self.score.context "`noticeCounts` not supported: {self}".fmt
+    ?self.score.context "`noticeCounts` not supported: " & $self
   ).noticeCounts(garbageRate, useComet)

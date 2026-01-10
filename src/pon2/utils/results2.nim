@@ -6,7 +6,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, sugar]
+import std/[sugar]
 import results
 
 export results
@@ -17,4 +17,4 @@ func context*[T](
     self: Pon2Result[T], contextMsg: string
 ): Pon2Result[T] {.inline, noinit.} =
   ## Returns the result with the context error message added.
-  self.mapErr (error: string) => "{contextMsg}\n{error}".fmt
+  self.mapErr (error: string) => contextMsg & '\n' & error

@@ -357,7 +357,7 @@ func toUriQuery*(self: Steps, fqdn = Pon2): Pon2Result[string] {.inline, noinit.
   ## Returns the URI query converted from the steps.
   let strs = collect:
     for step in self:
-      ?step.toUriQuery(fqdn).context "Invalid steps: {self}".fmt
+      ?step.toUriQuery(fqdn).context "Invalid steps: " & $self
 
   ok strs.join
 

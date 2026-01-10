@@ -95,7 +95,7 @@ const
 func toUriQuery*(self: PuyoPuyo, fqdn = Pon2): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query converted from the game.
   let
-    errorMsg = "Puyo Puyo that does not support URI conversion: {self}".fmt
+    errorMsg = "Puyo Puyo that does not support URI conversion: " & $self
 
     fieldQuery = ?self.field.toUriQuery(fqdn).context errorMsg
     stepsQuery = ?self.steps.toUriQuery(fqdn).context errorMsg

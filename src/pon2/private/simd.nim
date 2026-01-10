@@ -29,9 +29,6 @@ when Sse42Available:
     {.passl: "-msse4.2".}
 
 when Sse42Available:
-  import std/[strformat]
-
-when Sse42Available:
   # ------------------------------------------------
   # XMM - Constructor
   # ------------------------------------------------
@@ -50,7 +47,7 @@ when Sse42Available:
     arr.addr.mm_store_si128 self
 
     {.push warning[Uninit]: off.}
-    return "M128i{arr}".fmt
+    return "M128i" & $arr
     {.pop.}
 
   func `==`*(x1, x2: M128i): bool {.inline, noinit.} =

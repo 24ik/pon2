@@ -11,7 +11,7 @@
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
-  import std/[asyncjs, jsconsole, json, jsonutils, sequtils, strformat, sugar]
+  import std/[asyncjs, jsconsole, json, jsonutils, sequtils, sugar]
   import ../../[utils]
   import ../../private/[bitops, localstorage, math, staticfor, strutils, zlib]
 
@@ -41,7 +41,7 @@ when defined(js) or defined(nimsuggest):
       return ok str.parseJson.jsonTo set[int16]
       {.pop.}
     except:
-      return err "cannot convert to set\n{getCurrentExceptionMsg()}".fmt
+      return err "cannot convert to set\n" & getCurrentExceptionMsg()
 
   proc solvedEntryIndices*(
       localStorage: GrimoireLocalStorageType
@@ -107,9 +107,9 @@ when defined(js) or defined(nimsuggest):
       if compressedResult.isOk:
         return Pon2Result[string].ok compressedResult.unsafeValue
       else:
-        return Pon2Result[string].err "cannot export\n{compressedResult.error}".fmt
+        return Pon2Result[string].err "cannot export\n" & compressedResult.error
     else:
-      return Pon2Result[string].err "cannot export\n{indicesResult.error}".fmt
+      return Pon2Result[string].err "cannot export\n" & indicesResult.error
 
   # ------------------------------------------------
   # Grimoire - Import
@@ -139,7 +139,7 @@ when defined(js) or defined(nimsuggest):
       LocalStorage[GrimoirePrefix & ImportedKey] = "1"
       return Pon2Result[void].ok
     else:
-      return Pon2Result[void].err "cannot import\n{bytesResult.error}".fmt
+      return Pon2Result[void].err "cannot import\n" & bytesResult.error
 
   proc imported*(localStorage: GrimoireLocalStorageType): bool =
     ## Returns `true` if the local storage is updated by `importStr`.

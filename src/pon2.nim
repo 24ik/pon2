@@ -63,8 +63,6 @@ when isMainModule:
   # ------------------------------------------------
 
   when defined(js) or defined(nimsuggest):
-    import std/[strformat]
-
     when defined(pon2.build.worker):
       import ./pon2/private/[webworkers]
       when defined(pon2.build.grimoire):
@@ -72,13 +70,15 @@ when isMainModule:
       else:
         import ./pon2/private/[app]
     else:
+      import std/[strformat]
       import karax/[karax, karaxdsl, kbase, vdom]
       import ./pon2/private/[assign, dom, gui, strutils]
       when defined(pon2.build.marathon):
-        import std/[asyncjs, jsfetch, random, sugar]
+        import std/[asyncjs, jsfetch, os, random, sequtils, staticos, sugar]
+        import ./pon2/private/[algorithm]
       elif defined(pon2.build.grimoire):
         import std/[asyncjs, jsconsole, jsfetch, os, sequtils, staticos, sugar]
-        import ./pon2/private/[webworkers]
+        import ./pon2/private/[algorithm, webworkers]
       else:
         import std/[sugar]
 
@@ -170,12 +170,10 @@ when isMainModule:
         # ------------------------------------------------
 
         proc task(args: seq[string]): Pon2Result[seq[string]] =
-          let errorMsg = "Invalid run args: {args}".fmt
-
           if args.len == 0:
-            return err errorMsg
+            return err "no arguments"
 
-          args[0].toGrimoireEntryStrs
+          args[0].toGrimoireEntryStrs.context "grimoire task failed"
 
       else:
         # ------------------------------------------------
@@ -183,14 +181,12 @@ when isMainModule:
         # ------------------------------------------------
 
         proc task(args: seq[string]): Pon2Result[seq[string]] =
-          let errorMsg = "Invalid run args: {args}".fmt
-
           if args.len == 0:
-            return err errorMsg
+            return err "no arguments"
 
-          let (goal, steps) = ?args.parseSolveInfo.context errorMsg
+          let (goal, steps) = ?args.parseSolveInfo.context "studio task failed"
 
-          let node = ?args.parseSolveNode.context errorMsg
+          let node = ?args.parseSolveNode.context "studio task failed"
           var solutions = newSeq[Solution]()
           node.solveSingleThread solutions, steps.len, true, goal, steps
 
@@ -219,28 +215,31 @@ when isMainModule:
       let globalMarathonRef = new Marathon
       globalMarathonRef[] = Marathon.init rng
 
-      const ChunkCount = 4
+      const FileNames = "{projectRootPath()}/assets/marathon".fmt.staticWalkDir
+        .mapIt(it.path.splitPath.tail)
+        .filterIt(it.endsWith ".txt").sorted
       var
-        errorMsgs = newSeqOfCap[string](ChunkCount)
-        completes = newSeqOfCap[bool](ChunkCount)
+        errorMsgs = newSeqOfCap[string](FileNames.len)
+        completes = newSeqOfCap[bool](FileNames.len)
 
-      for chunkIndex in 0 ..< ChunkCount:
+      for fileName in FileNames:
         {.push warning[Uninit]: off.}
         {.push warning[ProveInit]: off.}
-        discard "{AssetsDir}/marathon/swap{chunkIndex}.txt".fmt.cstring.fetch
+        discard "{AssetsDir}/marathon/{fileName}".fmt.cstring.fetch
           .then((r: Response) => r.text)
           .then(
             (s: cstring) => (
               block:
                 globalMarathonRef[].load ($s).splitLines
                 completes.add true
-                if completes.len == ChunkCount:
+                if completes.len == FileNames.len:
                   globalMarathonRef[].isReady.assign true
                   safeRedraw()
             )
           )
           .catch(
-            (error: Error) => errorMsgs.add "[Chunk {chunkIndex}] {error.message}".fmt
+            (error: Error) =>
+              errorMsgs.add "error on file {fileName}\n".fmt & $error.message
           )
         {.pop.}
         {.pop.}
@@ -286,16 +285,16 @@ when isMainModule:
       # set key handler
       document.onkeydown = (event: Event) => globalGrimoireRef.keyHandler event
 
-      const FileNames = "{projectRootPath()}/assets/grimoire".fmt.staticWalkDir.mapIt(
-        it.path.splitPath.tail
-      ).filterIt it.endsWith ".toml"
+      const FileNames = "{projectRootPath()}/assets/grimoire".fmt.staticWalkDir
+        .mapIt(it.path.splitPath.tail)
+        .filterIt(it.endsWith ".toml").sorted
       var
         errorMsgs = newSeqOfCap[string](FileNames.len)
         completes = newSeqOfCap[bool](FileNames.len)
 
       # load nazo puyo data
       for fileName in FileNames:
-        let errorMsg = "error on file {fileName}".fmt
+        let errorMsgPrefix = "error on file {fileName}\n".fmt
 
         {.push warning[Uninit]: off.}
         {.push warning[ProveInit]: off.}
@@ -314,12 +313,12 @@ when isMainModule:
                       globalGrimoireRef[].isReady = true
                       safeRedraw()
                   else:
-                    errorMsgs.add errorMsg & '\n' & entriesResult.error
+                    errorMsgs.add errorMsgPrefix & entriesResult.error
                 else:
-                  errorMsgs.add errorMsg & '\n' & strsResult.error
+                  errorMsgs.add errorMsgPrefix & strsResult.error
             )
           )
-          .catch((error: Error) => errorMsgs.add errorMsg & $error.message)
+          .catch((error: Error) => errorMsgs.add errorMsgPrefix & $error.message)
         {.pop.}
 
       # load solve data
