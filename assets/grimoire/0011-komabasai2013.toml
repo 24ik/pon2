@@ -1,148 +1,173 @@
 [[entries]]
+id = 375
 query = "field=0_rr....bbb...rrr...bbb.&steps=rrbb&goal=_0"
 creators = "ウァルト"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Easy 1"
 
 [[entries]]
+id = 376
 query = "field=0_gbg...gbg...gbg...rrr...&steps=gbgr&goal=0_0_4_0_"
 creators = "ウァルト"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Easy 2"
 
 [[entries]]
+id = 377
 query = "field=0_yrr..ryyr..rrggg.&steps=ryrg&goal=0_0_4_0_"
 creators = "ウァルト"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Easy 3"
 
 [[entries]]
+id = 378
 query = "field=0_gyy.ggoog.gyyygg&steps=yyyg&goal=0_0_4_0_"
 creators = "ウァルト"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Easy 4"
 
 [[entries]]
+id = 379
 query = "field=0_rbrg..rrgg..gbbr..ggrr..&steps=gbrg&goal=0_0_5_0_"
 creators = "hemios"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Easy 5"
 
 [[entries]]
+id = 380
 query = "field=0_b...bbr...brr..rggb..rrgbb.&steps=rgrb&goal=0_0_5_0_"
 creators = "ウァルト"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Easy 6"
 
 [[entries]]
+id = 381
 query = "field=0_brr...boor.rrbbr.&steps=bbbrbr&goal=0_0_4_0_"
 creators = "colo"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Easy 7"
 
 [[entries]]
+id = 382
 query = "field=0_r.r...rbr...brb..bbrbb.ggyyy.&steps=ryggrb&goal=0_0_6_0_"
 creators = "ウァルト"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Easy 8"
 
 [[entries]]
+id = 383
 query = "field=0_r..g..r..g..yybb.&steps=rybyrgbg&goal=1_0_3_0_"
 creators = "ウァルト"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Easy 9"
 
 [[entries]]
+id = 384
 query = "field=0_r..g..rg.ggrgg.rrbbb.&steps=grrrgb&goal=0_0_5_0_"
 creators = "くだら"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Normal 1"
 
 [[entries]]
+id = 385
 query = "field=0_byy..rbyrybbboooobyyyrrr&steps=rrrbby&goal=0_0_6_0_"
 creators = "colo"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Normal 2"
 
 [[entries]]
+id = 386
 query = "field=0_yr....ygrr..yrggy.grryy&steps=rgygggyr&goal=0_0_6_0_"
 creators = "ウァルト"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Normal 3"
 
 [[entries]]
+id = 387
 query = "field=0_br....bb....yy...rgrrb.rggbb&steps=ryrbgbyr&goal=0_0_6_0_"
 creators = "まてりあ"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Normal 4"
 
 [[entries]]
+id = 388
 query = "field=0_oobbb.yyyoo.ooggg.rrroo.ooggg.yyyoo.oobbb.rrroo.&steps=rbyyrgbg&goal=0_0_8_0_"
 creators = "ウァルト"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Normal 5"
 
 [[entries]]
+id = 389
 query = "field=0_yg..y.rr.grygygrrgbbyrrogyor&steps=grbrbygryr&goal=0_0_8_0_"
 creators = "くだら"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Normal 6"
 
 [[entries]]
+id = 390
 query = "field=0_g.....gy.y..yryr..rgyr..rggro.oooooo&steps=gyrygygr&goal=0_0_6_0_1"
 creators = "colo"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Hard 1"
 
 [[entries]]
+id = 391
 query = "field=0_g.....r....rbg...bgg...rrb.ggrbbo&steps=rgrbgbrb&goal=0_0_6_0_"
 creators = "ウァルト"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Hard 2"
 
 [[entries]]
+id = 392
 query = "field=0_pp...prbp.prrbbppggyypopgypoooppoo&steps=pgpbprpy&goal=_0"
 creators = "ウァルト"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Hard 3"
 
 [[entries]]
+id = 393
 query = "field=0_rry...ryy..bbbrr.ygggr.yybbyy&steps=ybygrbybyr&goal=0_0_8_0_"
 creators = "まてりあ"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Hard 4"
 
 [[entries]]
+id = 394
 query = "field=0_y...bbb.rryyyyybbrrrybyyyrgggrr&steps=yrbrygrrbr&goal=0_0_9_0_"
 creators = "まてりあ"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Hard 5"
 
 [[entries]]
+id = 395
 query = "field=0_brr...yyy...brr...yyy.obbrr.o&steps=ybrrbbbbyb&goal=0_0_6_0_0"
 creators = "ウァルト"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "Hard 6"
 
 [[entries]]
+id = 396
 query = "field=0_bbyybbboryobgorroygooooygoggoyyogbogyybbgg&steps=gbybgrgyby&goal=0_0_10_0_"
 creators = "ウァルト"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "H"
 
 [[entries]]
+id = 397
 query = "field=0_bbg...booo..orgro.orgro.orgro.booob.bbgbb.&steps=bgbgrgbr&goal=0_0_7_0_"
 creators = "ウァルト"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "O"
 
 [[entries]]
+id = 398
 query = "field=0_gg..rrryyygboobbgbobobgbooggryobbgryorbyryrryy&steps=bgryygrgbgry&goal=0_0_12_0_"
 creators = "ウァルト"
 source = "2013年度駒場祭ぷよぷよ大会"
 sourceDetail = "P"
 
 [[entries]]
+id = 399
 query = "field=0_ooo...obbb.booorrboyyrbbooobbrrryyybbbggg&steps=yrybgbybrb&goal=0_0_9_0_"
 creators = "ウァルト"
 source = "2013年度駒場祭ぷよぷよ大会"

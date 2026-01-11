@@ -256,18 +256,18 @@ when isMainModule:
 
       proc renderer(): VNode =
         ## Returns the root node.
-        let errorMsg = errorMsgs.join "\n"
+        if errorMsgs.len > 0:
+          return buildHtml tdiv:
+            errorMsgs.join("\n").initErrorNode
+            initFooterNode()
+
+        let helper = VNodeHelper.init(globalMarathonRef, "pon2-main")
 
         buildHtml tdiv:
-          if errorMsg == "":
-            let helper = VNodeHelper.init(globalMarathonRef, "pon2-main")
-            section(
-              class = (if helper.mobile: "section pt-3 pl-3" else: "section").kstring
-            ):
-              globalMarathonRef.toMarathonVNode helper
-          else:
-            errorMsg.initErrorNode
-
+          section(
+            class = (if helper.mobile: "section pt-3 pl-3" else: "section").kstring
+          ):
+            globalMarathonRef.toMarathonVNode helper
           initFooterNode()
 
       renderer.setRenderer
@@ -330,32 +330,31 @@ when isMainModule:
         {.pop.}
 
       # load solve data
-      let solvedEntryIndicesResult = GrimoireLocalStorage.solvedEntryIndices
-      var solvedEntryIndices =
-        if solvedEntryIndicesResult.isOk:
-          solvedEntryIndicesResult.unsafeValue
+      let solvedEntryIdsResult = GrimoireLocalStorage.solvedEntryIds
+      var solvedEntryIds =
+        if solvedEntryIdsResult.isOk:
+          solvedEntryIdsResult.unsafeValue
         else:
-          console.error solvedEntryIndicesResult.error.cstring
+          errorMsgs.add solvedEntryIdsResult.error
           {}
 
-      GrimoireLocalStorage.selectedEntryIndex = -1
+      GrimoireLocalStorage.selectedEntryId = -1
       var
-        matchedEntryIndices = set[int16]({})
-        matchedEntryIndicesSeq = newSeq[int16]()
+        matchedEntryIds = set[int16]({})
+        matchedEntryIdsSeq = newSeq[int16]()
 
       proc renderer(routerData: RouterData): VNode =
         ## Returns the root node.
         # error node
-        let errorMsg = errorMsgs.join "\n"
-        if errorMsg.len > 0:
+        if errorMsgs.len > 0:
           return buildHtml tdiv:
-            errorMsg.initErrorNode
+            errorMsgs.join("\n").initErrorNode
             initFooterNode()
 
         # check imported
         if GrimoireLocalStorage.imported:
-          GrimoireLocalStorage.solvedEntryIndices.isErrOr:
-            solvedEntryIndices.assign value
+          GrimoireLocalStorage.solvedEntryIds.isErrOr:
+            solvedEntryIds.assign value
 
           GrimoireLocalStorage.imported = false
 
@@ -363,49 +362,48 @@ when isMainModule:
         let hashData = routerData.hashPart.parseGrimoireHashData
         globalGrimoireRef[].match hashData.matcher
 
-        # filter matched entry indices with `solved` query
-        let newEntryIndices =
+        # filter matched entry IDs with `solved` query
+        let newEntryIds =
           if hashData.matchSolvedOpt.isErr:
-            globalGrimoireRef[].matchedEntryIndices
+            globalGrimoireRef[].matchedEntryIds
           elif hashData.matchSolvedOpt.unsafeValue:
-            globalGrimoireRef[].matchedEntryIndices * solvedEntryIndices
+            globalGrimoireRef[].matchedEntryIds * solvedEntryIds
           else:
-            globalGrimoireRef[].matchedEntryIndices - solvedEntryIndices
+            globalGrimoireRef[].matchedEntryIds - solvedEntryIds
 
-        # update global matched entry indices
-        if newEntryIndices != matchedEntryIndices:
-          matchedEntryIndices.assign newEntryIndices
-          matchedEntryIndicesSeq.assign newEntryIndices.toSeq
+        # update global matched entry IDs
+        if newEntryIds != matchedEntryIds:
+          matchedEntryIds.assign newEntryIds
+          matchedEntryIdsSeq.assign newEntryIds.toSeq
 
         # make helper
         var helper = VNodeHelper.init(
           globalGrimoireRef, "pon2-main", hashData.matcher, hashData.matchSolvedOpt,
-          matchedEntryIndicesSeq, solvedEntryIndices, hashData.pageIndex,
+          matchedEntryIdsSeq, solvedEntryIds, hashData.pageIndex,
         )
 
         # update solve data
-        let selectedEntryIndexResult = GrimoireLocalStorage.selectedEntryIndex
-        if selectedEntryIndexResult.isOk:
-          let selectedEntryIndex = selectedEntryIndexResult.unsafeValue
+        let selectedEntryIdResult = GrimoireLocalStorage.selectedEntryId
+        if selectedEntryIdResult.isOk:
+          let selectedEntryId = selectedEntryIdResult.unsafeValue
 
-          if selectedEntryIndex >= 0 and helper.simulator.markResult == Correct and
-              globalGrimoireRef[].simulator.mode in PlayModes and
-              selectedEntryIndex notin solvedEntryIndices:
-            solvedEntryIndices.incl selectedEntryIndex
-            GrimoireLocalStorage.solvedEntryIndices = solvedEntryIndices
-            helper.grimoireOpt.unsafeValue.solvedEntryIndices.assign solvedEntryIndices
+          if selectedEntryId >= 0 and helper.simulator.markResult == Correct and
+              selectedEntryId notin solvedEntryIds:
+            solvedEntryIds.incl selectedEntryId
+            GrimoireLocalStorage.solvedEntryIds = solvedEntryIds
+            helper.grimoireOpt.unsafeValue.solvedEntryIds.assign solvedEntryIds
 
-            # update matched indices if needed
-            if selectedEntryIndex in matchedEntryIndices and hashData.matchSolvedOpt.isOk:
+            # update matched IDs if needed
+            if selectedEntryId in matchedEntryIds and hashData.matchSolvedOpt.isOk:
               if hashData.matchSolvedOpt.unsafeValue:
-                matchedEntryIndices.incl selectedEntryIndex
+                matchedEntryIds.incl selectedEntryId
               else:
-                matchedEntryIndices.excl selectedEntryIndex
+                matchedEntryIds.excl selectedEntryId
 
-              matchedEntryIndicesSeq.assign newEntryIndices.toSeq
-              helper.grimoireOpt.unsafeValue.matchedEntryIndices.assign matchedEntryIndicesSeq
+              matchedEntryIdsSeq.assign newEntryIds.toSeq
+              helper.grimoireOpt.unsafeValue.matchedEntryIds.assign matchedEntryIdsSeq
         else:
-          console.error selectedEntryIndexResult.error.cstring
+          console.error selectedEntryIdResult.error.cstring
 
         # make VNode
         buildHtml tdiv:

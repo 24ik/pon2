@@ -28,4 +28,4 @@ when defined(js) or defined(nimsuggest):
     buildHtml nav(class = "navbar is-fixed-top is-light has-shadow"):
       tdiv(class = "navbar-brand"):
         tdiv(class = "navbar-item"):
-          text "正解数：{helper.grimoireOpt.unsafeValue.solvedEntryIndices.card}/{self[].len}問".fmt.kstring
+          text "正解数：{helper.grimoireOpt.unsafeValue.solvedEntryIds.card}/{self[].len}問".fmt.kstring

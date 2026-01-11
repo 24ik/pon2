@@ -34,6 +34,15 @@ when defined(js) or defined(nimsuggest):
 
     var strs = newSeqOfCap[string](entryElems.len)
     for entryIndex, entryElem in entryElems:
+      # ID
+      let idVal = entryElem.getOrDefault "id"
+      if idVal.isNil or idVal.kind != Int:
+        return err "[Entry {entryIndex}] `id` key with a 16-bit signed integer value is required".fmt
+      let id = idVal.getInt
+      if id notin int16.low.int .. int16.high.int:
+        return err "[Entry {entryIndex}] `id` key with a 16-bit signed integer value is required".fmt
+      let id16 = id.int16
+
       # query
       let queryVal = entryElem.getOrDefault "query"
       if queryVal.isNil or queryVal.kind != String:
@@ -93,8 +102,9 @@ when defined(js) or defined(nimsuggest):
         sourceDetail = ""
         return err "[Entry {entryIndex}] `sourceDetail` value should be string".fmt
 
-      let entry = GrimoireEntry.init(query, title, creators, source, sourceDetail)
+      let entry = GrimoireEntry.init(id16, query, title, creators, source, sourceDetail)
       strs.add [
+        $id16,
         query,
         $entry.rule.ord,
         $entry.moveCount,
@@ -115,18 +125,19 @@ when defined(js) or defined(nimsuggest):
       let errorMsg = "Invalid grimoire entry: {str}".fmt
 
       let substrs = str.split Sep
-      if substrs.len != 8:
+      if substrs.len != 9:
         return err errorMsg
 
       entries.add GrimoireEntry(
-        query: substrs[0],
-        rule: ?parseOrdinal[Rule](substrs[1]).context errorMsg,
-        moveCount: ?substrs[2].parseInt.context errorMsg,
-        goal: ?substrs[3].parseGoal(Pon2).context errorMsg,
-        title: substrs[4],
-        creators: substrs[5].split2 CreatorSep,
-        source: substrs[6],
-        sourceDetail: substrs[7],
+        id: ?parseOrdinal[int16](substrs[0]).context errorMsg,
+        query: substrs[1],
+        rule: ?parseOrdinal[Rule](substrs[2]).context errorMsg,
+        moveCount: ?substrs[3].parseInt.context errorMsg,
+        goal: ?substrs[4].parseGoal(Pon2).context errorMsg,
+        title: substrs[5],
+        creators: substrs[6].split2 CreatorSep,
+        source: substrs[7],
+        sourceDetail: substrs[8],
       )
 
     ok entries

@@ -43,56 +43,52 @@ when defined(js) or defined(nimsuggest):
     except:
       return err "cannot convert to set\n" & getCurrentExceptionMsg()
 
-  proc solvedEntryIndices*(
-      localStorage: GrimoireLocalStorageType
-  ): Pon2Result[set[int16]] =
-    ## Returns the solved entry indices.
+  proc solvedEntryIds*(localStorage: GrimoireLocalStorageType): Pon2Result[set[int16]] =
+    ## Returns the solved entry IDs.
     let valResult = LocalStorage[GrimoirePrefix & SolvedKey]
     if valResult.isErr:
       return ok set[int16]({})
 
-    ($valResult.unsafeValue).jsonToSet.context "cannot get solved entry indices"
+    ($valResult.unsafeValue).jsonToSet.context "cannot get solved entry IDs"
 
-  proc `solvedEntryIndices=`*(
-      localStorage: GrimoireLocalStorageType, entryIndices: set[int16]
+  proc `solvedEntryIds=`*(
+      localStorage: GrimoireLocalStorageType, entryIds: set[int16]
   ) =
-    ## Sets the solved entry indices.
+    ## Sets the solved entry IDs.
     try:
       var str {.noinit.}: string
-      str.toUgly entryIndices.toJson
+      str.toUgly entryIds.toJson
 
       LocalStorage[GrimoirePrefix & SolvedKey] = str.cstring
     except:
       console.error getCurrentExceptionMsg().cstring
 
-  proc selectedEntryIndex*(localStorage: GrimoireLocalStorageType): Pon2Result[int16] =
-    ## Returns the selected entry index.
+  proc selectedEntryId*(localStorage: GrimoireLocalStorageType): Pon2Result[int16] =
+    ## Returns the selected entry ID.
     ## If not set, returns `-1`.
     let valResult = LocalStorage[GrimoirePrefix & SelectedKey]
     if valResult.isErr:
       return ok -1'i16
 
-    ($valResult.unsafeValue).parseInt.map((index: int) => index.int16).context "cannot get selected entry index"
+    ($valResult.unsafeValue).parseInt.map((index: int) => index.int16).context "cannot get selected entry ID"
 
-  proc `selectedEntryIndex=`*(
-      localStorage: GrimoireLocalStorageType, entryIndex: int16
-  ) =
-    ## Sets the selected entry index.
-    LocalStorage[GrimoirePrefix & SelectedKey] = ($entryIndex).cstring
+  proc `selectedEntryId=`*(localStorage: GrimoireLocalStorageType, entryId: int16) =
+    ## Sets the selected entry ID.
+    LocalStorage[GrimoirePrefix & SelectedKey] = ($entryId).cstring
 
   # ------------------------------------------------
   # Grimoire - Export
   # ------------------------------------------------
 
-  func toBytes(indices: set[int16]): seq[byte] =
-    ## Returns the bytes converted from the indices.
-    if indices.card == 0:
+  func toBytes(ids: set[int16]): seq[byte] =
+    ## Returns the bytes converted from the IDs.
+    if ids.card == 0:
       return @[]
 
-    let indicesSeq = indices.toSeq
-    var bytes = 0.byte.repeat (indicesSeq[^1] div 8) + 1
-    for index in indices:
-      let (arrayIndex, bitIndex) = index.divmod 8
+    let idsSeq = ids.toSeq
+    var bytes = 0.byte.repeat (idsSeq[^1] div 8) + 1
+    for id in ids:
+      let (arrayIndex, bitIndex) = id.divmod 8
       bytes[arrayIndex].setBit bitIndex
 
     bytes
@@ -101,23 +97,23 @@ when defined(js) or defined(nimsuggest):
       localStorage: GrimoireLocalStorageType
   ): Future[Pon2Result[string]] {.async.} =
     ## Returns a string to export grimoire local storage.
-    let indicesResult = localStorage.solvedEntryIndices
-    if indicesResult.isOk:
-      let compressedResult = await indicesResult.unsafeValue.toBytes.zlibCompressed
+    let idsResult = localStorage.solvedEntryIds
+    if idsResult.isOk:
+      let compressedResult = await idsResult.unsafeValue.toBytes.zlibCompressed
       if compressedResult.isOk:
         return Pon2Result[string].ok compressedResult.unsafeValue
       else:
         return Pon2Result[string].err "cannot export\n" & compressedResult.error
     else:
-      return Pon2Result[string].err "cannot export\n" & indicesResult.error
+      return Pon2Result[string].err "cannot export\n" & idsResult.error
 
   # ------------------------------------------------
   # Grimoire - Import
   # ------------------------------------------------
 
-  func toIndices(bytes: seq[byte]): set[int16] =
-    ## Returns the indices converted from the bytes.
-    var indices = set[int16]({})
+  func toIds(bytes: seq[byte]): set[int16] =
+    ## Returns the IDs converted from the bytes.
+    var ids = set[int16]({})
     for index, val in bytes:
       if val == 0:
         continue
@@ -125,9 +121,9 @@ when defined(js) or defined(nimsuggest):
       let baseVal = index * 8
       staticFor(bitIndex, 0 ..< 8):
         if val.getBit bitIndex:
-          indices.incl (baseVal + bitIndex).int16
+          ids.incl (baseVal + bitIndex).int16
 
-    indices
+    ids
 
   proc importStr*(
       localStorage: GrimoireLocalStorageType, str: string
@@ -135,7 +131,7 @@ when defined(js) or defined(nimsuggest):
     ## Imports a string to update the grimoire local storage.
     let bytesResult = await str.zlibDecompressed
     if bytesResult.isOk:
-      localStorage.solvedEntryIndices = bytesResult.unsafeValue.toIndices
+      localStorage.solvedEntryIds = bytesResult.unsafeValue.toIds
       LocalStorage[GrimoirePrefix & ImportedKey] = "1"
       return Pon2Result[void].ok
     else:

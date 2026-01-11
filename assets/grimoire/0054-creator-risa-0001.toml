@@ -1,84 +1,101 @@
 [[entries]]
+id = 2782
 query = "field=0_rrgb..rgbb..gbgr..bbrr.&steps=ggrbggrb&goal=0_0_6_0_"
 creators = "りさ"
 source = "X"
 
 [[entries]]
+id = 2783
 query = "field=0_bbgr..bgrr..rgbb..rrgb.&steps=ggrbggrb&goal=0_0_6_0_"
 creators = "りさ"
 source = "X"
 
 [[entries]]
+id = 2784
 query = "field=0_r....rr....ggr..rrgr..rbbb.&steps=gbrrrr&goal=0_0_5_0_"
 creators = "りさ"
 source = "X"
 
 [[entries]]
+id = 2785
 query = "field=0_g....go...bbgr..bgrr..rrgb..rgbb.&steps=bgrgrb&goal=0_0_6_0_"
 creators = "りさ"
 source = "X"
 
 [[entries]]
+id = 2786
 query = "field=0_g.....g..r.obb.rroob.bbbrrr&steps=rgbgbr&goal=0_0_5_0_"
 creators = "りさ"
 source = "X"
 
 [[entries]]
+id = 2787
 query = "field=0_gg..ooogoorooorrbbbrbrrgrbgbrrgrrbggrggg&steps=rrrbbbgbrb&goal=0_0_10_0_"
 creators = "りさ"
 source = "X"
 
 [[entries]]
+id = 2788
 query = "field=0_b....bb....ry....bb....bgy...rgg...rryyy.&steps=bgyyby&goal=0_0_6_0_"
 creators = "りさ"
 source = "X"
 
 [[entries]]
+id = 2789
 query = "field=0_b...brr...bbr...ygy...gyy...ggb...yyy...grb..grbb..bgrrrrrbbb&steps=rgggygrg&goal=0_0_11_0_"
 creators = "りさ"
 source = "X"
 
 [[entries]]
+id = 2790
 query = "field=0_rr....bb....rr....br...boor.rbbrrbrroobb&steps=bbbr&goal=0_0_5_0_"
 creators = "りさ"
 source = "X"
 
 [[entries]]
+id = 2791
 query = "field=0_bbrr..boro..rrbb..robo.yyyggg&steps=ygrbrb&goal=0_0_6_0_"
 creators = "りさ"
 source = "X"
 
 [[entries]]
+id = 2792
 query = "field=0_brrr..bogo..bgog..gogb..ogob..rrrb.&steps=ggrbrb&goal=0_0_6_0_"
 creators = "りさ"
 source = "X"
 
 [[entries]]
+id = 2793
 query = "field=0_boog..bbgg..ggbb..goob.rrryyy&steps=ygbbrg&goal=0_0_6_0_"
 creators = "りさ"
 source = "X"
 
 [[entries]]
+id = 2794
 query = "field=0_gg....rb....rr....gg...rrgb..brbb..bbgg..&steps=rgrb&goal=0_0_6_0_"
 creators = "りさ"
 source = "X"
 
 [[entries]]
+id = 2795
 query = "field=0_r.....or....gg....grro..ooro.oooor.gggrr&steps=rgrrrg&goal=0_0_5_0_"
 creators = "りさ"
 source = "X"
 
 [[entries]]
+id = 2796
 query = "field=0_ggrr..goor..rgog..rrgg.&steps=rgrg&goal=0_0_4_0_0"
 creators = "りさ"
 source = "X"
 
 [[entries]]
+id = 2797
 query = "field=0_g.....g.....gr.b..rrbb..&steps=bbrbgb&goal=_0"
 creators = "りさ"
 source = "X"
 
 [[entries]]
+id = 2798
 query = "field=0_o....bb....bg.br.rggrr.rrbbb&steps=rbbbrgbb&goal=0_0_6_0_"
 creators = "りさ"
 source = "X"

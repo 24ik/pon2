@@ -37,8 +37,8 @@ when defined(js) or defined(nimsuggest):
       importId*: kstring
       matcher*: GrimoireMatcher
       matchSolvedOpt*: Opt[bool]
-      matchedEntryIndices*: seq[int16]
-      solvedEntryIndices*: set[int16]
+      matchedEntryIds*: seq[int16]
+      solvedEntryIds*: set[int16]
       pageIndex*: int
 
     VNodeHelper* = object ## Helper for making VNode.
@@ -66,8 +66,8 @@ when defined(js) or defined(nimsuggest):
       rootId: kstring,
       matcher: GrimoireMatcher,
       matchSolvedOpt: Opt[bool],
-      matchedEntryIndices: seq[int16],
-      solvedEntryIndices: set[int16],
+      matchedEntryIds: seq[int16],
+      solvedEntryIds: set[int16],
       pageIndex: int,
   ): T =
     T(
@@ -76,8 +76,8 @@ when defined(js) or defined(nimsuggest):
       importId: "pon2-grimoire-import-" & rootId,
       matcher: matcher,
       matchSolvedOpt: matchSolvedOpt,
-      matchedEntryIndices: matchedEntryIndices,
-      solvedEntryIndices: solvedEntryIndices,
+      matchedEntryIds: matchedEntryIds,
+      solvedEntryIds: solvedEntryIds,
       pageIndex: pageIndex,
     )
 
@@ -134,8 +134,8 @@ when defined(js) or defined(nimsuggest):
       rootId: kstring,
       matcher: GrimoireMatcher,
       matchSolvedOpt: Opt[bool],
-      matchedEntryIndices: seq[int16],
-      solvedEntryIndices: set[int16],
+      matchedEntryIds: seq[int16],
+      solvedEntryIds: set[int16],
       pageIndex: int,
   ): T =
     VNodeHelper(
@@ -144,7 +144,6 @@ when defined(js) or defined(nimsuggest):
       studioOpt: Opt[StudioVNodeHelper].err,
       marathonOpt: Opt[MarathonVNodeHelper].err,
       grimoireOpt: Opt[GrimoireVNodeHelper].ok GrimoireVNodeHelper.init(
-        rootId, matcher, matchSolvedOpt, matchedEntryIndices, solvedEntryIndices,
-        pageIndex,
+        rootId, matcher, matchSolvedOpt, matchedEntryIds, solvedEntryIds, pageIndex
       ),
     )

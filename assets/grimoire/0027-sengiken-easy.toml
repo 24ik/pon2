@@ -1,250 +1,292 @@
 [[entries]]
+id = 780
 query = "field=0_r.....pr..r.pp..r.yy..p.yp&steps=pryr&goal=_2"
 creators = "へーょまは"
 source = "戦技研HP"
 sourceDetail = "Easy 第1問"
 
 [[entries]]
+id = 781
 query = "field=0_yyy...bbbgg.gggbb.rrrgg&steps=rggy&goal=_2"
 creators = "みそしる"
 source = "戦技研HP"
 sourceDetail = "Easy 第2問"
 
 [[entries]]
+id = 782
 query = "field=0_bgy...bgy...bgy...rrr...bgy...bgy...bgy...rrr..&steps=yybbrr&goal=_2"
 creators = "きゅい"
 source = "戦技研HP"
 sourceDetail = "Easy 第3問"
 
 [[entries]]
+id = 783
 query = "field=0_y.....ybgy..rbbg..rrgg..&steps=yrby&goal=_2"
 creators = "sky"
 source = "戦技研HP"
 sourceDetail = "Easy 第4問"
 
 [[entries]]
+id = 784
 query = "field=0_gbgbg.bgbgbgbgbgbgbgbgbg&steps=gbgbgb&goal=0_0_6_0_"
 creators = "ワタリ"
 source = "戦技研HP"
 sourceDetail = "Easy 第5問"
 
 [[entries]]
+id = 785
 query = "field=0_r.r.r.r.rbr.yrbrb.ybgbb.bggoo.&steps=yygrbb&goal=_0"
 creators = "tobi"
 source = "戦技研HP"
 sourceDetail = "Easy 第6問"
 
 [[entries]]
+id = 786
 query = "field=0_r.r.r.r.r.r.ororo.&steps=rrrrrr&goal=0_0_2_0_"
 creators = "きゅい"
 source = "戦技研HP"
 sourceDetail = "Easy 第7問"
 
 [[entries]]
+id = 787
 query = "field=0_y.....rr..r.ro..r.yg..r.yyory.ogrry.oggooooooooooooooooooooooooooooooooo&steps=rrrr&goal=_3"
 creators = "きゅい"
 source = "戦技研HP"
 sourceDetail = "Easy 第8問"
 
 [[entries]]
+id = 788
 query = "field=0_yo....bb...yyyb..grgb..ggrgg.rrbbb.&steps=gbgb&goal=0_0_6_0_"
 creators = "みそしる"
 source = "戦技研HP"
 sourceDetail = "Easy 第9問"
 
 [[entries]]
+id = 789
 query = "field=0_r.....r.....r...b.o...b.o...rrr.&steps=brbr&goal=0_0_3_0_"
 creators = "K-NES"
 source = "戦技研HP"
 sourceDetail = "Easy 第10問"
 
 [[entries]]
+id = 790
 query = "field=0_rgrg.rgrgrgrgrgrgrgrgrg&steps=rgrgrg&goal=0_0_6_0_"
 creators = "飛車ちゅう"
 source = "戦技研HP"
 sourceDetail = "Easy 第11問"
 
 [[entries]]
+id = 791
 query = "field=0_r.....r.....y....yg....ggy..rrry..&steps=rrrg&goal=0_0_4_0_"
 creators = "凸凹マスター"
 source = "戦技研HP"
 sourceDetail = "Easy 第12問"
 
 [[entries]]
+id = 792
 query = "field=0_b.b.b.bgbrbpboboborgorgpggorypoboroprooyyyrrgogpbbbogogggogpobobpp&steps=bb&goal=_0"
 creators = "カトウ"
 source = "戦技研HP"
 sourceDetail = "Easy 第13問"
 
 [[entries]]
+id = 793
 query = "field=0_g.....ygb...byg..ybbg.byrrrbb&steps=grgb&goal=0_0_5_0_"
 creators = "みそしる"
 source = "戦技研HP"
 sourceDetail = "Easy 第14問"
 
 [[entries]]
+id = 794
 query = "field=0_gb...ggbb.bbbyyy&steps=gybb&goal=0_0_4_0_"
 creators = "aojil"
 source = "戦技研HP"
 sourceDetail = "Easy 第15問"
 
 [[entries]]
+id = 795
 query = "field=0_g.....bb....grgyb.ggryy.rrybb.&steps=ybbb&goal=0_0_5_0_"
 creators = "aojil"
 source = "戦技研HP"
 sourceDetail = "Easy 第16問"
 
 [[entries]]
+id = 796
 query = "field=0_o.br.ogbrr.ggooo&steps=rbgb&goal=0_0_3_0_"
 creators = "platinum"
 source = "戦技研HP"
 sourceDetail = "Easy 第17問"
 
 [[entries]]
+id = 797
 query = "field=0_b..obrb..bggr..bgbr.&steps=rgbb&goal=0_0_4_0_"
 creators = "platinum"
 source = "戦技研HP"
 sourceDetail = "Easy 第18問"
 
 [[entries]]
+id = 798
 query = "field=0_oo....oo....bg....gbo...bgg...yyg.oooooo&steps=gygbgy&goal=0_0_4_0_"
 creators = "platinum"
 source = "戦技研HP"
 sourceDetail = "Easy 第19問"
 
 [[entries]]
+id = 799
 query = "field=0_o....og.y.brggybbr&steps=gyrbry&goal=0_1_4_0_"
 creators = "platinum"
 source = "戦技研HP"
 sourceDetail = "Easy 第20問"
 
 [[entries]]
+id = 800
 query = "field=0_g.....g.....g.....y....yy...bgby..bbgb.yogbbyy&steps=gbyb&goal=0_0_5_0_"
 creators = "けんろう"
 source = "戦技研HP"
 sourceDetail = "Easy 第21問"
 
 [[entries]]
+id = 801
 query = "field=0_o.o.&steps=rrrrrrrrrrrr&goal=0_0_3_0_"
 creators = "けんろう"
 source = "戦技研HP"
 sourceDetail = "Easy 第22問"
 
 [[entries]]
+id = 802
 query = "field=0_b..b..g..b..rrbgg.grgbg.&steps=bbrgbg&goal=0_0_5_0_"
 creators = "すぴぃちゃん"
 source = "戦技研HP"
 sourceDetail = "Easy 第23問"
 
 [[entries]]
+id = 803
 query = "field=0_r.....b.r..br.b..br.r..brbr..oorbr.&steps=rrrb&goal=0_0_5_0_"
 creators = "山岸"
 source = "戦技研HP"
 sourceDetail = "Easy 第24問"
 
 [[entries]]
+id = 804
 query = "field=0_bg...ggb.r.rrgggbrbbrr&steps=grgr&goal=0_2_5_0_"
 creators = "和樹"
 source = "戦技研HP"
 sourceDetail = "Easy 第25問"
 
 [[entries]]
+id = 805
 query = "field=0_o..ryyb..rryb..&steps=brby&goal=0_0_3_0_"
 creators = "platinum"
 source = "戦技研HP"
 sourceDetail = "Easy 第26問"
 
 [[entries]]
+id = 806
 query = "field=0_y..b.yb.bbyybbyy&steps=byby&goal=0_0_4_0_"
 creators = "platinum"
 source = "戦技研HP"
 sourceDetail = "Easy 第27問"
 
 [[entries]]
+id = 807
 query = "field=0_bbbg..rrgg..rbbb.&steps=bbrg&goal=0_0_4_0_"
 creators = "さっか"
 source = "戦技研HP"
 sourceDetail = "Easy 第28問"
 
 [[entries]]
+id = 808
 query = "field=0_r.....rr....bgb...bgb...bgb...&steps=bgrb&goal=0_0_4_0_"
 creators = "さっか"
 source = "戦技研HP"
 sourceDetail = "Easy 第29問"
 
 [[entries]]
+id = 809
 query = "field=0_y...gyy..rggb..rrbb..&steps=ygrb&goal=0_0_4_0_"
 creators = "aojil"
 source = "戦技研HP"
 sourceDetail = "Easy 第30問"
 
 [[entries]]
+id = 810
 query = "field=0_g.rrrgg.bbbrrr&steps=rbrg&goal=0_0_4_0_"
 creators = "aojil"
 source = "戦技研HP"
 sourceDetail = "Easy 第31問"
 
 [[entries]]
+id = 811
 query = "field=0_gg.y..gy.y.&steps=gygy&goal=0_0_2_0_0"
 creators = "platinum"
 source = "戦技研HP"
 sourceDetail = "Easy 第32問"
 
 [[entries]]
+id = 812
 query = "field=0_g.....grb...gbrb..bbrb.&steps=gbrb&goal=0_0_4_0_"
 creators = "h!de"
 source = "戦技研HP"
 sourceDetail = "Easy 第33問"
 
 [[entries]]
+id = 813
 query = "field=0_bb.yyyyy.bbb&steps=byby&goal=_0"
 creators = "aojil"
 source = "戦技研HP"
 sourceDetail = "Easy 第34問"
 
 [[entries]]
+id = 814
 query = "field=0_gbr.bgbrr&steps=bgrg&goal=_0"
 creators = "さっか"
 source = "戦技研HP"
 sourceDetail = "Easy 第35問"
 
 [[entries]]
+id = 815
 query = "field=0_g.....ggy..bbyy..brrr.&steps=gyrb&goal=0_0_4_0_"
 creators = "platinum"
 source = "戦技研HP"
 sourceDetail = "Easy 第36問"
 
 [[entries]]
+id = 816
 query = "field=0_g...bggbggyyybbgbbb&steps=bgyg&goal=0_0_5_0_"
 creators = "aojil"
 source = "戦技研HP"
 sourceDetail = "Easy 第37問"
 
 [[entries]]
+id = 817
 query = "field=0_r....rr..rggb..rrgbb.&steps=rbrg&goal=2_0_12_0_"
 creators = "aojil"
 source = "戦技研HP"
 sourceDetail = "Easy 第38問"
 
 [[entries]]
+id = 818
 query = "field=0_yg..rygygrrrygrryygygg&steps=yrgr&goal=0_0_6_0_"
 creators = "shimogon"
 source = "戦技研HP"
 sourceDetail = "Easy 第39問"
 
 [[entries]]
+id = 819
 query = "field=0_b....brb...bgg.b.rrgbb&steps=rbgb&goal=0_0_4_0_0"
 creators = "hides"
 source = "戦技研HP"
 sourceDetail = "Easy 第40問"
 
 [[entries]]
+id = 820
 query = "field=0_o.....oo..gggoogybbbogyorrrgyooyyy&steps=gyrybg&goal=0_0_6_0_"
 creators = "shimogon"
 source = "戦技研HP"
 sourceDetail = "Easy 第41問"
 
 [[entries]]
+id = 821
 query = "field=0_bb....gg....gr..oooo..oooo.&steps=rbrrbg&goal=0_0_3_0_0"
 creators = "さっか"
 source = "戦技研HP"

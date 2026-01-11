@@ -12,17 +12,19 @@ import ../../src/pon2/app/[grimoire]
 
 block: # init, add
   let
+    id = 10'i16
     query = "field=0_rrrbbb&steps=rb&goal=0_0_2_0_"
     title = "title1"
     creators = @["creator1", "creator2"]
     source = "source1"
     sourceDetail = "sourceDetail1"
 
-    entry1 = GrimoireEntry.init(query, title, creators, source, sourceDetail)
-    entry2 = GrimoireEntry.init("field=1_ggpp.&steps=gpgp&goal=_0")
+    entry1 = GrimoireEntry.init(id, query, title, creators, source, sourceDetail)
+    entry2 = GrimoireEntry.init(20, "field=1_ggpp.&steps=gpgp&goal=_0")
 
   check entry1 ==
     GrimoireEntry(
+      id: id,
       query: query,
       rule: Tsu,
       moveCount: 1,
@@ -71,33 +73,38 @@ block: # init, add
 # ------------------------------------------------
 
 block:
-  # `[]`, isReady, `isReady=`, len, matchedEntryIndices, moveCountMax, sources, match
+  # getEntry, isReady, `isReady=`, len, matchedEntryIds, moveCountMax, sources, match
   let
     entry0 = GrimoireEntry.init(
+      0,
       "field=0_p.....op....pp...ggo...gppp.&steps=gp&goal=0_0_3_0_",
       creators = @["OrangeP"],
       source = "早大なぞぷよマスターズ2025",
       sourceDetail = "第1問",
     )
     entry1 = GrimoireEntry.init(
+      100,
       "field=0_o..o..po.g..pg.ggopggppp&steps=gpgp&goal=1_0_2_0_",
       creators = @["OrangeP"],
       source = "早大なぞぷよマスターズ2025",
       sourceDetail = "第17問",
     )
     entry2 = GrimoireEntry.init(
+      20,
       "field=0_b.....o.....bbr.bbobr.&steps=rbrb&goal=0_0_3_0_",
       creators = @["Pon!通"],
       source = "早大なぞぷよマスターズ2025",
       sourceDetail = "第9問",
     )
     entry3 = GrimoireEntry.init(
+      3,
       "field=3_~.ypor..oprr..y.yy....y&steps=ypyyrp&goal=0_0_4_0_",
       creators = @["Pon!通"],
       source = "早大なぞぷよマスターズ2024",
       sourceDetail = "第31問",
     )
     entry4 = GrimoireEntry.init(
+      40,
       "field=0_&steps=o1_0_0_0_0_0oyyo0_1_0_1_0_1oyyo1_0_0_0_1_1oyyo0_1_0_0_1_1oyyo0_0_1_0_1_1oyy&goal=_0",
       title = "流れ星",
       creators = @["π"],
@@ -105,6 +112,7 @@ block:
       sourceDetail = "第30問",
     )
     entry5 = GrimoireEntry.init(
+      5,
       "field=0_pb.pb.bp.pb.oo.oo.pb.pb.pb.bp.oo.oo.bp.bb.pb.pp.oo.oo.bb.bp.pp.pb.&steps=pbppbbpbppbbpbpb&goal=0_0_8_0_0",
       title = "コラプサー",
       creators = @["π"],
@@ -114,18 +122,20 @@ block:
 
   var grimoire = Grimoire.init [entry0, entry1, entry2, entry3, entry4, entry5]
 
-  check grimoire[0] == entry0
-  check grimoire[1] == entry1
+  check grimoire.getEntry(100).isErr
+  check grimoire.getEntry(200).isErr
   check not grimoire.isReady
   check grimoire.len == 6
-  check grimoire.matchedEntryIndices == set[int16]({})
+  check grimoire.matchedEntryIds == set[int16]({})
   check grimoire.moveCountMax == 10
   check grimoire.sources == newSeq[string]()
 
   grimoire.isReady = true
 
+  check grimoire.getEntry(100) == Pon2Result[GrimoireEntry].ok entry1
+  check grimoire.getEntry(200).isErr
   check grimoire.isReady
-  check grimoire.matchedEntryIndices == {0'i16, 1, 2, 3, 4, 5}
+  check grimoire.matchedEntryIds == {0'i16, 100, 20, 3, 40, 5}
   check grimoire.sources ==
     @[
       "早大なぞぷよマスターズ2020", "早大なぞぷよマスターズ2022",
@@ -133,30 +143,30 @@ block:
     ]
 
   grimoire.match GrimoireMatcher.init(ruleOpt = Opt[Rule].ok Water)
-  check grimoire.matchedEntryIndices == {3'i16}
+  check grimoire.matchedEntryIds == {3'i16}
 
   grimoire.match GrimoireMatcher.init(moveCountOpt = Opt[int].ok 1)
-  check grimoire.matchedEntryIndices == {0'i16}
+  check grimoire.matchedEntryIds == {0'i16}
 
   grimoire.match GrimoireMatcher.init(
     kindOptOpt = Opt[Opt[GoalKind]].ok Opt[GoalKind].ok Chain
   )
-  check grimoire.matchedEntryIndices == {0'i16, 2, 3, 5}
+  check grimoire.matchedEntryIds == {0'i16, 20, 3, 5}
 
   grimoire.match GrimoireMatcher.init(hasClearColorOpt = Opt[bool].ok true)
-  check grimoire.matchedEntryIndices == {4'i16, 5}
+  check grimoire.matchedEntryIds == {40'i16, 5}
 
   grimoire.match GrimoireMatcher.init(creatorOpt = Opt[string].ok "PoN")
-  check grimoire.matchedEntryIndices == {2'i16, 3}
+  check grimoire.matchedEntryIds == {20'i16, 3}
 
   grimoire.match GrimoireMatcher.init(titleOpt = Opt[string].ok "プサ")
-  check grimoire.matchedEntryIndices == {5'i16}
+  check grimoire.matchedEntryIds == {5'i16}
 
   grimoire.match GrimoireMatcher.init(sourceOpt = Opt[string].ok "2025")
-  check grimoire.matchedEntryIndices == {0'i16, 1, 2}
+  check grimoire.matchedEntryIds == {0'i16, 100, 20}
 
   grimoire.match GrimoireMatcher.init(
     moveCountOpt = Opt[int].ok 2,
     kindOptOpt = Opt[Opt[GoalKind]].ok Opt[GoalKind].ok Color,
   )
-  check grimoire.matchedEntryIndices == {1'i16}
+  check grimoire.matchedEntryIds == {100'i16}

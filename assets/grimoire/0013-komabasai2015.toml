@@ -1,130 +1,152 @@
 [[entries]]
+id = 425
 query = "field=0_y.....y....bb....byyy.&steps=yyby&goal=0_0_3_0_"
 creators = "ウァルト"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Easy 1"
 
 [[entries]]
+id = 426
 query = "field=0_bb....rb...ppp...rrr&steps=prpb&goal=_0"
 creators = "くだら"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Easy 2"
 
 [[entries]]
+id = 427
 query = "field=0_gb....gg....bb...gby...gyy..&steps=ggyg&goal=0_0_4_0_"
 creators = "かにすけ"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Easy 3"
 
 [[entries]]
+id = 428
 query = "field=0_bbg...bggb..rrrbb&steps=bgbr&goal=0_0_4_0_"
 creators = "ウァルト"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Easy 4"
 
 [[entries]]
+id = 429
 query = "field=0_yb....yy...yrr..rrbr..rbbyy.&steps=ryry&goal=0_0_5_0_"
 creators = "colo"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Easy 5"
 
 [[entries]]
+id = 430
 query = "field=0_rr....gr....bg...brg...brr..&steps=brgr&goal=0_0_4_0_"
 creators = "ウァルト"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Easy 6"
 
 [[entries]]
+id = 431
 query = "field=0_r.....r.....r.....y.g...ygg...yry...grr...ggyy.&steps=rygyrg&goal=0_0_6_0_"
 creators = "まてりあ"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Normal 1"
 
 [[entries]]
+id = 432
 query = "field=0_r.....r.go.rg.ggobg.rrrbb.&steps=rggbgr&goal=0_0_5_0_"
 creators = "colo"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Normal 2"
 
 [[entries]]
+id = 433
 query = "field=0_bbb...rgg...yyy...ggg...bbb...rrr..&steps=bgggyb&goal=0_0_6_0_"
 creators = "mtsd"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Normal 3"
 
 [[entries]]
+id = 434
 query = "field=0_oo..oorr..rroo..oroo..roro..roro..oror..rorr.roroo.roroo.&steps=rrrrrr&goal=_3"
 creators = "これえん"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Normal 4"
 
 [[entries]]
+id = 435
 query = "field=0_bb...bgg...boo..grrg..bbrg&steps=grgbgb&goal=0_0_5_0_"
 creators = "colo"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Normal 5"
 
 [[entries]]
+id = 436
 query = "field=0_ggrr..ygry..ryyg.yrrggy&steps=grgrgrgr&goal=6_2_26_0_"
 creators = "へみおす"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Normal 6"
 
 [[entries]]
+id = 437
 query = "field=0_ggg...bbb..yyrr.bbyrgg&steps=bgbgrgby&goal=0_0_6_0_"
 creators = "かにすけ"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Normal 7"
 
 [[entries]]
+id = 438
 query = "field=0_r....gr....yy....gy...rgr...gyr...gyy..&steps=rgrgygyr&goal=0_0_6_0_"
 creators = "まてりあ"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Normal 8"
 
 [[entries]]
+id = 439
 query = "field=0_rrbbbrroyoyrgyoyorgoyoyggbbbgg&steps=rygbgyrb&goal=1_0_4_0_"
 creators = "ウァルト"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Normal 9"
 
 [[entries]]
+id = 440
 query = "field=0_rbog..robg..gbor..gobr..rbog..robg.&steps=rgrbrrrbrg&goal=0_0_7_0_"
 creators = "かにすけ"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Normal 10"
 
 [[entries]]
+id = 441
 query = "field=0_yybgyyybgbbyrrrggg&steps=brgygbgbyb&goal=0_0_7_0_"
 creators = "かにすけ"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Hard 1"
 
 [[entries]]
+id = 442
 query = "field=0_yyyo..oggg..yyyo..orrr..bbbo..oggg..bbbo..orrr.&steps=gygybrbr&goal=1_0_3_0_"
 creators = "ウァルト"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Hard 2"
 
 [[entries]]
+id = 443
 query = "field=0_r.....y.....ryrr..bbyr..byyb..rrbb.&steps=yrbryrbryr&goal=0_0_7_0_"
 creators = "まてりあ"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Hard 3"
 
 [[entries]]
+id = 444
 query = "field=0_rrryyyooorrrbbboooooobbbgggooorrrbbb&steps=rybybgrybyry&goal=0_0_9_0_"
 creators = "ウァルト"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Hard 4"
 
 [[entries]]
+id = 445
 query = "field=0_yyg..bygg..rryy.grybb.yyrbr.gggrr.&steps=bygybybrby&goal=0_0_9_0_"
 creators = "ウァルト"
 source = "2015年度駒場祭ぷよぷよ大会"
 sourceDetail = "Extra 1"
 
 [[entries]]
+id = 446
 query = "field=0_r....gr...gyy...ygy...rrg...rggy..yyrr.&steps=gygyrygygggy&goal=0_0_8_0_"
 creators = "ウァルト"
 source = "2015年度駒場祭ぷよぷよ大会"

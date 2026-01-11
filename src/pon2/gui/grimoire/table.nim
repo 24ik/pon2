@@ -73,14 +73,12 @@ when defined(js) or defined(nimsuggest):
           span(class = "icon"):
             italic(class = "fa-solid fa-forward-fast")
 
-  func initPlayHandler(
-      self: ref Grimoire, entry: GrimoireEntry, entryIndex: int16
-  ): () -> void =
+  func initPlayHandler(self: ref Grimoire, entry: GrimoireEntry): () -> void =
     ## Returns the click handler of the play button.
     () => (
       block:
         self[].simulator.assign Simulator.init entry.query.parseNazoPuyo(Pon2).unsafeValue
-        GrimoireLocalStorage.selectedEntryIndex = entryIndex
+        GrimoireLocalStorage.selectedEntryId = entry.id
     )
 
   proc toGrimoireTableVNode(
@@ -91,7 +89,7 @@ when defined(js) or defined(nimsuggest):
       beginIndex = EntryCountInPage * clampedPageIndex
       endIndex = min(
         EntryCountInPage * (clampedPageIndex + 1),
-        helper.grimoireOpt.unsafeValue.matchedEntryIndices.len,
+        helper.grimoireOpt.unsafeValue.matchedEntryIds.len,
       )
 
     buildHtml tdiv(class = "table-container"):
@@ -119,23 +117,21 @@ when defined(js) or defined(nimsuggest):
         tbody:
           for index in beginIndex ..< endIndex:
             let
-              entryIndex = helper.grimoireOpt.unsafeValue.matchedEntryIndices[index]
-              entry = self[][entryIndex]
+              entryId = helper.grimoireOpt.unsafeValue.matchedEntryIds[index]
+              entry = self[].getEntry(entryId).unsafeValue
               goalDescs = ($entry.goal).split '&'
 
             tr:
               td:
-                button(
-                  class = "button", onclick = self.initPlayHandler(entry, entryIndex)
-                ):
+                button(class = "button", onclick = self.initPlayHandler entry):
                   span(class = "icon"):
                     italic(class = "fa-solid fa-gamepad")
               td:
-                if entryIndex in helper.grimoireOpt.unsafeValue.solvedEntryIndices:
+                if entryId in helper.grimoireOpt.unsafeValue.solvedEntryIds:
                   span(class = "icon"):
                     italic(class = "fa-solid fa-circle-check")
               td:
-                text ($(index + 1)).kstring
+                text ($entry.id).kstring
               td:
                 text entry.title.kstring
               td:
@@ -166,7 +162,7 @@ when defined(js) or defined(nimsuggest):
     ## Returns the grimoire match result node.
     let
       pageCount =
-        helper.grimoireOpt.unsafeValue.matchedEntryIndices.len.ceilDiv EntryCountInPage
+        helper.grimoireOpt.unsafeValue.matchedEntryIds.len.ceilDiv EntryCountInPage
       clampedPageIndex =
         helper.grimoireOpt.unsafeValue.pageIndex.clamp(0, max(pageCount - 1, 0))
 
