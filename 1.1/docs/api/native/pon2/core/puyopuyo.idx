@@ -1,0 +1,15 @@
+nimTitle	puyopuyo	pon2/core/puyopuyo.html	module src/pon2/core/puyopuyo		0
+nim	PuyoPuyo	pon2/core/puyopuyo.html#PuyoPuyo	object PuyoPuyo		16
+nim	init	pon2/core/puyopuyo.html#init,typePuyoPuyo,Field,Steps	proc init(T: type PuyoPuyo; field: Field; steps: Steps): T:type		24
+nim	init	pon2/core/puyopuyo.html#init,typePuyoPuyo	proc init(T: type PuyoPuyo; rule = Rule.Tsu): T:type		27
+nim	cellCount	pon2/core/puyopuyo.html#cellCount,PuyoPuyo,Cell	proc cellCount(self: PuyoPuyo; cell: Cell): int		34
+nim	puyoCount	pon2/core/puyopuyo.html#puyoCount,PuyoPuyo	proc puyoCount(self: PuyoPuyo): int		38
+nim	coloredPuyoCount	pon2/core/puyopuyo.html#coloredPuyoCount,PuyoPuyo	proc coloredPuyoCount(self: PuyoPuyo): int		42
+nim	nuisancePuyoCount	pon2/core/puyopuyo.html#nuisancePuyoCount,PuyoPuyo	proc nuisancePuyoCount(self: PuyoPuyo): int		46
+nim	move	pon2/core/puyopuyo.html#move,PuyoPuyo	proc move(self: var PuyoPuyo; calcConnection = true): MoveResult		54
+nim	`$`	pon2/core/puyopuyo.html#$,PuyoPuyo	proc `$`(self: PuyoPuyo): string		68
+nim	parsePuyoPuyo	pon2/core/puyopuyo.html#parsePuyoPuyo,string	proc parsePuyoPuyo(str: string): Pon2Result[PuyoPuyo]		71
+nim	toUriQuery	pon2/core/puyopuyo.html#toUriQuery,PuyoPuyo	proc toUriQuery(self: PuyoPuyo; fqdn = Pon2): Pon2Result[string]		95
+nim	parsePuyoPuyo	pon2/core/puyopuyo.html#parsePuyoPuyo,string,SimulatorFqdn	proc parsePuyoPuyo(query: string; fqdn: SimulatorFqdn): Pon2Result[PuyoPuyo]		158
+nimgrp	init	pon2/core/puyopuyo.html#init-procs-all	proc		24
+nimgrp	parsepuyopuyo	pon2/core/puyopuyo.html#parsePuyoPuyo-procs-all	proc		71

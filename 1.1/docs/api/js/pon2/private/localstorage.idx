@@ -1,0 +1,7 @@
+nimTitle	localstorage	pon2/private/localstorage.html	module src/pon2/private/localstorage		0
+nim	LocalStorageType	pon2/private/localstorage.html#LocalStorageType	object LocalStorageType		16
+nim	LocalStorage	pon2/private/localstorage.html#LocalStorage	const LocalStorage		18
+nim	contains	pon2/private/localstorage.html#contains,LocalStorageType,string	proc contains(localStorage: LocalStorageType; key: string): bool		24
+nim	`[]`	pon2/private/localstorage.html#[],LocalStorageType,string	proc `[]`(localStorage: LocalStorageType; key: string): Pon2Result[cstring]		27
+nim	`[]=`	pon2/private/localstorage.html#[]=,LocalStorageType,string,cstring	proc `[]=`(localStorage: LocalStorageType; key: string; val: cstring)		36
+nim	del	pon2/private/localstorage.html#del,LocalStorageType,string	proc del(localStorage: LocalStorageType; key: string)		41

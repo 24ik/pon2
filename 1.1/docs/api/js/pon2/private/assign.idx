@@ -1,0 +1,2 @@
+nimTitle	assign	pon2/private/assign.html	module src/pon2/private/assign		0
+nim	assign	pon2/private/assign.html#assign,T,T	proc assign[T](dst: var T; src: T)		16

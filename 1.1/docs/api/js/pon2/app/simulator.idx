@@ -1,0 +1,71 @@
+nimTitle	simulator	pon2/app/simulator.html	module src/pon2/app/simulator		0
+nim	SimulatorMode	pon2/app/simulator.html#SimulatorMode	enum SimulatorMode		24
+nim	SimulatorState	pon2/app/simulator.html#SimulatorState	enum SimulatorState		32
+nim	SimulatorEditData	pon2/app/simulator.html#SimulatorEditData	object SimulatorEditData		39
+nim	Simulator	pon2/app/simulator.html#Simulator	object Simulator		52
+nim	PlayModes	pon2/app/simulator.html#PlayModes	const PlayModes		66
+nim	EditModes	pon2/app/simulator.html#EditModes	const EditModes		67
+nim	ViewerModes	pon2/app/simulator.html#ViewerModes	const ViewerModes		68
+nim	EditorModes	pon2/app/simulator.html#EditorModes	const EditorModes		69
+nim	Pon2Path	pon2/app/simulator.html#Pon2Path	const Pon2Path		71
+nim	init	pon2/app/simulator.html#init,typeSimulator,NazoPuyo	proc init(T: type Simulator; nazoPuyo: NazoPuyo; mode = DefaultMode): T:type		100
+nim	init	pon2/app/simulator.html#init,typeSimulator,PuyoPuyo	proc init(T: type Simulator; puyoPuyo: PuyoPuyo; mode = DefaultMode): T:type		112
+nim	init	pon2/app/simulator.html#init,typeSimulator	proc init(T: type Simulator; mode = DefaultMode): T:type		115
+nim	undo	pon2/app/simulator.html#undo,Simulator	proc undo(self: var Simulator)		129
+nim	redo	pon2/app/simulator.html#redo,Simulator	proc redo(self: var Simulator)		139
+nim	mark	pon2/app/simulator.html#mark,Simulator	proc mark(self: Simulator): MarkResult		178
+nim	rule	pon2/app/simulator.html#rule,Simulator	proc rule(self: Simulator): Rule		190
+nim	nazoPuyo	pon2/app/simulator.html#nazoPuyo,Simulator	proc nazoPuyo(self: Simulator): NazoPuyo		194
+nim	moveResult	pon2/app/simulator.html#moveResult,Simulator	proc moveResult(self: Simulator): MoveResult		198
+nim	mode	pon2/app/simulator.html#mode,Simulator	proc mode(self: Simulator): SimulatorMode		202
+nim	state	pon2/app/simulator.html#state,Simulator	proc state(self: Simulator): SimulatorState		206
+nim	editData	pon2/app/simulator.html#editData,Simulator	proc editData(self: Simulator): SimulatorEditData		210
+nim	operating	pon2/app/simulator.html#operating,Simulator	proc operating(self: Simulator): tuple[index: int, placement: Placement]		214
+nim	rule=	pon2/app/simulator.html#rule=,Simulator,Rule	proc rule=(self: var Simulator; rule: Rule)		222
+nim	mode=	pon2/app/simulator.html#mode=,Simulator,SimulatorMode	proc mode=(self: var Simulator; mode: SimulatorMode)		227
+nim	selectingCell=	pon2/app/simulator.html#selectingCell=,Simulator,Cell	proc selectingCell=(self: var Simulator; cell: Cell)		240
+nim	selectingCross=	pon2/app/simulator.html#selectingCross=,Simulator,bool	proc selectingCross=(self: var Simulator; cross: bool)		245
+nim	setRule	pon2/app/simulator.html#setRule,Simulator,Rule	proc setRule(self: var Simulator; rule: Rule)		250
+nim	toggleFocus	pon2/app/simulator.html#toggleFocus,Simulator	proc toggleFocus(self: var Simulator)		289
+nim	toggleInsert	pon2/app/simulator.html#toggleInsert,Simulator	proc toggleInsert(self: var Simulator)		293
+nim	movePlacementRight	pon2/app/simulator.html#movePlacementRight,Simulator	proc movePlacementRight(self: var Simulator)		301
+nim	movePlacementLeft	pon2/app/simulator.html#movePlacementLeft,Simulator	proc movePlacementLeft(self: var Simulator)		305
+nim	rotatePlacementRight	pon2/app/simulator.html#rotatePlacementRight,Simulator	proc rotatePlacementRight(self: var Simulator)		309
+nim	rotatePlacementLeft	pon2/app/simulator.html#rotatePlacementLeft,Simulator	proc rotatePlacementLeft(self: var Simulator)		313
+nim	moveCursorUp	pon2/app/simulator.html#moveCursorUp,Simulator	proc moveCursorUp(self: var Simulator)		321
+nim	moveCursorDown	pon2/app/simulator.html#moveCursorDown,Simulator	proc moveCursorDown(self: var Simulator)		331
+nim	moveCursorRight	pon2/app/simulator.html#moveCursorRight,Simulator	proc moveCursorRight(self: var Simulator)		341
+nim	moveCursorLeft	pon2/app/simulator.html#moveCursorLeft,Simulator	proc moveCursorLeft(self: var Simulator)		354
+nim	delStep	pon2/app/simulator.html#delStep,Simulator,int	proc delStep(self: var Simulator; index: int)		371
+nim	writeCell	pon2/app/simulator.html#writeCell,Simulator,Row,Col	proc writeCell(self: var Simulator; row: Row; col: Col)		397
+nim	writeCell	pon2/app/simulator.html#writeCell,Simulator,int,bool	proc writeCell(self: var Simulator; index: int; pivot: bool)		474
+nim	writeCell	pon2/app/simulator.html#writeCell,Simulator,Cell	proc writeCell(self: var Simulator; cell: Cell)		487
+nim	writeCross	pon2/app/simulator.html#writeCross,Simulator,int	proc writeCross(self: var Simulator; index: int)		525
+nim	writeCross	pon2/app/simulator.html#writeCross,Simulator,bool	proc writeCross(self: var Simulator; cross: bool)		530
+nim	writeCount	pon2/app/simulator.html#writeCount,Simulator,int,Col,int	proc writeCount(self: var Simulator; index: int; col: Col; count: int)		538
+nim	writeCount	pon2/app/simulator.html#writeCount,Simulator,int	proc writeCount(self: var Simulator; count: int)		548
+nim	writeCountClamp	pon2/app/simulator.html#writeCountClamp,Simulator,int,Col,int	proc writeCountClamp(self: var Simulator; index: int; col: Col; count: int)		552
+nim	shiftFieldUp	pon2/app/simulator.html#shiftFieldUp,Simulator	proc shiftFieldUp(self: var Simulator)		580
+nim	shiftFieldDown	pon2/app/simulator.html#shiftFieldDown,Simulator	proc shiftFieldDown(self: var Simulator)		585
+nim	shiftFieldRight	pon2/app/simulator.html#shiftFieldRight,Simulator	proc shiftFieldRight(self: var Simulator)		590
+nim	shiftFieldLeft	pon2/app/simulator.html#shiftFieldLeft,Simulator	proc shiftFieldLeft(self: var Simulator)		595
+nim	flipFieldVertical	pon2/app/simulator.html#flipFieldVertical,Simulator	proc flipFieldVertical(self: var Simulator)		604
+nim	flipFieldHorizontal	pon2/app/simulator.html#flipFieldHorizontal,Simulator	proc flipFieldHorizontal(self: var Simulator)		609
+nim	flip	pon2/app/simulator.html#flip,Simulator	proc flip(self: var Simulator)		614
+nim	normalizeGoal	pon2/app/simulator.html#normalizeGoal,Simulator	proc normalizeGoal(self: var Simulator)		641
+nim	goalKindOpt=	pon2/app/simulator.html#goalKindOpt=,Simulator,Opt[GoalKind]	proc goalKindOpt=(self: var Simulator; kindOpt: Opt[GoalKind])		646
+nim	goalColor=	pon2/app/simulator.html#goalColor=,Simulator,GoalColor	proc goalColor=(self: var Simulator; color: GoalColor)		663
+nim	goalVal=	pon2/app/simulator.html#goalVal=,Simulator,int	proc goalVal=(self: var Simulator; val: int)		672
+nim	goalOperator=	pon2/app/simulator.html#goalOperator=,Simulator,GoalOperator	proc goalOperator=(self: var Simulator; operator: GoalOperator)		681
+nim	goalClearColorOpt=	pon2/app/simulator.html#goalClearColorOpt=,Simulator,Opt[GoalColor]	proc goalClearColorOpt=(self: var Simulator; clearColorOpt: Opt[GoalColor])		690
+nim	forward	pon2/app/simulator.html#forward,Simulator	proc forward(self: var Simulator; replay = false; skip = false)		800
+nim	backward	pon2/app/simulator.html#backward,Simulator	proc backward(self: var Simulator; detail = false)		819
+nim	reset	pon2/app/simulator.html#reset,Simulator	proc reset(self: var Simulator)		840
+nim	operate	pon2/app/simulator.html#operate,Simulator,KeyEvent	proc operate(self: var Simulator; key: KeyEvent): bool		853
+nim	toUri	pon2/app/simulator.html#toUri,Simulator	proc toUri(self: Simulator; clearPlacements = false; fqdn = Pon2): Pon2Result[Uri]		1014
+nim	parseSimulator	pon2/app/simulator.html#parseSimulator,Uri	proc parseSimulator(uri: Uri): Pon2Result[Simulator]		1047
+nim	toExportUri	pon2/app/simulator.html#toExportUri,Simulator	proc toExportUri(self: Simulator; viewer = true; clearPlacements = true; fqdn = Pon2): Pon2Result[\n    Uri]		1093
+nimgrp	writecell	pon2/app/simulator.html#writeCell-procs-all	proc		397
+nimgrp	writecross	pon2/app/simulator.html#writeCross-procs-all	proc		525
+nimgrp	writecount	pon2/app/simulator.html#writeCount-procs-all	proc		538
+nimgrp	init	pon2/app/simulator.html#init-procs-all	proc		100

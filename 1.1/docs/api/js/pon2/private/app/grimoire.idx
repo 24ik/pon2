@@ -1,0 +1,2 @@
+nimTitle	grimoire	pon2/private/app/grimoire.html	module src/pon2/private/app/grimoire		0
+nim	normalized	pon2/private/app/grimoire.html#normalized,string	proc normalized(str: string): string		12

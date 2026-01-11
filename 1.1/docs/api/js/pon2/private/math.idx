@@ -1,0 +1,13 @@
+nimTitle	math	pon2/private/math.html	module src/pon2/private/math		0
+nim	sum	pon2/private/math.html#sum,T,T	proc sum[T](x1, x2: T): T		13
+nim	sum	pon2/private/math.html#sum,T,T,T	proc sum[T](x1, x2, x3: T): T		17
+nim	sum	pon2/private/math.html#sum,T,T,T,T	proc sum[T](x1, x2, x3, x4: T): T		21
+nim	sum	pon2/private/math.html#sum,T,T,T,T,T	proc sum[T](x1, x2, x3, x4, x5: T): T		25
+nim	sum	pon2/private/math.html#sum,T,T,T,T,T,T	proc sum[T](x1, x2, x3, x4, x5, x6: T): T		29
+nim	sum	pon2/private/math.html#sum,T,T,T,T,T,T,T	proc sum[T](x1, x2, x3, x4, x5, x6, x7: T): T		33
+nim	sum	pon2/private/math.html#sum,T,T,T,T,T,T,T,T	proc sum[T](x1, x2, x3, x4, x5, x6, x7, x8: T): T		37
+nim	sum	pon2/private/math.html#sum,openArray[T]	proc sum[T: SomeNumber](numbers: openArray[T]): T		41
+nim	sumIt	pon2/private/math.html#sumIt.t,untyped,untyped,untyped	template sumIt(iter, unit, body: untyped): untyped		49
+nim	sumIt	pon2/private/math.html#sumIt.t,untyped,untyped	template sumIt(iter, body: untyped): untyped		57
+nimgrp	sum	pon2/private/math.html#sum-procs-all	proc		13
+nimgrp	sumit	pon2/private/math.html#sumIt-templates-all	template		49
