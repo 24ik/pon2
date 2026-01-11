@@ -35,3 +35,7 @@ when defined(js) or defined(nimsuggest):
   proc derefSimulator*(self: ref Marathon, helper: VNodeHelper): var Simulator =
     ## Dereferences the simulator.
     self[].simulator
+
+  proc derefSimulator*(self: ref Grimoire, helper: VNodeHelper): var Simulator =
+    ## Dereferences the simulator.
+    self[].simulator

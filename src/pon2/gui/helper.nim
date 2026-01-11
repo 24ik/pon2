@@ -1,4 +1,4 @@
-## This module implements helpers for making GUI.
+## This module implements helpers for making views.
 ##
 
 {.push raises: [].}
@@ -14,7 +14,7 @@ when defined(js) or defined(nimsuggest):
   import std/[jsffi]
   import karax/[kbase, vdom]
   import ../[app]
-  import ../private/[dom, utils]
+  import ../private/[dom, strutils, utils]
 
   export app, kbase
 
@@ -31,17 +31,29 @@ when defined(js) or defined(nimsuggest):
     MarathonVNodeHelper* = object ## Helper for making VNode of marathon.
       searchBarId*: kstring
 
+    GrimoireVNodeHelper* = object ## Helper for making VNode of grimoire.
+      searchId*: kstring
+      exportId*: kstring
+      importId*: kstring
+      matcher*: GrimoireMatcher
+      matchSolvedOpt*: Opt[bool]
+      matchedEntryIds*: seq[int16]
+      solvedEntryIds*: set[int16]
+      pageIndex*: int
+      entryId*: int16
+
     VNodeHelper* = object ## Helper for making VNode.
       mobile*: bool
       simulator*: SimulatorVNodeHelper
       studioOpt*: Opt[StudioVNodeHelper]
       marathonOpt*: Opt[MarathonVNodeHelper]
+      grimoireOpt*: Opt[GrimoireVNodeHelper]
 
   func init(T: type SimulatorVNodeHelper, simulator: Simulator, rootId: kstring): T =
     T(
       goalId: "pon2-simulator-goal-" & rootId,
       cameraReadyId: "pon2-simulator-cameraready-" & rootId,
-      markResult: simulator.mark,
+      markResult: if simulator.mode in EditModes: Incorrect else: simulator.mark,
     )
 
   func init(T: type StudioVNodeHelper, rootId: kstring, isReplaySimulator: bool): T =
@@ -50,12 +62,35 @@ when defined(js) or defined(nimsuggest):
   func init(T: type MarathonVNodeHelper, rootId: kstring): T =
     T(searchBarId: "pon2-marathon-searchbar-" & rootId)
 
+  func init(
+      T: type GrimoireVNodeHelper,
+      rootId: kstring,
+      matcher: GrimoireMatcher,
+      matchSolvedOpt: Opt[bool],
+      matchedEntryIds: seq[int16],
+      solvedEntryIds: set[int16],
+      pageIndex: int,
+      entryId: int16,
+  ): T =
+    T(
+      searchId: "pon2-grimoire-search-" & rootId,
+      exportId: "pon2-grimoire-export-" & rootId,
+      importId: "pon2-grimoire-import-" & rootId,
+      matcher: matcher,
+      matchSolvedOpt: matchSolvedOpt,
+      matchedEntryIds: matchedEntryIds,
+      solvedEntryIds: solvedEntryIds,
+      pageIndex: pageIndex,
+      entryId: entryId,
+    )
+
   proc init*(T: type VNodeHelper, simulatorRef: ref Simulator, rootId: kstring): T =
     VNodeHelper(
       mobile: mobileDetected(),
       simulator: SimulatorVNodeHelper.init(simulatorRef[], rootId),
       studioOpt: Opt[StudioVNodeHelper].err,
       marathonOpt: Opt[MarathonVNodeHelper].err,
+      grimoireOpt: Opt[GrimoireVNodeHelper].err,
     )
 
   proc init2*(
@@ -74,6 +109,7 @@ when defined(js) or defined(nimsuggest):
           mainRootId, isReplaySimulator = false
         ),
         marathonOpt: Opt[MarathonVNodeHelper].err,
+        grimoireOpt: Opt[GrimoireVNodeHelper].err,
       ),
       replay: VNodeHelper(
         mobile: mobile,
@@ -82,6 +118,7 @@ when defined(js) or defined(nimsuggest):
           replayRootId, isReplaySimulator = true
         ),
         marathonOpt: Opt[MarathonVNodeHelper].err,
+        grimoireOpt: Opt[GrimoireVNodeHelper].err,
       ),
     )
 
@@ -91,4 +128,27 @@ when defined(js) or defined(nimsuggest):
       simulator: SimulatorVNodeHelper.init(marathonRef[].simulator, rootId),
       studioOpt: Opt[StudioVNodeHelper].err,
       marathonOpt: Opt[MarathonVNodeHelper].ok MarathonVNodeHelper.init rootId,
+      grimoireOpt: Opt[GrimoireVNodeHelper].err,
+    )
+
+  proc init*(
+      T: type VNodeHelper,
+      grimoireRef: ref Grimoire,
+      rootId: kstring,
+      matcher: GrimoireMatcher,
+      matchSolvedOpt: Opt[bool],
+      matchedEntryIds: seq[int16],
+      solvedEntryIds: set[int16],
+      pageIndex: int,
+      entryId: int16,
+  ): T =
+    VNodeHelper(
+      mobile: mobileDetected(),
+      simulator: SimulatorVNodeHelper.init(grimoireRef[].simulator, rootId),
+      studioOpt: Opt[StudioVNodeHelper].err,
+      marathonOpt: Opt[MarathonVNodeHelper].err,
+      grimoireOpt: Opt[GrimoireVNodeHelper].ok GrimoireVNodeHelper.init(
+        rootId, matcher, matchSolvedOpt, matchedEntryIds, solvedEntryIds, pageIndex,
+        entryId,
+      ),
     )

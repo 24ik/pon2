@@ -27,6 +27,7 @@
 ## | `-d:pon2.assets=<str>`                   | Assets directory.                   | `../assets`            |
 ## | `-d:pon2.webworker=<str>`                | Web workers file.                   | `./worker.min.js`      |
 ## | `-d:pon2.build.marathon`                 | Builds marathon pages.              | `<undefined>`          |
+## | `-d:pon2.build.grimoire`                 | Builds grimoire pages.              | `<undefined>`          |
 ## | `-d:pon2.build.worker`                   | Builds web workers.                 | `<undefined>`          |
 ##
 
@@ -44,15 +45,15 @@ else:
 
   export gui
 
-proc getNimbleFile(): Path =
-  ## Returns the path to `pon2.nimble`.
+proc projectRootPath(): Path =
+  ## Returns the project root path.
   let
     head = srcPath().splitPath.head
     (head2, tail2) = head.splitPath
 
-  (if tail2 == "src".Path: head2 else: head).joinPath "pon2.nimble".Path
+  if tail2 == "src".Path: head2 else: head
 
-const Pon2Ver* = ($getNimbleFile()).staticRead.newStringStream.loadConfig.getSectionValue(
+const Pon2Ver* = ($projectRootPath().joinPath "pon2.nimble".Path).staticRead.newStringStream.loadConfig.getSectionValue(
   "", "version"
 )
 
@@ -62,78 +63,142 @@ when isMainModule:
   # ------------------------------------------------
 
   when defined(js) or defined(nimsuggest):
-    import std/[strformat]
-
     when defined(pon2.build.worker):
-      import ./pon2/private/[app, webworkers]
-    else:
-      import std/[sugar]
-      import karax/[karax, karaxdsl, kbase, vdom]
-      import ./pon2/private/[dom, gui, strutils]
-      when defined(pon2.build.marathon):
-        import std/[asyncjs, jsfetch, random]
+      import ./pon2/private/[webworkers]
+      when defined(pon2.build.grimoire):
+        import ./pon2/private/[gui]
       else:
-        import ./pon2/private/[assign]
+        import ./pon2/private/[app]
+    else:
+      import std/[strformat]
+      import karax/[karax, karaxdsl, kbase, vdom]
+      import ./pon2/private/[assign, dom, gui, strutils]
+      when defined(pon2.build.marathon):
+        import std/[asyncjs, jsfetch, os, random, sequtils, staticos, sugar]
+        import ./pon2/private/[algorithm]
+      elif defined(pon2.build.grimoire):
+        import std/[asyncjs, jsfetch, os, sequtils, staticos, sugar]
+        import ./pon2/private/[algorithm, webworkers]
+      else:
+        import std/[sugar]
 
     # ------------------------------------------------
     # JS - Utils
     # ------------------------------------------------
 
     when not defined(pon2.build.worker):
+      proc initFooterNode(): VNode =
+        ## Returns the footer node.
+        buildHtml footer(class = "footer"):
+          tdiv(class = "block"):
+            tdiv(class = "columns is-mobile is-centered"):
+              tdiv(class = "column is-narrow"):
+                tdiv(class = "content"):
+                  ul:
+                    li:
+                      a(
+                        href = "../studio/",
+                        target = "_blank",
+                        rel = "noopener noreferrer",
+                      ):
+                        text "なぞぷよエディタ"
+                    li:
+                      a(
+                        href = "../grimoire/",
+                        target = "_blank",
+                        rel = "noopener noreferrer",
+                      ):
+                        text "なぞぷよグリモワール"
+                    li:
+                      a(
+                        href = "../marathon/",
+                        target = "_blank",
+                        rel = "noopener noreferrer",
+                      ):
+                        text "とこぷよ"
+                    li:
+                      a(
+                        href =
+                          "https://docs.google.com/forms/d/e/1FAIpQLSfhFQm7x4mDQCcPfZMDfxr03PGSGoQJb_euGjxyraLbs7EIvA/viewform?usp=header",
+                        target = "_blank",
+                        rel = "noopener noreferrer",
+                      ):
+                        text "グリモワール問題追加フォーム"
+              tdiv(class = "column is-narrow"):
+                tdiv(class = "field is-grouped is-grouped-centered"):
+                  tdiv(class = "control"):
+                    a(
+                      class = "button",
+                      href = "https://github.com/24ik/pon2",
+                      target = "_blank",
+                      rel = "noopener noreferrer",
+                    ):
+                      span(class = "icon"):
+                        italic(class = "fab fa-github")
+                      span:
+                        text "GitHub"
+          tdiv(class = "block"):
+            tdiv(class = "content has-text-centered"):
+              p:
+                text "Pon!通 Ver. {Pon2Ver}".fmt
+
       proc initErrorNode(msg: string): VNode =
         ## Returns the error node.
         buildHtml section(class = "section"):
           tdiv(class = "content"):
             h1(class = "title"):
-              text("Pon!通 URL形式エラー")
-            tdiv(class = "field"):
-              label(class = "label"):
-                text "エラー内容"
-              tdiv(class = "control"):
-                textarea(class = "textarea is-large", readonly = true):
-                  text msg.kstring
-
-      proc initFooterNode(): VNode =
-        ## Returns the footer node.
-        buildHtml footer(class = "footer"):
-          tdiv(class = "content has-text-centered"):
-            p:
-              text "Pon!通 Version {Pon2Ver}".fmt
-            tdiv(class = "field is-grouped is-grouped-centered"):
-              tdiv(class = "control"):
-                a(
-                  class = "button",
-                  href = "https://github.com/24ik/pon2",
-                  target = "_blank",
-                  rel = "noopener noreferrer",
-                ):
-                  span(class = "icon"):
-                    italic(class = "fab fa-github")
-                  span:
-                    text "GitHub"
+              text("Pon!通 エラー")
+            tdiv(class = "block"):
+              tdiv(class = "content"):
+                p:
+                  text "不具合と思われる場合は，開発者（"
+                  a(
+                    href = "https://x.com/orangep24",
+                    target = "_blank",
+                    rel = "noopener noreferrer",
+                  ):
+                    text "こちら"
+                  text "）までご連絡ください．"
+            tdiv(class = "block"):
+              tdiv(class = "field"):
+                label(class = "label"):
+                  text "エラー内容"
+                tdiv(class = "control"):
+                  textarea(class = "textarea is-large", readonly = true):
+                    text msg.kstring
 
     # ------------------------------------------------
     # JS - Main
     # ------------------------------------------------
 
     when defined(pon2.build.worker):
-      # ------------------------------------------------
-      # JS - Main - Worker
-      # ------------------------------------------------
+      when defined(pon2.build.grimoire):
+        # ------------------------------------------------
+        # JS - Main - Worker - Grimoire
+        # ------------------------------------------------
 
-      proc task(args: seq[string]): Pon2Result[seq[string]] =
-        let errorMsg = "Invalid run args: {args}".fmt
+        proc task(args: seq[string]): Pon2Result[seq[string]] =
+          if args.len == 0:
+            return err "no arguments"
 
-        if args.len == 0:
-          return err errorMsg
+          args[0].toGrimoireEntryStrs.context "grimoire task failed"
 
-        let (goal, steps) = ?args.parseSolveInfo.context errorMsg
+      else:
+        # ------------------------------------------------
+        # JS - Main - Worker - Studio
+        # ------------------------------------------------
 
-        let node = ?args.parseSolveNode.context errorMsg
-        var solutions = newSeq[Solution]()
-        node.solveSingleThread solutions, steps.len, true, goal, steps
+        proc task(args: seq[string]): Pon2Result[seq[string]] =
+          if args.len == 0:
+            return err "no arguments"
 
-        ok solutions.toStrs
+          let (goal, steps) = ?args.parseSolveInfo.context "studio task failed"
+
+          let node = ?args.parseSolveNode.context "studio task failed"
+          var solutions = newSeq[Solution]()
+          node.solveSingleThread solutions, steps.len, true, goal, steps
+
+          ok solutions.toStrs
 
       task.register
     elif defined(pon2.build.marathon):
@@ -158,28 +223,31 @@ when isMainModule:
       let globalMarathonRef = new Marathon
       globalMarathonRef[] = Marathon.init rng
 
-      const ChunkCount = 16
+      const FileNames = "{projectRootPath()}/assets/marathon".fmt.staticWalkDir
+        .mapIt(it.path.splitPath.tail)
+        .filterIt(it.endsWith ".txt").sorted
       var
-        errorMsgs = newSeqOfCap[string](ChunkCount)
-        completes = newSeqOfCap[bool](ChunkCount)
+        errorMsgs = newSeqOfCap[string](FileNames.len)
+        completes = newSeqOfCap[bool](FileNames.len)
 
-      for chunkIndex in 0 ..< ChunkCount:
+      for fileName in FileNames:
         {.push warning[Uninit]: off.}
         {.push warning[ProveInit]: off.}
-        discard "{AssetsDir}/marathon/swap{chunkIndex:02}.txt".fmt.cstring.fetch
+        discard "{AssetsDir}/marathon/{fileName}".fmt.cstring.fetch
           .then((r: Response) => r.text)
           .then(
             (s: cstring) => (
               block:
                 globalMarathonRef[].load ($s).splitLines
                 completes.add true
-                if completes.len == ChunkCount:
-                  globalMarathonRef[].isReady = true
+                if completes.len == FileNames.len:
+                  globalMarathonRef[].isReady.assign true
                   safeRedraw()
             )
           )
           .catch(
-            (error: Error) => errorMsgs.add "[Chunk {chunkIndex}] {error.message}".fmt
+            (error: Error) =>
+              errorMsgs.add "error on file {fileName}\n".fmt & $error.message
           )
         {.pop.}
         {.pop.}
@@ -188,18 +256,177 @@ when isMainModule:
 
       proc renderer(): VNode =
         ## Returns the root node.
-        let errorMsg = errorMsgs.join "\n"
+        if errorMsgs.len > 0:
+          return buildHtml tdiv:
+            errorMsgs.join("\n").initErrorNode
+            initFooterNode()
+
+        let helper = VNodeHelper.init(globalMarathonRef, "pon2-main")
 
         buildHtml tdiv:
-          if errorMsg == "":
-            let helper = VNodeHelper.init(globalMarathonRef, "pon2-main")
-            section(
-              class = (if helper.mobile: "section pt-3 pl-3" else: "section").kstring
-            ):
-              globalMarathonRef.toMarathonVNode helper
-          else:
-            errorMsg.initErrorNode
+          section(
+            class = (if helper.mobile: "section pt-3 pl-3" else: "section").kstring
+          ):
+            globalMarathonRef.toMarathonVNode helper
+          initFooterNode()
 
+      renderer.setRenderer
+    elif defined(pon2.build.grimoire):
+      # ------------------------------------------------
+      # JS - Main - Grimoire
+      # ------------------------------------------------
+
+      proc keyHandler(grimoireRef: ref Grimoire, event: Event) =
+        ## Runs the keyboard event handler.
+        let
+          keyboardEvent = cast[KeyboardEvent](event)
+          focusInput = document.activeElement.className == "input"
+        if not focusInput:
+          if grimoireRef[].simulator.operate keyboardEvent.toKeyEvent:
+            safeRedraw()
+            event.preventDefault
+
+      # global grimoire
+      let globalGrimoireRef = new Grimoire
+      globalGrimoireRef[] = Grimoire.init
+
+      # set key handler
+      document.onkeydown = (event: Event) => globalGrimoireRef.keyHandler event
+
+      const FileNames = "{projectRootPath()}/assets/grimoire".fmt.staticWalkDir
+        .mapIt(it.path.splitPath.tail)
+        .filterIt(it.endsWith ".toml").sorted
+      var
+        errorMsgs = newSeqOfCap[string](FileNames.len)
+        completes = newSeqOfCap[bool](FileNames.len)
+
+      # load nazo puyo data
+      for fileName in FileNames:
+        let errorMsgPrefix = "error on file {fileName}\n".fmt
+
+        {.push warning[Uninit]: off.}
+        {.push warning[ProveInit]: off.}
+        discard "{AssetsDir}/grimoire/{fileName}".fmt.cstring.fetch
+          .then((r: Response) => r.text)
+          .then((s: cstring) => webWorkerPool.run $s)
+          .then(
+            (strsResult: Pon2Result[seq[string]]) => (
+              block:
+                if strsResult.isOk:
+                  let entriesResult = strsResult.unsafeValue.parseGrimoireEntries
+                  if entriesResult.isOk:
+                    globalGrimoireRef[].add entriesResult.unsafeValue
+                    completes.add true
+                    if completes.len == FileNames.len:
+                      globalGrimoireRef[].isReady = true
+                      safeRedraw()
+                  else:
+                    errorMsgs.add errorMsgPrefix & entriesResult.error
+                else:
+                  errorMsgs.add errorMsgPrefix & strsResult.error
+            )
+          )
+          .catch((error: Error) => errorMsgs.add errorMsgPrefix & $error.message)
+        {.pop.}
+
+      # load solve data
+      let solvedEntryIdsResult = GrimoireLocalStorage.solvedEntryIds
+      var solvedEntryIds =
+        if solvedEntryIdsResult.isOk:
+          solvedEntryIdsResult.unsafeValue
+        else:
+          errorMsgs.add solvedEntryIdsResult.error
+          {}
+
+      var
+        matchedEntryIds = set[int16]({})
+        matchedEntryIdsSeq = newSeq[int16]()
+        selectedEntryId = -1'i16
+
+      proc renderer(routerData: RouterData): VNode =
+        ## Returns the root node.
+        # error node
+        if errorMsgs.len > 0:
+          return buildHtml tdiv:
+            errorMsgs.join("\n").initErrorNode
+            initFooterNode()
+
+        # check imported
+        if GrimoireLocalStorage.imported:
+          GrimoireLocalStorage.solvedEntryIds.isErrOr:
+            solvedEntryIds.assign value
+
+          GrimoireLocalStorage.imported = false
+
+        # load and update hash data
+        # NOTE: do not update page index here since the page count is unknown
+        var hashData = routerData.hashPart.parseGrimoireHashData
+        if globalGrimoireRef[].isReady:
+          if hashData.matcher.moveCountOpt.isOk and
+              globalGrimoireRef[].moveCounts.binarySearch(
+                hashData.matcher.moveCountOpt.unsafeValue
+              ) < 0:
+            hashData.matcher.moveCountOpt.err
+            hashData.matcher.moveCountOpt.updateGrimoireHashWithMoveCount
+          if hashData.entryId notin globalGrimoireRef[].entryIds:
+            hashData.entryId.assign -1
+            hashData.entryId.updateGrimoireHashWithEntryId
+
+        # match
+        globalGrimoireRef[].match hashData.matcher
+
+        # update simulator if needed
+        if hashData.entryId != selectedEntryId:
+          let entryResult = globalGrimoireRef[].getEntry hashData.entryId
+          if entryResult.isOk:
+            globalGrimoireRef[].simulator.assign Simulator.init entryResult.unsafeValue.query.parseNazoPuyo(
+              Pon2
+            ).unsafeValue
+            selectedEntryId.assign hashData.entryId
+
+        # filter matched entry IDs with `solved` query
+        let newEntryIds =
+          if hashData.matchSolvedOpt.isErr:
+            globalGrimoireRef[].matchedEntryIds
+          elif hashData.matchSolvedOpt.unsafeValue:
+            globalGrimoireRef[].matchedEntryIds * solvedEntryIds
+          else:
+            globalGrimoireRef[].matchedEntryIds - solvedEntryIds
+
+        # update global matched entry IDs
+        if newEntryIds != matchedEntryIds:
+          matchedEntryIds.assign newEntryIds
+          matchedEntryIdsSeq.assign newEntryIds.toSeq
+
+        # make helper
+        var helper = VNodeHelper.init(
+          globalGrimoireRef, "pon2-main", hashData.matcher, hashData.matchSolvedOpt,
+          matchedEntryIdsSeq, solvedEntryIds, hashData.pageIndex, hashData.entryId,
+        )
+
+        # update solve data
+        if hashData.entryId >= 0 and helper.simulator.markResult == Correct and
+            hashData.entryId notin solvedEntryIds:
+          solvedEntryIds.incl hashData.entryId
+          GrimoireLocalStorage.solvedEntryIds = solvedEntryIds
+          helper.grimoireOpt.unsafeValue.solvedEntryIds.assign solvedEntryIds
+
+          # update matched IDs if needed
+          if hashData.entryId in matchedEntryIds and hashData.matchSolvedOpt.isOk:
+            if hashData.matchSolvedOpt.unsafeValue:
+              matchedEntryIds.incl hashData.entryId
+            else:
+              matchedEntryIds.excl hashData.entryId
+
+            matchedEntryIdsSeq.assign newEntryIds.toSeq
+            helper.grimoireOpt.unsafeValue.matchedEntryIds.assign matchedEntryIdsSeq
+
+        # make VNode
+        buildHtml tdiv:
+          section(
+            class = (if helper.mobile: "section pt-3 pl-3" else: "section").kstring
+          ):
+            globalGrimoireRef.toGrimoireVNode helper
           initFooterNode()
 
       renderer.setRenderer
@@ -264,9 +491,9 @@ when isMainModule:
   # ------------------------------------------------
 
   when not defined(js):
-    import std/[random, sequtils, strformat, sugar, uri]
+    import std/[random, sequtils, strformat, sugar]
     import cligen
-    import ./pon2/private/[assign, browsers, staticfor, strutils]
+    import ./pon2/private/[assign, browsers, staticfor, strutils, uri]
 
     # ------------------------------------------------
     # Native - Solve

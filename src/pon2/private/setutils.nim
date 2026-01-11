@@ -7,8 +7,18 @@
 {.experimental: "views".}
 
 import std/[setutils, typetraits]
+import ./[assign]
 
 export setutils except toSet
+
+func `+=`*[T](a: var set[T], b: set[T]) {.inline, noinit.} =
+  a.assign a + b
+
+func `-=`*[T](a: var set[T], b: set[T]) {.inline, noinit.} =
+  a.assign a - b
+
+func `*=`*[T](a: var set[T], b: set[T]) {.inline, noinit.} =
+  a.assign a * b
 
 template toSet*(iter: untyped): untyped =
   ## Converts the iterable to a built-in set type.

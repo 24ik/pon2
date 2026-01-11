@@ -24,7 +24,7 @@ when defined(js) or defined(nimsuggest):
 
   export vdom
 
-  proc cellBackgroundColor[S: Simulator or Studio or Marathon](
+  proc cellBackgroundColor[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper, row: Row, col: Col, editable: bool
   ): Color =
     ## Returns the cell's background color.
@@ -48,13 +48,13 @@ when defined(js) or defined(nimsuggest):
           row == AirBottomRow
       if isDead: DeadColor else: DefaultColor
 
-  func initBtnHandler[S: Simulator or Studio or Marathon](
+  func initBtnHandler[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper, row: Row, col: Col
   ): () -> void =
     ## Returns the handler for clicking buttons.
     () => self.derefSimulator(helper).writeCell(row, col)
 
-  proc toFieldVNode*[S: Simulator or Studio or Marathon](
+  proc toFieldVNode*[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper, cameraReady = false
   ): VNode =
     ## Returns the field node.

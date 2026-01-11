@@ -45,7 +45,7 @@ when defined(js) or defined(nimsuggest):
             text "N手目を固定:"
             for stepIndex in 0 ..< self[].simulator.nazoPuyo.puyoPuyo.steps.len:
               label(class = "checkbox"):
-                text "　{stepIndex.succ}".fmt.kstring
+                text "　{stepIndex + 1}".fmt.kstring
                 input(
                   id =
                     FixIndicesIdPrefix & helper.studioOpt.unsafeValue.settingId &
@@ -56,7 +56,7 @@ when defined(js) or defined(nimsuggest):
           text "N手目をゾロ許可:"
           for stepIndex in 0 ..< self[].simulator.nazoPuyo.puyoPuyo.steps.len:
             label(class = "checkbox"):
-              text "　{stepIndex.succ}".fmt.kstring
+              text "　{stepIndex + 1}".fmt.kstring
               input(
                 id =
                   AllowDoubleIndicesIdPrefix & helper.studioOpt.unsafeValue.settingId &

@@ -72,7 +72,7 @@ const PoolPollingMs = 100
 
 func parseResult(str: string): Pon2Result[seq[string]] {.inline, noinit.} =
   ## Returns the result of the web worker's task.
-  let errorMsg = "Invalid result: {str}".fmt
+  let errorMsg = "Invalid result: " & str
 
   let strs = str.split2(MsgSep, 1)
   if strs.len != 2:
@@ -164,9 +164,9 @@ proc getSelf(): JsObject {.inline, noinit, importjs: "(self)".}
 func toStr(res: Pon2Result[seq[string]]): string {.inline, noinit.} =
   ## Returns the string representation of the task result.
   if res.isOk:
-    "{OkStr}{MsgSep}{res.unsafeValue.join MsgSep}".fmt
+    OkStr & MsgSep & res.unsafeValue.join MsgSep
   else:
-    "{ErrorStr}{MsgSep}{res.error}".fmt
+    ErrorStr & MsgSep & res.error
 
 proc register*(task: WebWorkerTask) {.inline, noinit.} =
   ## Registers the task to the web worker.
@@ -175,7 +175,14 @@ proc register*(task: WebWorkerTask) {.inline, noinit.} =
     getSelf().postMessage ($event.data.to cstring).split2(MsgSep).task.toStr.cstring
 
 when not defined(pon2.build.worker):
-  let webWorkerPool* = WebWorkerPool.init getNavigator().hardwareConcurrency
-  .to(int)
-  .ceilDiv(2)
-  .clamp(1, 16)
+  # NOTE: divide by 2 because we assume hyper-threading or big.LITTLE
+  # NOTE: clamp to counter anti-fingerprinting (we assume the lower bound is 4-core)
+  let
+    concurrencyJs = getNavigator().hardwareConcurrency
+    concurrency =
+      if concurrencyJs.isNull or concurrencyJs.isUndefined:
+        0
+      else:
+        concurrencyJs.to int
+    workerCount = concurrency.ceilDiv(2).clamp(3, 16)
+    webWorkerPool* = WebWorkerPool.init workerCount

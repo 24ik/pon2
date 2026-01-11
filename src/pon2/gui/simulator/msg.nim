@@ -25,7 +25,7 @@ when defined(js) or defined(nimsuggest):
 
   const ShowNoticeCount = 6
 
-  func noticeCounts[S: Simulator or Studio or Marathon](
+  func noticeCounts[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper, score: int
   ): array[Notice, int] =
     ## Returns the numbers of notice garbages.
@@ -44,7 +44,7 @@ when defined(js) or defined(nimsuggest):
 
     counts
 
-  func goalMsg[S: Simulator or Studio or Marathon](
+  func goalMsg[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper, goal: Goal
   ): string =
     ## Returns the goal message.
@@ -140,7 +140,7 @@ when defined(js) or defined(nimsuggest):
 
     "{mainMsg}&{clearColorMsg}".fmt.strip(chars = {'&'})
 
-  proc toMsgVNode*[S: Simulator or Studio or Marathon](
+  proc toMsgVNode*[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper
   ): VNode =
     ## Returns the message node.

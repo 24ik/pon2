@@ -18,7 +18,7 @@ when defined(js) or defined(nimsuggest):
 
   export vdom
 
-  proc toNextCellVNode[S: Simulator or Studio or Marathon](
+  proc toNextCellVNode[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper, doubleNext: bool, pivot: bool
   ): VNode =
     ## Returns the node of the cell in the next or double-next step.
@@ -55,7 +55,7 @@ when defined(js) or defined(nimsuggest):
           else:
             italic(class = "fa-solid fa-arrows-rotate")
 
-  proc toNextVNode*[S: Simulator or Studio or Marathon](
+  proc toNextVNode*[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper
   ): VNode =
     ## Returns the next node.

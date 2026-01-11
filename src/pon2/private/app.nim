@@ -1,6 +1,7 @@
 ## This module implements private stuff for `app`.
 ##
 ## Submodule Documentations:
+## - [grimoire](./app/grimoire.html)
 ## - [solve](./app/solve.html)
 ##
 
@@ -9,6 +10,6 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import ./app/[solve]
+import ./app/[grimoire, solve]
 
-export solve
+export grimoire, solve

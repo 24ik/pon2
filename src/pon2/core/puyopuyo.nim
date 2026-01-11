@@ -6,10 +6,10 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, uri]
+import std/[strformat]
 import ./[cell, field, fqdn, moveresult, pair, placement, popresult, step]
 import ../[utils]
-import ../private/[assign, bitops, strutils, tables]
+import ../private/[assign, bitops, strutils, tables, uri]
 
 export field, moveresult, step, utils
 
@@ -95,7 +95,7 @@ const
 func toUriQuery*(self: PuyoPuyo, fqdn = Pon2): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query converted from the game.
   let
-    errorMsg = "Puyo Puyo that does not support URI conversion: {self}".fmt
+    errorMsg = "Puyo Puyo that does not support URI conversion: " & $self
 
     fieldQuery = ?self.field.toUriQuery(fqdn).context errorMsg
     stepsQuery = ?self.steps.toUriQuery(fqdn).context errorMsg

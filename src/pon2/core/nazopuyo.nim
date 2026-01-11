@@ -6,11 +6,11 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[strformat, uri]
+import std/[strformat]
 import
   ./[cell, field, fqdn, goal, moveresult, pair, placement, popresult, puyopuyo, step]
 import ../[utils]
-import ../private/[assign, bitops, core, strutils, tables]
+import ../private/[assign, bitops, core, strutils, tables, uri]
 
 export goal, puyopuyo, utils
 
@@ -188,7 +188,7 @@ const
 
 func toUriQueryPon2(self: NazoPuyo): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query with Pon2 format converted from the Nazo Puyo.
-  let errorMsg = "Nazo Puyo that does not support URI conversion: {self}".fmt
+  let errorMsg = "Nazo Puyo that does not support URI conversion: " & $self
 
   ok (?self.puyoPuyo.toUriQuery(Pon2).context errorMsg) & '&' &
     [(GoalKey, ?self.goal.toUriQuery(Pon2).context errorMsg)].encodeQuery
@@ -196,7 +196,7 @@ func toUriQueryPon2(self: NazoPuyo): Pon2Result[string] {.inline, noinit.} =
 func toUriQueryIshikawa(self: NazoPuyo): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query with IshikawaPuyo/Ips format converted from the Nazo Puyo.
   let
-    errorMsg = "Nazo Puyo that does not support URI conversion: {self}".fmt
+    errorMsg = "Nazo Puyo that does not support URI conversion: " & $self
     puyoPuyoQueryRaw = ?self.puyoPuyo.toUriQuery(IshikawaPuyo).context errorMsg
     puyoPuyoQuery =
       if '_' in puyoPuyoQueryRaw:

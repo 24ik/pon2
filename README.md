@@ -10,6 +10,7 @@ and [Nazo Puyo](https://vc.sega.jp/3ds/nazopuyo/).
 - **Permute** pairs in Nazo Puyo to find problems with unique solutions.
 - **[Edit Nazo Puyo](https://24ik.github.io/pon2/stable/studio/)** via the web interface.
 - **[Play Marathon](https://24ik.github.io/pon2/stable/marathon/)** in your browser.
+- **[Nazo Puyo Grimoire](https://24ik.github.io/pon2/stable/grimoire/)**.
 
 ## Installation
 

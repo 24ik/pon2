@@ -2,7 +2,7 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[appdirs, dirs, os, osproc, random, sequtils, strformat, strutils]
+import std/[appdirs, dirs, os, osproc, random, sequtils, strformat]
 import ../src/pon2/private/[bitops, math, paths]
 import unittest2
 

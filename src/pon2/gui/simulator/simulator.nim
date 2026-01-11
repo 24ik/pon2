@@ -24,7 +24,7 @@ when defined(js) or defined(nimsuggest):
 
   export vdom
 
-  proc toSimulatorVNode*[S: Simulator or Studio or Marathon](
+  proc toSimulatorVNode*[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper
   ): VNode =
     ## Returns the simulator node.

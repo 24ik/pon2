@@ -28,19 +28,19 @@ when defined(js) or defined(nimsuggest):
     "L".kstring, ";".kstring,
   ]
 
-  func initBtnHandler[S: Simulator or Studio or Marathon](
+  func initBtnHandler[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper, cell: Cell
   ): () -> void =
     ## Returns the handler for clicking button.
     () => (self.derefSimulator(helper).selectingCell = cell)
 
-  func initBtnHandler[S: Simulator or Studio or Marathon](
+  func initBtnHandler[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper, cross: bool
   ): () -> void =
     ## Returns the handler for clicking button.
     () => (self.derefSimulator(helper).selectingCross = cross)
 
-  proc toPaletteVNode*[S: Simulator or Studio or Marathon](
+  proc toPaletteVNode*[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper
   ): VNode =
     ## Returns the palette node.

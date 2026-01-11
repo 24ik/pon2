@@ -6,7 +6,8 @@
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
 
-import std/[browsers, uri]
+import std/[browsers]
+import ./[uri]
 import ../[utils]
 
 export browsers, utils

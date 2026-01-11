@@ -794,7 +794,7 @@ func toUriQueryPon2(self: Field): Pon2Result[string] {.inline, noinit.} =
 func toUriQueryIshikawa(self: Field): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query with IshikawaPuyo/Ips format converted from the field.
   if self.rule != Rule.Tsu:
-    return err "non-Tsu field is not supported on IshikawaPuyo/Ips format: {self}".fmt
+    return err "non-Tsu field is not supported on IshikawaPuyo/Ips format: " & $self
 
   let cellArray = self.toArray
 
@@ -901,7 +901,7 @@ func parseFieldIshikawa(query: string): Pon2Result[Field] {.inline, noinit.} =
 
   if query.startsWith TildeIshikawaPrefix:
     let queryWithoutTilde = query[1 ..^ 1]
-    if queryWithoutTilde.len > Height * Width - 1:
+    if queryWithoutTilde.len > Height * Width:
       return err errorMsg
 
     let
