@@ -1,2 +1,5 @@
 nimTitle	setutils	pon2/private/setutils.html	module src/pon2/private/setutils		0
-nim	toSet	pon2/private/setutils.html#toSet.t,untyped	template toSet(iter: untyped): untyped		13
+nim	`+=`	pon2/private/setutils.html#+=,set[T],set[T]	proc `+=`[T](a: var set[T]; b: set[T])		14
+nim	`-=`	pon2/private/setutils.html#-=,set[T],set[T]	proc `-=`[T](a: var set[T]; b: set[T])		17
+nim	`*=`	pon2/private/setutils.html#*=,set[T],set[T]	proc `*=`[T](a: var set[T]; b: set[T])		20
+nim	toSet	pon2/private/setutils.html#toSet.t,untyped	template toSet(iter: untyped): untyped		23

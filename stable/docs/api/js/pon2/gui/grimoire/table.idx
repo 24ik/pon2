@@ -1,0 +1,2 @@
+nimTitle	table	pon2/gui/grimoire/table.html	module src/pon2/gui/grimoire/table		0
+nim	toGrimoireMatchResultVNode	pon2/gui/grimoire/table.html#toGrimoireMatchResultVNode,ref.Grimoire,VNodeHelper	proc toGrimoireMatchResultVNode(self: ref Grimoire; helper: VNodeHelper): VNode		164

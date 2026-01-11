@@ -1,0 +1,13 @@
+nimTitle	hash	pon2/private/gui/hash.html	module src/pon2/private/gui/hash		0
+nim	GrimoireHashData	pon2/private/gui/hash.html#GrimoireHashData	object GrimoireHashData		21
+nim	parseGrimoireHashData	pon2/private/gui/hash.html#parseGrimoireHashData,cstring	proc parseGrimoireHashData(hashPart: cstring): GrimoireHashData		41
+nim	updateGrimoireHashWithRule	pon2/private/gui/hash.html#updateGrimoireHashWithRule,Opt[Rule]	proc updateGrimoireHashWithRule(ruleOpt: Opt[Rule])		112
+nim	updateGrimoireHashWithMoveCount	pon2/private/gui/hash.html#updateGrimoireHashWithMoveCount,Opt[int]	proc updateGrimoireHashWithMoveCount(moveCountOpt: Opt[int])		119
+nim	updateGrimoireHashWithKind	pon2/private/gui/hash.html#updateGrimoireHashWithKind,Opt[Opt[GoalKind]]	proc updateGrimoireHashWithKind(kindOptOpt: Opt[Opt[GoalKind]])		126
+nim	updateGrimoireHashWithClearColor	pon2/private/gui/hash.html#updateGrimoireHashWithClearColor,Opt[bool]	proc updateGrimoireHashWithClearColor(hasClearColorOpt: Opt[bool])		139
+nim	updateGrimoireHashWithTitle	pon2/private/gui/hash.html#updateGrimoireHashWithTitle,Opt[string]	proc updateGrimoireHashWithTitle(titleOpt: Opt[string])		146
+nim	updateGrimoireHashWithCreator	pon2/private/gui/hash.html#updateGrimoireHashWithCreator,Opt[string]	proc updateGrimoireHashWithCreator(creatorOpt: Opt[string])		153
+nim	updateGrimoireHashWithSource	pon2/private/gui/hash.html#updateGrimoireHashWithSource,Opt[string]	proc updateGrimoireHashWithSource(sourceOpt: Opt[string])		160
+nim	updateGrimoireHashWithSolved	pon2/private/gui/hash.html#updateGrimoireHashWithSolved,Opt[bool]	proc updateGrimoireHashWithSolved(solvedOpt: Opt[bool])		167
+nim	updateGrimoireHashWithPageIndex	pon2/private/gui/hash.html#updateGrimoireHashWithPageIndex,int	proc updateGrimoireHashWithPageIndex(pageIndex: int)		174
+nim	updateGrimoireHashWithEntryId	pon2/private/gui/hash.html#updateGrimoireHashWithEntryId,int16	proc updateGrimoireHashWithEntryId(entryId: int16)		181

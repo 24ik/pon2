@@ -1,0 +1,2 @@
+nimTitle	navbar	pon2/gui/grimoire/navbar.html	module src/pon2/gui/grimoire/navbar		0
+nim	toGrimoireNavbarVNode	pon2/gui/grimoire/navbar.html#toGrimoireNavbarVNode,ref.Grimoire,VNodeHelper	proc toGrimoireNavbarVNode(self: ref Grimoire; helper: VNodeHelper): VNode		26

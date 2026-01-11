@@ -65,7 +65,11 @@
   All = &quot;&quot;, Nuisance = &quot;おじゃま&quot;, Colored = &quot;色&quot;, Red = &quot;赤&quot;,
   Green = &quot;緑&quot;, Blue = &quot;青&quot;, Yellow = &quot;黄&quot;, Purple = &quot;紫&quot;">GoalColor</a></li>
 <li><a class="reference" href="#GoalKind" title="GoalKind {.pure.} = enum
-  Chain, Color, Count, Place, Connection, AccumColor, AccumCount">GoalKind</a></li>
+  Chain = &quot;n連鎖する&quot;, Color = &quot;n色同時に消す&quot;,
+  Count = &quot;cぷよn個同時に消す&quot;,
+  Place = &quot;cぷよn箇所で同時に消す&quot;,
+  Connection = &quot;cぷよn連結で消す&quot;, AccumColor = &quot;累計n色消す&quot;,
+  AccumCount = &quot;cぷよ累計n個消す&quot;">GoalKind</a></li>
 <li><a class="reference" href="#GoalMain" title="GoalMain = object
   kind*: GoalKind
   color*: GoalColor
@@ -202,7 +206,11 @@
 </div>
 <div id="GoalKind">
   <dt><pre><a href="goal.html#GoalKind"><span class="Identifier">GoalKind</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">Chain</span><span class="Other">,</span> <span class="Identifier">Color</span><span class="Other">,</span> <span class="Identifier">Count</span><span class="Other">,</span> <span class="Identifier">Place</span><span class="Other">,</span> <span class="Identifier">Connection</span><span class="Other">,</span> <span class="Identifier">AccumColor</span><span class="Other">,</span> <span class="Identifier">AccumCount</span></pre></dt>
+  <span class="Identifier">Chain</span> <span class="Other">=</span> <span class="StringLit">&quot;n連鎖する&quot;</span><span class="Other">,</span> <span class="Identifier">Color</span> <span class="Other">=</span> <span class="StringLit">&quot;n色同時に消す&quot;</span><span class="Other">,</span>
+  <span class="Identifier">Count</span> <span class="Other">=</span> <span class="StringLit">&quot;cぷよn個同時に消す&quot;</span><span class="Other">,</span>
+  <span class="Identifier">Place</span> <span class="Other">=</span> <span class="StringLit">&quot;cぷよn箇所で同時に消す&quot;</span><span class="Other">,</span>
+  <span class="Identifier">Connection</span> <span class="Other">=</span> <span class="StringLit">&quot;cぷよn連結で消す&quot;</span><span class="Other">,</span> <span class="Identifier">AccumColor</span> <span class="Other">=</span> <span class="StringLit">&quot;累計n色消す&quot;</span><span class="Other">,</span>
+  <span class="Identifier">AccumCount</span> <span class="Other">=</span> <span class="StringLit">&quot;cぷよ累計n個消す&quot;</span></pre></dt>
   <dd>
     
     Kind of the goal to clear the Nazo Puyo.
@@ -520,7 +528,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-30 12:02:45 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-01-11 12:30:34 UTC</small>
       </div>
     </div>
   </div>
