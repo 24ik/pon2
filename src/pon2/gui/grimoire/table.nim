@@ -12,7 +12,7 @@
 
 when defined(js) or defined(nimsuggest):
   import std/[strformat, sugar]
-  import karax/[karax, karaxdsl, vdom]
+  import karax/[karax, karaxdsl, vdom, vstyles]
   import ../[helper]
   import ../../[app]
   import ../../private/[gui, math, strutils]
@@ -88,7 +88,10 @@ when defined(js) or defined(nimsuggest):
       )
 
     buildHtml tdiv(class = "table-container"):
-      table(class = "table is-striped is-hoverable has-text-centered"):
+      table(
+        class = "table is-striped is-hoverable has-text-centered",
+        style = style(StyleAttr.whiteSpace, "nowrap"),
+      ):
         thead:
           tr:
             th:
@@ -98,13 +101,13 @@ when defined(js) or defined(nimsuggest):
             th(class = "has-text-centered"):
               text "No."
             th(class = "has-text-centered"):
-              text "タイトル"
-            th(class = "has-text-centered"):
               text "ルール"
             th(class = "has-text-centered"):
               text "手数"
             th(class = "has-text-centered"):
               text "クリア条件"
+            th(class = "has-text-centered"):
+              text "タイトル"
             th(class = "has-text-centered"):
               text "作問者"
             th(class = "has-text-centered"):
@@ -133,8 +136,6 @@ when defined(js) or defined(nimsuggest):
               td:
                 text ($entry.id).kstring
               td:
-                text entry.title.kstring
-              td:
                 text ($entry.rule).kstring
               td:
                 text ($entry.moveCount).kstring
@@ -144,6 +145,8 @@ when defined(js) or defined(nimsuggest):
                   br:
                     discard
                   text ('&' & goalDescs[i]).kstring
+              td:
+                text entry.title.kstring
               td:
                 for creatorIndex in 0 ..< entry.creators.len - 1:
                   text entry.creators[creatorIndex].kstring
