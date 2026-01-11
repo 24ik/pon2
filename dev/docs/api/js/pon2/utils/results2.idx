@@ -1,3 +1,4 @@
 nimTitle	results2	pon2/utils/results2.html	module src/pon2/utils/results2		0
 nim	Pon2Result	pon2/utils/results2.html#Pon2Result	type Pon2Result		14
-nim	context	pon2/utils/results2.html#context,Pon2Result[T],string	proc context[T](self: Pon2Result[T]; contextMsg: string): Pon2Result[T]		16
+nim	value	pon2/utils/results2.html#value,Result[T,E],T	proc value[T, E](self: Result[T, E]; defaultVal: T): T		16
+nim	context	pon2/utils/results2.html#context,Pon2Result[T],string	proc context[T](self: Pon2Result[T]; contextMsg: string): Pon2Result[T]		21

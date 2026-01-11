@@ -1,0 +1,18 @@
+nimTitle	grimoire	pon2/app/grimoire.html	module src/pon2/app/grimoire		0
+nim	GrimoireEntry	pon2/app/grimoire.html#GrimoireEntry	object GrimoireEntry		18
+nim	Grimoire	pon2/app/grimoire.html#Grimoire	object Grimoire		29
+nim	GrimoireMatcher	pon2/app/grimoire.html#GrimoireMatcher	object GrimoireMatcher		53
+nim	init	pon2/app/grimoire.html#init,typeGrimoireEntry,int16,string,string,string,string	proc init(T: type GrimoireEntry; id: int16; query: string; title = "";\n     creators = newSeq[string](); source = ""; sourceDetail = ""): T:type		66
+nim	add	pon2/app/grimoire.html#add,Grimoire,openArray[GrimoireEntry]	proc add(self: var Grimoire; entries: openArray[GrimoireEntry])		136
+nim	init	pon2/app/grimoire.html#init,typeGrimoire,openArray[GrimoireEntry]	proc init(T: type Grimoire; entries: openArray[GrimoireEntry] = []): T:type		141
+nim	init	pon2/app/grimoire.html#init,typeGrimoireMatcher	proc init(T: type GrimoireMatcher; ruleOpt = Opt[Rule].err;\n     moveCountOpt = Opt[int].err; kindOptOpt = Opt[Opt[GoalKind]].err;\n     hasClearColorOpt = Opt[bool].err; titleOpt = Opt[string].err;\n     creatorOpt = Opt[string].err; sourceOpt = Opt[string].err): T:type		168
+nim	getEntry	pon2/app/grimoire.html#getEntry,Grimoire,int16	proc getEntry(self: Grimoire; id: int16): Pon2Result[GrimoireEntry]		192
+nim	entryIds	pon2/app/grimoire.html#entryIds,Grimoire	proc entryIds(self: Grimoire): set[int16]		203
+nim	isReady	pon2/app/grimoire.html#isReady,Grimoire	proc isReady(self: Grimoire): bool		210
+nim	isReady=	pon2/app/grimoire.html#isReady=,Grimoire,bool	proc isReady=(self: var Grimoire; isReady: bool)		214
+nim	len	pon2/app/grimoire.html#len,Grimoire	proc len(self: Grimoire): int		284
+nim	matchedEntryIds	pon2/app/grimoire.html#matchedEntryIds,Grimoire	proc matchedEntryIds(self: Grimoire): set[int16]		288
+nim	moveCounts	pon2/app/grimoire.html#moveCounts,Grimoire	proc moveCounts(self: Grimoire): seq[int]		292
+nim	sources	pon2/app/grimoire.html#sources,Grimoire	proc sources(self: Grimoire): seq[string]		296
+nim	match	pon2/app/grimoire.html#match,Grimoire,GrimoireMatcher	proc match(self: var Grimoire; matcher: GrimoireMatcher)		304
+nimgrp	init	pon2/app/grimoire.html#init-procs-all	proc		66

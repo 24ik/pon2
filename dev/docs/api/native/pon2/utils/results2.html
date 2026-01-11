@@ -68,6 +68,10 @@
   <li><a class="reference" href="#context%2CPon2Result%5BT%5D%2Cstring" title="context[T](self: Pon2Result[T]; contextMsg: string): Pon2Result[T]">context[T](self: Pon2Result[T]; contextMsg: string): Pon2Result[T]</a></li>
 
 </ul>
+<ul class="simple nested-toc-section">value
+  <li><a class="reference" href="#value%2CResult%5BT%2CE%5D%2CT" title="value[T, E](self: Result[T, E]; defaultVal: T): T">value[T, E](self: Result[T, E]; defaultVal: T): T</a></li>
+
+</ul>
 
     </ul>
   </details>
@@ -109,6 +113,20 @@
   <dd>
     
     Returns the result with the context error message added.
+    <a href="https://github.com/24ik/pon2/tree/dev/src/pon2/utils/results2.nim#L21" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/dev/src/pon2/utils/results2.nim#L21" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
+  </dd>
+</div>
+
+</div>
+<div id="value-procs-all">
+  <div id="value,Result[T,E],T">
+  <dt><pre><span class="Keyword">func</span> <a href="#value%2CResult%5BT%2CE%5D%2CT"><span class="Identifier">value</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">,</span> <span class="Identifier">E</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Identifier">Result</span><span class="Other">[</span><span class="Identifier">T</span><span class="Other">,</span> <span class="Identifier">E</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">defaultVal</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Returns the (immutable) value. If the result is error, returns <tt class="docutils literal"><span class="pre"><span class="Identifier">defaultVal</span></span></tt>.
     <a href="https://github.com/24ik/pon2/tree/dev/src/pon2/utils/results2.nim#L16" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/24ik/pon2/edit/dev/src/pon2/utils/results2.nim#L16" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
@@ -126,7 +144,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2025-12-30 12:08:44 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-01-11 09:11:39 UTC</small>
       </div>
     </div>
   </div>

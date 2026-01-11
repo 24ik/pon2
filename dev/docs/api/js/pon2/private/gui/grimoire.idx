@@ -1,0 +1,3 @@
+nimTitle	grimoire	pon2/private/gui/grimoire.html	module src/pon2/private/gui/grimoire		0
+nim	toGrimoireEntryStrs	pon2/private/gui/grimoire.html#toGrimoireEntryStrs,string	proc toGrimoireEntryStrs(str: string): Pon2Result[seq[string]]		19
+nim	parseGrimoireEntries	pon2/private/gui/grimoire.html#parseGrimoireEntries,seq[string]	proc parseGrimoireEntries(strs: seq[string]): Pon2Result[seq[GrimoireEntry]]		120

@@ -1,6 +1,6 @@
 nimTitle	simd	pon2/private/simd.html	module src/pon2/private/simd		0
 nim	Sse42Available	pon2/private/simd.html#Sse42Available	const Sse42Available		21
-nim	mm_set_epi16	pon2/private/simd.html#mm_set_epi16,uint16,uint16,uint16,uint16,uint16,uint16,uint16,uint16	proc mm_set_epi16(a, b, c, d, e, f, g, h: uint16): M128i		39
-nim	`$`	pon2/private/simd.html#$,M128i	proc `$`(self: M128i): string		48
-nim	`==`	pon2/private/simd.html#==,M128i,M128i	proc `==`(x1, x2: M128i): bool		56
-nim	reverseBits	pon2/private/simd.html#reverseBits,M128i	proc reverseBits(x: M128i): M128i		64
+nim	mm_set_epi16	pon2/private/simd.html#mm_set_epi16,uint16,uint16,uint16,uint16,uint16,uint16,uint16,uint16	proc mm_set_epi16(a, b, c, d, e, f, g, h: uint16): M128i		36
+nim	`$`	pon2/private/simd.html#$,M128i	proc `$`(self: M128i): string		45
+nim	`==`	pon2/private/simd.html#==,M128i,M128i	proc `==`(x1, x2: M128i): bool		53
+nim	reverseBits	pon2/private/simd.html#reverseBits,M128i	proc reverseBits(x: M128i): M128i		61
