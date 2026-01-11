@@ -22,6 +22,7 @@ when defined(js) or defined(nimsuggest):
     matcher*: GrimoireMatcher
     matchSolvedOpt*: Opt[bool]
     pageIndex*: int
+    entryId*: int16
 
   const
     RuleKey = "rule"
@@ -33,11 +34,12 @@ when defined(js) or defined(nimsuggest):
     SourceKey = "source"
     SolvedKey = "solved"
     PageKey = "page"
+    EntryKey = "entry"
 
     ErrVal = "~"
 
   func parseGrimoireHashData*(hashPart: cstring): GrimoireHashData =
-    ## Returns the grimoire matcher and the page index converted from the hash part.
+    ## Returns the grimoire hash data converted from the hash part.
     var
       ruleOpt = Opt[Rule].err
       moveCountOpt = Opt[int].err
@@ -48,6 +50,7 @@ when defined(js) or defined(nimsuggest):
       sourceOpt = Opt[string].err
       solvedOpt = Opt[bool].err
       pageIndex = 0
+      entryId = -1'i16
 
     for (key, val) in ($hashPart).substr(1).decodeQuery:
       let decodedVal = val.decodeUrl
@@ -81,6 +84,10 @@ when defined(js) or defined(nimsuggest):
         decodedVal.parseInt.isErrOr:
           if value > 0:
             pageIndex.assign value
+      of EntryKey:
+        parseOrdinal[int16](decodedVal).isErrOr:
+          if value >= 0:
+            entryId.assign value
       else:
         discard
 
@@ -91,6 +98,7 @@ when defined(js) or defined(nimsuggest):
       ),
       matchSolvedOpt: solvedOpt,
       pageIndex: pageIndex,
+      entryId: entryId,
     )
 
   proc updateHash(key, val: string) =
@@ -166,3 +174,7 @@ when defined(js) or defined(nimsuggest):
   proc updateGrimoireHashWithPageIndex*(pageIndex: int) =
     ## Updates the hash part with the page index.
     PageKey.updateHash $pageIndex
+
+  proc updateGrimoireHashWithEntryId*(entryId: int16) =
+    ## Updates the hash part with the entry ID.
+    EntryKey.updateHash $entryId

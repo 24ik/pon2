@@ -15,7 +15,7 @@ when defined(js) or defined(nimsuggest):
   import karax/[karax, karaxdsl, vdom]
   import ../[helper]
   import ../../[app]
-  import ../../private/[assign, gui, math, strutils]
+  import ../../private/[gui, math, strutils]
 
   {.push warning[UnusedImport]: off.}
   import karax/[kbase]
@@ -75,11 +75,7 @@ when defined(js) or defined(nimsuggest):
 
   func initPlayHandler(self: ref Grimoire, entry: GrimoireEntry): () -> void =
     ## Returns the click handler of the play button.
-    () => (
-      block:
-        self[].simulator.assign Simulator.init entry.query.parseNazoPuyo(Pon2).unsafeValue
-        GrimoireLocalStorage.selectedEntryId = entry.id
-    )
+    () => entry.id.updateGrimoireHashWithEntryId
 
   proc toGrimoireTableVNode(
       self: ref Grimoire, helper: VNodeHelper, clampedPageIndex: int
@@ -121,7 +117,12 @@ when defined(js) or defined(nimsuggest):
               entry = self[].getEntry(entryId).unsafeValue
               goalDescs = ($entry.goal).split '&'
 
-            tr:
+              rowClass = (
+                if helper.grimoireOpt.unsafeValue.entryId == entryId: "is-selected"
+                else: ""
+              ).kstring
+
+            tr(class = rowClass):
               td:
                 button(class = "button", onclick = self.initPlayHandler entry):
                   span(class = "icon"):

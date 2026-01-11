@@ -40,6 +40,7 @@ when defined(js) or defined(nimsuggest):
       matchedEntryIds*: seq[int16]
       solvedEntryIds*: set[int16]
       pageIndex*: int
+      entryId*: int16
 
     VNodeHelper* = object ## Helper for making VNode.
       mobile*: bool
@@ -69,6 +70,7 @@ when defined(js) or defined(nimsuggest):
       matchedEntryIds: seq[int16],
       solvedEntryIds: set[int16],
       pageIndex: int,
+      entryId: int16,
   ): T =
     T(
       searchId: "pon2-grimoire-search-" & rootId,
@@ -79,6 +81,7 @@ when defined(js) or defined(nimsuggest):
       matchedEntryIds: matchedEntryIds,
       solvedEntryIds: solvedEntryIds,
       pageIndex: pageIndex,
+      entryId: entryId,
     )
 
   proc init*(T: type VNodeHelper, simulatorRef: ref Simulator, rootId: kstring): T =
@@ -137,6 +140,7 @@ when defined(js) or defined(nimsuggest):
       matchedEntryIds: seq[int16],
       solvedEntryIds: set[int16],
       pageIndex: int,
+      entryId: int16,
   ): T =
     VNodeHelper(
       mobile: mobileDetected(),
@@ -144,6 +148,7 @@ when defined(js) or defined(nimsuggest):
       studioOpt: Opt[StudioVNodeHelper].err,
       marathonOpt: Opt[MarathonVNodeHelper].err,
       grimoireOpt: Opt[GrimoireVNodeHelper].ok GrimoireVNodeHelper.init(
-        rootId, matcher, matchSolvedOpt, matchedEntryIds, solvedEntryIds, pageIndex
+        rootId, matcher, matchSolvedOpt, matchedEntryIds, solvedEntryIds, pageIndex,
+        entryId,
       ),
     )

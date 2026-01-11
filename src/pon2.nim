@@ -77,7 +77,7 @@ when isMainModule:
         import std/[asyncjs, jsfetch, os, random, sequtils, staticos, sugar]
         import ./pon2/private/[algorithm]
       elif defined(pon2.build.grimoire):
-        import std/[asyncjs, jsconsole, jsfetch, os, sequtils, staticos, sugar]
+        import std/[asyncjs, jsfetch, os, sequtils, staticos, sugar]
         import ./pon2/private/[algorithm, webworkers]
       else:
         import std/[sugar]
@@ -338,10 +338,10 @@ when isMainModule:
           errorMsgs.add solvedEntryIdsResult.error
           {}
 
-      GrimoireLocalStorage.selectedEntryId = -1
       var
         matchedEntryIds = set[int16]({})
         matchedEntryIdsSeq = newSeq[int16]()
+        selectedEntryId = -1'i16
 
       proc renderer(routerData: RouterData): VNode =
         ## Returns the root node.
@@ -362,6 +362,15 @@ when isMainModule:
         let hashData = routerData.hashPart.parseGrimoireHashData
         globalGrimoireRef[].match hashData.matcher
 
+        # update simulator
+        if hashData.entryId != selectedEntryId:
+          let entryResult = globalGrimoireRef[].getEntry hashData.entryId
+          if entryResult.isOk:
+            globalGrimoireRef[].simulator.assign Simulator.init entryResult.unsafeValue.query.parseNazoPuyo(
+              Pon2
+            ).unsafeValue
+            selectedEntryId.assign hashData.entryId
+
         # filter matched entry IDs with `solved` query
         let newEntryIds =
           if hashData.matchSolvedOpt.isErr:
@@ -379,31 +388,25 @@ when isMainModule:
         # make helper
         var helper = VNodeHelper.init(
           globalGrimoireRef, "pon2-main", hashData.matcher, hashData.matchSolvedOpt,
-          matchedEntryIdsSeq, solvedEntryIds, hashData.pageIndex,
+          matchedEntryIdsSeq, solvedEntryIds, hashData.pageIndex, hashData.entryId,
         )
 
         # update solve data
-        let selectedEntryIdResult = GrimoireLocalStorage.selectedEntryId
-        if selectedEntryIdResult.isOk:
-          let selectedEntryId = selectedEntryIdResult.unsafeValue
+        if hashData.entryId >= 0 and helper.simulator.markResult == Correct and
+            hashData.entryId notin solvedEntryIds:
+          solvedEntryIds.incl hashData.entryId
+          GrimoireLocalStorage.solvedEntryIds = solvedEntryIds
+          helper.grimoireOpt.unsafeValue.solvedEntryIds.assign solvedEntryIds
 
-          if selectedEntryId >= 0 and helper.simulator.markResult == Correct and
-              selectedEntryId notin solvedEntryIds:
-            solvedEntryIds.incl selectedEntryId
-            GrimoireLocalStorage.solvedEntryIds = solvedEntryIds
-            helper.grimoireOpt.unsafeValue.solvedEntryIds.assign solvedEntryIds
+          # update matched IDs if needed
+          if hashData.entryId in matchedEntryIds and hashData.matchSolvedOpt.isOk:
+            if hashData.matchSolvedOpt.unsafeValue:
+              matchedEntryIds.incl hashData.entryId
+            else:
+              matchedEntryIds.excl hashData.entryId
 
-            # update matched IDs if needed
-            if selectedEntryId in matchedEntryIds and hashData.matchSolvedOpt.isOk:
-              if hashData.matchSolvedOpt.unsafeValue:
-                matchedEntryIds.incl selectedEntryId
-              else:
-                matchedEntryIds.excl selectedEntryId
-
-              matchedEntryIdsSeq.assign newEntryIds.toSeq
-              helper.grimoireOpt.unsafeValue.matchedEntryIds.assign matchedEntryIdsSeq
-        else:
-          console.error selectedEntryIdResult.error.cstring
+            matchedEntryIdsSeq.assign newEntryIds.toSeq
+            helper.grimoireOpt.unsafeValue.matchedEntryIds.assign matchedEntryIdsSeq
 
         # make VNode
         buildHtml tdiv:
