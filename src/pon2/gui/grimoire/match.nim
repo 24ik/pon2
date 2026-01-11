@@ -75,6 +75,22 @@ when defined(js) or defined(nimsuggest):
       sourceId = helper.toSourceId
       sourceDatalistId = helper.toSourceDatalistId
 
+      titleVal = (
+        if helper.grimoireOpt.unsafeValue.matcher.titleOpt.isOk:
+        helper.grimoireOpt.unsafeValue.matcher.titleOpt.unsafeValue
+        else: ""
+      ).substr(0, InputMaxLen - 1).kstring
+      creatorVal = (
+        if helper.grimoireOpt.unsafeValue.matcher.creatorOpt.isOk:
+        helper.grimoireOpt.unsafeValue.matcher.creatorOpt.unsafeValue
+        else: ""
+      ).substr(0, InputMaxLen - 1).kstring
+      sourceVal = (
+        if helper.grimoireOpt.unsafeValue.matcher.sourceOpt.isOk:
+        helper.grimoireOpt.unsafeValue.matcher.sourceOpt.unsafeValue
+        else: ""
+      ).substr(0, InputMaxLen - 1).kstring
+
     buildHtml tdiv:
       tdiv(class = "field is-grouped"):
         label(`for` = solvedId):
@@ -254,9 +270,7 @@ when defined(js) or defined(nimsuggest):
           class = "input",
           `type` = "text",
           maxlength = ($InputMaxLen).kstring,
-          value = helper.grimoireOpt.unsafeValue.matcher.titleOpt
-            .value("")
-            .substr(0, InputMaxLen - 1).kstring,
+          value = titleVal,
           disabled = not self[].isReady,
           oninput =
             () => (
@@ -282,9 +296,7 @@ when defined(js) or defined(nimsuggest):
           `type` = "text",
           maxlength = ($InputMaxLen).kstring,
           disabled = not self[].isReady,
-          value = helper.grimoireOpt.unsafeValue.matcher.creatorOpt
-            .value("")
-            .substr(0, InputMaxLen - 1).kstring,
+          value = creatorVal,
           oninput =
             () => (
               block:
@@ -309,9 +321,7 @@ when defined(js) or defined(nimsuggest):
           class = "input",
           `type` = "text",
           maxlength = ($InputMaxLen).kstring,
-          value = helper.grimoireOpt.unsafeValue.matcher.sourceOpt
-            .value("")
-            .substr(0, InputMaxLen - 1).kstring,
+          value = sourceVal,
           disabled = not self[].isReady,
           oninput =
             () => (
