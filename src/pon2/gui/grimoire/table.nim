@@ -59,8 +59,7 @@ when defined(js) or defined(nimsuggest):
         button(
           class = "button",
           disabled = clampedPageIndex >= pageCount - 1,
-          onclick =
-            () => ((clampedPageIndex + 1).updateGrimoireHashWithPageIndex; safeRedraw()),
+          onclick = () => (clampedPageIndex + 1).updateGrimoireHashWithPageIndex,
         ):
           span(class = "icon"):
             italic(class = "fa-solid fa-forward-step")
@@ -161,11 +160,16 @@ when defined(js) or defined(nimsuggest):
 
   proc toGrimoireMatchResultVNode*(self: ref Grimoire, helper: VNodeHelper): VNode =
     ## Returns the grimoire match result node.
+    ## If the page index is invalid, updates the hash part of the URI.
     let
       pageCount =
         helper.grimoireOpt.unsafeValue.matchedEntryIds.len.ceilDiv EntryCountInPage
       clampedPageIndex =
         helper.grimoireOpt.unsafeValue.pageIndex.clamp(0, max(pageCount - 1, 0))
+
+    # update hash part
+    if self[].isReady and clampedPageIndex != helper.grimoireOpt.unsafeValue.pageIndex:
+      clampedPageIndex.updateGrimoireHashWithPageIndex
 
     buildHtml tdiv:
       tdiv(class = "block"):

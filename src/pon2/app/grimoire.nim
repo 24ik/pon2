@@ -30,8 +30,8 @@ type
     simulator*: Simulator
 
     entries: seq[GrimoireEntry]
+    entryIds: set[int16]
     matchedEntryIds: set[int16]
-    allIds: set[int16]
 
     ruleToIds: array[Rule, set[int16]]
     moveCountToIds: seq[set[int16]]
@@ -46,6 +46,7 @@ type
     sourceIndexToIds: seq[set[int16]]
 
     idToIndex: seq[int]
+    moveCounts: seq[int]
     sortedSources: seq[string]
     isReady: bool
 
@@ -112,6 +113,7 @@ func add(self: var Grimoire, entry: GrimoireEntry) =
 
   # entries
   self.entries.add entry
+  self.entryIds.incl entry.id
 
   # rule
   self.ruleToIds[nazoPuyo.puyoPuyo.field.rule].incl entry.id
@@ -140,8 +142,8 @@ func init*(T: type Grimoire, entries: openArray[GrimoireEntry] = []): T =
   var grimoire = T(
     simulator: Simulator.init,
     entries: @[],
+    entryIds: set[int16]({}),
     matchedEntryIds: set[int16]({}),
-    allIds: set[int16]({}),
     ruleToIds: Rule.initArrayWith set[int16]({}),
     moveCountToIds: @[],
     kindToIds: GoalKind.initArrayWith set[int16]({}),
@@ -154,6 +156,7 @@ func init*(T: type Grimoire, entries: openArray[GrimoireEntry] = []): T =
     sourceSuffixArray: SuffixArray.init newSeq[string](),
     sourceIndexToIds: @[],
     idToIndex: @[],
+    moveCounts: @[],
     sortedSources: @[],
     isReady: false,
   )
@@ -197,6 +200,13 @@ func getEntry*(self: Grimoire, id: int16): Pon2Result[GrimoireEntry] =
   else:
     err "ID {id} is not registered".fmt
 
+func entryIds*(self: Grimoire): set[int16] =
+  ## Returns the all IDs of the entries.
+  if self.isReady:
+    self.entryIds
+  else:
+    {}
+
 func isReady*(self: Grimoire): bool =
   ## Returns `true` if the grimoire is ready.
   self.isReady
@@ -208,6 +218,7 @@ func `isReady=`*(self: var Grimoire, isReady: bool) =
     titleToIds = initTable[string, set[int16]]()
     creatorToIds = initTable[string, set[int16]]()
     sourceToIds = initTable[string, set[int16]]()
+    moveCounts = set[int16]({})
     sourcesSet = initHashSet[string]()
     maxId = int16.low
   for entry in self.entries:
@@ -219,7 +230,7 @@ func `isReady=`*(self: var Grimoire, isReady: bool) =
       sourceToIds.mgetOrPut(entry.source.normalized, {}).incl entry.id
       sourcesSet.incl entry.source
 
-    self.allIds.incl entry.id
+    moveCounts.incl entry.moveCount.int16
     maxId = max(entry.id, maxId)
 
   # sort entries by their IDs
@@ -231,7 +242,7 @@ func `isReady=`*(self: var Grimoire, isReady: bool) =
     self.idToIndex[entry.id].assign entryIndex
 
   # match all
-  self.matchedEntryIds.assign self.allIds
+  self.matchedEntryIds.assign self.entryIds
 
   # title
   let titleCount = titleToIds.len
@@ -260,6 +271,11 @@ func `isReady=`*(self: var Grimoire, isReady: bool) =
     self.sourceIndexToIds.add ids
   self.sourceSuffixArray.assign SuffixArray.init sources
 
+  # sorted move counts
+  self.moveCounts.assign newSeqOfCap[int](moveCounts.card)
+  for moveCount in moveCounts:
+    self.moveCounts.add moveCount.int
+
   # sort source
   self.sortedSources.assign sourcesSet.toSeq.sorted
 
@@ -273,9 +289,9 @@ func matchedEntryIds*(self: Grimoire): set[int16] =
   ## Returns the sorted IDs of the matched entries.
   self.matchedEntryIds
 
-func moveCountMax*(self: Grimoire): int =
-  ## Returns the max move count of the Nazo Puyo in the grimoire.
-  self.moveCountToIds.len - 1
+func moveCounts*(self: Grimoire): seq[int] =
+  ## Returns the sorted move counts in the Nazo Puyo grimoire.
+  self.moveCounts
 
 func sources*(self: Grimoire): seq[string] =
   ## Returns the sorted sources.
@@ -290,7 +306,7 @@ func match*(self: var Grimoire, matcher: GrimoireMatcher) =
   if not self.isReady:
     return
 
-  self.matchedEntryIds.assign self.allIds
+  self.matchedEntryIds.assign self.entryIds
 
   # rule
   if matcher.ruleOpt.isOk:

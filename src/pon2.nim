@@ -358,11 +358,24 @@ when isMainModule:
 
           GrimoireLocalStorage.imported = false
 
-        # load hash data
-        let hashData = routerData.hashPart.parseGrimoireHashData
+        # load and update hash data
+        # NOTE: do not update page index here since the page count is unknown
+        var hashData = routerData.hashPart.parseGrimoireHashData
+        if globalGrimoireRef[].isReady:
+          if hashData.matcher.moveCountOpt.isOk and
+              globalGrimoireRef[].moveCounts.binarySearch(
+                hashData.matcher.moveCountOpt.unsafeValue
+              ) < 0:
+            hashData.matcher.moveCountOpt.err
+            hashData.matcher.moveCountOpt.updateGrimoireHashWithMoveCount
+          if hashData.entryId notin globalGrimoireRef[].entryIds:
+            hashData.entryId.assign -1
+            hashData.entryId.updateGrimoireHashWithEntryId
+
+        # match
         globalGrimoireRef[].match hashData.matcher
 
-        # update simulator
+        # update simulator if needed
         if hashData.entryId != selectedEntryId:
           let entryResult = globalGrimoireRef[].getEntry hashData.entryId
           if entryResult.isOk:

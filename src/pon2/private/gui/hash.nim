@@ -173,8 +173,14 @@ when defined(js) or defined(nimsuggest):
 
   proc updateGrimoireHashWithPageIndex*(pageIndex: int) =
     ## Updates the hash part with the page index.
-    PageKey.updateHash $pageIndex
+    PageKey.updateHash if pageIndex >= 0:
+      $pageIndex
+    else:
+      ""
 
   proc updateGrimoireHashWithEntryId*(entryId: int16) =
     ## Updates the hash part with the entry ID.
-    EntryKey.updateHash $entryId
+    EntryKey.updateHash if entryId >= 0:
+      $entryId
+    else:
+      ""

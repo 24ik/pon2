@@ -73,7 +73,7 @@ block: # init, add
 # ------------------------------------------------
 
 block:
-  # getEntry, isReady, `isReady=`, len, matchedEntryIds, moveCountMax, sources, match
+  # getEntry, entryIds, isReady, `isReady=`, len, matchedEntryIds, moveCounts, sources, match
   let
     entry0 = GrimoireEntry.init(
       0,
@@ -124,18 +124,21 @@ block:
 
   check grimoire.getEntry(100).isErr
   check grimoire.getEntry(200).isErr
+  check grimoire.entryIds == set[int16]({})
   check not grimoire.isReady
   check grimoire.len == 6
   check grimoire.matchedEntryIds == set[int16]({})
-  check grimoire.moveCountMax == 10
+  check grimoire.moveCounts == newSeq[int]()
   check grimoire.sources == newSeq[string]()
 
   grimoire.isReady = true
 
   check grimoire.getEntry(100) == Pon2Result[GrimoireEntry].ok entry1
   check grimoire.getEntry(200).isErr
+  check grimoire.entryIds == {0'i16, 100, 20, 3, 40, 5}
   check grimoire.isReady
   check grimoire.matchedEntryIds == {0'i16, 100, 20, 3, 40, 5}
+  check grimoire.moveCounts == @[1, 2, 3, 8, 10]
   check grimoire.sources ==
     @[
       "早大なぞぷよマスターズ2020", "早大なぞぷよマスターズ2022",

@@ -11,7 +11,7 @@
 # ------------------------------------------------
 
 when defined(js) or defined(nimsuggest):
-  import std/[asyncjs, jsconsole, json, jsonutils, sequtils, sugar]
+  import std/[asyncjs, jsconsole, json, jsonutils, sequtils]
   import ../../[utils]
   import ../../private/[bitops, localstorage, math, staticfor, strutils, zlib]
 
@@ -31,7 +31,6 @@ when defined(js) or defined(nimsuggest):
 
   const
     SolvedKey = "solved"
-    SelectedKey = "selected"
     ImportedKey = "imported"
 
   proc jsonToSet(str: string): Pon2Result[set[int16]] =
@@ -62,19 +61,6 @@ when defined(js) or defined(nimsuggest):
       LocalStorage[GrimoirePrefix & SolvedKey] = str.cstring
     except:
       console.error getCurrentExceptionMsg().cstring
-
-  proc selectedEntryId*(localStorage: GrimoireLocalStorageType): Pon2Result[int16] =
-    ## Returns the selected entry ID.
-    ## If not set, returns `-1`.
-    let valResult = LocalStorage[GrimoirePrefix & SelectedKey]
-    if valResult.isErr:
-      return ok -1'i16
-
-    ($valResult.unsafeValue).parseInt.map((index: int) => index.int16).context "cannot get selected entry ID"
-
-  proc `selectedEntryId=`*(localStorage: GrimoireLocalStorageType, entryId: int16) =
-    ## Sets the selected entry ID.
-    LocalStorage[GrimoirePrefix & SelectedKey] = ($entryId).cstring
 
   # ------------------------------------------------
   # Grimoire - Export

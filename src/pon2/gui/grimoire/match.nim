@@ -151,15 +151,16 @@ when defined(js) or defined(nimsuggest):
                 block:
                   let
                     index = moveCountId.getSelectedIndex
-                    moveCountOpt = if index == 0: Opt[int].err
-                    else: Opt[int].ok index
+                    moveCountOpt =
+                      if index == 0: Opt[int].err
+                      else: Opt[int].ok self[].moveCounts[index - 1]
                   moveCountOpt.updateGrimoireHashWithMoveCount
                   0.updateGrimoireHashWithPageIndex
               ),
           ):
             option(selected = helper.grimoireOpt.unsafeValue.matcher.moveCountOpt.isErr):
               text "全て"
-            for moveCount in 1 .. self[].moveCountMax:
+            for moveCount in self[].moveCounts:
               option(
                 selected =
                   helper.grimoireOpt.unsafeValue.matcher.moveCountOpt ==
