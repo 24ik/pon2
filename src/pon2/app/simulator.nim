@@ -720,9 +720,10 @@ func forwardApply(self: var Simulator, replay = false, skip = false) =
       self.nazoPuyo.puyoPuyo.steps[self.operating.index].placement.assign self.operating.placement
 
   # apply
+  let firstOperation = self.operating.index == 0 and self.state in {Stable, AfterEdit}
   self.nazoPuyo.puyoPuyo.field.apply(
     self.nazoPuyo.puyoPuyo.steps[self.operating.index],
-    requireSettled = self.operating.index != 0,
+    requireSettled = not firstOperation,
   )
 
   # set move result
@@ -740,6 +741,8 @@ func forwardApply(self: var Simulator, replay = false, skip = false) =
       self.state.assign WillSettle
   elif self.nazoPuyo.puyoPuyo.field.canPop:
     self.state.assign WillPop
+  elif firstOperation and not self.nazoPuyo.puyoPuyo.field.isSettled:
+    self.state.assign WillSettle
   else:
     self.state.assign Stable
     self.operating.index += 1
