@@ -102,6 +102,8 @@ func toggleFocus*(self: var Studio) =
 
 func updateReplaySimulator(self: var Studio) =
   ## Updates the replay simulator.
+  self.replaySimulator.reset
+
   var nazoPuyo = self.replaySimulator.nazoPuyo
   nazoPuyo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIndex]
 
