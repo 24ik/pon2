@@ -425,7 +425,7 @@ func childrenAtDepth*(
 
       continue
 
-    if childIsLeaf or child.canPrune goal:
+    if childIsLeaf or child.field.isDead or child.canPrune goal:
       continue
 
     if childIsSpawned:
@@ -499,7 +499,7 @@ func solveSingleThread*(
 
       continue
 
-    if childIsLeaf or child.canPrune goal:
+    if childIsLeaf or child.field.isDead or child.canPrune goal:
       continue
 
     child.solveSingleThread(

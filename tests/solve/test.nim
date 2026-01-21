@@ -515,3 +515,49 @@ yy|
 bg|
 yg|""".solve ==
       "23344N2121".toSolutions
+
+  block: # reject mid-dead
+    check """
+ちょうど1連鎖するべし
+======
+[通]
+......
+....o.
+..o.o.
+..o.o.
+..o.o.
+..o.o.
+..o.o.
+..o.o.
+..o.o.
+..o.o.
+..p.o.
+..p.oo
+..p.rr
+------
+rg|
+rg|""".solve ==
+      toSolutions("454N", "4543")
+
+    check """
+ちょうど1連鎖するべし
+======
+[すいちゅう]
+......
+......
+......
+......
+......
+~~~~~~
+ror.o.
+ooo.o.
+ooo.o.
+ooo.o.
+ooo.o.
+ooo.o.
+ooo.o.
+o.o.o.
+------
+rg|
+rg|""".solve ==
+      toSolutions("4S2N", "4S21", "4S23")
