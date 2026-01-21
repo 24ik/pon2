@@ -1,2 +1,2 @@
 nimTitle	match	pon2/gui/grimoire/match.html	module src/pon2/gui/grimoire/match		0
-nim	toGrimoireMatchVNode	pon2/gui/grimoire/match.html#toGrimoireMatchVNode,ref.Grimoire,VNodeHelper	proc toGrimoireMatchVNode(self: ref Grimoire; helper: VNodeHelper): VNode		65
+nim	toGrimoireMatchVNode	pon2/gui/grimoire/match.html#toGrimoireMatchVNode,ref.Grimoire,VNodeHelper	proc toGrimoireMatchVNode(self: ref Grimoire; helper: VNodeHelper): VNode		61
