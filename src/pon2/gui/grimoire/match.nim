@@ -58,10 +58,6 @@ when defined(js) or defined(nimsuggest):
     ## Returns the ID of the source.
     "pon2-grimoire-search-source-" & helper.grimoireOpt.unsafeValue.searchId
 
-  func toSourceDatalistId(helper: VNodeHelper): kstring =
-    ## Returns the ID of the source datalist.
-    "pon2-grimoire-search-source-datalist-" & helper.grimoireOpt.unsafeValue.searchId
-
   proc toGrimoireMatchVNode*(self: ref Grimoire, helper: VNodeHelper): VNode =
     ## Returns the grimoire match node.
     let
@@ -73,7 +69,6 @@ when defined(js) or defined(nimsuggest):
       titleId = helper.toTitleId
       creatorId = helper.toCreatorId
       sourceId = helper.toSourceId
-      sourceDatalistId = helper.toSourceDatalistId
 
       titleVal = (
         if helper.grimoireOpt.unsafeValue.matcher.titleOpt.isOk:
@@ -317,7 +312,6 @@ when defined(js) or defined(nimsuggest):
             text "出典"
         input(
           id = sourceId,
-          list = sourceDatalistId,
           class = "input",
           `type` = "text",
           maxlength = ($InputMaxLen).kstring,
@@ -337,6 +331,3 @@ when defined(js) or defined(nimsuggest):
                 0.updateGrimoireHashWithPageIndex
             ),
         )
-      datalist(id = sourceDatalistId):
-        for source in self[].sources:
-          option(value = source.kstring)
