@@ -299,6 +299,7 @@ when isMainModule:
       var
         errorMsgs = newSeqOfCap[string](FileNames.len)
         completes = newSeqOfCap[bool](FileNames.len)
+        entryCount = 0
 
       # load nazo puyo data
       for fileName in FileNames:
@@ -315,10 +316,15 @@ when isMainModule:
                 if strsResult.isOk:
                   let entriesResult = strsResult.unsafeValue.parseGrimoireEntries
                   if entriesResult.isOk:
-                    globalGrimoireRef[].add entriesResult.unsafeValue
+                    let entries = entriesResult.unsafeValue
+                    globalGrimoireRef[].add entries
                     completes.add true
+                    entryCount += entries.len
+
                     if completes.len == FileNames.len:
                       globalGrimoireRef[].isReady = true
+                      if globalGrimoireRef[].entryIds.card != entryCount:
+                        errorMsgs.add "Duplicate ID detected"
                       safeRedraw()
                   else:
                     errorMsgs.add errorMsgPrefix & entriesResult.error
