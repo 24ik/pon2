@@ -87,7 +87,7 @@ when isMainModule:
     # ------------------------------------------------
 
     when not defined(pon2.build.worker):
-      proc initFooterNode(): VNode =
+      proc initFooterVNode[T: Studio or Marathon or Grimoire](self: ref T): VNode =
         ## Returns the footer node.
         buildHtml footer(class = "footer"):
           tdiv(class = "block"):
@@ -125,24 +125,27 @@ when isMainModule:
                       ):
                         text "グリモワール問題追加フォーム"
               tdiv(class = "column is-narrow"):
-                tdiv(class = "field is-grouped is-grouped-centered"):
-                  tdiv(class = "control"):
-                    a(
-                      class = "button",
-                      href = "https://github.com/24ik/pon2",
-                      target = "_blank",
-                      rel = "noopener noreferrer",
-                    ):
-                      span(class = "icon"):
-                        italic(class = "fab fa-github")
-                      span:
-                        text "GitHub"
+                tdiv(class = "block"):
+                  self.toKeyBindVNode
+                tdiv(class = "block"):
+                  tdiv(class = "field is-grouped is-grouped-centered"):
+                    tdiv(class = "control"):
+                      a(
+                        class = "button",
+                        href = "https://github.com/24ik/pon2",
+                        target = "_blank",
+                        rel = "noopener noreferrer",
+                      ):
+                        span(class = "icon"):
+                          italic(class = "fab fa-github")
+                        span:
+                          text "GitHub"
           tdiv(class = "block"):
             tdiv(class = "content has-text-centered"):
               p:
                 text "Pon!通 Ver. {Pon2Ver}".fmt
 
-      proc initErrorNode(msg: string): VNode =
+      proc initErrorVNode(msg: string): VNode =
         ## Returns the error node.
         buildHtml section(class = "section"):
           tdiv(class = "content"):
@@ -223,6 +226,13 @@ when isMainModule:
       let globalMarathonRef = new Marathon
       globalMarathonRef[] = Marathon.init rng
 
+      # load key bind
+      let keyBindPatternResult = MarathonLocalStorage.keyBindPattern
+      if keyBindPatternResult.isOk:
+        globalMarathonRef[].simulator.keyBindPattern = keyBindPatternResult.unsafeValue
+      else:
+        MarathonLocalStorage.keyBindPattern = Pon2
+
       const FileNames = "{projectRootPath()}/assets/marathon".fmt.staticWalkDir
         .mapIt(it.path.splitPath.tail)
         .filterIt(it.endsWith ".txt").sorted
@@ -258,9 +268,8 @@ when isMainModule:
         ## Returns the root node.
         if errorMsgs.len > 0:
           return buildHtml tdiv:
-            errorMsgs.join("\n").initErrorNode
-            initFooterNode()
-
+            errorMsgs.join("\n").initErrorVNode
+            globalMarathonRef.initFooterVNode
         let helper = VNodeHelper.init(globalMarathonRef, "pon2-main")
 
         buildHtml tdiv:
@@ -268,7 +277,7 @@ when isMainModule:
             class = (if helper.mobile: "section pt-3 pl-3" else: "section").kstring
           ):
             globalMarathonRef.toMarathonVNode helper
-          initFooterNode()
+          globalMarathonRef.initFooterVNode
 
       renderer.setRenderer
     elif defined(pon2.build.grimoire):
@@ -289,6 +298,13 @@ when isMainModule:
       # global grimoire
       let globalGrimoireRef = new Grimoire
       globalGrimoireRef[] = Grimoire.init
+
+      # load key bind
+      let keyBindPatternResult = GrimoireLocalStorage.keyBindPattern
+      if keyBindPatternResult.isOk:
+        globalGrimoireRef[].simulator.keyBindPattern = keyBindPatternResult.unsafeValue
+      else:
+        GrimoireLocalStorage.keyBindPattern = Pon2
 
       # set key handler
       document.onkeydown = (event: Event) => globalGrimoireRef.keyHandler event
@@ -354,8 +370,8 @@ when isMainModule:
         # error node
         if errorMsgs.len > 0:
           return buildHtml tdiv:
-            errorMsgs.join("\n").initErrorNode
-            initFooterNode()
+            errorMsgs.join("\n").initErrorVNode
+            globalGrimoireRef.initFooterVNode
 
         # check imported
         if GrimoireLocalStorage.imported:
@@ -433,7 +449,7 @@ when isMainModule:
             class = (if helper.mobile: "section pt-3 pl-3" else: "section").kstring
           ):
             globalGrimoireRef.toGrimoireVNode helper
-          initFooterNode()
+          globalGrimoireRef.initFooterVNode
 
       renderer.setRenderer
     else:
@@ -473,6 +489,15 @@ when isMainModule:
           if simulatorResult.isOk:
             globalStudioRef[] = Studio.init simulatorResult.unsafeValue
             globalStudioRef[].simulator.normalizeGoal
+
+            # load key bind
+            let keyBindPatternResult = StudioLocalStorage.keyBindPattern
+            if keyBindPatternResult.isOk:
+              let keyBindPattern = keyBindPatternResult.unsafeValue
+              globalStudioRef[].simulator.keyBindPattern = keyBindPattern
+              globalStudioRef[].replaySimulator.keyBindPattern = keyBindPattern
+            else:
+              StudioLocalStorage.keyBindPattern = Pon2
           else:
             errorMsg.assign simulatorResult.error
 
@@ -486,9 +511,9 @@ when isMainModule:
             ):
               globalStudioRef.toStudioVNode(helper, replayHelper)
           else:
-            errorMsg.initErrorNode
+            errorMsg.initErrorVNode
 
-          initFooterNode()
+          globalStudioRef.initFooterVNode
 
       renderer.setRenderer
 
