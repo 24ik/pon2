@@ -36,6 +36,11 @@ type
     WillSettle
     AfterEdit
 
+  SimulatorKeyBindPattern* {.pure.} = enum
+    ## Simulator's key bind pattern.
+    Pon2
+    IshikawaPuyo
+
   SimulatorEditData* = object ## Edit information.
     selecting*: tuple[cellOpt: Opt[Cell], crossOpt: Opt[bool]]
     field*: tuple[row: Row, col: Col]
@@ -104,7 +109,7 @@ type
 
     mode: SimulatorMode
     state: SimulatorState
-    keyBindPattern*: SimulatorFqdn
+    keyBindPattern*: SimulatorKeyBindPattern
 
     editData: SimulatorEditData
     operating: tuple[index: int, placement: Placement]
@@ -139,106 +144,106 @@ const
     insert: false,
   )
 
-  Pon2KeyBinds = SimulatorKeyBinds(
-    modeToggle: @[KeyEventT],
-    playRotateRight: @[KeyEventK],
-    playRotateLeft: @[KeyEventJ],
-    playMoveRight: @[KeyEventD],
-    playMoveLeft: @[KeyEventA],
-    playForward: @[KeyEventS],
-    playForwardSkip: @[KeyEventSpace],
-    playForwardReplay: @[KeyEventC],
-    playBackward: @[KeyEventW, KeyEventX],
-    playReset: @[KeyEventZ],
-    editInsertToggle: @[KeyEventG],
-    editFocusToggle: @[KeyEventTab],
-    editRuleNext: @[KeyEventR],
-    editRulePrev: @[KeyEventE],
-    editCursorRight: @[KeyEventD],
-    editCursorLeft: @[KeyEventA],
-    editCursorUp: @[KeyEventW],
-    editCursorDown: @[KeyEventS],
-    editCellRed: @[KeyEventH],
-    editCellGreen: @[KeyEventJ],
-    editCellBlue: @[KeyEventK],
-    editCellYellow: @[KeyEventL],
-    editCellPurple: @[KeyEventSemicolon],
-    editCellGarbage: @[KeyEventO],
-    editCellHard: @[KeyEventP],
-    editCellNone: @[KeyEventSpace],
-    editCellRotate: @[KeyEventN],
-    editCellCrossRotate: @[KeyEventM],
-    editCell0: @[KeyEvent0],
-    editCell1: @[KeyEvent1],
-    editCell2: @[KeyEvent2],
-    editCell3: @[KeyEvent3],
-    editCell4: @[KeyEvent4],
-    editCell5: @[KeyEvent5],
-    editFieldShiftRight: @[KeyEventShiftD],
-    editFieldShiftLeft: @[KeyEventShiftA],
-    editFieldShiftUp: @[KeyEventShiftW],
-    editFieldShiftDown: @[KeyEventShiftS],
-    editFieldFlip: @[KeyEventF],
-    editUndo: @[KeyEventShiftZ],
-    editRedo: @[KeyEventShiftX],
-    editForward: @[KeyEventC],
-    editBackward: @[KeyEventX],
-    editReset: @[KeyEventZ],
-    replayForward: @[KeyEventS, KeyEventC],
-    replayBackward: @[KeyEventW, KeyEventX],
-    replayReset: @[KeyEventShiftW, KeyEventZ],
-  )
-  IshikawaPuyoKeyBinds = SimulatorKeyBinds(
-    modeToggle: @[KeyEventT],
-    playRotateRight: @[KeyEventX, KeyEvent3, KeyEvent5, KeyEventL],
-    playRotateLeft: @[KeyEventZ, KeyEvent1, KeyEventK],
-    playMoveRight: @[KeyEventM, KeyEvent6],
-    playMoveLeft: @[KeyEventB, KeyEvent4],
-    playForward: @[KeyEventN, KeyEvent2],
-    playForwardSkip: @[KeyEventSpace],
-    playForwardReplay: @[KeyEvent9],
-    playBackward: @[KeyEventH, KeyEvent8],
-    playReset: @[KeyEvent7, KeyEvent0],
-    editInsertToggle: @[KeyEventY],
-    editFocusToggle: @[KeyEventTab],
-    editRuleNext: @[KeyEventI],
-    editRulePrev: @[KeyEventU],
-    editCursorRight: @[KeyEventM, KeyEvent6],
-    editCursorLeft: @[KeyEventB, KeyEvent4],
-    editCursorUp: @[KeyEventH, KeyEvent8],
-    editCursorDown: @[KeyEventN, KeyEvent2],
-    editCellRed: @[KeyEventG],
-    editCellGreen: @[KeyEventF],
-    editCellBlue: @[KeyEventD],
-    editCellYellow: @[KeyEventS],
-    editCellPurple: @[KeyEventA],
-    editCellGarbage: @[KeyEventW],
-    editCellHard: @[KeyEventQ],
-    editCellNone: @[KeyEventSpace],
-    editCellRotate: @[KeyEventV],
-    editCellCrossRotate: @[KeyEventC],
-    editCell0: @[],
-    editCell1: @[],
-    editCell2: @[],
-    editCell3: @[],
-    editCell4: @[],
-    editCell5: @[],
-    editFieldShiftRight: @[KeyEventShiftM],
-    editFieldShiftLeft: @[KeyEventShiftB],
-    editFieldShiftUp: @[KeyEventShiftH],
-    editFieldShiftDown: @[KeyEventShiftN],
-    editFieldFlip: @[KeyEventJ],
-    editUndo: @[KeyEventShiftZ],
-    editRedo: @[KeyEventShiftX],
-    editForward: @[KeyEvent9],
-    editBackward: @[KeyEvent8],
-    editReset: @[KeyEvent7],
-    replayForward: @[KeyEventN, KeyEvent9],
-    replayBackward: @[KeyEventH, KeyEvent8],
-    replayReset: @[KeyEventShiftH, KeyEvent7],
-  )
-  SimulatorKeyBindsArray*: array[SimulatorFqdn, SimulatorKeyBinds] =
-    [Pon2KeyBinds, IshikawaPuyoKeyBinds, IshikawaPuyoKeyBinds]
+  SimulatorKeyBindsArray*: array[SimulatorKeyBindPattern, SimulatorKeyBinds] = [
+    SimulatorKeyBinds(
+      modeToggle: @[KeyEventT],
+      playRotateRight: @[KeyEventK],
+      playRotateLeft: @[KeyEventJ],
+      playMoveRight: @[KeyEventD],
+      playMoveLeft: @[KeyEventA],
+      playForward: @[KeyEventS],
+      playForwardSkip: @[KeyEventSpace],
+      playForwardReplay: @[KeyEventC],
+      playBackward: @[KeyEventW, KeyEventX],
+      playReset: @[KeyEventZ],
+      editInsertToggle: @[KeyEventG],
+      editFocusToggle: @[KeyEventTab],
+      editRuleNext: @[KeyEventR],
+      editRulePrev: @[KeyEventE],
+      editCursorRight: @[KeyEventD],
+      editCursorLeft: @[KeyEventA],
+      editCursorUp: @[KeyEventW],
+      editCursorDown: @[KeyEventS],
+      editCellRed: @[KeyEventH],
+      editCellGreen: @[KeyEventJ],
+      editCellBlue: @[KeyEventK],
+      editCellYellow: @[KeyEventL],
+      editCellPurple: @[KeyEventSemicolon],
+      editCellGarbage: @[KeyEventO],
+      editCellHard: @[KeyEventP],
+      editCellNone: @[KeyEventSpace],
+      editCellRotate: @[KeyEventN],
+      editCellCrossRotate: @[KeyEventM],
+      editCell0: @[KeyEvent0],
+      editCell1: @[KeyEvent1],
+      editCell2: @[KeyEvent2],
+      editCell3: @[KeyEvent3],
+      editCell4: @[KeyEvent4],
+      editCell5: @[KeyEvent5],
+      editFieldShiftRight: @[KeyEventShiftD],
+      editFieldShiftLeft: @[KeyEventShiftA],
+      editFieldShiftUp: @[KeyEventShiftW],
+      editFieldShiftDown: @[KeyEventShiftS],
+      editFieldFlip: @[KeyEventF],
+      editUndo: @[KeyEventShiftZ],
+      editRedo: @[KeyEventShiftX],
+      editForward: @[KeyEventC],
+      editBackward: @[KeyEventX],
+      editReset: @[KeyEventZ],
+      replayForward: @[KeyEventS, KeyEventC],
+      replayBackward: @[KeyEventW, KeyEventX],
+      replayReset: @[KeyEventShiftW, KeyEventZ],
+    ),
+    SimulatorKeyBinds(
+      modeToggle: @[KeyEventT],
+      playRotateRight: @[KeyEventX, KeyEvent3, KeyEvent5, KeyEventL],
+      playRotateLeft: @[KeyEventZ, KeyEvent1, KeyEventK],
+      playMoveRight: @[KeyEventM, KeyEvent6],
+      playMoveLeft: @[KeyEventB, KeyEvent4],
+      playForward: @[KeyEventN, KeyEvent2],
+      playForwardSkip: @[KeyEventSpace],
+      playForwardReplay: @[KeyEvent9],
+      playBackward: @[KeyEventH, KeyEvent8],
+      playReset: @[KeyEvent7, KeyEvent0],
+      editInsertToggle: @[KeyEventY],
+      editFocusToggle: @[KeyEventTab],
+      editRuleNext: @[KeyEventI],
+      editRulePrev: @[KeyEventU],
+      editCursorRight: @[KeyEventM, KeyEvent6],
+      editCursorLeft: @[KeyEventB, KeyEvent4],
+      editCursorUp: @[KeyEventH, KeyEvent8],
+      editCursorDown: @[KeyEventN, KeyEvent2],
+      editCellRed: @[KeyEventG],
+      editCellGreen: @[KeyEventF],
+      editCellBlue: @[KeyEventD],
+      editCellYellow: @[KeyEventS],
+      editCellPurple: @[KeyEventA],
+      editCellGarbage: @[KeyEventW],
+      editCellHard: @[KeyEventQ],
+      editCellNone: @[KeyEventSpace],
+      editCellRotate: @[KeyEventV],
+      editCellCrossRotate: @[KeyEventC],
+      editCell0: @[],
+      editCell1: @[],
+      editCell2: @[],
+      editCell3: @[],
+      editCell4: @[],
+      editCell5: @[],
+      editFieldShiftRight: @[KeyEventShiftM],
+      editFieldShiftLeft: @[KeyEventShiftB],
+      editFieldShiftUp: @[KeyEventShiftH],
+      editFieldShiftDown: @[KeyEventShiftN],
+      editFieldFlip: @[KeyEventJ],
+      editUndo: @[KeyEventShiftZ],
+      editRedo: @[KeyEventShiftX],
+      editForward: @[KeyEvent9],
+      editBackward: @[KeyEvent8],
+      editReset: @[KeyEvent7],
+      replayForward: @[KeyEventN, KeyEvent9],
+      replayBackward: @[KeyEventH, KeyEvent8],
+      replayReset: @[KeyEventShiftH, KeyEvent7],
+    ),
+  ]
 
 func init(T: type SimulatorDequeElem, simulator: Simulator): T =
   T(
@@ -249,7 +254,10 @@ func init(T: type SimulatorDequeElem, simulator: Simulator): T =
   )
 
 func init*(
-    T: type Simulator, nazoPuyo: NazoPuyo, mode = DefaultMode, keyBindPattern = Pon2
+    T: type Simulator,
+    nazoPuyo: NazoPuyo,
+    mode = DefaultMode,
+    keyBindPattern = SimulatorKeyBindPattern.Pon2,
 ): T =
   T(
     nazoPuyo: nazoPuyo,
@@ -264,11 +272,16 @@ func init*(
   )
 
 func init*(
-    T: type Simulator, puyoPuyo: PuyoPuyo, mode = DefaultMode, keyBindPattern = Pon2
+    T: type Simulator,
+    puyoPuyo: PuyoPuyo,
+    mode = DefaultMode,
+    keyBindPattern = SimulatorKeyBindPattern.Pon2,
 ): T =
   T.init(NazoPuyo.init(puyoPuyo, Goal.init), mode, keyBindPattern)
 
-func init*(T: type Simulator, mode = DefaultMode, keyBindPattern = Pon2): T =
+func init*(
+    T: type Simulator, mode = DefaultMode, keyBindPattern = SimulatorKeyBindPattern.Pon2
+): T =
   T.init(NazoPuyo.init, mode, keyBindPattern)
 
 # ------------------------------------------------
@@ -1171,7 +1184,9 @@ func initPon2Paths(): seq[string] =
 
 const Pon2Paths = initPon2Paths()
 
-func toUri*(self: Simulator, clearPlacements = false, fqdn = Pon2): Pon2Result[Uri] =
+func toUri*(
+    self: Simulator, clearPlacements = false, fqdn = SimulatorFqdn.Pon2
+): Pon2Result[Uri] =
   ## Returns the URI converted from the simulator.
   var uri = initUri()
   uri.scheme.assign "https"
@@ -1179,9 +1194,9 @@ func toUri*(self: Simulator, clearPlacements = false, fqdn = Pon2): Pon2Result[U
 
   uri.path.assign (
     case fqdn
-    of Pon2:
+    of SimulatorFqdn.Pon2:
       Pon2Path
-    of IshikawaPuyo, Ips:
+    of SimulatorFqdn.IshikawaPuyo, Ips:
       if self.nazoPuyo.goal != NoneGoal:
         "/simu/pn.html"
       else:
@@ -1213,7 +1228,7 @@ func parseSimulator*(uri: Uri): Pon2Result[Simulator] =
 
   let fqdn = ?uri.hostname.parseSimulatorFqdn.context "Invalid simulator: {uri}".fmt
   case fqdn
-  of Pon2:
+  of SimulatorFqdn.Pon2:
     if uri.path notin Pon2Paths:
       return err "Invalid simulator (invalid path): {uri}".fmt
 
@@ -1236,7 +1251,7 @@ func parseSimulator*(uri: Uri): Pon2Result[Simulator] =
       ?keyVals.encodeQuery.parseNazoPuyo(fqdn).context "Invalid simulator: {uri}".fmt,
       modeOpt.unsafeValue,
     )
-  of IshikawaPuyo, Ips:
+  of SimulatorFqdn.IshikawaPuyo, Ips:
     let mode: SimulatorMode
     case uri.path
     of "/simu/pe.html":
@@ -1251,7 +1266,7 @@ func parseSimulator*(uri: Uri): Pon2Result[Simulator] =
     ok Simulator.init ?uri.query.parseNazoPuyo(fqdn).context "Invalid simulator: {uri}".fmt
 
 func toExportUri*(
-    self: Simulator, viewer = true, clearPlacements = true, fqdn = Pon2
+    self: Simulator, viewer = true, clearPlacements = true, fqdn = SimulatorFqdn.Pon2
 ): Pon2Result[Uri] =
   ## Returns the URI of the simulator with any moves reset.
   var simulator = self

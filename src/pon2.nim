@@ -477,7 +477,7 @@ when isMainModule:
         if not initialized:
           var uri = initUri()
           uri.scheme.assign "https"
-          uri.hostname.assign $Pon2
+          uri.hostname.assign $SimulatorFqdn.Pon2
           uri.path.assign Pon2Path
 
           uri.query.assign ($routerData.queryString).strip(
@@ -498,7 +498,7 @@ when isMainModule:
               globalStudioRef[].simulator.keyBindPattern = keyBindPattern
               globalStudioRef[].replaySimulator.keyBindPattern = keyBindPattern
             else:
-              StudioLocalStorage.keyBindPattern = Pon2
+              StudioLocalStorage.keyBindPattern = SimulatorKeyBindPattern.Pon2
           else:
             errorMsg.assign simulatorResult.error
 

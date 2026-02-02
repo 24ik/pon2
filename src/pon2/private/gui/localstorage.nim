@@ -44,7 +44,7 @@ when defined(js) or defined(nimsuggest):
 
   proc keyBindPattern*[
       L: StudioLocalStorageType or MarathonLocalStorageType or GrimoireLocalStorageType
-  ](localStorage: L): Pon2Result[SimulatorFqdn] =
+  ](localStorage: L): Pon2Result[SimulatorKeyBindPattern] =
     ## Returns the key bind pattern.
     const Prefix =
       when L is StudioLocalStorageType:
@@ -58,11 +58,11 @@ when defined(js) or defined(nimsuggest):
     if valResult.isErr:
       return ok Pon2
 
-    parseOrdinal[SimulatorFqdn](($valResult.unsafeValue)).context "cannot get key bind pattern"
+    parseOrdinal[SimulatorKeyBindPattern](($valResult.unsafeValue)).context "cannot get key bind pattern"
 
   proc `keyBindPattern=`*[
       L: StudioLocalStorageType or MarathonLocalStorageType or GrimoireLocalStorageType
-  ](localStorage: L, keyBindPattern: SimulatorFqdn) =
+  ](localStorage: L, keyBindPattern: SimulatorKeyBindPattern) =
     ## Sets the key bind pattern.
     const Prefix =
       when L is StudioLocalStorageType:

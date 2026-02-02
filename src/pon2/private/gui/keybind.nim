@@ -19,7 +19,7 @@ when defined(js) or defined(nimsuggest):
 
   export vdom
 
-  proc setKeyBindPattern(self: ref Studio, keyBindPattern: SimulatorFqdn) =
+  proc setKeyBindPattern(self: ref Studio, keyBindPattern: SimulatorKeyBindPattern) =
     ## Sets the key bind pattern.
     self[].simulator.keyBindPattern = keyBindPattern
     self[].replaySimulator.keyBindPattern = keyBindPattern
@@ -27,7 +27,7 @@ when defined(js) or defined(nimsuggest):
     StudioLocalStorage.keyBindPattern = keyBindPattern
 
   proc setKeyBindPattern[T: Marathon or Grimoire](
-      self: ref T, keyBindPattern: SimulatorFqdn
+      self: ref T, keyBindPattern: SimulatorKeyBindPattern
   ) =
     ## Sets the key bind pattern.
     self[].simulator.keyBindPattern = keyBindPattern
@@ -45,10 +45,10 @@ when defined(js) or defined(nimsuggest):
 
     let pon2BtnClass, ipsBtnClass: kstring
     case self[].simulator.keyBindPattern
-    of Pon2:
+    of SimulatorKeyBindPattern.Pon2:
       pon2BtnClass = SelectBtnClass
       ipsBtnClass = BtnClass
-    of IshikawaPuyo, Ips:
+    of SimulatorKeyBindPattern.IshikawaPuyo:
       pon2BtnClass = BtnClass
       ipsBtnClass = SelectBtnClass
 
