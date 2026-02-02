@@ -15,6 +15,9 @@ import ../../src/pon2/private/[algorithm]
 block: # init
   check Simulator.init == Simulator.init NazoPuyo.init
   check Simulator.init(PuyoPuyo.init Rule.Water, EditEditor).mode == EditEditor
+  check Simulator.init(
+    PuyoPuyo.init Spinner, Replay, SimulatorKeyBindPattern.IshikawaPuyo
+  ).keyBindPattern == SimulatorKeyBindPattern.IshikawaPuyo
 
 # ------------------------------------------------
 # Undo / Redo / Edit
@@ -972,7 +975,7 @@ rb|""".parseNazoPuyo.unsafeValue
 # Key
 # ------------------------------------------------
 
-block: # operate
+block: # operate (pon2)
   let nazoPuyo =
     """
 ちょうど1連鎖するべし
@@ -1232,6 +1235,265 @@ pp|23""".parseNazoPuyo.unsafeValue
       simulator5.editData.steps.col, digit
     check simulator6.operate KeyEvent.init "Digit{digit}".fmt
     check simulator5 == simulator6
+
+block: # operate (ishikawa)
+  let nazoPuyo =
+    """
+ちょうど1連鎖するべし
+======
+[通]
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+......
+------
+rg|1N
+by|
+pp|23""".parseNazoPuyo.unsafeValue
+  var
+    simulator1 =
+      Simulator.init(nazoPuyo, EditEditor, SimulatorKeyBindPattern.IshikawaPuyo)
+    simulator2 =
+      Simulator.init(nazoPuyo, EditEditor, SimulatorKeyBindPattern.IshikawaPuyo)
+  check simulator1 == simulator2
+
+  simulator1.mode = PlayEditor
+  check simulator2.operate KeyEventT
+  check simulator1 == simulator2
+
+  simulator1.rotatePlacementLeft
+  check simulator2.operate KeyEventZ
+  check simulator1 == simulator2
+
+  simulator1.rotatePlacementRight
+  check simulator2.operate KeyEventX
+  check simulator1 == simulator2
+
+  simulator1.movePlacementLeft
+  check simulator2.operate KeyEventB
+  check simulator1 == simulator2
+
+  simulator1.movePlacementRight
+  check simulator2.operate KeyEventM
+  check simulator1 == simulator2
+
+  simulator1.forward
+  check simulator2.operate KeyEventN
+  check simulator1 == simulator2
+
+  simulator1.forward(replay = true)
+  check simulator2.operate KeyEvent9
+  check simulator1 == simulator2
+
+  simulator1.forward(skip = true)
+  check simulator2.operate KeyEventSpace
+  check simulator1 == simulator2
+
+  simulator1.backward
+  check simulator2.operate KeyEventH
+  check simulator1 == simulator2
+
+  simulator1.backward
+  check simulator2.operate KeyEvent8
+  check simulator1 == simulator2
+
+  simulator1.reset
+  check simulator2.operate KeyEvent7
+  check simulator1 == simulator2
+
+  check not simulator2.operate KeyEventTab
+  check simulator1 == simulator2
+
+  simulator1.mode = EditEditor
+  check simulator2.operate KeyEventT
+  check simulator1 == simulator2
+
+  simulator1.toggleInsert
+  check simulator2.operate KeyEventY
+  check simulator1 == simulator2
+
+  simulator1.toggleFocus
+  check simulator2.operate KeyEventTab
+  check simulator1 == simulator2
+
+  simulator1.moveCursorRight
+  check simulator2.operate KeyEventM
+  check simulator1 == simulator2
+
+  simulator1.moveCursorLeft
+  check simulator2.operate KeyEventB
+  check simulator1 == simulator2
+
+  simulator1.moveCursorUp
+  check simulator2.operate KeyEventH
+  check simulator1 == simulator2
+
+  simulator1.moveCursorDown
+  check simulator2.operate KeyEventN
+  check simulator1 == simulator2
+
+  simulator1.writeCell Cell.Red
+  check simulator2.operate KeyEventG
+  check simulator1 == simulator2
+
+  simulator1.writeCell Cell.Green
+  check simulator2.operate KeyEventF
+  check simulator1 == simulator2
+
+  simulator1.writeCell Cell.Blue
+  check simulator2.operate KeyEventD
+  check simulator1 == simulator2
+
+  simulator1.writeCell Cell.Yellow
+  check simulator2.operate KeyEventS
+  check simulator1 == simulator2
+
+  simulator1.writeCell Cell.Purple
+  check simulator2.operate KeyEventA
+  check simulator1 == simulator2
+
+  simulator1.writeCell Garbage
+  check simulator2.operate KeyEventW
+  check simulator1 == simulator2
+
+  simulator1.writeCell Hard
+  check simulator2.operate KeyEventQ
+  check simulator1 == simulator2
+
+  simulator1.writeCell Cell.None
+  check simulator2.operate KeyEventSpace
+  check simulator1 == simulator2
+
+  simulator1.rule = Spinner
+  check simulator2.operate KeyEventI
+  check simulator1 == simulator2
+
+  simulator1.writeCross(cross = false)
+  check simulator2.operate KeyEventV
+  check simulator1 == simulator2
+
+  simulator1.writeCell Cell.None
+  check simulator2.operate KeyEventSpace
+  check simulator1 == simulator2
+
+  simulator1.rule = CrossSpinner
+  check simulator2.operate KeyEventI
+  check simulator1 == simulator2
+
+  simulator1.writeCross(cross = true)
+  check simulator2.operate KeyEventC
+  check simulator1 == simulator2
+
+  simulator1.shiftFieldRight
+  check simulator2.operate KeyEventShiftM
+  check simulator1 == simulator2
+
+  simulator1.shiftFieldLeft
+  check simulator2.operate KeyEventShiftB
+  check simulator1 == simulator2
+
+  simulator1.shiftFieldUp
+  check simulator2.operate KeyEventShiftH
+  check simulator1 == simulator2
+
+  simulator1.shiftFieldDown
+  check simulator2.operate KeyEventShiftN
+  check simulator1 == simulator2
+
+  simulator1.flip
+  check simulator2.operate KeyEventJ
+  check simulator1 == simulator2
+
+  simulator1.undo
+  check simulator2.operate KeyEventShiftZ
+  check simulator1 == simulator2
+
+  simulator1.redo
+  check simulator2.operate KeyEventShiftX
+  check simulator1 == simulator2
+
+  simulator1.forward
+  check simulator2.operate KeyEvent9
+  check simulator1 == simulator2
+
+  simulator1.backward
+  check simulator2.operate KeyEvent8
+  check simulator1 == simulator2
+
+  simulator1.reset
+  check simulator2.operate KeyEvent7
+  check simulator1 == simulator2
+
+  check not simulator2.operate KeyEventSemicolon
+  check simulator1 == simulator2
+
+  simulator1.mode = PlayEditor
+  check simulator2.operate KeyEventT
+  check simulator1 == simulator2
+
+  var
+    simulator3 = Simulator.init(nazoPuyo, Replay, SimulatorKeyBindPattern.IshikawaPuyo)
+    simulator4 = Simulator.init(nazoPuyo, Replay, SimulatorKeyBindPattern.IshikawaPuyo)
+  check simulator3 == simulator4
+
+  simulator3.forward(replay = true)
+  check simulator4.operate KeyEventN
+  check simulator3 == simulator4
+
+  simulator3.reset
+  check simulator4.operate KeyEventShiftH
+  check simulator3 == simulator4
+
+  simulator3.forward(replay = true)
+  check simulator4.operate KeyEvent9
+  check simulator3 == simulator4
+
+  simulator3.backward
+  check simulator4.operate KeyEventH
+  check simulator3 == simulator4
+
+  simulator3.backward
+  check simulator4.operate KeyEvent8
+  check simulator3 == simulator4
+
+  simulator3.reset
+  check simulator4.operate KeyEvent7
+  check simulator3 == simulator4
+
+  check not simulator4.operate KeyEventZ
+  check simulator3 == simulator4
+
+  var
+    simulator5 =
+      Simulator.init(nazoPuyo, EditEditor, SimulatorKeyBindPattern.IshikawaPuyo)
+    simulator6 =
+      Simulator.init(nazoPuyo, EditEditor, SimulatorKeyBindPattern.IshikawaPuyo)
+  check simulator5 == simulator6
+
+  simulator5.rule = Water
+  check simulator6.operate KeyEventU
+  check simulator5 == simulator6
+
+  simulator5.rule = Tsu
+  check simulator6.operate KeyEventI
+  check simulator5 == simulator6
+
+  simulator5.toggleFocus
+  check simulator6.operate KeyEventTab
+  check simulator5 == simulator6
+
+  simulator5.writeCell Garbage
+  check simulator6.operate KeyEventW
+  check simulator5 == simulator6
 
 # ------------------------------------------------
 # Simulator <-> URI

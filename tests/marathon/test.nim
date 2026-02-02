@@ -25,7 +25,7 @@ block: # load, init
 
   var
     rng2 = 123.initRand
-    marathon2 = Marathon.init(rng2, ["rr", "gb"])
+    marathon2 = Marathon.init(rng2, ["rr", "gb"], SimulatorKeyBindPattern.Pon2)
 
   check marathon1 == marathon2
 
