@@ -138,9 +138,13 @@ func add*(self: var Grimoire, entries: openArray[GrimoireEntry]) =
   for entry in entries:
     self.add entry
 
-func init*(T: type Grimoire, entries: openArray[GrimoireEntry] = []): T =
+func init*(
+    T: type Grimoire,
+    entries: openArray[GrimoireEntry] = [],
+    keyBindPattern = SimulatorKeyBindPattern.Pon2,
+): T =
   var grimoire = T(
-    simulator: Simulator.init,
+    simulator: Simulator.init(keyBindPattern = keyBindPattern),
     entries: @[],
     entryIds: set[int16]({}),
     matchedEntryIds: set[int16]({}),

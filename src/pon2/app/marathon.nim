@@ -36,9 +36,14 @@ func load*(self: var Marathon, queries: openArray[string]) =
     self.critBitTree.incl query
   self.allQueries &= queries
 
-func init*(T: type Marathon, rng: Rand, queries: openArray[string] = []): T =
+func init*(
+    T: type Marathon,
+    rng: Rand,
+    queries: openArray[string] = [],
+    keyBindPattern = SimulatorKeyBindPattern.Pon2,
+): T =
   var marathon = T(
-    simulator: Simulator.init,
+    simulator: Simulator.init(keyBindPattern = keyBindPattern),
     matchQueries: @[],
     allQueries: @[],
     isReady: false,
