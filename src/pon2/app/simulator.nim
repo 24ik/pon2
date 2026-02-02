@@ -18,7 +18,7 @@ import
   ../private/
     [algorithm, arrayutils, assign, deques, staticfor, strutils, tables, uri, utils]
 
-export core, uri
+export core, key, uri
 
 type
   SimulatorMode* {.pure.} = enum
@@ -49,12 +49,62 @@ type
     state: SimulatorState
     operatingIndex: int
 
+  SimulatorKeyBinds* = object ## Simulator's keybinds.
+    modeToggle*: seq[KeyEvent]
+    playRotateRight*: seq[KeyEvent]
+    playRotateLeft*: seq[KeyEvent]
+    playMoveRight*: seq[KeyEvent]
+    playMoveLeft*: seq[KeyEvent]
+    playForward*: seq[KeyEvent]
+    playForwardSkip*: seq[KeyEvent]
+    playForwardReplay*: seq[KeyEvent]
+    playBackward*: seq[KeyEvent]
+    playReset*: seq[KeyEvent]
+    editInsertToggle*: seq[KeyEvent]
+    editFocusToggle*: seq[KeyEvent]
+    editRuleNext*: seq[KeyEvent]
+    editRulePrev*: seq[KeyEvent]
+    editCursorRight*: seq[KeyEvent]
+    editCursorLeft*: seq[KeyEvent]
+    editCursorUp*: seq[KeyEvent]
+    editCursorDown*: seq[KeyEvent]
+    editCellRed*: seq[KeyEvent]
+    editCellGreen*: seq[KeyEvent]
+    editCellBlue*: seq[KeyEvent]
+    editCellYellow*: seq[KeyEvent]
+    editCellPurple*: seq[KeyEvent]
+    editCellGarbage*: seq[KeyEvent]
+    editCellHard*: seq[KeyEvent]
+    editCellNone*: seq[KeyEvent]
+    editCellRotate*: seq[KeyEvent]
+    editCellCrossRotate*: seq[KeyEvent]
+    editCell0*: seq[KeyEvent]
+    editCell1*: seq[KeyEvent]
+    editCell2*: seq[KeyEvent]
+    editCell3*: seq[KeyEvent]
+    editCell4*: seq[KeyEvent]
+    editCell5*: seq[KeyEvent]
+    editFieldShiftRight*: seq[KeyEvent]
+    editFieldShiftLeft*: seq[KeyEvent]
+    editFieldShiftUp*: seq[KeyEvent]
+    editFieldShiftDown*: seq[KeyEvent]
+    editFieldFlip*: seq[KeyEvent]
+    editUndo*: seq[KeyEvent]
+    editRedo*: seq[KeyEvent]
+    editForward*: seq[KeyEvent]
+    editBackward*: seq[KeyEvent]
+    editReset*: seq[KeyEvent]
+    replayForward*: seq[KeyEvent]
+    replayBackward*: seq[KeyEvent]
+    replayReset*: seq[KeyEvent]
+
   Simulator* = object ## Simulator for Puyo Puyo and Nazo Puyo.
     nazoPuyo: NazoPuyo
     moveResult: MoveResult
 
     mode: SimulatorMode
     state: SimulatorState
+    keyBindPattern*: SimulatorFqdn
 
     editData: SimulatorEditData
     operating: tuple[index: int, placement: Placement]
@@ -89,6 +139,107 @@ const
     insert: false,
   )
 
+  Pon2KeyBinds = SimulatorKeyBinds(
+    modeToggle: @[KeyEventT],
+    playRotateRight: @[KeyEventK],
+    playRotateLeft: @[KeyEventJ],
+    playMoveRight: @[KeyEventD],
+    playMoveLeft: @[KeyEventA],
+    playForward: @[KeyEventS],
+    playForwardSkip: @[KeyEventSpace],
+    playForwardReplay: @[KeyEventC],
+    playBackward: @[KeyEventW, KeyEventX],
+    playReset: @[KeyEventZ],
+    editInsertToggle: @[KeyEventG],
+    editFocusToggle: @[KeyEventTab],
+    editRuleNext: @[KeyEventR],
+    editRulePrev: @[KeyEventE],
+    editCursorRight: @[KeyEventD],
+    editCursorLeft: @[KeyEventA],
+    editCursorUp: @[KeyEventW],
+    editCursorDown: @[KeyEventS],
+    editCellRed: @[KeyEventH],
+    editCellGreen: @[KeyEventJ],
+    editCellBlue: @[KeyEventK],
+    editCellYellow: @[KeyEventL],
+    editCellPurple: @[KeyEventSemicolon],
+    editCellGarbage: @[KeyEventO],
+    editCellHard: @[KeyEventP],
+    editCellNone: @[KeyEventSpace],
+    editCellRotate: @[KeyEventN],
+    editCellCrossRotate: @[KeyEventM],
+    editCell0: @[KeyEvent0],
+    editCell1: @[KeyEvent1],
+    editCell2: @[KeyEvent2],
+    editCell3: @[KeyEvent3],
+    editCell4: @[KeyEvent4],
+    editCell5: @[KeyEvent5],
+    editFieldShiftRight: @[KeyEventShiftD],
+    editFieldShiftLeft: @[KeyEventShiftA],
+    editFieldShiftUp: @[KeyEventShiftW],
+    editFieldShiftDown: @[KeyEventShiftS],
+    editFieldFlip: @[KeyEventF],
+    editUndo: @[KeyEventShiftZ],
+    editRedo: @[KeyEventShiftX],
+    editForward: @[KeyEventC],
+    editBackward: @[KeyEventX],
+    editReset: @[KeyEventZ],
+    replayForward: @[KeyEventS, KeyEventC],
+    replayBackward: @[KeyEventW, KeyEventX],
+    replayReset: @[KeyEventShiftW, KeyEventZ],
+  )
+  IshikawaPuyoKeyBinds = SimulatorKeyBinds(
+    modeToggle: @[KeyEventT],
+    playRotateRight: @[KeyEventX, KeyEvent3, KeyEvent5, KeyEventL],
+    playRotateLeft: @[KeyEventZ, KeyEvent1, KeyEventK],
+    playMoveRight: @[KeyEventM, KeyEvent6],
+    playMoveLeft: @[KeyEventB, KeyEvent4],
+    playForward: @[KeyEventN, KeyEvent2],
+    playForwardSkip: @[KeyEventSpace],
+    playForwardReplay: @[KeyEvent9],
+    playBackward: @[KeyEventH, KeyEvent8],
+    playReset: @[KeyEvent7, KeyEvent0],
+    editInsertToggle: @[KeyEventY],
+    editFocusToggle: @[KeyEventTab],
+    editRuleNext: @[KeyEventI],
+    editRulePrev: @[KeyEventU],
+    editCursorRight: @[KeyEventM, KeyEvent6],
+    editCursorLeft: @[KeyEventB, KeyEvent4],
+    editCursorUp: @[KeyEventH, KeyEvent8],
+    editCursorDown: @[KeyEventN, KeyEvent2],
+    editCellRed: @[KeyEventG],
+    editCellGreen: @[KeyEventF],
+    editCellBlue: @[KeyEventD],
+    editCellYellow: @[KeyEventS],
+    editCellPurple: @[KeyEventA],
+    editCellGarbage: @[KeyEventW],
+    editCellHard: @[KeyEventQ],
+    editCellNone: @[KeyEventSpace],
+    editCellRotate: @[KeyEventV],
+    editCellCrossRotate: @[KeyEventC],
+    editCell0: @[],
+    editCell1: @[],
+    editCell2: @[],
+    editCell3: @[],
+    editCell4: @[],
+    editCell5: @[],
+    editFieldShiftRight: @[KeyEventShiftM],
+    editFieldShiftLeft: @[KeyEventShiftB],
+    editFieldShiftUp: @[KeyEventShiftH],
+    editFieldShiftDown: @[KeyEventShiftN],
+    editFieldFlip: @[KeyEventJ],
+    editUndo: @[KeyEventShiftZ],
+    editRedo: @[KeyEventShiftX],
+    editForward: @[KeyEvent9],
+    editBackward: @[KeyEvent8],
+    editReset: @[KeyEvent7],
+    replayForward: @[KeyEventN, KeyEvent9],
+    replayBackward: @[KeyEventH, KeyEvent8],
+    replayReset: @[KeyEventShiftH, KeyEvent7],
+  )
+  SimulatorKeyBindsArray*: array[SimulatorFqdn, SimulatorKeyBinds] =
+    [Pon2KeyBinds, IshikawaPuyoKeyBinds, IshikawaPuyoKeyBinds]
+
 func init(T: type SimulatorDequeElem, simulator: Simulator): T =
   T(
     nazoPuyo: simulator.nazoPuyo,
@@ -97,23 +248,28 @@ func init(T: type SimulatorDequeElem, simulator: Simulator): T =
     operatingIndex: simulator.operating.index,
   )
 
-func init*(T: type Simulator, nazoPuyo: NazoPuyo, mode = DefaultMode): T =
+func init*(
+    T: type Simulator, nazoPuyo: NazoPuyo, mode = DefaultMode, keyBindPattern = Pon2
+): T =
   T(
     nazoPuyo: nazoPuyo,
     moveResult: DefaultMoveResult,
     mode: mode,
     state: if mode in EditModes: AfterEdit else: Stable,
+    keyBindPattern: keyBindPattern,
     editData: DefaultEditData,
     operating: (0, DefaultPlacement),
     undoDeque: Deque[SimulatorDequeElem].init,
     redoDeque: Deque[SimulatorDequeElem].init,
   )
 
-func init*(T: type Simulator, puyoPuyo: PuyoPuyo, mode = DefaultMode): T =
-  T.init(NazoPuyo.init(puyoPuyo, Goal.init), mode)
+func init*(
+    T: type Simulator, puyoPuyo: PuyoPuyo, mode = DefaultMode, keyBindPattern = Pon2
+): T =
+  T.init(NazoPuyo.init(puyoPuyo, Goal.init), mode, keyBindPattern)
 
-func init*(T: type Simulator, mode = DefaultMode): T =
-  T.init(NazoPuyo.init, mode)
+func init*(T: type Simulator, mode = DefaultMode, keyBindPattern = Pon2): T =
+  T.init(NazoPuyo.init, mode, keyBindPattern)
 
 # ------------------------------------------------
 # Undo / Redo / Edit
@@ -858,124 +1014,125 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.discardable.} =
   ## Returns `true` if the key is handled.
   var handled = true
 
+  let keyBinds = SimulatorKeyBindsArray[self.keyBindPattern]
   case self.mode
   of PlayModes:
     # mode
-    if key == KeyEventT:
+    if key in keyBinds.modeToggle:
       if self.mode == PlayViewer:
         self.`mode=` EditViewer
       else: # PlayEditor
         self.`mode=` EditEditor
     # rotate operating placement
-    elif key == KeyEventK:
+    elif key in keyBinds.playRotateRight:
       self.rotatePlacementRight
-    elif key == KeyEventJ:
+    elif key in keyBinds.playRotateLeft:
       self.rotatePlacementLeft
     # move operating placement
-    elif key == KeyEventD:
+    elif key in keyBinds.playMoveRight:
       self.movePlacementRight
-    elif key == KeyEventA:
+    elif key in keyBinds.playMoveLeft:
       self.movePlacementLeft
     # forward / backward / reset
-    elif key == KeyEventS:
+    elif key in keyBinds.playForward:
       self.forward
-    elif key in [KeyEventX, KeyEventW]:
-      self.backward
-    elif key == KeyEventZ:
-      self.reset
-    elif key == KeyEventSpace:
+    elif key in keyBinds.playForwardSkip:
       self.forward(skip = true)
-    elif key == KeyEventC:
+    elif key in keyBinds.playForwardReplay:
       self.forward(replay = true)
+    elif key in keyBinds.playBackward:
+      self.backward
+    elif key in keyBinds.playReset:
+      self.reset
     else:
       handled.assign false
   of EditModes:
     # mode
-    if key == KeyEventT:
+    if key in keyBinds.modeToggle:
       if self.mode == EditViewer:
         self.`mode=` PlayViewer
       else: # EditEditor
         self.`mode=` PlayEditor
     # move cursor
-    elif key == KeyEventD:
+    elif key in keyBinds.editCursorRight:
       self.moveCursorRight
-    elif key == KeyEventA:
+    elif key in keyBinds.editCursorLeft:
       self.moveCursorLeft
-    elif key == KeyEventS:
-      self.moveCursorDown
-    elif key == KeyEventW:
+    elif key in keyBinds.editCursorUp:
       self.moveCursorUp
+    elif key in keyBinds.editCursorDown:
+      self.moveCursorDown
     # write / delete cell
-    elif key == KeyEventH:
+    elif key in keyBinds.editCellRed:
       self.writeCell Cell.Red
-    elif key == KeyEventJ:
+    elif key in keyBinds.editCellGreen:
       self.writeCell Cell.Green
-    elif key == KeyEventK:
+    elif key in keyBinds.editCellBlue:
       self.writeCell Cell.Blue
-    elif key == KeyEventL:
+    elif key in keyBinds.editCellYellow:
       self.writeCell Cell.Yellow
-    elif key == KeyEventSemicolon:
+    elif key in keyBinds.editCellPurple:
       self.writeCell Cell.Purple
-    elif key == KeyEventO:
+    elif key in keyBinds.editCellGarbage:
       self.writeCell Garbage
-    elif key == KeyEventP:
+    elif key in keyBinds.editCellHard:
       self.writeCell Hard
-    elif key == KeyEventSpace:
+    elif key in keyBinds.editCellNone:
       self.writeCell Cell.None
     # undo / redo
-    elif key == KeyEventShiftZ:
+    elif key in keyBinds.editUndo:
       self.undo
-    elif key == KeyEventShiftX:
+    elif key in keyBinds.editRedo:
       self.redo
     # forward / backward / reset
-    elif key == KeyEventC:
+    elif key in keyBinds.editForward:
       self.forward
-    elif key == KeyEventX:
+    elif key in keyBinds.editBackward:
       self.backward
-    elif key == KeyEventZ:
+    elif key in keyBinds.editReset:
       self.reset
     elif self.mode == EditEditor:
       # rule
-      if key == KeyEventR:
+      if key in keyBinds.editRuleNext:
         self.setRule self.rule.rotateSucc
-      elif key == KeyEventE:
+      elif key in keyBinds.editRulePrev:
         self.setRule self.rule.rotatePred
       # toggle insert / focus
-      elif key == KeyEventG:
+      elif key in keyBinds.editInsertToggle:
         self.toggleInsert
-      elif key == KeyEventTab:
+      elif key in keyBinds.editFocusToggle:
         self.toggleFocus
       # write rotate
-      elif key == KeyEventN:
+      elif key in keyBinds.editCellRotate:
         if self.rule == Spinner:
           self.writeCross(cross = false)
-      elif key == KeyEventM:
+      elif key in keyBinds.editCellCrossRotate:
         if self.rule == CrossSpinner:
           self.writeCross(cross = true)
       # write count
-      elif key == KeyEvent0:
+      elif key in keyBinds.editCell0:
         self.writeCountClamp 0
-      elif key == KeyEvent1:
+      elif key in keyBinds.editCell1:
         self.writeCountClamp 1
-      elif key == KeyEvent2:
+      elif key in keyBinds.editCell2:
         self.writeCountClamp 2
-      elif key == KeyEvent3:
+      elif key in keyBinds.editCell3:
         self.writeCountClamp 3
-      elif key == KeyEvent4:
+      elif key in keyBinds.editCell4:
         self.writeCountClamp 4
-      elif key == KeyEvent5:
+      elif key in keyBinds.editCell5:
         self.writeCountClamp 5
       # shift field
-      elif key == KeyEventShiftD:
+      elif key in keyBinds.editFieldShiftRight:
         self.shiftFieldRight
-      elif key == KeyEventShiftA:
+      elif key in keyBinds.editFieldShiftLeft:
         self.shiftFieldLeft
-      elif key == KeyEventShiftS:
-        self.shiftFieldDown
-      elif key == KeyEventShiftW:
+      elif key in keyBinds.editFieldShiftUp:
         self.shiftFieldUp
+      elif key in keyBinds.editFieldShiftDown:
+        self.shiftFieldDown
       # flip field
-      elif key == KeyEventF:
+      elif key in keyBinds.editFieldFlip:
         self.flip
       else:
         handled.assign false
@@ -983,12 +1140,12 @@ func operate*(self: var Simulator, key: KeyEvent): bool {.discardable.} =
       handled.assign false
   of Replay:
     # forward / backward / reset
-    if key in [KeyEventX, KeyEventW]:
-      self.backward
-    elif key in [KeyEventZ, KeyEventShiftW]:
-      self.reset
-    elif key in [KeyEventC, KeyEventS]:
+    if key in keyBinds.replayForward:
       self.forward(replay = true)
+    elif key in keyBinds.replayBackward:
+      self.backward
+    elif key in keyBinds.replayReset:
+      self.reset
     else:
       handled.assign false
 
