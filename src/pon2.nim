@@ -401,9 +401,10 @@ when isMainModule:
         if hashData.entryId != selectedEntryId:
           let entryResult = globalGrimoireRef[].getEntry hashData.entryId
           if entryResult.isOk:
-            globalGrimoireRef[].simulator.assign Simulator.init entryResult.unsafeValue.query.parseNazoPuyo(
-              Pon2
-            ).unsafeValue
+            globalGrimoireRef[].simulator.assign Simulator.init(
+              entryResult.unsafeValue.query.parseNazoPuyo(Pon2).unsafeValue,
+              keyBindPattern = globalGrimoireRef[].simulator.keyBindPattern,
+            )
             selectedEntryId.assign hashData.entryId
 
         # filter matched entry IDs with `solved` query

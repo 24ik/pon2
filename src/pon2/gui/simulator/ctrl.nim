@@ -38,6 +38,7 @@ when defined(js) or defined(nimsuggest):
         else:
           style()
       mode = self.derefSimulator(helper).mode
+      keyBinds = SimulatorKeyBindsArray[self.derefSimulator(helper).keyBindPattern]
 
     buildHtml tdiv(class = "card", style = translucentStyle):
       tdiv(class = "card-content p-1"):
@@ -48,14 +49,12 @@ when defined(js) or defined(nimsuggest):
               button(class = "button", onclick = () => self.derefSimulator(helper).undo):
                 text "Undo"
                 if not helper.mobile:
-                  span(style = counterStyle):
-                    text "Sft+Z"
+                  keyBinds.editUndo.toKeyBindDescVNode
             tdiv(class = "control"):
               button(class = "button", onclick = () => self.derefSimulator(helper).redo):
                 text "Redo"
                 if not helper.mobile:
-                  span(style = counterStyle):
-                    text "Sft+X"
+                  keyBinds.editRedo.toKeyBindDescVNode
           tdiv(class = "field is-grouped is-grouped-centered", style = fieldStyle):
             tdiv(class = "control"):
               button(
@@ -64,8 +63,7 @@ when defined(js) or defined(nimsuggest):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-backward-fast")
                   if not helper.mobile:
-                    span(style = counterStyle):
-                      text "Z"
+                    keyBinds.editReset.toKeyBindDescVNode
             tdiv(class = "control"):
               button(
                 class = "button", onclick = () => self.derefSimulator(helper).backward
@@ -73,8 +71,7 @@ when defined(js) or defined(nimsuggest):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-backward-step")
                   if not helper.mobile:
-                    span(style = counterStyle):
-                      text "X"
+                    keyBinds.editBackward.toKeyBindDescVNode
             tdiv(class = "control"):
               button(
                 class = "button", onclick = () => self.derefSimulator(helper).forward
@@ -82,8 +79,7 @@ when defined(js) or defined(nimsuggest):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-forward-step")
                   if not helper.mobile:
-                    span(style = counterStyle):
-                      text "C"
+                    keyBinds.editForward.toKeyBindDescVNode
           tdiv(class = "field is-grouped is-grouped-centered", style = fieldStyle):
             tdiv(class = "control"):
               button(
@@ -93,8 +89,7 @@ when defined(js) or defined(nimsuggest):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-indent")
                   if not helper.mobile:
-                    span(style = counterStyle):
-                      text "G"
+                    keyBinds.editInsertToggle.toKeyBindDescVNode
             tdiv(class = "control"):
               button(
                 class = "button",
@@ -103,8 +98,7 @@ when defined(js) or defined(nimsuggest):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-angles-up")
                   if not helper.mobile:
-                    span(style = counterStyle):
-                      text "Sft+W"
+                    keyBinds.editFieldShiftUp.toKeyBindDescVNode
             tdiv(class = "control"):
               button(
                 class = "button",
@@ -113,8 +107,7 @@ when defined(js) or defined(nimsuggest):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-arrow-right-arrow-left")
                   if not helper.mobile:
-                    span(style = counterStyle):
-                      text "F"
+                    keyBinds.editFieldFlip.toKeyBindDescVNode
           tdiv(class = "field is-grouped is-grouped-centered", style = fieldStyle):
             tdiv(class = "control"):
               button(
@@ -124,8 +117,7 @@ when defined(js) or defined(nimsuggest):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-angles-left")
                   if not helper.mobile:
-                    span(style = counterStyle):
-                      text "Sft+A"
+                    keyBinds.editFieldShiftLeft.toKeyBindDescVNode
             tdiv(class = "control"):
               button(
                 class = "button",
@@ -134,8 +126,7 @@ when defined(js) or defined(nimsuggest):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-angles-down")
                   if not helper.mobile:
-                    span(style = counterStyle):
-                      text "Sft+S"
+                    keyBinds.editFieldShiftDown.toKeyBindDescVNode
             tdiv(class = "control"):
               button(
                 class = "button",
@@ -144,8 +135,7 @@ when defined(js) or defined(nimsuggest):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-angles-right")
                   if not helper.mobile:
-                    span(style = counterStyle):
-                      text "Sft+D"
+                    keyBinds.editFieldShiftRight.toKeyBindDescVNode
         of EditViewer, Replay:
           tdiv(class = "field is-grouped is-grouped-centered", style = fieldStyle):
             tdiv(class = "control"):
@@ -155,8 +145,10 @@ when defined(js) or defined(nimsuggest):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-backward-fast")
                   if not helper.mobile:
-                    span(style = counterStyle):
-                      text (if mode == EditViewer: "Z" else: "Sft+W").kstring
+                    (
+                      if mode == EditViewer: keyBinds.editReset
+                      else: keyBinds.replayReset
+                    ).toKeyBindDescVNode
             tdiv(class = "control", style = fieldStyle):
               button(
                 class = "button", onclick = () => self.derefSimulator(helper).backward
@@ -164,8 +156,10 @@ when defined(js) or defined(nimsuggest):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-backward-step")
                   if not helper.mobile:
-                    span(style = counterStyle):
-                      text (if mode == EditViewer: "X" else: "W").kstring
+                    (
+                      if mode == EditViewer: keyBinds.editBackward
+                      else: keyBinds.replayBackward
+                    ).toKeyBindDescVNode
             tdiv(class = "control", style = fieldStyle):
               button(
                 class = "button", onclick = () => self.derefSimulator(helper).forward
@@ -173,8 +167,10 @@ when defined(js) or defined(nimsuggest):
                 span(class = "icon"):
                   italic(class = "fa-solid fa-forward-step")
                   if not helper.mobile:
-                    span(style = counterStyle):
-                      text (if mode == EditViewer: "C" else: "S").kstring
+                    (
+                      if mode == EditViewer: keyBinds.editForward
+                      else: keyBinds.replayForward
+                    ).toKeyBindDescVNode
         of PlayModes:
           if helper.mobile:
             tdiv(class = "field is-grouped is-grouped-centered", style = fieldStyle):
@@ -206,8 +202,7 @@ when defined(js) or defined(nimsuggest):
                 ):
                   span(class = "icon"):
                     italic(class = "fa-solid fa-backward-fast")
-                    span(style = counterStyle):
-                      text "Z"
+                    keyBinds.playReset.toKeyBindDescVNode
               tdiv(class = "control"):
                 button(
                   class = "button",
@@ -215,8 +210,7 @@ when defined(js) or defined(nimsuggest):
                 ):
                   span(class = "icon"):
                     italic(class = "fa-solid fa-angles-right")
-                    span(style = counterStyle):
-                      text "Space"
+                    keyBinds.playForwardSkip.toKeyBindDescVNode
               tdiv(class = "control"):
                 button(
                   class = "button",
@@ -224,8 +218,7 @@ when defined(js) or defined(nimsuggest):
                 ):
                   span(class = "icon"):
                     italic(class = "fa-solid fa-forward-step")
-                    span(style = counterStyle):
-                      text "C"
+                    keyBinds.playForwardReplay.toKeyBindDescVNode
             tdiv(class = "field is-grouped is-grouped-centered", style = fieldStyle):
               tdiv(class = "control"):
                 button(
@@ -234,16 +227,14 @@ when defined(js) or defined(nimsuggest):
                 ):
                   span(class = "icon"):
                     italic(class = "fa-solid fa-arrow-rotate-left")
-                    span(style = counterStyle):
-                      text "J"
+                    keyBinds.playRotateLeft.toKeyBindDescVNode
               tdiv(class = "control"):
                 button(
                   class = "button", onclick = () => self.derefSimulator(helper).backward
                 ):
                   span(class = "icon"):
                     italic(class = "fa-solid fa-backward-step")
-                    span(style = counterStyle):
-                      text "W"
+                    keyBinds.playBackward.toKeyBindDescVNode
               tdiv(class = "control"):
                 button(
                   class = "button",
@@ -251,8 +242,7 @@ when defined(js) or defined(nimsuggest):
                 ):
                   span(class = "icon"):
                     italic(class = "fa-solid fa-arrow-rotate-right")
-                    span(style = counterStyle):
-                      text "K"
+                    keyBinds.playRotateRight.toKeyBindDescVNode
             tdiv(class = "field is-grouped is-grouped-centered", style = fieldStyle):
               tdiv(class = "control"):
                 button(
@@ -261,16 +251,14 @@ when defined(js) or defined(nimsuggest):
                 ):
                   span(class = "icon"):
                     italic(class = "fa-solid fa-arrow-left")
-                    span(style = counterStyle):
-                      text "A"
+                    keyBinds.playMoveLeft.toKeyBindDescVNode
               tdiv(class = "control"):
                 button(
                   class = "button", onclick = () => self.derefSimulator(helper).forward
                 ):
                   span(class = "icon"):
                     italic(class = "fa-solid fa-arrow-down")
-                    span(style = counterStyle):
-                      text "S"
+                    keyBinds.playForward.toKeyBindDescVNode
               tdiv(class = "control"):
                 button(
                   class = "button",
@@ -278,8 +266,7 @@ when defined(js) or defined(nimsuggest):
                 ):
                   span(class = "icon"):
                     italic(class = "fa-solid fa-arrow-right")
-                    span(style = counterStyle):
-                      text "D"
+                    keyBinds.playMoveRight.toKeyBindDescVNode
 
   proc toBottomCtrlVNode*[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper

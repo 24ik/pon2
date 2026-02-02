@@ -228,7 +228,9 @@ func loadSteps(self: var Marathon, query: string) =
     (query[i + 1] & query[i]).parseStep(Pon2).isErrOr:
       steps.addLast value
 
-  self.simulator.assign Simulator.init PuyoPuyo.init(Field.init, steps)
+  self.simulator.assign Simulator.init(
+    PuyoPuyo.init(Field.init, steps), keyBindPattern = self.simulator.keyBindPattern
+  )
 
 func selectQuery*(self: var Marathon, index: int) =
   ## Applies the selected query to the simulator.

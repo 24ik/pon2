@@ -13,7 +13,8 @@
 when defined(js) or defined(nimsuggest):
   import std/[sugar]
   import karax/[karaxdsl, kbase, vdom]
-  import ./[localstorage]
+  import ./[localstorage, utils]
+  import ../[strutils]
   import ../../[app]
 
   export vdom
@@ -43,7 +44,7 @@ when defined(js) or defined(nimsuggest):
       SelectBtnClass = "button is-primary is-selected".kstring
 
     let pon2BtnClass, ipsBtnClass: kstring
-    case self.simulator.keyBindPattern
+    case self[].simulator.keyBindPattern
     of Pon2:
       pon2BtnClass = SelectBtnClass
       ipsBtnClass = BtnClass
@@ -58,3 +59,34 @@ when defined(js) or defined(nimsuggest):
       tdiv(class = "control"):
         button(class = ipsBtnClass, onclick = () => self.setKeyBindPattern IshikawaPuyo):
           text "IPS"
+
+  proc toKeyBindDescVNode*(keys: openArray[KeyEvent]): VNode =
+    ## Returns the node of the key bind description.
+    if keys.len == 0:
+      return buildHtml tdiv:
+        discard
+
+    let
+      key = keys[0]
+      code =
+        if key.code.startsWith "Key":
+          key.code.substr 3
+        elif key.code.startsWith "Digit":
+          key.code.substr 5
+        elif key.code == "Semicolon":
+          ";"
+        else:
+          key.code
+    var txts = newSeqOfCap[string](5)
+    if key.ctrl:
+      txts.add "Ctrl"
+    if key.alt:
+      txts.add "Alt"
+    if key.shift:
+      txts.add "Shift"
+    if key.meta:
+      txts.add "Meta"
+    txts.add code
+
+    buildHtml span(style = counterStyle):
+      text txts.join "+"

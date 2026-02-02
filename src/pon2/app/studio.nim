@@ -107,7 +107,9 @@ func updateReplaySimulator(self: var Studio) =
   var nazoPuyo = self.replaySimulator.nazoPuyo
   nazoPuyo.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIndex]
 
-  self.replaySimulator.assign Simulator.init(nazoPuyo, Replay)
+  self.replaySimulator.assign Simulator.init(
+    nazoPuyo, Replay, self.replaySimulator.keyBindPattern
+  )
 
 func nextReplay*(self: var Studio) =
   ## Shows the next solution.
@@ -176,7 +178,9 @@ func workPostProcess(self: var Studio, nazoPuyo: NazoPuyo) =
 
     var nazoPuyo2 = nazoPuyo
     nazoPuyo2.puyoPuyo.steps.assign self.replayData.stepsSeq[self.replayData.stepsIndex]
-    self.replaySimulator.assign Simulator.init(nazoPuyo2, Replay)
+    self.replaySimulator.assign Simulator.init(
+      nazoPuyo2, Replay, self.replaySimulator.keyBindPattern
+    )
   else:
     self.focusReplay.assign false
 
