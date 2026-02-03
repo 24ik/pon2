@@ -13,11 +13,11 @@ when defined(js) or defined(nimsuggest):
   import ../private/[dom]
 
 type KeyEvent* = object ## Keyboard Event.
-  code: string
-  shift: bool
-  ctrl: bool
-  alt: bool
-  meta: bool
+  code*: string
+  shift*: bool
+  ctrl*: bool
+  alt*: bool
+  meta*: bool
 
 # ------------------------------------------------
 # Constructor

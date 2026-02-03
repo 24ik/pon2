@@ -12,18 +12,67 @@
 
 when defined(js) or defined(nimsuggest):
   import std/[asyncjs, jsconsole, json, jsonutils, sequtils]
-  import ../../[utils]
+  import ../../[app]
   import ../../private/[bitops, localstorage, math, staticfor, strutils, zlib]
 
-  export utils
+  export app
 
-  type GrimoireLocalStorageType* = object
-    ## Local storage for the grimoire. This type has no real data.
+  type
+    StudioLocalStorageType* = object
+      ## Local storage for the studio. This type has no real data.
+
+    MarathonLocalStorageType* = object
+      ## Local storage for the marathon. This type has no real data.
+
+    GrimoireLocalStorageType* = object
+      ## Local storage for the grimoire. This type has no real data.
 
   const
+    StudioLocalStorage* = StudioLocalStorageType()
+    MarathonLocalStorage* = MarathonLocalStorageType()
     GrimoireLocalStorage* = GrimoireLocalStorageType()
 
+    StudioPrefix = "studio-"
+    MarathonPrefix = "marathon-"
     GrimoirePrefix = "grimoire-"
+
+  # ------------------------------------------------
+  # Key Bind
+  # ------------------------------------------------
+
+  const KeyBindPatternKey = "keybind"
+
+  proc keyBindPattern*[
+      L: StudioLocalStorageType or MarathonLocalStorageType or GrimoireLocalStorageType
+  ](localStorage: L): Pon2Result[SimulatorKeyBindPattern] =
+    ## Returns the key bind pattern.
+    const Prefix =
+      when L is StudioLocalStorageType:
+        StudioPrefix
+      elif L is MarathonLocalStorageType:
+        MarathonPrefix
+      else:
+        GrimoirePrefix
+
+    let valResult = LocalStorage[Prefix & KeyBindPatternKey]
+    if valResult.isErr:
+      return ok Pon2
+
+    parseOrdinal[SimulatorKeyBindPattern](($valResult.unsafeValue)).context "cannot get key bind pattern"
+
+  proc `keyBindPattern=`*[
+      L: StudioLocalStorageType or MarathonLocalStorageType or GrimoireLocalStorageType
+  ](localStorage: L, keyBindPattern: SimulatorKeyBindPattern) =
+    ## Sets the key bind pattern.
+    const Prefix =
+      when L is StudioLocalStorageType:
+        StudioPrefix
+      elif L is MarathonLocalStorageType:
+        MarathonPrefix
+      else:
+        GrimoirePrefix
+
+    LocalStorage[Prefix & KeyBindPatternKey] = ($keyBindPattern.ord).cstring
 
   # ------------------------------------------------
   # Grimoire

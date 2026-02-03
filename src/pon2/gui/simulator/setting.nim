@@ -53,6 +53,8 @@ when defined(js) or defined(nimsuggest):
       playMode = PlayEditor
       editMode = EditEditor
 
+    let keyBinds = SimulatorKeyBindsArray[self.derefSimulator(helper).keyBindPattern]
+
     buildHtml tdiv:
       tdiv(class = "field has-addons"):
         tdiv(class = "control"):
@@ -63,8 +65,7 @@ when defined(js) or defined(nimsuggest):
             span(class = "icon"):
               italic(class = "fa-solid fa-gamepad")
               if not helper.mobile and self.derefSimulator(helper).mode notin PlayModes:
-                span(style = counterStyle):
-                  text "T"
+                keyBinds.modeToggle.toKeyBindDescVNode
         tdiv(class = "control"):
           button(
             class = editBtnClass,
@@ -73,8 +74,7 @@ when defined(js) or defined(nimsuggest):
             span(class = "icon"):
               italic(class = "fa-solid fa-pen-to-square")
               if not helper.mobile and self.derefSimulator(helper).mode notin EditModes:
-                span(style = counterStyle):
-                  text "T"
+                keyBinds.modeToggle.toKeyBindDescVNode
       if self.derefSimulator(helper).mode == EditEditor:
         let nowRule = self.derefSimulator(helper).rule
 
@@ -117,8 +117,6 @@ when defined(js) or defined(nimsuggest):
                     italic(class = italicClass)
                   if not helper.mobile:
                     if rule == nowRule.rotateSucc:
-                      span(style = counterStyle):
-                        text "R"
+                      keyBinds.editRuleNext.toKeyBindDescVNode
                     elif rule == nowRule.rotatePred:
-                      span(style = counterStyle):
-                        text "E"
+                      keyBinds.editRulePrev.toKeyBindDescVNode

@@ -16,6 +16,8 @@ when defined(js):
 block: # init
   check KeyEvent.init("KeyA") == KeyEventA
   check KeyEvent.init("KeyD", shift = true) == KeyEventShiftD
+  check KeyEvent.init("KeyX", ctrl = true, meta = true) ==
+    KeyEvent(code: "KeyX", shift: false, ctrl: true, alt: false, meta: true)
 
 # ------------------------------------------------
 # JS backend

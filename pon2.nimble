@@ -1,6 +1,6 @@
 # Package
 
-version = "1.1.4"
+version = "1.2.0"
 author = "Keisuke Izumiya"
 description = "Application and Library Dedicated to Puyo Puyo and Nazo Puyo"
 license = "Apache-2.0 OR MIT"
@@ -15,7 +15,7 @@ bin = @["pon2"]
 requires "nim ^= 2.2.6"
 
 requires "chroma ^= 1.0.0"
-requires "cligen ^= 1.9.5"
+requires "cligen ^= 1.9.6"
 requires "karax ^= 1.5.0"
 requires "nimsimd ^= 1.3.2"
 requires "parsetoml ^= 0.7.2"

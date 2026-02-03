@@ -36,9 +36,14 @@ func load*(self: var Marathon, queries: openArray[string]) =
     self.critBitTree.incl query
   self.allQueries &= queries
 
-func init*(T: type Marathon, rng: Rand, queries: openArray[string] = []): T =
+func init*(
+    T: type Marathon,
+    rng: Rand,
+    queries: openArray[string] = [],
+    keyBindPattern = SimulatorKeyBindPattern.Pon2,
+): T =
   var marathon = T(
-    simulator: Simulator.init,
+    simulator: Simulator.init(keyBindPattern = keyBindPattern),
     matchQueries: @[],
     allQueries: @[],
     isReady: false,
@@ -228,7 +233,9 @@ func loadSteps(self: var Marathon, query: string) =
     (query[i + 1] & query[i]).parseStep(Pon2).isErrOr:
       steps.addLast value
 
-  self.simulator.assign Simulator.init PuyoPuyo.init(Field.init, steps)
+  self.simulator.assign Simulator.init(
+    PuyoPuyo.init(Field.init, steps), keyBindPattern = self.simulator.keyBindPattern
+  )
 
 func selectQuery*(self: var Marathon, index: int) =
   ## Applies the selected query to the simulator.

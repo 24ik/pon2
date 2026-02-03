@@ -23,11 +23,6 @@ when defined(js) or defined(nimsuggest):
 
   export vdom
 
-  const Shortcuts: array[Cell, kstring] = [
-    "Space".kstring, "P".kstring, "O".kstring, "H".kstring, "J".kstring, "K".kstring,
-    "L".kstring, ";".kstring,
-  ]
-
   func initBtnHandler[S: Simulator or Studio or Marathon or Grimoire](
       self: ref S, helper: VNodeHelper, cell: Cell
   ): () -> void =
@@ -51,6 +46,7 @@ when defined(js) or defined(nimsuggest):
         if helper.mobile: "button is-large is-primary px-2"
         else: "button px-2 is-primary"
       ).kstring
+      keyBinds = SimulatorKeyBindsArray[self.derefSimulator(helper).keyBindPattern]
 
     buildHtml tdiv(class = "card", style = translucentStyle):
       tdiv(class = "card-content p-1"):
@@ -75,8 +71,15 @@ when defined(js) or defined(nimsuggest):
                       ):
                         img(src = cell.cellImgSrc)
                       if not helper.mobile and not cellSelected:
-                        span(style = counterStyle):
-                          text ShortCuts[cell]
+                        case cell
+                        of Cell.None: keyBinds.editCellNone.toKeyBindDescVNode
+                        of Hard: keyBinds.editCellHard.toKeyBindDescVNode
+                        of Garbage: keyBinds.editCellGarbage.toKeyBindDescVNode
+                        of Cell.Red: keyBinds.editCellRed.toKeyBindDescVNode
+                        of Cell.Green: keyBinds.editCellGreen.toKeyBindDescVNode
+                        of Cell.Blue: keyBinds.editCellBlue.toKeyBindDescVNode
+                        of Cell.Yellow: keyBinds.editCellYellow.toKeyBindDescVNode
+                        of Cell.Purple: keyBinds.editCellPurple.toKeyBindDescVNode
                 td:
                   let
                     cross = row.bool
@@ -110,5 +113,7 @@ when defined(js) or defined(nimsuggest):
                         else:
                           italic(class = "fa-solid fa-arrows-rotate")
                     if not helper.mobile and not selected:
-                      span(style = counterStyle):
-                        text (if cross: "M" else: "N").kstring
+                      (
+                        if cross: keyBinds.editCellCrossRotate
+                        else: keyBinds.editCellRotate
+                      ).toKeyBindDescVNode

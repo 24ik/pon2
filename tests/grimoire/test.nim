@@ -4,7 +4,7 @@
 
 import std/[unittest]
 import ../../src/pon2/[core]
-import ../../src/pon2/app/[grimoire]
+import ../../src/pon2/app/[grimoire, simulator]
 
 # ------------------------------------------------
 # Constructor
@@ -38,7 +38,7 @@ block: # init, add
   var grimoire1 = Grimoire.init
   grimoire1.add [entry1, entry2]
 
-  let grimoire2 = Grimoire.init [entry1, entry2]
+  let grimoire2 = Grimoire.init([entry1, entry2], SimulatorKeyBindPattern.Pon2)
 
   check grimoire1 == grimoire2
 
