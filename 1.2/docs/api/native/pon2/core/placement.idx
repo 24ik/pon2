@@ -1,0 +1,23 @@
+nimTitle	placement	pon2/core/placement.html	module src/pon2/core/placement		0
+nim	Dir	pon2/core/placement.html#Dir	enum Dir		17
+nim	Placement	pon2/core/placement.html#Placement	enum Placement		24
+nim	ActualPlacements	pon2/core/placement.html#ActualPlacements	const ActualPlacements		51
+nim	DoublePlacements	pon2/core/placement.html#DoublePlacements	const DoublePlacements		52
+nim	init	pon2/core/placement.html#init,typePlacement,Col,Dir	proc init(T: type Placement; pivotCol: Col; rotorDir: Dir): T:type		58
+nim	init	pon2/core/placement.html#init,typePlacement	proc init(T: type Placement): T:type		69
+nim	pivotCol	pon2/core/placement.html#pivotCol,Placement	proc pivotCol(self: Placement): Col		76
+nim	rotorCol	pon2/core/placement.html#rotorCol,Placement	proc rotorCol(self: Placement): Col		87
+nim	rotorDir	pon2/core/placement.html#rotorDir,Placement	proc rotorDir(self: Placement): Dir		98
+nim	moveRight	pon2/core/placement.html#moveRight,Placement	proc moveRight(self: var Placement)		111
+nim	moveLeft	pon2/core/placement.html#moveLeft,Placement	proc moveLeft(self: var Placement)		117
+nim	movedRight	pon2/core/placement.html#movedRight,Placement	proc movedRight(self: Placement): Placement		123
+nim	movedLeft	pon2/core/placement.html#movedLeft,Placement	proc movedLeft(self: Placement): Placement		127
+nim	rotateRight	pon2/core/placement.html#rotateRight,Placement	proc rotateRight(self: var Placement)		135
+nim	rotateLeft	pon2/core/placement.html#rotateLeft,Placement	proc rotateLeft(self: var Placement)		147
+nim	rotatedRight	pon2/core/placement.html#rotatedRight,Placement	proc rotatedRight(self: Placement): Placement		161
+nim	rotatedLeft	pon2/core/placement.html#rotatedLeft,Placement	proc rotatedLeft(self: Placement): Placement		165
+nim	parsePlacement	pon2/core/placement.html#parsePlacement,string	proc parsePlacement(str: string): Pon2Result[Placement]		173
+nim	toUriQuery	pon2/core/placement.html#toUriQuery,Placement	proc toUriQuery(self: Placement; fqdn = Pon2): string		187
+nim	parsePlacement	pon2/core/placement.html#parsePlacement,string,SimulatorFqdn	proc parsePlacement(query: string; fqdn: SimulatorFqdn): Pon2Result[Placement]		195
+nimgrp	init	pon2/core/placement.html#init-procs-all	proc		58
+nimgrp	parseplacement	pon2/core/placement.html#parsePlacement-procs-all	proc		173

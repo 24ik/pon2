@@ -1,0 +1,4 @@
+nimTitle	suffixarray	pon2/private/suffixarray.html	module src/pon2/private/suffixarray		0
+nim	SuffixArray	pon2/private/suffixarray.html#SuffixArray	object SuffixArray		12
+nim	init	pon2/private/suffixarray.html#init,typeSuffixArray,openArray[string]	proc init(T: type SuffixArray; strs: openArray[string]): T:type		19
+nim	findAll	pon2/private/suffixarray.html#findAll,SuffixArray,string	proc findAll(self: SuffixArray; query: string): set[int16]		92

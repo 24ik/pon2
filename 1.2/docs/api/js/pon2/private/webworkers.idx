@@ -1,0 +1,7 @@
+nimTitle	webworkers	pon2/private/webworkers.html	module src/pon2/private/webworkers		0
+nim	WebWorkerTask	pon2/private/webworkers.html#WebWorkerTask	type WebWorkerTask		24
+nim	WebWorkerPool	pon2/private/webworkers.html#WebWorkerPool	object WebWorkerPool		32
+nim	run	pon2/private/webworkers.html#run,WebWorkerPool,varargs[string]	proc run(self: WebWorkerPool; args: varargs[string]): Future[Pon2Result[seq[string]]]		115
+nim	terminate	pon2/private/webworkers.html#terminate,WebWorkerPool	proc terminate(self: WebWorkerPool)		138
+nim	register	pon2/private/webworkers.html#register,WebWorkerTask	proc register(task: WebWorkerTask)		171
+nim	webWorkerPool	pon2/private/webworkers.html#webWorkerPool_2	let webWorkerPool		188

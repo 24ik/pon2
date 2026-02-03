@@ -1,0 +1,11 @@
+nimTitle	helper	pon2/gui/helper.html	module src/pon2/gui/helper		0
+nim	SimulatorVNodeHelper	pon2/gui/helper.html#SimulatorVNodeHelper	object SimulatorVNodeHelper		22
+nim	StudioVNodeHelper	pon2/gui/helper.html#StudioVNodeHelper	object StudioVNodeHelper		27
+nim	MarathonVNodeHelper	pon2/gui/helper.html#MarathonVNodeHelper	object MarathonVNodeHelper		31
+nim	GrimoireVNodeHelper	pon2/gui/helper.html#GrimoireVNodeHelper	object GrimoireVNodeHelper		34
+nim	VNodeHelper	pon2/gui/helper.html#VNodeHelper	object VNodeHelper		45
+nim	init	pon2/gui/helper.html#init,typeVNodeHelper,ref.Simulator,kstring	proc init(T: type VNodeHelper; simulatorRef: ref Simulator; rootId: kstring): T:type		87
+nim	init2	pon2/gui/helper.html#init2,typeVNodeHelper,ref.Studio,kstring	proc init2(T: type VNodeHelper; studioRef: ref Studio; rootId: kstring): tuple[\n    main, replay: VNodeHelper]		96
+nim	init	pon2/gui/helper.html#init,typeVNodeHelper,ref.Marathon,kstring	proc init(T: type VNodeHelper; marathonRef: ref Marathon; rootId: kstring): T:type		125
+nim	init	pon2/gui/helper.html#init,typeVNodeHelper,ref.Grimoire,kstring,GrimoireMatcher,Opt[bool],seq[int16],set[int16],int,int16	proc init(T: type VNodeHelper; grimoireRef: ref Grimoire; rootId: kstring;\n     matcher: GrimoireMatcher; matchSolvedOpt: Opt[bool];\n     matchedEntryIds: seq[int16]; solvedEntryIds: set[int16]; pageIndex: int;\n     entryId: int16): T:type		134
+nimgrp	init	pon2/gui/helper.html#init-procs-all	proc		87

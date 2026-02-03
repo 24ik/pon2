@@ -1,0 +1,3 @@
+nimTitle	zlib	pon2/private/zlib.html	module src/pon2/private/zlib		0
+nim	zlibCompressed	pon2/private/zlib.html#zlibCompressed,seq[byte]	proc zlibCompressed(bytes: seq[byte]): Future[Pon2Result[string]]		58
+nim	zlibDecompressed	pon2/private/zlib.html#zlibDecompressed,string	proc zlibDecompressed(str: string): Future[Pon2Result[seq[byte]]]		102

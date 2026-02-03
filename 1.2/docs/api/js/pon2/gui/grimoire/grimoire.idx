@@ -1,0 +1,2 @@
+nimTitle	grimoire	pon2/gui/grimoire/grimoire.html	module src/pon2/gui/grimoire/grimoire		0
+nim	toGrimoireVNode	pon2/gui/grimoire/grimoire.html#toGrimoireVNode,ref.Grimoire,VNodeHelper	proc toGrimoireVNode(self: ref Grimoire; helper: VNodeHelper): VNode		23

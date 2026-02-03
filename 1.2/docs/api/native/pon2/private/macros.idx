@@ -1,0 +1,3 @@
+nimTitle	macros	pon2/private/macros.html	module src/pon2/private/macros		0
+nim	replaced	pon2/private/macros.html#replaced,NimNode,NimNode,NimNode	proc replaced(node, before, after: NimNode): NimNode		18
+nim	replace	pon2/private/macros.html#replace,NimNode,NimNode,NimNode	proc replace(node: var NimNode; before, after: NimNode)		32

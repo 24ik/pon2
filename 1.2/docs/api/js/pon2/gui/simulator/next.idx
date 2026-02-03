@@ -1,0 +1,2 @@
+nimTitle	next	pon2/gui/simulator/next.html	module src/pon2/gui/simulator/next		0
+nim	toNextVNode	pon2/gui/simulator/next.html#toNextVNode,ref.S,VNodeHelper	proc toNextVNode[S: Simulator or Studio or Marathon or Grimoire](self: ref S;\n    helper: VNodeHelper): VNode		58
