@@ -52,13 +52,17 @@ when defined(js) or defined(nimsuggest):
       pon2BtnClass = BtnClass
       ipsBtnClass = SelectBtnClass
 
-    buildHtml tdiv(class = "field has-addons"):
-      tdiv(class = "control"):
-        button(class = pon2BtnClass, onclick = () => self.setKeyBindPattern Pon2):
-          text "Pon!通"
-      tdiv(class = "control"):
-        button(class = ipsBtnClass, onclick = () => self.setKeyBindPattern IshikawaPuyo):
-          text "IPS"
+    buildHtml tdiv:
+      text "キー操作方式"
+      tdiv(class = "field has-addons"):
+        tdiv(class = "control"):
+          button(class = pon2BtnClass, onclick = () => self.setKeyBindPattern Pon2):
+            text "Pon!通"
+        tdiv(class = "control"):
+          button(
+            class = ipsBtnClass, onclick = () => self.setKeyBindPattern IshikawaPuyo
+          ):
+            text "IPS"
 
   proc toKeyBindDescVNode*(keys: openArray[KeyEvent]): VNode =
     ## Returns the node of the key bind description.
