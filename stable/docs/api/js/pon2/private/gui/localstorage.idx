@@ -1,9 +1,15 @@
 nimTitle	localstorage	pon2/private/gui/localstorage.html	module src/pon2/private/gui/localstorage		0
-nim	GrimoireLocalStorageType	pon2/private/gui/localstorage.html#GrimoireLocalStorageType	object GrimoireLocalStorageType		20
-nim	GrimoireLocalStorage	pon2/private/gui/localstorage.html#GrimoireLocalStorage	const GrimoireLocalStorage		24
-nim	solvedEntryIds	pon2/private/gui/localstorage.html#solvedEntryIds,GrimoireLocalStorageType	proc solvedEntryIds(localStorage: GrimoireLocalStorageType): Pon2Result[set[int16]]		45
-nim	solvedEntryIds=	pon2/private/gui/localstorage.html#solvedEntryIds=,GrimoireLocalStorageType,set[int16]	proc solvedEntryIds=(localStorage: GrimoireLocalStorageType; entryIds: set[int16])		53
-nim	exportedStr	pon2/private/gui/localstorage.html#exportedStr,GrimoireLocalStorageType	proc exportedStr(localStorage: GrimoireLocalStorageType): Future[Pon2Result[string]]		84
-nim	importStr	pon2/private/gui/localstorage.html#importStr,GrimoireLocalStorageType,string	proc importStr(localStorage: GrimoireLocalStorageType; str: string): Future[\n    Pon2Result[void]]		116
-nim	imported	pon2/private/gui/localstorage.html#imported,GrimoireLocalStorageType	proc imported(localStorage: GrimoireLocalStorageType): bool		126
-nim	imported=	pon2/private/gui/localstorage.html#imported=,GrimoireLocalStorageType,bool	proc imported=(localStorage: GrimoireLocalStorageType; imported: bool)		130
+nim	StudioLocalStorageType	pon2/private/gui/localstorage.html#StudioLocalStorageType	object StudioLocalStorageType		21
+nim	MarathonLocalStorageType	pon2/private/gui/localstorage.html#MarathonLocalStorageType	object MarathonLocalStorageType		24
+nim	GrimoireLocalStorageType	pon2/private/gui/localstorage.html#GrimoireLocalStorageType	object GrimoireLocalStorageType		27
+nim	StudioLocalStorage	pon2/private/gui/localstorage.html#StudioLocalStorage	const StudioLocalStorage		31
+nim	MarathonLocalStorage	pon2/private/gui/localstorage.html#MarathonLocalStorage	const MarathonLocalStorage		32
+nim	GrimoireLocalStorage	pon2/private/gui/localstorage.html#GrimoireLocalStorage	const GrimoireLocalStorage		33
+nim	keyBindPattern	pon2/private/gui/localstorage.html#keyBindPattern,L	proc keyBindPattern[L: StudioLocalStorageType or MarathonLocalStorageType or\n    GrimoireLocalStorageType](localStorage: L): Pon2Result[\n    SimulatorKeyBindPattern]		45
+nim	keyBindPattern=	pon2/private/gui/localstorage.html#keyBindPattern=,L,SimulatorKeyBindPattern	proc keyBindPattern=[L: StudioLocalStorageType or MarathonLocalStorageType or\n    GrimoireLocalStorageType](localStorage: L;\n                              keyBindPattern: SimulatorKeyBindPattern)		63
+nim	solvedEntryIds	pon2/private/gui/localstorage.html#solvedEntryIds,GrimoireLocalStorageType	proc solvedEntryIds(localStorage: GrimoireLocalStorageType): Pon2Result[set[int16]]		94
+nim	solvedEntryIds=	pon2/private/gui/localstorage.html#solvedEntryIds=,GrimoireLocalStorageType,set[int16]	proc solvedEntryIds=(localStorage: GrimoireLocalStorageType; entryIds: set[int16])		102
+nim	exportedStr	pon2/private/gui/localstorage.html#exportedStr,GrimoireLocalStorageType	proc exportedStr(localStorage: GrimoireLocalStorageType): Future[Pon2Result[string]]		133
+nim	importStr	pon2/private/gui/localstorage.html#importStr,GrimoireLocalStorageType,string	proc importStr(localStorage: GrimoireLocalStorageType; str: string): Future[\n    Pon2Result[void]]		165
+nim	imported	pon2/private/gui/localstorage.html#imported,GrimoireLocalStorageType	proc imported(localStorage: GrimoireLocalStorageType): bool		175
+nim	imported=	pon2/private/gui/localstorage.html#imported=,GrimoireLocalStorageType,bool	proc imported=(localStorage: GrimoireLocalStorageType; imported: bool)		179

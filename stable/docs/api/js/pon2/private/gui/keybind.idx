@@ -1,0 +1,3 @@
+nimTitle	keybind	pon2/private/gui/keybind.html	module src/pon2/private/gui/keybind		0
+nim	toKeyBindVNode	pon2/private/gui/keybind.html#toKeyBindVNode,ref.T	proc toKeyBindVNode[T: Studio or Marathon or Grimoire](self: ref T): VNode		40
+nim	toKeyBindDescVNode	pon2/private/gui/keybind.html#toKeyBindDescVNode,openArray[KeyEvent]	proc toKeyBindDescVNode(keys: openArray[KeyEvent]): VNode		67

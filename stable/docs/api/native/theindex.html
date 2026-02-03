@@ -584,7 +584,9 @@
     indices: tuple[allowDouble: seq[int], garbage: seq[int], hard: seq[int],
                    rotate: seq[int], crossRotate: seq[int]]): T:type</a></li>
           <li><a class="reference external"
-          data-doc-search-tag="grimoire: proc init(T: type Grimoire; entries: openArray[GrimoireEntry] = []): T:type" href="pon2/app/grimoire.html#init%2CtypeGrimoire%2CopenArray%5BGrimoireEntry%5D">grimoire: proc init(T: type Grimoire; entries: openArray[GrimoireEntry] = []): T:type</a></li>
+          data-doc-search-tag="grimoire: proc init(T: type Grimoire; entries: openArray[GrimoireEntry] = [];
+     keyBindPattern = SimulatorKeyBindPattern.Pon2): T:type" href="pon2/app/grimoire.html#init%2CtypeGrimoire%2CopenArray%5BGrimoireEntry%5D">grimoire: proc init(T: type Grimoire; entries: openArray[GrimoireEntry] = [];
+     keyBindPattern = SimulatorKeyBindPattern.Pon2): T:type</a></li>
           <li><a class="reference external"
           data-doc-search-tag="grimoire: proc init(T: type GrimoireEntry; id: int16; query: string; title = &quot;&quot;;
      creators = newSeq[string](); source = &quot;&quot;; sourceDetail = &quot;&quot;): T:type" href="pon2/app/grimoire.html#init%2CtypeGrimoireEntry%2Cint16%2Cstring%2Cstring%2Cstring%2Cstring">grimoire: proc init(T: type GrimoireEntry; id: int16; query: string; title = &quot;&quot;;
@@ -602,13 +604,21 @@
      meta = false): T:type" href="pon2/app/key.html#init%2CtypeKeyEvent%2Cstring">key: proc init(T: type KeyEvent; code: string; shift = false; ctrl = false; alt = false;
      meta = false): T:type</a></li>
           <li><a class="reference external"
-          data-doc-search-tag="marathon: proc init(T: type Marathon; rng: Rand; queries: openArray[string] = []): T:type" href="pon2/app/marathon.html#init%2CtypeMarathon%2CRand%2CopenArray%5Bstring%5D">marathon: proc init(T: type Marathon; rng: Rand; queries: openArray[string] = []): T:type</a></li>
+          data-doc-search-tag="marathon: proc init(T: type Marathon; rng: Rand; queries: openArray[string] = [];
+     keyBindPattern = SimulatorKeyBindPattern.Pon2): T:type" href="pon2/app/marathon.html#init%2CtypeMarathon%2CRand%2CopenArray%5Bstring%5D">marathon: proc init(T: type Marathon; rng: Rand; queries: openArray[string] = [];
+     keyBindPattern = SimulatorKeyBindPattern.Pon2): T:type</a></li>
           <li><a class="reference external"
-          data-doc-search-tag="simulator: proc init(T: type Simulator; mode = DefaultMode): T:type" href="pon2/app/simulator.html#init%2CtypeSimulator">simulator: proc init(T: type Simulator; mode = DefaultMode): T:type</a></li>
+          data-doc-search-tag="simulator: proc init(T: type Simulator; mode = DefaultMode;
+     keyBindPattern = SimulatorKeyBindPattern.Pon2): T:type" href="pon2/app/simulator.html#init%2CtypeSimulator">simulator: proc init(T: type Simulator; mode = DefaultMode;
+     keyBindPattern = SimulatorKeyBindPattern.Pon2): T:type</a></li>
           <li><a class="reference external"
-          data-doc-search-tag="simulator: proc init(T: type Simulator; nazoPuyo: NazoPuyo; mode = DefaultMode): T:type" href="pon2/app/simulator.html#init%2CtypeSimulator%2CNazoPuyo">simulator: proc init(T: type Simulator; nazoPuyo: NazoPuyo; mode = DefaultMode): T:type</a></li>
+          data-doc-search-tag="simulator: proc init(T: type Simulator; nazoPuyo: NazoPuyo; mode = DefaultMode;
+     keyBindPattern = SimulatorKeyBindPattern.Pon2): T:type" href="pon2/app/simulator.html#init%2CtypeSimulator%2CNazoPuyo">simulator: proc init(T: type Simulator; nazoPuyo: NazoPuyo; mode = DefaultMode;
+     keyBindPattern = SimulatorKeyBindPattern.Pon2): T:type</a></li>
           <li><a class="reference external"
-          data-doc-search-tag="simulator: proc init(T: type Simulator; puyoPuyo: PuyoPuyo; mode = DefaultMode): T:type" href="pon2/app/simulator.html#init%2CtypeSimulator%2CPuyoPuyo">simulator: proc init(T: type Simulator; puyoPuyo: PuyoPuyo; mode = DefaultMode): T:type</a></li>
+          data-doc-search-tag="simulator: proc init(T: type Simulator; puyoPuyo: PuyoPuyo; mode = DefaultMode;
+     keyBindPattern = SimulatorKeyBindPattern.Pon2): T:type" href="pon2/app/simulator.html#init%2CtypeSimulator%2CPuyoPuyo">simulator: proc init(T: type Simulator; puyoPuyo: PuyoPuyo; mode = DefaultMode;
+     keyBindPattern = SimulatorKeyBindPattern.Pon2): T:type</a></li>
           <li><a class="reference external"
           data-doc-search-tag="studio: proc init(T: type Studio): T:type" href="pon2/app/studio.html#init%2CtypeStudio">studio: proc init(T: type Studio): T:type</a></li>
           <li><a class="reference external"
@@ -1756,6 +1766,18 @@
 <li><a class="reference external"
           data-doc-search-tag="fqdn: enum SimulatorFqdn" href="pon2/core/fqdn.html#SimulatorFqdn">fqdn: enum SimulatorFqdn</a></li>
           </ul></dd>
+<dt><a name="SimulatorKeyBindPattern" href="#SimulatorKeyBindPattern"><span>SimulatorKeyBindPattern:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="simulator: enum SimulatorKeyBindPattern" href="pon2/app/simulator.html#SimulatorKeyBindPattern">simulator: enum SimulatorKeyBindPattern</a></li>
+          </ul></dd>
+<dt><a name="SimulatorKeyBinds" href="#SimulatorKeyBinds"><span>SimulatorKeyBinds:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="simulator: object SimulatorKeyBinds" href="pon2/app/simulator.html#SimulatorKeyBinds">simulator: object SimulatorKeyBinds</a></li>
+          </ul></dd>
+<dt><a name="SimulatorKeyBindsArray" href="#SimulatorKeyBindsArray"><span>SimulatorKeyBindsArray:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="simulator: const SimulatorKeyBindsArray" href="pon2/app/simulator.html#SimulatorKeyBindsArray">simulator: const SimulatorKeyBindsArray</a></li>
+          </ul></dd>
 <dt><a name="SimulatorMode" href="#SimulatorMode"><span>SimulatorMode:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="simulator: enum SimulatorMode" href="pon2/app/simulator.html#SimulatorMode">simulator: enum SimulatorMode</a></li>
@@ -1916,9 +1938,9 @@
           </ul></dd>
 <dt><a name="toExportUri" href="#toExportUri"><span>toExportUri:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="simulator: proc toExportUri(self: Simulator; viewer = true; clearPlacements = true; fqdn = Pon2): Pon2Result[
-    Uri]" href="pon2/app/simulator.html#toExportUri%2CSimulator">simulator: proc toExportUri(self: Simulator; viewer = true; clearPlacements = true; fqdn = Pon2): Pon2Result[
-    Uri]</a></li>
+          data-doc-search-tag="simulator: proc toExportUri(self: Simulator; viewer = true; clearPlacements = true;
+            fqdn = SimulatorFqdn.Pon2): Pon2Result[Uri]" href="pon2/app/simulator.html#toExportUri%2CSimulator">simulator: proc toExportUri(self: Simulator; viewer = true; clearPlacements = true;
+            fqdn = SimulatorFqdn.Pon2): Pon2Result[Uri]</a></li>
           </ul></dd>
 <dt><a name="toField" href="#toField"><span>toField:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -1948,7 +1970,9 @@
           </ul></dd>
 <dt><a name="toUri" href="#toUri"><span>toUri:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="simulator: proc toUri(self: Simulator; clearPlacements = false; fqdn = Pon2): Pon2Result[Uri]" href="pon2/app/simulator.html#toUri%2CSimulator">simulator: proc toUri(self: Simulator; clearPlacements = false; fqdn = Pon2): Pon2Result[Uri]</a></li>
+          data-doc-search-tag="simulator: proc toUri(self: Simulator; clearPlacements = false; fqdn = SimulatorFqdn.Pon2): Pon2Result[
+    Uri]" href="pon2/app/simulator.html#toUri%2CSimulator">simulator: proc toUri(self: Simulator; clearPlacements = false; fqdn = SimulatorFqdn.Pon2): Pon2Result[
+    Uri]</a></li>
           </ul></dd>
 <dt><a name="toUriQuery" href="#toUriQuery"><span>toUriQuery:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -2050,7 +2074,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-01-24 19:12:49 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-02-03 08:18:36 UTC</small>
       </div>
     </div>
   </div>

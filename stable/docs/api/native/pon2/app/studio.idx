@@ -10,9 +10,9 @@ nim	replayStepsCount	pon2/app/studio.html#replayStepsCount,Studio	proc replaySte
 nim	replayStepsIndex	pon2/app/studio.html#replayStepsIndex,Studio	proc replayStepsIndex(self: Studio): int		83
 nim	progress	pon2/app/studio.html#progress,Studio	proc progress(self: Studio): tuple[now, total: int]		87
 nim	toggleFocus	pon2/app/studio.html#toggleFocus,Studio	proc toggleFocus(self: var Studio)		95
-nim	nextReplay	pon2/app/studio.html#nextReplay,Studio	proc nextReplay(self: var Studio)		112
-nim	prevReplay	pon2/app/studio.html#prevReplay,Studio	proc prevReplay(self: var Studio)		124
-nim	solve	pon2/app/studio.html#solve,Studio	proc solve(self: var Studio)		198
-nim	permute	pon2/app/studio.html#permute,Studio,openArray[int],openArray[int]	proc permute(self: var Studio; fixIndices, allowDoubleIndices: openArray[int])		243
-nim	operate	pon2/app/studio.html#operate,ref.Studio,KeyEvent	proc operate(self: ref Studio; key: KeyEvent): bool		292
+nim	nextReplay	pon2/app/studio.html#nextReplay,Studio	proc nextReplay(self: var Studio)		114
+nim	prevReplay	pon2/app/studio.html#prevReplay,Studio	proc prevReplay(self: var Studio)		126
+nim	solve	pon2/app/studio.html#solve,Studio	proc solve(self: var Studio)		202
+nim	permute	pon2/app/studio.html#permute,Studio,openArray[int],openArray[int]	proc permute(self: var Studio; fixIndices, allowDoubleIndices: openArray[int])		247
+nim	operate	pon2/app/studio.html#operate,ref.Studio,KeyEvent	proc operate(self: ref Studio; key: KeyEvent): bool		296
 nimgrp	init	pon2/app/studio.html#init-procs-all	proc		42
