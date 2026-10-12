@@ -5,7 +5,7 @@ nim	childrenAtDepth	pon2/private/app/solve.html#childrenAtDepth,SolveNode,int,se
 nim	solveSingleThread	pon2/private/app/solve.html#solveSingleThread,SolveNode,seq[seq[Placement]],int,bool,Goal,Steps	proc solveSingleThread(self: SolveNode; solutions: var seq[seq[Placement]];\n                  moveCount: int; calcAllSolutions: bool; goal: Goal;\n                  steps: Steps; checkPruneFirst = false)		465
 nim	toStrs	pon2/private/app/solve.html#toStrs,SolveNode,Goal,Steps	proc toStrs(self: SolveNode; goal: Goal; steps: Steps): seq[string]		561
 nim	parseSolveInfo	pon2/private/app/solve.html#parseSolveInfo,seq[string]	proc parseSolveInfo(strs: seq[string]): Pon2Result[tuple[goal: Goal, steps: Steps]]		665
-nim	parseSolveNode	pon2/private/app/solve.html#parseSolveNode,seq[string]	proc parseSolveNode(strs: seq[string]): Pon2Result[SolveNode]		679
-nim	toStrs	pon2/private/app/solve.html#toStrs,seq[seq[Placement]]	proc toStrs(solutions: seq[seq[Placement]]): seq[string]		709
-nim	parseSolutions	pon2/private/app/solve.html#parseSolutions,seq[string]	proc parseSolutions(strs: seq[string]): Pon2Result[seq[seq[Placement]]]		723
+nim	parseSolveNode	pon2/private/app/solve.html#parseSolveNode,seq[string]	proc parseSolveNode(strs: seq[string]): Pon2Result[SolveNode]		680
+nim	toStrs	pon2/private/app/solve.html#toStrs,seq[seq[Placement]]	proc toStrs(solutions: seq[seq[Placement]]): seq[string]		711
+nim	parseSolutions	pon2/private/app/solve.html#parseSolutions,seq[string]	proc parseSolutions(strs: seq[string]): Pon2Result[seq[seq[Placement]]]		725
 nimgrp	tostrs	pon2/private/app/solve.html#toStrs-procs-all	proc		561

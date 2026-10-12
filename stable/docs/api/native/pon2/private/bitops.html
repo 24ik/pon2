@@ -16,13 +16,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.6">
+<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.12">
 
 <!-- JS -->
-<script type="text/javascript" src="../../dochack.js?v=2.2.6"></script>
+<script type="text/javascript" src="../../dochack.js?v=2.2.12"></script>
 </head>
 <body>
   <div class="document" id="documentId">
+    <input type="checkbox" id="nav-toggle" hidden>
+    <label for="nav-toggle" id="nav-burger">&#9776;</label>
+    <label for="nav-toggle" id="nav-overlay"></label>
     <div class="container">
       <h1 class="title">src/pon2/private/bitops</h1>
       <div class="row">
@@ -172,7 +175,7 @@
   <h1><a class="toc-backref" href="#7">Types</a></h1>
   <dl class="item">
     <div id="PextMask">
-  <dt><pre><a href="bitops.html#PextMask"><span class="Identifier">PextMask</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span> <span class="Other">=</span> <span class="Identifier">T</span></pre></dt>
+  <dt><pre><a href="#PextMask"><span class="Identifier">PextMask</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span> <span class="Other">=</span> <span class="Identifier">T</span></pre></dt>
   <dd>
     
     Mask used in <tt class="docutils literal"><span class="pre"><span class="Identifier">pext</span></span></tt>.
@@ -188,7 +191,7 @@
   <h1><a class="toc-backref" href="#10">Consts</a></h1>
   <dl class="item">
     <div id="Bmi1Available">
-  <dt><pre><a href="bitops.html#Bmi1Available"><span class="Identifier">Bmi1Available</span></a> <span class="Other">=</span> <span class="DecNumber">true</span></pre></dt>
+  <dt><pre><a href="#Bmi1Available"><span class="Identifier">Bmi1Available</span></a> <span class="Other">=</span> <span class="DecNumber">true</span></pre></dt>
   <dd>
     
     
@@ -198,7 +201,7 @@
   </dd>
 </div>
 <div id="Bmi2Available">
-  <dt><pre><a href="bitops.html#Bmi2Available"><span class="Identifier">Bmi2Available</span></a> <span class="Other">=</span> <span class="DecNumber">true</span></pre></dt>
+  <dt><pre><a href="#Bmi2Available"><span class="Identifier">Bmi2Available</span></a> <span class="Other">=</span> <span class="DecNumber">true</span></pre></dt>
   <dd>
     
     
@@ -208,7 +211,7 @@
   </dd>
 </div>
 <div id="ClmulAvailable">
-  <dt><pre><a href="bitops.html#ClmulAvailable"><span class="Identifier">ClmulAvailable</span></a> <span class="Other">=</span> <span class="DecNumber">true</span></pre></dt>
+  <dt><pre><a href="#ClmulAvailable"><span class="Identifier">ClmulAvailable</span></a> <span class="Other">=</span> <span class="DecNumber">true</span></pre></dt>
   <dd>
     
     
@@ -516,7 +519,7 @@
 </div>
 <div id="init-procs-all">
   <div id="init,typePextMask[T: uint64 or uint32 or uint16],T">
-  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypePextMask%5BT%3A%20uint64%20or%20uint32%20or%20uint16%5D%2CT"><span class="Identifier">init</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Identifier">uint64</span> <span class="Keyword">or</span> <span class="Identifier">uint32</span> <span class="Keyword">or</span> <span class="Identifier">uint16</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">M</span><span class="Other">:</span> <span class="Keyword">type</span> <a href="bitops.html#PextMask"><span class="Identifier">PextMask</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">mask</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">M:type</span> {.
+  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypePextMask%5BT%3A%20uint64%20or%20uint32%20or%20uint16%5D%2CT"><span class="Identifier">init</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Identifier">uint64</span> <span class="Keyword">or</span> <span class="Identifier">uint32</span> <span class="Keyword">or</span> <span class="Identifier">uint16</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">M</span><span class="Other">:</span> <span class="Keyword">type</span> <a href="#PextMask"><span class="Identifier">PextMask</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">mask</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">M:type</span> {.
     <span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -530,7 +533,7 @@
 </div>
 <div id="pext-procs-all">
   <div id="pext,uint16,">
-  <dt><pre><span class="Keyword">func</span> <a href="#pext%2Cuint16%2C"><span class="Identifier">pext</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <span class="Identifier">uint16</span><span class="Other">;</span> <span class="Identifier">mask</span><span class="Other">:</span> <span class="Identifier">uint16</span> <span class="Keyword">or</span> <a href="bitops.html#PextMask"><span class="Identifier">PextMask</span></a><span class="Other">[</span><span class="Identifier">uint16</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">uint16</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#pext%2Cuint16%2C"><span class="Identifier">pext</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <span class="Identifier">uint16</span><span class="Other">;</span> <span class="Identifier">mask</span><span class="Other">:</span> <span class="Identifier">uint16</span> <span class="Keyword">or</span> <a href="#PextMask"><span class="Identifier">PextMask</span></a><span class="Other">[</span><span class="Identifier">uint16</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">uint16</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -541,7 +544,7 @@
   </dd>
 </div>
 <div id="pext,uint32,">
-  <dt><pre><span class="Keyword">func</span> <a href="#pext%2Cuint32%2C"><span class="Identifier">pext</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <span class="Identifier">uint32</span><span class="Other">;</span> <span class="Identifier">mask</span><span class="Other">:</span> <span class="Identifier">uint32</span> <span class="Keyword">or</span> <a href="bitops.html#PextMask"><span class="Identifier">PextMask</span></a><span class="Other">[</span><span class="Identifier">uint32</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">uint32</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#pext%2Cuint32%2C"><span class="Identifier">pext</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <span class="Identifier">uint32</span><span class="Other">;</span> <span class="Identifier">mask</span><span class="Other">:</span> <span class="Identifier">uint32</span> <span class="Keyword">or</span> <a href="#PextMask"><span class="Identifier">PextMask</span></a><span class="Other">[</span><span class="Identifier">uint32</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">uint32</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -552,7 +555,7 @@
   </dd>
 </div>
 <div id="pext,uint64,">
-  <dt><pre><span class="Keyword">func</span> <a href="#pext%2Cuint64%2C"><span class="Identifier">pext</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <span class="Identifier">uint64</span><span class="Other">;</span> <span class="Identifier">mask</span><span class="Other">:</span> <span class="Identifier">uint64</span> <span class="Keyword">or</span> <a href="bitops.html#PextMask"><span class="Identifier">PextMask</span></a><span class="Other">[</span><span class="Identifier">uint64</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">uint64</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#pext%2Cuint64%2C"><span class="Identifier">pext</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <span class="Identifier">uint64</span><span class="Other">;</span> <span class="Identifier">mask</span><span class="Other">:</span> <span class="Identifier">uint64</span> <span class="Keyword">or</span> <a href="#PextMask"><span class="Identifier">PextMask</span></a><span class="Other">[</span><span class="Identifier">uint64</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">uint64</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -566,7 +569,7 @@
 </div>
 <div id="popcnt-procs-all">
   <div id="popcnt,PextMask[T: uint64 or uint32 or uint16]">
-  <dt><pre><span class="Keyword">func</span> <a href="#popcnt%2CPextMask%5BT%3A%20uint64%20or%20uint32%20or%20uint16%5D"><span class="Identifier">popcnt</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Identifier">uint64</span> <span class="Keyword">or</span> <span class="Identifier">uint32</span> <span class="Keyword">or</span> <span class="Identifier">uint16</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="bitops.html#PextMask"><span class="Identifier">PextMask</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#popcnt%2CPextMask%5BT%3A%20uint64%20or%20uint32%20or%20uint16%5D"><span class="Identifier">popcnt</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Identifier">uint64</span> <span class="Keyword">or</span> <span class="Identifier">uint32</span> <span class="Keyword">or</span> <span class="Identifier">uint16</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#PextMask"><span class="Identifier">PextMask</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
     <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -624,7 +627,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-02-03 08:18:34 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-10-12 14:57:02 UTC</small>
       </div>
     </div>
   </div>

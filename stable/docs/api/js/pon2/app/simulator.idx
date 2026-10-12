@@ -67,7 +67,7 @@ nim	reset	pon2/app/simulator.html#reset,Simulator	proc reset(self: var Simulator
 nim	operate	pon2/app/simulator.html#operate,Simulator,KeyEvent	proc operate(self: var Simulator; key: KeyEvent): bool		1025
 nim	toUri	pon2/app/simulator.html#toUri,Simulator	proc toUri(self: Simulator; clearPlacements = false; fqdn = SimulatorFqdn.Pon2): Pon2Result[\n    Uri]		1187
 nim	parseSimulator	pon2/app/simulator.html#parseSimulator,Uri	proc parseSimulator(uri: Uri): Pon2Result[Simulator]		1222
-nim	toExportUri	pon2/app/simulator.html#toExportUri,Simulator	proc toExportUri(self: Simulator; viewer = true; clearPlacements = true;\n            fqdn = SimulatorFqdn.Pon2): Pon2Result[Uri]		1268
+nim	toExportUri	pon2/app/simulator.html#toExportUri,Simulator	proc toExportUri(self: Simulator; viewer = true; clearPlacements = true;\n            fqdn = SimulatorFqdn.Pon2): Pon2Result[Uri]		1269
 nimgrp	writecell	pon2/app/simulator.html#writeCell-procs-all	proc		566
 nimgrp	writecross	pon2/app/simulator.html#writeCross-procs-all	proc		694
 nimgrp	writecount	pon2/app/simulator.html#writeCount-procs-all	proc		707

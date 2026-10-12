@@ -14,7 +14,7 @@ nim	puyoCount	pon2/core/pair.html#puyoCount,Pair	proc puyoCount(self: Pair): int
 nim	coloredPuyoCount	pon2/core/pair.html#coloredPuyoCount,Pair	proc coloredPuyoCount(self: Pair): int		118
 nim	nuisancePuyoCount	pon2/core/pair.html#nuisancePuyoCount,Pair	proc nuisancePuyoCount(self: Pair): int		122
 nim	parsePair	pon2/core/pair.html#parsePair,string	proc parsePair(str: string): Pon2Result[Pair]		130
-nim	toUriQuery	pon2/core/pair.html#toUriQuery,Pair	proc toUriQuery(self: Pair; fqdn = Pon2): string		153
-nim	parsePair	pon2/core/pair.html#parsePair,string,SimulatorFqdn	proc parsePair(query: string; fqdn: SimulatorFqdn): Pon2Result[Pair]		161
+nim	toUriQuery	pon2/core/pair.html#toUriQuery,Pair	proc toUriQuery(self: Pair; fqdn = Pon2): string		154
+nim	parsePair	pon2/core/pair.html#parsePair,string,SimulatorFqdn	proc parsePair(query: string; fqdn: SimulatorFqdn): Pon2Result[Pair]		162
 nimgrp	init	pon2/core/pair.html#init-procs-all	proc		53
 nimgrp	parsepair	pon2/core/pair.html#parsePair-procs-all	proc		130

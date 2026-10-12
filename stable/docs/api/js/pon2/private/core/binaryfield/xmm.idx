@@ -32,11 +32,11 @@ nim	`[]=`	pon2/private/core/binaryfield/xmm.html#[]=,M128i,Row,Col,bool	proc `[]
 nim	insert	pon2/private/core/binaryfield/xmm.html#insert,M128i,Row,Col,bool,Physics	proc insert(self: var BinaryField; row: Row; col: Col; val: bool; physics: Physics)		281
 nim	del	pon2/private/core/binaryfield/xmm.html#del,M128i,Row,Col,Physics	proc del(self: var BinaryField; row: Row; col: Col; physics: Physics)		328
 nim	placeMasksTsu	pon2/private/core/binaryfield/xmm.html#placeMasksTsu,M128i,Col,Col	proc placeMasksTsu(existField: BinaryField; col1, col2: Col): (BinaryField,\n    BinaryField)		351
-nim	dropNuisanceTsu	pon2/private/core/binaryfield/xmm.html#dropNuisanceTsu,M128i,array[Col,int],M128i	proc dropNuisanceTsu(self: var BinaryField; counts: array[Col, int];\n                existField: BinaryField)		380
-nim	dropNuisanceWater	pon2/private/core/binaryfield/xmm.html#dropNuisanceWater,M128i,M128i,M128i,array[Col,int]	proc dropNuisanceWater(self, other1, other2: var BinaryField; counts: array[Col, int])		396
-nim	dropNuisanceTsuSafe	pon2/private/core/binaryfield/xmm.html#dropNuisanceTsuSafe,M128i,array[Col,int],M128i	proc dropNuisanceTsuSafe(self: var BinaryField; counts: array[Col, int];\n                    existField: BinaryField)		442
-nim	dropNuisanceWaterSafe	pon2/private/core/binaryfield/xmm.html#dropNuisanceWaterSafe,M128i,M128i,M128i,array[Col,int]	proc dropNuisanceWaterSafe(self, other1, other2: var BinaryField;\n                      counts: array[Col, int])		466
-nim	settleTsu	pon2/private/core/binaryfield/xmm.html#settleTsu,M128i,M128i,M128i,M128i	proc settleTsu(field0, field1, field2: var BinaryField; existField: BinaryField)		575
-nim	settleWater	pon2/private/core/binaryfield/xmm.html#settleWater,M128i,M128i,M128i,M128i	proc settleWater(field0, field1, field2: var BinaryField; existField: BinaryField)		600
-nim	areSettledTsu	pon2/private/core/binaryfield/xmm.html#areSettledTsu,M128i,M128i,M128i,M128i	proc areSettledTsu(field0, field1, field2, existField: BinaryField): bool		610
-nim	areSettledWater	pon2/private/core/binaryfield/xmm.html#areSettledWater,M128i,M128i,M128i,M128i	proc areSettledWater(field0, field1, field2, existField: BinaryField): bool		621
+nim	dropNuisanceTsu	pon2/private/core/binaryfield/xmm.html#dropNuisanceTsu,M128i,array[Col,int],M128i	proc dropNuisanceTsu(self: var BinaryField; counts: array[Col, int];\n                existField: BinaryField)		383
+nim	dropNuisanceWater	pon2/private/core/binaryfield/xmm.html#dropNuisanceWater,M128i,M128i,M128i,array[Col,int]	proc dropNuisanceWater(self, other1, other2: var BinaryField; counts: array[Col, int])		399
+nim	dropNuisanceTsuSafe	pon2/private/core/binaryfield/xmm.html#dropNuisanceTsuSafe,M128i,array[Col,int],M128i	proc dropNuisanceTsuSafe(self: var BinaryField; counts: array[Col, int];\n                    existField: BinaryField)		445
+nim	dropNuisanceWaterSafe	pon2/private/core/binaryfield/xmm.html#dropNuisanceWaterSafe,M128i,M128i,M128i,array[Col,int]	proc dropNuisanceWaterSafe(self, other1, other2: var BinaryField;\n                      counts: array[Col, int])		469
+nim	settleTsu	pon2/private/core/binaryfield/xmm.html#settleTsu,M128i,M128i,M128i,M128i	proc settleTsu(field0, field1, field2: var BinaryField; existField: BinaryField)		578
+nim	settleWater	pon2/private/core/binaryfield/xmm.html#settleWater,M128i,M128i,M128i,M128i	proc settleWater(field0, field1, field2: var BinaryField; existField: BinaryField)		603
+nim	areSettledTsu	pon2/private/core/binaryfield/xmm.html#areSettledTsu,M128i,M128i,M128i,M128i	proc areSettledTsu(field0, field1, field2, existField: BinaryField): bool		613
+nim	areSettledWater	pon2/private/core/binaryfield/xmm.html#areSettledWater,M128i,M128i,M128i,M128i	proc areSettledWater(field0, field1, field2, existField: BinaryField): bool		624

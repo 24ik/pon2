@@ -40,6 +40,6 @@ nim	toArray	pon2/core/field.html#toArray,Field	proc toArray(self: Field): array[
 nim	toField	pon2/core/field.html#toField,array[Row,array[Col,Cell]],Rule	proc toField(cellArray: array[Row, array[Col, Cell]]; rule: Rule): Field		671
 nim	`$`	pon2/core/field.html#$,Field	proc `$`(self: Field): string		699
 nim	parseField	pon2/core/field.html#parseField,string	proc parseField(str: string): Pon2Result[Field]		715
-nim	toUriQuery	pon2/core/field.html#toUriQuery,Field	proc toUriQuery(self: Field; fqdn = Pon2): Pon2Result[string]		836
-nim	parseField	pon2/core/field.html#parseField,string,SimulatorFqdn	proc parseField(query: string; fqdn: SimulatorFqdn): Pon2Result[Field]		959
+nim	toUriQuery	pon2/core/field.html#toUriQuery,Field	proc toUriQuery(self: Field; fqdn = Pon2): Pon2Result[string]		837
+nim	parseField	pon2/core/field.html#parseField,string,SimulatorFqdn	proc parseField(query: string; fqdn: SimulatorFqdn): Pon2Result[Field]		961
 nimgrp	parsefield	pon2/core/field.html#parseField-procs-all	proc		715

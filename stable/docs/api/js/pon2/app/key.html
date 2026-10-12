@@ -16,13 +16,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.6">
+<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.12">
 
 <!-- JS -->
-<script type="text/javascript" src="../../dochack.js?v=2.2.6"></script>
+<script type="text/javascript" src="../../dochack.js?v=2.2.12"></script>
 </head>
 <body>
   <div class="document" id="documentId">
+    <input type="checkbox" id="nav-toggle" hidden>
+    <label for="nav-toggle" id="nav-burger">&#9776;</label>
+    <label for="nav-toggle" id="nav-overlay"></label>
     <div class="container">
       <h1 class="title">src/pon2/app/key</h1>
       <div class="row">
@@ -214,7 +217,7 @@
   <h1><a class="toc-backref" href="#7">Types</a></h1>
   <dl class="item">
     <div id="KeyEvent">
-  <dt><pre><a href="key.html#KeyEvent"><span class="Identifier">KeyEvent</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <dt><pre><a href="#KeyEvent"><span class="Identifier">KeyEvent</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">code</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>
   <span class="Identifier">shift</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
   <span class="Identifier">ctrl</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
@@ -235,7 +238,7 @@
   <h1><a class="toc-backref" href="#10">Consts</a></h1>
   <dl class="item">
     <div id="KeyEvent0">
-  <dt><pre><a href="key.html#KeyEvent0"><span class="Identifier">KeyEvent0</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit0&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEvent0"><span class="Identifier">KeyEvent0</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit0&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -245,7 +248,7 @@
   </dd>
 </div>
 <div id="KeyEvent1">
-  <dt><pre><a href="key.html#KeyEvent1"><span class="Identifier">KeyEvent1</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit1&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEvent1"><span class="Identifier">KeyEvent1</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit1&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -255,7 +258,7 @@
   </dd>
 </div>
 <div id="KeyEvent2">
-  <dt><pre><a href="key.html#KeyEvent2"><span class="Identifier">KeyEvent2</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit2&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEvent2"><span class="Identifier">KeyEvent2</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit2&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -265,7 +268,7 @@
   </dd>
 </div>
 <div id="KeyEvent3">
-  <dt><pre><a href="key.html#KeyEvent3"><span class="Identifier">KeyEvent3</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit3&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEvent3"><span class="Identifier">KeyEvent3</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit3&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -275,7 +278,7 @@
   </dd>
 </div>
 <div id="KeyEvent4">
-  <dt><pre><a href="key.html#KeyEvent4"><span class="Identifier">KeyEvent4</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit4&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEvent4"><span class="Identifier">KeyEvent4</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit4&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -285,7 +288,7 @@
   </dd>
 </div>
 <div id="KeyEvent5">
-  <dt><pre><a href="key.html#KeyEvent5"><span class="Identifier">KeyEvent5</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit5&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEvent5"><span class="Identifier">KeyEvent5</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit5&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -295,7 +298,7 @@
   </dd>
 </div>
 <div id="KeyEvent6">
-  <dt><pre><a href="key.html#KeyEvent6"><span class="Identifier">KeyEvent6</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit6&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEvent6"><span class="Identifier">KeyEvent6</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit6&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -305,7 +308,7 @@
   </dd>
 </div>
 <div id="KeyEvent7">
-  <dt><pre><a href="key.html#KeyEvent7"><span class="Identifier">KeyEvent7</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit7&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEvent7"><span class="Identifier">KeyEvent7</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit7&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -315,7 +318,7 @@
   </dd>
 </div>
 <div id="KeyEvent8">
-  <dt><pre><a href="key.html#KeyEvent8"><span class="Identifier">KeyEvent8</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit8&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEvent8"><span class="Identifier">KeyEvent8</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit8&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -325,7 +328,7 @@
   </dd>
 </div>
 <div id="KeyEvent9">
-  <dt><pre><a href="key.html#KeyEvent9"><span class="Identifier">KeyEvent9</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit9&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEvent9"><span class="Identifier">KeyEvent9</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Digit9&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -335,7 +338,7 @@
   </dd>
 </div>
 <div id="KeyEventA">
-  <dt><pre><a href="key.html#KeyEventA"><span class="Identifier">KeyEventA</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyA&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventA"><span class="Identifier">KeyEventA</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyA&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -345,7 +348,7 @@
   </dd>
 </div>
 <div id="KeyEventB">
-  <dt><pre><a href="key.html#KeyEventB"><span class="Identifier">KeyEventB</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyB&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventB"><span class="Identifier">KeyEventB</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyB&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -355,7 +358,7 @@
   </dd>
 </div>
 <div id="KeyEventC">
-  <dt><pre><a href="key.html#KeyEventC"><span class="Identifier">KeyEventC</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyC&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventC"><span class="Identifier">KeyEventC</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyC&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -365,7 +368,7 @@
   </dd>
 </div>
 <div id="KeyEventD">
-  <dt><pre><a href="key.html#KeyEventD"><span class="Identifier">KeyEventD</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyD&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventD"><span class="Identifier">KeyEventD</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyD&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -375,7 +378,7 @@
   </dd>
 </div>
 <div id="KeyEventE">
-  <dt><pre><a href="key.html#KeyEventE"><span class="Identifier">KeyEventE</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyE&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventE"><span class="Identifier">KeyEventE</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyE&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -385,7 +388,7 @@
   </dd>
 </div>
 <div id="KeyEventEnter">
-  <dt><pre><a href="key.html#KeyEventEnter"><span class="Identifier">KeyEventEnter</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Enter&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventEnter"><span class="Identifier">KeyEventEnter</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Enter&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                  <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -396,7 +399,7 @@
   </dd>
 </div>
 <div id="KeyEventF">
-  <dt><pre><a href="key.html#KeyEventF"><span class="Identifier">KeyEventF</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyF&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventF"><span class="Identifier">KeyEventF</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyF&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -406,7 +409,7 @@
   </dd>
 </div>
 <div id="KeyEventG">
-  <dt><pre><a href="key.html#KeyEventG"><span class="Identifier">KeyEventG</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyG&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventG"><span class="Identifier">KeyEventG</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyG&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -416,7 +419,7 @@
   </dd>
 </div>
 <div id="KeyEventH">
-  <dt><pre><a href="key.html#KeyEventH"><span class="Identifier">KeyEventH</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyH&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventH"><span class="Identifier">KeyEventH</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyH&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -426,7 +429,7 @@
   </dd>
 </div>
 <div id="KeyEventI">
-  <dt><pre><a href="key.html#KeyEventI"><span class="Identifier">KeyEventI</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyI&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventI"><span class="Identifier">KeyEventI</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyI&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -436,7 +439,7 @@
   </dd>
 </div>
 <div id="KeyEventJ">
-  <dt><pre><a href="key.html#KeyEventJ"><span class="Identifier">KeyEventJ</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyJ&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventJ"><span class="Identifier">KeyEventJ</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyJ&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -446,7 +449,7 @@
   </dd>
 </div>
 <div id="KeyEventK">
-  <dt><pre><a href="key.html#KeyEventK"><span class="Identifier">KeyEventK</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyK&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventK"><span class="Identifier">KeyEventK</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyK&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -456,7 +459,7 @@
   </dd>
 </div>
 <div id="KeyEventL">
-  <dt><pre><a href="key.html#KeyEventL"><span class="Identifier">KeyEventL</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyL&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventL"><span class="Identifier">KeyEventL</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyL&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -466,7 +469,7 @@
   </dd>
 </div>
 <div id="KeyEventM">
-  <dt><pre><a href="key.html#KeyEventM"><span class="Identifier">KeyEventM</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyM&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventM"><span class="Identifier">KeyEventM</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyM&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -476,7 +479,7 @@
   </dd>
 </div>
 <div id="KeyEventN">
-  <dt><pre><a href="key.html#KeyEventN"><span class="Identifier">KeyEventN</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyN&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventN"><span class="Identifier">KeyEventN</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyN&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -486,7 +489,7 @@
   </dd>
 </div>
 <div id="KeyEventO">
-  <dt><pre><a href="key.html#KeyEventO"><span class="Identifier">KeyEventO</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyO&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventO"><span class="Identifier">KeyEventO</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyO&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -496,7 +499,7 @@
   </dd>
 </div>
 <div id="KeyEventP">
-  <dt><pre><a href="key.html#KeyEventP"><span class="Identifier">KeyEventP</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyP&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventP"><span class="Identifier">KeyEventP</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyP&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -506,7 +509,7 @@
   </dd>
 </div>
 <div id="KeyEventQ">
-  <dt><pre><a href="key.html#KeyEventQ"><span class="Identifier">KeyEventQ</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyQ&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventQ"><span class="Identifier">KeyEventQ</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyQ&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -516,7 +519,7 @@
   </dd>
 </div>
 <div id="KeyEventR">
-  <dt><pre><a href="key.html#KeyEventR"><span class="Identifier">KeyEventR</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyR&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventR"><span class="Identifier">KeyEventR</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyR&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -526,7 +529,7 @@
   </dd>
 </div>
 <div id="KeyEventS">
-  <dt><pre><a href="key.html#KeyEventS"><span class="Identifier">KeyEventS</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyS&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventS"><span class="Identifier">KeyEventS</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyS&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -536,7 +539,7 @@
   </dd>
 </div>
 <div id="KeyEventSemicolon">
-  <dt><pre><a href="key.html#KeyEventSemicolon"><span class="Identifier">KeyEventSemicolon</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Semicolon&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventSemicolon"><span class="Identifier">KeyEventSemicolon</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Semicolon&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                      <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -547,7 +550,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftA">
-  <dt><pre><a href="key.html#KeyEventShiftA"><span class="Identifier">KeyEventShiftA</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyA&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftA"><span class="Identifier">KeyEventShiftA</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyA&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -558,7 +561,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftB">
-  <dt><pre><a href="key.html#KeyEventShiftB"><span class="Identifier">KeyEventShiftB</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyB&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftB"><span class="Identifier">KeyEventShiftB</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyB&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -569,7 +572,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftC">
-  <dt><pre><a href="key.html#KeyEventShiftC"><span class="Identifier">KeyEventShiftC</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyC&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftC"><span class="Identifier">KeyEventShiftC</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyC&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -580,7 +583,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftD">
-  <dt><pre><a href="key.html#KeyEventShiftD"><span class="Identifier">KeyEventShiftD</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyD&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftD"><span class="Identifier">KeyEventShiftD</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyD&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -591,7 +594,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftE">
-  <dt><pre><a href="key.html#KeyEventShiftE"><span class="Identifier">KeyEventShiftE</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyE&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftE"><span class="Identifier">KeyEventShiftE</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyE&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -602,7 +605,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftEnter">
-  <dt><pre><a href="key.html#KeyEventShiftEnter"><span class="Identifier">KeyEventShiftEnter</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Enter&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftEnter"><span class="Identifier">KeyEventShiftEnter</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Enter&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                       <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -613,7 +616,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftF">
-  <dt><pre><a href="key.html#KeyEventShiftF"><span class="Identifier">KeyEventShiftF</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyF&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftF"><span class="Identifier">KeyEventShiftF</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyF&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -624,7 +627,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftG">
-  <dt><pre><a href="key.html#KeyEventShiftG"><span class="Identifier">KeyEventShiftG</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyG&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftG"><span class="Identifier">KeyEventShiftG</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyG&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -635,7 +638,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftH">
-  <dt><pre><a href="key.html#KeyEventShiftH"><span class="Identifier">KeyEventShiftH</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyH&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftH"><span class="Identifier">KeyEventShiftH</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyH&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -646,7 +649,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftI">
-  <dt><pre><a href="key.html#KeyEventShiftI"><span class="Identifier">KeyEventShiftI</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyI&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftI"><span class="Identifier">KeyEventShiftI</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyI&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -657,7 +660,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftJ">
-  <dt><pre><a href="key.html#KeyEventShiftJ"><span class="Identifier">KeyEventShiftJ</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyJ&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftJ"><span class="Identifier">KeyEventShiftJ</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyJ&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -668,7 +671,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftK">
-  <dt><pre><a href="key.html#KeyEventShiftK"><span class="Identifier">KeyEventShiftK</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyK&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftK"><span class="Identifier">KeyEventShiftK</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyK&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -679,7 +682,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftL">
-  <dt><pre><a href="key.html#KeyEventShiftL"><span class="Identifier">KeyEventShiftL</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyL&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftL"><span class="Identifier">KeyEventShiftL</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyL&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -690,7 +693,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftM">
-  <dt><pre><a href="key.html#KeyEventShiftM"><span class="Identifier">KeyEventShiftM</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyM&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftM"><span class="Identifier">KeyEventShiftM</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyM&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -701,7 +704,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftN">
-  <dt><pre><a href="key.html#KeyEventShiftN"><span class="Identifier">KeyEventShiftN</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyN&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftN"><span class="Identifier">KeyEventShiftN</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyN&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -712,7 +715,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftO">
-  <dt><pre><a href="key.html#KeyEventShiftO"><span class="Identifier">KeyEventShiftO</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyO&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftO"><span class="Identifier">KeyEventShiftO</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyO&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -723,7 +726,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftP">
-  <dt><pre><a href="key.html#KeyEventShiftP"><span class="Identifier">KeyEventShiftP</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyP&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftP"><span class="Identifier">KeyEventShiftP</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyP&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -734,7 +737,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftQ">
-  <dt><pre><a href="key.html#KeyEventShiftQ"><span class="Identifier">KeyEventShiftQ</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyQ&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftQ"><span class="Identifier">KeyEventShiftQ</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyQ&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -745,7 +748,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftR">
-  <dt><pre><a href="key.html#KeyEventShiftR"><span class="Identifier">KeyEventShiftR</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyR&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftR"><span class="Identifier">KeyEventShiftR</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyR&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -756,7 +759,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftS">
-  <dt><pre><a href="key.html#KeyEventShiftS"><span class="Identifier">KeyEventShiftS</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyS&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftS"><span class="Identifier">KeyEventShiftS</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyS&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -767,7 +770,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftT">
-  <dt><pre><a href="key.html#KeyEventShiftT"><span class="Identifier">KeyEventShiftT</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyT&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftT"><span class="Identifier">KeyEventShiftT</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyT&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -778,7 +781,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftTab">
-  <dt><pre><a href="key.html#KeyEventShiftTab"><span class="Identifier">KeyEventShiftTab</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Tab&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftTab"><span class="Identifier">KeyEventShiftTab</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Tab&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                     <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -789,7 +792,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftU">
-  <dt><pre><a href="key.html#KeyEventShiftU"><span class="Identifier">KeyEventShiftU</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyU&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftU"><span class="Identifier">KeyEventShiftU</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyU&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -800,7 +803,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftV">
-  <dt><pre><a href="key.html#KeyEventShiftV"><span class="Identifier">KeyEventShiftV</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyV&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftV"><span class="Identifier">KeyEventShiftV</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyV&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -811,7 +814,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftW">
-  <dt><pre><a href="key.html#KeyEventShiftW"><span class="Identifier">KeyEventShiftW</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyW&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftW"><span class="Identifier">KeyEventShiftW</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyW&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -822,7 +825,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftX">
-  <dt><pre><a href="key.html#KeyEventShiftX"><span class="Identifier">KeyEventShiftX</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyX&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftX"><span class="Identifier">KeyEventShiftX</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyX&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -833,7 +836,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftY">
-  <dt><pre><a href="key.html#KeyEventShiftY"><span class="Identifier">KeyEventShiftY</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyY&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftY"><span class="Identifier">KeyEventShiftY</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyY&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -844,7 +847,7 @@
   </dd>
 </div>
 <div id="KeyEventShiftZ">
-  <dt><pre><a href="key.html#KeyEventShiftZ"><span class="Identifier">KeyEventShiftZ</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyZ&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventShiftZ"><span class="Identifier">KeyEventShiftZ</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyZ&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">true</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                   <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -855,7 +858,7 @@
   </dd>
 </div>
 <div id="KeyEventSpace">
-  <dt><pre><a href="key.html#KeyEventSpace"><span class="Identifier">KeyEventSpace</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Space&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+  <dt><pre><a href="#KeyEventSpace"><span class="Identifier">KeyEventSpace</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Space&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
                  <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
@@ -866,7 +869,7 @@
   </dd>
 </div>
 <div id="KeyEventT">
-  <dt><pre><a href="key.html#KeyEventT"><span class="Identifier">KeyEventT</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyT&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventT"><span class="Identifier">KeyEventT</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyT&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -876,7 +879,7 @@
   </dd>
 </div>
 <div id="KeyEventTab">
-  <dt><pre><a href="key.html#KeyEventTab"><span class="Identifier">KeyEventTab</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Tab&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventTab"><span class="Identifier">KeyEventTab</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;Tab&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -886,7 +889,7 @@
   </dd>
 </div>
 <div id="KeyEventU">
-  <dt><pre><a href="key.html#KeyEventU"><span class="Identifier">KeyEventU</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyU&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventU"><span class="Identifier">KeyEventU</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyU&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -896,7 +899,7 @@
   </dd>
 </div>
 <div id="KeyEventV">
-  <dt><pre><a href="key.html#KeyEventV"><span class="Identifier">KeyEventV</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyV&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventV"><span class="Identifier">KeyEventV</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyV&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -906,7 +909,7 @@
   </dd>
 </div>
 <div id="KeyEventW">
-  <dt><pre><a href="key.html#KeyEventW"><span class="Identifier">KeyEventW</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyW&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventW"><span class="Identifier">KeyEventW</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyW&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -916,7 +919,7 @@
   </dd>
 </div>
 <div id="KeyEventX">
-  <dt><pre><a href="key.html#KeyEventX"><span class="Identifier">KeyEventX</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyX&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventX"><span class="Identifier">KeyEventX</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyX&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -926,7 +929,7 @@
   </dd>
 </div>
 <div id="KeyEventY">
-  <dt><pre><a href="key.html#KeyEventY"><span class="Identifier">KeyEventY</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyY&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventY"><span class="Identifier">KeyEventY</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyY&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -936,7 +939,7 @@
   </dd>
 </div>
 <div id="KeyEventZ">
-  <dt><pre><a href="key.html#KeyEventZ"><span class="Identifier">KeyEventZ</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyZ&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#KeyEventZ"><span class="Identifier">KeyEventZ</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">code</span><span class="Other">:</span> <span class="StringLit">&quot;KeyZ&quot;</span><span class="Other">,</span> <span class="Identifier">shift</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">ctrl</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">alt</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">meta</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -967,7 +970,7 @@
 </div>
 <div id="toKeyEvent-procs-all">
   <div id="toKeyEvent,KeyboardEvent">
-  <dt><pre><span class="Keyword">func</span> <a href="#toKeyEvent%2CKeyboardEvent"><span class="Identifier">toKeyEvent</span></a><span class="Other">(</span><span class="Identifier">event</span><span class="Other">:</span> <span class="Identifier">KeyboardEvent</span><span class="Other">)</span><span class="Other">:</span> <a href="key.html#KeyEvent"><span class="Identifier">KeyEvent</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#toKeyEvent%2CKeyboardEvent"><span class="Identifier">toKeyEvent</span></a><span class="Other">(</span><span class="Identifier">event</span><span class="Other">:</span> <span class="Identifier">KeyboardEvent</span><span class="Other">)</span><span class="Other">:</span> <a href="#KeyEvent"><span class="Identifier">KeyEvent</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -989,7 +992,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-02-03 08:18:38 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-10-12 14:57:07 UTC</small>
       </div>
     </div>
   </div>
