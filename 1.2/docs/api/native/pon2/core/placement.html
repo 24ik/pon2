@@ -16,13 +16,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.6">
+<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.12">
 
 <!-- JS -->
-<script type="text/javascript" src="../../dochack.js?v=2.2.6"></script>
+<script type="text/javascript" src="../../dochack.js?v=2.2.12"></script>
 </head>
 <body>
   <div class="document" id="documentId">
+    <input type="checkbox" id="nav-toggle" hidden>
+    <label for="nav-toggle" id="nav-burger">&#9776;</label>
+    <label for="nav-toggle" id="nav-overlay"></label>
     <div class="container">
       <h1 class="title">src/pon2/core/placement</h1>
       <div class="row">
@@ -154,8 +157,8 @@
 
   </div>
   <div class="nine columns" id="content">
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L1" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L1" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L1" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L1" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
     <div id="tocRoot"></div>
     
@@ -170,18 +173,18 @@
   <h1><a class="toc-backref" href="#7">Types</a></h1>
   <dl class="item">
     <div id="Dir">
-  <dt><pre><a href="placement.html#Dir"><span class="Identifier">Dir</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
+  <dt><pre><a href="#Dir"><span class="Identifier">Dir</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
   <span class="Identifier">Up</span><span class="Other">,</span> <span class="Identifier">Right</span><span class="Other">,</span> <span class="Identifier">Down</span><span class="Other">,</span> <span class="Identifier">Left</span></pre></dt>
   <dd>
     
     Rotor-puyo's direction seen from the pivot-puyo.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L17" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L17" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L17" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L17" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="Placement">
-  <dt><pre><a href="placement.html#Placement"><span class="Identifier">Placement</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
+  <dt><pre><a href="#Placement"><span class="Identifier">Placement</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
   <span class="Identifier">None</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">,</span> <span class="Identifier">Up0</span> <span class="Other">=</span> <span class="StringLit">&quot;1N&quot;</span><span class="Other">,</span> <span class="Identifier">Up1</span> <span class="Other">=</span> <span class="StringLit">&quot;2N&quot;</span><span class="Other">,</span> <span class="Identifier">Up2</span> <span class="Other">=</span> <span class="StringLit">&quot;3N&quot;</span><span class="Other">,</span> <span class="Identifier">Up3</span> <span class="Other">=</span> <span class="StringLit">&quot;4N&quot;</span><span class="Other">,</span> <span class="Identifier">Up4</span> <span class="Other">=</span> <span class="StringLit">&quot;5N&quot;</span><span class="Other">,</span>
   <span class="Identifier">Up5</span> <span class="Other">=</span> <span class="StringLit">&quot;6N&quot;</span><span class="Other">,</span> <span class="Identifier">Right0</span> <span class="Other">=</span> <span class="StringLit">&quot;12&quot;</span><span class="Other">,</span> <span class="Identifier">Right1</span> <span class="Other">=</span> <span class="StringLit">&quot;23&quot;</span><span class="Other">,</span> <span class="Identifier">Right2</span> <span class="Other">=</span> <span class="StringLit">&quot;34&quot;</span><span class="Other">,</span> <span class="Identifier">Right3</span> <span class="Other">=</span> <span class="StringLit">&quot;45&quot;</span><span class="Other">,</span>
   <span class="Identifier">Right4</span> <span class="Other">=</span> <span class="StringLit">&quot;56&quot;</span><span class="Other">,</span> <span class="Identifier">Down0</span> <span class="Other">=</span> <span class="StringLit">&quot;1S&quot;</span><span class="Other">,</span> <span class="Identifier">Down1</span> <span class="Other">=</span> <span class="StringLit">&quot;2S&quot;</span><span class="Other">,</span> <span class="Identifier">Down2</span> <span class="Other">=</span> <span class="StringLit">&quot;3S&quot;</span><span class="Other">,</span> <span class="Identifier">Down3</span> <span class="Other">=</span> <span class="StringLit">&quot;4S&quot;</span><span class="Other">,</span>
@@ -190,8 +193,8 @@
   <dd>
     
     The location where a pair is put.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L24" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L24" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L24" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L24" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -202,22 +205,22 @@
   <h1><a class="toc-backref" href="#10">Consts</a></h1>
   <dl class="item">
     <div id="ActualPlacements">
-  <dt><pre><a href="placement.html#ActualPlacements"><span class="Identifier">ActualPlacements</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">Placement.Up0</span><span class="Other">..</span><span class="DecNumber">Placement.Left5</span><span class="Other">}</span></pre></dt>
+  <dt><pre><a href="#ActualPlacements"><span class="Identifier">ActualPlacements</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">Placement.Up0</span><span class="Other">..</span><span class="DecNumber">Placement.Left5</span><span class="Other">}</span></pre></dt>
   <dd>
     
     
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L51" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L51" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L51" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L51" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="DoublePlacements">
-  <dt><pre><a href="placement.html#DoublePlacements"><span class="Identifier">DoublePlacements</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">Placement.Up0</span><span class="Other">..</span><span class="DecNumber">Placement.Right4</span><span class="Other">}</span></pre></dt>
+  <dt><pre><a href="#DoublePlacements"><span class="Identifier">DoublePlacements</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">Placement.Up0</span><span class="Other">..</span><span class="DecNumber">Placement.Right4</span><span class="Other">}</span></pre></dt>
   <dd>
     
     
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L52" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L52" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L52" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L52" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -233,19 +236,19 @@
   <dd>
     
     
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L69" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L69" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L69" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L69" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="init,typePlacement,Col,Dir">
-  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypePlacement%2CCol%2CDir"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">Placement</span><span class="Other">;</span> <span class="Identifier">pivotCol</span><span class="Other">:</span> <a href="common.html#Col"><span class="Identifier">Col</span></a><span class="Other">;</span> <span class="Identifier">rotorDir</span><span class="Other">:</span> <a href="placement.html#Dir"><span class="Identifier">Dir</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#init%2CtypePlacement%2CCol%2CDir"><span class="Identifier">init</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <span class="Keyword">type</span> <span class="Identifier">Placement</span><span class="Other">;</span> <span class="Identifier">pivotCol</span><span class="Other">:</span> <a href="common.html#Col"><span class="Identifier">Col</span></a><span class="Other">;</span> <span class="Identifier">rotorDir</span><span class="Other">:</span> <a href="#Dir"><span class="Identifier">Dir</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T:type</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
     <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L58" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L58" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L58" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L58" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -253,13 +256,13 @@
 </div>
 <div id="movedLeft-procs-all">
   <div id="movedLeft,Placement">
-  <dt><pre><span class="Keyword">func</span> <a href="#movedLeft%2CPlacement"><span class="Identifier">movedLeft</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="placement.html#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span><span class="Other">:</span> <a href="placement.html#Placement"><span class="Identifier">Placement</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#movedLeft%2CPlacement"><span class="Identifier">movedLeft</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span><span class="Other">:</span> <a href="#Placement"><span class="Identifier">Placement</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the placement moved leftward.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L127" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L127" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L127" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L127" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -267,13 +270,13 @@
 </div>
 <div id="movedRight-procs-all">
   <div id="movedRight,Placement">
-  <dt><pre><span class="Keyword">func</span> <a href="#movedRight%2CPlacement"><span class="Identifier">movedRight</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="placement.html#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span><span class="Other">:</span> <a href="placement.html#Placement"><span class="Identifier">Placement</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#movedRight%2CPlacement"><span class="Identifier">movedRight</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span><span class="Other">:</span> <a href="#Placement"><span class="Identifier">Placement</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the placement moved rightward.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L123" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L123" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L123" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L123" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -281,13 +284,13 @@
 </div>
 <div id="moveLeft-procs-all">
   <div id="moveLeft,Placement">
-  <dt><pre><span class="Keyword">func</span> <a href="#moveLeft%2CPlacement"><span class="Identifier">moveLeft</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="placement.html#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#moveLeft%2CPlacement"><span class="Identifier">moveLeft</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
                                      <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Moves the placement leftward.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L117" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L117" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L117" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L117" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -295,13 +298,13 @@
 </div>
 <div id="moveRight-procs-all">
   <div id="moveRight,Placement">
-  <dt><pre><span class="Keyword">func</span> <a href="#moveRight%2CPlacement"><span class="Identifier">moveRight</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="placement.html#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#moveRight%2CPlacement"><span class="Identifier">moveRight</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
                                       <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Moves the placement rightward.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L111" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L111" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L111" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L111" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -309,24 +312,24 @@
 </div>
 <div id="parsePlacement-procs-all">
   <div id="parsePlacement,string,SimulatorFqdn">
-  <dt><pre><span class="Keyword">func</span> <a href="#parsePlacement%2Cstring%2CSimulatorFqdn"><span class="Identifier">parsePlacement</span></a><span class="Other">(</span><span class="Identifier">query</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">fqdn</span><span class="Other">:</span> <a href="fqdn.html#SimulatorFqdn"><span class="Identifier">SimulatorFqdn</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a><span class="Other">[</span><a href="placement.html#Placement"><span class="Identifier">Placement</span></a><span class="Other">]</span> {.
+  <dt><pre><span class="Keyword">func</span> <a href="#parsePlacement%2Cstring%2CSimulatorFqdn"><span class="Identifier">parsePlacement</span></a><span class="Other">(</span><span class="Identifier">query</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">fqdn</span><span class="Other">:</span> <a href="fqdn.html#SimulatorFqdn"><span class="Identifier">SimulatorFqdn</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a><span class="Other">[</span><a href="#Placement"><span class="Identifier">Placement</span></a><span class="Other">]</span> {.
     <span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the placement converted from the URI query.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L195" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L195" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L195" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L195" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="parsePlacement,string">
-  <dt><pre><span class="Keyword">func</span> <a href="#parsePlacement%2Cstring"><span class="Identifier">parsePlacement</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a><span class="Other">[</span><a href="placement.html#Placement"><span class="Identifier">Placement</span></a><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#parsePlacement%2Cstring"><span class="Identifier">parsePlacement</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a><span class="Other">[</span><a href="#Placement"><span class="Identifier">Placement</span></a><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the placement converted from the string representation.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L173" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L173" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L173" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L173" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -334,13 +337,13 @@
 </div>
 <div id="pivotCol-procs-all">
   <div id="pivotCol,Placement">
-  <dt><pre><span class="Keyword">func</span> <a href="#pivotCol%2CPlacement"><span class="Identifier">pivotCol</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="placement.html#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span><span class="Other">:</span> <a href="common.html#Col"><span class="Identifier">Col</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#pivotCol%2CPlacement"><span class="Identifier">pivotCol</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span><span class="Other">:</span> <a href="common.html#Col"><span class="Identifier">Col</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
                                       <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the pivot-puyo's column. If the placement is None, returns the undefined column.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L76" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L76" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L76" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L76" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -348,13 +351,13 @@
 </div>
 <div id="rotatedLeft-procs-all">
   <div id="rotatedLeft,Placement">
-  <dt><pre><span class="Keyword">func</span> <a href="#rotatedLeft%2CPlacement"><span class="Identifier">rotatedLeft</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="placement.html#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span><span class="Other">:</span> <a href="placement.html#Placement"><span class="Identifier">Placement</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#rotatedLeft%2CPlacement"><span class="Identifier">rotatedLeft</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span><span class="Other">:</span> <a href="#Placement"><span class="Identifier">Placement</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the placement rotated left (counterclockwise).
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L165" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L165" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L165" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L165" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -362,13 +365,13 @@
 </div>
 <div id="rotatedRight-procs-all">
   <div id="rotatedRight,Placement">
-  <dt><pre><span class="Keyword">func</span> <a href="#rotatedRight%2CPlacement"><span class="Identifier">rotatedRight</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="placement.html#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span><span class="Other">:</span> <a href="placement.html#Placement"><span class="Identifier">Placement</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#rotatedRight%2CPlacement"><span class="Identifier">rotatedRight</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span><span class="Other">:</span> <a href="#Placement"><span class="Identifier">Placement</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the placement rotated right (clockwise).
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L161" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L161" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L161" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L161" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -376,13 +379,13 @@
 </div>
 <div id="rotateLeft-procs-all">
   <div id="rotateLeft,Placement">
-  <dt><pre><span class="Keyword">func</span> <a href="#rotateLeft%2CPlacement"><span class="Identifier">rotateLeft</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="placement.html#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#rotateLeft%2CPlacement"><span class="Identifier">rotateLeft</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
                                        <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Rotates the placement left (counterclockwise).
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L147" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L147" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L147" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L147" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -390,13 +393,13 @@
 </div>
 <div id="rotateRight-procs-all">
   <div id="rotateRight,Placement">
-  <dt><pre><span class="Keyword">func</span> <a href="#rotateRight%2CPlacement"><span class="Identifier">rotateRight</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="placement.html#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#rotateRight%2CPlacement"><span class="Identifier">rotateRight</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
                                         <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Rotates the placement right (clockwise).
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L135" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L135" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L135" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L135" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -404,13 +407,13 @@
 </div>
 <div id="rotorCol-procs-all">
   <div id="rotorCol,Placement">
-  <dt><pre><span class="Keyword">func</span> <a href="#rotorCol%2CPlacement"><span class="Identifier">rotorCol</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="placement.html#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span><span class="Other">:</span> <a href="common.html#Col"><span class="Identifier">Col</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#rotorCol%2CPlacement"><span class="Identifier">rotorCol</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span><span class="Other">:</span> <a href="common.html#Col"><span class="Identifier">Col</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
                                       <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the rotor-puyo's column. If the placement is None, returns the undefined column.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L87" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L87" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L87" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L87" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -418,13 +421,13 @@
 </div>
 <div id="rotorDir-procs-all">
   <div id="rotorDir,Placement">
-  <dt><pre><span class="Keyword">func</span> <a href="#rotorDir%2CPlacement"><span class="Identifier">rotorDir</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="placement.html#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span><span class="Other">:</span> <a href="placement.html#Dir"><span class="Identifier">Dir</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#rotorDir%2CPlacement"><span class="Identifier">rotorDir</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#Placement"><span class="Identifier">Placement</span></a><span class="Other">)</span><span class="Other">:</span> <a href="#Dir"><span class="Identifier">Dir</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
                                       <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the rotor-puyo's direction. If the placement is None, returns the undefined direction.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L98" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L98" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L98" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L98" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -432,13 +435,13 @@
 </div>
 <div id="toUriQuery-procs-all">
   <div id="toUriQuery,Placement">
-  <dt><pre><span class="Keyword">func</span> <a href="#toUriQuery%2CPlacement"><span class="Identifier">toUriQuery</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="placement.html#Placement"><span class="Identifier">Placement</span></a><span class="Other">;</span> <span class="Identifier">fqdn</span> <span class="Other">=</span> <span class="Identifier">Pon2</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#toUriQuery%2CPlacement"><span class="Identifier">toUriQuery</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#Placement"><span class="Identifier">Placement</span></a><span class="Other">;</span> <span class="Identifier">fqdn</span> <span class="Other">=</span> <span class="Identifier">Pon2</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span>
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the URI query converted from the placement.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/placement.nim#L187" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/placement.nim#L187" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/placement.nim#L187" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/placement.nim#L187" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -450,7 +453,7 @@
 <div class="section" id="19">
   <h1><a class="toc-backref" href="#19">Exports</a></h1>
   <dl class="item">
-    <a href="common.html#WaterTopRow"><span class="Identifier">WaterTopRow</span></a>, <a href="common.html#Height"><span class="Identifier">Height</span></a>, <a href="common.html#WaterHeight"><span class="Identifier">WaterHeight</span></a>, <a href="common.html#Width"><span class="Identifier">Width</span></a>, <a href="common.html#Row"><span class="Identifier">Row</span></a>, <a href="common.html#Col"><span class="Identifier">Col</span></a>, <a href="common.html#AirBottomRow"><span class="Identifier">AirBottomRow</span></a>, <a href="common.html#AirHeight"><span class="Identifier">AirHeight</span></a>, <a href="../utils/results2.html#context,Pon2Result[T],string"><span class="Identifier">context</span></a>, <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a>
+    <a href="common.html#WaterTopRow"><span class="Identifier">WaterTopRow</span></a>, <a href="common.html#Height"><span class="Identifier">Height</span></a>, <a href="common.html#WaterHeight"><span class="Identifier">WaterHeight</span></a>, <a href="common.html#Width"><span class="Identifier">Width</span></a>, <a href="common.html#Row"><span class="Identifier">Row</span></a>, <a href="common.html#Col"><span class="Identifier">Col</span></a>, <a href="common.html#AirBottomRow"><span class="Identifier">AirBottomRow</span></a>, <a href="common.html#AirHeight"><span class="Identifier">AirHeight</span></a>, <a href="../utils/results2.html#catch.m,varargs[untyped]"><span class="Identifier">catch</span></a>, <a href="../utils/results2.html#context.t,Pon2Result[T],untyped"><span class="Identifier">context</span></a>, <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a>
   </dl>
 </div>
 
@@ -460,7 +463,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-02-03 08:17:49 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-10-12 14:56:10 UTC</small>
       </div>
     </div>
   </div>

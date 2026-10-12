@@ -16,13 +16,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.6">
+<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.12">
 
 <!-- JS -->
-<script type="text/javascript" src="../../dochack.js?v=2.2.6"></script>
+<script type="text/javascript" src="../../dochack.js?v=2.2.12"></script>
 </head>
 <body>
   <div class="document" id="documentId">
+    <input type="checkbox" id="nav-toggle" hidden>
+    <label for="nav-toggle" id="nav-burger">&#9776;</label>
+    <label for="nav-toggle" id="nav-overlay"></label>
     <div class="container">
       <h1 class="title">src/pon2/core/pair</h1>
       <div class="row">
@@ -146,8 +149,8 @@
 
   </div>
   <div class="nine columns" id="content">
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/pair.nim#L1" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/pair.nim#L1" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/pair.nim#L1" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/pair.nim#L1" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
     <div id="tocRoot"></div>
     
@@ -162,7 +165,7 @@
   <h1><a class="toc-backref" href="#7">Types</a></h1>
   <dl class="item">
     <div id="Pair">
-  <dt><pre><a href="pair.html#Pair"><span class="Identifier">Pair</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
+  <dt><pre><a href="#Pair"><span class="Identifier">Pair</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
   <span class="Identifier">RedRed</span> <span class="Other">=</span> <span class="StringLit">&quot;r&quot;</span> <span class="Operator">&amp;</span> <span class="StringLit">&quot;r&quot;</span><span class="Other">,</span> <span class="Identifier">RedGreen</span> <span class="Other">=</span> <span class="StringLit">&quot;r&quot;</span> <span class="Operator">&amp;</span> <span class="StringLit">&quot;g&quot;</span><span class="Other">,</span> <span class="Identifier">RedBlue</span> <span class="Other">=</span> <span class="StringLit">&quot;r&quot;</span> <span class="Operator">&amp;</span> <span class="StringLit">&quot;b&quot;</span><span class="Other">,</span>
   <span class="Identifier">RedYellow</span> <span class="Other">=</span> <span class="StringLit">&quot;r&quot;</span> <span class="Operator">&amp;</span> <span class="StringLit">&quot;y&quot;</span><span class="Other">,</span> <span class="Identifier">RedPurple</span> <span class="Other">=</span> <span class="StringLit">&quot;r&quot;</span> <span class="Operator">&amp;</span> <span class="StringLit">&quot;p&quot;</span><span class="Other">,</span> <span class="Identifier">GreenRed</span> <span class="Other">=</span> <span class="StringLit">&quot;g&quot;</span> <span class="Operator">&amp;</span> <span class="StringLit">&quot;r&quot;</span><span class="Other">,</span>
   <span class="Identifier">GreenGreen</span> <span class="Other">=</span> <span class="StringLit">&quot;g&quot;</span> <span class="Operator">&amp;</span> <span class="StringLit">&quot;g&quot;</span><span class="Other">,</span> <span class="Identifier">GreenBlue</span> <span class="Other">=</span> <span class="StringLit">&quot;g&quot;</span> <span class="Operator">&amp;</span> <span class="StringLit">&quot;b&quot;</span><span class="Other">,</span> <span class="Identifier">GreenYellow</span> <span class="Other">=</span> <span class="StringLit">&quot;g&quot;</span> <span class="Operator">&amp;</span> <span class="StringLit">&quot;y&quot;</span><span class="Other">,</span>
@@ -175,8 +178,8 @@
   <dd>
     
     The pair of two colored puyos.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/pair.nim#L16" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/pair.nim#L16" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/pair.nim#L16" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/pair.nim#L16" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -188,13 +191,13 @@
   <dl class="item">
     <div id="cellCount-procs-all">
   <div id="cellCount,Pair,Cell">
-  <dt><pre><span class="Keyword">func</span> <a href="#cellCount%2CPair%2CCell"><span class="Identifier">cellCount</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="pair.html#Pair"><span class="Identifier">Pair</span></a><span class="Other">;</span> <span class="Identifier">cell</span><span class="Other">:</span> <a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#cellCount%2CPair%2CCell"><span class="Identifier">cellCount</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#Pair"><span class="Identifier">Pair</span></a><span class="Other">;</span> <span class="Identifier">cell</span><span class="Other">:</span> <a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the number of <tt class="docutils literal"><span class="pre"><span class="Identifier">cell</span></span></tt> in the pair.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/pair.nim#L110" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/pair.nim#L110" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/pair.nim#L110" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/pair.nim#L110" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -202,13 +205,13 @@
 </div>
 <div id="coloredPuyoCount-procs-all">
   <div id="coloredPuyoCount,Pair">
-  <dt><pre><span class="Keyword">func</span> <a href="#coloredPuyoCount%2CPair"><span class="Identifier">coloredPuyoCount</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="pair.html#Pair"><span class="Identifier">Pair</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#coloredPuyoCount%2CPair"><span class="Identifier">coloredPuyoCount</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#Pair"><span class="Identifier">Pair</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the number of colored puyos in the pair.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/pair.nim#L118" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/pair.nim#L118" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/pair.nim#L118" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/pair.nim#L118" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -220,8 +223,8 @@
   <dd>
     
     
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/pair.nim#L62" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/pair.nim#L62" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/pair.nim#L62" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/pair.nim#L62" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -230,8 +233,8 @@
   <dd>
     
     Note that the result is undefined if the pivot or rotor are not colored puyos.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/pair.nim#L53" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/pair.nim#L53" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/pair.nim#L53" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/pair.nim#L53" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -239,13 +242,13 @@
 </div>
 <div id="isDouble-procs-all">
   <div id="isDouble,Pair">
-  <dt><pre><span class="Keyword">func</span> <a href="#isDouble%2CPair"><span class="Identifier">isDouble</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="pair.html#Pair"><span class="Identifier">Pair</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#isDouble%2CPair"><span class="Identifier">isDouble</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#Pair"><span class="Identifier">Pair</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
                                   <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt> if the pair is double (monochromatic).
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/pair.nim#L75" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/pair.nim#L75" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/pair.nim#L75" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/pair.nim#L75" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -253,13 +256,13 @@
 </div>
 <div id="nuisancePuyoCount-procs-all">
   <div id="nuisancePuyoCount,Pair">
-  <dt><pre><span class="Keyword">func</span> <a href="#nuisancePuyoCount%2CPair"><span class="Identifier">nuisancePuyoCount</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="pair.html#Pair"><span class="Identifier">Pair</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#nuisancePuyoCount%2CPair"><span class="Identifier">nuisancePuyoCount</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#Pair"><span class="Identifier">Pair</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the number of nuisance puyos in the pair.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/pair.nim#L122" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/pair.nim#L122" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/pair.nim#L122" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/pair.nim#L122" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -267,24 +270,24 @@
 </div>
 <div id="parsePair-procs-all">
   <div id="parsePair,string,SimulatorFqdn">
-  <dt><pre><span class="Keyword">func</span> <a href="#parsePair%2Cstring%2CSimulatorFqdn"><span class="Identifier">parsePair</span></a><span class="Other">(</span><span class="Identifier">query</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">fqdn</span><span class="Other">:</span> <a href="fqdn.html#SimulatorFqdn"><span class="Identifier">SimulatorFqdn</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a><span class="Other">[</span><a href="pair.html#Pair"><span class="Identifier">Pair</span></a><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#parsePair%2Cstring%2CSimulatorFqdn"><span class="Identifier">parsePair</span></a><span class="Other">(</span><span class="Identifier">query</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">fqdn</span><span class="Other">:</span> <a href="fqdn.html#SimulatorFqdn"><span class="Identifier">SimulatorFqdn</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a><span class="Other">[</span><a href="#Pair"><span class="Identifier">Pair</span></a><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
     <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the pair converted from the URI query.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/pair.nim#L161" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/pair.nim#L161" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/pair.nim#L162" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/pair.nim#L162" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="parsePair,string">
-  <dt><pre><span class="Keyword">func</span> <a href="#parsePair%2Cstring"><span class="Identifier">parsePair</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a><span class="Other">[</span><a href="pair.html#Pair"><span class="Identifier">Pair</span></a><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#parsePair%2Cstring"><span class="Identifier">parsePair</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a><span class="Other">[</span><a href="#Pair"><span class="Identifier">Pair</span></a><span class="Other">]</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the pair converted from the string representation.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/pair.nim#L130" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/pair.nim#L130" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/pair.nim#L130" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/pair.nim#L130" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -292,12 +295,12 @@
 </div>
 <div id="pivot-procs-all">
   <div id="pivot,Pair">
-  <dt><pre><span class="Keyword">func</span> <a href="#pivot%2CPair"><span class="Identifier">pivot</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="pair.html#Pair"><span class="Identifier">Pair</span></a><span class="Other">)</span><span class="Other">:</span> <a href="cell.html#Cell"><span class="Identifier">Cell</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">func</span> <a href="#pivot%2CPair"><span class="Identifier">pivot</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#Pair"><span class="Identifier">Pair</span></a><span class="Other">)</span><span class="Other">:</span> <a href="cell.html#Cell"><span class="Identifier">Cell</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the pivot-puyo.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/pair.nim#L69" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/pair.nim#L69" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/pair.nim#L69" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/pair.nim#L69" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -305,13 +308,13 @@
 </div>
 <div id="pivot=-procs-all">
   <div id="pivot=,Pair,Cell">
-  <dt><pre><span class="Keyword">func</span> <a href="#pivot%3D%2CPair%2CCell"><span class="Identifier">pivot=</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="pair.html#Pair"><span class="Identifier">Pair</span></a><span class="Other">;</span> <span class="Identifier">colorPuyo</span><span class="Other">:</span> <a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#pivot%3D%2CPair%2CCell"><span class="Identifier">pivot=</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#Pair"><span class="Identifier">Pair</span></a><span class="Other">;</span> <span class="Identifier">colorPuyo</span><span class="Other">:</span> <a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Sets the pivot-puyo. If the <tt class="docutils literal"><span class="pre"><span class="Identifier">colorPuyo</span></span></tt> is not color puyo, does nothing.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/pair.nim#L83" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/pair.nim#L83" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/pair.nim#L83" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/pair.nim#L83" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -319,13 +322,13 @@
 </div>
 <div id="puyoCount-procs-all">
   <div id="puyoCount,Pair">
-  <dt><pre><span class="Keyword">func</span> <a href="#puyoCount%2CPair"><span class="Identifier">puyoCount</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="pair.html#Pair"><span class="Identifier">Pair</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#puyoCount%2CPair"><span class="Identifier">puyoCount</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#Pair"><span class="Identifier">Pair</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
                                   <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the number of puyos in the pair.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/pair.nim#L114" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/pair.nim#L114" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/pair.nim#L114" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/pair.nim#L114" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -333,12 +336,12 @@
 </div>
 <div id="rotor-procs-all">
   <div id="rotor,Pair">
-  <dt><pre><span class="Keyword">func</span> <a href="#rotor%2CPair"><span class="Identifier">rotor</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="pair.html#Pair"><span class="Identifier">Pair</span></a><span class="Other">)</span><span class="Other">:</span> <a href="cell.html#Cell"><span class="Identifier">Cell</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">func</span> <a href="#rotor%2CPair"><span class="Identifier">rotor</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#Pair"><span class="Identifier">Pair</span></a><span class="Other">)</span><span class="Other">:</span> <a href="cell.html#Cell"><span class="Identifier">Cell</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the rotor-puyo.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/pair.nim#L72" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/pair.nim#L72" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/pair.nim#L72" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/pair.nim#L72" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -346,13 +349,13 @@
 </div>
 <div id="rotor=-procs-all">
   <div id="rotor=,Pair,Cell">
-  <dt><pre><span class="Keyword">func</span> <a href="#rotor%3D%2CPair%2CCell"><span class="Identifier">rotor=</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="pair.html#Pair"><span class="Identifier">Pair</span></a><span class="Other">;</span> <span class="Identifier">colorPuyo</span><span class="Other">:</span> <a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#rotor%3D%2CPair%2CCell"><span class="Identifier">rotor=</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#Pair"><span class="Identifier">Pair</span></a><span class="Other">;</span> <span class="Identifier">colorPuyo</span><span class="Other">:</span> <a href="cell.html#Cell"><span class="Identifier">Cell</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Sets the rotor-puyo. If the <tt class="docutils literal"><span class="pre"><span class="Identifier">colorPuyo</span></span></tt> is not color puyo, does nothing.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/pair.nim#L89" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/pair.nim#L89" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/pair.nim#L89" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/pair.nim#L89" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -360,12 +363,12 @@
 </div>
 <div id="swap-procs-all">
   <div id="swap,Pair">
-  <dt><pre><span class="Keyword">func</span> <a href="#swap%2CPair"><span class="Identifier">swap</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="pair.html#Pair"><span class="Identifier">Pair</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">func</span> <a href="#swap%2CPair"><span class="Identifier">swap</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#Pair"><span class="Identifier">Pair</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Swaps the pivot-puyo and rotor-puyo.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/pair.nim#L103" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/pair.nim#L103" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/pair.nim#L103" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/pair.nim#L103" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -373,13 +376,13 @@
 </div>
 <div id="swapped-procs-all">
   <div id="swapped,Pair">
-  <dt><pre><span class="Keyword">func</span> <a href="#swapped%2CPair"><span class="Identifier">swapped</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="pair.html#Pair"><span class="Identifier">Pair</span></a><span class="Other">)</span><span class="Other">:</span> <a href="pair.html#Pair"><span class="Identifier">Pair</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#swapped%2CPair"><span class="Identifier">swapped</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#Pair"><span class="Identifier">Pair</span></a><span class="Other">)</span><span class="Other">:</span> <a href="#Pair"><span class="Identifier">Pair</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
                                  <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the pair with pivot-puyo and rotor-puyo swapped.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/pair.nim#L99" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/pair.nim#L99" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/pair.nim#L99" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/pair.nim#L99" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -387,13 +390,13 @@
 </div>
 <div id="toUriQuery-procs-all">
   <div id="toUriQuery,Pair">
-  <dt><pre><span class="Keyword">func</span> <a href="#toUriQuery%2CPair"><span class="Identifier">toUriQuery</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="pair.html#Pair"><span class="Identifier">Pair</span></a><span class="Other">;</span> <span class="Identifier">fqdn</span> <span class="Other">=</span> <span class="Identifier">Pon2</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">func</span> <a href="#toUriQuery%2CPair"><span class="Identifier">toUriQuery</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#Pair"><span class="Identifier">Pair</span></a><span class="Other">;</span> <span class="Identifier">fqdn</span> <span class="Other">=</span> <span class="Identifier">Pon2</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Returns the URI query converted from the pair.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/core/pair.nim#L153" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/core/pair.nim#L153" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/core/pair.nim#L154" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/core/pair.nim#L154" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -405,7 +408,7 @@
 <div class="section" id="19">
   <h1><a class="toc-backref" href="#19">Exports</a></h1>
   <dl class="item">
-    <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a>, <a href="cell.html#ColoredPuyos"><span class="Identifier">ColoredPuyos</span></a>, <a href="cell.html#parseCell,string"><span class="Identifier">parseCell</span></a>, <a href="cell.html#Cell"><span class="Identifier">Cell</span></a>, <a href="cell.html#NuisancePuyos"><span class="Identifier">NuisancePuyos</span></a>, <a href="cell.html#Puyos"><span class="Identifier">Puyos</span></a>, <a href="../utils/results2.html#context,Pon2Result[T],string"><span class="Identifier">context</span></a>, <a href="../utils/results2.html#context,Pon2Result[T],string_2"><span class="Identifier">context</span></a>, <a href="../utils/results2.html#Pon2Result_2"><span class="Identifier">Pon2Result</span></a>
+    <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a>, <a href="cell.html#ColoredPuyos"><span class="Identifier">ColoredPuyos</span></a>, <a href="../utils/results2.html#catch.m,varargs[untyped]"><span class="Identifier">catch</span></a>, <a href="cell.html#parseCell,string"><span class="Identifier">parseCell</span></a>, <a href="cell.html#Cell"><span class="Identifier">Cell</span></a>, <a href="cell.html#NuisancePuyos"><span class="Identifier">NuisancePuyos</span></a>, <a href="cell.html#Puyos"><span class="Identifier">Puyos</span></a>, <a href="../utils/results2.html#context.t,Pon2Result[T],untyped"><span class="Identifier">context</span></a>, <a href="../utils/results2.html#catch.m,varargs[untyped]_2"><span class="Identifier">catch</span></a>, <a href="../utils/results2.html#context.t,Pon2Result[T],untyped_2"><span class="Identifier">context</span></a>, <a href="../utils/results2.html#Pon2Result_2"><span class="Identifier">Pon2Result</span></a>
   </dl>
 </div>
 
@@ -415,7 +418,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-02-03 08:17:49 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-10-12 14:56:10 UTC</small>
       </div>
     </div>
   </div>

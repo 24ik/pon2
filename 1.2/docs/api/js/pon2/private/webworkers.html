@@ -16,13 +16,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.6">
+<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.12">
 
 <!-- JS -->
-<script type="text/javascript" src="../../dochack.js?v=2.2.6"></script>
+<script type="text/javascript" src="../../dochack.js?v=2.2.12"></script>
 </head>
 <body>
   <div class="document" id="documentId">
+    <input type="checkbox" id="nav-toggle" hidden>
+    <label for="nav-toggle" id="nav-burger">&#9776;</label>
+    <label for="nav-toggle" id="nav-overlay"></label>
     <div class="container">
       <h1 class="title">src/pon2/private/webworkers</h1>
       <div class="row">
@@ -102,8 +105,8 @@
 
   </div>
   <div class="nine columns" id="content">
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/webworkers.nim#L1" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/webworkers.nim#L1" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/webworkers.nim#L1" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/webworkers.nim#L1" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
     <div id="tocRoot"></div>
     
@@ -122,23 +125,23 @@
   <h1><a class="toc-backref" href="#7">Types</a></h1>
   <dl class="item">
     <div id="WebWorkerPool">
-  <dt><pre><a href="webworkers.html#WebWorkerPool"><span class="Identifier">WebWorkerPool</span></a> <span class="Other">=</span> <span class="Keyword">object</span></pre></dt>
+  <dt><pre><a href="#WebWorkerPool"><span class="Identifier">WebWorkerPool</span></a> <span class="Other">=</span> <span class="Keyword">object</span></pre></dt>
   <dd>
     
     Web worker pool.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/webworkers.nim#L32" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/webworkers.nim#L32" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/webworkers.nim#L32" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/webworkers.nim#L32" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="WebWorkerTask">
-  <dt><pre><a href="webworkers.html#WebWorkerTask"><span class="Identifier">WebWorkerTask</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Other">(</span><span class="Identifier">args</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">gcsafe</span></span>.} <span class="Operator">-&gt;</span>
-    <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a><span class="Other">[</span><span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span><span class="Other">]</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#WebWorkerTask"><span class="Identifier">WebWorkerTask</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Other">(</span><span class="Identifier">args</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">gcsafe</span></span>.} <span class="Operator">-&gt;</span>
+    <span class="Identifier">Pon2Result</span><span class="Other">[</span><span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span><span class="Other">]</span><span class="Other">)</span></pre></dt>
   <dd>
     
     Task executed by web workers.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/webworkers.nim#L24" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/webworkers.nim#L24" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/webworkers.nim#L24" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/webworkers.nim#L24" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -149,12 +152,12 @@
   <h1><a class="toc-backref" href="#9">Lets</a></h1>
   <dl class="item">
     <div id="webWorkerPool_2">
-  <dt><pre><a href="webworkers.html#webWorkerPool"><span class="Identifier">webWorkerPool</span></a> <span class="Other">=</span> <span class="Identifier">init</span><span class="Other">(</span><a href="webworkers.html#WebWorkerPool"><span class="Identifier">WebWorkerPool</span></a><span class="Other">,</span> <span class="Identifier">workerCount</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#webWorkerPool"><span class="Identifier">webWorkerPool</span></a> <span class="Other">=</span> <span class="Identifier">init</span><span class="Other">(</span><a href="#WebWorkerPool"><span class="Identifier">WebWorkerPool</span></a><span class="Other">,</span> <span class="Identifier">workerCount</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/webworkers.nim#L188" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/webworkers.nim#L188" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/webworkers.nim#L188" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/webworkers.nim#L188" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -166,13 +169,13 @@
   <dl class="item">
     <div id="register-procs-all">
   <div id="register,WebWorkerTask">
-  <dt><pre><span class="Keyword">proc</span> <a href="#register%2CWebWorkerTask"><span class="Identifier">register</span></a><span class="Other">(</span><span class="Identifier">task</span><span class="Other">:</span> <a href="webworkers.html#WebWorkerTask"><span class="Identifier">WebWorkerTask</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#register%2CWebWorkerTask"><span class="Identifier">register</span></a><span class="Other">(</span><span class="Identifier">task</span><span class="Other">:</span> <a href="#WebWorkerTask"><span class="Identifier">WebWorkerTask</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
                                      <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Registers the task to the web worker.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/webworkers.nim#L171" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/webworkers.nim#L171" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/webworkers.nim#L171" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/webworkers.nim#L171" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -180,14 +183,14 @@
 </div>
 <div id="run-procs-all">
   <div id="run,WebWorkerPool,varargs[string]">
-  <dt><pre><span class="Keyword">proc</span> <a href="#run%2CWebWorkerPool%2Cvarargs%5Bstring%5D"><span class="Identifier">run</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="webworkers.html#WebWorkerPool"><span class="Identifier">WebWorkerPool</span></a><span class="Other">;</span> <span class="Identifier">args</span><span class="Other">:</span> <span class="Identifier">varargs</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#run%2CWebWorkerPool%2Cvarargs%5Bstring%5D"><span class="Identifier">run</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#WebWorkerPool"><span class="Identifier">WebWorkerPool</span></a><span class="Other">;</span> <span class="Identifier">args</span><span class="Other">:</span> <span class="Identifier">varargs</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span>
     <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a><span class="Other">[</span><span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span><span class="Other">]</span><span class="Other">]</span> {.<span class="Identifier">codegenDecl</span><span class="Other">:</span> <span class="StringLit">&quot;async function $2($3)&quot;</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
                                <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/webworkers.nim#L115" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/webworkers.nim#L115" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/webworkers.nim#L115" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/webworkers.nim#L115" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -195,13 +198,13 @@
 </div>
 <div id="terminate-procs-all">
   <div id="terminate,WebWorkerPool">
-  <dt><pre><span class="Keyword">proc</span> <a href="#terminate%2CWebWorkerPool"><span class="Identifier">terminate</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="webworkers.html#WebWorkerPool"><span class="Identifier">WebWorkerPool</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#terminate%2CWebWorkerPool"><span class="Identifier">terminate</span></a><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="#WebWorkerPool"><span class="Identifier">WebWorkerPool</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">noinit</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
                                       <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Terminates the web worker pool.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/webworkers.nim#L138" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/webworkers.nim#L138" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/webworkers.nim#L138" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/webworkers.nim#L138" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -213,7 +216,7 @@
 <div class="section" id="19">
   <h1><a class="toc-backref" href="#19">Exports</a></h1>
   <dl class="item">
-    <a href="../utils/results2.html#context,Pon2Result[T],string"><span class="Identifier">context</span></a>, <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a>
+    <a href="../utils/results2.html#catch.m,varargs[untyped]"><span class="Identifier">catch</span></a>, <a href="../utils/results2.html#context.t,Pon2Result[T],untyped"><span class="Identifier">context</span></a>, <a href="../utils/results2.html#Pon2Result"><span class="Identifier">Pon2Result</span></a>
   </dl>
 </div>
 
@@ -223,7 +226,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-02-03 08:17:54 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-10-12 14:56:16 UTC</small>
       </div>
     </div>
   </div>

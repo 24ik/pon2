@@ -16,13 +16,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../../../nimdoc.out.css?v=2.2.6">
+<link rel="stylesheet" type="text/css" href="../../../nimdoc.out.css?v=2.2.12">
 
 <!-- JS -->
-<script type="text/javascript" src="../../../dochack.js?v=2.2.6"></script>
+<script type="text/javascript" src="../../../dochack.js?v=2.2.12"></script>
 </head>
 <body>
   <div class="document" id="documentId">
+    <input type="checkbox" id="nav-toggle" hidden>
+    <label for="nav-toggle" id="nav-burger">&#9776;</label>
+    <label for="nav-toggle" id="nav-overlay"></label>
     <div class="container">
       <h1 class="title">src/pon2/private/gui/utils</h1>
       <div class="row">
@@ -119,8 +122,8 @@
 
   </div>
   <div class="nine columns" id="content">
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/gui/utils.nim#L1" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/gui/utils.nim#L1" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/gui/utils.nim#L1" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/gui/utils.nim#L1" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
     <div id="tocRoot"></div>
     
@@ -139,7 +142,7 @@
   <h1><a class="toc-backref" href="#9">Lets</a></h1>
   <dl class="item">
     <div id="bottomFixStyle">
-  <dt><pre><a href="utils.html#bottomFixStyle"><span class="Identifier">bottomFixStyle</span></a> <span class="Other">=</span> <span class="Identifier">style</span><span class="Other">(</span><span class="Other">[</span><span class="Other">(</span><span class="Identifier">position</span><span class="Other">,</span> <span class="Identifier">kstring</span><span class="Other">(</span><span class="StringLit">&quot;fixed&quot;</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span> <span class="Other">(</span><span class="Identifier">bottom</span><span class="Other">,</span>
+  <dt><pre><a href="#bottomFixStyle"><span class="Identifier">bottomFixStyle</span></a> <span class="Other">=</span> <span class="Identifier">style</span><span class="Other">(</span><span class="Other">[</span><span class="Other">(</span><span class="Identifier">position</span><span class="Other">,</span> <span class="Identifier">kstring</span><span class="Other">(</span><span class="StringLit">&quot;fixed&quot;</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span> <span class="Other">(</span><span class="Identifier">bottom</span><span class="Other">,</span>
     <span class="Identifier">kstring</span><span class="Other">(</span><span class="StringLit">&quot;calc(16px + env(safe-area-inset-bottom))&quot;</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span>
                         <span class="Other">(</span><span class="Identifier">left</span><span class="Other">,</span> <span class="Identifier">kstring</span><span class="Other">(</span><span class="StringLit">&quot;50%&quot;</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span>
                         <span class="Other">(</span><span class="Identifier">transform</span><span class="Other">,</span> <span class="Identifier">kstring</span><span class="Other">(</span><span class="StringLit">&quot;translateX(-50%)&quot;</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span>
@@ -147,13 +150,13 @@
   <dd>
     
     
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/gui/utils.nim#L53" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/gui/utils.nim#L53" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/gui/utils.nim#L53" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/gui/utils.nim#L53" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="counterStyle">
-  <dt><pre><a href="utils.html#counterStyle"><span class="Identifier">counterStyle</span></a> <span class="Other">=</span> <span class="Identifier">style</span><span class="Other">(</span><span class="Other">[</span><span class="Other">(</span><span class="Identifier">color</span><span class="Other">,</span> <span class="Identifier">kstring</span><span class="Other">(</span><span class="Identifier">toHtmlRgba</span><span class="Other">(</span><span class="Identifier">CounterStyleColor</span><span class="Other">)</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span>
+  <dt><pre><a href="#counterStyle"><span class="Identifier">counterStyle</span></a> <span class="Other">=</span> <span class="Identifier">style</span><span class="Other">(</span><span class="Other">[</span><span class="Other">(</span><span class="Identifier">color</span><span class="Other">,</span> <span class="Identifier">kstring</span><span class="Other">(</span><span class="Identifier">toHtmlRgba</span><span class="Other">(</span><span class="Identifier">CounterStyleColor</span><span class="Other">)</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span>
                       <span class="Other">(</span><span class="Identifier">fontSize</span><span class="Other">,</span> <span class="Identifier">kstring</span><span class="Other">(</span><span class="StringLit">&quot;0.6rem&quot;</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span>
                       <span class="Other">(</span><span class="Identifier">position</span><span class="Other">,</span> <span class="Identifier">kstring</span><span class="Other">(</span><span class="StringLit">&quot;absolute&quot;</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span>
                       <span class="Other">(</span><span class="Identifier">top</span><span class="Other">,</span> <span class="Identifier">kstring</span><span class="Other">(</span><span class="StringLit">&quot;-0.2em&quot;</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span> <span class="Other">(</span><span class="Identifier">right</span><span class="Other">,</span> <span class="Identifier">kstring</span><span class="Other">(</span><span class="StringLit">&quot;0.3em&quot;</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span>
@@ -161,19 +164,19 @@
   <dd>
     
     
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/gui/utils.nim#L45" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/gui/utils.nim#L45" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/gui/utils.nim#L45" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/gui/utils.nim#L45" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="translucentStyle">
-  <dt><pre><a href="utils.html#translucentStyle"><span class="Identifier">translucentStyle</span></a> <span class="Other">=</span> <span class="Identifier">style</span><span class="Other">(</span><span class="Identifier">backgroundColor</span><span class="Other">,</span>
+  <dt><pre><a href="#translucentStyle"><span class="Identifier">translucentStyle</span></a> <span class="Other">=</span> <span class="Identifier">style</span><span class="Other">(</span><span class="Identifier">backgroundColor</span><span class="Other">,</span>
                          <span class="Identifier">kstring</span><span class="Other">(</span><span class="Identifier">toHtmlRgba</span><span class="Other">(</span><span class="Identifier">TranslucentStyleColor</span><span class="Other">)</span><span class="Other">)</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/gui/utils.nim#L60" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/gui/utils.nim#L60" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/gui/utils.nim#L60" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/gui/utils.nim#L60" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -184,64 +187,64 @@
   <h1><a class="toc-backref" href="#10">Consts</a></h1>
   <dl class="item">
     <div id="AssetsDir">
-  <dt><pre><a href="utils.html#AssetsDir"><span class="Identifier">AssetsDir</span></a> {.<span class="Identifier">define</span><span class="Other">:</span> <span class="StringLit">&quot;pon2.assets&quot;</span>.} <span class="Other">=</span> <span class="StringLit">&quot;../assets&quot;</span></pre></dt>
+  <dt><pre><a href="#AssetsDir"><span class="Identifier">AssetsDir</span></a> {.<span class="Identifier">define</span><span class="Other">:</span> <span class="StringLit">&quot;pon2.assets&quot;</span>.} <span class="Other">=</span> <span class="StringLit">&quot;../assets&quot;</span></pre></dt>
   <dd>
     
     
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/gui/utils.nim#L28" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/gui/utils.nim#L28" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/gui/utils.nim#L28" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/gui/utils.nim#L28" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="DeadColor">
-  <dt><pre><a href="utils.html#DeadColor"><span class="Identifier">DeadColor</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">r</span><span class="Other">:</span> <span class="FloatNumber">1.0</span><span class="Other">,</span> <span class="Identifier">g</span><span class="Other">:</span> <span class="FloatNumber">0.7</span><span class="Other">,</span> <span class="Identifier">b</span><span class="Other">:</span> <span class="FloatNumber">0.7599999999999999</span><span class="Other">,</span> <span class="Identifier">a</span><span class="Other">:</span> <span class="FloatNumber">1.0</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#DeadColor"><span class="Identifier">DeadColor</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">r</span><span class="Other">:</span> <span class="FloatNumber">1.0</span><span class="Other">,</span> <span class="Identifier">g</span><span class="Other">:</span> <span class="FloatNumber">0.7</span><span class="Other">,</span> <span class="Identifier">b</span><span class="Other">:</span> <span class="FloatNumber">0.7599999999999999</span><span class="Other">,</span> <span class="Identifier">a</span><span class="Other">:</span> <span class="FloatNumber">1.0</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/gui/utils.nim#L34" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/gui/utils.nim#L34" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/gui/utils.nim#L34" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/gui/utils.nim#L34" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="DefaultColor">
-  <dt><pre><a href="utils.html#DefaultColor"><span class="Identifier">DefaultColor</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">r</span><span class="Other">:</span> <span class="FloatNumber">0.8823529411764706</span><span class="Other">,</span> <span class="Identifier">g</span><span class="Other">:</span> <span class="FloatNumber">0.8823529411764706</span><span class="Other">,</span>
+  <dt><pre><a href="#DefaultColor"><span class="Identifier">DefaultColor</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">r</span><span class="Other">:</span> <span class="FloatNumber">0.8823529411764706</span><span class="Other">,</span> <span class="Identifier">g</span><span class="Other">:</span> <span class="FloatNumber">0.8823529411764706</span><span class="Other">,</span>
                 <span class="Identifier">b</span><span class="Other">:</span> <span class="FloatNumber">0.8823529411764706</span><span class="Other">,</span> <span class="Identifier">a</span><span class="Other">:</span> <span class="FloatNumber">1.0</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/gui/utils.nim#L33" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/gui/utils.nim#L33" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/gui/utils.nim#L33" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/gui/utils.nim#L33" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="GhostColor">
-  <dt><pre><a href="utils.html#GhostColor"><span class="Identifier">GhostColor</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">r</span><span class="Other">:</span> <span class="FloatNumber">0.7843137254901961</span><span class="Other">,</span> <span class="Identifier">g</span><span class="Other">:</span> <span class="FloatNumber">0.7843137254901961</span><span class="Other">,</span>
+  <dt><pre><a href="#GhostColor"><span class="Identifier">GhostColor</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">r</span><span class="Other">:</span> <span class="FloatNumber">0.7843137254901961</span><span class="Other">,</span> <span class="Identifier">g</span><span class="Other">:</span> <span class="FloatNumber">0.7843137254901961</span><span class="Other">,</span>
               <span class="Identifier">b</span><span class="Other">:</span> <span class="FloatNumber">0.7843137254901961</span><span class="Other">,</span> <span class="Identifier">a</span><span class="Other">:</span> <span class="FloatNumber">1.0</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/gui/utils.nim#L31" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/gui/utils.nim#L31" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/gui/utils.nim#L31" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/gui/utils.nim#L31" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="SelectColor">
-  <dt><pre><a href="utils.html#SelectColor"><span class="Identifier">SelectColor</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">r</span><span class="Other">:</span> <span class="FloatNumber">0.0</span><span class="Other">,</span> <span class="Identifier">g</span><span class="Other">:</span> <span class="FloatNumber">0.82</span><span class="Other">,</span> <span class="Identifier">b</span><span class="Other">:</span> <span class="FloatNumber">0.697</span><span class="Other">,</span> <span class="Identifier">a</span><span class="Other">:</span> <span class="FloatNumber">1.0</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#SelectColor"><span class="Identifier">SelectColor</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">r</span><span class="Other">:</span> <span class="FloatNumber">0.0</span><span class="Other">,</span> <span class="Identifier">g</span><span class="Other">:</span> <span class="FloatNumber">0.82</span><span class="Other">,</span> <span class="Identifier">b</span><span class="Other">:</span> <span class="FloatNumber">0.697</span><span class="Other">,</span> <span class="Identifier">a</span><span class="Other">:</span> <span class="FloatNumber">1.0</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/gui/utils.nim#L30" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/gui/utils.nim#L30" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/gui/utils.nim#L30" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/gui/utils.nim#L30" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="WaterColor">
-  <dt><pre><a href="utils.html#WaterColor"><span class="Identifier">WaterColor</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">r</span><span class="Other">:</span> <span class="FloatNumber">0.5294117647058824</span><span class="Other">,</span> <span class="Identifier">g</span><span class="Other">:</span> <span class="FloatNumber">0.9725490196078431</span><span class="Other">,</span> <span class="Identifier">b</span><span class="Other">:</span> <span class="FloatNumber">1.0</span><span class="Other">,</span> <span class="Identifier">a</span><span class="Other">:</span> <span class="FloatNumber">1.0</span><span class="Other">)</span></pre></dt>
+  <dt><pre><a href="#WaterColor"><span class="Identifier">WaterColor</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">r</span><span class="Other">:</span> <span class="FloatNumber">0.5294117647058824</span><span class="Other">,</span> <span class="Identifier">g</span><span class="Other">:</span> <span class="FloatNumber">0.9725490196078431</span><span class="Other">,</span> <span class="Identifier">b</span><span class="Other">:</span> <span class="FloatNumber">1.0</span><span class="Other">,</span> <span class="Identifier">a</span><span class="Other">:</span> <span class="FloatNumber">1.0</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/gui/utils.nim#L32" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/gui/utils.nim#L32" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/gui/utils.nim#L32" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/gui/utils.nim#L32" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -258,8 +261,8 @@
   <dd>
     
     Adds the copying handler to the button.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/gui/utils.nim#L73" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/gui/utils.nim#L73" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/gui/utils.nim#L73" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/gui/utils.nim#L73" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -271,8 +274,8 @@
   <dd>
     
     Returns the image source of cells.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/gui/utils.nim#L91" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/gui/utils.nim#L91" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/gui/utils.nim#L91" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/gui/utils.nim#L91" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -284,8 +287,8 @@
   <dd>
     
     Returns the image source of notice garbages.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/gui/utils.nim#L106" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/gui/utils.nim#L106" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/gui/utils.nim#L106" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/gui/utils.nim#L106" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -297,8 +300,8 @@
   <dd>
     
     Redraws the window.
-    <a href="https://github.com/24ik/pon2/tree/v1.2.0/src/pon2/private/gui/utils.nim#L125" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/24ik/pon2/edit/v1.2.0/src/pon2/private/gui/utils.nim#L125" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/24ik/pon2/tree/v1.2.1/src/pon2/private/gui/utils.nim#L125" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/24ik/pon2/edit/v1.2.1/src/pon2/private/gui/utils.nim#L125" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -314,7 +317,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-02-03 08:17:54 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-10-12 14:56:16 UTC</small>
       </div>
     </div>
   </div>
