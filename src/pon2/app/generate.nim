@@ -1,10 +1,10 @@
 ## This module implements Nazo Puyo generators.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[random, sequtils, sets, sugar]
 import ./[solve]

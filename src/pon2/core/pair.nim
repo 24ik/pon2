@@ -1,10 +1,10 @@
 ## This modules implements pairs.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[strformat]
 import ./[cell, fqdn]
@@ -129,7 +129,8 @@ func nuisancePuyoCount*(self: Pair): int {.inline, noinit.} =
 
 func parsePair*(str: string): Pon2Result[Pair] {.inline, noinit.} =
   ## Returns the pair converted from the string representation.
-  let errorMsg = "Invalid pair: {str}".fmt
+  template errorMsg(): string =
+    "Invalid pair: " & str
 
   if str.len != 2:
     return err errorMsg

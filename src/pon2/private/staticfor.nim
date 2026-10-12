@@ -1,10 +1,10 @@
 ## This module implements static unrolled for-loop.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[sequtils]
 import stew/[staticfor]

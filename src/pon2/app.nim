@@ -17,10 +17,10 @@
 ## | `-d:pon2.path=<str>` | Path of the web studio. | `/pon2/stable/studio/` |
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import ./[core]
 import ./app/[generate, grimoire, key, marathon, permute, simulator, solve, studio]

@@ -1,10 +1,10 @@
 ## This module implements studio settings views.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 type StudioSetting* = object ## Studio settings.
   fixIndices*: seq[int]

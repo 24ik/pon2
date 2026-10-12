@@ -1,10 +1,10 @@
 ## This module implements browser-related functions.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[browsers]
 import ./[uri]

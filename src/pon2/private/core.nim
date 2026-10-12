@@ -5,10 +5,10 @@
 ## - [nazopuyo](./core/nazopuyo.html)
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import ./core/[binaryfield, nazopuyo]
 

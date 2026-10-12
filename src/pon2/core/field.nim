@@ -1,10 +1,10 @@
 ## This module implements fields.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[sequtils, strformat, sugar]
 import
@@ -714,7 +714,8 @@ func `$`*(self: Field): string {.inline, noinit.} =
 
 func parseField*(str: string): Pon2Result[Field] {.inline, noinit.} =
   ## Returns the field converted from the string representation.
-  let errorMsg = "Invalid field: {str}".fmt
+  template errorMsg(): string =
+    "Invalid field: " & str
 
   var lines = str.split '\n'
 
@@ -841,7 +842,8 @@ func toUriQuery*(self: Field, fqdn = Pon2): Pon2Result[string] {.inline, noinit.
 
 func parseFieldPon2(query: string): Pon2Result[Field] {.inline, noinit.} =
   ## Returns the field converted from the URI query with Pon2 format.
-  let errorMsg = "Invalid field: {query}".fmt
+  template errorMsg(): string =
+    "Invalid field: " & query
 
   if query == "":
     return ok Field.init

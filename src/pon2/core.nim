@@ -32,10 +32,10 @@
 ## | `-d:pon2.clmul=<int>`                    | CLMUL level. (1:Use, 0:None)        | `1`              |
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import ./[utils]
 import

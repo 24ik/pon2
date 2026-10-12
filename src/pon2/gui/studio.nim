@@ -7,10 +7,10 @@
 ## - [studio](./studio/studio.html)
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import ./studio/[ctrl, pagination, setting, studio]
 

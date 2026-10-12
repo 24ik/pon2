@@ -1,10 +1,10 @@
 ## This module implements grimoire navigation bar views.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 # ------------------------------------------------
 # JS backend

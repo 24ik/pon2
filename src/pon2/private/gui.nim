@@ -9,10 +9,10 @@
 ## - [utils](./gui/utils.html)
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import ./gui/[deref, grimoire, hash, keybind, localstorage, utils]
 

@@ -1,10 +1,10 @@
 ## This module implements helpers for Nazo Puyo Grimoire used in GUI.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 when defined(js) or defined(nimsuggest):
   import std/[sequtils, strformat]
@@ -119,11 +119,12 @@ when defined(js) or defined(nimsuggest):
 
   func parseGrimoireEntries*(strs: seq[string]): Pon2Result[seq[GrimoireEntry]] =
     ## Returns the grimoire entries converted from the run result.
+    template errorMsg(): string =
+      "Invalid grimoire entry: " & str
+
     var entries = newSeqOfCap[GrimoireEntry](strs.len)
 
     for str in strs:
-      let errorMsg = "Invalid grimoire entry: {str}".fmt
-
       let substrs = str.split Sep
       if substrs.len != 9:
         return err errorMsg

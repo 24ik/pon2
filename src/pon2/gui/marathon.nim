@@ -6,10 +6,10 @@
 ## - [search](./marathon/search.html)
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import ./marathon/[ctrl, marathon, search]
 

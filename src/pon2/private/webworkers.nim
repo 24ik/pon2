@@ -6,10 +6,10 @@
 ## | `-d:pon2.webworker=<str>` | Web workers file. | `./worker.min.js` |
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[asyncjs, jsffi, sequtils, strformat, sugar]
 import ./[assign, dom, strutils, utils as privateUtils]

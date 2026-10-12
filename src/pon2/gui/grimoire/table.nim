@@ -1,10 +1,10 @@
 ## This module implements grimoire match result views.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 # ------------------------------------------------
 # JS backend

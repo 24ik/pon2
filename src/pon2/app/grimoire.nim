@@ -1,10 +1,10 @@
 ## This module implements the Nazo Puyo Grimoire.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[sequtils, sets, strformat, sugar]
 import ./[simulator]

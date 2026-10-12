@@ -1,10 +1,10 @@
 ## This module implements DOM operations.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[dom, jsffi]
 

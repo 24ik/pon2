@@ -4,10 +4,10 @@
 ## - [results2](./utils/results2.html)
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import ./utils/[results2]
 

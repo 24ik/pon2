@@ -1,9 +1,9 @@
 ## This module implements dereference functions used with helpers.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
+{.push raises: [].}
 {.push experimental: "views".}
 
 # ------------------------------------------------

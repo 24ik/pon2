@@ -1,10 +1,10 @@
 ## This module implements zlib algorithms.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[asyncjs, base64, jsffi]
 import ../[utils]

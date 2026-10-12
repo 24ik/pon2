@@ -1,6 +1,7 @@
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[sugar, unittest]
 import ../../src/pon2/private/[strutils]
@@ -16,13 +17,14 @@ block: # parseOrdinal
   check parseOrdinal[bool]("2").isErr
 
 block: # split2
-  proc checkSplit2(str, sep: string, answer: seq[string], maxsplit = -1) =
-    check str.split2(sep, maxsplit) == answer
+  template checkSplit2(str, sep: string, answer: seq[string], maxsplit = -1) =
+    block:
+      check str.split2(sep, maxsplit) == answer
 
-    let strs = collect:
-      for s in str.split2(sep, maxsplit):
-        s
-    check strs == answer
+      let strs = collect:
+        for s in str.split2(sep, maxsplit):
+          s
+      check strs == answer
 
   ".a.bc.def.".checkSplit2 ".", @["", "a", "bc", "def", ""]
   "a---b".checkSplit2 "--", @["a", "-b"]
@@ -35,6 +37,6 @@ block: # split2
   "a+b+c".checkSplit2 "+", @["a", "b", "c"], 2
   "a+b+c".checkSplit2 "+", @["a", "b", "c"], 3
 
-  "".checkSplit2 "", @[]
-  "".checkSplit2 "x", @[]
-  "".checkSplit2 "x", @[], 1
+  "".checkSplit2 "", newSeq[string]()
+  "".checkSplit2 "x", newSeq[string]()
+  "".checkSplit2 "x", newSeq[string](), 1

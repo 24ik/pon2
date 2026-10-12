@@ -1,10 +1,10 @@
 ## This module implements binary fields with XMM register.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[hashes, sugar]
 import ../../[arrayutils, assign, bitops, expand, simd, staticfor]
@@ -377,6 +377,9 @@ func placeMasksTsu*(
 # Drop Nuisance
 # ------------------------------------------------
 
+func upTo15(val: int): int {.inline, noinit.} =
+  min(val, 15)
+
 func dropNuisanceTsu*(
     self: var BinaryField, counts: array[Col, int], existField: BinaryField
 ) {.inline, noinit.} =
@@ -389,7 +392,7 @@ func dropNuisanceTsu*(
   staticFor(col, Col):
     const ArrayIndex = 7 - col.ord
     let notExistElem = valArray[ArrayIndex]
-    valArray[ArrayIndex].assign notExistElem *~ (notExistElem shl counts[col])
+    valArray[ArrayIndex].assign notExistElem *~ (notExistElem shl counts[col].upTo15)
 
   self += valArray.addr.mm_load_si128
 
@@ -423,13 +426,13 @@ func dropNuisanceWater*(
         valArraySelf[ArrayIndex].assign WaterMaskElem *~ (WaterMaskElem shr count)
       else:
         valArraySelf[ArrayIndex].assign WaterMaskElem or
-          (AirMaskElem *~ (AirMaskElem shl (count - WaterHeight)))
+          (AirMaskElem *~ (AirMaskElem shl (count - WaterHeight).upTo15))
     else:
       let
         shift = min(count, exist.tzcnt - 1)
         shiftExist = exist shr shift
         emptySpace = ValidMaskElem *~ (shiftExist or shiftExist.blsmsk)
-        nuisance = emptySpace *~ (emptySpace shl count)
+        nuisance = emptySpace *~ (emptySpace shl count.upTo15)
 
       valArraySelf[ArrayIndex].assign (valArraySelf[ArrayIndex] shr shift) or nuisance
       valArrayOther1[ArrayIndex].assign valArrayOther1[ArrayIndex] shr shift
@@ -457,7 +460,7 @@ func dropNuisanceTsuSafe*(
     let
       arrayIndex = 7 - col.ord
       maskBase = uint16.high shl (16 - existFloorArray[arrayIndex].leadingZeros)
-      mask = (maskBase xor (maskBase shl counts[col])).keptValid
+      mask = (maskBase xor (maskBase shl counts[col].upTo15)).keptValid
 
     valArray[arrayIndex].assign mask
 
@@ -527,7 +530,7 @@ func dropNuisanceWaterSafe*(
           waterNuisanceVal
         else:
           waterNuisanceVal or
-            (AirMaskElem *~ (AirMaskElem shl (counts[col] - emptyCellCount)))
+            (AirMaskElem *~ (AirMaskElem shl (counts[col] - emptyCellCount).upTo15))
 
     # update array
     valArraySelf[arrayIndex].assign newValBase or nuisanceVal

@@ -1,10 +1,10 @@
 ## This module implements studios.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[deques, sugar]
 import ./[key, permute, simulator, solve]

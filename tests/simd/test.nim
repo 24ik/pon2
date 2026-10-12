@@ -1,7 +1,7 @@
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import ../../src/pon2/private/[simd]
 

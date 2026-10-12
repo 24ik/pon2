@@ -1,10 +1,10 @@
 ## This module implements the palette views.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 # ------------------------------------------------
 # JS backend

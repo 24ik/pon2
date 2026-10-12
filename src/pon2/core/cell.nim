@@ -1,10 +1,10 @@
 ## This module implements cells.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[strformat]
 import ../[utils]

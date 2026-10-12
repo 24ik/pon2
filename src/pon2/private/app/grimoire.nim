@@ -1,10 +1,10 @@
 ## This module implements helpers for Nazo Puyo Grimoire.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[unicode]
 import ../[assign]

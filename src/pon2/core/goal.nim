@@ -1,10 +1,10 @@
 ## This module implements Nazo Puyo goals.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[setutils, strformat, sugar]
 import regex
@@ -381,7 +381,8 @@ func parseGoal*(
     # clearColor
     var clearColorOpt = Opt[GoalColor].err
     if strs[1] != "":
-      clearColorOpt.ok ?parseOrdinal[GoalColor](strs[1]).context "Invalid goal (clearColor): {query}".fmt
+      clearColorOpt.ok ?parseOrdinal[GoalColor](strs[1]).context "Invalid goal (clearColor): " &
+        query
 
     if strs[0] == "":
       return ok Goal.init clearColorOpt
@@ -392,12 +393,12 @@ func parseGoal*(
 
     let
       kind =
-        ?parseOrdinal[GoalKind](mainStrs[0]).context "Invalid goal (kind): {query}".fmt
+        ?parseOrdinal[GoalKind](mainStrs[0]).context "Invalid goal (kind): " & query
       color =
-        ?parseOrdinal[GoalColor](mainStrs[1]).context "Invalid goal (color): {query}".fmt
-      val = ?mainStrs[2].parseInt.context "Invalid goal (val): {query}".fmt
-      operator =
-        ?parseOrdinal[GoalOperator](mainStrs[3]).context "Invalid goal (operator): {query}".fmt
+        ?parseOrdinal[GoalColor](mainStrs[1]).context "Invalid goal (color): " & query
+      val = ?mainStrs[2].parseInt.context "Invalid goal (val): " & query
+      operator = ?parseOrdinal[GoalOperator](mainStrs[3]).context "Invalid goal (operator): " &
+        query
 
     ok Goal.init(kind, color, val, operator, clearColorOpt)
   of IshikawaPuyo, Ips:
