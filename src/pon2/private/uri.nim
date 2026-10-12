@@ -1,10 +1,10 @@
 ## This module implements URI-related functions.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[uri]
 import ./[assign]

@@ -1,10 +1,10 @@
 ## This module implements Puyo Puyo.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[strformat]
 import ./[cell, field, fqdn, moveresult, pair, placement, popresult, step]

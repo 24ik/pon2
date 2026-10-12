@@ -6,10 +6,10 @@
 ## | `-d:pon2.fqdn=<str>` | FQDN of the web simulator. | `24ik.github.io` |
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[strformat]
 import ../[utils]

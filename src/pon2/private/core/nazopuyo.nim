@@ -1,10 +1,10 @@
 ## This module implements helpers for Nazo Puyo marking.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[sequtils]
 import ../../core/[cell, goal, moveresult]

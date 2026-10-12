@@ -14,10 +14,10 @@
 ## | `-d:pon2.assets=<str>` | Assets directory. | `../assets` |
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import ./[app]
 import ./gui/[grimoire, helper, marathon, simulator, studio]

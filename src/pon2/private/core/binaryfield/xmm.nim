@@ -1,10 +1,10 @@
 ## This module implements binary fields with XMM register.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[hashes, sugar]
 import ../../[arrayutils, assign, bitops, expand, simd, staticfor]

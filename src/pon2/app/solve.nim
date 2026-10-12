@@ -1,10 +1,10 @@
 ## This module implements Nazo Puyo solvers.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import ../[core]
 import ../private/[algorithm, core]

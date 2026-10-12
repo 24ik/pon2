@@ -1,10 +1,10 @@
 ## This module implements Nazo Puyo.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[strformat]
 import

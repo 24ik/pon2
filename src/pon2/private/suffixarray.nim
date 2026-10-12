@@ -1,10 +1,10 @@
 ## This module implements suffix arrays.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[sequtils, sugar]
 import ./[algorithm, assign, strutils]

@@ -1,10 +1,10 @@
 ## This module implements helpers of built-in sets.
 ## 
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[setutils, typetraits]
 import ./[assign]

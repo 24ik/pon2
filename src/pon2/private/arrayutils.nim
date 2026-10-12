@@ -1,10 +1,10 @@
 ## This module implements array utilities.
 ## 
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import ./[assign]
 

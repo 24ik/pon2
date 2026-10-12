@@ -6,10 +6,10 @@
 ## | `-d:pon2.path=<str>` | Path of the web studio. | `/pon2/stable/studio/` |
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[sequtils, strformat, sugar]
 import ./[key]

@@ -8,10 +8,10 @@
 ## - [table](./grimoire/table.html)
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import ./grimoire/[exchange, grimoire, match, navbar, table]
 

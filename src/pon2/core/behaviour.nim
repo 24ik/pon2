@@ -9,10 +9,10 @@
 ## | `-d:pon2.garbagerate.water=<int>`        | Garbage rate in Water rule.         | `90`     |
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import ./[rule]
 

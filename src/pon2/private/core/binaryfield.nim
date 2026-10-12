@@ -1,10 +1,10 @@
 ## This module implements binary fields.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[setutils]
 import ../[assign, math, setutils, simd, staticfor]

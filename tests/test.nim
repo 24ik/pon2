@@ -75,7 +75,7 @@ template suites(backend: Backend): untyped =
   ## Runs the suites of specified implementation levels.
   let
     testDirs = currentSourcePath().Path.parentDir.walkDir.toSeq
-    .filterIt(it.kind in {pcDir, pcLinkToDir}).mapIt it.path
+      .filterIt(it.kind in {pcDir, pcLinkToDir}).mapIt it.path
 
     simdLevels, bmiLevels, clmulLevels: seq[int]
   case backend

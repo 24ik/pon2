@@ -1,10 +1,10 @@
 ## This module implements fields.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[sequtils, strformat, sugar]
 import

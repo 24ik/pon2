@@ -1,6 +1,7 @@
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[critbits, random, sequtils, sugar, unittest]
 import ../../src/pon2/[core]

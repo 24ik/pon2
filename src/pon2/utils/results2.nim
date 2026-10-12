@@ -1,10 +1,10 @@
 ## This module implements helpers of [nim-results](https://github.com/arnetheduck/nim-results).
 ## 
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[sugar]
 import results

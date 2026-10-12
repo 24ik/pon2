@@ -1,10 +1,10 @@
 ## This module implements helpers for Nazo Puyo Grimoire used in GUI.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 when defined(js) or defined(nimsuggest):
   import std/[sequtils, strformat]

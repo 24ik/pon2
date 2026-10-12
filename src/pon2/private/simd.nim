@@ -6,10 +6,10 @@
 ## | `-d:pon2.simd=<int>` | SIMD level. (1:SSE4.2, 0:None) | `1`     |
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 const SimdLevel {.define: "pon2.simd".} = 1
 

@@ -1,10 +1,10 @@
 ## This module implements pop results.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[sequtils]
 import ./[cell, common]

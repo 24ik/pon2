@@ -3,10 +3,10 @@
 # ref: https://github.com/status-im/nim-stew/blob/master/stew/assign2.nim
 # ref: https://github.com/status-im/nim-stew/blob/master/stew/shims/macros.nim
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 when not defined(js):
   import std/[typetraits]

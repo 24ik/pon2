@@ -5,10 +5,10 @@
 ## - [solve](./app/solve.html)
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import ./app/[grimoire, solve]
 

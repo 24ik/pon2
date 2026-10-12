@@ -1,10 +1,10 @@
 ## This module implements expand macros.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[sugar]
 import ./[macros, strutils]

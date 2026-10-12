@@ -1,10 +1,10 @@
 ## This module implements binary fields with 64bit operations.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[sugar]
 import ../../[assign, bitops, expand, staticcase, staticfor]

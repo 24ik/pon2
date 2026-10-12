@@ -6,10 +6,10 @@
 ## | `-d:pon2.waterheight=<int>` | Height of the water. | `8`     |
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[typetraits]
 

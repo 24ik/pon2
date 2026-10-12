@@ -1,10 +1,10 @@
 ## This module implements crit-bit trees.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[critbits]
 

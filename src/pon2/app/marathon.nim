@@ -1,10 +1,10 @@
 ## This module implements Puyo Puyo marathon.
 ##
 
-{.push raises: [].}
 {.experimental: "strictDefs".}
 {.experimental: "strictFuncs".}
 {.experimental: "views".}
+{.push raises: [].}
 
 import std/[sequtils, sugar, random]
 import ./[key, simulator]
