@@ -70,7 +70,8 @@ func `$`*(self: PuyoPuyo): string {.inline, noinit.} =
 
 func parsePuyoPuyo*(str: string): Pon2Result[PuyoPuyo] {.inline, noinit.} =
   ## Returns the game converted from the string representation.
-  let errorMsg = "Invalid Puyo Puyo: {str}".fmt
+  template errorMsg(): string =
+    "Invalid Puyo Puyo: " & str
 
   let strs = str.split FieldStepsSep
   if strs.len != 2:
@@ -94,9 +95,10 @@ const
 
 func toUriQuery*(self: PuyoPuyo, fqdn = Pon2): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query converted from the game.
-  let
-    errorMsg = "Puyo Puyo that does not support URI conversion: " & $self
+  template errorMsg(): string =
+    "Puyo Puyo that does not support URI conversion: " & $self
 
+  let
     fieldQuery = ?self.field.toUriQuery(fqdn).context errorMsg
     stepsQuery = ?self.steps.toUriQuery(fqdn).context errorMsg
 
@@ -124,13 +126,13 @@ func parsePuyoPuyoPon2(query: string): Pon2Result[PuyoPuyo] {.inline, noinit.} =
         return err "Invalid Puyo Puyo (multiple key: `{key}`): {query}".fmt
       fieldSet.assign true
 
-      puyoPuyo.field.assign ?val.parseField(Pon2).context "Invalid Puyo Puyo: {query}".fmt
+      puyoPuyo.field.assign ?val.parseField(Pon2).context "Invalid Puyo Puyo: " & query
     of StepsKey:
       if stepsSet:
         return err "Invalid Puyo Puyo (multiple key: `{key}`): {query}".fmt
       stepsSet.assign true
 
-      puyoPuyo.steps.assign ?val.parseSteps(Pon2).context "Invalid Puyo Puyo: {query}".fmt
+      puyoPuyo.steps.assign ?val.parseSteps(Pon2).context "Invalid Puyo Puyo: " & query
     else:
       return err "Invalid Puyo Puyo (Invalid key: `{key}`): {query}".fmt
 
@@ -138,12 +140,13 @@ func parsePuyoPuyoPon2(query: string): Pon2Result[PuyoPuyo] {.inline, noinit.} =
 
 func parsePuyoPuyoIshikawa(query: string): Pon2Result[PuyoPuyo] {.inline, noinit.} =
   ## Returns the game converted from the URI query.
-  let errorMsg = "Invalid Puyo Puyo: {query}".fmt
+  template errorMsg(): string =
+    "Invalid Puyo Puyo: " & query
 
   let strs = query.split FieldStepsSepIshikawaUri
 
   var puyoPuyo = PuyoPuyo.init
-  puyoPuyo.field.assign ?strs[0].parseField(IshikawaPuyo).context "Invalid Puyo Puyo: {query}".fmt
+  puyoPuyo.field.assign ?strs[0].parseField(IshikawaPuyo).context errorMsg
 
   case strs.len
   of 1:

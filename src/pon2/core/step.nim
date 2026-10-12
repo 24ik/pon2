@@ -172,6 +172,12 @@ func `$`*(self: Step): string {.inline, noinit.} =
 
 func parseStep*(str: string): Pon2Result[Step] {.inline, noinit.} =
   ## Returns the step converted from the string representation.
+  template errorMsgNuisance(): string =
+    "Invalid step (nuisance): " & str
+
+  template errorMsgPair(): string =
+    "Invalid step: " & str
+
   # rotate
   if str == RotateDesc:
     return ok Step.init(cross = false)
@@ -183,30 +189,26 @@ func parseStep*(str: string): Pon2Result[Step] {.inline, noinit.} =
     garbageDrop = str.startsWith(GarbagePrefix) and str.endsWith(GarbageSuffix)
     hardDrop = str.startsWith(HardPrefix) and str.endsWith(HardSuffix)
   if garbageDrop or hardDrop:
-    let errorMsg = "Invalid step (nuisance): {str}".fmt
-
     let strs = str[1 ..^ 2].split NuisanceSep
     if strs.len != Width:
-      return err errorMsg
+      return err errorMsgNuisance
 
     let counts = collect:
       for s in strs:
-        ?s.parseInt.context errorMsg
+        ?s.parseInt.context errorMsgNuisance
     return ok Step.init(
       [Col0: counts[0], counts[1], counts[2], counts[3], counts[4], counts[5]],
       hard = hardDrop,
     )
 
   # pair
-  let errorMsg = "Invalid step: {str}".fmt
-
   let strs = str.split PairPlaceSep
   if strs.len != 2:
-    return err errorMsg
+    return err errorMsgPair
 
   let
-    pair = ?strs[0].parsePair.context errorMsg
-    placement = ?strs[1].parsePlacement.context errorMsg
+    pair = ?strs[0].parsePair.context errorMsgPair
+    placement = ?strs[1].parsePlacement.context errorMsgPair
 
   ok Step.init(pair, placement)
 
@@ -255,6 +257,9 @@ func parseStep*(
     query: string, fqdn: SimulatorFqdn
 ): Pon2Result[Step] {.inline, noinit.} =
   ## Returns the step converted from the URI query.
+  template errorMsgNuisance(): string =
+    "Invalid step (nuisance): " & query
+
   case fqdn
   of Pon2:
     # rotate
@@ -268,15 +273,13 @@ func parseStep*(
       garbageDrop = query.startsWith(GarbageWrapUri) and query.endsWith(GarbageWrapUri)
       hardDrop = query.startsWith(HardWrapUri) and query.endsWith(HardWrapUri)
     if garbageDrop or hardDrop:
-      let errorMsg = "Invalid step (nuisance): {query}".fmt
-
       let strs = query[1 ..^ 2].split NuisanceSepUri
       if strs.len != Width:
-        return err errorMsg
+        return err errorMsgNuisance
 
       let counts = collect:
         for s in strs:
-          ?s.parseInt.context errorMsg
+          ?s.parseInt.context errorMsgNuisance
       return ok Step.init(
         [Col0: counts[0], counts[1], counts[2], counts[3], counts[4], counts[5]],
         hard = hardDrop,
@@ -285,19 +288,17 @@ func parseStep*(
     # pair
     case query.len
     of 2:
-      ok Step.init ?query.parsePair(fqdn).context "Invalid step (pair): {query}".fmt
+      ok Step.init ?query.parsePair(fqdn).context "Invalid step (pair): " & query
     of 4:
       ok Step.init(
-        ?query[0 ..< 2].parsePair(fqdn).context "Invalid step (pair): {query}".fmt,
-        ?query[2 ..< 4].parsePlacement(fqdn).context(
-          "Invalid step (placement): {query}".fmt
-        ),
+        ?query[0 ..< 2].parsePair(fqdn).context "Invalid step (pair): " & query,
+        ?query[2 ..< 4].parsePlacement(fqdn).context "Invalid step (placement): " & query,
       )
     else:
-      err "Invalid step: {query}".fmt
+      err "Invalid step: " & query
   of IshikawaPuyo, Ips:
     if query.len != 2:
-      return err "Invalid step: {query}".fmt
+      return err "Invalid step: " & query
 
     # nuisance
     if query == "a0":
@@ -306,7 +307,7 @@ func parseStep*(
     if maxCount > 0:
       let val = ValToIshikawaUri.find query[1]
       if val < 0:
-        return err "Invalid step: {query}".fmt
+        return err "Invalid step: " & query
 
       var counts = Col.initArrayWith maxCount - 1
       staticFor(col, Col):
@@ -316,11 +317,9 @@ func parseStep*(
 
     # pair
     let
-      pair = ?query[0 .. 0].parsePair(fqdn).context "Invalid step (pair): {query}".fmt
+      pair = ?query[0 .. 0].parsePair(fqdn).context "Invalid step (pair): " & query
       placement =
-        ?query[1 .. 1].parsePlacement(fqdn).context(
-          "Invalid step (placement): {query}".fmt
-        )
+        ?query[1 .. 1].parsePlacement(fqdn).context "Invalid step (placement): " & query
     ok Step.init(pair, placement)
 
 # ------------------------------------------------
@@ -345,7 +344,7 @@ func parseSteps*(str: string): Pon2Result[Steps] {.inline, noinit.} =
 
   var steps = Steps.init strs.len
   for s in strs:
-    steps.addLast ?s.parseStep.context "Invalid steps: {str}".fmt
+    steps.addLast ?s.parseStep.context "Invalid steps: " & str
 
   ok steps
 
@@ -365,7 +364,8 @@ func parseSteps*(
     query: string, fqdn: SimulatorFqdn
 ): Pon2Result[Steps] {.inline, noinit.} =
   ## Returns the steps converted from the URI query.
-  let errorMsg = "Invalid steps: {query}".fmt
+  template errorMsg(): string =
+    "Invalid steps: " & query
 
   case fqdn
   of Pon2:

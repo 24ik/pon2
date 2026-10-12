@@ -27,7 +27,7 @@ func parseInt*(str: string): Pon2Result[int] {.inline, noinit.} =
 
 func parseOrdinal*[T: Ordinal](str: string): Pon2Result[T] {.inline, noinit.} =
   ## Returns the ordinal type converted from the string.
-  let val = ?str.safeParseInt.context "Invalid ordinal: {str}".fmt
+  let val = ?str.safeParseInt.context "Invalid ordinal: " & str
 
   if val in T.low.ord .. T.high.ord:
     ok val.T

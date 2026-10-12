@@ -1226,7 +1226,7 @@ func parseSimulator*(uri: Uri): Pon2Result[Simulator] =
   if uri.scheme notin ["https", "http"]:
     return err "Invalid simulator (invalid scheme): {uri}".fmt
 
-  let fqdn = ?uri.hostname.parseSimulatorFqdn.context "Invalid simulator: {uri}".fmt
+  let fqdn = ?uri.hostname.parseSimulatorFqdn.context "Invalid simulator: " & $uri
   case fqdn
   of SimulatorFqdn.Pon2:
     if uri.path notin Pon2Paths:
@@ -1240,7 +1240,8 @@ func parseSimulator*(uri: Uri): Pon2Result[Simulator] =
         if modeOpt.isOk:
           return err "Invalid simulator (multiple mode detected): {uri}".fmt
         else:
-          modeOpt.ok ?parseOrdinal[SimulatorMode](keyVal.value).context "Invalid mode: {keyVal.value}".fmt
+          modeOpt.ok ?parseOrdinal[SimulatorMode](keyVal.value).context "Invalid mode: " &
+            keyVal.value
       else:
         keyVals.add keyVal
 
@@ -1248,7 +1249,7 @@ func parseSimulator*(uri: Uri): Pon2Result[Simulator] =
       modeOpt.ok DefaultMode
 
     ok Simulator.init(
-      ?keyVals.encodeQuery.parseNazoPuyo(fqdn).context "Invalid simulator: {uri}".fmt,
+      ?keyVals.encodeQuery.parseNazoPuyo(fqdn).context "Invalid simulator: " & $uri,
       modeOpt.unsafeValue,
     )
   of SimulatorFqdn.IshikawaPuyo, Ips:
@@ -1263,7 +1264,7 @@ func parseSimulator*(uri: Uri): Pon2Result[Simulator] =
     else:
       return err "Invalid simulator (invalid path): {uri}".fmt
 
-    ok Simulator.init ?uri.query.parseNazoPuyo(fqdn).context "Invalid simulator: {uri}".fmt
+    ok Simulator.init ?uri.query.parseNazoPuyo(fqdn).context "Invalid simulator: " & $uri
 
 func toExportUri*(
     self: Simulator, viewer = true, clearPlacements = true, fqdn = SimulatorFqdn.Pon2

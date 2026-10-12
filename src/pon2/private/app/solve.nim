@@ -582,7 +582,8 @@ when defined(js) or defined(nimsuggest):
 
   func parseMoveResult(str: string): Pon2Result[MoveResult] {.inline, noinit.} =
     ## Returns the move result converted from the string representation.
-    let errorMsg = "Invalid move result: {str}".fmt
+    template errorMsg(): string =
+      "Invalid move result: " & str
 
     let strs = str.split2 Sep4
     if strs.len != 6:
@@ -640,17 +641,16 @@ when defined(js) or defined(nimsuggest):
 
   func parseCells(str: string): Pon2Result[set[Cell]] {.inline, noinit.} =
     ## Returns the cells converted from the string representation.
-    let errorMsg = "Invalid cells: {str}".fmt
-
     var cells: set[Cell] = {}
     for c in str:
-      cells.incl ?($c).parseCell.context errorMsg
+      cells.incl ?($c).parseCell.context "Invalid cells: " & str
 
     ok cells
 
   func parseCounts(str: string): Pon2Result[array[Cell, int]] {.inline, noinit.} =
     ## Returns the counts converted from the string representation.
-    let errorMsg = "Invalid counts: {str}".fmt
+    template errorMsg(): string =
+      "Invalid counts: " & str
 
     let strs = str.split2 Sep1
     if strs.len != Cell.enumLen:
@@ -666,7 +666,8 @@ when defined(js) or defined(nimsuggest):
       strs: seq[string]
   ): Pon2Result[tuple[goal: Goal, steps: Steps]] {.inline, noinit.} =
     ## Returns the rule of the solve node converted from the string representations.
-    let errorMsg = "Invalid solve info: {strs}".fmt
+    template errorMsg(): string =
+      "Invalid solve info: " & $strs
 
     if strs.len != 9:
       return err errorMsg
@@ -678,7 +679,8 @@ when defined(js) or defined(nimsuggest):
 
   func parseSolveNode*(strs: seq[string]): Pon2Result[SolveNode] {.inline, noinit.} =
     ## Returns the solve node converted from the string representations.
-    let errorMsg = "Invalid node: {strs}".fmt
+    template errorMsg(): string =
+      "Invalid node: " & $strs
 
     if strs.len != 9:
       return err errorMsg
@@ -724,10 +726,11 @@ when defined(js) or defined(nimsuggest):
       strs: seq[string]
   ): Pon2Result[seq[seq[Placement]]] {.inline, noinit.} =
     ## Returns the solutions converted from the run result.
+    template errorMsg(): string =
+      "Invalid solutions: " & str
+
     var solutions = newSeqOfCap[seq[Placement]](strs.len)
     for str in strs:
-      let errorMsg = "Invalid solutions: {str}".fmt
-
       if str.len mod 2 == 1:
         return err errorMsg
 

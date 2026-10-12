@@ -166,7 +166,8 @@ func `$`*(self: NazoPuyo): string {.inline, noinit.} =
 
 func parseNazoPuyo*(str: string): Pon2Result[NazoPuyo] {.inline, noinit.} =
   ## Returns the Nazo Puyo converted from the string representation.
-  let errorMsg = "Invalid Nazo Puyo: {str}".fmt
+  template errorMsg(): string =
+    "Invalid Nazo Puyo: " & str
 
   let strs = str.split GoalPuyoPuyoSep
   if strs.len != 2:
@@ -188,15 +189,18 @@ const
 
 func toUriQueryPon2(self: NazoPuyo): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query with Pon2 format converted from the Nazo Puyo.
-  let errorMsg = "Nazo Puyo that does not support URI conversion: " & $self
+  template errorMsg(): string =
+    "Nazo Puyo that does not support URI conversion: " & $self
 
   ok (?self.puyoPuyo.toUriQuery(Pon2).context errorMsg) & '&' &
     [(GoalKey, ?self.goal.toUriQuery(Pon2).context errorMsg)].encodeQuery
 
 func toUriQueryIshikawa(self: NazoPuyo): Pon2Result[string] {.inline, noinit.} =
   ## Returns the URI query with IshikawaPuyo/Ips format converted from the Nazo Puyo.
+  template errorMsg(): string =
+    "Nazo Puyo that does not support URI conversion: " & $self
+
   let
-    errorMsg = "Nazo Puyo that does not support URI conversion: " & $self
     puyoPuyoQueryRaw = ?self.puyoPuyo.toUriQuery(IshikawaPuyo).context errorMsg
     puyoPuyoQuery =
       if '_' in puyoPuyoQueryRaw:
@@ -226,17 +230,19 @@ func parseNazoPuyoPon2(query: string): Pon2Result[NazoPuyo] {.inline, noinit.} =
         return err "Invalid Nazo Puyo (multiple `{key}`): {query}".fmt
       goalSet.assign true
 
-      nazoPuyo.goal.assign ?val.parseGoal(Pon2).context "Invalid Nazo Puyo: {query}".fmt
+      nazoPuyo.goal.assign ?val.parseGoal(Pon2).context "Invalid Nazo Puyo: " & query
     else:
       keyVals.add (key, val)
 
-  nazoPuyo.puyoPuyo.assign ?keyVals.encodeQuery.parsePuyoPuyo(Pon2).context "Invalid Nazo Puyo: {query}".fmt
+  nazoPuyo.puyoPuyo.assign ?keyVals.encodeQuery.parsePuyoPuyo(Pon2).context "Invalid Nazo Puyo: " &
+    query
 
   ok nazoPuyo
 
 func parseNazoPuyoIshikawa(query: string): Pon2Result[NazoPuyo] {.inline, noinit.} =
   ## Returns the Nazo Puyo converted from the URI query.
-  let errorMsg = "Invalid Nazo Puyo: {query}".fmt
+  template errorMsg(): string =
+    "Invalid Nazo Puyo: " & query
 
   let strs = query.rsplit(IshikawaPuyoPuyoGoalSep, 1)
   if strs.len notin 1 .. 2:
